@@ -6,7 +6,9 @@ import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 
 export interface TextFieldProps {
+  /** Controlled input value; the rendered text always mirrors this prop. */
   value: string
+  /** Called on every edit with the plain string value — not the DOM change event. */
   onChange: (value: string) => void
   onFocus?: (
     event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,11 +31,16 @@ export interface TextFieldProps {
    * both are set the top-level prop wins (same precedence FieldShell uses).
    */
   required?: boolean
+  /** Node rendered inside the field frame before the input (icon, unit prefix, …). */
   startAdornment?: React.ReactNode
+  /** Node rendered inside the field frame after the input. */
   endAdornment?: React.ReactNode
   placeholder?: string | undefined
+  /** Native input `type` (default 'text'). Ignored when `multiline` is set. */
   type?: string
+  /** Renders a `<textarea>` instead of a single-line input (default false). */
   multiline?: boolean
+  /** Minimum textarea height in rows (default 3; applied as 1.5em per row). */
   minRows?: number
   /** Stable test selector — emitted as `data-field` on the wrapper. */
   dataField?: string

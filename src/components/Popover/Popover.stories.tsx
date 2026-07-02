@@ -307,6 +307,37 @@ export const DarkWithContent: Story = {
 }
 
 // --------------------------------------------------------------------------
+// SACRED THEME STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Dedicated sacred baseline. Passes the component's real theme prop
+ * (`styles: { theme: 'sacred' }`), so the surface emits `data-theme="sacred"`
+ * and renders the sacred CSS override block: `--goobs-sacred-surface`
+ * background with the sacred ambient gradient, gold border, and
+ * `--goobs-shadow-sacred-glow`. The play step clicks the trigger so the
+ * baseline captures the OPEN sacred surface, not just the toggle button.
+ */
+export const Sacred: Story = {
+  name: 'Themes/Sacred',
+  render: () => (
+    <InteractivePopover styles={{ theme: 'sacred' }}>
+      <PopoverContent theme="sacred" />
+    </InteractivePopover>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Toggle Popover' })
+    )
+    // The popover portals to document.body, so query the whole document.
+    const body = within(canvasElement.ownerDocument.body)
+    await expect(await body.findByText('Popover Content')).toBeVisible()
+  },
+}
+
+// --------------------------------------------------------------------------
 // CUSTOMIZATION STORIES
 // --------------------------------------------------------------------------
 

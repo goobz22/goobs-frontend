@@ -5,9 +5,11 @@ import type { FormFieldStyles } from '../Field/Shell/types'
 import cssStyles from './MenuItem.module.css'
 import { emitDiag } from '../../utils/diag'
 
-// dense / divider / selected live as TOP-LEVEL MenuItemProps (wired to
-// data-attributes in the render); MenuItemStyles carries only the
-// FormFieldStyles theming surface.
+/**
+ * Styling contract for the `styles` prop. dense / divider / selected live as
+ * TOP-LEVEL MenuItemProps (wired to data-attributes in the render);
+ * MenuItemStyles carries only the FormFieldStyles theming surface.
+ */
 export type MenuItemStyles = FormFieldStyles
 
 export interface MenuItemProps extends React.OptionHTMLAttributes<HTMLOptionElement> {

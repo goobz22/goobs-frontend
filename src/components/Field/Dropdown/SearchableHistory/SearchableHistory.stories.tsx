@@ -58,7 +58,7 @@ const navigationItems: NavigationItem[] = [
 ]
 
 const meta: Meta<typeof SearchableHistory> = {
-  title: 'Components/SearchableHistory',
+  title: 'Components/Field/Dropdown/SearchableHistory',
   component: SearchableHistory,
   parameters: {
     layout: 'centered',
@@ -87,6 +87,10 @@ type Story = StoryObj<typeof meta>
 // BASIC THEME STORIES
 // --------------------------------------------------------------------------
 
+/**
+ * Light theme via `styles.theme: 'light'` on a light canvas — white combobox
+ * surface, dark text, slate control border.
+ */
 export const Default: Story = {
   args: {
     label: 'Navigate',
@@ -95,6 +99,7 @@ export const Default: Story = {
     name: 'navigation',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -116,7 +121,7 @@ export const SacredTheme: Story = {
     name: 'navigation',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

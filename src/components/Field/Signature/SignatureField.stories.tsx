@@ -11,7 +11,7 @@ import Form from '../../Form'
 import Button from '../../Button'
 
 const meta: Meta<typeof SignatureField> = {
-  title: 'Components/Field/SignatureField',
+  title: 'Components/Field/Signature',
   component: SignatureField,
   parameters: { layout: 'centered' },
   decorators: [

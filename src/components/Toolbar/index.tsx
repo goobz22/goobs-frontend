@@ -34,14 +34,31 @@ export interface ToolbarStyles {
 }
 
 export interface CustomToolbarProps {
+  /**
+   * Action buttons rendered left-to-right after the divider. Only each
+   * entry's `text`, `onClick`, and `disabled` are forwarded to the underlying
+   * Button; when `styles.theme` is set it is passed as the button theme too.
+   */
   buttons?: ButtonProps[]
+  /**
+   * When provided, renders a Searchbar at the end of the toolbar. Its
+   * `value`/`onChange`/`label`/`placeholder` are forwarded; the field is
+   * restyled with a fixed per-theme palette matching the toolbar theme
+   * (caller `styles` on this prop are not forwarded).
+   */
   searchbarProps?: SearchbarProps
+  /** When provided, renders a controlled filter Dropdown themed to match the toolbar. */
   filterDropdown?: {
+    /** Dropdown field label. Default 'Filter'. */
     label?: string
+    /** Selectable filter options. */
     options: DropdownOption[]
+    /** Controlled selected value. */
     value: string
+    /** Called with the newly selected value. */
     onChange: (value: string) => void
   }
+  /** Theme plus glyph/background overrides. See ToolbarStyles. */
   styles?: ToolbarStyles
 }
 
@@ -104,6 +121,14 @@ const createSearchbarStyles = (
   }
 }
 
+/**
+ * Horizontal action bar composing optional action Buttons, a controlled
+ * filter Dropdown, and a Searchbar — each section rendering only when its
+ * prop is provided. Themed light (default) / dark / sacred via `data-theme`
+ * on the root; the sacred variant adds a decorative glyph. The toolbar theme
+ * propagates to every child it renders, including a fixed per-theme field
+ * palette for the searchbar.
+ */
 const CustomToolbar: FC<CustomToolbarProps> = ({
   buttons,
   searchbarProps,

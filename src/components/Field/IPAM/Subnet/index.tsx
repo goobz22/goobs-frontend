@@ -7,7 +7,14 @@ import { useFieldBinding } from '../../Shell/useFieldBinding'
 import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
-export interface InternalIncrementNumberFieldProps {
+/**
+ * Props for the internal mask-stepper field that SubnetField composes.
+ * Renamed from `InternalIncrementNumberFieldProps`, which collided with the
+ * barrel-exported interface of `Field/Number/InternalIncrement` (a different
+ * shape). Internal to this module — SubnetField callers use SubnetFieldProps.
+ */
+export interface SubnetMaskIncrementFieldProps {
+  /** Seed CIDR for the internal mask state (default '16'), clamped to min/max. */
   initialValue?: string
   /**
    * Emits the new mask CIDR as a number. Was previously polymorphic
@@ -65,7 +72,7 @@ const calculateSubnetInfo = (cidr: number) => {
 // driven by the native :disabled pseudo-class.
 
 const InternalIncrementNumberField: React.FC<
-  InternalIncrementNumberFieldProps
+  SubnetMaskIncrementFieldProps
 > = ({
   initialValue = '16',
   onChange: onChangeProp,
@@ -282,6 +289,7 @@ const InternalIncrementNumberField: React.FC<
   )
 }
 
+/** The structural value of a SubnetField: an IPv4 address plus a CIDR mask length. */
 export interface SubnetFieldValue {
   address: string
   mask: number
@@ -294,14 +302,25 @@ export interface SubnetFieldProps {
    * jointly meaningful (a /24 with no address is meaningless, etc.).
    */
   value: SubnetFieldValue
+  /**
+   * Emits the updated `{ address, mask }` object — the plain value, not a
+   * DOM event — on every mask change.
+   */
   onChange: (value: SubnetFieldValue) => void
+  /** Field label on the mask stepper (default 'Subnet'). */
   label?: string
   required?: boolean
+  /** Mask (CIDR) lower clamp. Defaults 16 for maskType 'subnet', 8 for 'supernet'. */
   min?: number
+  /** Mask (CIDR) upper clamp. Defaults 32 for maskType 'subnet', 23 for 'supernet'. */
   max?: number
+  /** Selects the default mask bracket: 'subnet' (/16–/32, default) or 'supernet' (/8–/23). */
   maskType?: 'subnet' | 'supernet'
+  /** Inline style on the outer wrapper div. */
   style?: React.CSSProperties
+  /** Parent supernet address. With `supernetMask`, the subnet is validated to sit inside its range and the available range is displayed. */
   supernetAddress?: string
+  /** Parent supernet mask — a CIDR number-string or dotted-decimal — paired with `supernetAddress`. */
   supernetMask?: string
   disabled?: boolean
   helperText?: string
@@ -385,6 +404,14 @@ const calculateNetworkRange = (
   return { start: startParts.join('.'), end: endParts.join('.') }
 }
 
+/**
+ * Subnet editor: a dotted-decimal mask display with press-and-hold +/- CIDR
+ * stepper buttons (built on FieldShell) plus a live CIDR/host-count summary,
+ * and an out-of-range error when the subnet falls outside the optional
+ * supernet. `onChange` emits the plain `{ address, mask }` object — not a DOM
+ * event. Auto-binds that object by `name` inside a goobs `<Form>` when no
+ * explicit `value` is passed; otherwise controlled via `value`.
+ */
 const SubnetField: React.FC<SubnetFieldProps> = ({
   value: valueProp,
   onChange: onChangeProp,

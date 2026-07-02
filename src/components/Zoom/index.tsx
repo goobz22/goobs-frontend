@@ -17,25 +17,37 @@ import cssStyles from './Zoom.module.css'
  */
 export interface ZoomStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred' — changes only the default transition/hidden-scale values. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Animation properties
+  /** Visibility toggle: false zooms out, anything else (including unset) shows the content. */
   in?: boolean
+  /** Zoom duration in milliseconds; wins over transitionDuration. */
   timeout?: number
 
   // Transform properties
+  /** CSS transform-origin for the scale animation. */
   transformOrigin?: string
+  /** Visible-state scale (default 1); superseded by scaleEnter. */
   scale?: number
+  /** Visible-state scale; wins over `scale`. */
   scaleEnter?: number
+  /** Hidden-state scale (otherwise the per-theme CSS default applies). */
   scaleExit?: number
 
   // Custom transition
+  /** Full CSS transition shorthand; replaces the computed transition verbatim. */
   transition?: string
+  /** Zoom duration as a CSS time (default '0.3s' once any styles are passed); superseded by timeout. */
   transitionDuration?: string
+  /** Transition delay. */
   transitionDelay?: string
+  /** Transition timing function (default 'ease' once any styles are passed). */
   transitionTimingFunction?: string
 
   // States
+  /** Renders the disabled treatment (data-disabled) — purely visual. */
   disabled?: boolean
 }
 

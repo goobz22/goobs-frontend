@@ -100,6 +100,10 @@ type Story = StoryObj<typeof Dropdown>
 // BASIC THEME STORIES
 // --------------------------------------------------------------------------
 
+/**
+ * Light theme via `styles.theme: 'light'` on a light canvas — white field
+ * surface, dark text, slate control border.
+ */
 export const LightTheme: Story = {
   name: 'Light Theme (Default)',
   render: () => (
@@ -109,6 +113,7 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -131,6 +136,22 @@ export const DarkThemeAlt: Story = {
     />
   ),
   globals: { backgrounds: { value: 'dark' } },
+}
+
+/**
+ * Sacred theme via `styles.theme: 'sacred'` on the sacred canvas — the gold
+ * accent palette (translucent-dark field surface, gold label/border/focus)
+ * from the FieldShell `[data-theme='sacred']` block.
+ */
+export const SacredTheme: Story = {
+  render: () => (
+    <DropdownWithState
+      label="Programming Language"
+      options={sampleOptions}
+      styles={{ theme: 'sacred' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

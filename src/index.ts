@@ -83,6 +83,7 @@ export {
 export {
   default as QRCodeComponent,
   type QRCodeProps,
+  type QRCodeStyles,
 } from './components/QRCode'
 export {
   default as FormProjectBoard,
@@ -96,7 +97,10 @@ export {
   default as ComplexEditor,
   type ComplexTextEditorProps,
 } from './components/ComplexTextEditor'
-export type { ComplexTextEditorStyles } from './components/ComplexTextEditor/theme'
+export type {
+  ComplexTextEditorStyles,
+  ComplexTextEditorFormFieldStyles,
+} from './components/ComplexTextEditor/theme'
 export type { EditorMode } from './components/ComplexTextEditor/Toolbars/Complex'
 export {
   default as Select,
@@ -135,7 +139,11 @@ export {
   type DrawerProps,
   type DrawerStyles,
 } from './components/Drawer'
-export { default as Alert, type AlertProps } from './components/Alert'
+export {
+  default as Alert,
+  type AlertProps,
+  type AlertStyles,
+} from './components/Alert'
 export {
   default as Badge,
   type BadgeProps,
@@ -423,6 +431,7 @@ export type {
   RowData,
   DatagridProps,
   DataGridFilter,
+  DataGridStyles,
 } from './components/DataGrid/types'
 export {
   List,
@@ -569,8 +578,11 @@ export {
 // Calendar Components
 export {
   default as BigCalendar,
+  type BigCalendarProps,
+  type BigCalendarStyles,
   type CalendarEvent,
   type CalendarFilterOptions,
+  type CalendarView,
 } from './components/BigCalendar'
 
 // Slider Component

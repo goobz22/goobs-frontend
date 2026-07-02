@@ -10,20 +10,35 @@ export interface AccordionProps {
   expanded?: boolean
   defaultExpanded?: boolean
   onChange?: (event: React.SyntheticEvent, expanded: boolean) => void
+  /** Styling options: theme plus scalar overrides wired to CSS custom properties. */
   styles?: {
+    /** Disables toggling/clicking and renders the disabled treatment. */
     disabled?: boolean
+    /** Theme variant: 'sacred' or 'dark' select those variants; anything else (or unset) resolves to 'light'. */
     theme?: string
+    /** @deprecated No-op — the indent level comes from the top-level `level` prop; scheduled for removal. */
     level?: number
+    /** Container padding. */
     padding?: string
+    /** Container border radius. */
     borderRadius?: string
+    /** Container background color. */
     backgroundColor?: string
+    /** Summary row background color. */
     summaryBackgroundColor?: string
+    /** Summary text color (also applies to the active menu-item state). */
     summaryColor?: string
+    /** Container CSS outline; `true` maps to 'none', `false` leaves the CSS default, a string passes through verbatim. */
     outline?: string | boolean
+    /** Base indent in px before level scaling (default 20). */
     levelIndentBase?: number
+    /** Extra indent in px per `level` (default 20): indent = base + level x increment. */
     levelIndentIncrement?: number
+    /** Container border color. */
     borderColor?: string
+    /** Container border width. */
     borderWidth?: string
+    /** Container bottom margin. */
     marginBottom?: string
   }
   level?: number

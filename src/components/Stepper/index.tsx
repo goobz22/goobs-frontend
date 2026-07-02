@@ -15,27 +15,68 @@ import { emitDiag } from '../../utils/diag'
 type DynamicStyle = React.CSSProperties & Record<string, string | undefined>
 
 export interface StepperProps {
+  /**
+   * 'navigation' (default): each step carries its own status and clicking a
+   * non-inactive step navigates to its link. 'wizard': statuses derive from
+   * `activeStep`, and the active step's `content` plus Back/Continue/Finish
+   * controls render below the indicator.
+   */
   mode?: 'navigation' | 'wizard'
+  /** The ordered steps to render. */
   steps: {
+    /** Step title on the clickable step button; also the React key, so labels must be unique. */
     label: string
+    /** Navigation-mode destination assigned on click ('#' fallback); `statusLink` wins when both are set. */
     stepLink?: string
+    /**
+     * Explicit status in navigation mode (default 'inactive'; inactive steps
+     * are unclickable). Ignored in wizard mode, where status derives from
+     * `activeStep`.
+     */
     status?: 'completed' | 'active' | 'error' | 'inactive'
+    /** Overrides `stepLink` as the navigation-mode click destination. */
     statusLink?: string
+    /** Secondary text rendered under the step label. */
     description?: string
+    /** Step body rendered below the indicator while this step is active (wizard mode only). */
     content?: React.ReactNode
+    /**
+     * Custom indicator icon, used for the 'active' and 'inactive' states in
+     * place of the built-in circle/lock; 'completed' and 'error' always
+     * render the built-in Check/Error icons.
+     */
     icon?: React.ReactNode
   }[]
+  /**
+   * Wizard-mode current step index (default 0): earlier steps render
+   * completed, later ones inactive. An index past the last step shows the
+   * all-steps-completed pane when `finalActions` is provided.
+   */
   activeStep?: number
+  /** Wizard mode: renders the Continue (Finish on the last step) button and receives its clicks. */
   onNext?: () => void
+  /** Wizard mode: renders the Back button (hidden on the first step) and receives its clicks. */
   onBack?: () => void
+  /** Wizard mode: renders a "Start Over" button in the all-steps-completed pane. */
   onReset?: () => void
+  /**
+   * Wizard mode: actions shown in the all-steps-completed pane. The pane
+   * renders only when this is provided AND `activeStep >= steps.length`.
+   */
   finalActions?: React.ReactNode
+  /** Wizard mode: extra nodes rendered beside the Continue/Finish button. */
   stepActions?: React.ReactNode
+  /** Styling options; the spacing keys ride in as `--stepper-*` CSS custom properties. */
   styles?: {
+    /** Step layout and connector direction: 'horizontal' (default) or 'vertical'. */
     orientation?: 'horizontal' | 'vertical'
+    /** `data-theme` variant on the root: 'sacred' (default), 'light', or 'dark'. */
     theme?: string
+    /** Gap between steps; overrides the stylesheet default. */
     gap?: string
+    /** Root padding; overrides the stylesheet default. */
     padding?: string
+    /** Root bottom margin; overrides the stylesheet default. */
     marginBottom?: string
   }
 }

@@ -23,38 +23,63 @@ import cssStyles from './Popover.module.css'
  */
 export interface PopoverStyles {
   // Theme selection — drives `data-theme` on the surface. Default `light`.
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling overrides
+  /** Surface background color. */
   backgroundColor?: string
+  /** Surface border color; composes `<borderWidth> solid <borderColor>` (no border override without it). */
   borderColor?: string
+  /** Surface border radius. */
   borderRadius?: string
+  /** Border width used with borderColor (default 1px); ignored without borderColor. */
   borderWidth?: string
+  /** Surface box shadow. */
   boxShadow?: string
+  /** Surface backdrop-filter (e.g. a blur). */
   backdropFilter?: string
+  /** Surface background-image. */
   backgroundImage?: string
 
   // Layout and sizing
+  /** Surface max-width. */
   maxWidth?: string
+  /** Surface width. */
   width?: string
+  /** Surface min-width. */
   minWidth?: string
+  /** Surface height. */
   height?: string
+  /** Surface max-height. */
   maxHeight?: string
+  /** Surface min-height. */
   minHeight?: string
+  /** Surface padding. */
   padding?: string
+  /** Surface margin. */
   margin?: string
+  /** Surface top margin. */
   marginTop?: string
 
   // Positioning
+  /** Surface z-index. */
   zIndex?: number
+  /** CSS position override (default: fixed via the CSS module). */
   position?: string
+  /** CSS `top`; replaces the anchor-derived position (default: the anchor rect's bottom). */
   top?: string
+  /** CSS `left`; replaces the anchor-derived position (default: the anchor rect's left). */
   left?: string
+  /** CSS `right`. */
   right?: string
+  /** CSS `bottom`. */
   bottom?: string
 
   // Transitions
+  /** Replaces the surface transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 }
 

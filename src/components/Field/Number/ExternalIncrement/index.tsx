@@ -5,6 +5,7 @@ import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface ExternalIncrementNumberFieldProps {
+  /** Seed for the uncontrolled display (default '0'). Ignored once `value` (or a form binding) drives the field. */
   initialValue?: string
   /**
    * Controlled numeric value. Optional and additive: when omitted (the
@@ -41,6 +42,14 @@ export interface ExternalIncrementNumberFieldProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Integer stepper built on FieldShell with − and + buttons flanking a
+ * centered digits-only input (one step per click, floor 0, no upper bound —
+ * unlike InternalIncrement there is no press-and-hold auto-repeat).
+ * `onChange` emits the plain numeric value — not a DOM event. Auto-binds by
+ * `name` inside a goobs `<Form>` (the engine stores the number); otherwise
+ * controlled via the numeric `value` or seeded from `initialValue`.
+ */
 const ExternalIncrementNumberField: React.FC<
   ExternalIncrementNumberFieldProps
 > = ({

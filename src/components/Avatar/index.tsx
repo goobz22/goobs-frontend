@@ -13,34 +13,53 @@ import cssStyles from './Avatar.module.css'
 
 export interface AvatarStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Size options
+  /** Named size preset applied via data-size in the CSS module. */
   size?: 'small' | 'medium' | 'large' | 'xl'
+  /** Explicit width (overrides the size preset). */
   width?: string
+  /** Explicit height (overrides the size preset). */
   height?: string
 
   // Appearance
+  /** Avatar background color. */
   backgroundColor?: string
+  /** Content text/icon color. */
   color?: string
+  /** Border radius (default circular). */
   borderRadius?: string
+  /** Content font size. */
   fontSize?: string
+  /** Content font weight. */
   fontWeight?: string | number
 
   // Border and shadow
+  /** Full border shorthand; wins over borderColor/borderWidth. */
   border?: string
+  /** Border color; composes `<borderWidth> solid <borderColor>` when `border` is not set. */
   borderColor?: string
+  /** Border width used with borderColor (default 1px); ignored without borderColor. */
   borderWidth?: string
+  /** Avatar box shadow. */
   boxShadow?: string
 
   // Layout and spacing
+  /** Margin shorthand. */
   margin?: string
+  /** Top margin. */
   marginTop?: string
+  /** Bottom margin. */
   marginBottom?: string
+  /** Left margin. */
   marginLeft?: string
+  /** Right margin. */
   marginRight?: string
 
   // States
+  /** Renders the disabled treatment (data-disabled) — purely visual. */
   disabled?: boolean
 }
 

@@ -1,41 +1,14 @@
 'use client'
 
 /**
- * =============================================================================
- * SACRED GLYPH FRAME — animated gold-glow + decorative glyph wrapper
- * =============================================================================
- *
- * Owns the duplicated `injectKeyframes()` + glyph-decoration recipe that the
- * ThothOS statement/billing forms each re-implemented inline:
- *
- *   - `InlineShowEstimate` (index.tsx:92 `injectKeyframes`, :148 re-injects
- *     `sacredGlowPulse` + `sacredFloat`, :436 the floating-glyph row)
- *   - `InlineShowServiceInvoice` (index.tsx:138 the same re-injection)
- *   - the `Inline*` billing/ledger edit forms
- *
- * Every one of those callsites:
- *   1. declared a local `injectKeyframes(name, frames)` helper,
- *   2. re-injected `sacredGlowPulse` and `sacredFloat` from a `useEffect`
- *      on EVERY mount, and
- *   3. hand-rolled a `position:absolute` row of floating Egyptian glyphs.
- *
- * This wrapper centralises all three. The `@keyframes` are injected ONCE at
- * MODULE LOAD via the existing `commonKeyframes` helpers in
- * `src/utils/keyframes.ts` — there is no per-instance `useEffect` injection.
- * The animated border and the decorative glyph corners then merely reference
- * the resulting animation NAMES from the CSS module.
- *
- *   <SacredGlyphFrame glow glyphs>
- *     <Card styles={{ theme: 'sacred' }}>…</Card>
- *   </SacredGlyphFrame>
- *
- * Decoration is purely presentational: the glyph row and corner ornaments are
- * `aria-hidden`, and the frame forwards arbitrary content via `children`.
- *
- * COMPOSES: standalone primitive — no other goobs component is required. It is
- * designed to WRAP a sacred-themed `<Card>` (or any sacred surface), but does
- * not import Card, so there is no Card→Frame / Frame→Card dependency.
- * =============================================================================
+ * @fileoverview SacredGlyphFrame — owns the duplicated `injectKeyframes()` +
+ * glyph-decoration recipe that the ThothOS statement/billing forms each
+ * re-implemented inline (InlineShowEstimate, InlineShowServiceInvoice, the
+ * `Inline*` billing/ledger edit forms). Each of those callsites declared a
+ * local keyframe-injection helper, re-injected `sacredGlowPulse` +
+ * `sacredFloat` from a `useEffect` on every mount, and hand-rolled a
+ * `position:absolute` row of floating Egyptian glyphs — this module
+ * centralises all three, injecting the keyframes ONCE at module load.
  */
 
 import React, {
@@ -252,6 +225,17 @@ const SacredGlyphFrameInner = forwardRef<HTMLDivElement, SacredGlyphFrameProps>(
 // tree-shaken and documents the binding between JS injection and CSS name.
 SacredGlyphFrameInner.displayName = `SacredGlyphFrame(${sacredGlowPulseAnimationName}/${sacredFloatAnimationName})`
 
+/**
+ * Animated gold-glow + decorative-glyph wrapper for sacred surfaces —
+ * designed to wrap a sacred-themed `<Card>` (though it is standalone and
+ * imports no other goobs component). The `sacredGlowPulse` / `sacredFloat`
+ * keyframes are injected exactly once at module load via `commonKeyframes`,
+ * never per-instance, and the CSS module references the resulting animation
+ * names; the glow honours `prefers-reduced-motion` by freezing to a static
+ * glow. All decoration (the floating glyph row and any `corners` ornaments)
+ * is `aria-hidden`, so only `children` carry content. Sacred-only by design —
+ * there is no light/dark theme variant.
+ */
 const SacredGlyphFrame =
   SacredGlyphFrameInner as unknown as SacredGlyphFrameComponent
 SacredGlyphFrame.displayName = 'SacredGlyphFrame'

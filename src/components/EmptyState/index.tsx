@@ -1,33 +1,5 @@
 'use client'
 
-/**
- * =============================================================================
- * EMPTYSTATE — standalone empty / zero-data placeholder
- * =============================================================================
- *
- * Promoted out of `<Card.EmptyState>` so it can be used ANYWHERE — not just
- * inside a `<Card.Grid empty={...}>`. Absorbs the ~26 hand-rolled "No X yet"
- * boxes scattered across the ThothOS wizard steps, list panes, and dashboard
- * tiles (e.g. AssigneesStep:347 "No assignees yet").
- *
- *   <EmptyState
- *     icon="👥"
- *     title="No assignees yet"
- *     description="Add a teammate to get started."
- *     actions={<CustomButton text="Add assignee" onClick={open} />}
- *   />
- *
- * Dashed-gold-border centered placeholder. `role="status"` so assistive tech
- * announces the empty condition. Theme tokens follow the same sacred / light /
- * dark CSS-variable convention as the rest of goobs.
- *
- * BACK-COMPAT: `<Card.EmptyState>` is now a thin re-export of this component
- * (see Card/index.tsx) — every existing `<Card.Grid empty={<Card.EmptyState …>}>`
- * callsite keeps working byte-for-byte.
- *
- * =============================================================================
- */
-
 import React, { forwardRef, type ReactNode } from 'react'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './EmptyState.module.css'
@@ -51,6 +23,16 @@ function emptyStateTitleText(title: ReactNode): string | undefined {
   return typeof title === 'string' ? title : undefined
 }
 
+/**
+ * Standalone empty / zero-data placeholder: a centered, dashed-accent-border
+ * box with an optional icon, a required title, an optional description line,
+ * and an optional actions slot. Renders with `role="status"` so assistive
+ * tech announces the empty condition, and emits a `component.state: 'empty'`
+ * diagnostics beacon on mount (a no-op when no host bus is present). Theming
+ * via `styles.theme` (default `'sacred'`). `<Card.EmptyState>` is a thin
+ * re-export of this component, so it works both standalone and inside
+ * `<Card.Grid empty={…}>`.
+ */
 const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
   function EmptyState({ icon, title, description, actions, styles }, ref) {
     const theme = styles?.theme ?? 'sacred'

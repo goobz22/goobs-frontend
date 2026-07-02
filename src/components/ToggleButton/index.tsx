@@ -24,15 +24,25 @@ export interface ToggleButtonStyles {
 
   // Caller-supplied layout / spacing / dimension overrides — applied as inline
   // style on the button, exactly as the old getButtonStyles forwarded them.
+  /** Button margin shorthand. */
   margin?: string
+  /** Button top margin. */
   marginTop?: string
+  /** Button bottom margin. */
   marginBottom?: string
+  /** Button left margin. */
   marginLeft?: string
+  /** Button right margin. */
   marginRight?: string
+  /** Button width. */
   width?: string
+  /** Button max-width. */
   maxWidth?: string
+  /** Button min-width. */
   minWidth?: string
+  /** Button height. */
   height?: string
+  /** Button max-height. */
   maxHeight?: string
 }
 

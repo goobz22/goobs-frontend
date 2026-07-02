@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import USDField from './index'
 
 const meta: Meta<typeof USDField> = {
-  title: 'Components/Field/USD',
+  title: 'Components/Field/USDField',
   component: USDField,
   parameters: {
     layout: 'fullscreen',

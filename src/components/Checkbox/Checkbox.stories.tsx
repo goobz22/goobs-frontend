@@ -95,6 +95,24 @@ export const SacredDisabled: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * The dark theme on the dark canvas: the checked box fills with the dark
+ * palette's blue primary (`--goobs-dark-primary`, #60a5fa) instead of gold,
+ * and the inline label renders in the light slate text color
+ * (`--goobs-dark-text`) so it stays legible against #111827.
+ */
+export const DarkTheme: Story = {
+  name: 'Theme/Dark',
+  args: {
+    checked: true,
+    children: 'Dark theme checkbox',
+    styles: {
+      theme: 'dark',
+    },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+}
+
 /** The premium checkbox without its default outline. */
 export const NoOutline: Story = {
   name: 'Theme/No Outline',

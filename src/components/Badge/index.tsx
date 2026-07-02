@@ -3,31 +3,51 @@
 import React from 'react'
 import cssStyles from './Badge.module.css'
 
+/**
+ * Styling surface for the badge chip. `theme` and `position` map to data
+ * attributes; every scalar override rides in as the matching `--badge-*` CSS
+ * custom property, set only when provided so the theme default applies
+ * otherwise.
+ */
 export interface BadgeStyles {
-  // Theme selection
+  /** `data-theme` variant on the chip: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
-  // Basic styling
+  /** Chip fill color; overrides `--badge-background-color` (theme default otherwise). */
   backgroundColor?: string
+  /** Chip text color; overrides `--badge-color` (theme default otherwise). */
   color?: string
+  /** Corner of the wrapped children the chip anchors to. Default 'top-right'. */
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  /** Inset in pixels from the anchored corner (`--badge-offset`). Default 8. */
   offset?: number
 
-  // Advanced styling
+  /** Chip corner radius; overrides `--badge-border-radius` (theme default otherwise). */
   borderRadius?: string
+  /** Chip width; overrides `--badge-width` (theme default otherwise). */
   width?: string
+  /** Chip height; overrides `--badge-height` (theme default otherwise). */
   height?: string
+  /** Chip font size; overrides `--badge-font-size` (theme default otherwise). */
   fontSize?: string
+  /** Chip font weight; overrides `--badge-font-weight` (theme default otherwise). */
   fontWeight?: string
+  /** Chip box shadow; overrides `--badge-box-shadow` (theme default otherwise). */
   boxShadow?: string
+  /** Chip backdrop filter; overrides `--badge-backdrop-filter` (theme default otherwise). */
   backdropFilter?: string
+  /** Chip border shorthand; overrides `--badge-border` (theme default otherwise). */
   border?: string
+  /** Chip text shadow; overrides `--badge-text-shadow` (theme default otherwise). */
   textShadow?: string
 }
 
 export interface BadgeProps {
+  /** Content rendered inside the badge chip (a count, dot, or short label). */
   content: React.ReactNode
+  /** The anchor element(s) the badge overlays; the chip positions at one corner of this wrapper. */
   children: React.ReactNode
+  /** Theme, corner position/offset, and `--badge-*` scalar overrides. See BadgeStyles. */
   styles?: BadgeStyles
 }
 

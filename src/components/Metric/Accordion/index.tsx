@@ -1,79 +1,5 @@
 'use client'
 
-/**
- * =============================================================================
- * METRICS ACCORDION
- * =============================================================================
- *
- * Canonical collapsible shell for KPI / metric cards. Replaces THREE older
- * implementations that did the same job in slightly different ways:
- *   - ThothOS-side `src/components/metrics-accordion/` (per-workspace shell —
- *     `useState(false)` + button + collapsible div, no stable test selectors)
- *   - goobs `DataGrid/MetricSection` (data-driven cards in a flex container,
- *     auto-collapsing on tablet screens)
- *   - 9 in-workspace `MetricCard` duplicates wrapped in ad-hoc accordions
- *
- * One implementation now covers all of them. Located at
- * `components/Metric/Accordion/` (not DataGrid-scoped) because the audience
- * is broader than DataGrid — workspaces, dashboards, dialogs, etc.
- *
- * Styles live in `Accordion.module.css` so Storybook + dev-tools can tweak
- * theming via CSS variables without React re-renders.
- *
- * TWO USAGE SHAPES
- *
- * 1) Children mode — for workspaces that group cards themselves (rows,
- *    labels, custom layouts inside the accordion):
- *
- * ```tsx
- * <MetricsAccordion title="Metrics Summary">
- *   <div style={{ display: 'flex', gap: 12 }}>
- *     <MetricCard title="Active" value={12} icon="✓" dataField="active" />
- *     <MetricCard title="Pending" value={3} icon="⏳" dataField="pending" />
- *   </div>
- * </MetricsAccordion>
- * ```
- *
- * 2) `metrics` array mode — for DataGrid (and other data-driven callers).
- *    The component renders the cards itself in a responsive flex row:
- *
- * ```tsx
- * <MetricsAccordion
- *   metrics={[
- *     { title: 'Revenue', value: '$125K', trend: { value: 12, isPositive: true } },
- *     { title: 'Users', value: '1,234', subtitle: 'Active' },
- *   ]}
- *   collapsible
- *   responsiveCollapseOnTablet
- * />
- * ```
- *
- * RESPONSIVE BEHAVIOUR (only applies in `metrics`-array mode)
- *
- *   - `collapsible: false` + `responsiveCollapseOnTablet: false` — always
- *     render cards expanded (no accordion shell, no toggle).
- *   - `collapsible: true` — always render inside the accordion.
- *   - `responsiveCollapseOnTablet: true` — render in accordion when the
- *     viewport is ≤ 1023px wide, expanded otherwise. Preserves the prior
- *     `MetricSection` behavior.
- *
- * In children mode the accordion is ALWAYS rendered (no auto-expand path),
- * because the caller's children may be arbitrarily complex.
- *
- * TEST CONTRACT
- *   - `[data-metrics-accordion="true"]` — outer wrapper
- *   - `[data-state="open" | "closed"]` — current state on the wrapper AND the toggle
- *   - `[data-testid="metrics-accordion-toggle"]` — toggle button
- *   - `[data-testid="metrics-accordion-panel"]` — content panel (only mounted when open)
- *   - `aria-expanded` + `aria-controls` (standard a11y)
- *   - In `metrics`-array mode: `[data-metric-card]` on each card (from MetricCard's own selectors)
- *
- * Default state: COLLAPSED. Tests should open via the toggle before
- * asserting on metric text inside the panel.
- *
- * =============================================================================
- */
-
 import React, { useEffect, useId, useMemo, useState } from 'react'
 import { emitDiag } from '../../../utils/diag'
 import MetricCard from '../Card'
@@ -165,6 +91,21 @@ function useScreenSize() {
   return size
 }
 
+/**
+ * Canonical collapsible shell for KPI / metric cards, replacing the older
+ * per-workspace accordions and DataGrid's `MetricSection`. Two mutually
+ * exclusive content modes: `children` (caller-composed layout — always
+ * rendered inside the accordion shell) and `metrics` (data-driven — a flat
+ * `MetricCardData[]` row or labelled `MetricsGroup[]` rows of `MetricCard`s).
+ * In `metrics` mode the accordion shell renders when `collapsible` (default
+ * `true`) or, with `responsiveCollapseOnTablet`, when the viewport is
+ * narrower than 1024px — otherwise the cards render bare and expanded.
+ * Default state is collapsed (`initiallyOpen: false`) and the panel is only
+ * mounted while open, so tests must click the toggle before asserting on
+ * panel content. Test selectors: `data-metrics-accordion` + `data-state` on
+ * the wrapper and toggle, plus `data-testid="metrics-accordion-toggle"` /
+ * `"metrics-accordion-panel"`.
+ */
 export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   children,
   metrics,

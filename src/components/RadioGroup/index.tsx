@@ -20,17 +20,25 @@ export interface RadioOption {
  */
 export interface RadioGroupStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Label styling
+  /** Group label color. */
   labelColor?: string
+  /** Group label font size. */
   labelFontSize?: string
+  /** Group label font weight. */
   labelFontWeight?: string | number
+  /** Group label font family. */
   labelFontFamily?: string
 
   // Radio button styling
+  /** Diameter of each radio ring. */
   radioSize?: string
+  /** Radio ring border color. */
   radioOuterBorderColor?: string
+  /** Radio ring border width. */
   radioOuterBorderWidth?: string
   /**
    * Color of the checked inner dot. Passing this opts the group into the
@@ -39,21 +47,31 @@ export interface RadioGroupStyles {
    * omitted, checked state is the default solid-filled outer ring.
    */
   radioInnerColor?: string
+  /** Radio ring border color on hover. */
   radioHoverBorderColor?: string
+  /** Radio ring background on hover. */
   radioHoverBackgroundColor?: string
 
   // Text styling
+  /** Option text color. */
   textColor?: string
+  /** Option text font size. */
   textFontSize?: string
+  /** Option text font family. */
   textFontFamily?: string
+  /** Option text color on hover. */
   textHoverColor?: string
 
   // Layout and spacing
+  /** Padding around each option row. */
   padding?: string
+  /** Space below the group label. */
   marginBottom?: string
 
   // Transitions
+  /** Replaces the control transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 }
 

@@ -6,6 +6,7 @@ import { useFieldBinding } from '../../Shell/useFieldBinding'
 import Typography from '../../../../components/Typography'
 
 export interface IPAddressFieldProps {
+  /** Seed for the internal value (default ''). The field is not value-controlled; edits flow out via `onChange`. */
   initialValue?: string
   /**
    * Emits the formatted/validated IP string. Was previously a synthetic
@@ -14,6 +15,7 @@ export interface IPAddressFieldProps {
    * a ref / their own onBlur instead.
    */
   onChange?: (value: string) => void
+  /** Field label (default 'IP Address'). */
   label?: string
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
@@ -33,18 +35,31 @@ export interface IPAddressFieldProps {
   required?: boolean
   disabled?: boolean
   styles?: FieldStyleOverrides
+  /** Treats partially-typed addresses as valid-so-far (default true); when false, only a complete 4-octet address validates. */
   allowIncomplete?: boolean
+  /** Auto-appends a '.' once an octet reaches 3 digits (default true; suppressed while deleting). */
   autoInsertDots?: boolean
+  /** Network address paired with `subnetMask` for membership validation of the initial value. */
   defaultNetwork?: string
+  /** Dotted-decimal mask paired with `defaultNetwork`. */
   subnetMask?: string
+  /** Subnet address paired with `subnetCIDR`: the value must sit inside this subnet (and its usable range, unless `isGateway`). */
   subnetAddress?: string
+  /** CIDR prefix length paired with `subnetAddress`. */
   subnetCIDR?: number
+  /** Validates the value as a gateway: inside the subnet but not its network or broadcast address. */
   isGateway?: boolean
+  /** Marks this input as one end of an IP range; pair with `isStartIP`/`isEndIP` and the opposite end's value. */
   isRange?: boolean
+  /** This input is the range start; validated as <= `endIPValue`. */
   isStartIP?: boolean
+  /** This input is the range end; validated as >= `startIPValue`. */
   isEndIP?: boolean
+  /** The opposite (end) IP used for range-order validation, and the end input's value in `renderAsRange` mode. */
   endIPValue?: string
+  /** The opposite (start) IP used for range-order validation, and the start input's value in `renderAsRange` mode. */
   startIPValue?: string
+  /** Renders paired start/end inputs in one row instead of a single input. */
   renderAsRange?: boolean
   /**
    * Same value-only shape as `onChange`; emits the formatted end-IP

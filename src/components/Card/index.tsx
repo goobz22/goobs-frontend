@@ -1,9 +1,7 @@
 'use client'
 
 /**
- * =============================================================================
- * CARD — compositional surface primitive
- * =============================================================================
+ * @fileoverview CARD — compositional surface primitive.
  *
  * Built to absorb the ~50 hand-rolled item-card variants across ThothOS
  * workspaces. The pattern is the shadcn / Chakra compound-component model:
@@ -81,8 +79,6 @@
  *   `<Card.DragHandle onMoveUp onMoveDown />` exposes the drag affordance
  *   AND keyboard up/down buttons (WAI-ARIA APG listbox-reorder pattern).
  *   Absorbs the bespoke step-card reorder UI in automations workspace.
- *
- * =============================================================================
  */
 
 import React, {
@@ -1379,6 +1375,19 @@ const CardEmptyState = EmptyState as React.ForwardRefExoticComponent<
 // COMPOUND-COMPONENT ASSEMBLY
 // -----------------------------------------------------------------------------
 
+/**
+ * Compound-component card root: renders an `<article role="article">` labelled
+ * (via `aria-labelledby`) by the id of its `<Card.Title>`, with every card
+ * region composed from the static subcomponents (`Card.Header`, `Card.Body`,
+ * `Card.Footer`, `Card.Metrics`, `Card.Grid`, …). Click handling follows the
+ * block-link pattern — `<Card.Title href|onClick>` gets a `::after` overlay
+ * that stretches the click target across the whole card while inner
+ * interactive elements stay individually clickable. `Card` and `Card.Title`
+ * accept `asChild` (Radix slot pattern) to forward their props onto a single
+ * child element instead of wrapping it. Theming via `styles.theme` (default
+ * `'sacred'`), emitted as `data-theme`; state, selection, and type surface as
+ * `data-card-*` attributes for tests.
+ */
 const Card = CardInner as unknown as CardComponent
 Card.Header = CardHeader
 Card.HeaderIcon = CardHeaderIcon

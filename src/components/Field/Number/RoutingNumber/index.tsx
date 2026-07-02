@@ -9,9 +9,13 @@ export interface RoutingNumberProps {
   onChange?: (value: string) => void
   /** Optional side-channel for validity changes (ABA checksum + length). */
   onValidityChange?: (isValid: boolean) => void
+  /** Validates the ABA checksum in addition to the 9-digit length (default true). */
   useChecksum?: boolean
+  /** Marks the value as prefilled: it renders masked until the field is focused or edited. */
   isDefaultValue?: boolean
+  /** Controlled value. Omit inside a `<Form>` with `name` to let the engine drive it. */
   value?: string
+  /** Field label (default 'Routing Number'). */
   label?: React.ReactNode
   placeholder?: string
   id?: string
@@ -29,6 +33,14 @@ export interface RoutingNumberProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * ABA routing-number input built on FieldShell (9 digits). `onChange` emits
+ * the digits-only string — not a DOM event — and `onValidityChange` reports
+ * the 9-digit length plus, when `useChecksum` is on, the ABA checksum. With
+ * `isDefaultValue`, a prefilled number renders masked until focused or
+ * edited. Auto-binds by `name` inside a goobs `<Form>` when no explicit
+ * `value` is passed.
+ */
 const RoutingNumber: React.FC<RoutingNumberProps> = ({
   onChange: onChangeProp,
   onValidityChange,

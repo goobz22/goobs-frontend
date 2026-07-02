@@ -1,47 +1,5 @@
 'use client'
 
-/**
- * =============================================================================
- * FILEDROPZONE — drag-drop + click-to-browse file input with a preview slot
- * =============================================================================
- *
- * Promoted from the ThothOS
- * `src/forms/Inventory/ImageUploadField.tsx` (Cloudflare image upload field) and
- * generalized into a presentation-only goobs primitive. The upload transport
- * (Cloudflare, S3, whatever) stays in the host app: the host owns a hook that
- * takes the picked `File` via `onFileSelect` and renders the result back in
- * through the `preview` slot.
- *
- *   // in ThothOS:
- *   const { uploadImage, isUploading, uploadError } = useCloudflareImageUpload()
- *   <FileDropzone
- *     label="Product Image"
- *     variant="image"
- *     value={imageUrl}
- *     uploading={isUploading}
- *     error={uploadError}
- *     onFileSelect={async file => {
- *       const r = await uploadImage(file)
- *       if (r.success && r.url) onImageChange(r.url)
- *     }}
- *     preview={imageUrl ? <Image src={imageUrl} alt="Preview" fill /> : undefined}
- *   />
- *
- * COMPOSITION
- *
- *   - Label / required / error wiring is delegated to goobs `<FieldShell>` —
- *     the same shell every Field component uses — so the dropzone announces
- *     its label, required state, and validation errors to assistive tech the
- *     same way the rest of the form does.
- *   - The drop surface is a real `<button>` that opens a hidden `<input
- *     type="file">`; the whole surface is also a native drag-drop target.
- *
- * Presentation only: no network, no upload state machine. `uploading` and
- * `error` are controlled by the host. `data-component="FileDropzone"`.
- *
- * =============================================================================
- */
-
 import React, {
   useId,
   useRef,
@@ -147,6 +105,19 @@ function placeholderGlyph(variant: FileDropzoneVariant): ReactNode {
   )
 }
 
+/**
+ * Drag-drop + click-to-browse file picker with a preview slot, generalized
+ * from the ThothOS Cloudflare image-upload field into a presentation-only
+ * primitive: the host app owns the upload transport, receives the picked
+ * `File` via `onFileSelect`, and controls `uploading` / `error` / `preview`.
+ * Label, required, and error wiring is delegated to the shared `<FieldShell>`
+ * so the dropzone announces to assistive tech like every other goobs field.
+ * The drop surface is a real `<button>` that opens a hidden
+ * `<input type="file">` and doubles as a native drag-drop target; the input
+ * resets after each pick so the same file can be re-selected. Emits
+ * `data-component="FileDropzone"` plus a `file.select` diagnostics beacon on
+ * every pick.
+ */
 const FileDropzone: React.FC<FileDropzoneProps> = ({
   value,
   onFileSelect,

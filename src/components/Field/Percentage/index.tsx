@@ -7,7 +7,9 @@ import ArrowDropUpIcon from '../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../Icons/ArrowDropDown'
 
 export interface PercentageFieldProps {
+  /** Seed for the uncontrolled display (default '0'). Ignored once `value` is set. */
   initialValue?: string | number
+  /** Controlled value as a string; drives the display verbatim when set. */
   value?: string
   /**
    * Canonical numeric onChange. Always called with the parsed numeric
@@ -16,11 +18,17 @@ export interface PercentageFieldProps {
    */
   onChange?: (value: number) => void
   label?: string
+  /** Lower clamp for typed and stepped values (default 0). */
   min?: number
+  /** Upper clamp for typed and stepped values (default 100). */
   max?: number
+  /** Amount added/removed per +/- press (default 1). */
   step?: number
+  /** Milliseconds a +/- button is held before auto-repeat kicks in (default 500). */
   initialDelay?: number
+  /** Milliseconds between auto-repeat steps while a +/- button stays held (default 100). */
   repeatInterval?: number
+  /** Appends '%' to the displayed value (default true); `onChange` still emits the bare number. */
   showPercentSymbol?: boolean
   placeholder?: string
   id?: string
@@ -37,6 +45,14 @@ export interface PercentageFieldProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Percentage entry built on FieldShell: an auto-width numeric input that
+ * appends a % symbol, with stacked +/- buttons that auto-repeat while held.
+ * Typed input is stripped to digits and clamped to [min, max]; `onChange`
+ * emits the parsed number — not a DOM event. Auto-binds by `name` inside a
+ * goobs `<Form>` (the engine stores the number); otherwise the string `value`
+ * prop controls the display.
+ */
 const PercentageField: React.FC<PercentageFieldProps> = ({
   initialValue = '0',
   value: valueProp,

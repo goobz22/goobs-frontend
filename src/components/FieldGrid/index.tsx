@@ -1,36 +1,5 @@
 'use client'
 
-/**
- * =============================================================================
- * FIELDGRID — responsive auto-fit field layout primitive
- * =============================================================================
- *
- * Absorbs the ~134 hand-rolled `repeat(auto-fit, minmax(min(100%, …), 1fr))`
- * grid re-rolls across ThothOS form sections (reference: InlineManageContact
- * :203). Every "Personal Information" / "Billing" / "Address" field cluster
- * re-declares the same `display: grid` + `gridTemplateColumns` + `gap` inline.
- * FieldGrid collapses that into a single `<div role="group">` whose column
- * track is driven by the CSS module from two custom properties.
- *
- *   <FieldGrid>
- *     <TextField label="Full Name" ... />
- *     <TextField label="Email" ... />
- *     <Dropdown label="State" ... />
- *   </FieldGrid>
- *
- *   <FieldGrid minColWidth="180px" gap="8px"> ...tighter cluster... </FieldGrid>
- *
- * The grid wraps to as many equal-width columns as fit, never letting a column
- * narrower than `min(100%, minColWidth)` — so a single field on a narrow
- * viewport spans the full row instead of clipping.
- *
- * `role="group"` lets assistive tech announce the cluster as one related set
- * of controls; pair with `aria-labelledby` / `aria-label` (forwarded via
- * `...restProps`) to name the group from a section heading.
- *
- * =============================================================================
- */
-
 import React, {
   forwardRef,
   type CSSProperties,
@@ -61,6 +30,19 @@ export interface FieldGridProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode
 }
 
+/**
+ * Responsive auto-fit field layout primitive: lays children out in a CSS grid
+ * whose column track is `repeat(auto-fit, minmax(min(100%, var(--fg-min)),
+ * 1fr))`, so the grid wraps to as many equal-width columns as fit and a
+ * single field on a narrow viewport spans the full row instead of clipping.
+ * `minColWidth` (default `'250px'`) and `gap` (default `'clamp(12px, 3vw,
+ * 24px)'`) feed the CSS module as custom properties. Renders a `<div
+ * role="group">` by default so assistive tech announces the cluster as one
+ * related set of controls (name it via `aria-label` / `aria-labelledby`
+ * forwarded through rest props); when `as` names another element (e.g.
+ * `'dl'` for DetailGrid) the implicit group role is dropped so the element
+ * keeps its native role.
+ */
 const FieldGrid = forwardRef<HTMLDivElement, FieldGridProps>(function FieldGrid(
   {
     minColWidth = '250px',

@@ -31,14 +31,18 @@ const parseExistingPhoneNumber = (value: string): string => {
 }
 
 export interface PhoneNumberFieldProps {
+  /** Controlled phone value; re-parsed into the masked NNN-NNN-NNNN display whenever it changes. */
   value?: string | number
+  /** Emits the full formatted string including the prefix, e.g. '+1 555-555-5555' ('+1 ' alone when emptied) — the plain value, not a DOM event. */
   onChange?: (value: string) => void
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+  /** Field label (default 'Phone Number'). */
   label?: React.ReactNode
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
   error?: string | boolean
+  /** Placeholder text (default '555-555-5555'). */
   placeholder?: string
   id?: string
   autoComplete?: string
@@ -51,6 +55,13 @@ export interface PhoneNumberFieldProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * US phone input built on FieldShell with a fixed "+1" prefix glued to the
+ * left of the input. Typing is limited to 10 digits, displayed as
+ * NNN-NNN-NNNN; `onChange` emits the full formatted string with the prefix
+ * (e.g. '+1 555-555-5555') — not a DOM event. Auto-binds by `name` inside a
+ * goobs `<Form>` when no explicit `value` is passed.
+ */
 const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   value: valueProp,
   onChange: onChangeProp,

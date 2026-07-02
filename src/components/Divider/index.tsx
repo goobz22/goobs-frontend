@@ -7,19 +7,36 @@ export interface DividerProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'style'
 > {
+  /** Optional label rendered centered on top of the rule. */
   children?: React.ReactNode
+  /** Styling options; each scalar override rides in as a `--divider-*` CSS custom property. */
   styles?: {
+    /** Rule direction: 'horizontal' (default) or 'vertical'. */
     orientation?: 'horizontal' | 'vertical'
+    /**
+     * Margin shorthand. Applied only when no per-side margin override below
+     * is set; otherwise the per-side values (and their CSS defaults) win.
+     */
     margin?: string
+    /** Top margin (default: 24px main-axis spacing on horizontal, 0 on vertical). */
     marginTop?: string
+    /** Bottom margin (default: 24px main-axis spacing on horizontal, 0 on vertical). */
     marginBottom?: string
+    /** Left margin (default: 0 on horizontal, 24px main-axis spacing on vertical). */
     marginLeft?: string
+    /** Right margin (default: 0 on horizontal, 24px main-axis spacing on vertical). */
     marginRight?: string
+    /** Rule height: the 2px thickness of a horizontal divider, the 100% length of a vertical one. */
     height?: string
+    /** Rule width: the 100% length of a horizontal divider, the 2px thickness of a vertical one. */
     width?: string
+    /** Text color of the centered label content (theme default otherwise). */
     color?: string
+    /** `data-theme` variant: 'sacred' (default, gold gradient), 'light', or 'dark'. */
     theme?: string
+    /** Dims the rule (half opacity + weaker gradient alpha). Default false. */
     disabled?: boolean
+    /** Replaces the theme gradient with this solid rule color. */
     backgroundColor?: string
   }
 }
@@ -28,6 +45,14 @@ function mergeClassNames(...names: Array<string | false | undefined>): string {
   return names.filter(Boolean).join(' ')
 }
 
+/**
+ * Thin gradient rule, horizontal (default) or vertical, with an optional
+ * label centered on the line. Themed via `data-theme` (sacred gold gradient
+ * by default; light/dark remap to neutral border tokens); scalar overrides
+ * (width/height/margins/colors) ride in as `--divider-*` CSS custom
+ * properties, and `styles.backgroundColor` swaps the gradient for a solid
+ * color. All other div attributes (except `style`) pass through to the root.
+ */
 const Divider = forwardRef<HTMLDivElement, DividerProps>(
   ({ children, styles, ...restProps }, ref) => {
     const orientation = styles?.orientation || 'horizontal'

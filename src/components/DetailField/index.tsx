@@ -1,9 +1,7 @@
 'use client'
 
 /**
- * =============================================================================
- * DETAILFIELD / DETAILGRID — read-only label/value display primitives
- * =============================================================================
+ * @fileoverview DETAILFIELD / DETAILGRID — read-only label/value display primitives.
  *
  * Absorbs the ~125 hand-rolled `labelStyle` / `valueStyle` pairs across
  * ThothOS read-only surfaces (reference: InlineShowServiceInvoice:514). Every
@@ -33,8 +31,6 @@
  * `<dt>`/`<dd>` couplet wrapped in a `<div>` (valid `<dl>` content per the
  * HTML spec's "one or more dt followed by one or more dd, optionally wrapped
  * in a div" grouping rule).
- *
- * =============================================================================
  */
 
 import React, { forwardRef, type CSSProperties, type ReactNode } from 'react'

@@ -1195,3 +1195,36 @@ export const ThemeShowcase: Story = {
     )
   },
 }
+
+/**
+ * Dedicated sacred baseline. Sacred is the component's hardcoded CSS default,
+ * and this story passes the real theme prop explicitly
+ * (`styles: { theme: 'sacred' }`), so the root emits `data-theme="sacred"` and
+ * renders the sacred token palette: gold completed/active step icons,
+ * `--goobs-sacred-text` labels in `--goobs-font-sacred`, a muted locked
+ * inactive step, and gold connectors — one step in each status
+ * (completed / active / error / inactive) with the error step's description
+ * rendered as secondary text beneath its label.
+ */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred',
+  render: () => (
+    <div style={{ padding: '48px 32px' }}>
+      <Stepper
+        steps={[
+          { label: 'Start', stepLink: '#1', status: 'completed' },
+          { label: 'Progress', stepLink: '#2', status: 'active' },
+          {
+            label: 'Error',
+            stepLink: '#3',
+            status: 'error',
+            description: 'Something went wrong!',
+          },
+          { label: 'Finish', stepLink: '#4', status: 'inactive' },
+        ]}
+        styles={{ theme: 'sacred', orientation: 'horizontal' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+}

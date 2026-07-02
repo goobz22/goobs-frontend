@@ -21,49 +21,77 @@ import cssStyles from './Drawer.module.css'
 
 export interface DrawerStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred' (sacred adds the animated glyph canvas). */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Permanent drawer styling
+  /** Panel background when variant is 'permanent'. */
   permanentBackground?: string
+  /** Panel box shadow when variant is 'permanent'. */
   permanentBoxShadow?: string
+  /** Panel backdrop-filter when variant is 'permanent'. */
   permanentBackdropFilter?: string
+  /** Panel background-image when variant is 'permanent'. */
   permanentBackgroundImage?: string
 
   // Temporary drawer styling
+  /** Panel background for non-permanent variants. */
   temporaryBackground?: string
+  /** Panel box shadow for non-permanent variants. */
   temporaryBoxShadow?: string
+  /** Panel backdrop-filter for non-permanent variants. */
   temporaryBackdropFilter?: string
+  /** Panel background-image for non-permanent variants. */
   temporaryBackgroundImage?: string
 
   // Backdrop styling
+  /** Backdrop background color (temporary variant only). */
   backdropBackgroundColor?: string
+  /** Backdrop backdrop-filter (temporary variant only). */
   backdropBackdropFilter?: string
 
   // Layout and spacing
+  /** Panel width (applies to both vertical and horizontal anchors). */
   width?: string
+  /** Panel height (applies to both vertical and horizontal anchors). */
   height?: string
+  /** Panel CSS `top` offset; numbers are treated as px. */
   top?: string | number
+  /** Panel padding. */
   padding?: string
+  /** Panel margin. */
   margin?: string
+  /** Panel z-index. */
   zIndex?: number
+  /** Backdrop z-index. */
   backdropZIndex?: number
 
   // Transitions
+  /** Replaces the slide transition with `transform <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default ease-in-out); ignored without it. */
   transitionEasing?: string
 
   // States
+  /** Dims the panel to 50% opacity and disables pointer events. */
   disabled?: boolean
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   outline?: boolean
 
   // Dimensions
+  /** Panel max-width. */
   maxWidth?: string
+  /** Panel min-width. */
   minWidth?: string
+  /** Panel max-height. */
   maxHeight?: string
+  /** Panel min-height. */
   minHeight?: string
 
   // Force positioning
+  /** Forces the drawer to the left edge, overriding the `anchor` prop. */
   forceLeft?: boolean
+  /** Forces the drawer to the right edge, overriding the `anchor` prop (forceLeft wins if both set). */
   forceRight?: boolean
 }
 

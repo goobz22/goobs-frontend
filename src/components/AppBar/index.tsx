@@ -21,48 +21,79 @@ import cssStyles from './AppBar.module.css'
 
 export interface AppBarStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling
+  /** Bar background color. */
   backgroundColor?: string
+  /** Bar background-image. */
   backgroundImage?: string
+  /** Bar border color; composes a `<borderWidth> solid <borderColor>` border (no border without it). */
   borderColor?: string
+  /** Bar border radius. */
   borderRadius?: string
+  /** Border width used with borderColor (default 1px); ignored without borderColor. */
   borderWidth?: string
+  /** Bar box shadow (overrides the elevated/theme default). */
   boxShadow?: string
+  /** Bar backdrop-filter (e.g. a blur). */
   backdropFilter?: string
+  /** CSS animation shorthand applied to the bar container. */
   containerAnimation?: string
 
   // Toolbar styling
+  /** Inner toolbar padding. */
   toolbarPadding?: string
+  /** Inner toolbar min-height. */
   toolbarMinHeight?: string
+  /** Flex gap between toolbar children. */
   toolbarGap?: string
 
   // Layout and spacing
+  /** Bar margin shorthand. */
   margin?: string
+  /** Bar top margin. */
   marginTop?: string
+  /** Bar bottom margin. */
   marginBottom?: string
+  /** Bar left margin. */
   marginLeft?: string
+  /** Bar right margin. */
   marginRight?: string
 
   // Position and dimensions
+  /** CSS position; takes precedence over the `position` prop. 'fixed' auto-pins top/left/right to 0 unless overridden. */
   position?: 'static' | 'fixed' | 'absolute' | 'sticky' | 'relative'
+  /** CSS `top` offset (defaults to 0 when position is 'fixed'). */
   top?: string
+  /** CSS `left` offset (defaults to 0 when position is 'fixed'). */
   left?: string
+  /** CSS `right` offset (defaults to 0 when position is 'fixed'). */
   right?: string
+  /** Bar width. */
   width?: string
+  /** Bar max-width. */
   maxWidth?: string
+  /** Bar min-width. */
   minWidth?: string
+  /** Bar height. */
   height?: string
+  /** Bar max-height. */
   maxHeight?: string
+  /** Bar min-height. */
   minHeight?: string
+  /** Bar z-index. */
   zIndex?: number
 
   // Transitions
+  /** Replaces the whole bar transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 
   // States
+  /** Disables the bar: suppresses onClick and sets data-disabled for the CSS module. */
   disabled?: boolean
 }
 

@@ -15,32 +15,52 @@ import ConfirmationCodeInputs, {
 } from '../ConfirmationCodeInput'
 import cssStyles from './QRCode.module.css'
 
+/**
+ * Styling surface for the QR panel. `theme` maps to `data-theme` on each
+ * themed element; the scalar overrides ride in as `--qr-*` CSS custom
+ * properties, set only when provided so the theme defaults apply otherwise.
+ */
 export interface QRCodeStyles {
-  // Theme selection
+  /** `data-theme` variant for the frame, title, and states: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
-  // QR container (framed box around the canvas) styling.
-  // `qrBackgroundColor`/`qrBorderColor` are the specific knobs and win over
-  // the generic `backgroundColor`/`borderColor` when both are provided.
+  // ----- QR container (the framed box around the canvas) -----
+  /** Frame background; the more specific `qrBackgroundColor` wins when both are set. */
   backgroundColor?: string
+  /** Frame border color; the more specific `qrBorderColor` wins when both are set. */
   borderColor?: string
+  /** Frame corner radius (theme default otherwise). */
   borderRadius?: string
+  /**
+   * Frame border width (default '1px' when combined with a border-color
+   * override; alone it keeps the theme's default border color).
+   */
   borderWidth?: string
+  /** Frame inner padding (theme default otherwise). */
   padding?: string
+  /** Frame background; wins over `backgroundColor`. */
   qrBackgroundColor?: string
+  /** Frame border color; wins over `borderColor`. */
   qrBorderColor?: string
+  /** Frame box shadow (theme default otherwise). */
   qrBoxShadow?: string
 
-  // Text styling
+  // ----- Title text -----
+  /** Title heading color (theme default otherwise). */
   titleColor?: string
+  /** Title heading font size (theme default otherwise). */
   titleFontSize?: string
+  /** Title heading font weight (theme default otherwise). */
   titleFontWeight?: string | number
 
-  // Success state styling
+  // ----- Success state -----
+  /** Success-state check icon color. Default: gold on sacred, green otherwise. */
   successIconColor?: string
+  /** Success-state message text color (theme default otherwise). */
   successMessageColor?: string
 
-  // Error styling
+  // ----- Error state -----
+  /** Text color of the no-value error message (theme default otherwise). */
   errorTextColor?: string
 
   /** QR pixel size; overrides the top-level `size` prop when both are set. */
@@ -48,26 +68,68 @@ export interface QRCodeStyles {
 }
 
 export interface QRCodeProps {
+  /**
+   * Text encoded into the QR code. When omitted or empty, the component
+   * renders an inline error message instead of a canvas.
+   */
   value?: string
+  /**
+   * Rendered pixel size (default 256), clamped to the viewport width minus
+   * 32px; `styles.size` wins when both are set. The sacred theme draws the
+   * canvas 40px smaller to leave room for the frame.
+   */
   size?: number
+  /** QR error-correction level. Default 'H'. */
   level?: 'L' | 'M' | 'Q' | 'H'
+  /** Light-module color drawn on the canvas (independent of theme). Default '#FFFFFF'. */
   bgColor?: string
+  /** Dark-module color drawn on the canvas (independent of theme). Default '#000000'. */
   fgColor?: string
+  /** Heading rendered above the frame; also names the canvas aria-label ('MFA Setup' fallback). */
   title?: string
+  /** Renders a full-width "Verify Code" button under the QR. Default false. */
   showVerifyButton?: boolean
+  /** Verify-button click handler; a returned promise's rejection is caught and logged. */
   onVerify?: () => void | Promise<void>
+  /** Click handler for the success-state "Disable Verification" button; promise rejections are caught and logged. */
   onDisableVerification?: () => void | Promise<void>
+  /**
+   * Extra Button props spread onto the verify button. Note its `disabled`
+   * is combined with the built-in gate (disabled until 6 code digits are
+   * entered while `showConfirmationInput` is set).
+   */
   verifyButtonProps?: Partial<ButtonProps>
+  /** Extra Button props spread onto the success-state "Disable Verification" button. */
   disableVerificationButtonProps?: Partial<ButtonProps>
+  /**
+   * Replaces the QR frame with the success pane: check icon, message, and
+   * the "Disable Verification" button. Default false.
+   */
   showSuccessState?: boolean
+  /** Success-pane message. Default 'Verification Successful'. */
   successMessage?: string
+  /** Renders a 6-digit confirmation-code input under the QR and gates the verify button on it. Default false. */
   showConfirmationInput?: boolean
+  /** Controlled value of the confirmation-code input. Default ''. */
   confirmationCode?: string
+  /** Called with the confirmation-code input's new value. */
   onConfirmationCodeChange?: (value: string) => void
+  /** Extra ConfirmationCodeInputs props spread onto the code input. */
   confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
+  /** Theme plus frame/title/state styling overrides. See QRCodeStyles. */
   styles?: QRCodeStyles
 }
 
+/**
+ * MFA-style QR panel: draws `value` onto a canvas inside a themed frame, with
+ * an optional title, 6-digit confirmation-code input, and Verify button.
+ * `showSuccessState` swaps the whole panel for a success pane (check icon,
+ * message, "Disable Verification" button); a missing `value` renders an
+ * inline error instead. Themed light (default) / dark / sacred via
+ * `styles.theme`, with scalar overrides riding in as `--qr-*` CSS custom
+ * properties; the canvas module colors come from `bgColor`/`fgColor`, not the
+ * theme.
+ */
 const QRCodeComponent: FC<QRCodeProps> = React.memo(
   ({
     value,

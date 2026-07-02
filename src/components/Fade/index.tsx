@@ -13,19 +13,27 @@ import cssStyles from './Fade.module.css'
 
 export interface FadeStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred' — changes only the default transition timing. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Animation properties
+  /** Visibility toggle: false fades out, anything else (including unset) shows the content. */
   in?: boolean
+  /** Fade duration in milliseconds; wins over transitionDuration. */
   timeout?: number
 
   // Custom transition
+  /** Full CSS transition shorthand; replaces the computed transition verbatim. */
   transition?: string
+  /** Fade duration as a CSS time (e.g. '0.3s'); superseded by timeout. */
   transitionDuration?: string
+  /** Transition delay. */
   transitionDelay?: string
+  /** Transition timing function. */
   transitionTimingFunction?: string
 
   // States
+  /** Renders the disabled treatment (data-disabled) — purely visual. */
   disabled?: boolean
 }
 

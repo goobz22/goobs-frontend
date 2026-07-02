@@ -6,28 +6,51 @@ import cssStyles from './Paper.module.css'
 
 export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
+  /** Styling options: theme plus scalar overrides layered over the CSS-module defaults. */
   styles?: {
+    /** Theme variant: only 'sacred' selects the sacred surface (gold glow); any other value (or unset) renders the default surface. */
     theme?: string
+    /** Surface width. */
     width?: string
+    /** Surface max-width. */
     maxWidth?: string
+    /** Surface min-width. */
     minWidth?: string
+    /** Surface height. */
     height?: string
+    /** Surface max-height. */
     maxHeight?: string
+    /** Surface min-height. */
     minHeight?: string
+    /** Surface padding. */
     padding?: string
+    /** Surface border radius. */
     borderRadius?: string
+    /** Surface background color. */
     backgroundColor?: string
+    /** Surface background-image. */
     backgroundImage?: string
+    /** Full border shorthand; wins over borderColor/borderWidth. */
     border?: string
+    /** Border color; composes `<borderWidth> solid <borderColor>` when `border` is not set. */
     borderColor?: string
+    /** Border width; with neither border nor borderColor it composes a theme-tinted border on its own (default 1px with borderColor). */
     borderWidth?: string
+    /** Surface box shadow; replaces the elevation-derived shadow. */
     boxShadow?: string
+    /** Surface backdrop-filter. */
     backdropFilter?: string
+    /** Surface opacity. */
     opacity?: number | string
+    /** Margin shorthand; when set, the per-side margins are ignored. */
     margin?: string
+    /** Bottom margin (ignored when `margin` is set). */
     marginBottom?: string
+    /** Top margin (ignored when `margin` is set). */
     marginTop?: string
+    /** Left margin (ignored when `margin` is set). */
     marginLeft?: string
+    /** Right margin (ignored when `margin` is set). */
     marginRight?: string
   }
   elevation?: number

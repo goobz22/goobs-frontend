@@ -223,6 +223,31 @@ export const DarkCustomized: Story = {
 }
 
 // --------------------------------------------------------------------------
+// SACRED THEME STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Dedicated sacred baseline. Passes the component's real theme prop
+ * (`styles: { theme: 'sacred' }`), so the root emits `data-theme="sacred"`
+ * and the CSS override block re-points the token palette: gold group label
+ * and option text in `--goobs-font-sacred`, gold radio rings with the checked
+ * option solid-filled, and the premium 400ms hover transition.
+ */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred',
+  args: {
+    name: 'sacred-radio',
+    label: 'Choose Your Blessing',
+    options: mysticalOptions,
+    defaultValue: 'Divine Insight',
+    styles: {
+      theme: 'sacred',
+    },
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+}
+
+// --------------------------------------------------------------------------
 // CUSTOMIZATION STORIES
 // --------------------------------------------------------------------------
 

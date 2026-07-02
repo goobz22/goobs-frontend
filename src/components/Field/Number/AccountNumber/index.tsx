@@ -16,11 +16,17 @@ export interface AccountNumberProps {
    * tuple-position `(value, isValid)` shape.
    */
   onValidityChange?: (isValid: boolean) => void
+  /** Minimum digit count for validity (default 8). */
   minLength?: number
+  /** Maximum digit count for validity (default 17); also caps the input length. */
   maxLength?: number
+  /** Marks the value as prefilled: it renders masked to its last 4 digits until the field is focused or edited. */
   isDefaultValue?: boolean
+  /** Controlled value. Omit inside a `<Form>` with `name` to let the engine drive it. */
   value?: string
+  /** Field label (default 'Account Number'). */
   label?: React.ReactNode
+  /** Placeholder text. Overridden to '1234567890' under the sacred theme. */
   placeholder?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
@@ -37,6 +43,14 @@ export interface AccountNumberProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Bank-account-number input built on FieldShell with a '#' prefix adornment.
+ * Input is restricted to digits and dashes; `onChange` emits the plain string
+ * — not a DOM event — and `onValidityChange` reports the digits/length check.
+ * With `isDefaultValue`, a prefilled value renders masked to its last 4
+ * digits until focused or edited. Auto-binds by `name` inside a goobs
+ * `<Form>` when no explicit `value` is passed.
+ */
 const AccountNumber: React.FC<AccountNumberProps> = ({
   onChange: onChangeProp,
   onValidityChange,

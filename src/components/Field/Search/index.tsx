@@ -7,7 +7,9 @@ import { useFieldBinding } from '../Shell/useFieldBinding'
 
 export interface SearchbarProps {
   label?: string
+  /** Placeholder text (default 'Search...'). */
   placeholder?: string
+  /** Controlled query string; the input always mirrors this prop. */
   value: string
   /**
    * Canonical value-shape onChange. Receives the raw input string —
@@ -39,6 +41,12 @@ export interface SearchbarProps {
   }
 }
 
+/**
+ * Search input built on FieldShell with a leading magnifier icon inside the
+ * frame. `onChange` emits the plain string value — not a DOM event.
+ * Controlled via `value`; inside a goobs `<Form>` a `name` lets the form
+ * engine drive value/onChange instead.
+ */
 const Searchbar: React.FC<SearchbarProps> = ({
   label,
   placeholder = 'Search...',

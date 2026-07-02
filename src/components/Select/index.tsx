@@ -6,9 +6,13 @@ import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 import { useOptionalFormContext } from '../Form/context'
 import cssStyles from './Select.module.css'
 
+/** Styling contract for the `styles` prop — FormFieldStyles plus Select-specific keys. */
 export interface SelectStyles extends FormFieldStyles {
+  /** @deprecated No-op — use the top-level `variant` prop; scheduled for removal. */
   variant?: 'standard' | 'outlined' | 'filled'
+  /** @deprecated No-op — use the top-level `size` prop; scheduled for removal. */
   size?: 'small' | 'medium'
+  /** @deprecated No-op — use the top-level `fullWidth` prop; scheduled for removal. */
   fullWidth?: boolean
 }
 

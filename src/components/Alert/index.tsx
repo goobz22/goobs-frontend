@@ -24,93 +24,161 @@ import cssStyles from './Alert.module.css'
  */
 export interface AlertStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling
+  /** Container background; set on the `background` shorthand, so the severity background (a longhand) still wins unless that is also overridden. */
   backgroundColor?: string
+  /** Container border color; highest-precedence border hook (caller > severity > theme). */
   borderColor?: string
+  /** Container border radius. */
   borderRadius?: string
+  /** Container border width. */
   borderWidth?: string
+  /** Container box shadow. */
   boxShadow?: string
+  /** Container backdrop-filter (e.g. a blur). */
   backdropFilter?: string
+  /** Container background-image. */
   backgroundImage?: string
+  /** Message font family. */
   fontFamily?: string
+  /** Message font size. */
   fontSize?: string
+  /** Message line height. */
   lineHeight?: string | number
+  /** Container padding. */
   padding?: string
 
   // Hover states
+  /** Container background on hover. */
   hoverBackgroundColor?: string
+  /** Container border color on hover. */
   hoverBorderColor?: string
+  /** Container box shadow on hover. */
   hoverBoxShadow?: string
+  /** Container transform on hover. */
   hoverTransform?: string
 
   // Severity styling overrides
+  /** Background when severity is 'error'. */
   errorBackgroundColor?: string
+  /** Border color when severity is 'error'. */
   errorBorderColor?: string
+  /** Text/icon color when severity is 'error'. */
   errorColor?: string
+  /** Text shadow when severity is 'error'. */
   errorTextShadow?: string
+  /** Background when severity is 'warning'. */
   warningBackgroundColor?: string
+  /** Border color when severity is 'warning'. */
   warningBorderColor?: string
+  /** Text/icon color when severity is 'warning'. */
   warningColor?: string
+  /** Text shadow when severity is 'warning'. */
   warningTextShadow?: string
+  /** Background when severity is 'info'. */
   infoBackgroundColor?: string
+  /** Border color when severity is 'info'. */
   infoBorderColor?: string
+  /** Text/icon color when severity is 'info'. */
   infoColor?: string
+  /** Text shadow when severity is 'info'. */
   infoTextShadow?: string
+  /** Background when severity is 'success'. */
   successBackgroundColor?: string
+  /** Border color when severity is 'success'. */
   successBorderColor?: string
+  /** Text/icon color when severity is 'success'. */
   successColor?: string
+  /** Text shadow when severity is 'success'. */
   successTextShadow?: string
 
   // Icon styling
+  /** Severity icon width (default 20px; 24px on sacred). */
   iconWidth?: string
+  /** Severity icon height (default 20px; 24px on sacred). */
   iconHeight?: string
+  /** Severity icon CSS filter (sacred defaults to a currentColor drop-shadow glow). */
   iconFilter?: string
+  /** Severity icon transform on container hover. */
   iconHoverTransform?: string
+  /** Severity icon filter on container hover. */
   iconHoverFilter?: string
 
   // Message styling
+  /** Message text color (overrides the severity color). */
   messageColor?: string
+  /** Message font weight. */
   messageFontWeight?: string | number
+  /** Message letter spacing. */
   messageLetterSpacing?: string
 
   // Close button styling
+  /** Close button width. */
   closeButtonWidth?: string
+  /** Close button height. */
   closeButtonHeight?: string
+  /** Close button border radius. */
   closeButtonBorderRadius?: string
+  /** Close button border shorthand. */
   closeButtonBorder?: string
+  /** Close button background. */
   closeButtonBackground?: string
+  /** Close button text color. */
   closeButtonColor?: string
+  /** Close button font size. */
   closeButtonFontSize?: string
+  /** Close button font family. */
   closeButtonFontFamily?: string
+  /** Close button text shadow. */
   closeButtonTextShadow?: string
+  /** Close button background on hover. */
   closeButtonHoverBackground?: string
+  /** Close button border color on hover. */
   closeButtonHoverBorderColor?: string
+  /** Close button transform on hover. */
   closeButtonHoverTransform?: string
+  /** Close button box shadow on hover. */
   closeButtonHoverBoxShadow?: string
 
   // Layout and spacing
+  /** Flex gap between icon, message, and close button. */
   gap?: string
+  /** Container margin shorthand. */
   margin?: string
+  /** Container top margin. */
   marginTop?: string
+  /** Container bottom margin. */
   marginBottom?: string
+  /** Container left margin. */
   marginLeft?: string
+  /** Container right margin. */
   marginRight?: string
 
   // Transitions
+  /** Replaces the whole container transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 
   // States
+  /** Set false to remove the container border entirely (default: bordered). */
   outline?: boolean
 
   // Dimensions
+  /** Container width. */
   width?: string
+  /** Container max-width. */
   maxWidth?: string
+  /** Container min-width. */
   minWidth?: string
+  /** Container height. */
   height?: string
+  /** Container max-height. */
   maxHeight?: string
+  /** Container min-height. */
   minHeight?: string
 }
 

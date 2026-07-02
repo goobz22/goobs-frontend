@@ -14,31 +14,51 @@ import cssStyles from './Tooltip.module.css'
  */
 export interface TooltipStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Content styling
+  /** Bubble background (also recolors the arrow to match). */
   backgroundColor?: string
+  /** Bubble border color (rendered as a 1px solid border). */
   borderColor?: string
+  /** Bubble border radius. */
   borderRadius?: string
+  /** Bubble box shadow. */
   boxShadow?: string
+  /** Bubble backdrop-filter. */
   backdropFilter?: string
+  /** Bubble font family. */
   fontFamily?: string
+  /** Bubble font size. */
   fontSize?: string
+  /** Bubble font weight. */
   fontWeight?: string | number
+  /** Bubble letter spacing. */
   letterSpacing?: string
+  /** Bubble text color. */
   color?: string
+  /** Bubble text shadow. */
   textShadow?: string
+  /** Bubble padding. */
   padding?: string
+  /** CSS animation shorthand on the bubble. */
   animation?: string
 
   // Positioning
+  /** Bubble z-index — floored at 10000 so tooltips clear modals. */
   zIndex?: number
+  /** Arrow border width in px (default 5; 6 on sacred). Also feeds the anchor offset math. */
   arrowSize?: number
 
   // Transitions
+  /** With transitionEasing, replaces the opacity/transform show transition; ignored alone. */
   transitionDuration?: string
+  /** With transitionDuration, replaces the opacity/transform show transition; ignored alone. */
   transitionEasing?: string
+  /** Bubble scale while hidden/entering. */
   enterScale?: number
+  /** Bubble scale when visible. */
   visibleScale?: number
 }
 

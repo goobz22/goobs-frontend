@@ -15,22 +15,31 @@ import cssStyles from './Slide.module.css'
 
 export interface SlideStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred' — changes only the default transition timing. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Animation properties
+  /** Visibility toggle: false slides out, anything else (including unset) shows the content. */
   in?: boolean
+  /** Slide duration in milliseconds; wins over transitionDuration. */
   timeout?: number
 
   // Slide direction
+  /** Direction the content slides in from (default 'up'). */
   direction?: 'up' | 'down' | 'left' | 'right'
 
   // Custom transition
+  /** Full CSS transition shorthand; replaces the computed transition verbatim. */
   transition?: string
+  /** Slide duration as a CSS time (e.g. '0.3s'); superseded by timeout. */
   transitionDuration?: string
+  /** Transition delay. */
   transitionDelay?: string
+  /** Transition timing function. */
   transitionTimingFunction?: string
 
   // States
+  /** Freezes the transition (`transition: none` via data-disabled). */
   disabled?: boolean
 }
 

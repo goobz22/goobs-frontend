@@ -4,22 +4,46 @@ import React, { type CSSProperties } from 'react'
 import cssStyles from './Table.module.css'
 
 /**
- * Public theming + per-caller override surface. Self-contained local
- * interface (identical shape to the legacy `TableStyles` from src/theme/table.ts
- * that callers relied on) — the global theme system is being torn down and the
- * Table no longer imports from it.
+ * Shared styling surface for every Table part. `theme` picks the palette; each
+ * scalar override maps to a `--table-*` CSS custom property that
+ * Table.module.css reads, so a supplied value beats the theme default and an
+ * omitted one falls back to it. The vars inherit down the DOM: set once on
+ * `TableContainer` (or `Table`) they reach every head/cell lookup unless a
+ * closer part re-sets the same var. Each part reads only the keys noted on
+ * its members.
  */
 export interface TableStyles {
+  /**
+   * Palette: 'sacred' (default), 'light', or 'dark'. TableContainer always
+   * stamps its `data-theme`; the other parts stamp it only when explicitly
+   * themed, otherwise they inherit the container's cascade.
+   */
   theme?: 'sacred' | 'light' | 'dark'
+  /**
+   * Surface color: the wrapper background on TableContainer, the `<table>`
+   * background on Table; not read by head/row/cell.
+   */
   backgroundColor?: string
+  /** Container border color (read by TableContainer only). */
   borderColor?: string
+  /** Container corner radius (read by TableContainer only). */
   borderRadius?: string
+  /** Container width (read by TableContainer only). */
   width?: string
+  /** Container max-width (read by TableContainer only). */
   maxWidth?: string
+  /** Body-cell text color; inherits to cells when set on TableContainer or Table. */
   color?: string
+  /**
+   * Header background; applies via TableHead or a header cell, and inherits
+   * down when set on TableContainer or Table.
+   */
   headerBackgroundColor?: string
+  /** Header text color; same read points and inheritance as headerBackgroundColor. */
   headerColor?: string
+  /** Font family for header and cells; inherits down from any wrapper part. */
   fontFamily?: string
+  /** Cell border color; read by TableCell, inheriting from TableContainer/Table. */
   cellBorderColor?: string
 }
 
@@ -109,37 +133,84 @@ const cellVars = (styles?: TableStyles): CSSVarStyle | undefined => {
   return Object.keys(vars).length > 0 ? vars : undefined
 }
 
+/** Props for the `Table` part (the `<table>` element). */
 export interface SimpleTableProps {
   children: React.ReactNode
+  /**
+   * Shared styling surface. On this part, `theme` stamps `data-theme` on the
+   * `<table>` (cascading to unthemed descendants) and `backgroundColor`
+   * paints the table surface; the header/cell/font keys inherit down to
+   * head and cells. See TableStyles for per-key read points.
+   */
   styles?: TableStyles
 }
 
+/** Props for the `TableContainer` wrapper around a `Table`. */
 export interface TableContainerProps {
   children: React.ReactNode
+  /**
+   * Shared styling surface. The container reads `theme` (always stamped,
+   * sacred default), `backgroundColor`, `borderColor`, `borderRadius`,
+   * `width`, and `maxWidth`; the header/cell/font keys set here inherit
+   * down to every part inside. See TableStyles for per-key read points.
+   */
   styles?: TableStyles
 }
 
+/** Props for the `TableHead` part (the `<thead>` element). */
 export interface TableHeadProps {
   children: React.ReactNode
+  /**
+   * Shared styling surface. The head reads `headerBackgroundColor`,
+   * `headerColor`, and `fontFamily`; `theme` stamps `data-theme` only when
+   * set here (otherwise the container's cascade applies).
+   */
   styles?: TableStyles
 }
 
+/** Props for the `TableBody` part (the `<tbody>` element) — rows only, no styling surface of its own. */
 export interface TableBodyProps {
   children: React.ReactNode
 }
 
+/** Props for the `TableRow` part (the `<tr>` element). */
 export interface TableRowProps {
   children: React.ReactNode
+  /** Enables the row hover highlight (emitted as `data-hover="true"`). Default false. */
   hover?: boolean
+  /**
+   * Shared styling surface. A row has no scalar hooks of its own; `theme`
+   * stamps `data-theme` only when set here (otherwise the container's
+   * cascade applies).
+   */
   styles?: TableStyles
 }
 
+/** Props for the `TableCell` part (the `<td>` element). */
 export interface TableCellProps {
+  /**
+   * Cell content. When the direct child is a `<th>` element, the cell is
+   * flagged `data-header-cell="true"` so the CSS module styles it as a
+   * header cell.
+   */
   children: React.ReactNode
+  /** Horizontal text alignment, applied as an inline `text-align`. Default 'left'. */
   align?: 'left' | 'center' | 'right'
+  /**
+   * Shared styling surface. The cell reads `color`, `fontFamily`,
+   * `cellBorderColor`, plus the header background/color keys (for
+   * header-cell usage); `theme` stamps `data-theme` only when set here.
+   */
   styles?: TableStyles
 }
 
+/**
+ * Wrapper `<div>` that owns the border, corner radius, and width chrome around
+ * a `Table`. It ALWAYS stamps `data-theme` (sacred default), so unthemed
+ * head/row/cell descendants inherit its palette through the CSS-module
+ * cascade; scalar overrides land as `--table-*` custom properties, and the
+ * header/cell/font keys set here inherit down to every part inside.
+ */
 export const TableContainer: React.FC<TableContainerProps> = ({
   children,
   styles,
@@ -182,6 +253,11 @@ export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
   )
 }
 
+/**
+ * `<thead>` part. Honors the header background/color and `fontFamily`
+ * overrides; stamps `data-theme` only when explicitly themed via
+ * `styles.theme`, otherwise it inherits the container's cascade.
+ */
 export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
   const overrides = headerVars(styles)
   return (
@@ -195,10 +271,19 @@ export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
   )
 }
 
+/**
+ * `<tbody>` part. Purely structural — it accepts rows and exposes no styling
+ * surface; theme and overrides reach its rows via the container/table cascade.
+ */
 export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
   return <tbody className={cssStyles.table}>{children}</tbody>
 }
 
+/**
+ * `<tr>` part. `hover` turns on the CSS hover highlight via a
+ * `data-hover="true"` attribute; `data-theme` is stamped only when this row is
+ * explicitly themed, otherwise the container's cascade applies.
+ */
 export const TableRow: React.FC<TableRowProps> = ({
   children,
   hover = false,
@@ -215,6 +300,13 @@ export const TableRow: React.FC<TableRowProps> = ({
   )
 }
 
+/**
+ * `<td>` part. `align` maps to an inline `text-align` (left default). When its
+ * direct child is a `<th>` element the cell is flagged
+ * `data-header-cell="true"` and styled as a header cell, honoring the header
+ * background/color overrides; otherwise the body-cell color/border/font
+ * overrides apply. `data-theme` is stamped only when explicitly themed.
+ */
 export const TableCell: React.FC<TableCellProps> = ({
   children,
   align = 'left',

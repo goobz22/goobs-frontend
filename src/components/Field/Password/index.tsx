@@ -6,8 +6,10 @@ import { useFieldBinding } from '../Shell/useFieldBinding'
 import ShowHideEyeIcon from '../../Icons/ShowHideEye'
 
 export interface PasswordFieldProps {
+  /** Field label (default 'Password'). */
   label?: string
   placeholder?: string
+  /** Controlled value. Omit inside a `<Form>` with `name` to let the engine drive it. */
   value?: string
   /**
    * Canonical value-shape onChange. Receives the raw input string —
@@ -31,6 +33,12 @@ export interface PasswordFieldProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Password input built on FieldShell with a show/hide eye toggle overlaid on
+ * the input. `onChange` emits the plain string value — not a DOM event.
+ * Auto-binds its value by `name` inside a goobs `<Form>` when no explicit
+ * `value` is passed; otherwise it is a controlled input.
+ */
 const PasswordField: React.FC<PasswordFieldProps> = ({
   label = 'Password',
   placeholder,

@@ -9,11 +9,17 @@ export interface CVVProps {
   onChange?: (value: string) => void
   /** Optional side-channel for validity changes. */
   onValidityChange?: (isValid: boolean) => void
+  /** Minimum digit count for validity (default 3). */
   minLength?: number
+  /** Maximum digit count for validity (default 4); also caps the input length. */
   maxLength?: number
+  /** Marks the value as prefilled: it renders fully masked (*'s) until the field is focused or edited. */
   isDefaultValue?: boolean
+  /** Controlled value. Omit inside a `<Form>` with `name` to let the engine drive it. */
   value?: string
+  /** Field label (default 'CVV'). */
   label?: React.ReactNode
+  /** Placeholder text (default '123'). */
   placeholder?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
@@ -27,10 +33,19 @@ export interface CVVProps {
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
+  /** Disables the input. Takes precedence over `styles.disabled`. */
   disabled?: boolean
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Card security-code input built on FieldShell. Input is digits-only and
+ * capped at `maxLength`; `onChange` emits the plain string — not a DOM event —
+ * and `onValidityChange` reports the digits/length check. With
+ * `isDefaultValue`, a prefilled code renders fully masked until focused or
+ * edited. Auto-binds by `name` inside a goobs `<Form>` when no explicit
+ * `value` is passed.
+ */
 const CVV: React.FC<CVVProps> = ({
   onChange: onChangeProp,
   onValidityChange,

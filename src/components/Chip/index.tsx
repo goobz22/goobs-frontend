@@ -1,36 +1,5 @@
 'use client'
 
-/**
- * =============================================================================
- * CHIP
- * =============================================================================
- *
- * Compact label / token element with two variants:
- *
- *   - `variant="chip"` (default) — interactive filter token. 32px tall,
- *     6px border radius, matches the redesigned Button family.
- *   - `variant="pill"` — read-only status indicator. 22-24px tall,
- *     fully rounded (999px), bolder font. Replaces the hand-rolled
- *     status pills that used to live in several workspaces
- *     (`StatusPill` in employees/contracts, `StatusBadge` in
- *     accounting/billing, `Pill` in scheduling).
- *
- * `label` accepts ReactNode so callers can include inline glyphs / dots
- * directly. `dot` is a shortcut for the common pattern of a leading
- * colored dot — pass `true` to use the chip's current color, or a color
- * string to override.
- *
- * Migrated from the legacy `theme/chip.ts` system to a `Chip.module.css`
- * file on 2026-05-22.
- *
- * TEST CONTRACT
- *   - `data-chip="true"` on the root
- *   - `data-chip-field="<name>"` / `data-chip-value="<value>"` when set
- *   - `data-chip-active="true"|"false"` when `active` prop is provided
- *   - `data-chip-variant="chip"|"pill"`
- * =============================================================================
- */
-
 import React, { type ReactNode } from 'react'
 import CloseIcon from '../Icons/Close'
 import cssStyles from './Chip.module.css'
@@ -86,14 +55,18 @@ export interface ChipStyles {
   fontWeight?: string | number
   /** Optional font family override. */
   fontFamily?: string
-  /** Optional width / min-width / max-width / height override. */
+  /** Chip width override. */
   width?: string
+  /** Chip min-width override. */
   minWidth?: string
+  /** Chip max-width override. */
   maxWidth?: string
+  /** Chip height override. */
   height?: string
   /** When the chip should wrap long content (e.g. selected items in
    *  `MultiSelect` that exceed the cell width). Defaults to `nowrap`. */
   whiteSpace?: React.CSSProperties['whiteSpace']
+  /** Word-break override for long unbroken content (used with whiteSpace wrapping). */
   wordBreak?: React.CSSProperties['wordBreak']
 }
 
@@ -246,6 +219,20 @@ function resolveAriaLabel(
   return undefined
 }
 
+/**
+ * Compact label / token element with two variants: `variant="chip"` (default),
+ * an interactive filter token matching the Button family's radius, and
+ * `variant="pill"`, a fully-rounded read-only status indicator (replaces the
+ * hand-rolled StatusPill / StatusBadge / Pill components). A clickable chip
+ * (`onClick` set and not disabled) renders as `role="button"` with
+ * Enter/Space keyboard activation; a read-only pill renders as
+ * `role="status"`. Colors come from the semantic `tone` palette or explicit
+ * `styles` overrides (applied as CSS custom properties), and `dot` renders
+ * the common leading colored-dot pattern. Theming via `styles.theme` (default
+ * `'sacred'`); the root emits `data-chip`, `data-chip-variant`,
+ * `data-chip-field` / `data-chip-value`, and `data-chip-active` test
+ * selectors.
+ */
 const Chip: React.FC<ChipProps> = ({
   label,
   ariaLabel,

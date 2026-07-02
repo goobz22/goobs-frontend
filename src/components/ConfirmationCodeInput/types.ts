@@ -15,23 +15,37 @@ export interface ConfirmationCodeInputStyles {
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling — applied as inline overrides on the root element.
+  /** Root background color. */
   backgroundColor?: string
+  /** Root background-image. */
   backgroundImage?: string
+  /** Root border color. */
   borderColor?: string
+  /** Root border radius. */
   borderRadius?: string
+  /** Root border width. */
   borderWidth?: string
+  /** Root box shadow. */
   boxShadow?: string
+  /** Root padding. */
   padding?: string
 
   // Layout and spacing. gap/inputGap forward as the --cci-gap /
   // --cci-input-gap custom properties (main-content and digit-cell gaps);
   // margins apply inline on the root element.
+  /** Gap between the main content blocks (--cci-gap). */
   gap?: string
+  /** Gap between the digit cells (--cci-input-gap). */
   inputGap?: string
+  /** Root margin shorthand. */
   margin?: string
+  /** Root top margin. */
   marginTop?: string
+  /** Root bottom margin. */
   marginBottom?: string
+  /** Root left margin. */
   marginLeft?: string
+  /** Root right margin. */
   marginRight?: string
 
   /**
@@ -41,10 +55,16 @@ export interface ConfirmationCodeInputStyles {
   disabled?: boolean
 
   // Dimensions — applied as inline overrides on the root element.
+  /** Root width. */
   width?: string
+  /** Root max-width. */
   maxWidth?: string
+  /** Root min-width. */
   minWidth?: string
+  /** Root height. */
   height?: string
+  /** Root max-height. */
   maxHeight?: string
+  /** Root min-height. */
   minHeight?: string
 }

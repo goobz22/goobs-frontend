@@ -331,7 +331,7 @@ const customerArgs: CustomerBoardProps = {
 }
 
 const meta: Meta<typeof ProjectBoard> = {
-  title: 'ProjectBoard/Board',
+  title: 'Components/ProjectBoard/Board',
   component: ProjectBoard,
   parameters: {
     layout: 'fullscreen',

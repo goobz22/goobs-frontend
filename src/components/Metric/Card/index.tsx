@@ -1,48 +1,3 @@
-/**
- * =============================================================================
- * METRIC CARD
- * =============================================================================
- *
- * Compact visual card for a single KPI / metric value. Used standalone in any
- * workspace, and as the cell-renderer inside `<MetricsAccordion metrics=...>`
- * (which DataGrid uses for its KPI strip above the table).
- *
- * Moved from `DataGrid/MetricCard/` to `components/Metric/Card/` on 2026-05-22
- * because the audience is broader than DataGrid — workspaces, dashboards,
- * and dialogs all show metric cards. Styles live in `Card.module.css` so
- * Storybook + dev-tools can theme without React re-renders.
- *
- * LAYOUT:
- * ┌───────────────┐
- * │     [Icon]    │
- * │      48       │ <- Value
- * │  Active Users │ <- Title/Label
- * │    ↗ 12%      │ <- Trend (optional)
- * └───────────────┘
- *
- * USAGE:
- * ```tsx
- * <MetricCard
- *   title="Total Revenue"
- *   value="$125,000"
- *   icon={<DollarIcon />}
- *   trend={{ value: 12.5, isPositive: true }}
- *   dataField="total-revenue"
- *   styles={{ theme: 'sacred', color: '#D4AF37' }}
- * />
- * ```
- *
- * TEST SELECTORS:
- *   - `[data-metric-card="true"]` on the wrapper
- *   - `[data-metric-field]` (optional, stable across label changes)
- *   - `[data-metric-label]` mirrors the visible label
- *   - `[data-metric-value]` mirrors the rendered value
- *   - `[data-metric-trend="positive" | "negative"]` on the trend block
- *   - `role="group"` + `aria-label` for screenreaders
- *
- * =============================================================================
- */
-
 'use client'
 
 import React, { memo } from 'react'
@@ -53,7 +8,7 @@ export interface MetricCardProps {
   title: string
   /** Main value to display prominently */
   value: string | number
-  /** Optional subtitle below the value (legacy support, now same as title) */
+  /** When set, replaces `title` as the displayed label and in the aria-label. */
   subtitle?: string
   /** Optional icon displayed above the value */
   icon?: React.ReactNode
@@ -88,6 +43,19 @@ export interface MetricCardProps {
   }
 }
 
+/**
+ * Compact card for a single KPI / metric value: an optional icon above a
+ * prominent value, a label below it, and an optional trend row (green up /
+ * red down arrow with percentage). Used standalone in workspaces and as the
+ * cell renderer inside `<MetricsAccordion metrics={…}>`. `styles.theme`
+ * renders `'sacred'` and `'dark'` verbatim; anything else (including
+ * undefined) resolves to the light palette, and the scalar knobs
+ * (color/width/height/padding/borderRadius) ride in as CSS custom-property
+ * overrides so the CSS-module defaults stay authoritative. The wrapper is a
+ * `role="group"` labelled `"<label>: <value>"` and exposes
+ * `data-metric-card`, `data-metric-field`, `data-metric-label`,
+ * `data-metric-value`, and `data-metric-trend` test selectors.
+ */
 const MetricCard = memo(function MetricCard({
   title,
   value,

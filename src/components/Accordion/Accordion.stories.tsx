@@ -78,6 +78,24 @@ export const DarkThemeAlt: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * Dedicated sacred baseline. Passes the component's real theme prop
+ * (`styles: { theme: 'sacred' }`), so the root emits `data-theme="sacred"`
+ * and renders the sacred CSS base block: `--goobs-sacred-control-bg` surface
+ * with gold summary text in `--goobs-font-sacred`. Expanded by default so the
+ * details region's sacred text color is pinned by this baseline too.
+ */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred',
+  args: {
+    summary: 'Sacred Theme Accordion',
+    details: sampleDetails,
+    defaultExpanded: true,
+    styles: { theme: 'sacred' },
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+}
+
 // --------------------------------------------------------------------------
 // STATE STORIES
 // --------------------------------------------------------------------------

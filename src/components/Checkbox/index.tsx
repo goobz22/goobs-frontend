@@ -37,54 +37,87 @@ import { useFieldBinding } from '../Field/Shell/useFieldBinding'
  */
 export interface CheckboxStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling
+  /** Box width. */
   width?: string
+  /** Box height. */
   height?: string
+  /** Box border color. */
   borderColor?: string
+  /** Box border radius. */
   borderRadius?: string
+  /** Box border width. */
   borderWidth?: string
+  /** Box background color. */
   backgroundColor?: string
+  /** Box backdrop-filter. */
   backdropFilter?: string
+  /** Box box-shadow. */
   boxShadow?: string
+  /** Box background-image. */
   backgroundImage?: string
 
   // Hover states
+  /** Box background on hover. */
   hoverBackgroundColor?: string
+  /** Box border color on hover. */
   hoverBorderColor?: string
+  /** Box shadow on hover. */
   hoverBoxShadow?: string
+  /** Box transform on hover. */
   hoverTransform?: string
+  /** Box background-image on hover. */
   hoverBackgroundImage?: string
 
   // Checked states (checked === indeterminate visually in every theme)
+  /** Box background when checked/indeterminate. */
   checkedBackgroundColor?: string
+  /** Box border color when checked/indeterminate. */
   checkedBorderColor?: string
+  /** Box shadow when checked/indeterminate. */
   checkedBoxShadow?: string
+  /** Box background-image when checked/indeterminate. */
   checkedBackgroundImage?: string
 
   // Checkmark icon
+  /** Checkmark/indeterminate icon color. */
   iconColor?: string
 
   // Disabled states
+  /** Box background when disabled. */
   disabledBackgroundColor?: string
+  /** Box border color when disabled. */
   disabledBorderColor?: string
+  /** Box shadow when disabled. */
   disabledBoxShadow?: string
+  /** Box transform when disabled. */
   disabledTransform?: string
 
   // Layout and spacing
+  /** Wrapper margin shorthand. */
   margin?: string
+  /** Wrapper top margin. */
   marginTop?: string
+  /** Wrapper bottom margin. */
   marginBottom?: string
+  /** Wrapper left margin. */
   marginLeft?: string
+  /** Wrapper right margin. */
   marginRight?: string
 
   // Transitions
+  /** Replaces the wrapper transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 
   // States
+  /** Disables the input (also settable via the native `disabled` prop). */
   disabled?: boolean
+  /** Set false to drop the outline/premium-accent treatment (default true). */
   outline?: boolean
 }
 

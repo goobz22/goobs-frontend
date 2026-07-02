@@ -220,35 +220,55 @@ export interface DataGridTheme {
  */
 export interface DataGridStyles {
   // Theme selection
+  /** Theme variant: 'light', 'dark', or 'sacred' (default). Propagated to every DataGrid subcomponent. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   backgroundColor?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   borderColor?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   borderRadius?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   borderWidth?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   backdropFilter?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   animation?: string
 
   // Error states
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   errorBackgroundColor?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   errorColor?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   errorBorderColor?: string
 
   // Layout
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   width?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   height?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   maxWidth?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   minWidth?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   maxHeight?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   minHeight?: string
 
   // Spacing
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   padding?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   margin?: string
 
   // Transitions
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   transitionDuration?: string
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   transitionEasing?: string
 }
 

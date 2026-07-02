@@ -8,6 +8,7 @@ import ArrowDropUpIcon from '../../../Icons/ArrowDropUp'
 import ArrowDropDownIcon from '../../../Icons/ArrowDropDown'
 
 export interface InternalIncrementNumberFieldProps {
+  /** Seed for the uncontrolled display (default '0'). Ignored once `value` is set. */
   initialValue?: string
   /**
    * Fires whenever the value changes (typed input, +/- click, or
@@ -17,10 +18,15 @@ export interface InternalIncrementNumberFieldProps {
    */
   onChange?: (value: number) => void
   label?: React.ReactNode
+  /** Lower clamp for typed and stepped values (default 0). */
   min?: number
+  /** Upper clamp for typed and stepped values (unclamped when omitted). */
   max?: number
+  /** Milliseconds a +/- button is held before auto-repeat kicks in (default 500). */
   initialDelay?: number
+  /** Milliseconds between auto-repeat steps while a +/- button stays held (default 100). */
   repeatInterval?: number
+  /** Controlled value as a string; drives the display verbatim when set. */
   value?: string
   placeholder?: string
   id?: string
@@ -38,6 +44,13 @@ export interface InternalIncrementNumberFieldProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Integer stepper built on FieldShell: a numeric text input with stacked +/-
+ * buttons inside the frame that auto-repeat while held (`initialDelay`, then
+ * `repeatInterval`). `onChange` emits the plain numeric value — not a DOM
+ * event. Auto-binds by `name` inside a goobs `<Form>` (the engine stores the
+ * number); otherwise the string `value` prop controls the display.
+ */
 const InternalIncrementNumberField: React.FC<
   InternalIncrementNumberFieldProps
 > = ({

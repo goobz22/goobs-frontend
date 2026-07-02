@@ -13,16 +13,29 @@ import type { FieldStyleOverrides } from '../Field/Shell/types'
 
 const { FilterListIcon, CloseIcon } = Icons
 
+/**
+ * Client-side event filters applied by BigCalendar. All set criteria AND
+ * together; an unset or empty criterion is ignored.
+ */
 export interface CalendarFilterOptions {
+  /** Case-insensitive substring match against event title, description, and resource. */
   searchText?: string
+  /** Keep events whose `type` is in this list. */
   eventTypes?: string[]
+  /** Bounds on the event START date; each bound is optional. */
   dateRange?: {
+    /** Inclusive lower bound on the event start date. */
     start?: Date | null
+    /** Upper bound on the event start date, inclusive through the end of that day. */
     end?: Date | null
   }
+  /** Keep events whose `resource` is in this list. */
   resources?: string[]
+  /** Keep events whose `metadata.tags` contains at least one of these tags. */
   tags?: string[]
+  /** Keep events whose `metadata.status` is in this list. */
   status?: string[]
+  /** Per-`metadata`-key equality filters (an array value means "one of"); empty/null values are skipped. */
   customFilters?: Record<string, any>
 }
 

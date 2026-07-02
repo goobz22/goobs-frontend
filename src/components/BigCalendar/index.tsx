@@ -57,82 +57,154 @@ export type { CalendarFilterOptions } from './CalendarFilters'
  * as layout overrides on the root.
  */
 export interface BigCalendarStyles {
+  /** `data-theme` variant on the root and every themed child (Paper, toggles, icons). Default 'light'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container / typography passthrough
+  /** Root container background, applied inline (theme surface default otherwise). */
   backgroundColor?: string
+  /** Root container corner radius, applied inline. */
   borderRadius?: string
+  /** Root font family, applied inline; also forwarded to the calendar's internal Typography text. */
   fontFamily?: string
+  /** Base text size forwarded to the calendar's internal Typography; the per-element sizes the calendar sets win. */
   fontSize?: string
+  /** Base text weight forwarded to the calendar's internal Typography; the per-element weights the calendar sets win. */
   fontWeight?: string | number
+  /** Base line-height forwarded to the calendar's internal Typography (event chips set their own). */
   lineHeight?: string
+  /** Base text color forwarded to the calendar's internal Typography (event chips force white; headers/dates set their own weights). */
   color?: string
 
   // Layout overrides applied to the root container
+  /** Root margin shorthand, applied inline. */
   margin?: string
+  /** Root top margin, applied inline. */
   marginTop?: string
+  /** Root bottom margin, applied inline. */
   marginBottom?: string
+  /** Root left margin, applied inline. */
   marginLeft?: string
+  /** Root right margin, applied inline. */
   marginRight?: string
+  /** Root max-width, applied inline. */
   maxWidth?: string
+  /** Root min-width, applied inline. */
   minWidth?: string
+  /** Root max-height, applied inline. */
   maxHeight?: string
+  /** Root min-height, applied inline. */
   minHeight?: string
+  /** @deprecated Not read by the root container — it only flows into the internal Typography text width; scheduled for removal. */
   width?: string
+  /** @deprecated No-op — not read by the component; scheduled for removal. */
   height?: string
 
   // Toolbar overrides (passed to the toolbar Paper)
+  /** Toolbar Paper padding. Default: 20px sacred, 16px light/dark. */
   toolbarPadding?: string
+  /** Toolbar Paper height and min-height. Default: 72px sacred, 64px light/dark. */
   toolbarHeight?: string
+  /** @deprecated No-op — not read by the component; scheduled for removal. */
   toolbarBackground?: string
 
   // Calendar surface overrides (passed to the calendar Paper)
+  /** Calendar-surface Paper corner radius. Default: 12px sacred, 8px light/dark. */
   calendarBorderRadius?: string
 
   // Sacred surface override
+  /** Replaces the sacred theme's default gold-gradient background image on the calendar Paper (sacred theme only). */
   sacredBackgroundImage?: string
 
-  // Transition overrides (reserved for caller parity)
+  /** @deprecated No-op — not read by the component; scheduled for removal. */
   transitionDuration?: string
+  /** @deprecated No-op — not read by the component; scheduled for removal. */
   transitionEasing?: string
 }
 
+/** A single event rendered on the calendar. */
 export type CalendarEvent = {
+  /** Unique id; used as the React key for the event chip. */
   id: string
+  /** Label shown on the chip and in its tooltip; matched by the search filter. */
   title: string
+  /** Event start; anchors day placement, the date-range filter, and all-day placement. */
   startDate: Date
+  /** Event end; with `startDate` it decides which day and hour cells the event occupies. */
   endDate: Date
+  /** Chip background color. Default: '#2196f3', or translucent gold on the sacred theme. */
   color?: string
+  /** In week/day views, shows the event in every visible hour cell of its start day. */
   allDay?: boolean
+  /** Resource label appended to the chip label and tooltip; matched by the search and resource filters. */
   resource?: string
+  /** Longer text shown in the tooltip; matched by the search filter. */
   description?: string
+  /** Category key matched by the `eventTypes` filter. */
   type?: string
+  /** Free-form bag read by the tags/status/custom filters (`metadata.tags`, `metadata.status`, plus custom keys). */
   metadata?: Record<string, any>
 }
 
 export interface BigCalendarProps {
+  /** Events to render; filtered client-side by the active filters. Default []. */
   events?: CalendarEvent[]
+  /**
+   * Initial focused date (default: today). Seeds internal state — the
+   * calendar navigates itself and reports through `onDateChange`; later prop
+   * changes do not re-sync it.
+   */
   currentDate?: Date
+  /**
+   * Initial view (default 'month'). Seeds internal state — the toolbar
+   * toggles switch views and report through `onViewChange`.
+   */
   view?: CalendarView
+  /** Called with the clicked event; when omitted, event chips render non-clickable. */
   onEventClick?: (event: CalendarEvent) => void
+  /**
+   * Called when a day cell (month view) or hour cell (week/day views, with
+   * the hour) is clicked. The click also toggles the built-in selection
+   * highlight summarized in the toolbar title.
+   */
   onCellClick?: (date: Date, hour?: number) => void
+  /** Notified when the toolbar view toggle changes the view. */
   onViewChange?: (view: CalendarView) => void
+  /** Notified when previous/today/next navigation changes the focused date. */
   onDateChange?: (date: Date) => void
+  /** Replaces the default tooltip-wrapped chip rendering for every event. */
   eventRenderer?: (event: CalendarEvent) => React.ReactNode
+  /** Shows the navigation toolbar (prev/today/next, selection title, view toggles). Default true. */
   showToolbar?: boolean
+  /** Month-view cell minimum height in px. Default 80. */
   minCellHeight?: number
+  /** Week/day-view hour row height in px. Default 60. */
   hourHeight?: number
+  /** First visible hour of the week/day grid (0–23). Default 0. */
   startHour?: number
+  /** Hour the week/day grid ends at (exclusive). Default 24. */
   endHour?: number
+  /** Theme plus container/typography/toolbar/surface overrides. See BigCalendarStyles. */
   styles?: BigCalendarStyles
+  /** Shows the CalendarFilters panel between the toolbar and the grid. Default false. */
   showFilters?: boolean
+  /**
+   * Initial filter set (default {}). Seeds internal state — panel edits
+   * apply immediately and report through `onFiltersChange`.
+   */
   filters?: CalendarFilterOptions
+  /** Notified with the full filter set whenever the filter panel changes it. */
   onFiltersChange?: (filters: CalendarFilterOptions) => void
+  /** Options offered by the filter panel's resource dropdown. Default []. */
   availableResources?: { id: string; title: string }[]
   // Inline standardized dropdown datasets
+  /** City options for the filter panel's standardized dropdown. Default []. */
   cities?: string[]
+  /** Property-type options for the filter panel's standardized dropdown. Default []. */
   propertyTypes?: string[]
+  /** Bedroom-count options for the filter panel's standardized dropdown. Default []. */
   bedroomOptions?: Array<string | number>
+  /** Price-range options for the filter panel's standardized dropdown. Default []. */
   priceRanges?: string[]
 }
 
@@ -142,6 +214,17 @@ function mergeClassNames(...names: Array<string | false | undefined>): string {
   return names.filter(Boolean).join(' ')
 }
 
+/**
+ * Full calendar with month/week/day views, a navigation toolbar
+ * (previous/today/next plus view toggles), an optional filter panel, and
+ * built-in day/hour-span selection whose summary renders as the toolbar
+ * title. Events render as tooltip-wrapped chips (replaceable via
+ * `eventRenderer`) and are filtered client-side by the active
+ * CalendarFilterOptions. `view`, `currentDate`, and `filters` only SEED
+ * internal state — the calendar navigates itself and reports changes through
+ * the `on*Change` callbacks. Themed light (default) / dark / sacred via
+ * `styles.theme`.
+ */
 export default function BigCalendar({
   events = [],
   currentDate = new Date(),

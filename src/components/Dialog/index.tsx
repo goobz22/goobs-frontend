@@ -32,22 +32,39 @@ export interface DialogProps {
   open: boolean
   onClose: () => void
   children: React.ReactNode
+  /** Styling options: theme plus sizing/surface overrides forwarded as CSS custom properties. */
   styles?: {
+    /** Theme variant: only 'sacred' selects the sacred palette; any other value (or unset) renders light. */
     theme?: string
+    /** Dialog max-width on desktop (default 600px); mobile/tablet clamp to 95vw/80vw. Ignored with fullWidth. */
     maxWidth?: string
+    /** Dialog width (default 100%). Ignored with fullWidth. */
     width?: string
+    /** Dialog height (default auto). */
     height?: string
+    /** Dialog min-height. */
     minHeight?: string
+    /** Dialog max-height on desktop (default 80vh); mobile clamps to 90vh. */
     maxHeight?: string
+    /** Content-area padding. */
     padding?: string
+    /** Dialog border radius. */
     borderRadius?: string
+    /** Dialog background color. */
     backgroundColor?: string
+    /** Full border shorthand; wins over borderColor. */
     border?: string
+    /** Border color; composes a `2px solid <borderColor>` border when `border` is not set. */
     borderColor?: string
+    /** Anchors the dialog to the top of the backdrop with this padding instead of vertical centering. */
     topOffset?: string
+    /** Stretches the dialog to 100% width/max-width. */
     fullWidth?: boolean
+    /** Backdrop background color. */
     backdropBackgroundColor?: string
+    /** Backdrop backdrop-filter (e.g. a blur). */
     backdropFilter?: string
+    /** Dialog box shadow. */
     boxShadow?: string
   }
   customDialogStyles?: React.CSSProperties

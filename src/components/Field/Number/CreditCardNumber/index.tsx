@@ -4,6 +4,7 @@ import cssStyles from './CreditCardNumber.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
+/** Card brands detectable from the number's prefix pattern. */
 export type CardType =
   | 'visa'
   | 'mastercard'
@@ -69,11 +70,17 @@ export interface CreditCardNumberProps {
   onValidityChange?: (isValid: boolean) => void
   /** Optional side-channel for card-brand detection. */
   onCardTypeChange?: (cardType: CardType) => void
+  /** Includes the Luhn checksum in validity (default true); brand/length checks always run. */
   useLuhnValidation?: boolean
+  /** Marks the value as prefilled: it renders masked to its first and last 4 digits until focused or edited. */
   isDefaultValue?: boolean
+  /** Groups the displayed digits per detected brand pattern, e.g. '4444 4444 4444 4444' (default true). */
   enableFormatting?: boolean
+  /** Controlled value. Omit inside a `<Form>` with `name` to let the engine drive it. */
   value?: string
+  /** Field label (default 'Card Number'). */
   label?: React.ReactNode
+  /** Placeholder text (default '1234 5678 9012 3456'). */
   placeholder?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
@@ -91,6 +98,15 @@ export interface CreditCardNumberProps {
   styles?: FieldStyleOverrides
 }
 
+/**
+ * Credit-card-number input built on FieldShell. Detects the card brand from
+ * the digits (reported via `onCardTypeChange`), groups the display per brand
+ * pattern when `enableFormatting` is on, and reports length + optional Luhn
+ * validity via `onValidityChange`. `onChange` emits the digits-only string —
+ * not a DOM event. With `isDefaultValue`, a prefilled number renders masked
+ * to its first and last 4 digits until focused or edited. Auto-binds by
+ * `name` inside a goobs `<Form>` when no explicit `value` is passed.
+ */
 const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   onChange: onChangeProp,
   onValidityChange,

@@ -26,63 +26,105 @@ import cssStyles from './ProgressBar.module.css'
  */
 export interface ProgressBarStyles {
   // Theme selection
+  /** Theme variant: 'light' (default), 'dark', or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
 
   // Container styling
+  /** Track background. */
   backgroundColor?: string
+  /** Track border color; composes `<borderWidth> solid <borderColor>` (no border without it). */
   borderColor?: string
+  /** Track border radius. */
   borderRadius?: string
+  /** Border width used with borderColor (default 1px); ignored without borderColor. */
   borderWidth?: string
+  /** Track box shadow. */
   boxShadow?: string
+  /** Track backdrop-filter. */
   backdropFilter?: string
+  /** Track background-image. */
   backgroundImage?: string
 
   // Bar styling
+  /** Fill background (determinate mode). With `striped`, the stripe gradient layers over it. */
   barBackground?: string
+  /** Fill border radius (determinate mode). */
   barBorderRadius?: string
+  /** Fill box shadow (determinate mode). */
   barBoxShadow?: string
+  /** Fill background-image (determinate mode). */
   barBackgroundImage?: string
+  /** Fill CSS filter (determinate mode). */
   barFilter?: string
 
   // Indeterminate bar styling
+  /** Fill background (indeterminate mode). With `striped`, the stripe gradient layers over it. */
   indeterminateBarBackground?: string
+  /** Fill border radius (indeterminate mode). */
   indeterminateBarBorderRadius?: string
+  /** Fill box shadow (indeterminate mode). */
   indeterminateBarBoxShadow?: string
+  /** Fill background-image (indeterminate mode). */
   indeterminateBarBackgroundImage?: string
+  /** Fill CSS filter (indeterminate mode). */
   indeterminateBarFilter?: string
+  /** CSS animation shorthand replacing the default indeterminate sweep. */
   indeterminateBarAnimation?: string
 
   // Label styling
+  /** Label text color. */
   labelColor?: string
+  /** Label font size. */
   labelFontSize?: string
+  /** Label font family. */
   labelFontFamily?: string
+  /** Label font weight. */
   labelFontWeight?: string | number
+  /** Label text shadow. */
   labelTextShadow?: string
 
   // Layout and spacing
+  /** Track width. */
   width?: string
+  /** Track height. */
   height?: string
+  /** Track padding. */
   padding?: string
+  /** Track margin shorthand. */
   margin?: string
+  /** Track top margin. */
   marginTop?: string
+  /** Track bottom margin. */
   marginBottom?: string
+  /** Track left margin. */
   marginLeft?: string
+  /** Track right margin. */
   marginRight?: string
 
   // Transitions
+  /** Replaces the determinate fill transition with `all <duration> <easing>`. */
   transitionDuration?: string
+  /** Easing used with transitionDuration (default cubic-bezier(0.4, 0, 0.2, 1)); ignored without it. */
   transitionEasing?: string
 
   // States
+  /** Renders the disabled treatment (data-disabled) — purely visual. */
   disabled?: boolean
+  /** Overlays the diagonal stripe gradient on the fill. */
   striped?: boolean
+  /** Animates the stripes (data-animated in the CSS module). */
   animated?: boolean
+  /** Adds the pulsing fill animation (data-pulse in the CSS module). */
   pulse?: boolean
 
   // Dimensions
+  /** Track max-width. */
   maxWidth?: string
+  /** Track min-width. */
   minWidth?: string
+  /** Track max-height. */
   maxHeight?: string
+  /** Track min-height. */
   minHeight?: string
 }
 

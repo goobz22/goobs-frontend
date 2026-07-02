@@ -112,6 +112,26 @@ export const SacredTheme: Story = {
   },
 }
 
+/**
+ * The dark theme (`theme="dark"`) on the dark canvas: the table container is
+ * a near-opaque slate surface (rgba(31,41,55,0.95)) with a gray-600 border,
+ * headers in near-white gray-100, price labels in gray-400, and the sacred
+ * corner glyphs hidden — the `case 'dark'` palette in getThemeStyles.
+ */
+export const DarkTheme: Story = {
+  render: args => (
+    <div style={{ width: '800px', maxWidth: '100%', padding: '24px' }}>
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    ...defaultConfig,
+    theme: 'dark',
+    highlightedPackageIndex: 1,
+  },
+  globals: { backgrounds: { value: 'dark' } },
+}
+
 const InteractiveDemoRenderer = () => {
   const [sacredtheme, setsacredtheme] = React.useState(false)
   return (
