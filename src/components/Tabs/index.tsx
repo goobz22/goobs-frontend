@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useId, useRef } from 'react'
+import React, { useRef } from 'react'
 import { alpha } from '../../utils'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tabs.module.css'
@@ -128,10 +128,6 @@ const Tabs: React.FC<TabsProps> = ({
   ariaLabel = 'Workspace sections',
   styles,
 }) => {
-  // Stable id base for `aria-controls` linkage to corresponding
-  // `<TabPanel>`. Each tab button references `tabpanel-${reactId}-${id}`;
-  // a sibling panel matching that id pairs the two.
-  const reactId = useId()
   // Sacred is the hardcoded CSS default (the component historically rendered
   // sacred-gold inline regardless of theme); light/dark are [data-theme]
   // overrides in Tabs.module.css.
@@ -260,7 +256,10 @@ const Tabs: React.FC<TabsProps> = ({
         // when the label is a ReactNode the caller must pass `id`.
         const labelString = typeof label === 'string' ? label : undefined
         const tabId = tab.id ?? kebabFallback(labelString) ?? String(index)
-        const panelId = `tabpanel-${reactId}-${tabId}`
+        // Single source of truth for the tab↔panel ARIA pairing: the same
+        // helper `<TabPanel>` uses for its `id`, so
+        // `tab.aria-controls === panel.id` holds by construction.
+        const panelId = tabPanelId(tabId)
         return (
           <Tab
             key={index}
@@ -292,15 +291,19 @@ const Tabs: React.FC<TabsProps> = ({
 }
 
 /**
- * Compute the panel id that matches a given tab id from the same
- * `<Tabs>` instance. Use when rendering a sibling `<TabPanel>` so the
- * `aria-labelledby` / `id` pair lines up. The `reactId` argument is
- * the same `useId()` value Tabs allocated — pass it down via a wrapper
- * if you need direct control, otherwise prefer `<TabPanel>` (below)
- * which co-locates the wiring.
+ * Compute the panel id that matches a given tab id. This is the SINGLE
+ * source of truth for the tab↔panel ARIA pairing: `<Tabs>` uses it for
+ * each tab's `aria-controls` and `<TabPanel>` uses it for its `id`, so
+ * the two link by construction. Call it directly when hand-rolling a
+ * panel element instead of using `<TabPanel>`.
+ *
+ * Ids are derived purely from the tab id (`tabpanel-${tabId}`), matching
+ * the unscoped `tab-${tabId}` button ids. When several `<Tabs>` render
+ * on the same page, give their items distinct `id`s (the same contract
+ * the tab button ids already require — see `TabsProps.ariaLabel`).
  */
-export function tabPanelId(reactId: string, tabId: string): string {
-  return `tabpanel-${reactId}-${tabId}`
+export function tabPanelId(tabId: string): string {
+  return `tabpanel-${tabId}`
 }
 
 export interface TabProps {
@@ -327,9 +330,8 @@ export interface TabProps {
    *  parent `<Tabs>` from `TabsItem.id` (or its kebab-cased label). */
   tabId?: string
   /** `id` of the corresponding `<TabPanel>` for `aria-controls`. The
-   *  parent `<Tabs>` computes this via `tabPanelId(reactId, tabId)` and
-   *  hands it down so screenreader navigation lands on the right
-   *  region. */
+   *  parent `<Tabs>` computes this via `tabPanelId(tabId)` and hands it
+   *  down so screenreader navigation lands on the right region. */
   panelId?: string
   /** Singular entity noun for THIS tab — emitted as `data-tab-subject`
    *  so tests can locate a tab by the entity it manages even when its
@@ -446,7 +448,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
 }) => (
   <div
     role="tabpanel"
-    id={`tabpanel-${tabId}`}
+    id={tabPanelId(tabId)}
     aria-labelledby={`tab-${tabId}`}
     data-tab-id={tabId}
     data-tab-active={isActive ? 'true' : 'false'}

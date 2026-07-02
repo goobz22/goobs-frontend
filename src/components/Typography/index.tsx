@@ -59,9 +59,10 @@ export interface TypographyProps {
 
 /**
  * Resolved variant identity: which CSS module class supplies the default
- * font-size, plus the variant's default font-weight and font-family. This
- * mirrors getVariantStyles() one-for-one — the branch ORDER is significant
- * (cinzel is matched before standard headings, merri-helper before the rest).
+ * font-size, plus the variant's default font-weight and font-family. The
+ * branch ORDER is significant: cinzel is matched first, then EVERY merri*
+ * variant (so the 'h1'..'h6' substring inside 'merrih1' etc. can never
+ * hijack the family to Cinzel), then standard headings, then body.
  */
 interface VariantResolution {
   className: string
@@ -122,14 +123,68 @@ function resolveVariant(variant: string): VariantResolution {
     }
   }
 
-  // Merriweather helper/footer text
-  if (v.includes('merri') && (v.includes('helper') || v.includes('footer'))) {
+  // Merriweather variants — anything explicitly named merri* is BRAND
+  // Merriweather (fonts/goobs-fonts.css ships its @font-face at 400/700).
+  // This branch must run BEFORE the standard-heading checks below: 'merrih1'
+  // contains the substring 'h1', so without it the heading branch would force
+  // Cinzel onto a variant whose name promises Merriweather.
+  if (v.includes('merri')) {
+    if (v.includes('helper') || v.includes('footer')) {
+      return {
+        className: cssStyles.merriHelper ?? '',
+        fontWeight: 400,
+        fontFamily: '"Merriweather", serif',
+        merriColorNonSacred: 'rgba(255, 255, 255, 0.6)',
+        merriColorSacred: 'rgba(255, 215, 0, 0.7)',
+      }
+    }
+    // Merri headings reuse the standard heading font-size classes; the
+    // family is Merriweather and the weight is 700 (the bold face the
+    // Merriweather @font-face actually ships — it has no 600).
+    if (v.includes('h1'))
+      return {
+        className: cssStyles.h1 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    if (v.includes('h2'))
+      return {
+        className: cssStyles.h2 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    if (v.includes('h3'))
+      return {
+        className: cssStyles.h3 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    if (v.includes('h4'))
+      return {
+        className: cssStyles.h4 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    if (v.includes('h5'))
+      return {
+        className: cssStyles.h5 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    if (v.includes('h6'))
+      return {
+        className: cssStyles.h6 ?? '',
+        fontWeight: 700,
+        fontFamily: '"Merriweather", serif',
+      }
+    // merriparagraph / any other merri body text (default 1rem size from
+    // .root). Without this branch 'merriparagraph' fell through to the
+    // family-less default and the isHeading `.includes('h')` check matched
+    // the 'h' in 'paragraph', forcing Cinzel.
     return {
-      className: cssStyles.merriHelper ?? '',
+      className: '',
       fontWeight: 400,
       fontFamily: '"Merriweather", serif',
-      merriColorNonSacred: 'rgba(255, 255, 255, 0.6)',
-      merriColorSacred: 'rgba(255, 215, 0, 0.7)',
     }
   }
 
@@ -217,10 +272,13 @@ const Typography: React.FC<TypographyProps> = ({
   const finalPadding = styles?.padding
   const finalGutterBottom = styles?.gutterBottom ?? gutterBottom ?? false
 
-  // Handle outline — convert boolean to string if needed.
+  // Handle outline. `outline: true` opts into the visible CSS-module outline
+  // treatment (.outlined — 1px solid currentColor, matching the resolved
+  // per-theme text color); a string passes through verbatim as the CSS
+  // `outline` value; false/undefined renders no outline.
   const rawOutline = styles?.outline ?? outline
-  const finalOutline =
-    rawOutline === true ? 'none' : rawOutline === false ? undefined : rawOutline
+  const hasBooleanOutline = rawOutline === true
+  const finalOutline = typeof rawOutline === 'string' ? rawOutline : undefined
 
   const isHeading = String(finalVariant).toLowerCase().includes('h')
   const resolved = resolveVariant(String(finalVariant))
@@ -301,9 +359,13 @@ const Typography: React.FC<TypographyProps> = ({
       dynamicStyle.paddingBottom = styles.paddingBottom
   }
 
-  const className = resolved.className
-    ? `${cssStyles.root} ${resolved.className}`
-    : cssStyles.root
+  const className = [
+    cssStyles.root,
+    resolved.className,
+    hasBooleanOutline ? cssStyles.outlined : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const content = text || children
 

@@ -2,8 +2,8 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, fn } from 'storybook/test'
-import Tabs, { TabsItem } from './index'
+import { expect, userEvent, within, fn } from 'storybook/test'
+import Tabs, { TabsItem, TabPanel, tabPanelId } from './index'
 
 const basicTabs: TabsItem[] = [
   { title: 'Home', route: '/home', trigger: 'route' },
@@ -42,7 +42,10 @@ const meta: Meta<typeof Tabs> = {
     },
   },
   parameters: {
-    layout: 'fullscreen', // Use fullscreen to better showcase sticky behavior
+    // Fullscreen so the tablist spans the canvas edge-to-edge like it does
+    // in a real page header. (The component itself does NOT stick on
+    // scroll — it renders a static tab strip; position it via the host.)
+    layout: 'fullscreen',
   },
 }
 export default meta
@@ -50,15 +53,15 @@ export default meta
 type Story = StoryObj<typeof Tabs>
 
 /**
- * 1) Premium Theme
+ * 1) Light Theme
  */
-export const PremiumTheme: Story = {
+export const LightTheme: Story = {
   render: args => (
-    <div style={{ background: '#1f2937', height: '200vh' }}>
+    <div style={{ background: '#1f2937' }}>
       <Tabs {...args} />
       <div style={{ padding: '32px', color: '#ffffff' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 700 }}>Page Content</h1>
-        <p>Scroll down to see the tabs stick to the top.</p>
+        <p>A static light-theme tab strip rendered above page content.</p>
       </div>
     </div>
   ),
@@ -77,7 +80,7 @@ export const PremiumTheme: Story = {
  */
 export const SacredTheme: Story = {
   render: args => (
-    <div style={{ background: '#000000', height: '200vh' }}>
+    <div style={{ background: '#000000' }}>
       <Tabs {...args} />
       <div style={{ padding: '32px', color: '#ffe680' }}>
         <h1
@@ -90,13 +93,13 @@ export const SacredTheme: Story = {
           Ancient Archives
         </h1>
         <p style={{ fontFamily: "'Cinzel', Georgia, serif" }}>
-          Scroll to observe the sacred header.
+          A static sacred-gold tab strip with per-tab borders.
         </p>
       </div>
     </div>
   ),
   args: {
-    ...PremiumTheme.args,
+    ...LightTheme.args,
     items: withBordersTabs,
     alignment: 'center',
     styles: {
@@ -213,5 +216,71 @@ export const InteractiveDemo: Story = {
     // Test clicking a tab
     const settingsTab = await canvas.findByText('Settings')
     await userEvent.click(settingsTab)
+  },
+}
+
+const panelPairingTabs: TabsItem[] = [
+  { title: 'Overview', id: 'overview', trigger: 'onClick', onClick: fn() },
+  { title: 'Activity', id: 'activity', trigger: 'onClick', onClick: fn() },
+]
+
+const WithPanelsRenderer = () => {
+  const [activeTab, setActiveTab] = React.useState(0)
+  return (
+    <div style={{ padding: '16px' }}>
+      <Tabs
+        items={panelPairingTabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        ariaLabel="Panel pairing demo"
+        styles={{ theme: 'light' }}
+      />
+      <TabPanel tabId="overview" isActive={activeTab === 0}>
+        <p style={{ padding: '16px' }}>Overview content</p>
+      </TabPanel>
+      <TabPanel tabId="activity" isActive={activeTab === 1}>
+        <p style={{ padding: '16px' }}>Activity content</p>
+      </TabPanel>
+    </div>
+  )
+}
+
+/**
+ * 4) With Panels — ARIA pairing (regression)
+ *
+ * Renders `<Tabs>` alongside its `<TabPanel>` companions and asserts the
+ * documented contract: each tab button's `aria-controls` equals the `id`
+ * of the `<TabPanel>` rendered for the same tab id, both produced by the
+ * shared `tabPanelId` helper. Pins the fix for the bug where `<Tabs>`
+ * scoped `aria-controls` with an internal `useId()` value that
+ * `<TabPanel>` never had, leaving every tab's `aria-controls` dangling.
+ */
+export const WithPanelsAriaPairing: Story = {
+  render: () => <WithPanelsRenderer />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const overviewTab = canvas.getByRole('tab', { name: 'Overview' })
+    const overviewPanel = canvas.getByRole('tabpanel', { name: 'Overview' })
+    const activityTab = canvas.getByRole('tab', { name: 'Activity' })
+    const activityPanel = canvas.getByRole('tabpanel', { name: 'Activity' })
+
+    // The panel id comes from the exported helper…
+    await expect(overviewPanel).toHaveAttribute('id', tabPanelId('overview'))
+    await expect(activityPanel).toHaveAttribute('id', tabPanelId('activity'))
+
+    // …and each tab's aria-controls points at exactly that id (the old
+    // code emitted `tabpanel-<useId>-overview` here, which matched no
+    // element in the document).
+    await expect(overviewTab).toHaveAttribute('aria-controls', overviewPanel.id)
+    await expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
+
+    // Activating another tab keeps the pairing and flips the active state.
+    await userEvent.click(activityTab)
+    await expect(activityTab).toHaveAttribute('aria-selected', 'true')
+    await expect(activityPanel).toHaveAttribute('data-tab-active', 'true')
+    await expect(overviewPanel).toHaveAttribute('data-tab-active', 'false')
+    await expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
   },
 }

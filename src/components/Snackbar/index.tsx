@@ -10,6 +10,12 @@ export interface SnackbarProps {
   onClose: () => void
   message: string
   severity: AlertProps['severity']
+  /**
+   * Milliseconds before the snackbar automatically hides. Defaults to 6000
+   * when omitted (`undefined`). Pass `0` (or any non-positive value) to
+   * DISABLE auto-hide entirely — the snackbar then stays visible until it is
+   * dismissed manually (close button / `onClose`).
+   */
   autoHideDuration?: number
   /**
    * Styling forwarded to the inner Alert (theme selection + container/
@@ -60,8 +66,12 @@ const Snackbar: React.FC<SnackbarProps> = ({
     }
   }, [isOpen])
 
+  // Auto-hide timer. A non-positive `autoHideDuration` (e.g. `0`) means
+  // "never auto-hide": no timer is scheduled, so the snackbar stays open
+  // until dismissed manually. (Previously the timer was ALWAYS scheduled, so
+  // `autoHideDuration={0}` hid the snackbar after 0ms instead of disabling.)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && autoHideDuration > 0) {
       const timer = setTimeout(() => {
         setIsOpen(false)
         onClose()
@@ -69,6 +79,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [isOpen, autoHideDuration, onClose])
 
   if (!isOpen) {

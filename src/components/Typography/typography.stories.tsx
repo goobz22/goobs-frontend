@@ -30,6 +30,12 @@ type Story = StoryObj<typeof Typography>
 // LIGHT THEME STORIES
 // --------------------------------------------------------------------------
 
+/**
+ * merrih1 is a Merriweather-branded heading. Regression baseline: the merri*
+ * branch in resolveVariant pins '"Merriweather", serif', so the 'h1'
+ * substring inside the variant name can no longer hijack the font family to
+ * Cinzel (standard h1–h6 variants still render Cinzel).
+ */
 export const LightH1: Story = {
   name: 'Light/Heading 1',
   args: {
@@ -38,6 +44,13 @@ export const LightH1: Story = {
       theme: 'light',
       variant: 'merrih1',
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const heading = canvas.getByText('Heading 1 - Light Theme')
+    const fontFamily = window.getComputedStyle(heading).fontFamily
+    await expect(fontFamily).toContain('Merriweather')
+    await expect(fontFamily).not.toContain('Cinzel')
   },
 }
 
@@ -52,6 +65,11 @@ export const LightH2: Story = {
   },
 }
 
+/**
+ * merriparagraph is Merriweather body text. Regression baseline: before the
+ * merri* branch existed, the isHeading `.includes('h')` check matched the
+ * 'h' in 'paragraph' and forced Cinzel onto this variant.
+ */
 export const LightParagraph: Story = {
   name: 'Light/Paragraph',
   args: {
@@ -60,6 +78,15 @@ export const LightParagraph: Story = {
       theme: 'light',
       variant: 'merriparagraph',
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const paragraph = canvas.getByText(
+      'This is a paragraph in the light theme. It uses Merriweather for excellent readability.'
+    )
+    const fontFamily = window.getComputedStyle(paragraph).fontFamily
+    await expect(fontFamily).toContain('Merriweather')
+    await expect(fontFamily).not.toContain('Cinzel')
   },
 }
 
@@ -74,6 +101,12 @@ export const LightHelperText: Story = {
   },
 }
 
+/**
+ * `outline: true` renders a VISIBLE 1px currentColor outline (the .outlined
+ * CSS-module treatment). Regression baseline: the boolean used to be
+ * inverted to CSS `outline: none`, silently removing the outline this story
+ * claims to add.
+ */
 export const LightWithOutline: Story = {
   name: 'Light/With Outline',
   args: {
@@ -83,6 +116,13 @@ export const LightWithOutline: Story = {
       variant: 'merrih2',
       outline: true,
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const heading = canvas.getByText('Outlined Light Heading')
+    const style = window.getComputedStyle(heading)
+    await expect(style.outlineStyle).toBe('solid')
+    await expect(style.outlineWidth).toBe('1px')
   },
 }
 
@@ -114,6 +154,10 @@ export const DarkParagraph: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * `outline: true` on the dark theme: a visible 1px outline in currentColor,
+ * so it tracks the dark theme's light text color.
+ */
 export const DarkWithOutline: Story = {
   name: 'Dark/With Outline',
   args: {
@@ -146,7 +190,7 @@ export const SacredH1: Story = {
 export const SacredParagraph: Story = {
   name: 'Sacred/Paragraph',
   args: {
-    text: 'This is a paragraph in the sacred theme, using Cinzel for a mystical feel.',
+    text: 'This is a paragraph in the sacred theme, using Merriweather body text against the gold palette.',
     styles: {
       theme: 'sacred',
       variant: 'merriparagraph',
@@ -155,6 +199,10 @@ export const SacredParagraph: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * `outline: true` on the sacred theme: a visible 1px outline in currentColor,
+ * so it renders gold to match the sacred text color.
+ */
 export const SacredWithOutline: Story = {
   name: 'Sacred/With Outline',
   args: {

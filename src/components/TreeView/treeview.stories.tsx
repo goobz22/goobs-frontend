@@ -578,6 +578,24 @@ export const DarkInteractiveElements: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * Sacred themed tree. This is the only story that passes
+ * `styles: { theme: 'sacred' }`, so it is the Chromatic baseline for the
+ * entire sacred variant — including the SacredBackground canvas, whose
+ * drifting hieroglyph particles (SACRED_GLYPHS) were previously invisible
+ * because the particle glyph was hardcoded to an empty string.
+ */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred',
+  args: {
+    items: elementTreeData,
+    defaultExpandedItems: ['elements', 'fire', 'water', 'celestial'],
+    defaultSelectedItems: ['phoenix'],
+    styles: { theme: 'sacred' },
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+}
+
 // --------------------------------------------------------------------------
 // COMPREHENSIVE SHOWCASE
 // --------------------------------------------------------------------------

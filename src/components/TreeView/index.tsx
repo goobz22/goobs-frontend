@@ -19,6 +19,7 @@ import React, {
 } from 'react'
 import cssStyles from './TreeView.module.css'
 import ExpandMoreIcon from '../Icons/ExpandMore'
+import { SACRED_GLYPHS } from '../Icons/sacredGlyphs'
 
 // --------------------------------------------------------------------------
 // TYPES AND INTERFACES
@@ -819,7 +820,9 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.2,
         vy: (Math.random() - 0.5) * 0.2,
-        glyph: '',
+        glyph:
+          SACRED_GLYPHS[Math.floor(Math.random() * SACRED_GLYPHS.length)] ??
+          SACRED_GLYPHS[0],
         size: 10 + Math.random() * 6,
         opacity: Math.random() * 0.15 + 0.05,
         maxOpacity: Math.random() * 0.2 + 0.1,

@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 import Snackbar from './index'
 
 const meta: Meta<typeof Snackbar> = {
@@ -57,6 +57,7 @@ export const LightThemeSuccess: Story = {
     message: 'Operation completed successfully!',
     severity: 'success',
     autoHideDuration: 6000,
+    styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -69,6 +70,7 @@ export const LightThemeError: Story = {
     message: 'An error occurred while processing your request.',
     severity: 'error',
     autoHideDuration: 6000,
+    styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -81,6 +83,7 @@ export const LightThemeWarning: Story = {
     message: 'Please review your input before proceeding.',
     severity: 'warning',
     autoHideDuration: 6000,
+    styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -93,6 +96,7 @@ export const LightThemeInfo: Story = {
     message: 'Your session will expire in 5 minutes.',
     severity: 'info',
     autoHideDuration: 6000,
+    styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -105,6 +109,7 @@ export const DarkThemeSuccess: Story = {
     message: 'Operation completed successfully!',
     severity: 'success',
     autoHideDuration: 6000,
+    styles: { theme: 'dark' },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
@@ -117,6 +122,7 @@ export const DarkThemeError: Story = {
     message: 'An error occurred while processing your request.',
     severity: 'error',
     autoHideDuration: 6000,
+    styles: { theme: 'dark' },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
@@ -129,6 +135,7 @@ export const DarkThemeWarning: Story = {
     message: 'Please review your input before proceeding.',
     severity: 'warning',
     autoHideDuration: 6000,
+    styles: { theme: 'dark' },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
@@ -141,6 +148,7 @@ export const DarkThemeInfo: Story = {
     message: 'Your session will expire in 5 minutes.',
     severity: 'info',
     autoHideDuration: 6000,
+    styles: { theme: 'dark' },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
@@ -153,8 +161,9 @@ export const SacredThemeSuccess: Story = {
     message: 'Operation completed successfully!',
     severity: 'success',
     autoHideDuration: 6000,
+    styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** Error snackbar with sacred theme. */
@@ -165,8 +174,9 @@ export const SacredThemeError: Story = {
     message: 'An error occurred while processing your request.',
     severity: 'error',
     autoHideDuration: 6000,
+    styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** Warning snackbar with sacred theme. */
@@ -177,8 +187,9 @@ export const SacredThemeWarning: Story = {
     message: 'Please review your input before proceeding.',
     severity: 'warning',
     autoHideDuration: 6000,
+    styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** Info snackbar with sacred theme. */
@@ -189,8 +200,9 @@ export const SacredThemeInfo: Story = {
     message: 'Your session will expire in 5 minutes.',
     severity: 'info',
     autoHideDuration: 6000,
+    styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -561,7 +573,12 @@ export const CustomDuration: Story = {
   globals: { backgrounds: { value: 'light' } },
 }
 
-/** Snackbar that doesn't auto-hide. */
+/**
+ * Snackbar that doesn't auto-hide (`autoHideDuration: 0` disables the timer).
+ * The play function pins the real behavior: the snackbar must STILL be
+ * visible well after mount — under the old always-schedule-a-timer logic it
+ * hid after 0ms, so this assertion fails against that code.
+ */
 export const NoAutoHide: Story = {
   name: 'Behavior/No Auto-Hide',
   args: {
@@ -571,6 +588,16 @@ export const NoAutoHide: Story = {
     autoHideDuration: 0,
   },
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // Give the (buggy) 0ms timer every chance to fire before asserting.
+    await new Promise(resolve => setTimeout(resolve, 300))
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByText(
+        'This snackbar will not auto-hide - you must close it manually'
+      )
+    ).toBeVisible()
+  },
 }
 
 // Component for Interactive
