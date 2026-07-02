@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the ExternalIncrementNumberField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import ExternalIncrementNumberField from './index'
 
 const meta: Meta<typeof ExternalIncrementNumberField> = {

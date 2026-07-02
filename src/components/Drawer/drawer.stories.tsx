@@ -5,7 +5,7 @@
  * stateful wrapper so the drawer can be opened and closed.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Drawer from './index'
 import Button from '../Button'
 
@@ -118,25 +118,19 @@ const InteractiveDrawer = ({
 export const LightTheme: Story = {
   name: 'Themes/Light Theme',
   render: () => <InteractiveDrawer theme="light" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
   name: 'Themes/Dark Theme',
   render: () => <InteractiveDrawer theme="dark" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
   name: 'Themes/Sacred Theme',
   render: () => <InteractiveDrawer theme="sacred" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -146,33 +140,25 @@ export const SacredTheme: Story = {
 export const AnchorLeft: Story = {
   name: 'Anchor/Left',
   render: () => <InteractiveDrawer theme="light" anchor="left" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const AnchorRight: Story = {
   name: 'Anchor/Right',
   render: () => <InteractiveDrawer theme="light" anchor="right" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const AnchorTop: Story = {
   name: 'Anchor/Top',
   render: () => <InteractiveDrawer theme="light" anchor="top" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const AnchorBottom: Story = {
   name: 'Anchor/Bottom',
   render: () => <InteractiveDrawer theme="light" anchor="bottom" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -199,23 +185,17 @@ export const PermanentVariant: Story = {
       </div>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const TemporaryVariant: Story = {
   name: 'Variant/Temporary',
   render: () => <InteractiveDrawer theme="light" variant="temporary" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const PersistentVariant: Story = {
   name: 'Variant/Persistent',
   render: () => <InteractiveDrawer theme="light" variant="persistent" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

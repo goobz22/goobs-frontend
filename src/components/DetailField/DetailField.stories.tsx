@@ -4,7 +4,7 @@
  * hand-rolled labelStyle/valueStyle pairs across ThothOS read-only surfaces.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import DetailField, { DetailGrid } from './index'
 
@@ -20,9 +20,8 @@ const meta: Meta<typeof DetailField> = {
   },
   parameters: {
     layout: 'padded',
-    backgrounds: { default: 'dark' },
   },
-  tags: ['autodocs'],
+  globals: { backgrounds: { value: 'dark' } },
   decorators: [
     Story => (
       <div
@@ -46,7 +45,6 @@ type Story = StoryObj<typeof DetailField>
 
 /** A single DetailField wrapped in a <dl> so the dt/dd couplet is valid. */
 export const SingleField: Story = {
-  name: 'Single Field',
   render: args => (
     <dl style={{ margin: 0 }}>
       <DetailField {...args} />
@@ -109,7 +107,6 @@ export const HideWhenEmpty: Story = {
 // INTERACTION TEST — labels are <dt>, values are <dd>, empty rows dropped
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <DetailGrid
       ariaLabel="Test Details"

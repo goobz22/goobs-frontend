@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the TimeRange component.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import TimeRangeComponent, { TimeRange } from './index'
 
 const meta: Meta<typeof TimeRangeComponent> = {
@@ -40,7 +40,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -77,7 +76,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -114,7 +112,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -151,7 +148,6 @@ export const SacredTheme: Story = {
 }
 
 export const CustomLabels: Story = {
-  name: 'Custom Labels',
   render: args => (
     <div
       style={{
@@ -308,6 +304,5 @@ const InteractiveDemoComponent = () => {
 }
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoComponent />,
 }

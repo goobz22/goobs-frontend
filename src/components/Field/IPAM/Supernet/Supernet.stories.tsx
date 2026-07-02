@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the SupernetField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import SupernetField from './index'
 
 const meta: Meta<typeof SupernetField> = {
@@ -37,7 +37,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -74,7 +73,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -111,7 +109,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -148,7 +145,6 @@ export const SacredTheme: Story = {
 }
 
 export const NetworkAggregation: Story = {
-  name: 'Network Aggregation',
   render: args => (
     <div
       style={{
@@ -184,7 +180,6 @@ export const NetworkAggregation: Story = {
 }
 
 export const ISPNetworkPlanning: Story = {
-  name: 'ISP Network Planning',
   render: args => (
     <div
       style={{
@@ -221,7 +216,6 @@ export const ISPNetworkPlanning: Story = {
 }
 
 export const EnterpriseWAN: Story = {
-  name: 'Enterprise WAN',
   render: args => (
     <div
       style={{
@@ -258,7 +252,6 @@ export const EnterpriseWAN: Story = {
 }
 
 export const RegionalNetwork: Story = {
-  name: 'Regional Network',
   render: args => (
     <div
       style={{
@@ -294,7 +287,6 @@ export const RegionalNetwork: Story = {
 }
 
 export const CloudInfrastructure: Story = {
-  name: 'Cloud Infrastructure',
   render: args => (
     <div
       style={{

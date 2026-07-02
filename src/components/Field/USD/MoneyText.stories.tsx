@@ -4,7 +4,7 @@
  * <span>. Shares the parsing core (formatMoney) with the editable field.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import MoneyText from './MoneyText'
 
 const meta: Meta<typeof MoneyText> = {
@@ -21,7 +21,6 @@ const meta: Meta<typeof MoneyText> = {
     emptyText: { control: 'text' },
   },
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
 export default meta
 

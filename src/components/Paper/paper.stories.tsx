@@ -5,7 +5,7 @@
  * children.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Paper from './index'
 
 const meta: Meta<typeof Paper> = {
@@ -29,7 +29,6 @@ const meta: Meta<typeof Paper> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -66,9 +65,7 @@ export const LightTheme: Story = {
     styles: { theme: 'light', width: '320px', padding: '24px' },
     children: <SampleContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -82,9 +79,7 @@ export const DarkTheme: Story = {
     },
     children: <SampleContent color="#F9FAFB" />,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -93,9 +88,7 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred', width: '320px', padding: '24px' },
     children: <SampleContent color="#FFD700" />,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -109,9 +102,7 @@ export const Elevation: Story = {
     styles: { theme: 'light', width: '320px', padding: '24px' },
     children: <SampleContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A range of elevation levels for comparison. */
@@ -139,9 +130,7 @@ export const ElevationVariants: Story = {
       ))}
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -162,7 +151,5 @@ export const CustomStyling: Story = {
     },
     children: <SampleContent color="#312e81" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

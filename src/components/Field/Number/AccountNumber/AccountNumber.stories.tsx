@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the AccountNumber component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import AccountNumber from './index'
 
 const meta: Meta<typeof AccountNumber> = {
@@ -52,7 +52,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -89,7 +88,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -126,7 +124,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -163,7 +160,6 @@ export const SacredTheme: Story = {
 }
 
 export const BankingForm: Story = {
-  name: 'Banking Form',
   render: args => (
     <div
       style={{
@@ -202,7 +198,6 @@ export const BankingForm: Story = {
 }
 
 export const WithDefaultValue: Story = {
-  name: 'With Default Value',
   render: args => (
     <div
       style={{
@@ -239,7 +234,6 @@ export const WithDefaultValue: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -276,7 +270,6 @@ export const DisabledState: Story = {
 }
 
 export const SacredBanking: Story = {
-  name: 'Sacred Banking',
   render: args => (
     <div
       style={{

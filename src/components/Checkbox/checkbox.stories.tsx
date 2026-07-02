@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the Checkbox component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Checkbox from './index'
 
 const meta: Meta<typeof Checkbox> = {
@@ -79,9 +79,7 @@ export const SacredTheme: Story = {
       theme: 'sacred',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A sacred theme checkbox that is also disabled. */
@@ -94,9 +92,7 @@ export const SacredDisabled: Story = {
       theme: 'sacred',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** The premium checkbox without its default outline. */

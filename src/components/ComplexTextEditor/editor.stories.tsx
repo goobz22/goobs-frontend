@@ -4,7 +4,7 @@
  * The ComplexTextEditor supports simple, rich text, and markdown editing modes with unified theming.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import ComplexTextEditor from './index'
 
@@ -23,7 +23,6 @@ const meta: Meta<typeof ComplexTextEditor> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'text' },
     onChange: { action: 'changed' },
@@ -68,7 +67,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <ComplexTextEditorWithState
       label="Document Content"
@@ -76,13 +74,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <ComplexTextEditorWithState
       label="Sacred Manuscript"
@@ -90,9 +85,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -136,12 +129,11 @@ export const SimpleEditor: Story = {
   ),
   parameters: {
     layout: 'centered',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const MarkdownEditor: Story = {
-  name: 'Markdown Editor',
   render: () => (
     <ComplexTextEditorWithState
       label="Markdown Content"
@@ -153,7 +145,6 @@ export const MarkdownEditor: Story = {
 }
 
 export const RichTextEditor: Story = {
-  name: 'Rich Text Editor',
   render: () => (
     <ComplexTextEditorWithState
       label="Rich Text Content"
@@ -181,7 +172,6 @@ export const ComplexEditor: Story = {
 // --------------------------------------------------------------------------
 
 export const AccordionMode: Story = {
-  name: 'Accordion Mode',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <ComplexTextEditorWithState
@@ -223,7 +213,6 @@ export const AccordionMode: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <ComplexTextEditorWithState
       label="Custom Styled Editor"
@@ -241,7 +230,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <ComplexTextEditorWithState
       label="Neon Editor"
@@ -258,9 +246,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -311,7 +297,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const EditorConfiguration: Story = {
-  name: 'Editor Configuration',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <ComplexTextEditorWithState
@@ -386,7 +371,6 @@ export const HelperTextAndErrors: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -535,8 +519,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -634,7 +618,6 @@ export const ModeSwitching: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <ComplexTextEditorWithState
       label="Test Editor"
@@ -665,7 +648,6 @@ export const InteractionTest: Story = {
 }
 
 export const AccordionInteractionTest: Story = {
-  name: 'Accordion Interaction Test',
   render: () => (
     <ComplexTextEditorWithState
       label="Accordion Test"
@@ -695,7 +677,6 @@ export const AccordionInteractionTest: Story = {
 }
 
 export const ComplexModeTest: Story = {
-  name: 'Complex Mode Test',
   render: () => (
     <ComplexTextEditorWithState
       label="Complex Mode Test"

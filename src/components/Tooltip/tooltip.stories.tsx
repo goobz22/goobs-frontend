@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React from 'react'
 import StyledTooltip from './index'
 import Button from '../Button'
@@ -19,7 +19,6 @@ const meta: Meta<typeof StyledTooltip> = {
     enterDelay: { control: 'number' },
     leaveDelay: { control: 'number' },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -73,14 +72,11 @@ export const SacredTheme: Story = {
       theme: 'sacred',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // Different placements
 export const Placements: Story = {
-  name: 'Placements',
   render: () => (
     <div
       style={{
@@ -109,7 +105,6 @@ export const Placements: Story = {
 
 // With and without arrow
 export const ArrowVariants: Story = {
-  name: 'Arrow Variants',
   render: () => (
     <div
       style={{

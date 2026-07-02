@@ -4,8 +4,8 @@
  * The PhoneNumber component provides formatted phone number input with validation.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import PhoneNumberField from './index'
 
 // Wrapper component for state management
@@ -23,7 +23,6 @@ const meta: Meta<typeof PhoneNumberField> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'text' },
     onChange: { action: 'changed' },
@@ -63,7 +62,6 @@ export const LightTheme: Story = {
 }
 
 export const DefaultPlaceholder: Story = {
-  name: 'Default Placeholder',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PhoneNumberFieldWithState
@@ -83,7 +81,6 @@ export const DefaultPlaceholder: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <PhoneNumberFieldWithState
       label="Contact Number"
@@ -91,13 +88,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <PhoneNumberFieldWithState
       label="Divine Communication"
@@ -105,9 +99,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -115,7 +107,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <PhoneNumberFieldWithState
       label="Custom Styled Phone"
@@ -133,7 +124,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <PhoneNumberFieldWithState
       label="Neon Phone Input"
@@ -150,9 +140,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -203,7 +191,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTypography: Story = {
-  name: 'Custom Typography',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PhoneNumberFieldWithState
@@ -246,7 +233,6 @@ export const CustomTypography: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PhoneNumberFieldWithState
@@ -281,7 +267,6 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
-  name: 'Required Fields',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PhoneNumberFieldWithState
@@ -322,7 +307,6 @@ export const RequiredFields: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -465,8 +449,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -474,7 +458,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PhoneNumberFieldWithState
@@ -503,6 +486,8 @@ export const DisabledStates: Story = {
 // VALIDATION DEMO
 // --------------------------------------------------------------------------
 
+const onValidationSuccess = fn()
+
 const PhoneValidationDemo = () => {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
@@ -521,7 +506,7 @@ const PhoneValidationDemo = () => {
   const handleSubmit = () => {
     validatePhone(phone)
     if (error === '' && phone.trim() !== '') {
-      alert('Phone number validated successfully!')
+      onValidationSuccess('Phone number validated successfully!')
     }
   }
 
@@ -570,7 +555,6 @@ const PhoneValidationDemo = () => {
 }
 
 export const ValidationDemo: Story = {
-  name: 'Validation Demo',
   render: () => <PhoneValidationDemo />,
 }
 
@@ -579,7 +563,6 @@ export const ValidationDemo: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <PhoneNumberFieldWithState
       label="Test Phone Input"

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the CIDRField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import CIDRField from './index'
 
 const meta: Meta<typeof CIDRField> = {
@@ -59,7 +59,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -96,7 +95,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -133,7 +131,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -170,7 +167,6 @@ export const SacredTheme: Story = {
 }
 
 export const WithoutSubnetInfo: Story = {
-  name: 'Without Subnet Info',
   render: args => (
     <div
       style={{
@@ -205,7 +201,6 @@ export const WithoutSubnetInfo: Story = {
 }
 
 export const CustomRange: Story = {
-  name: 'Custom Range',
   render: args => (
     <div
       style={{
@@ -243,7 +238,6 @@ export const CustomRange: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -279,7 +273,6 @@ export const DisabledState: Story = {
 }
 
 export const SubnetCalculator: Story = {
-  name: 'Subnet Calculator',
   render: args => (
     <div
       style={{

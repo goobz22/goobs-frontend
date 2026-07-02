@@ -4,7 +4,7 @@
  * the sticky footer, and the three variants (sacred / standard / fullscreen).
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect, fn } from 'storybook/test'
 import Panel from './index'
 import CustomButton from '../Button'
@@ -21,7 +21,6 @@ const meta: Meta<typeof Panel> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ height: '480px', width: '720px' }}>
@@ -73,7 +72,6 @@ export const Sacred: Story = {
 
 /** Standard (neutral) variant — light bordered surface. */
 export const Standard: Story = {
-  name: 'Standard',
   args: { variant: 'standard' },
   render: args => (
     <Panel {...args}>
@@ -119,7 +117,6 @@ export const BodyOnly: Story = {
 // INTERACTION TEST — back button fires onBack, region is labelled by title
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   args: { variant: 'sacred' },
   render: args => {
     const handleBack = fn()

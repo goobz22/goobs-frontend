@@ -1,7 +1,8 @@
 /**
  * @fileoverview Storybook stories for the ConfirmationCodeInput component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn } from 'storybook/test'
 import ConfirmationCodeInput from './index'
 
 const meta: Meta<typeof ConfirmationCodeInput> = {
@@ -47,13 +48,12 @@ const commonArgs = {
   showActionButtons: true,
   showSendResendButton: true,
   showSuccessState: false,
-  onDisableVerification: () => alert('Verification disabled'),
-  onVerify: () => alert('Code verified'),
-  onSendResend: () => alert('Code sent/resent'),
+  onDisableVerification: fn(),
+  onVerify: fn(),
+  onSendResend: fn(),
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -90,7 +90,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -127,7 +126,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -164,7 +162,6 @@ export const SacredTheme: Story = {
 }
 
 export const LightSuccessState: Story = {
-  name: 'Light Success State',
   render: args => (
     <div
       style={{
@@ -203,7 +200,6 @@ export const LightSuccessState: Story = {
 }
 
 export const DarkSuccessState: Story = {
-  name: 'Dark Success State',
   render: args => (
     <div
       style={{
@@ -242,7 +238,6 @@ export const DarkSuccessState: Story = {
 }
 
 export const SacredSuccessState: Story = {
-  name: 'Sacred Success State',
   render: args => (
     <div
       style={{
@@ -281,7 +276,6 @@ export const SacredSuccessState: Story = {
 }
 
 export const CustomCodeLength: Story = {
-  name: 'Custom Code Length',
   render: args => (
     <div
       style={{
@@ -316,7 +310,6 @@ export const CustomCodeLength: Story = {
 }
 
 export const MinimalLayout: Story = {
-  name: 'Minimal Layout',
   render: args => (
     <div
       style={{

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn } from 'storybook/test'
 import { z } from 'zod'
 import FileDropzone from './index'
 import Form from '../Form'
@@ -42,7 +43,7 @@ function ImageUploadForm() {
     <Form
       schema={productSchema}
       initialValues={{ imageUrl } as ProductValues}
-      onSubmit={values => alert(`submit: ${values.imageUrl}`)}
+      onSubmit={fn()}
       subject="product"
       id="product-image-form"
     >

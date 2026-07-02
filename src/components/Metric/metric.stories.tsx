@@ -14,7 +14,7 @@
  * override block. Each theme has its own override block in Card.module.css.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import MetricCard from './Card'
 import MetricsAccordion from './Accordion'
 import type { MetricCardData } from './types'
@@ -67,7 +67,6 @@ const meta: Meta<typeof MetricCard> = {
   },
   parameters: {
     layout: 'centered',
-    tags: ['autodocs'],
   },
   decorators: [
     Story => (
@@ -89,7 +88,6 @@ type Story = StoryObj<typeof MetricCard>
  * A metric card with light theme styling.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     title: 'Active Users',
     value: 1234,
@@ -97,9 +95,7 @@ export const LightTheme: Story = {
     trend: { value: 12.5, isPositive: true },
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -108,7 +104,6 @@ export const LightTheme: Story = {
  * reads correctly against the dark background.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     title: 'Active Users',
     value: 1234,
@@ -116,16 +111,13 @@ export const DarkTheme: Story = {
     trend: { value: 12.5, isPositive: true },
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * A metric card with the "sacred" dark/gold theme.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     title: 'Active Users',
     value: 1234,
@@ -133,9 +125,7 @@ export const SacredTheme: Story = {
     trend: { value: 12.5, isPositive: true },
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -152,9 +142,7 @@ export const ValueOnly: Story = {
     value: 42,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -182,9 +170,7 @@ export const TrendStates: Story = {
       />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -204,9 +190,7 @@ export const CustomStyling: Story = {
       borderRadius: '16px',
     },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -229,9 +213,7 @@ export const AccordionArrayLight: Story = {
       />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -264,9 +246,7 @@ export const AccordionGroupedSacred: Story = {
       />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
@@ -301,7 +281,5 @@ export const AccordionChildren: Story = {
       </MetricsAccordion>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

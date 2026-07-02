@@ -3,8 +3,8 @@
  * Demonstrates different positions, colors, and use cases.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn, userEvent, within } from 'storybook/test'
 import Badge from './index'
 
 const meta: Meta<typeof Badge> = {
@@ -28,7 +28,6 @@ const meta: Meta<typeof Badge> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div
@@ -69,9 +68,7 @@ export const LightTheme: Story = {
     ),
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A badge with dark theme. */
@@ -97,9 +94,7 @@ export const DarkTheme: Story = {
     ),
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A badge with sacred theme. */
@@ -126,9 +121,7 @@ export const SacredTheme: Story = {
     ),
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** All themes displayed together for comparison. */
@@ -186,9 +179,7 @@ export const AllThemes: Story = {
       </Badge>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -197,7 +188,6 @@ export const AllThemes: Story = {
 
 /** A default badge positioned at top-right with red background. */
 export const Default: Story = {
-  name: 'Default',
   args: {
     content: '5',
     children: (
@@ -220,7 +210,6 @@ export const Default: Story = {
 
 /** A badge with custom content. */
 export const CustomContent: Story = {
-  name: 'Custom Content',
   args: {
     content: 'NEW',
     children: (
@@ -496,9 +485,7 @@ export const ColorVariantsLight: Story = {
       </Badge>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Different colored badges for different states in dark theme. */
@@ -584,9 +571,7 @@ export const ColorVariantsDark: Story = {
       </Badge>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Different colored badges for different states in sacred theme. */
@@ -692,9 +677,7 @@ export const ColorVariantsSacred: Story = {
       </Badge>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -929,7 +912,7 @@ export const Interactive: Story = {
           borderRadius: '8px',
           cursor: 'pointer',
         }}
-        onClick={() => alert('Badge clicked!')}
+        onClick={fn()}
       >
         Icon
       </div>

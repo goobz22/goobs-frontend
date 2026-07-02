@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the CodeCopy component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import CodeCopy from './index'
 
 const meta: Meta<typeof CodeCopy> = {
@@ -82,7 +82,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -112,7 +111,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -142,7 +140,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -200,7 +197,6 @@ export const TypeScriptExample: Story = {
 }
 
 export const PythonExample: Story = {
-  name: 'Python Example',
   render: args => (
     <div
       style={{
@@ -228,7 +224,6 @@ export const PythonExample: Story = {
 }
 
 export const WithoutLineNumbers: Story = {
-  name: 'Without Line Numbers',
   render: args => (
     <div
       style={{

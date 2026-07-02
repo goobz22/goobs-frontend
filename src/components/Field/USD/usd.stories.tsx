@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the USD field component.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import USDField from './index'
 
 const meta: Meta<typeof USDField> = {
@@ -58,7 +58,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -95,7 +94,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -132,7 +130,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -169,7 +166,6 @@ export const SacredTheme: Story = {
 }
 
 export const WithIncrementButtons: Story = {
-  name: 'With Increment Buttons',
   render: args => (
     <div
       style={{
@@ -204,7 +200,6 @@ export const WithIncrementButtons: Story = {
 }
 
 export const WithoutIncrementButtons: Story = {
-  name: 'Without Increment Buttons',
   render: args => (
     <div
       style={{
@@ -276,7 +271,6 @@ export const WithMinMax: Story = {
 }
 
 export const LargeAmount: Story = {
-  name: 'Large Amount',
   render: args => (
     <div
       style={{
@@ -498,6 +492,5 @@ const InteractiveDemoComponent = () => {
 }
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoComponent />,
 }

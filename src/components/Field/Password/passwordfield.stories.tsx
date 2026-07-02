@@ -4,7 +4,7 @@
  * The Password component provides secure password input with visibility toggle functionality.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import PasswordField from './index'
 
@@ -26,7 +26,6 @@ const meta: Meta<typeof PasswordField> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'text' },
     onChange: { action: 'changed' },
@@ -67,7 +66,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <PasswordFieldWithState
       label="Secure Password"
@@ -75,13 +73,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <PasswordFieldWithState
       label="Secret Incantation"
@@ -89,9 +84,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -99,7 +92,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <PasswordFieldWithState
       label="Custom Styled Password"
@@ -117,7 +109,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <PasswordFieldWithState
       label="Neon Password"
@@ -134,9 +125,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -187,7 +176,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTypography: Story = {
-  name: 'Custom Typography',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PasswordFieldWithState
@@ -230,7 +218,6 @@ export const CustomTypography: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PasswordFieldWithState
@@ -265,7 +252,6 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
-  name: 'Required Fields',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PasswordFieldWithState
@@ -306,7 +292,6 @@ export const RequiredFields: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -449,8 +434,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -458,7 +443,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <PasswordFieldWithState
@@ -594,7 +578,6 @@ const PasswordValidationDemo = () => {
 }
 
 export const ValidationDemo: Story = {
-  name: 'Validation Demo',
   render: () => <PasswordValidationDemo />,
 }
 
@@ -603,7 +586,6 @@ export const ValidationDemo: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <PasswordFieldWithState
       label="Test Password Input"

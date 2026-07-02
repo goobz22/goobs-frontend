@@ -4,8 +4,8 @@
  * The SearchableSimple Dropdown component provides dropdown selection with search functionality but without history.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import SearchableSimple, { DropdownOption } from './index'
 
 // Sample data for dropdowns
@@ -71,7 +71,6 @@ const meta: Meta<typeof SearchableSimple> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     defaultValue: { control: 'text' },
     onChange: { action: 'changed' },
@@ -109,7 +108,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <SearchableSimpleWithState
       label="Select Country"
@@ -118,13 +116,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <SearchableSimpleWithState
       label="Divine Selection"
@@ -132,9 +127,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -142,7 +135,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <SearchableSimpleWithState
       label="Custom Dropdown"
@@ -160,7 +152,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <SearchableSimpleWithState
       label="Neon Dropdown"
@@ -177,9 +168,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -228,7 +217,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTypography: Story = {
-  name: 'Custom Typography',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SearchableSimpleWithState
@@ -271,7 +259,6 @@ export const CustomTypography: Story = {
 // --------------------------------------------------------------------------
 
 export const OptionVariations: Story = {
-  name: 'Option Variations',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SearchableSimpleWithState
@@ -303,7 +290,6 @@ export const OptionVariations: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SearchableSimpleWithState
@@ -339,7 +325,6 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
-  name: 'Required Fields',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SearchableSimpleWithState
@@ -381,7 +366,6 @@ export const RequiredFields: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SearchableSimpleWithState
@@ -411,6 +395,8 @@ export const DisabledStates: Story = {
 // SEARCH DEMO
 // --------------------------------------------------------------------------
 
+const onSubmitSuccess = fn()
+
 const SearchableSimpleDemo = () => {
   const [selectedCountry, setSelectedCountry] = useState('')
   const [selectedFruit, setSelectedFruit] = useState('')
@@ -429,7 +415,7 @@ const SearchableSimpleDemo = () => {
       setError('Please select both country and fruit')
     } else {
       setError('')
-      alert(`Selected: ${selectedCountry} and ${selectedFruit}`)
+      onSubmitSuccess(`Selected: ${selectedCountry} and ${selectedFruit}`)
     }
   }
 
@@ -493,7 +479,6 @@ const SearchableSimpleDemo = () => {
 }
 
 export const SearchDemo: Story = {
-  name: 'Search Demo',
   render: () => <SearchableSimpleDemo />,
 }
 
@@ -502,7 +487,6 @@ export const SearchDemo: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -645,8 +629,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -654,7 +638,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <SearchableSimpleWithState
       label="Test Searchable Simple"

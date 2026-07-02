@@ -5,7 +5,7 @@
  * disabled state. Stories track the current page with a stateful wrapper.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Pagination from './index'
 
 const meta: Meta<typeof Pagination> = {
@@ -49,7 +49,6 @@ const meta: Meta<typeof Pagination> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -108,9 +107,7 @@ const InteractivePagination = ({
 export const Default: Story = {
   name: 'Themes/Default',
   render: () => <InteractivePagination count={10} initialPage={1} />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -122,9 +119,7 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -136,9 +131,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -155,9 +148,7 @@ export const WithFirstLastButtons: Story = {
       showLastButton
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const HiddenPrevNext: Story = {
@@ -170,9 +161,7 @@ export const HiddenPrevNext: Story = {
       hideNextButton
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -189,9 +178,7 @@ export const ManyPagesWithEllipsis: Story = {
       showLastButton
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const SiblingAndBoundaryCount: Story = {
@@ -204,9 +191,7 @@ export const SiblingAndBoundaryCount: Story = {
       boundaryCount={2}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -222,7 +207,5 @@ export const Disabled: Story = {
       styles={{ disabled: true }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

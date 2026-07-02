@@ -5,7 +5,7 @@
  * with React and JSX.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import IconButton from './'
 import DeleteIcon from '../Icons/Delete'
 import EditIcon from '../Icons/Edit'
@@ -22,7 +22,6 @@ const meta: Meta<typeof IconButton> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '2rem' }}>
@@ -43,42 +42,33 @@ type Story = StoryObj<typeof IconButton>
  * An icon button with light theme styling.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     children: <EditIcon styles={{ theme: 'light' }} />,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
  * An icon button with dark theme styling.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     children: <EditIcon styles={{ theme: 'dark' }} />,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * An icon button with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     children: <EditIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -106,9 +96,7 @@ export const Sizes: Story = {
       </IconButton>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -145,9 +133,7 @@ export const Colors: Story = {
       </IconButton>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -172,7 +158,5 @@ export const DisabledStates: Story = {
       </IconButton>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }

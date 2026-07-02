@@ -7,7 +7,7 @@
  * markdown source through the real props (`children`, `maxWidth`, `align`).
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { Markdown } from './'
 
 // --------------------------------------------------------------------------
@@ -62,7 +62,6 @@ const meta: Meta<typeof Markdown> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '640px', padding: '1.5rem' }}>
@@ -84,7 +83,6 @@ type Story = StoryObj<typeof Markdown>
 
 /** Markdown rendered on a light surface. */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     children: sampleMarkdown,
   },
@@ -95,14 +93,11 @@ export const LightTheme: Story = {
       </div>
     ),
   ],
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Markdown rendered on a dark surface. */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     children: sampleMarkdown,
   },
@@ -113,14 +108,11 @@ export const DarkTheme: Story = {
       </div>
     ),
   ],
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Markdown rendered on a stylized "sacred" dark surface. */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     children: sampleMarkdown,
   },
@@ -131,9 +123,7 @@ export const SacredTheme: Story = {
       </div>
     ),
   ],
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------

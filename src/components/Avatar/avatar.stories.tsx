@@ -5,7 +5,7 @@
  * with the component's real `styles` prop API.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Avatar from './index'
 
 // --------------------------------------------------------------------------
@@ -35,7 +35,6 @@ const meta: Meta<typeof Avatar> = {
       disable: false,
     },
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '2rem' }}>
@@ -56,42 +55,33 @@ type Story = StoryObj<typeof Avatar>
  * An avatar with light theme styling.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     children: initials,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
  * An avatar with dark theme styling.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     children: initials,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * An avatar with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     children: initials,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -102,7 +92,6 @@ export const SacredTheme: Story = {
  * The available avatar sizes rendered side by side.
  */
 export const Sizes: Story = {
-  name: 'Sizes',
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
       <Avatar styles={{ theme: 'light', size: 'small' }}>S</Avatar>
@@ -129,9 +118,7 @@ export const DisabledStates: Story = {
       <Avatar styles={{ theme: 'sacred', disabled: true }}>{initials}</Avatar>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -155,7 +142,5 @@ export const CustomStyling: Story = {
       fontWeight: 600,
     },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

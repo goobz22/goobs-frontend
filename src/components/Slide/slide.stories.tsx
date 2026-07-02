@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
 import Slide from './index'
 import CustomButton from '../Button'
@@ -11,7 +11,6 @@ const meta: Meta<typeof Slide> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     styles: {
       control: { type: 'object' },

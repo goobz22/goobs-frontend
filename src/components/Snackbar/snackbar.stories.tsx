@@ -3,7 +3,7 @@
  * Demonstrates different severity levels, themes, and behaviors.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within } from 'storybook/test'
 import Snackbar from './index'
 
@@ -33,7 +33,6 @@ const meta: Meta<typeof Snackbar> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ minHeight: '100vh', padding: '2rem' }}>
@@ -59,9 +58,7 @@ export const LightThemeSuccess: Story = {
     severity: 'success',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Error snackbar with light theme. */
@@ -73,9 +70,7 @@ export const LightThemeError: Story = {
     severity: 'error',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Warning snackbar with light theme. */
@@ -87,9 +82,7 @@ export const LightThemeWarning: Story = {
     severity: 'warning',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Info snackbar with light theme. */
@@ -101,9 +94,7 @@ export const LightThemeInfo: Story = {
     severity: 'info',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Success snackbar with dark theme. */
@@ -115,9 +106,7 @@ export const DarkThemeSuccess: Story = {
     severity: 'success',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Error snackbar with dark theme. */
@@ -129,9 +118,7 @@ export const DarkThemeError: Story = {
     severity: 'error',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Warning snackbar with dark theme. */
@@ -143,9 +130,7 @@ export const DarkThemeWarning: Story = {
     severity: 'warning',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Info snackbar with dark theme. */
@@ -157,9 +142,7 @@ export const DarkThemeInfo: Story = {
     severity: 'info',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Success snackbar with sacred theme. */
@@ -171,9 +154,7 @@ export const SacredThemeSuccess: Story = {
     severity: 'success',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Error snackbar with sacred theme. */
@@ -185,9 +166,7 @@ export const SacredThemeError: Story = {
     severity: 'error',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Warning snackbar with sacred theme. */
@@ -199,9 +178,7 @@ export const SacredThemeWarning: Story = {
     severity: 'warning',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** Info snackbar with sacred theme. */
@@ -213,9 +190,7 @@ export const SacredThemeInfo: Story = {
     severity: 'info',
     autoHideDuration: 6000,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -335,9 +310,7 @@ const AllSeveritiesLightComponent: React.FC = () => {
 export const AllSeveritiesLight: Story = {
   name: 'Severity/All Severities - Light Theme',
   render: () => <AllSeveritiesLightComponent />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Component for All Severities Dark
@@ -453,9 +426,7 @@ const AllSeveritiesDarkComponent: React.FC = () => {
 export const AllSeveritiesDark: Story = {
   name: 'Severity/All Severities - Dark Theme',
   render: () => <AllSeveritiesDarkComponent />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // Component for All Severities Sacred
@@ -571,9 +542,7 @@ const AllSeveritiesSacredComponent: React.FC = () => {
 export const AllSeveritiesSacred: Story = {
   name: 'Severity/All Severities - Sacred Theme',
   render: () => <AllSeveritiesSacredComponent />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -589,9 +558,7 @@ export const CustomDuration: Story = {
     severity: 'info',
     autoHideDuration: 3000,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Snackbar that doesn't auto-hide. */
@@ -603,9 +570,7 @@ export const NoAutoHide: Story = {
     severity: 'warning',
     autoHideDuration: 0,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Component for Interactive
@@ -644,9 +609,7 @@ const InteractiveComponent: React.FC = () => {
 export const Interactive: Story = {
   name: 'Behavior/Interactive',
   render: () => <InteractiveComponent />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const button = canvas.getByText('Show Snackbar')
@@ -727,9 +690,7 @@ const FormSubmissionComponent: React.FC = () => {
 export const FormSubmission: Story = {
   name: 'Use Cases/Form Submission',
   render: () => <FormSubmissionComponent />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Component for File Upload
@@ -828,7 +789,5 @@ const FileUploadComponent: React.FC = () => {
 export const FileUpload: Story = {
   name: 'Use Cases/File Upload',
   render: () => <FileUploadComponent />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

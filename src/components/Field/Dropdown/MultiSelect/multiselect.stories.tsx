@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the MultiSelect component.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import MultiSelectChip from './index'
 
 const meta: Meta<typeof MultiSelectChip> = {
@@ -67,7 +67,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -99,7 +98,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -131,7 +129,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -197,7 +194,6 @@ export const ComplexOptions: Story = {
 }
 
 export const WithHelperText: Story = {
-  name: 'With Helper Text',
   render: args => (
     <div
       style={{
@@ -230,7 +226,6 @@ export const WithHelperText: Story = {
 }
 
 export const RequiredField: Story = {
-  name: 'Required Field',
   render: args => (
     <div
       style={{
@@ -266,7 +261,6 @@ export const RequiredField: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -448,7 +442,6 @@ const InteractiveDemo = () => {
 }
 
 export const ArrowPositionTest: Story = {
-  name: 'Arrow Position Test',
   render: () => (
     <div
       style={{

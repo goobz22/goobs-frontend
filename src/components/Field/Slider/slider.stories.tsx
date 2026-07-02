@@ -4,7 +4,7 @@
  * range-input-backed Slider, which composes the shared FieldShell.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Slider from './index'
 
 // Wrapper component for state management. Slider is controlled — onChange
@@ -26,7 +26,6 @@ const meta: Meta<typeof Slider> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     label: { control: 'text' },
     helperText: { control: 'text' },
@@ -55,7 +54,6 @@ type Story = StoryObj<typeof Slider>
 // --------------------------------------------------------------------------
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => (
     <SliderWithState
       label="Volume"
@@ -69,7 +67,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <SliderWithState
       label="Brightness"
@@ -80,13 +77,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <SliderWithState
       label="Resonance"
@@ -97,9 +91,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -107,7 +99,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomRange: Story = {
-  name: 'Custom Range',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <SliderWithState
@@ -146,7 +137,6 @@ export const CustomRange: Story = {
 // --------------------------------------------------------------------------
 
 export const WithHelperText: Story = {
-  name: 'With Helper Text',
   render: () => (
     <SliderWithState
       label="Opacity"
@@ -165,7 +155,6 @@ export const WithHelperText: Story = {
 // --------------------------------------------------------------------------
 
 export const WithError: Story = {
-  name: 'With Error',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <SliderWithState
@@ -193,7 +182,6 @@ export const WithError: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <SliderWithState
@@ -226,7 +214,6 @@ export const DisabledStates: Story = {
 // --------------------------------------------------------------------------
 
 export const Required: Story = {
-  name: 'Required',
   render: () => (
     <SliderWithState
       label="Confidence Level"
@@ -243,7 +230,6 @@ export const Required: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -340,6 +326,6 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }

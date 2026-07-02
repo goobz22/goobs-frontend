@@ -4,7 +4,7 @@
  * optional title, verify button, confirmation-code input, and a success state.
  * These stories showcase the light / dark / sacred themes and the key states.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
 import QRCode from './index'
 
@@ -14,7 +14,6 @@ const meta: Meta<typeof QRCode> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'text' },
     size: { control: 'number' },
@@ -59,9 +58,7 @@ export const DarkTheme: Story = {
     title: 'Scan to set up MFA',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -71,9 +68,7 @@ export const SacredTheme: Story = {
     title: 'Scan the sacred sigil',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -91,7 +86,6 @@ export const PlainUrl: Story = {
 }
 
 export const HighErrorCorrection: Story = {
-  name: 'High Error Correction',
   args: {
     value: sampleValue,
     size: 220,
@@ -135,9 +129,7 @@ export const SuccessStateSacred: Story = {
     successMessage: 'The rite is complete',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -145,7 +137,6 @@ export const SuccessStateSacred: Story = {
 // --------------------------------------------------------------------------
 
 export const WithConfirmationInput: Story = {
-  name: 'With Confirmation Input',
   render: function WithConfirmationStory() {
     const [code, setCode] = useState('')
 

@@ -1,7 +1,7 @@
 // src/components/Toolbar/toolbar.stories.tsx
 
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import CustomToolbar, { type CustomToolbarProps } from './index'
 
 import type { SearchbarProps } from '../Field/Search'
@@ -40,7 +40,6 @@ type Story = StoryObj<typeof CustomToolbar>
  * 1) Light Theme
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div style={{ padding: '16px', background: '#f3f4f6' }}>
       <CustomToolbar {...args} />
@@ -57,7 +56,6 @@ export const LightTheme: Story = {
  * 2) Dark Theme
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div style={{ padding: '16px', background: '#111827' }}>
       <CustomToolbar {...args} />
@@ -73,7 +71,6 @@ export const DarkTheme: Story = {
  * 3) Sacred Theme
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div style={{ padding: '16px', background: '#000000' }}>
       <CustomToolbar {...args} />
@@ -172,6 +169,5 @@ const InteractiveDemoRenderer = () => {
  * 4) Interactive Demo
  */
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoRenderer />,
 }

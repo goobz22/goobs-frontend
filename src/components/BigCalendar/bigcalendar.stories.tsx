@@ -6,7 +6,7 @@
  * `currentDate` (June 2026) with a small realistic events array so the calendar
  * is deterministic across the light / dark / sacred themes and the three views.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React from 'react'
 import BigCalendar, { type CalendarEvent } from './index'
 
@@ -73,7 +73,6 @@ const meta: Meta<typeof BigCalendar> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
   argTypes: {
     events: { control: 'object' },
     view: { control: { type: 'select' }, options: ['month', 'week', 'day'] },
@@ -119,9 +118,7 @@ export const DarkTheme: Story = {
     view: 'month',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -132,9 +129,7 @@ export const SacredTheme: Story = {
     view: 'month',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -142,7 +137,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const WeekView: Story = {
-  name: 'Week View',
   args: {
     events: sampleEvents,
     currentDate: anchor,
@@ -154,7 +148,6 @@ export const WeekView: Story = {
 }
 
 export const DayView: Story = {
-  name: 'Day View',
   args: {
     events: sampleEvents,
     currentDate: anchor,
@@ -201,7 +194,6 @@ export const WithFilters: Story = {
 // --------------------------------------------------------------------------
 
 export const NoEvents: Story = {
-  name: 'No Events',
   args: {
     events: [],
     currentDate: anchor,

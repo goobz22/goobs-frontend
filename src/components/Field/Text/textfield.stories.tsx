@@ -4,9 +4,13 @@
  * The TextField uses a simplified approach with labels positioned above the input field.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import TextField from './index'
+
+// Spy for the validated-form demos' success path (blocking dialogs are banned
+// in stories — they wedge interaction runners).
+const onValidSubmit = fn()
 
 // A simple icon for adornments
 const AtIcon = () => (
@@ -71,7 +75,6 @@ const meta: Meta<typeof TextField> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'text' },
     onChange: { action: 'changed' },
@@ -112,7 +115,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <TextFieldWithState
       label="Username"
@@ -120,13 +122,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <TextFieldWithState
       label="Ancient Inscription"
@@ -134,9 +133,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -144,7 +141,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <TextFieldWithState
       label="Custom Styled"
@@ -162,7 +158,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <TextFieldWithState
       label="Neon Input"
@@ -179,9 +174,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -232,7 +225,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTypography: Story = {
-  name: 'Custom Typography',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -275,7 +267,6 @@ export const CustomTypography: Story = {
 // --------------------------------------------------------------------------
 
 export const WithAdornments: Story = {
-  name: 'With Adornments',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -311,7 +302,6 @@ export const WithAdornments: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -373,7 +363,6 @@ export const LabelsAndPlaceholders: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTransitions: Story = {
-  name: 'Custom Transitions',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -403,7 +392,6 @@ export const CustomTransitions: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -577,8 +565,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -586,7 +574,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -616,7 +603,6 @@ export const DisabledStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
-  name: 'Required Fields',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <TextFieldWithState
@@ -680,7 +666,7 @@ const RequiredValidationDemo = () => {
     setErrors({ name: nameError, email: emailError })
 
     if (!nameError && !emailError) {
-      alert('Form submitted successfully!')
+      onValidSubmit()
     }
   }
 
@@ -776,7 +762,7 @@ const SharedRequiredSystemDemo = () => {
     })
 
     if (!firstNameError && !lastNameError && !emailError && !countryError) {
-      alert('Form submitted successfully!')
+      onValidSubmit()
     }
   }
 
@@ -925,7 +911,6 @@ const SharedRequiredSystemDemo = () => {
 }
 
 export const SharedRequiredSystem: Story = {
-  name: 'Shared Required System',
   render: () => <SharedRequiredSystemDemo />,
   parameters: {
     layout: 'centered',
@@ -937,7 +922,6 @@ export const SharedRequiredSystem: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <TextFieldWithState
       label="Test Input"

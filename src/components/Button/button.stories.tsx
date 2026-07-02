@@ -4,7 +4,7 @@
  * demonstrating its usage with React and JSX.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import Button, { ButtonGroup } from './index'
 import SendIcon from '../Icons/Send'
@@ -35,7 +35,6 @@ const meta: Meta<typeof Button> = {
       disable: false,
     },
   },
-  tags: ['autodocs'],
 }
 export default meta
 
@@ -49,7 +48,6 @@ type Story = StoryObj<typeof Button>
  * A primary button with light theme styling.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     text: 'Light Button',
     styles: { theme: 'light' },
@@ -60,28 +58,22 @@ export const LightTheme: Story = {
  * A primary button with dark theme styling.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     text: 'Dark Button',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * A button with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     text: 'Sacred Button',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -300,9 +292,7 @@ export const DarkThemeGroup: Story = {
     }
     return <Component />
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredThemeGroup: Story = {
@@ -337,9 +327,7 @@ export const SacredThemeGroup: Story = {
     }
     return <Component />
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const InteractiveGroupDemo: Story = {

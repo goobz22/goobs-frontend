@@ -3,7 +3,7 @@
  * Demonstrates themes, with/without content, disabled state, orientation, and custom styling.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Divider from './index'
 
 const meta: Meta<typeof Divider> = {
@@ -20,7 +20,6 @@ const meta: Meta<typeof Divider> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   // A horizontal divider is width:100% of its container; the bare `centered`
   // layout gives it no width, collapsing the rule to 0. Wrap stories in a
   // fixed-width block so the rule is actually visible (mirrors real usage,
@@ -42,30 +41,23 @@ type Story = StoryObj<typeof Divider>
 // ---------------------------------------------------------------------------
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     styles: { theme: 'light' },
   },
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // ---------------------------------------------------------------------------

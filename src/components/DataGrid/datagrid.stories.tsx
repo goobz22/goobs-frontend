@@ -1,7 +1,8 @@
 // src/components/DataGrid/datagrid.stories.tsx
 
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn } from 'storybook/test'
 import DataGrid from './index'
 import type {
   DatagridProps,
@@ -547,7 +548,6 @@ export default meta
 type Story = StoryObj<typeof DataGrid>
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -570,7 +570,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -593,7 +592,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -696,13 +694,11 @@ const InteractiveDemoComponent: React.FC = () => {
 }
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoComponent />,
 }
 
 // Custom styling example
 export const CustomStyling: Story = {
-  name: 'Custom Styling',
   render: args => (
     <div
       style={{
@@ -779,7 +775,6 @@ const ColumnResizeDemoComponent: React.FC<DatagridProps> = args => {
 
 // Column Resize Demo
 export const ColumnResizeDemo: Story = {
-  name: 'Column Resize Demo',
   render: args => <ColumnResizeDemoComponent {...args} />,
   args: {
     ...commonArgs,
@@ -1212,13 +1207,17 @@ export const SacredThemeWithMetrics: Story = {
     },
   },
   parameters: {
-    backgrounds: { default: 'dark' },
     layout: 'fullscreen',
   },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
+const onManageAction = fn()
+const onDeleteAction = fn()
+const onDuplicateAction = fn()
+const onShowAction = fn()
+
 export const ManageRowDemo: Story = {
-  name: 'Manage Row Demo',
   render: args => (
     <div
       style={{
@@ -1246,25 +1245,25 @@ export const ManageRowDemo: Story = {
         showIdColumns={true}
         onManage={selectedRows => {
           console.log('🔧 Manage action called with rows:', selectedRows)
-          alert(
+          onManageAction(
             `Managing ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
           )
         }}
         onDelete={selectedRows => {
           console.log('🗑️ Delete action called with rows:', selectedRows)
-          alert(
+          onDeleteAction(
             `Deleting ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
           )
         }}
         onDuplicate={selectedRows => {
           console.log('📋 Duplicate action called with rows:', selectedRows)
-          alert(
+          onDuplicateAction(
             `Duplicating ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
           )
         }}
         onShow={selectedRows => {
           console.log('👁️ Show action called with rows:', selectedRows)
-          alert(
+          onShowAction(
             `Showing ${selectedRows.length} row(s): ${selectedRows.join(', ')}`
           )
         }}
@@ -1629,7 +1628,6 @@ const BillingInformationExampleDemo: React.FC = () => {
 }
 
 export const BillingInformationExample: Story = {
-  name: 'Billing Information Example',
   render: () => <BillingInformationExampleDemo />,
   args: {},
 }
@@ -1698,7 +1696,6 @@ export const Tablet: Story = {
 }
 
 export const Desktop: Story = {
-  name: 'Desktop',
   render: args => (
     <div
       style={{

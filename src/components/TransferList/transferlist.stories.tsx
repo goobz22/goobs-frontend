@@ -1,7 +1,7 @@
 // src/components/TransferList/transferlist.stories.tsx
 
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import TransferList, { TransferListDropdownDataMap } from './index'
 import { userEvent, within } from 'storybook/test'
 
@@ -52,7 +52,6 @@ const itemLabelMap = {
  * 1) Premium Theme
  */
 export const PremiumTheme: Story = {
-  name: 'Premium Theme',
   render: args => {
     const Component = () => {
       const [localLeft, setLocalLeft] = React.useState(
@@ -155,7 +154,6 @@ export const PremiumTheme: Story = {
  * 2) Sacred Theme
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => {
     const Component = () => {
       const [localLeft, setLocalLeft] = React.useState(
@@ -305,7 +303,6 @@ const InteractiveDemoRenderer = () => {
  * 3) Interactive Demo
  */
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoRenderer />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

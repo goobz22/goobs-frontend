@@ -4,7 +4,7 @@
  * variations of the Typography component using the new theme system.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import Typography from './index'
 
@@ -21,7 +21,6 @@ const meta: Meta<typeof Typography> = {
       description: 'Custom styles using the theme system',
     },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -100,9 +99,7 @@ export const DarkH1: Story = {
       variant: 'merrih1',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkParagraph: Story = {
@@ -114,9 +111,7 @@ export const DarkParagraph: Story = {
       variant: 'merriparagraph',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkWithOutline: Story = {
@@ -129,9 +124,7 @@ export const DarkWithOutline: Story = {
       outline: true,
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -147,9 +140,7 @@ export const SacredH1: Story = {
       variant: 'merrih1',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredParagraph: Story = {
@@ -161,9 +152,7 @@ export const SacredParagraph: Story = {
       variant: 'merriparagraph',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredWithOutline: Story = {
@@ -176,9 +165,7 @@ export const SacredWithOutline: Story = {
       outline: true,
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------

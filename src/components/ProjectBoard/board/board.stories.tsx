@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the ProjectBoard component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import ProjectBoard from '../index'
 import { ProjectBoardProvider } from '../context/ProjectBoardContext'
 import {
@@ -268,7 +268,6 @@ export default meta
 type Story = StoryObj<typeof ProjectBoard>
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -302,7 +301,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -336,7 +334,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -370,7 +367,6 @@ export const SacredTheme: Story = {
 }
 
 export const SeverityBoard: Story = {
-  name: 'Severity Board',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -411,7 +407,6 @@ export const SeverityBoard: Story = {
 }
 
 export const TopicBoard: Story = {
-  name: 'Topic Board',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -460,7 +455,6 @@ export const TopicBoard: Story = {
 }
 
 export const CompanyVariant: Story = {
-  name: 'Company Variant',
   render: args => (
     <ProjectBoardProvider>
       <div
@@ -496,7 +490,6 @@ export const CompanyVariant: Story = {
 }
 
 export const CustomerVariant: Story = {
-  name: 'Customer Variant',
   render: args => (
     <ProjectBoardProvider>
       <div

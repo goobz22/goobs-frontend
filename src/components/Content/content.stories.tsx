@@ -8,7 +8,7 @@
  * boolean. These stories thread `theme` through the REAL `grids` API.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Content from './'
 
 // --------------------------------------------------------------------------
@@ -62,7 +62,6 @@ const meta: Meta<typeof Content> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '2rem', width: 480 }}>
@@ -83,7 +82,6 @@ type Story = StoryObj<typeof Content>
  * A content section with light theme styling pushed into every sub-component.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   args: {
     grids: buildGrids('light'),
   },
@@ -93,13 +91,10 @@ export const LightTheme: Story = {
  * A content section with dark theme styling pushed into every sub-component.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     grids: buildGrids('dark'),
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
@@ -108,14 +103,11 @@ export const DarkTheme: Story = {
  * sub-component, alongside sacred-themed sub-component styles.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     grids: buildGrids('sacred'),
     sacredtheme: true,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------

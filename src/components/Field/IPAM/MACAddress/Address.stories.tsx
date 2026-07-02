@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the MACAddressField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import MACAddressField from './index'
 
 const meta: Meta<typeof MACAddressField> = {
@@ -44,7 +44,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -81,7 +80,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -118,7 +116,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -155,7 +152,6 @@ export const SacredTheme: Story = {
 }
 
 export const WithHelperText: Story = {
-  name: 'With Helper Text',
   render: args => (
     <div
       style={{
@@ -190,7 +186,6 @@ export const WithHelperText: Story = {
 }
 
 export const NetworkDeviceConfig: Story = {
-  name: 'Network Device Config',
   render: args => (
     <div
       style={{
@@ -227,7 +222,6 @@ export const NetworkDeviceConfig: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -264,7 +258,6 @@ export const DisabledState: Story = {
 }
 
 export const WirelessConfig: Story = {
-  name: 'Wireless Config',
   render: args => (
     <div
       style={{

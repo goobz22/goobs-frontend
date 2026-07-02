@@ -4,7 +4,7 @@
  * The Dropdown uses the shared form field system with labels positioned above the input field.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import Dropdown, { type DropdownOption } from './index'
 import type { FieldStyleOverrides } from '../../Shell'
@@ -75,7 +75,6 @@ const meta: Meta<typeof Dropdown> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     label: { control: 'text' },
     helperText: { control: 'text' },
@@ -113,7 +112,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <DropdownWithState
       label="Country"
@@ -121,13 +119,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkThemeAlt: Story = {
-  name: 'Dark Theme Alt',
   render: () => (
     <DropdownWithState
       label="Select Option"
@@ -135,9 +130,7 @@ export const DarkThemeAlt: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -145,7 +138,6 @@ export const DarkThemeAlt: Story = {
 // --------------------------------------------------------------------------
 
 export const BasicOptions: Story = {
-  name: 'Basic Options',
   render: () => (
     <DropdownWithState
       label="Simple Selection"
@@ -183,7 +175,6 @@ export const ComplexOptions: Story = {
 }
 
 export const WithDefaultValue: Story = {
-  name: 'With Default Value',
   render: () => (
     <DropdownWithState
       label="Pre-selected Option"
@@ -195,7 +186,6 @@ export const WithDefaultValue: Story = {
 }
 
 export const RequiredDropdown: Story = {
-  name: 'Required Dropdown',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DropdownWithState
@@ -252,7 +242,6 @@ export const RequiredDropdown: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DropdownWithState
@@ -287,7 +276,6 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <DropdownWithState
       label="Custom Styled"
@@ -339,7 +327,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DropdownWithState
@@ -369,7 +356,6 @@ export const DisabledStates: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -514,8 +500,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -523,7 +509,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <DropdownWithState
       label="Test Dropdown"

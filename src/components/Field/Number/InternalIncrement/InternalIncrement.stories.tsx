@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the InternalIncrementNumberField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import InternalIncrementNumberField from './index'
 
 const meta: Meta<typeof InternalIncrementNumberField> = {
@@ -59,7 +59,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -96,7 +95,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -133,7 +131,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -170,7 +167,6 @@ export const SacredTheme: Story = {
 }
 
 export const WithRange: Story = {
-  name: 'With Range',
   render: args => (
     <div
       style={{
@@ -209,7 +205,6 @@ export const WithRange: Story = {
 }
 
 export const FastIncrement: Story = {
-  name: 'Fast Increment',
   render: args => (
     <div
       style={{
@@ -250,7 +245,6 @@ export const FastIncrement: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -287,7 +281,6 @@ export const DisabledState: Story = {
 }
 
 export const SacredCounter: Story = {
-  name: 'Sacred Counter',
   render: args => (
     <div
       style={{

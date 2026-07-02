@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the CreditCardNumber component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import CreditCardNumber from './index'
 
 const meta: Meta<typeof CreditCardNumber> = {
@@ -59,7 +59,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -96,7 +95,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -133,7 +131,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -170,7 +167,6 @@ export const SacredTheme: Story = {
 }
 
 export const PaymentCheckout: Story = {
-  name: 'Payment Checkout',
   render: args => (
     <div
       style={{
@@ -209,7 +205,6 @@ export const PaymentCheckout: Story = {
 }
 
 export const WithoutFormatting: Story = {
-  name: 'Without Formatting',
   render: args => (
     <div
       style={{
@@ -247,7 +242,6 @@ export const WithoutFormatting: Story = {
 }
 
 export const PrefilledCard: Story = {
-  name: 'Prefilled Card',
   render: args => (
     <div
       style={{
@@ -284,7 +278,6 @@ export const PrefilledCard: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -321,7 +314,6 @@ export const DisabledState: Story = {
 }
 
 export const SacredPayment: Story = {
-  name: 'Sacred Payment',
   render: args => (
     <div
       style={{

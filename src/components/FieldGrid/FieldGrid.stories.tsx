@@ -4,7 +4,7 @@
  * hand-rolled repeat(auto-fit, minmax(min(100%, …), 1fr)) field clusters.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import FieldGrid from './index'
 import TextField from '../Field/Text'
@@ -33,7 +33,6 @@ const meta: Meta<typeof FieldGrid> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '760px', maxWidth: '100%' }}>
@@ -113,7 +112,6 @@ export const WideColumns: Story = {
 // INTERACTION TEST — the grid exposes role=group and the field-grid anchor
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: args => (
     <FieldGrid {...args} aria-label="Test Group">
       <StatefulTextField label="One" styles={{ theme: 'light' }} />

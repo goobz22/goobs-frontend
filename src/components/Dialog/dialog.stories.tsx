@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the Dialog component.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Dialog from './index'
 import Button from '../Button'
 import TextField from '../Field/Text'
@@ -770,7 +770,6 @@ const SettingsDialog = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => (
     <div
       style={{
@@ -806,7 +805,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <div
       style={{
@@ -842,7 +840,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <div
       style={{
@@ -878,7 +875,6 @@ export const SacredTheme: Story = {
 }
 
 export const LightScrollDemo: Story = {
-  name: 'Light Scroll Demo',
   render: () => (
     <div
       style={{
@@ -914,7 +910,6 @@ export const LightScrollDemo: Story = {
 }
 
 export const DarkScrollDemo: Story = {
-  name: 'Dark Scroll Demo',
   render: () => (
     <div
       style={{
@@ -950,7 +945,6 @@ export const DarkScrollDemo: Story = {
 }
 
 export const SacredScrollDemo: Story = {
-  name: 'Sacred Scroll Demo',
   render: () => (
     <div
       style={{
@@ -986,7 +980,6 @@ export const SacredScrollDemo: Story = {
 }
 
 export const LightConfirmation: Story = {
-  name: 'Light Confirmation',
   render: () => (
     <div
       style={{
@@ -1022,7 +1015,6 @@ export const LightConfirmation: Story = {
 }
 
 export const DarkConfirmation: Story = {
-  name: 'Dark Confirmation',
   render: () => (
     <div
       style={{
@@ -1058,7 +1050,6 @@ export const DarkConfirmation: Story = {
 }
 
 export const SacredConfirmation: Story = {
-  name: 'Sacred Confirmation',
   render: () => (
     <div
       style={{
@@ -1094,7 +1085,6 @@ export const SacredConfirmation: Story = {
 }
 
 export const LightSettings: Story = {
-  name: 'Light Settings',
   render: () => (
     <div
       style={{
@@ -1130,7 +1120,6 @@ export const LightSettings: Story = {
 }
 
 export const DarkSettings: Story = {
-  name: 'Dark Settings',
   render: () => (
     <div
       style={{
@@ -1166,7 +1155,6 @@ export const DarkSettings: Story = {
 }
 
 export const SacredSettings: Story = {
-  name: 'Sacred Settings',
   render: () => (
     <div
       style={{

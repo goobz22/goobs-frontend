@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the SubnetField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import SubnetField from './index'
 
 const meta: Meta<typeof SubnetField> = {
@@ -47,7 +47,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -84,7 +83,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -121,7 +119,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -158,7 +155,6 @@ export const SacredTheme: Story = {
 }
 
 export const PrivateNetwork: Story = {
-  name: 'Private Network',
   render: args => (
     <div
       style={{
@@ -196,7 +192,6 @@ export const PrivateNetwork: Story = {
 }
 
 export const EnterpriseNetwork: Story = {
-  name: 'Enterprise Network',
   render: args => (
     <div
       style={{
@@ -234,7 +229,6 @@ export const EnterpriseNetwork: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -270,7 +264,6 @@ export const DisabledState: Story = {
 }
 
 export const DataCenterSubnet: Story = {
-  name: 'Data Center Subnet',
   render: args => (
     <div
       style={{

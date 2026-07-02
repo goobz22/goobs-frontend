@@ -1,6 +1,6 @@
 // src/components/PricingTable/pricingtable.stories.tsx
 
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/nextjs'
 import PricingTable, { PricingProps } from './index'
 import React from 'react'
 
@@ -73,7 +73,6 @@ export default meta
 type Story = StoryObj<typeof PricingTable>
 
 export const PremiumTheme: Story = {
-  name: 'Premium Theme',
   render: args => (
     <div
       style={{
@@ -94,7 +93,6 @@ export const PremiumTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -157,7 +155,6 @@ const InteractiveDemoRenderer = () => {
 }
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoRenderer />,
 }
 

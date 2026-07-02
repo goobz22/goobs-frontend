@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the IPAddressField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import IPAddressField from './index'
 
 const meta: Meta<typeof IPAddressField> = {
@@ -59,7 +59,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -96,7 +95,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -133,7 +131,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -170,7 +167,6 @@ export const SacredTheme: Story = {
 }
 
 export const IPRangeExample: Story = {
-  name: 'IP Range Example',
   render: args => (
     <div
       style={{
@@ -207,7 +203,6 @@ export const IPRangeExample: Story = {
 }
 
 export const NetworkConfiguration: Story = {
-  name: 'Network Configuration',
   render: args => (
     <div
       style={{
@@ -246,7 +241,6 @@ export const NetworkConfiguration: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -282,7 +276,6 @@ export const DisabledState: Story = {
 }
 
 export const ErrorState: Story = {
-  name: 'Error State',
   render: args => (
     <div
       style={{

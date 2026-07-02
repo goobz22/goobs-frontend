@@ -6,7 +6,7 @@
  * <select> for context) and composed inside the Select component.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import MenuItem from './index'
 import Select from '../Select'
@@ -20,7 +20,6 @@ const meta: Meta<typeof MenuItem> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     dense: { control: 'boolean' },
     divider: { control: 'boolean' },
@@ -73,7 +72,6 @@ const SelectWithState = ({
 // --------------------------------------------------------------------------
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => (
     <SelectWithState theme="light">
       <MenuItem value="javascript" styles={{ theme: 'light' }}>
@@ -90,7 +88,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <SelectWithState theme="dark">
       <MenuItem value="usa" styles={{ theme: 'dark' }}>
@@ -104,13 +101,10 @@ export const DarkTheme: Story = {
       </MenuItem>
     </SelectWithState>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <SelectWithState theme="sacred">
       <MenuItem value="ankh" styles={{ theme: 'sacred' }}>
@@ -124,9 +118,7 @@ export const SacredTheme: Story = {
       </MenuItem>
     </SelectWithState>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -134,7 +126,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const Selected: Story = {
-  name: 'Selected',
   render: () => (
     <SelectWithState theme="light" initialValue="typescript">
       <MenuItem value="javascript" styles={{ theme: 'light' }}>
@@ -176,7 +167,6 @@ export const Disabled: Story = {
 // --------------------------------------------------------------------------
 
 export const Dense: Story = {
-  name: 'Dense',
   render: () => (
     <SelectWithState theme="light">
       <MenuItem value="a" dense styles={{ theme: 'light' }}>
@@ -197,7 +187,6 @@ export const Dense: Story = {
 // --------------------------------------------------------------------------
 
 export const Divider: Story = {
-  name: 'Divider',
   render: () => (
     <SelectWithState theme="light">
       <MenuItem value="a" styles={{ theme: 'light' }}>
@@ -218,7 +207,6 @@ export const Divider: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <SelectWithState theme="light">
       <MenuItem
@@ -243,7 +231,6 @@ export const CustomColors: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -310,8 +297,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -319,7 +306,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <SelectWithState theme="light">
       <MenuItem value="javascript" styles={{ theme: 'light' }}>

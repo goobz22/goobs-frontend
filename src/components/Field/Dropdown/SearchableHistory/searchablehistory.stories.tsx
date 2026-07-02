@@ -6,7 +6,7 @@
  * localStorage. Selecting an item fires `onSelect` to navigate.
  * These stories showcase the light / dark / sacred themes and the key states.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
 import SearchableHistory, { type NavigationItem } from './index'
 
@@ -63,7 +63,6 @@ const meta: Meta<typeof SearchableHistory> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     label: { control: 'text' },
     placeholder: { control: 'text' },
@@ -106,9 +105,7 @@ export const DarkTheme: Story = {
     name: 'navigation',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -119,9 +116,7 @@ export const SacredTheme: Story = {
     name: 'navigation',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -129,7 +124,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const WithHelperText: Story = {
-  name: 'With Helper Text',
   args: {
     label: 'Navigate',
     placeholder: 'Search navigation...',
@@ -145,7 +139,6 @@ export const WithHelperText: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorState: Story = {
-  name: 'Error State',
   args: {
     label: 'Navigate',
     placeholder: 'Search navigation...',
@@ -200,7 +193,6 @@ export const NoItems: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: function InteractiveDemoStory() {
     const [selected, setSelected] = useState<NavigationItem | null>(null)
 

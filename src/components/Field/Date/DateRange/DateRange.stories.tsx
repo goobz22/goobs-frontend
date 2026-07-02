@@ -4,8 +4,8 @@
  * The DateRange component provides dual date picker inputs for selecting date ranges.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { within, expect } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect, fn } from 'storybook/test'
 import DateRangeComponent, { DateRange } from './index'
 
 // Wrapper component for state management
@@ -29,7 +29,6 @@ const meta: Meta<typeof DateRangeComponent> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     value: { control: 'object' },
     onChange: { action: 'changed' },
@@ -71,7 +70,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <DateRangeWithState
       startLabel="From Date"
@@ -79,13 +77,10 @@ export const DarkTheme: Story = {
       styles={{ theme: 'dark' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <DateRangeWithState
       startLabel="Era Beginning"
@@ -93,9 +88,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -103,7 +96,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <DateRangeWithState
       startLabel="Custom Start"
@@ -121,7 +113,6 @@ export const CustomColors: Story = {
 }
 
 export const NeonStyle: Story = {
-  name: 'Neon Style',
   render: () => (
     <DateRangeWithState
       startLabel="Neon Start"
@@ -138,9 +129,7 @@ export const NeonStyle: Story = {
       }}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -191,7 +180,6 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomTypography: Story = {
-  name: 'Custom Typography',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DateRangeWithState
@@ -234,7 +222,6 @@ export const CustomTypography: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
-  name: 'Error States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DateRangeWithState
@@ -269,7 +256,6 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
-  name: 'Required Fields',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DateRangeWithState
@@ -310,7 +296,6 @@ export const RequiredFields: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -453,8 +438,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -462,7 +447,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DateRangeWithState
@@ -503,6 +487,8 @@ export const DisabledStates: Story = {
 // VALIDATION DEMO
 // --------------------------------------------------------------------------
 
+const onValidationSuccess = fn()
+
 const DateRangeValidationDemo = () => {
   const [dateRange, setDateRange] = useState<DateRange>({
     start: null,
@@ -523,7 +509,7 @@ const DateRangeValidationDemo = () => {
   const handleSubmit = () => {
     validateDateRange(dateRange)
     if (error === '' && dateRange.start && dateRange.end) {
-      alert('Date range validated successfully!')
+      onValidationSuccess()
     }
   }
 
@@ -572,7 +558,6 @@ const DateRangeValidationDemo = () => {
 }
 
 export const ValidationDemo: Story = {
-  name: 'Validation Demo',
   render: () => <DateRangeValidationDemo />,
 }
 
@@ -581,7 +566,6 @@ export const ValidationDemo: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <DateRangeWithState
       startLabel="Test Start Date"

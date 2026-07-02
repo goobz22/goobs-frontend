@@ -4,7 +4,7 @@
  * and real-world navigation-bar compositions.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import AppBar from './index'
 
 const meta: Meta<typeof AppBar> = {
@@ -34,7 +34,6 @@ const meta: Meta<typeof AppBar> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -81,9 +80,7 @@ export const LightTheme: Story = {
     styles: { theme: 'light' },
     children: <NavContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -92,9 +89,7 @@ export const DarkTheme: Story = {
     styles: { theme: 'dark' },
     children: <NavContent color="#F9FAFB" />,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -103,9 +98,7 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred' },
     children: <NavContent color="#FFD700" />,
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -119,9 +112,7 @@ export const Elevated: Story = {
     styles: { theme: 'light' },
     children: <NavContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Flat: Story = {
@@ -131,9 +122,7 @@ export const Flat: Story = {
     styles: { theme: 'light' },
     children: <NavContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Disabled: Story = {
@@ -142,9 +131,7 @@ export const Disabled: Story = {
     styles: { theme: 'light', disabled: true },
     children: <NavContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const StickyPosition: Story = {
@@ -154,9 +141,7 @@ export const StickyPosition: Story = {
     styles: { theme: 'light' },
     children: <NavContent color="#1F2937" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -174,7 +159,5 @@ export const CustomColors: Story = {
     },
     children: <NavContent color="#FFFFFF" />,
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

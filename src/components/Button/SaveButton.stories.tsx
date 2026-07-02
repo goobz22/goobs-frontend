@@ -5,7 +5,7 @@
  * spinner swap are exercised end-to-end.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { z } from 'zod'
 import SaveButton from './SaveButton'
 import Form from '../Form'
@@ -23,7 +23,6 @@ const meta: Meta<typeof SaveButton> = {
     onSave: { action: 'save' },
   },
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
 export default meta
 

@@ -6,7 +6,7 @@
  * variant on its Card.Section regions).
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import SacredGlyphFrame from './index'
 import Card from '../Card/index'
@@ -39,9 +39,8 @@ const meta: Meta<typeof SacredGlyphFrame> = {
   },
   parameters: {
     layout: 'centered',
-    backgrounds: { default: 'dark' },
   },
-  tags: ['autodocs'],
+  globals: { backgrounds: { value: 'dark' } },
   decorators: [
     Story => (
       <div style={{ padding: '3rem', minWidth: '420px' }}>

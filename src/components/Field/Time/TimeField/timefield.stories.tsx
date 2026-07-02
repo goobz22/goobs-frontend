@@ -5,7 +5,7 @@
  * is a Date whose hours/minutes are formatted as HH:MM for the native input.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import TimeField from './index'
 
 // Build a Date carrying a specific local time-of-day for seeding stories.
@@ -34,7 +34,6 @@ const meta: Meta<typeof TimeField> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     label: { control: 'text' },
     helperText: { control: 'text' },
@@ -60,30 +59,23 @@ type Story = StoryObj<typeof TimeField>
 // --------------------------------------------------------------------------
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => (
     <TimeFieldWithState label="Start Time" styles={{ theme: 'light' }} />
   ),
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <TimeFieldWithState label="Start Time" styles={{ theme: 'dark' }} />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <TimeFieldWithState label="Ritual Hour" styles={{ theme: 'sacred' }} />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -91,7 +83,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const WithValue: Story = {
-  name: 'With Value',
   render: () => (
     <TimeFieldWithState
       label="Appointment"
@@ -106,7 +97,6 @@ export const WithValue: Story = {
 // --------------------------------------------------------------------------
 
 export const WithHelperText: Story = {
-  name: 'With Helper Text',
   render: () => (
     <TimeFieldWithState
       label="Meeting Time"
@@ -122,7 +112,6 @@ export const WithHelperText: Story = {
 // --------------------------------------------------------------------------
 
 export const WithError: Story = {
-  name: 'With Error',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <TimeFieldWithState
@@ -146,7 +135,6 @@ export const WithError: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <TimeFieldWithState
@@ -173,7 +161,6 @@ export const DisabledStates: Story = {
 // --------------------------------------------------------------------------
 
 export const Required: Story = {
-  name: 'Required',
   render: () => (
     <TimeFieldWithState
       label="Departure Time"
@@ -187,7 +174,6 @@ export const Required: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -257,6 +243,6 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }

@@ -1,7 +1,8 @@
 /**
  * @fileoverview Storybook stories for the Chip component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn } from 'storybook/test'
 import Chip from './index'
 
 const meta: Meta<typeof Chip> = {
@@ -49,7 +50,7 @@ export const Default: Story = {
 export const Deletable: Story = {
   args: {
     label: 'Deletable Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'light',
     },
@@ -61,7 +62,7 @@ export const Disabled: Story = {
   name: 'State/Disabled',
   args: {
     label: 'Disabled Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'light',
       disabled: true,
@@ -78,7 +79,7 @@ export const LightTheme: Story = {
   name: 'Theme/Light',
   args: {
     label: 'Light Theme Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'light',
     },
@@ -90,14 +91,12 @@ export const DarkTheme: Story = {
   name: 'Theme/Dark',
   args: {
     label: 'Dark Theme Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'dark',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** The sacred theme provides a mystical, golden appearance. */
@@ -105,14 +104,12 @@ export const SacredTheme: Story = {
   name: 'Theme/Sacred',
   args: {
     label: 'Sacred Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'sacred',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A sacred theme chip that is also disabled. */
@@ -120,15 +117,13 @@ export const SacredDisabled: Story = {
   name: 'Theme/Sacred Disabled',
   args: {
     label: 'Sacred & Disabled',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'sacred',
       disabled: true,
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** The chip without its default outline. */
@@ -152,7 +147,7 @@ export const CustomColors: Story = {
   name: 'Customization/Custom Colors',
   args: {
     label: 'Custom Colors',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'light',
       backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -169,7 +164,7 @@ export const CustomSize: Story = {
   name: 'Customization/Custom Size',
   args: {
     label: 'Large Chip',
-    onDelete: () => alert('Chip deleted!'),
+    onDelete: fn(),
     styles: {
       theme: 'light',
       height: '36px',

@@ -1,7 +1,7 @@
 // src/components/Switch/switch.stories.tsx
 
 import React, { useState } from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import Switch from './index'
 
@@ -22,7 +22,6 @@ const meta: Meta<typeof Switch> = {
     checked: { control: 'boolean' },
     onChange: { action: 'changed' },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -779,7 +778,6 @@ export const SacredThemeVariants: Story = {
  * 4) Theme Comparison
  */
 export const ThemeComparison: Story = {
-  name: 'Theme Comparison',
   render: args => {
     const Component = () => {
       const [lightChecked1, setLightChecked1] = useState(false)
@@ -1037,7 +1035,6 @@ export const ThemeComparison: Story = {
  * 5) Custom Colors
  */
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: args => {
     const Component = () => {
       const [greenChecked1, setGreenChecked1] = useState(false)
@@ -1528,7 +1525,6 @@ const InteractiveDemoRenderer = (args: Story['args']) => {
  * 6) Interactive Demo
  */
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: args => <InteractiveDemoRenderer {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

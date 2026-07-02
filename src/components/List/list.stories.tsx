@@ -5,7 +5,7 @@
  * to demonstrate real-world usage with React and JSX.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { List, ListItem, ListItemIcon, ListItemText } from './'
 import HomeIcon from '../Icons/Home'
 import AccountIcon from '../Icons/Account'
@@ -72,7 +72,6 @@ const meta: Meta<typeof List> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '320px', padding: '1rem' }}>
@@ -93,33 +92,24 @@ type Story = StoryObj<typeof List>
  * A list with light theme styling.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => renderList('light'),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
  * A list with dark theme styling.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => renderList('dark'),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * A list with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => renderList('sacred'),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -132,9 +122,7 @@ export const SacredTheme: Story = {
 export const Dense: Story = {
   name: 'State/Dense',
   render: () => renderList('light', true),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -151,7 +139,5 @@ export const TextOnly: Story = {
       ))}
     </List>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

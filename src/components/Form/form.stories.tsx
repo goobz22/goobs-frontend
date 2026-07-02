@@ -12,7 +12,7 @@
  * exemplar.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { z } from 'zod'
 import Form from './index'
 import Button from '../Button'
@@ -133,7 +133,6 @@ const meta: Meta<typeof Form> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '2rem', minWidth: '20rem' }}>
@@ -154,33 +153,24 @@ type Story = StoryObj<typeof Form>
  * A contact form with light theme styling on its fields and submit button.
  */
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => <ThemedContactForm theme="light" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
  * A contact form with dark theme styling on its fields and submit button.
  */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => <ThemedContactForm theme="dark" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
  * A contact form with the "sacred" theme for a stylized appearance.
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => <ThemedContactForm theme="sacred" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -209,9 +199,7 @@ export const AutoFieldsScaffold: Story = {
       />
     </Form>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -232,9 +220,7 @@ export const AutoFieldsScaffold: Story = {
 export const ExternalServerErrors: Story = {
   name: 'External server errors (setExternalErrors)',
   render: () => <ServerErrorForm theme="light" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -329,9 +315,7 @@ const ChecklistForm: React.FC = () => {
 export const FieldArray: Story = {
   name: 'Field array (useFieldArray)',
   render: () => <ChecklistForm />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -419,9 +403,7 @@ const ArticleForm: React.FC = () => {
 export const DynamicFieldValues: Story = {
   name: 'Dynamic field-set (useFieldValues)',
   render: () => <ArticleForm />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -446,7 +428,5 @@ export const PartialFields: Story = {
       />
     </Form>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

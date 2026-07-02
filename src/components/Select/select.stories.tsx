@@ -5,7 +5,7 @@
  * MenuItem children (which render as <option> elements).
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import Select from './index'
 import MenuItem from '../MenuItem'
@@ -35,7 +35,6 @@ const meta: Meta<typeof Select> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     variant: {
       control: 'select',
@@ -72,7 +71,6 @@ type Story = StoryObj<typeof Select>
 // --------------------------------------------------------------------------
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => (
     <SelectWithState styles={{ theme: 'light' }} displayEmpty>
       <MenuItem value="javascript">JavaScript</MenuItem>
@@ -84,7 +82,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => (
     <SelectWithState styles={{ theme: 'dark' }} displayEmpty>
       <MenuItem value="usa">United States</MenuItem>
@@ -93,13 +90,10 @@ export const DarkTheme: Story = {
       <MenuItem value="japan">Japan</MenuItem>
     </SelectWithState>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => (
     <SelectWithState styles={{ theme: 'sacred' }} displayEmpty>
       <MenuItem value="ankh">Ankh</MenuItem>
@@ -108,9 +102,7 @@ export const SacredTheme: Story = {
       <MenuItem value="djed">Djed Pillar</MenuItem>
     </SelectWithState>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -118,7 +110,6 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 export const Variants: Story = {
-  name: 'Variants',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SelectWithState variant="outlined" styles={{ theme: 'light' }}>
@@ -142,7 +133,6 @@ export const Variants: Story = {
 // --------------------------------------------------------------------------
 
 export const Sizes: Story = {
-  name: 'Sizes',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SelectWithState size="medium" styles={{ theme: 'light' }}>
@@ -162,7 +152,6 @@ export const Sizes: Story = {
 // --------------------------------------------------------------------------
 
 export const FullWidth: Story = {
-  name: 'Full Width',
   render: () => (
     <SelectWithState fullWidth styles={{ theme: 'light' }}>
       <MenuItem value="a">Spans the full container width</MenuItem>
@@ -177,7 +166,6 @@ export const FullWidth: Story = {
 // --------------------------------------------------------------------------
 
 export const WithValue: Story = {
-  name: 'With Value',
   render: () => (
     <SelectWithState initialValue="typescript" styles={{ theme: 'light' }}>
       <MenuItem value="javascript">JavaScript</MenuItem>
@@ -207,7 +195,6 @@ export const DisplayEmpty: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorState: Story = {
-  name: 'Error State',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SelectWithState error styles={{ theme: 'light' }}>
@@ -231,7 +218,6 @@ export const ErrorState: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
-  name: 'Disabled States',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SelectWithState initialValue="a" disabled styles={{ theme: 'light' }}>
@@ -255,7 +241,6 @@ export const DisabledStates: Story = {
 // --------------------------------------------------------------------------
 
 export const CustomColors: Story = {
-  name: 'Custom Colors',
   render: () => (
     <SelectWithState
       styles={{
@@ -277,7 +262,6 @@ export const CustomColors: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -348,8 +332,8 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -357,7 +341,6 @@ export const ComprehensiveShowcase: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   render: () => (
     <SelectWithState styles={{ theme: 'light' }}>
       <MenuItem value="javascript">JavaScript</MenuItem>

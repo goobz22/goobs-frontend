@@ -3,7 +3,7 @@
  * Demonstrates different states, themes, selection modes, and compositions.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import TreeView, { TreeViewItem, useTreeViewApiRef } from './index'
 
@@ -34,7 +34,6 @@ const meta: Meta<typeof TreeView> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '400px', height: '500px', padding: '1rem' }}>
@@ -223,28 +222,22 @@ export const LightTheme: Story = {
 
 /** A tree view with dark theme. */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     items: sampleTreeData,
     defaultExpandedItems: ['documents'],
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** The dark theme with element data. */
 export const DarkThemeElements: Story = {
-  name: 'Dark Theme Elements',
   args: {
     items: elementTreeData,
     defaultExpandedItems: ['elements'],
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -545,9 +538,7 @@ const DarkThemeExample = () => {
 export const DarkWithCheckboxes: Story = {
   name: 'Themes/Dark with Checkboxes',
   render: () => <DarkThemeExample />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 const DarkThemeElementsExample = () => {
@@ -584,9 +575,7 @@ const DarkThemeElementsExample = () => {
 export const DarkInteractiveElements: Story = {
   name: 'Themes/Dark Interactive Elements',
   render: () => <DarkThemeElementsExample />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -594,7 +583,6 @@ export const DarkInteractiveElements: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -715,15 +703,14 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
 // INTERACTION TEST
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   args: {
     items: sampleTreeData,
     defaultExpandedItems: ['documents'],

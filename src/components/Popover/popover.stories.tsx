@@ -3,7 +3,7 @@
  * These stories showcase the various themes and styling options for the Popover component.
  */
 import React, { useState, useCallback } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect, userEvent } from 'storybook/test'
 import Popover from './index'
 import Button from '../Button'
@@ -21,7 +21,6 @@ const meta: Meta<typeof Popover> = {
       description: 'Custom styles using the theme system',
     },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -216,9 +215,7 @@ export const Dark: Story = {
       <PopoverContent theme="dark" />
     </InteractivePopover>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkWithMenu: Story = {
@@ -250,9 +247,7 @@ export const DarkWithMenu: Story = {
       </div>
     </InteractivePopover>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -266,9 +261,7 @@ export const DarkBasic: Story = {
       <PopoverContent theme="dark" />
     </InteractivePopover>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkWithContent: Story = {
@@ -312,9 +305,7 @@ export const DarkWithContent: Story = {
       </div>
     </InteractivePopover>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------

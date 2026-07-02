@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
 import Zoom from './index'
 import CustomButton from '../Button'
@@ -11,7 +11,6 @@ const meta: Meta<typeof Zoom> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   argTypes: {
     styles: {
       control: { type: 'object' },
@@ -175,9 +174,7 @@ export const DarkTheme: Story = {
       </div>
     )
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // Sacred theme — visible state
@@ -210,9 +207,7 @@ export const SacredTheme: Story = {
       </div>
     )
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // Story with a custom scale + transform origin

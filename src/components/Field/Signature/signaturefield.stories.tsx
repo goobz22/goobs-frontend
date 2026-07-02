@@ -4,7 +4,7 @@
  * auto-bound path across the goobs themes.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { z } from 'zod'
 import SignatureField from './index'
 import Form from '../../Form'
@@ -14,7 +14,6 @@ const meta: Meta<typeof SignatureField> = {
   title: 'Components/Field/SignatureField',
   component: SignatureField,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '2rem', width: '32rem', maxWidth: '90vw' }}>
@@ -54,21 +53,18 @@ const ControlledSignature: React.FC<{ theme: 'light' | 'dark' | 'sacred' }> = ({
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: () => <ControlledSignature theme="light" />,
-  parameters: { backgrounds: { default: 'light' } },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: () => <ControlledSignature theme="dark" />,
-  parameters: { backgrounds: { default: 'dark' } },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: () => <ControlledSignature theme="sacred" />,
-  parameters: { backgrounds: { default: 'dark' } },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -119,5 +115,5 @@ const SignOffForm: React.FC = () => {
 export const InForm: Story = {
   name: 'In Form (auto-bound, required)',
   render: () => <SignOffForm />,
-  parameters: { backgrounds: { default: 'light' } },
+  globals: { backgrounds: { value: 'light' } },
 }

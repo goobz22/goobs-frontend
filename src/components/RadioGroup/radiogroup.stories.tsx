@@ -3,7 +3,7 @@
  * These stories showcase the various themes and options for the RadioGroup component.
  */
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect, userEvent } from 'storybook/test'
 import RadioGroup, { RadioOption } from './index'
 
@@ -24,7 +24,6 @@ const meta: Meta<typeof RadioGroup> = {
       description: 'Custom styles using the theme system',
     },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -138,9 +137,7 @@ export const Dark: Story = {
       theme: 'dark',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkWithCustomColors: Story = {
@@ -157,9 +154,7 @@ export const DarkWithCustomColors: Story = {
       radioHoverBorderColor: '#60a5fa',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -177,9 +172,7 @@ export const DarkBasic: Story = {
       theme: 'dark',
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkWithGlyph: Story = {
@@ -194,9 +187,7 @@ export const DarkWithGlyph: Story = {
       showGlyph: true,
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const DarkCustomized: Story = {
@@ -214,9 +205,7 @@ export const DarkCustomized: Story = {
       showGlyph: true,
     },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------

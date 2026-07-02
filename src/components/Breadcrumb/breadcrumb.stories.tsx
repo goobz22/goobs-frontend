@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Breadcrumb from './index'
 import { ChevronRightIcon } from '../Icons'
 
@@ -13,7 +13,6 @@ const meta: Meta<typeof Breadcrumb> = {
       },
     },
   },
-  tags: ['autodocs'],
 }
 
 export default meta
@@ -38,9 +37,7 @@ export const Dark: Story = {
     items: sampleItems,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const Sacred: Story = {
@@ -48,9 +45,7 @@ export const Sacred: Story = {
     items: sampleItems,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const WithCustomSeparator: Story = {
@@ -59,9 +54,7 @@ export const WithCustomSeparator: Story = {
     separator: <ChevronRightIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const MaxItems: Story = {
@@ -77,7 +70,5 @@ export const MaxItems: Story = {
     maxItems: 4,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }

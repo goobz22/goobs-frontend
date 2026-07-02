@@ -1,7 +1,7 @@
 /**
  * @fileoverview Storybook stories for the VLANField component.
  */
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import VLANField from './index'
 
 const meta: Meta<typeof VLANField> = {
@@ -45,7 +45,6 @@ const commonArgs = {
 }
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => (
     <div
       style={{
@@ -82,7 +81,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => (
     <div
       style={{
@@ -119,7 +117,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div
       style={{
@@ -191,7 +188,6 @@ export const WithReservedVLANs: Story = {
 }
 
 export const SwitchPortConfig: Story = {
-  name: 'Switch Port Config',
   render: args => (
     <div
       style={{
@@ -228,7 +224,6 @@ export const SwitchPortConfig: Story = {
 }
 
 export const DisabledState: Story = {
-  name: 'Disabled State',
   render: args => (
     <div
       style={{
@@ -264,7 +259,6 @@ export const DisabledState: Story = {
 }
 
 export const TrunkConfiguration: Story = {
-  name: 'Trunk Configuration',
   render: args => (
     <div
       style={{
@@ -301,7 +295,6 @@ export const TrunkConfiguration: Story = {
 }
 
 export const DataCenterVLAN: Story = {
-  name: 'Data Center VLAN',
   render: args => (
     <div
       style={{

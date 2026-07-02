@@ -1,7 +1,7 @@
 // src/components/Stepper/stepper.stories.tsx
 
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Stepper, { StepperProps } from './index'
 
 // Mock Dialog Component
@@ -170,7 +170,6 @@ type Story = StoryObj<typeof Stepper>
  * Account Setup Wizard - A typical onboarding flow with user registration
  */
 export const AccountSetupWizard: Story = {
-  name: 'Account Setup Wizard',
   render: () => {
     const Component = () => {
       const [isOpen, setIsOpen] = useState(true)
@@ -777,7 +776,6 @@ export const ProjectSetupFlow: Story = {
  * Interactive Demo with Theme Switching
  */
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => {
     const Component = () => {
       const [theme, setTheme] = useState<'light' | 'dark' | 'sacred'>('light')
@@ -1012,7 +1010,6 @@ export const InteractiveDemo: Story = {
  * Simple Theme Showcase
  */
 export const ThemeShowcase: Story = {
-  name: 'Theme Showcase',
   render: () => {
     const basicSteps: StepperProps['steps'] = [
       { stepNumber: 1, label: 'Start', stepLink: '#1', status: 'completed' },

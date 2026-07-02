@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import {
   Table,
   TableContainer,
@@ -14,7 +14,6 @@ const meta: Meta<typeof Table> = {
   parameters: {
     layout: 'padded',
   },
-  tags: ['autodocs'],
 }
 
 export default meta

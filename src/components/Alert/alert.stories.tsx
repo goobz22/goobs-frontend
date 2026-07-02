@@ -3,8 +3,8 @@
  * These stories showcase the different severity levels, themes, and functionalities of the Alert.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within, expect } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import Alert from './index'
 
 // --------------------------------------------------------------------------
@@ -29,7 +29,6 @@ const meta: Meta<typeof Alert> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '500px', padding: '1rem' }}>
@@ -92,7 +91,7 @@ export const LightDismissible: Story = {
   args: {
     severity: 'info',
     message: 'You can close this alert by clicking the close button.',
-    onClose: () => alert('Alert closed!'),
+    onClose: fn(),
     styles: { theme: 'light' },
   },
 }
@@ -109,9 +108,7 @@ export const DarkSuccess: Story = {
     message: 'Your operation was completed successfully.',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A dark-themed alert for informational messages. */
@@ -122,9 +119,7 @@ export const DarkInfo: Story = {
     message: 'Here is some information that might be useful to you.',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A dark-themed alert for warnings. */
@@ -135,9 +130,7 @@ export const DarkWarning: Story = {
     message: 'Warning: This action may have unintended consequences.',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A dark-themed alert for errors. */
@@ -148,9 +141,7 @@ export const DarkError: Story = {
     message: 'An error occurred while processing your request.',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -165,9 +156,7 @@ export const SacredSuccess: Story = {
     message: 'The sacred ritual has been successfully completed.',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A sacred-themed alert for informational messages. */
@@ -178,9 +167,7 @@ export const SacredInfo: Story = {
     message: 'Ancient scrolls of wisdom have been unearthed.',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A sacred-themed alert for warnings. */
@@ -191,9 +178,7 @@ export const SacredWarning: Story = {
     message: 'The celestial alignment is imminent. Prepare yourself.',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** A sacred-themed alert for errors. */
@@ -204,9 +189,7 @@ export const SacredError: Story = {
     message: 'A dark energy has corrupted the sacred artifacts.',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -214,7 +197,6 @@ export const SacredError: Story = {
 // --------------------------------------------------------------------------
 
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   args: {
     severity: 'info',
     message: 'This is a dismissible alert.',

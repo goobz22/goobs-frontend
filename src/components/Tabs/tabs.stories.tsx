@@ -1,8 +1,8 @@
 // src/components/Tabs/tabs.stories.tsx
 
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
-import { userEvent, within } from 'storybook/test'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, fn } from 'storybook/test'
 import Tabs, { TabsItem } from './index'
 
 const basicTabs: TabsItem[] = [
@@ -21,10 +21,10 @@ const mixedTriggerTabs: TabsItem[] = [
   { title: 'Profile', route: '/profile', trigger: 'route' },
   {
     title: 'Settings',
-    onClick: () => alert('Settings clicked!'),
+    onClick: fn(),
     trigger: 'onClick',
   },
-  { title: 'Logout', onClick: () => alert('Logging out!'), trigger: 'onClick' },
+  { title: 'Logout', onClick: fn(), trigger: 'onClick' },
 ]
 
 const meta: Meta<typeof Tabs> = {
@@ -53,7 +53,6 @@ type Story = StoryObj<typeof Tabs>
  * 1) Premium Theme
  */
 export const PremiumTheme: Story = {
-  name: 'Premium Theme',
   render: args => (
     <div style={{ background: '#1f2937', height: '200vh' }}>
       <Tabs {...args} />
@@ -77,7 +76,6 @@ export const PremiumTheme: Story = {
  * 2) Sacred Theme
  */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => (
     <div style={{ background: '#000000', height: '200vh' }}>
       <Tabs {...args} />
@@ -208,7 +206,6 @@ const InteractiveDemoRenderer = () => {
  * 3) Interactive Demo
  */
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveDemoRenderer />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

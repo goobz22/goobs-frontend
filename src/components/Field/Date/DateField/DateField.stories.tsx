@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/nextjs'
 import DateField from './index'
 
 const meta: Meta<typeof DateField> = {
@@ -21,7 +21,6 @@ export default meta
 type Story = StoryObj<typeof DateField>
 
 export const LightTheme: Story = {
-  name: 'Light Theme',
   render: args => <DateField {...args} />,
   args: {
     label: 'Select Date',
@@ -39,7 +38,6 @@ export const LightTheme: Story = {
 }
 
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   render: args => <DateField {...args} />,
   args: {
     label: 'Select Date',
@@ -57,7 +55,6 @@ export const DarkTheme: Story = {
 }
 
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   render: args => <DateField {...args} />,
   args: {
     label: 'Select Date',
@@ -75,7 +72,6 @@ export const SacredTheme: Story = {
 }
 
 export const Disabled: Story = {
-  name: 'Disabled',
   render: args => <DateField {...args} />,
   args: {
     label: 'Disabled Date',
@@ -84,7 +80,6 @@ export const Disabled: Story = {
 }
 
 export const WithError: Story = {
-  name: 'With Error',
   render: args => <DateField {...args} />,
   args: {
     label: 'Date with Error',
@@ -93,7 +88,6 @@ export const WithError: Story = {
 }
 
 export const Required: Story = {
-  name: 'Required',
   render: args => <DateField {...args} />,
   args: {
     label: 'Required Date',
@@ -102,7 +96,6 @@ export const Required: Story = {
 }
 
 export const CustomStyled: Story = {
-  name: 'Custom Styled',
   render: args => <DateField {...args} />,
   args: {
     label: 'Custom Date',
@@ -163,6 +156,5 @@ const InteractiveComponent = () => {
 }
 
 export const InteractiveDemo: Story = {
-  name: 'Interactive Demo',
   render: () => <InteractiveComponent />,
 }

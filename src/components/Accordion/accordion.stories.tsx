@@ -3,7 +3,7 @@
  * Demonstrates different states, themes, and compositions.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import Accordion from './index'
 
@@ -25,7 +25,6 @@ const meta: Meta<typeof Accordion> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ width: '500px', padding: '1rem' }}>
@@ -61,28 +60,22 @@ export const LightTheme: Story = {
 
 /** A dark theme accordion. */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     summary: 'Dark Theme Accordion',
     details: sampleDetails,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** An alternative dark theme accordion. */
 export const DarkThemeAlt: Story = {
-  name: 'Dark Theme Alt',
   args: {
     summary: 'Alternative Dark Accordion',
     details: sampleDetails,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -132,9 +125,7 @@ export const DarkDisabled: Story = {
     details: sampleDetails,
     styles: { theme: 'dark', disabled: true },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -258,7 +249,6 @@ export const Controlled: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -382,15 +372,14 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
 // INTERACTION TEST
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   args: {
     summary: 'Test Accordion',
     details: sampleDetails,
@@ -527,8 +516,8 @@ export const MenuVsAccordion: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Story demonstrating width behavior: fixed vs dynamic */
@@ -610,8 +599,8 @@ export const WidthBehaviorComparison: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const createLevelContent = (
@@ -864,8 +853,8 @@ export const SixLevelNavigationTest: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Alternative test showing different indentation configurations. */
@@ -1221,6 +1210,6 @@ export const IndentationVariations: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }

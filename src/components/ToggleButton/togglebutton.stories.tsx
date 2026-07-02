@@ -3,7 +3,7 @@
  * Demonstrates different states, themes, and compositions.
  */
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import { ToggleButton, ToggleButtonGroup } from './index'
 
@@ -29,7 +29,6 @@ const meta: Meta<typeof ToggleButton> = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
   decorators: [
     Story => (
       <div style={{ padding: '1rem' }}>
@@ -58,28 +57,22 @@ export const LightTheme: Story = {
 
 /** A toggle button with dark theme. */
 export const DarkTheme: Story = {
-  name: 'Dark Theme',
   args: {
     value: 'dark',
     children: 'Dark Theme',
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /** The sacred theme provides a mystical, golden appearance. */
 export const SacredTheme: Story = {
-  name: 'Sacred Theme',
   args: {
     value: 'sacred',
     children: 'Sacred Theme',
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -258,9 +251,7 @@ const DarkGroupExample = () => {
 export const DarkGroup: Story = {
   name: 'Group/Dark Theme',
   render: () => <DarkGroupExample />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 const SacredGroupExample = () => {
@@ -284,9 +275,7 @@ const SacredGroupExample = () => {
 export const SacredGroup: Story = {
   name: 'Group/Sacred Theme',
   render: () => <SacredGroupExample />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 // --------------------------------------------------------------------------
@@ -346,7 +335,6 @@ export const LargeGroup: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
-  name: 'Comprehensive Showcase',
   render: () => (
     <div
       style={{
@@ -607,15 +595,14 @@ export const ComprehensiveShowcase: Story = {
   ),
   parameters: {
     layout: 'fullscreen',
-    backgrounds: { default: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
 // INTERACTION TEST
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
-  name: 'Interaction Test',
   args: {
     value: 'test',
     children: 'Test Button',
