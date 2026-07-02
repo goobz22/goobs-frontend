@@ -1,6 +1,6 @@
 {
-  "buildCommand": "echo 'Using pre-built storybook-static'",
-  "installCommand": "echo 'No install needed'",
+  "installCommand": "bun install",
+  "buildCommand": "bun run build-storybook",
   "framework": null,
   "outputDirectory": "./storybook-static"
 }
