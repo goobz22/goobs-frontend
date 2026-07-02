@@ -31,7 +31,7 @@ type AddTaskTabType = 'details' | 'knowledgeBase'
 const cx = (...names: Array<string | false | undefined>): string =>
   names.filter(Boolean).join(' ')
 
-interface InlineAddTaskProps {
+export interface InlineAddTaskProps {
   onAdd: (newTask: Omit<Task, '_id'>) => void
   onCancel: () => void
   topics: RawTopic[]

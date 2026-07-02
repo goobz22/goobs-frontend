@@ -4,17 +4,31 @@ import React, { useMemo, useCallback, forwardRef, type ReactNode } from 'react'
 import cssStyles from './Button.module.css'
 import { emitDiag } from '../../utils/diag'
 
+/** Props for ButtonGroup — a segmented single-select row of Button children. */
 export interface ButtonGroupProps {
+  /** Currently-selected value. The child Button whose `value` matches renders in the selected state. */
   value: string
+  /** When `true`, clicking a child reports that child's `value` through `onChange` (single-select semantics). When unset, clicks only run each child's own `onClick`. */
   exclusive?: boolean
+  /** Selection callback. Fires only in `exclusive` mode, with the clicked child's `value` (`''` when the child has none — never `null` in practice, despite the nullable type). */
   onChange: (
     event: React.MouseEvent<HTMLElement>,
     newValue: string | null
   ) => void
+  /** Button children. Each valid element is cloned with the group's merged `styles`, theme, and a computed `selected` flag. */
   children: React.ReactNode
+  /** Styling forwarded onto every child Button — group keys override each child's own `styles` keys — and applied as the container's `data-theme` (default `'sacred'`). */
   styles?: ButtonStyles
 }
 
+/**
+ * Segmented control wrapping Button children in one bordered row (rounded
+ * outer corners, dividers between children — see `.buttonGroup` in
+ * Button.module.css). Clones each child to inject the group's theme/styles
+ * and mark the child whose `value` matches the group `value` as `selected`;
+ * in `exclusive` mode a click reports the child's value via `onChange`
+ * before the child's own `onClick` runs.
+ */
 export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   value,
   exclusive,
@@ -57,93 +71,185 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   )
 }
 
+/**
+ * Styling override surface for Button (ButtonGroup forwards the same shape
+ * onto every child). `theme` switches the CSS-module palette via
+ * `data-theme`; the `hover*` keys travel as `--btn-hover-*` custom
+ * properties consumed by the module's hover rule; every other key is applied
+ * as an inline style on the `<button>`, overriding the module CSS. "Module
+ * default" in the member docs below means the value Button.module.css
+ * renders when the key is unset.
+ */
 export interface ButtonStyles {
+  /** Disables the button. OR-ed with the native `disabled` prop; blocks `onClick` and the `action.invoke` diag, and renders the theme's disabled palette. */
   disabled?: boolean
+  /** Theme palette: `'sacred'` (default), `'light'`, or `'dark'`. Emitted as `data-theme`; any other string keeps the sacred base styles because no CSS override matches it. */
   theme?: string
+  /** @deprecated No-op — Button never reads `styles.variant`. Use the top-level `variant` prop for the primary/secondary/destructive palettes. */
   variant?: string
+  /** Inline `width` (module default `auto`). */
   width?: string
+  /** Inline `min-width` (module default `fit-content`). */
   minWidth?: string
+  /** Inline `max-width`. */
   maxWidth?: string
+  /** Inline `height` (module default `auto`). */
   height?: string
+  /** Inline `min-height` (module default `var(--goobs-control-height)`, compact ≤768px). */
   minHeight?: string
+  /** Inline `padding` (module default `5px 12px`, `4px 10px` ≤768px). */
   padding?: string
+  /** Inline `margin` shorthand. */
   margin?: string
+  /** Inline `margin-top`. */
   marginTop?: string
+  /** Inline `margin-bottom`. */
   marginBottom?: string
+  /** Inline `margin-left`. */
   marginLeft?: string
+  /** Inline `margin-right`. */
   marginRight?: string
+  /** Inline `font-size` (module default `var(--goobs-text-sm)`; the icon slot tracks it at 1.15em). */
   fontSize?: string
+  /** Inline `font-weight` (module default `var(--goobs-weight-medium)`). */
   fontWeight?: string | number
+  /** Inline `font-family` (module default: Cinzel on sacred, the standard stack on light/dark). */
   fontFamily?: string
+  /** Inline `letter-spacing` (module default: sacred tracking, tight on light/dark). */
   letterSpacing?: string
+  /** Inline `text-transform` (module default `none`). */
   textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase'
+  /** Inline `border-radius` (module default `var(--goobs-radius-md)`; inside a ButtonGroup the module rounds only the outer corners). */
   borderRadius?: string
+  /** Inline `border-width`. */
   borderWidth?: string
+  /** Inline `border-color`. Wins over the `variant` prop's default palette. */
   borderColor?: string
+  /** Inline `border` shorthand (module default: 1px solid, per-theme color). */
   border?: string
+  /** Inline `box-shadow` for the RESTING state — the hover shadow is `hoverBoxShadow`. */
   boxShadow?: string
+  /** Where the icon renders relative to the label: `'left'` (default), `'right'`, or `'above'` (stacks icon over label in a column with a larger 1.4em glyph). */
   iconLocation?: 'left' | 'right' | 'above'
+  /** Inline `white-space` (module default `nowrap`). */
   whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line'
+  /** Inline `background-color`. Wins over the `variant` prop's default palette. */
   backgroundColor?: string
+  /** Inline `background` shorthand (gradients etc.). */
   background?: string
+  /** Inline text `color`. Wins over the `variant` prop's default palette. */
   color?: string
+  /** Inline `border-right-width`. */
   borderRightWidth?: string
+  /** Inline `border-right-style`. */
   borderRightStyle?: string
+  /** Inline `border-right-color`. */
   borderRightColor?: string
+  /** `true` → visible `1px solid currentcolor` outline; a string passes through verbatim as the CSS `outline` value; `false`/unset → no outline (the module default). */
   outline?: string | boolean
+  /** Hover background. Travels as the `--btn-hover-bg` custom property consumed by `.button:hover:not(:disabled)` in Button.module.css; unset falls back to the theme's hover default. The `variant` prop's palette also sets this. */
   hoverBackgroundColor?: string
+  /** Hover border color, via `--btn-hover-border` (same custom-property mechanism as `hoverBackgroundColor`). */
   hoverBorderColor?: string
+  /** Hover `transform` (e.g. `translateY(-1px)`), via `--btn-hover-transform` (module default `none`). */
   hoverTransform?: string
+  /** Hover `box-shadow`, via `--btn-hover-shadow`; unset falls back to the theme's hover glow. */
   hoverBoxShadow?: string
+  /** Inline `text-shadow`. */
   textShadow?: string
+  /** Inline `flex` shorthand. */
   flex?: string | number
+  /** Inline `opacity`. */
   opacity?: number | string
+  /** Inline `cursor` (module default `pointer`, `not-allowed` while disabled). */
   cursor?: string
+  /** @deprecated No-op — Button never reads `styles.size`. Size the button via `height`/`padding`/`fontSize`. */
   size?: string
   // Layout / typography passthrough — added 2026-05-02 to support
   // workspace conversions from native `<button>` (where these
-  // properties are common in inline `style={...}` blocks). The goobs
-  // Button rendering passes these through to the underlying button
-  // element via CSS; consumers that don't set them get the default.
+  // properties are common in inline `style={...}` blocks). Each key
+  // below is applied verbatim as the matching inline CSS property on
+  // the rendered <button>; consumers that don't set it get the
+  // module-CSS default.
+  /** Inline `display` (module default `inline-flex`). */
   display?: React.CSSProperties['display']
+  /** Inline `position` (module default `relative`). */
   position?: React.CSSProperties['position']
+  /** Inline `text-align`. */
   textAlign?: React.CSSProperties['textAlign']
+  /** Inline `vertical-align`. */
   verticalAlign?: React.CSSProperties['verticalAlign']
+  /** Inline `align-self`. */
   alignSelf?: React.CSSProperties['alignSelf']
+  /** Inline `align-items` (module default `center`). */
   alignItems?: React.CSSProperties['alignItems']
+  /** Inline `justify-content` (module default `center`). */
   justifyContent?: React.CSSProperties['justifyContent']
+  /** Inline `flex-direction` (the module sets `column` when `iconLocation` is `'above'`). */
   flexDirection?: React.CSSProperties['flexDirection']
+  /** Inline `flex-shrink`. */
   flexShrink?: React.CSSProperties['flexShrink']
+  /** Inline `flex-grow`. */
   flexGrow?: React.CSSProperties['flexGrow']
+  /** Inline `flex-basis`. */
   flexBasis?: React.CSSProperties['flexBasis']
+  /** Inline `flex-wrap`. */
   flexWrap?: React.CSSProperties['flexWrap']
+  /** Inline `gap` between icon and label (module default `6px`). */
   gap?: React.CSSProperties['gap']
+  /** Inline `row-gap`. */
   rowGap?: React.CSSProperties['rowGap']
+  /** Inline `column-gap`. */
   columnGap?: React.CSSProperties['columnGap']
+  /** Inline `transition` (module default: 180ms ease on background/border/shadow/color). */
   transition?: string
+  /** Inline `transform` for the RESTING state — the hover transform is `hoverTransform`. */
   transform?: string
+  /** Inline `z-index`. */
   zIndex?: React.CSSProperties['zIndex']
+  /** Inline `top` (pair with `position`). */
   top?: React.CSSProperties['top']
+  /** Inline `right` (pair with `position`). */
   right?: React.CSSProperties['right']
+  /** Inline `bottom` (pair with `position`). */
   bottom?: React.CSSProperties['bottom']
+  /** Inline `left` (pair with `position`). */
   left?: React.CSSProperties['left']
+  /** Inline `overflow`. */
   overflow?: React.CSSProperties['overflow']
+  /** Inline `overflow-x`. */
   overflowX?: React.CSSProperties['overflowX']
+  /** Inline `overflow-y`. */
   overflowY?: React.CSSProperties['overflowY']
+  /** Inline `text-overflow`. */
   textOverflow?: React.CSSProperties['textOverflow']
+  /** Inline `line-height` (module default `1.2`). */
   lineHeight?: React.CSSProperties['lineHeight']
+  /** Inline `border-style`. */
   borderStyle?: React.CSSProperties['borderStyle']
+  /** Inline `border-top` shorthand. */
   borderTop?: React.CSSProperties['borderTop']
+  /** Inline `border-bottom` shorthand. */
   borderBottom?: React.CSSProperties['borderBottom']
+  /** Inline `border-left` shorthand. */
   borderLeft?: React.CSSProperties['borderLeft']
+  /** Inline `border-right` shorthand. */
   borderRight?: React.CSSProperties['borderRight']
+  /** Inline `pointer-events`. */
   pointerEvents?: React.CSSProperties['pointerEvents']
+  /** Inline `user-select` (module default `none`). */
   userSelect?: React.CSSProperties['userSelect']
+  /** Inline `visibility`. */
   visibility?: React.CSSProperties['visibility']
+  /** Inline `text-decoration`. */
   textDecoration?: React.CSSProperties['textDecoration']
+  /** Inline `text-indent`. */
   textIndent?: React.CSSProperties['textIndent']
+  /** Inline `word-break`. */
   wordBreak?: React.CSSProperties['wordBreak']
+  /** Inline `word-spacing`. */
   wordSpacing?: React.CSSProperties['wordSpacing']
+  /** Inline `font-style` (e.g. `italic`). */
   fontStyle?: React.CSSProperties['fontStyle']
 }
 
@@ -178,20 +284,32 @@ export type ButtonAction =
  */
 export type ButtonVariant = 'primary' | 'secondary' | 'destructive'
 
+/**
+ * Props for Button. Extends the native `<button>` attributes (minus `style`
+ * — all styling goes through `styles`); unrecognized props pass through to
+ * the rendered element.
+ */
 export interface ButtonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   'style'
 > {
+  /** Button label, rendered in a `<span>` beside/below the icon per `styles.iconLocation`. Omit for an icon-only button. */
   text?: string
+  /** Icon node, rendered in a sized wrapper (1.15em, tracking the button's font-size) positioned by `styles.iconLocation` (`'left'` default). */
   icon?: ReactNode
+  /** Styling overrides — theme, inline-CSS keys, and hover intent. See ButtonStyles. */
   styles?: ButtonStyles
+  /** Renders the pressed/selected treatment (gold-tinted on sacred). Set automatically by ButtonGroup on the child whose `value` matches the group's. */
   selected?: boolean
+  /** Identity of this button inside a ButtonGroup — compared against the group `value` for selection and reported to the group's `onChange`. Unused outside a group. */
   value?: string
   /**
    * Action verb — emitted as `data-action="<verb>"` on the rendered
-   * `<button>`. Required so test selectors stay stable when label text
-   * changes (e.g. "Create" → "Create New" → "+ Add").
-   * Tests target via `[data-action="create"][data-subject="contract"]`.
+   * `<button>` and carried on the `action.invoke` diagnostic (which falls
+   * back to `'click'` when this is omitted). Optional, but set it on any
+   * button tests target: `[data-action="create"][data-subject="contract"]`
+   * selectors stay stable when label text changes
+   * (e.g. "Create" → "Create New" → "+ Add").
    */
   action?: ButtonAction | string
   /**

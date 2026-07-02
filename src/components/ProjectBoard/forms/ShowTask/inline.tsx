@@ -32,7 +32,7 @@ import cssStyles from './ShowTask.module.css'
 const cx = (...names: Array<string | false | null | undefined>): string =>
   names.filter(Boolean).join(' ')
 
-interface InlineShowTaskProps {
+export interface InlineShowTaskProps {
   taskId: string
   taskTitle: string
   createdBy: string

@@ -11,7 +11,11 @@ import './styles/global.css'
 export {
   default as CustomButton,
   type ButtonProps,
+  type ButtonStyles,
+  type ButtonAction,
+  type ButtonVariant,
   ButtonGroup,
+  type ButtonGroupProps,
 } from './components/Button'
 export {
   default as SaveButton,
@@ -34,29 +38,48 @@ export {
   default as RadioGroup,
   type RadioOption,
   type RadioGroupProps,
+  type RadioGroupStyles,
 } from './components/RadioGroup'
 export { default as Dialog, type DialogProps } from './components/Dialog'
-export { default as CodeCopy, type CodeCopyProps } from './components/CodeCopy'
+export {
+  default as CodeCopy,
+  type CodeCopyProps,
+  type CodeCopyStyles,
+} from './components/CodeCopy'
 export { default as Markdown, type MarkdownProps } from './components/Markdown'
 export {
   default as PricingTable,
   type PricingProps,
+  type Feature,
+  type SubFeature,
 } from './components/PricingTable'
 export { default as Stepper, type StepperProps } from './components/Stepper'
-export { default as AppBar, type AppBarProps } from './components/AppBar'
+export {
+  default as AppBar,
+  type AppBarProps,
+  type AppBarStyles,
+} from './components/AppBar'
 export {
   default as CustomToolbar,
   type CustomToolbarProps,
+  type ToolbarStyles,
 } from './components/Toolbar'
 export {
   default as TransferList,
   type TransferListProps,
+  type TransferListVariant,
+  type TransferListDropdownDataMap,
 } from './components/TransferList'
 export {
   default as StyledTooltip,
   type TooltipProps,
+  type TooltipStyles,
 } from './components/Tooltip'
-export { default as Popover, type PopoverProps } from './components/Popover'
+export {
+  default as Popover,
+  type PopoverProps,
+  type PopoverStyles,
+} from './components/Popover'
 export {
   default as QRCodeComponent,
   type QRCodeProps,
@@ -73,6 +96,8 @@ export {
   default as ComplexEditor,
   type ComplexTextEditorProps,
 } from './components/ComplexTextEditor'
+export type { ComplexTextEditorStyles } from './components/ComplexTextEditor/theme'
+export type { EditorMode } from './components/ComplexTextEditor/Toolbars/Complex'
 export {
   default as Select,
   type SelectProps,
@@ -91,10 +116,13 @@ export {
   default as Breadcrumb,
   type BreadcrumbProps,
   type BreadcrumbItem,
+  type BreadcrumbStyles,
 } from './components/Breadcrumb'
 export {
   default as TreeView,
   type TreeViewProps,
+  type TreeViewStyles,
+  type TreeItemProps,
   type TreeViewItem,
   type TreeViewItemId,
   type TreeViewApiRef,
@@ -102,9 +130,17 @@ export {
   useTreeViewApiRef,
   useTreeViewContext,
 } from './components/TreeView'
-export { default as Drawer, type DrawerProps } from './components/Drawer'
+export {
+  default as Drawer,
+  type DrawerProps,
+  type DrawerStyles,
+} from './components/Drawer'
 export { default as Alert, type AlertProps } from './components/Alert'
-export { default as Badge, type BadgeProps } from './components/Badge'
+export {
+  default as Badge,
+  type BadgeProps,
+  type BadgeStyles,
+} from './components/Badge'
 export {
   default as Tabs,
   type TabsProps,
@@ -119,17 +155,27 @@ export {
 export {
   default as ToggleButton,
   type ToggleButtonProps,
+  type ToggleButtonStyles,
   ToggleButtonGroup,
   type ToggleButtonGroupProps,
 } from './components/ToggleButton'
-export { default as Checkbox, type CheckboxProps } from './components/Checkbox'
+export {
+  default as Checkbox,
+  type CheckboxProps,
+  type CheckboxStyles,
+} from './components/Checkbox'
 export {
   default as Chip,
   type ChipProps,
   type ChipStyles,
   type ChipVariant,
+  type ChipTone,
 } from './components/Chip'
-export { default as Switch, type SwitchProps } from './components/Switch'
+export {
+  default as Switch,
+  type SwitchProps,
+  type SwitchStyles,
+} from './components/Switch'
 
 // Field Shell — canonical wrapper used by every Field component
 export type { FormFieldStyles } from './components/Field/Shell/types'
@@ -256,6 +302,8 @@ export {
   default as Content,
   type ContentSectionProps,
 } from './components/Content'
+export type { LinkProps } from './components/Content/Structure/link/useLink'
+export type { ImageProps } from './components/Content/Structure/image/useImage'
 export {
   default as DateField,
   type DateFieldProps,
@@ -295,8 +343,8 @@ export {
 } from './components/FileDropzone'
 
 // Layout Components
-export { default as Paper } from './components/Paper'
-export { default as Divider } from './components/Divider'
+export { default as Paper, type PaperProps } from './components/Paper'
+export { default as Divider, type DividerProps } from './components/Divider'
 // FieldGrid — responsive auto-fit field-cluster layout primitive. Lives with
 // the layout components since it is a generic grid wrapper, not a Field.
 export {
@@ -305,8 +353,16 @@ export {
 } from './components/FieldGrid'
 
 // Animation Components
-export { default as Fade } from './components/Fade'
-export { default as Zoom } from './components/Zoom'
+export {
+  default as Fade,
+  type FadeProps,
+  type FadeStyles,
+} from './components/Fade'
+export {
+  default as Zoom,
+  type ZoomProps,
+  type ZoomStyles,
+} from './components/Zoom'
 export { default as Slide, type SlideStyles } from './components/Slide'
 
 // Data Display
@@ -318,6 +374,8 @@ export {
   TableBody,
   TableRow,
   TableCell,
+  type TableStyles,
+  type SimpleTableProps,
   type TableContainerProps,
   type TableHeadProps,
   type TableBodyProps,
@@ -371,12 +429,17 @@ export {
   ListItem,
   ListItemIcon,
   ListItemText,
+  type ListStyles,
   type ListProps,
   type ListItemProps,
   type ListItemIconProps,
   type ListItemTextProps,
 } from './components/List'
-export { default as Avatar } from './components/Avatar'
+export {
+  default as Avatar,
+  type AvatarProps,
+  type AvatarStyles,
+} from './components/Avatar'
 // Card — compositional surface primitive. Replaced the legacy MUI-style
 // CardHeader/CardContent/CardActions trio on 2026-05-22 with a slot-
 // based compound family (`Card.Header`, `Card.Body`, etc.). The static
@@ -492,8 +555,16 @@ export {
 
 // Feedback Components
 export { default as Snackbar, type SnackbarProps } from './components/Snackbar'
-export { default as ProgressBar } from './components/ProgressBar'
-export { default as Pagination } from './components/Pagination'
+export {
+  default as ProgressBar,
+  type ProgressBarProps,
+  type ProgressBarStyles,
+} from './components/ProgressBar'
+export {
+  default as Pagination,
+  type PaginationProps,
+  type PaginationRenderItemParams,
+} from './components/Pagination'
 
 // Calendar Components
 export {
@@ -551,5 +622,11 @@ export type {
 
 // Task Management Components
 export { default as ProjectBoard } from './components/ProjectBoard'
-export { InlineAddTask } from './components/ProjectBoard/forms/AddTask/inline'
-export { InlineShowTask } from './components/ProjectBoard/forms/ShowTask/inline'
+export {
+  InlineAddTask,
+  type InlineAddTaskProps,
+} from './components/ProjectBoard/forms/AddTask/inline'
+export {
+  InlineShowTask,
+  type InlineShowTaskProps,
+} from './components/ProjectBoard/forms/ShowTask/inline'
