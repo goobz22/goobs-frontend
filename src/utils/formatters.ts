@@ -21,6 +21,9 @@
 /**
  * Strip non-digit characters and clamp to 10 digits (US numbers
  * without the country code; the "+1" is added by the formatter).
+ *
+ * @param formatted - Any phone string, formatted or raw.
+ * @returns Up to 10 raw digits.
  */
 export function parsePhone(formatted: string): string {
   return formatted.replace(/\D/g, '').slice(0, 10)
@@ -30,6 +33,9 @@ export function parsePhone(formatted: string): string {
  * Format a raw 10-digit US phone number string into "+1 (XXX) XXX-XXXX".
  * Partial inputs format progressively — typing "555" returns
  * "+1 (555". This matches what users expect during typing.
+ *
+ * @param raw - Digits (or any string; non-digits are stripped).
+ * @returns The progressively formatted phone string.
  */
 export function formatPhone(raw: string): string {
   const digits = parsePhone(raw)
@@ -46,6 +52,10 @@ export function formatPhone(raw: string): string {
 /**
  * Format a numeric value as "$X,XXX.XX". Uses Intl.NumberFormat for
  * locale-correct grouping separators.
+ *
+ * @param value - The numeric amount (NaN returns '').
+ * @param precision - Fraction digits (default 2).
+ * @returns The formatted USD string.
  */
 export function formatCurrency(value: number, precision = 2): string {
   if (Number.isNaN(value)) return ''
@@ -61,6 +71,9 @@ export function formatCurrency(value: number, precision = 2): string {
  * Parse a formatted currency string back to a number. Strips `$`,
  * commas, and any other non-numeric characters except the decimal
  * point and leading minus sign. Returns NaN for unparsable input.
+ *
+ * @param formatted - The formatted currency string.
+ * @returns The numeric value, or NaN.
  */
 export function parseCurrency(formatted: string): number {
   const cleaned = formatted.replace(/[^\d.-]/g, '')
@@ -72,11 +85,24 @@ export function parseCurrency(formatted: string): number {
 // Percentage — "XX.X%"
 // ──────────────────────────────────────────────────────────────────
 
+/**
+ * Format a numeric value as "XX.XX%" (NaN returns '').
+ *
+ * @param value - The numeric percentage.
+ * @param precision - Fraction digits (default 2).
+ * @returns The formatted percentage string.
+ */
 export function formatPercentage(value: number, precision = 2): string {
   if (Number.isNaN(value)) return ''
   return `${value.toFixed(precision)}%`
 }
 
+/**
+ * Parse a formatted percentage string back to a number.
+ *
+ * @param formatted - The formatted percentage string.
+ * @returns The numeric value, or NaN.
+ */
 export function parsePercentage(formatted: string): number {
   const cleaned = formatted.replace(/[^\d.-]/g, '')
   const value = parseFloat(cleaned)
@@ -101,6 +127,9 @@ export type CardType =
  * Detect the card type from the leading digits of a card number.
  * Order matters — `unionpay` is checked before `discover` because
  * their BIN ranges overlap.
+ *
+ * @param raw - The card number (formatted or raw).
+ * @returns The detected card network, or 'unknown'.
  */
 export function detectCardType(raw: string): CardType {
   const digits = raw.replace(/\D/g, '')
@@ -117,6 +146,9 @@ export function detectCardType(raw: string): CardType {
 /**
  * Format a raw card number into spaced groups based on card type.
  * Amex uses 4-6-5; everyone else uses 4-4-4-4.
+ *
+ * @param raw - The card number digits (non-digits stripped).
+ * @returns The space-grouped card number.
  */
 export function formatCardNumber(raw: string): string {
   const digits = raw.replace(/\D/g, '')
@@ -131,6 +163,12 @@ export function formatCardNumber(raw: string): string {
   return max.replace(/(.{4})/g, '$1 ').trim()
 }
 
+/**
+ * Strip formatting from a card number string.
+ *
+ * @param formatted - The formatted card number.
+ * @returns The raw digits.
+ */
 export function parseCardNumber(formatted: string): string {
   return formatted.replace(/\D/g, '')
 }
@@ -142,6 +180,9 @@ export function parseCardNumber(formatted: string): string {
 /**
  * Luhn (mod-10) checksum. Returns true when the digit string passes,
  * false otherwise. Empty/short strings return false.
+ *
+ * @param raw - The digit string to check (non-digits stripped).
+ * @returns Whether the checksum passes.
  */
 export function luhnValidate(raw: string): boolean {
   const digits = raw.replace(/\D/g, '')
@@ -168,6 +209,9 @@ export function luhnValidate(raw: string): boolean {
  * Validate a US ABA routing number using the standard
  * `3·d0 + 7·d1 + 1·d2 + 3·d3 + 7·d4 + 1·d5 + 3·d6 + 7·d7 + 1·d8 ≡ 0 (mod 10)`
  * checksum. Empty/short inputs return false.
+ *
+ * @param raw - The routing-number string (non-digits stripped).
+ * @returns Whether the ABA checksum passes.
  */
 export function validateRoutingNumber(raw: string): boolean {
   const digits = raw.replace(/\D/g, '')
@@ -187,6 +231,9 @@ export function validateRoutingNumber(raw: string): boolean {
 /**
  * Strip non-digit characters from a string. Used by every numeric
  * formatter as the parsing primitive.
+ *
+ * @param value - Any string.
+ * @returns The digits only.
  */
 export function digitsOnly(value: string): string {
   return value.replace(/\D/g, '')
@@ -195,6 +242,11 @@ export function digitsOnly(value: string): string {
 /**
  * Mask a string showing only the last `tail` characters. Used by
  * AccountNumber + CreditCardNumber + CVV when displaying a saved value.
+ *
+ * @param value - The string to mask.
+ * @param tail - How many trailing characters stay visible (default 4).
+ * @param mask - The mask character (default '•').
+ * @returns The masked string.
  */
 export function maskTail(value: string, tail = 4, mask = '•'): string {
   if (value.length <= tail) return value

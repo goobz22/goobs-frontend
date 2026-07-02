@@ -6,7 +6,7 @@
  * Migrated off the JS theme system (theme/progressbar.ts + theme/shared.ts) onto a CSS module.
  * Theme is a [data-theme] attribute (default 'light', matching the old getProgressBarTheme
  * fallback). The determinate fill width is a runtime --progress custom property. The
- * @keyframes that used to be injected at runtime via injectKeyframes() now live statically
+ * keyframes that used to be injected at runtime via injectKeyframes() now live statically
  * in ProgressBar.module.css. Caller-supplied style overrides (custom colors, sizing, margins,
  * transition timing, etc.) are layered as a small inline dynamicStyle object on top of the
  * CSS classes, so defaults render purely from CSS and only explicit overrides reach inline.

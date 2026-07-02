@@ -3,6 +3,7 @@ import { fixupConfigRules } from '@eslint/compat'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 import storybook from 'eslint-plugin-storybook'
+import jsdoc from 'eslint-plugin-jsdoc'
 
 // eslint-config-next still bundles eslint-plugin-react (7.37.x), which calls
 // context methods removed in ESLint 10 (getFilename → filename, etc.). Wrap the
@@ -142,6 +143,39 @@ const eslintConfig = defineConfig([
   {
     files: ['.storybook/**/*.{ts,tsx}'],
     rules: { 'storybook/no-uninstalled-addons': 'error' },
+  },
+  // JSDoc quality gates (story-jsdoc-standard-proposal.md §4.4). Deliberately
+  // minimal: presence + hygiene on the docgen-rendered surface, not tag
+  // ceremony — tag-less prose is house style for components (§2.1).
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.stories.tsx', 'src/**/*.d.ts'],
+    plugins: { jsdoc },
+    settings: {
+      jsdoc: {
+        // @fileoverview is the house file-header tag (standard §2.4); stop the
+        // default preference machinery from demanding @file.
+        tagNamePreference: { fileoverview: 'fileoverview' },
+      },
+    },
+    rules: {
+      // No empty doc blocks; TS owns types (no `{string}` annotations).
+      'jsdoc/no-types': 'error',
+      'jsdoc/check-tag-names': 'error',
+      'jsdoc/check-alignment': 'error',
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-returns': 'off',
+    },
+  },
+  {
+    // Hooks + utils: the one place @param/@returns is house style (§2.3).
+    files: ['src/utils/**/*.ts'],
+    ignores: ['src/**/*.stories.tsx', 'src/**/*.d.ts'],
+    plugins: { jsdoc },
+    rules: {
+      'jsdoc/require-param': 'error',
+      'jsdoc/require-returns': 'error',
+    },
   },
 ])
 

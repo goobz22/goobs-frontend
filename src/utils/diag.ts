@@ -62,6 +62,8 @@ interface DiagSink {
 /**
  * Emit a diagnostic event to the host bus if one is present. Never throws —
  * diagnostics must not be able to break a render or an effect.
+ *
+ * @param event - The diagnostic event to push onto the host bus.
  */
 export function emitDiag(event: GoobsDiagEvent): void {
   if (typeof window === 'undefined') return

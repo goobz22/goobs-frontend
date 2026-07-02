@@ -123,7 +123,7 @@ function safeString(value: unknown): string {
  *
  * @param value - Numeric value or string to format
  * @param sacredtheme - If true, uses dark/gold theme colors
- * @returns { formatted: string, element: ReactNode }
+ * @returns An object with the formatted string and the rendered element.
  */
 function formatCurrency(
   value: unknown,
@@ -417,7 +417,7 @@ function formatCurrency(
  *
  * @param value - Card number (string or number)
  * @param sacredtheme - If true, uses dark/gold theme colors
- * @returns { formatted: string, element: ReactNode }
+ * @returns An object with the formatted string and the rendered element.
  */
 function formatCreditCard(
   value: unknown,
@@ -611,7 +611,7 @@ function formatCreditCard(
  *
  * @param value - Date string in various formats
  * @param sacredtheme - If true, uses dark/gold theme colors
- * @returns { formatted: string, element: ReactNode }
+ * @returns An object with the formatted string and the rendered element.
  */
 function formatExpirationDate(
   value: unknown,
@@ -773,7 +773,7 @@ function formatExpirationDate(
  *
  * @param value - Account number (string or number)
  * @param sacredtheme - If true, uses dark/gold theme colors
- * @returns { formatted: string, element: ReactNode }
+ * @returns An object with the formatted string and the rendered element.
  */
 function formatAccountNumber(
   value: unknown,
@@ -863,7 +863,7 @@ function formatAccountNumber(
  *
  * @param value - Routing number (string or number)
  * @param sacredtheme - If true, uses dark/gold theme colors
- * @returns { formatted: string, element: ReactNode }
+ * @returns An object with the formatted string and the rendered element.
  */
 function formatRoutingNumber(
   value: unknown,
