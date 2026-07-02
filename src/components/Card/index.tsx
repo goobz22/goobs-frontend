@@ -367,13 +367,21 @@ function CardInner({
   )
 
   if (asChild) {
+    // The provider must wrap the slot too: the child element's own children
+    // are Card subcomponents (Card.Header / Card.Title / ...), and every one
+    // of them calls useCardContext(). Without this wrapper an asChild card
+    // (e.g. `<Card asChild><li>...</li></Card>`) threw
+    // "Card subcomponents must be rendered inside <Card>" and the title id
+    // referenced by aria-labelledby never mounted.
     return (
-      <AsChildSlot
-        ref={ref}
-        child={children}
-        parentProps={sharedProps}
-        parentClassName={rootClassName}
-      />
+      <CardContext.Provider value={contextValue}>
+        <AsChildSlot
+          ref={ref}
+          child={children}
+          parentProps={sharedProps}
+          parentClassName={rootClassName}
+        />
+      </CardContext.Provider>
     )
   }
 

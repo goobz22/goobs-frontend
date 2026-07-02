@@ -973,6 +973,19 @@ interface RowsProps {
   onCellCancel?: () => void
   /** Called as user types in edit input */
   onEditingValueChange?: (value: string) => void
+
+  /**
+   * Access control forwarded from the grid. Cell-editing affordances
+   * (pointer cursor, `data-cell-state="editable"`, click-to-edit — both
+   * inline editors and the composite-field modal) only activate with
+   * 'write' access. Mirrors MobileCardView's Card, which already gates
+   * field editing on `permissions.access === 'write'`.
+   */
+  permissions?:
+    | {
+        access: 'no-access' | 'read' | 'write'
+      }
+    | undefined
 }
 
 /**
@@ -1001,6 +1014,7 @@ const Rows: React.FC<RowsProps> = ({
   onCellSave,
   onCellCancel,
   onEditingValueChange,
+  permissions,
 }) => {
   /** Check if using sacred (dark/gold) theme */
   const isSacredTheme = styles?.theme === 'sacred'
@@ -1332,10 +1346,15 @@ const Rows: React.FC<RowsProps> = ({
                   col.creationField?.type === 'multiselect') &&
                 col.creationField?.options
 
+              // Editing requires 'write' access — 'read' grids never show
+              // the editable affordance nor route clicks into onCellClick
+              // (which would otherwise open inline editors / the
+              // composite-field modal). Same gate MobileCardView applies.
               const canEdit =
                 !isEditing &&
                 selectedRowIds.includes(rowId) &&
-                col.editable !== false
+                col.editable !== false &&
+                (!permissions || permissions.access === 'write')
 
               return (
                 <td

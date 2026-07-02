@@ -264,6 +264,7 @@ function DataGridContent({
   onSelectionChange,
   onColumnResize,
   onCellSave,
+  onCompositeFieldSave,
   onRowCreation,
   showIdColumns = false,
   filters,
@@ -582,6 +583,15 @@ function DataGridContent({
     selectRow(row, selectedRows, handleSelectionChange)
 
   /**
+   * Whether the caller granted write access. `permissions` is typed as
+   * required, but long-standing callers omit it at runtime — missing
+   * permissions mean write, matching the `!permissions ||
+   * permissions.access === 'write'` guards used throughout the grid
+   * (Table's CreationRow, MobileCardView, Toolbar).
+   */
+  const hasWriteAccess = !permissions || permissions.access === 'write'
+
+  /**
    * Handle header checkbox click - selects or deselects all rows.
    * Toggles between all selected and none selected.
    */
@@ -698,6 +708,36 @@ function DataGridContent({
       setEditingValue('')
     },
     [onCellSave, columns]
+  )
+
+  /**
+   * Handle a batched save from the CompositeFieldEditModal.
+   *
+   * Only wired when the consumer supplied `onCompositeFieldSave` — the
+   * documented "all field updates at once" contract. (Without it, Table
+   * falls back to calling `onCellSave` once per field, the historical
+   * behavior.) Mirrors handleCellSave's optimistic local update so the
+   * grid reflects the modal's edits immediately.
+   */
+  const handleCompositeFieldSave = useCallback(
+    (rowId: string, fieldUpdates: Record<string, any>) => {
+      onCompositeFieldSave?.(rowId, fieldUpdates)
+
+      const applyUpdates = (prevRows: RowData[]) =>
+        prevRows.map(row => {
+          const currentRowId = String(row._id ?? row.id)
+          if (currentRowId === rowId) {
+            return { ...row, ...fieldUpdates }
+          }
+          return row
+        })
+
+      // Optimistic update for immediate UI feedback (same pattern as
+      // single-cell saves above).
+      setRows(applyUpdates)
+      setFilteredRows(applyUpdates)
+    },
+    [onCompositeFieldSave]
   )
 
   /**
@@ -1280,13 +1320,19 @@ function DataGridContent({
             manageRowProps={{
               selectedRows,
               rows,
-              ...(onRowCreation && !isCreatingRow
+              // Write-verb actions (add/duplicate/delete/manage) are only
+              // handed to ManageRow with 'write' access — `read` is the
+              // documented "view only, no editing" mode. Mirrors
+              // MobileCardView, which already gates the same actions on
+              // `permissions.access === 'write'`. `onShow` (read verb)
+              // stays available in read mode.
+              ...(hasWriteAccess && onRowCreation && !isCreatingRow
                 ? { onAdd: handleStartRowCreation }
                 : {}),
-              ...(onDuplicate
+              ...(hasWriteAccess && onDuplicate
                 ? { onDuplicate: () => onDuplicate(selectedRows) }
                 : {}),
-              ...(onDelete
+              ...(hasWriteAccess && onDelete
                 ? {
                     onDelete: () => {
                       onDelete(selectedRows)
@@ -1294,7 +1340,9 @@ function DataGridContent({
                     },
                   }
                 : {}),
-              ...(onManage ? { onManage: handleManage } : {}),
+              ...(hasWriteAccess && onManage
+                ? { onManage: handleManage }
+                : {}),
               ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
               handleClose: handleManageRowClose,
               permissions,
@@ -1325,6 +1373,9 @@ function DataGridContent({
           editingValue={editingValue}
           onCellClick={handleCellClick}
           onCellSave={handleCellSave}
+          {...(onCompositeFieldSave
+            ? { onCompositeFieldSave: handleCompositeFieldSave }
+            : {})}
           onCellCancel={handleCellCancel}
           permissions={permissions}
           onEditingValueChange={handleEditingValueChange}

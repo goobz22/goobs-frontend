@@ -95,6 +95,7 @@ function Table({
   editingValue,
   onCellClick,
   onCellSave,
+  onCompositeFieldSave,
   onCellCancel,
   onEditingValueChange,
   isCreatingRow = false,
@@ -149,28 +150,36 @@ function Table({
 
   /**
    * Handle save from composite field edit modal.
-   * Calls onCellSave for each field that was updated.
+   * Prefers the batched `onCompositeFieldSave` callback (the documented
+   * "all field updates at once" contract) when the parent wired one;
+   * otherwise falls back to calling onCellSave once per updated field.
    * Uses setTimeout to defer state updates and avoid render conflicts.
    *
    * @param fieldUpdates - Object with field:value pairs for all changed fields
    */
   const handleCompositeFieldSave = useCallback(
     (fieldUpdates: Record<string, any>) => {
-      if (compositeEditingData && onCellSave) {
+      if (compositeEditingData) {
         // Capture the rowId before clearing the state
         const rowId = getRowId(compositeEditingData.rowData)
 
-        // Defer the state updates to avoid setState during render
-        setTimeout(() => {
-          // Call onCellSave for each field that was updated
-          Object.entries(fieldUpdates).forEach(([field, value]) => {
-            onCellSave(rowId, field, value)
-          })
-        }, 0)
+        if (onCompositeFieldSave) {
+          // Defer the state updates to avoid setState during render
+          setTimeout(() => {
+            onCompositeFieldSave(rowId, fieldUpdates)
+          }, 0)
+        } else if (onCellSave) {
+          setTimeout(() => {
+            // Call onCellSave for each field that was updated
+            Object.entries(fieldUpdates).forEach(([field, value]) => {
+              onCellSave(rowId, field, value)
+            })
+          }, 0)
+        }
       }
       setCompositeEditingData(null)
     },
-    [compositeEditingData, onCellSave]
+    [compositeEditingData, onCellSave, onCompositeFieldSave]
   )
 
   /** Close composite edit modal without saving. */
