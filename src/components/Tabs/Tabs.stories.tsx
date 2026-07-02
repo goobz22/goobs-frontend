@@ -111,6 +111,34 @@ export const SacredTheme: Story = {
   },
 }
 
+/**
+ * 2b) Dark Theme — `styles.theme: 'dark'` on the dark canvas. The tab strip
+ * takes the `[data-theme='dark']` module overrides: slate label text
+ * (`--goobs-dark-text`), a `--goobs-dark-border` bottom rule, and blue
+ * (`--goobs-dark-primary`) hover/active accents with a light-blue active
+ * wash — no gold, no Cinzel.
+ */
+export const DarkTheme: Story = {
+  render: args => (
+    <div>
+      <Tabs {...args} />
+      <div style={{ padding: '32px', color: 'var(--goobs-dark-text)' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700 }}>Page Content</h1>
+        <p>A static dark-theme tab strip rendered above page content.</p>
+      </div>
+    </div>
+  ),
+  args: {
+    items: basicTabs,
+    alignment: 'left',
+    styles: {
+      theme: 'dark',
+      height: '60px',
+    },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+}
+
 const InteractiveDemoRenderer = () => {
   const [theme, setTheme] = React.useState<'light' | 'dark' | 'sacred'>('light')
   const [alignment, setAlignment] = React.useState<
@@ -213,9 +241,10 @@ export const InteractiveDemo: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // Test clicking a tab
-    const settingsTab = await canvas.findByText('Settings')
+    // Clicking an onClick-trigger tab must activate it (aria-selected).
+    const settingsTab = await canvas.findByRole('tab', { name: 'Settings' })
     await userEvent.click(settingsTab)
+    await expect(settingsTab).toHaveAttribute('aria-selected', 'true')
   },
 }
 

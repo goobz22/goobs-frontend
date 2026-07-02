@@ -641,6 +641,10 @@ export const Interactive: Story = {
     const canvas = within(canvasElement)
     const button = canvas.getByText('Show Snackbar')
     await userEvent.click(button)
+    // The click must actually open the snackbar.
+    await expect(
+      await canvas.findByText('This is an interactive snackbar!')
+    ).toBeVisible()
   },
 }
 

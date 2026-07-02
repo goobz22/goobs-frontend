@@ -3,7 +3,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import TransferList, { TransferListDropdownDataMap } from './index'
-import { userEvent, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof TransferList> = {
   title: 'Components/TransferList',
@@ -307,13 +307,19 @@ export const InteractiveDemo: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // Test moving an item
+    // Move Item A from the left list to the right list.
     const itemToMove = await canvas.findByText('Item A')
+    const leftListElement = itemToMove.closest('ul')
     await userEvent.click(itemToMove)
 
     const moveRightButton = await canvas.findByRole('button', {
       name: 'move selected right',
     })
     await userEvent.click(moveRightButton)
+
+    // Assert the move actually happened: Item A now lives in a DIFFERENT
+    // list element than the one it started in.
+    const movedItem = await canvas.findByText('Item A')
+    await expect(movedItem.closest('ul')).not.toBe(leftListElement)
   },
 }
