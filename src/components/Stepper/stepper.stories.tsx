@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { expect, userEvent, within } from 'storybook/test'
 import Stepper, { StepperProps } from './index'
 
 // Mock Dialog Component
@@ -991,8 +992,40 @@ export const InteractiveDemo: Story = {
  * "All steps completed!" panel with `finalActions` and a "Start Over" reset.
  * Also exercises the `styles.gap` / `styles.padding` / `styles.marginBottom`
  * spacing overrides (24px rail gap, 24px root padding, 32px bottom offset).
+ *
+ * The play function drives the `onNext`/`onBack` wiring end-to-end: it pins
+ * that step 1 renders its `content` with NO Back button, that Continue
+ * swaps the rendered `content` to step 2 (step 1 content unmounts) and
+ * reveals "← Back", and that Back returns to step 1 content. The snapshot
+ * therefore captures the wizard back on step 1 after a full
+ * forward-then-back round trip.
  */
 export const WizardMode: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Step 1: its content is rendered, and the first step hides Back.
+    await expect(
+      await canvas.findByText(/Step 1 content — define what ships/)
+    ).toBeVisible()
+    await expect(canvas.queryByText('← Back')).toBeNull()
+
+    // Continue → onNext advances: step 2 content replaces step 1 content
+    // and the Back control appears.
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(
+      await canvas.findByText(/Step 2 content — implement the change/)
+    ).toBeVisible()
+    await expect(canvas.queryByText(/Step 1 content/)).toBeNull()
+    const backButton = canvas.getByRole('button', { name: '← Back' })
+    await expect(backButton).toBeVisible()
+
+    // Back → onBack retreats: step 1 content is rendered again.
+    await userEvent.click(backButton)
+    await expect(
+      await canvas.findByText(/Step 1 content — define what ships/)
+    ).toBeVisible()
+    await expect(canvas.queryByText(/Step 2 content/)).toBeNull()
+  },
   render: () => {
     const Component = () => {
       const [activeStep, setActiveStep] = useState(0)

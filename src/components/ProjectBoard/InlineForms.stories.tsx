@@ -1,0 +1,417 @@
+/**
+ * @fileoverview Direct stories for the ProjectBoard inline task forms:
+ * InlineAddTask (forms/AddTask/inline.tsx) and InlineShowTask
+ * (forms/ShowTask/inline.tsx). The board stories only reach these views
+ * interactively (click "+ Add Task" / a task card); these stories render each
+ * form directly so its layout, required-field validation, submit payload
+ * shape, and the ShowTask detail sidebar are pinned without board
+ * choreography. These stories are the InlineAddTask / InlineShowTask
+ * regression spec — goobs has no unit tests.
+ */
+import type { ComponentProps } from 'react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
+import { expect, fn, userEvent, within } from 'storybook/test'
+import { InlineAddTask } from './forms/AddTask/inline'
+import { InlineShowTask } from './forms/ShowTask/inline'
+import type {
+  CaseUpdate,
+  Comment,
+  RawArticle,
+  RawCompany,
+  RawCustomer,
+  RawEmployee,
+  RawProduct,
+  RawQueue,
+  RawRegion,
+  RawService,
+  RawSeverityLevel,
+  RawStatus,
+  RawSubStatus,
+  RawTopic,
+  TaskMeeting,
+} from './types'
+
+// ---------------------------------------------------------------------------
+// Shared demo rosters (mirrors the post-Wave-1 board.stories.tsx data)
+// ---------------------------------------------------------------------------
+
+const sampleStatuses: RawStatus[] = [
+  { _id: '1', status: 'Open', description: 'Open tasks' },
+  { _id: '2', status: 'In Progress', description: 'Tasks being worked on' },
+  { _id: '3', status: 'Closed', description: 'Completed tasks' },
+]
+
+const sampleSubStatuses: RawSubStatus[] = [
+  { _id: 'ss1', subStatus: 'New', description: 'New task', statusId: '1' },
+  {
+    _id: 'ss2',
+    subStatus: 'Assigned',
+    description: 'Assigned task',
+    statusId: '1',
+  },
+  {
+    _id: 'ss3',
+    subStatus: 'Working',
+    description: 'Working on task',
+    statusId: '2',
+  },
+]
+
+const sampleTopics: RawTopic[] = [
+  {
+    _id: 't1',
+    topic: 'Technical Support',
+    description: 'Technical support issues',
+  },
+  { _id: 't2', topic: 'Billing', description: 'Billing related issues' },
+  { _id: 't3', topic: 'General Inquiry', description: 'General questions' },
+]
+
+const sampleSeverityLevels: RawSeverityLevel[] = [
+  { _id: 's1', severityLevel: 1, description: 'Critical' },
+  { _id: 's2', severityLevel: 2, description: 'High' },
+  { _id: 's3', severityLevel: 3, description: 'Medium' },
+  { _id: 's4', severityLevel: 4, description: 'Low' },
+]
+
+const sampleQueues: RawQueue[] = [
+  { _id: 'q1', queueName: 'Support Queue' },
+  { _id: 'q2', queueName: 'Billing Queue' },
+]
+
+const sampleArticles: RawArticle[] = [
+  {
+    _id: 'a1',
+    articleTitle: 'How to troubleshoot connection issues',
+    purpose: 'Diagnose and resolve customer connectivity problems',
+    symptoms: 'Intermittent disconnects, slow page loads',
+    resolution: 'Reset the local gateway and re-run the line diagnostic',
+    categoryName: 'Networking',
+  },
+  {
+    _id: 'a2',
+    articleTitle: 'Understanding billing cycles',
+    purpose: 'Explain invoice timing to customers',
+    categoryName: 'Billing',
+  },
+]
+
+const sampleCompanies: RawCompany[] = [
+  { _id: 'comp1', companyName: 'Tech Solutions Inc.' },
+  { _id: 'comp2', companyName: 'Digital Services LLC' },
+]
+
+const sampleCustomers: RawCustomer[] = [
+  {
+    _id: 'c1',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+  },
+  {
+    _id: 'c2',
+    firstName: 'Jane',
+    lastName: 'Smith',
+    email: 'jane.smith@example.com',
+  },
+]
+
+const sampleEmployees: RawEmployee[] = [
+  { _id: 'e1', firstName: 'Alice', lastName: 'Admin' },
+  { _id: 'e2', firstName: 'Bob', lastName: 'Manager' },
+]
+
+const sampleProducts: RawProduct[] = [
+  { _id: 'p1', productName: 'Analytics Suite' },
+  { _id: 'p2', productName: 'Firewall Appliance' },
+]
+
+const sampleServices: RawService[] = [
+  { _id: 'svc1', serviceName: 'Managed IT Support' },
+  { _id: 'svc2', serviceName: 'Network Monitoring' },
+]
+
+const sampleRegions: RawRegion[] = [
+  { _id: 'r1', regionName: 'North America' },
+  { _id: 'r2', regionName: 'Europe' },
+]
+
+const sampleComments: Comment[] = [
+  {
+    _id: 'cm1',
+    text: 'Customer confirmed the issue started after the weekend deploy.',
+    createdAt: new Date('2023-12-13T15:30:00.000Z'),
+    createdBy: 'Alice Admin',
+    editHistory: [
+      {
+        _id: 'rev1',
+        text: 'Customer confirmed the issue started after the weekend deploy.',
+        isOriginal: true,
+      },
+    ],
+  },
+  {
+    _id: 'cm2',
+    text: '[INTERNAL] Suspect the SSO cert rotation — checking with ops.',
+    createdAt: new Date('2023-12-13T16:10:00.000Z'),
+    createdBy: 'Bob Manager',
+    editHistory: [
+      {
+        _id: 'rev2',
+        text: '[INTERNAL] Suspect the SSO cert rotation — checking with ops.',
+        isOriginal: true,
+      },
+    ],
+  },
+]
+
+const sampleCaseUpdates: CaseUpdate[] = [
+  {
+    _id: 'cu1',
+    updatedBy: 'Alice Admin',
+    updatedAt: new Date('2023-12-12T09:00:00.000Z'),
+    updateType: 'created',
+    description: 'Task created',
+  },
+  {
+    _id: 'cu2',
+    updatedBy: 'Bob Manager',
+    updatedAt: new Date('2023-12-13T10:00:00.000Z'),
+    updateType: 'status_change',
+    description: 'Changed status from "Open" to "In Progress"',
+    fieldChanged: 'status',
+    oldValue: 'Open',
+    newValue: 'In Progress',
+  },
+]
+
+const sampleMeetings: TaskMeeting[] = [
+  {
+    _id: 'm1',
+    eventTypeName: 'Troubleshooting Call',
+    attendeeName: 'John Doe',
+    attendeeEmail: 'john.doe@example.com',
+    startTime: '2023-12-15T15:00:00.000Z',
+    endTime: '2023-12-15T15:30:00.000Z',
+    status: 'confirmed',
+    location: 'Zoom',
+    notes: 'Walk through the login failure together',
+    meetingType: 'video',
+    taskId: 'task1',
+  },
+]
+
+// ---------------------------------------------------------------------------
+// Default arg sets
+// ---------------------------------------------------------------------------
+
+const addTaskArgs: ComponentProps<typeof InlineAddTask> = {
+  onAdd: fn(),
+  onCancel: fn(),
+  topics: sampleTopics,
+  severityLevels: sampleSeverityLevels,
+  statuses: sampleStatuses,
+  subStatuses: sampleSubStatuses,
+  createdUserId: 'u1',
+  companyId: 'comp1',
+  customerId: 'c1',
+  rawCompanies: sampleCompanies,
+  rawCustomers: sampleCustomers,
+  rawProducts: sampleProducts,
+  rawServices: sampleServices,
+  rawRegions: sampleRegions,
+  knowledgebaseArticles: sampleArticles,
+  styles: { theme: 'light' },
+}
+
+const showTaskProps: ComponentProps<typeof InlineShowTask> = {
+  taskId: 'task1abc',
+  taskTitle: 'Fix login issue',
+  createdBy: 'Alice Admin',
+  description: 'User cannot log in to their account since the last deploy.',
+  comments: sampleComments,
+  caseUpdates: sampleCaseUpdates,
+  customerAssigned: 'John Doe',
+  severity: 'Critical',
+  schedulingQueue: 'Support Queue',
+  region: 'North America',
+  status: 'Open',
+  subStatus: 'New',
+  topics: ['Technical Support'],
+  knowledgebaseArticles: ['How to troubleshoot connection issues'],
+  teamMemberAssigned: 'Alice Admin',
+  nextActionDate: '12/15/2023 - 9:00AM CST',
+  currentUserName: 'Alice Admin',
+  productOrService: 'product',
+  productServiceName: 'Analytics Suite',
+  productId: 'p1',
+  serviceId: '',
+  onEdit: fn(),
+  onDelete: fn(),
+  onComment: fn(),
+  onEditComment: fn(),
+  onBack: fn(),
+  severityOptions: sampleSeverityLevels,
+  schedulingQueueOptions: sampleQueues,
+  regionOptions: sampleRegions,
+  statusOptions: sampleStatuses,
+  subStatusOptions: sampleSubStatuses,
+  topicOptions: sampleTopics,
+  knowledgebaseArticleOptions: sampleArticles,
+  teamMemberOptions: sampleEmployees,
+  rawProducts: sampleProducts,
+  rawServices: sampleServices,
+  employees: [
+    { _id: 'e1', firstName: 'Alice', lastName: 'Admin' },
+    { _id: 'e2', firstName: 'Bob', lastName: 'Manager' },
+  ],
+  styles: { theme: 'light' },
+  meetings: sampleMeetings,
+  onScheduleMeeting: fn(),
+  onCancelMeeting: fn(),
+  onConfirmMeeting: fn(),
+  onRescheduleMeeting: fn(),
+  currentDate: new Date('2023-12-14T12:00:00.000Z'),
+  variant: 'employee',
+  onCaseUpdate: fn(),
+}
+
+const meta: Meta<typeof InlineAddTask> = {
+  title: 'Components/ProjectBoard/InlineForms',
+  component: InlineAddTask,
+  parameters: {
+    layout: 'fullscreen',
+  },
+  args: addTaskArgs,
+}
+
+export default meta
+type Story = StoryObj<typeof InlineAddTask>
+
+// ---------------------------------------------------------------------------
+// InlineAddTask
+// ---------------------------------------------------------------------------
+
+/**
+ * Pins the full add-task layout on the light theme with every roster
+ * populated: the "New Task" sidebar lists all six required fields (Title,
+ * Description, Type, Product/Service, Severity, Status), the Details/
+ * Knowledgebase tabs render, and the two-column grid shows the Company,
+ * Customer, Type, Product, Severity, Status, and Region dropdowns plus the
+ * Topics multi-select, with Create Task / Cancel buttons at the bottom.
+ */
+export const AddTaskLight: Story = {}
+
+/**
+ * Pins the sacred-theme rendering of the same fully-populated add-task form:
+ * the root carries data-theme="sacred" so the gold-on-dark module styles
+ * apply to the sidebar, tabs, dropdown grid, and action buttons.
+ */
+export const AddTaskSacred: Story = {
+  args: {
+    styles: { theme: 'sacred' },
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+}
+
+/**
+ * Pins the primary create flow end to end: with no product/service rosters
+ * the required set collapses to Title, Description, Severity, and Status;
+ * filling the title and description, picking Severity "Critical" and Status
+ * "Open" from the dropdowns, and clicking Create Task calls onAdd exactly
+ * once with a payload carrying the typed title/description and the resolved
+ * severity/status labels — and no validation error is shown.
+ */
+export const AddTaskSubmitFlow: Story = {
+  args: {
+    rawProducts: [],
+    rawServices: [],
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.type(
+      canvas.getByPlaceholderText('Enter task title'),
+      'Investigate login failure'
+    )
+    await userEvent.type(
+      canvas.getByPlaceholderText('Enter text...'),
+      'Customer cannot sign in since the last deploy.'
+    )
+
+    await userEvent.click(canvas.getByRole('combobox', { name: /severity/i }))
+    await userEvent.click(
+      await canvas.findByRole('option', { name: 'Critical' })
+    )
+
+    await userEvent.click(canvas.getByRole('combobox', { name: /^status/i }))
+    await userEvent.click(await canvas.findByRole('option', { name: 'Open' }))
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Create Task' }))
+
+    await expect(args.onAdd).toHaveBeenCalledTimes(1)
+    await expect(args.onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Investigate login failure',
+        description: 'Customer cannot sign in since the last deploy.',
+        severity: 'Critical',
+        status: 'Open',
+      })
+    )
+    await expect(
+      canvas.queryByText(/Please fill in all required fields/)
+    ).not.toBeInTheDocument()
+  },
+}
+
+/**
+ * Pins the required-field guard: submitting the untouched form shows the
+ * "Please fill in all required fields" banner naming every missing field
+ * (Title, Description, Severity, Status, Product/Service) and onAdd is
+ * never called.
+ */
+export const AddTaskValidationError: Story = {
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Create Task' }))
+
+    await expect(
+      canvas.getByText(
+        /Please fill in all required fields \(Title, Description, Severity, Status, Product\/Service\)/
+      )
+    ).toBeInTheDocument()
+    await expect(args.onAdd).not.toHaveBeenCalled()
+  },
+}
+
+// ---------------------------------------------------------------------------
+// InlineShowTask
+// ---------------------------------------------------------------------------
+
+/**
+ * Pins the read-mode detail view on the light theme: the Ticket Summary
+ * sidebar shows the truncated ticket #, Product "Analytics Suite", Queue,
+ * Region, Status "Open", Substatus "New", Severity "Critical", Assigned To,
+ * Topics, KB Articles, and Next Action rows with Edit/Delete and Back to
+ * Board buttons; the Details tab renders the Requestor/Customer card and the
+ * Title/Description card, and the tab strip shows Details / Comments /
+ * Scheduling / Knowledgebase (1) / Resolution / Case History with the
+ * linked-article count on the Knowledgebase tab.
+ */
+export const ShowTaskLight: Story = {
+  render: () => <InlineShowTask {...showTaskProps} />,
+}
+
+/**
+ * Pins the sacred-theme rendering of the same populated detail view: the
+ * root carries data-theme="sacred" (InlineShowTask's default theme family)
+ * so the gold accent styles apply to the sidebar summary rows, tab strip,
+ * and detail cards.
+ */
+export const ShowTaskSacred: Story = {
+  render: () => (
+    <InlineShowTask {...showTaskProps} styles={{ theme: 'sacred' }} />
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+}

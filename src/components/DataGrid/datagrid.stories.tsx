@@ -1,12 +1,20 @@
-// src/components/DataGrid/datagrid.stories.tsx
+/**
+ * @fileoverview Storybook stories for the DataGrid component: the three
+ * themes, filters + metrics, manage-row CRUD, inline row creation and
+ * validation, responsive card views, the composite-field subsystem
+ * (CompositeFieldConfig[] column type -> CompositeFieldEditModal ->
+ * batched onCompositeFieldSave), and read-only permission rendering.
+ * These stories are the DataGrid regression spec — goobs has no unit tests.
+ */
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { fn } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import DataGrid from './index'
 import type {
   DatagridProps,
   ColumnDef,
+  CompositeFieldConfig,
   RowData,
   DataGridFilter,
   MetricCardData,
@@ -1716,5 +1724,289 @@ export const Desktop: Story = {
     styles: {
       theme: 'light',
     },
+  },
+}
+
+// ============================================================================
+// COMPOSITE-FIELD SUBSYSTEM
+// A column whose `type` is CompositeFieldConfig[] opens the
+// CompositeFieldEditModal for multi-field editing when its cell is clicked
+// on a selected row. Saves batch into `onCompositeFieldSave`.
+// ============================================================================
+
+const compositeContactFields: CompositeFieldConfig[] = [
+  {
+    field: 'contactName',
+    label: 'Full Name',
+    type: 'text',
+    required: true,
+    placeholder: 'Enter contact name',
+  },
+  {
+    field: 'contactEmail',
+    label: 'Email',
+    type: 'text',
+    helperText: 'Work email preferred',
+  },
+  {
+    field: 'contactPhone',
+    label: 'Phone',
+    type: 'phoneNumber',
+  },
+]
+
+const compositeColumns: ColumnDef[] = [
+  { field: 'id', headerName: 'ID', width: 90 },
+  { field: 'company', headerName: 'Company', width: 200 },
+  {
+    field: 'contact',
+    headerName: 'Contact',
+    width: 280,
+    // CompositeFieldConfig[] column type: clicking this cell on a selected
+    // row opens the multi-field edit modal instead of an inline editor.
+    type: compositeContactFields,
+    // The composite cell itself displays a summary of the underlying
+    // row fields (the row has no `contact` key of its own).
+    renderCell: ({ row }) =>
+      `${String(row.contactName ?? '')} · ${String(row.contactEmail ?? '')}`,
+  },
+  { field: 'status', headerName: 'Status', width: 120 },
+]
+
+const compositeRows: RowData[] = [
+  {
+    id: '1',
+    company: 'Acme Corp',
+    contactName: 'John Doe',
+    contactEmail: 'john.doe@acme.com',
+    contactPhone: '(555) 123-4567',
+    status: 'Active',
+  },
+  {
+    id: '2',
+    company: 'Globex Inc',
+    contactName: 'Jane Smith',
+    contactEmail: 'jane.smith@globex.com',
+    contactPhone: '(555) 987-6543',
+    status: 'Prospect',
+  },
+  {
+    id: '3',
+    company: 'Initech LLC',
+    contactName: 'Bill Lumbergh',
+    contactEmail: 'bill.lumbergh@initech.com',
+    contactPhone: '(555) 246-8100',
+    status: 'Churned',
+  },
+]
+
+const onCompositeSaveAction = fn()
+
+/**
+ * The composite-field editing flow end to end. Pins the observable
+ * contract: the `contact` column (type: CompositeFieldConfig[]) renders its
+ * summary via renderCell; once its row is selected the cell reports
+ * `data-cell-state="editable"`, and clicking it opens the
+ * CompositeFieldEditModal (`[data-composite-modal="true"]`, an "Edit
+ * fields" dialog) with one labelled control per CompositeFieldConfig —
+ * each wrapped in `[data-field-name]`, seeded from the row's current
+ * values, required fields starred, helper text shown. "Save Changes"
+ * fires the batched `onCompositeFieldSave(rowId, fieldUpdates)` callback
+ * exactly once with ALL composite field values (not per-field
+ * `onCellSave`), closes the modal, and the grid cell optimistically shows
+ * the edited summary.
+ */
+export const CompositeField: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f3f4f6',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: compositeColumns,
+    rows: compositeRows,
+    dataGrid: 'composite-demo',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: {
+      theme: 'light',
+    },
+    onCellSave: fn(),
+    onCompositeFieldSave: onCompositeSaveAction,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Scope every cell query to the desktop <tr> — the hidden mobile card
+    // view duplicates the row content at this viewport.
+    const row = canvasElement.querySelector<HTMLElement>('tr[data-row-id="1"]')
+    if (!row) {
+      throw new Error('Desktop table row [data-row-id="1"] did not render')
+    }
+
+    // 1. Select the row (a click on any cell of an unselected row toggles
+    //    selection).
+    const companyCell = row.querySelector<HTMLElement>(
+      '[data-field-name="company"]'
+    )
+    if (!companyCell) throw new Error('Company cell did not render')
+    await userEvent.click(companyCell)
+    await expect(row).toHaveAttribute('data-row-state', 'selected')
+
+    // 2. The composite column now advertises editability.
+    const contactCell = row.querySelector<HTMLElement>(
+      '[data-field-name="contact"]'
+    )
+    if (!contactCell) throw new Error('Composite contact cell did not render')
+    await expect(contactCell).toHaveAttribute('data-cell-state', 'editable')
+
+    // 3. Clicking the composite cell opens the multi-field edit modal,
+    //    seeded from the row data.
+    await userEvent.click(contactCell)
+    const modal = await canvas.findByRole('dialog', { name: 'Edit fields' })
+    await expect(modal).toBeVisible()
+    await expect(modal).toHaveAttribute('data-composite-modal', 'true')
+    await expect(modal).toHaveAttribute('data-composite-row-id', '1')
+
+    const nameInput = modal.querySelector<HTMLInputElement>(
+      '[data-field-name="contactName"] input'
+    )
+    if (!nameInput) throw new Error('Composite Full Name input did not render')
+    await expect(nameInput).toHaveValue('John Doe')
+
+    // Required marker on the required field, helper text on the email field.
+    await expect(within(modal).getByText('Full Name *')).toBeVisible()
+    await expect(within(modal).getByText('Work email preferred')).toBeVisible()
+
+    // 4. Edit one field and save — the batched onCompositeFieldSave fires
+    //    once with the full field-update record (this pins the wired-up
+    //    callback; it used to be a dead prop).
+    await userEvent.clear(nameInput)
+    await userEvent.type(nameInput, 'Jane Roe')
+    await userEvent.click(
+      within(modal).getByRole('button', { name: 'Save Changes' })
+    )
+    await waitFor(() =>
+      expect(onCompositeSaveAction).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          contactName: 'Jane Roe',
+          contactEmail: 'john.doe@acme.com',
+        })
+      )
+    )
+
+    // 5. The modal closes and the grid optimistically shows the edit.
+    await waitFor(() =>
+      expect(canvas.queryByRole('dialog', { name: 'Edit fields' })).toBeNull()
+    )
+    await waitFor(() =>
+      expect(contactCell).toHaveTextContent('Jane Roe · john.doe@acme.com')
+    )
+  },
+}
+
+/**
+ * The `permissions.access: 'read'` rendering — "view only, no editing".
+ * Pins the observable read-only contract: write-verb toolbar buttons
+ * ("Add Contact") are filtered out while read-safe ones ("Download
+ * Report") stay; rows remain selectable but a selected row's cells stay
+ * `data-cell-state="idle"` (no editable affordance, no inline editor);
+ * clicking a composite-field cell does NOT open the
+ * CompositeFieldEditModal; and the row-actions toolbar offers only the
+ * read verb (View) — Add/Edit/Duplicate/Delete are absent even with a
+ * row selected and all write callbacks supplied.
+ */
+export const ReadOnlyPermissions: Story = {
+  name: 'Read-Only Permissions',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f3f4f6',
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: compositeColumns,
+    rows: compositeRows,
+    dataGrid: 'composite-readonly',
+    permissions: { access: 'read' },
+    buttons: [{ text: 'Download Report' }, { text: 'Add Contact' }],
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: {
+      theme: 'light',
+    },
+    onCellSave: fn(),
+    onCompositeFieldSave: fn(),
+    onRowCreation: fn(),
+    onManage: fn(),
+    onShow: fn(),
+    onDuplicate: fn(),
+    onDelete: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Read mode filters write-verb custom buttons out of the toolbar and
+    // keeps read-safe ones.
+    await expect(
+      canvas.getByRole('button', { name: 'Download Report' })
+    ).toBeVisible()
+    await expect(
+      canvas.queryByRole('button', { name: 'Add Contact' })
+    ).toBeNull()
+
+    const row = canvasElement.querySelector<HTMLElement>('tr[data-row-id="1"]')
+    if (!row) {
+      throw new Error('Desktop table row [data-row-id="1"] did not render')
+    }
+
+    // Selection is a view-level interaction and stays available.
+    const companyCell = row.querySelector<HTMLElement>(
+      '[data-field-name="company"]'
+    )
+    if (!companyCell) throw new Error('Company cell did not render')
+    await userEvent.click(companyCell)
+    await expect(row).toHaveAttribute('data-row-state', 'selected')
+
+    // A selected row's cells never advertise editability in read mode.
+    const contactCell = row.querySelector<HTMLElement>(
+      '[data-field-name="contact"]'
+    )
+    if (!contactCell) throw new Error('Composite contact cell did not render')
+    await expect(contactCell).toHaveAttribute('data-cell-state', 'idle')
+
+    // Row actions expose only the read verb; every write verb is withheld
+    // even though all the write callbacks were supplied.
+    await expect(canvas.getByRole('button', { name: 'View' })).toBeVisible()
+    for (const writeVerb of ['Add', 'Edit', 'Duplicate', 'Delete']) {
+      await expect(
+        canvas.queryByRole('button', { name: writeVerb })
+      ).toBeNull()
+    }
+
+    // Clicking the composite cell must NOT open the edit modal. In read
+    // mode the click falls through to row selection (toggling it off) —
+    // wait for that positive signal so the no-modal check runs after the
+    // click was fully processed.
+    await userEvent.click(contactCell)
+    await waitFor(() => expect(row).toHaveAttribute('data-row-state', 'idle'))
+    await expect(
+      canvasElement.querySelector('[data-composite-modal]')
+    ).toBeNull()
   },
 }

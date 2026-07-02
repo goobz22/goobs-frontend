@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the Panel compound component.
  * Demonstrates the back-button / title / actions header, the scrollable body,
  * the sticky footer, and the three variants (sacred / standard / fullscreen).
+ * These stories are the Panel regression spec — goobs has no unit tests.
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
@@ -111,6 +112,42 @@ export const BodyOnly: Story = {
       <Panel.Body>{sampleBody}</Panel.Body>
     </Panel>
   ),
+}
+
+/**
+ * Fullscreen takeover variant — the panel escapes the story's 480×720
+ * decorator box and pins to the whole viewport (`position: fixed; inset: 0`),
+ * keeping the sacred header/body/footer chrome edge-to-edge. The play
+ * function pins the computed `position: fixed` + `data-panel-variant`
+ * attribute so a CSS regression that un-pins the takeover fails here.
+ */
+export const Fullscreen: Story = {
+  args: { variant: 'fullscreen' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header
+        onBack={fn()}
+        title="Fullscreen Takeover"
+        subtitle="Pinned to the viewport with fixed inset:0"
+        actions={<CustomButton text="Save" styles={{ theme: 'sacred' }} />}
+      />
+      <Panel.Body>{sampleBody}</Panel.Body>
+      <Panel.Footer>
+        <CustomButton text="Close" styles={{ theme: 'sacred' }} />
+      </Panel.Footer>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Panel"]'
+    )
+    await expect(region).not.toBeNull()
+    await expect(region).toHaveAttribute('data-panel-variant', 'fullscreen')
+    // The fullscreen class pins the panel to the viewport, escaping the
+    // decorator's 480x720 box.
+    const computed = window.getComputedStyle(region as HTMLElement)
+    await expect(computed.position).toBe('fixed')
+  },
 }
 
 // --------------------------------------------------------------------------

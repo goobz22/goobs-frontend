@@ -1,9 +1,14 @@
 /**
- * @fileoverview Storybook stories for the Chip component.
+ * @fileoverview Storybook stories for the Chip component: the default
+ * interactive `chip` variant across the three themes and styling overrides,
+ * plus the read-only `pill` variant with all six semantic tone palettes
+ * (the shipped replacement for the hand-rolled StatusPill / StatusBadge /
+ * Pill status indicators). These stories are the Chip regression spec —
+ * goobs has no unit tests.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { fn } from 'storybook/test'
-import Chip from './index'
+import { expect, fn, within } from 'storybook/test'
+import Chip, { type ChipTone } from './index'
 
 const meta: Meta<typeof Chip> = {
   title: 'Components/Chip',
@@ -176,5 +181,91 @@ export const CustomSize: Story = {
       padding: '0 16px',
       fontSize: '16px',
     },
+  },
+}
+
+// --------------------------------------------------------------------------
+// Variant Stories — pill
+// --------------------------------------------------------------------------
+
+/**
+ * Every ChipTone, one label per tone so a palette swap is visible at a
+ * glance. Keyed to the semantics documented on the ChipTone type.
+ */
+const PILL_TONE_LABELS: Record<ChipTone, string> = {
+  success: 'Paid',
+  info: 'In Progress',
+  warn: 'Pending',
+  danger: 'Overdue',
+  neutral: 'Inactive',
+  gold: 'Featured',
+}
+
+/** Render order — the full ChipTone union, typechecked against the component. */
+const PILL_TONES: ChipTone[] = [
+  'success',
+  'info',
+  'warn',
+  'danger',
+  'neutral',
+  'gold',
+]
+
+/**
+ * The read-only `variant="pill"` in all six semantic tones (success / info /
+ * warn / danger / neutral / gold), side-by-side on a dark backdrop — the
+ * shipped replacement for the deleted StatusPill / StatusBadge / Pill
+ * components. Pins the observable pill contract: fully rounded (999px)
+ * compact status indicators, each deriving its translucent background +
+ * matching border + solid text triplet from `data-chip-tone` alone (no
+ * hand-tuned alpha values), rendered non-interactive with `role="status"`
+ * and `data-chip-variant="pill"`. The second row pins the `dot` shortcut:
+ * a leading dot inheriting the tone's text color. A tone palette or pill
+ * geometry regression changes this snapshot; the play function asserts the
+ * DOM contract (12 status pills, 2 per tone).
+ */
+export const PillTones: Story = {
+  name: 'Variants/Pill Tones',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        {PILL_TONES.map(tone => (
+          <Chip
+            key={tone}
+            variant="pill"
+            tone={tone}
+            label={PILL_TONE_LABELS[tone]}
+          />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        {PILL_TONES.map(tone => (
+          <Chip
+            key={tone}
+            variant="pill"
+            tone={tone}
+            dot
+            label={PILL_TONE_LABELS[tone]}
+          />
+        ))}
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Read-only pills expose role="status" (never button — they are
+    // non-interactive), one per tone per row.
+    const statusPills = canvas.getAllByRole('status')
+    await expect(statusPills).toHaveLength(PILL_TONES.length * 2)
+
+    for (const tone of PILL_TONES) {
+      const tonedPills = canvasElement.querySelectorAll(
+        `[data-chip-variant="pill"][data-chip-tone="${tone}"]`
+      )
+      // Two pills per tone: plain + leading-dot.
+      await expect(tonedPills).toHaveLength(2)
+    }
   },
 }
