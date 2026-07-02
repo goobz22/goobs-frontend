@@ -25,7 +25,7 @@ const allIcons: Array<{ name: string; component: IconComponentType }> = (
   .sort((first, second) => first.name.localeCompare(second.name))
 
 const meta: Meta = {
-  title: 'Icons/All Icons Showcase',
+  title: 'Components/Icons/All Icons',
   parameters: {
     layout: 'padded',
     docs: {

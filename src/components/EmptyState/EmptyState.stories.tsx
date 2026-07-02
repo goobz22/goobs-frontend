@@ -3,7 +3,7 @@ import EmptyState from './index'
 import CustomButton from '../Button'
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Primitives/EmptyState',
+  title: 'Components/EmptyState',
   component: EmptyState,
   parameters: { layout: 'centered' },
   argTypes: {

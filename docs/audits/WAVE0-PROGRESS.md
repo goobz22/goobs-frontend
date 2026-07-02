@@ -66,6 +66,61 @@ Audit: `docs/audits/story-jsdoc-audit-2026-07-01.md`.
   css pass remains uncommitted/deprioritized. Wave-2 note: Button outline-inversion
   (same class as Typography's, Button/index.tsx ~302-306) still open.
 
+## WAVE 2 — COMPLETE (2026-07-02 ~01:00) — commits on `production`
+Batches 1-5 (below) + `f1071e9` batch 6 (the 7 wholesale surfaces via workflow
+wf_70e3b650-a4c — ALL 7 verified CORRECT: 95 del / 20 impl / 15 left-as-read)
++ the loop-until-dry final: the new styles-key-is-read guard found 40 more
+definite-dead keys (FormFieldStyles+CTE mirror 9 each, CTE 10, DataGrid 4,
+Drawer 4, Icons 2, BigCalendar 2) — deleted, guard now GREEN over all 33
+exported *Styles interfaces and wired into lint:all as lint:styles-props.
+lint:coverage script committed, wired into package.json but NOT lint:all yet
+(goes live end of Wave 3). Total inert-API class: extinct + guarded.
+NOTE: dist rebuilt during gates; ThothOS .next-test clear needed on next
+test-stack restart. Chromatic re-baseline still user-gated.
+
+## WAVE 3 — COMPLETE (2026-07-02 ~11:45) — commits on `production`
+- `4bcd8c0` component bugs the coverage stories exposed: Card asChild context
+  crash; DataGrid onCompositeFieldSave dead API wired end-to-end; read
+  permissions now block desktop editing + write verbs gated.
+- `cf7716d` 7 new story files + 5 extended (all adversarially verified;
+  glyphs-and-utils repaired once): CardFamily (25 subcomponents),
+  FormDataGrid/FormProjectBoard, InlineForms, SacredGlyphs, alpha, Chip pill
+  tones, DataGrid composite + read-only, FormBoundFields (8 Tier-1 bindings in
+  one <Form>), Panel fullscreen, Tooltip open bubbles, Stepper wizard.
+- `ec1373a` coverage gate GREEN (152 exports / 95 files / 0 uncovered) and in
+  lint:all; matcher handles default-alias/compound-dot/meta-title forms;
+  storybook-static rebuilt: 95 docs + 834 stories (was 639/0 pre-program).
+- NEXT: Wave 4 (themes + taxonomy renames), Wave 5 (JSDoc), Wave 6 (plays/CI).
+
+## WAVE 2 — history (2026-07-01→02 overnight)
+Program: delete-or-implement the audit's inert props per dir (verify inertness →
+grep ThothOS consumers → delete/implement/@deprecate → story exercises implemented
+keys → tsc both + eslint + stylelint). Session token limit killed 25/26 workflow
+agents (resets 3:10am; resume: Workflow scriptPath goobs-wave2-inert-props +
+resumeFromRunId wf_6b948823-532 — only TreeView + verifier cached).
+- DONE (committed): `e555afa` batch 1 TreeView(46 keys, verified CORRECT) +
+  AppBar(6) + Fade/Slide/Zoom(3 each); `28c3505` batch 2 Switch(5 del + JSDoc
+  truth) / Pagination(color phantom del; gap/padding impl) / Alert(3 impl) /
+  Avatar(border impl) / Metric(height impl); `be40516` batch 3 CodeCopy(phantom
+  hovers fixed + clipboard API + animationDuration del) / CTE(showToolbar impl) /
+  ProgressBar(aria-required + outline del). Also `b878b56` css pass green,
+  `98a8aca` README truth, `ce3291d/06cbd75/7a25616/c9f63d4` Wave 1.
+- REMAINING Wave-2 dirs (13): Toolbar(~34/35), ConfirmationCodeInput(~56/74),
+  QRCode(17/27 + onSecretGenerated), Button(outline inversion + secondary/
+  destructive stories), IconButton('&:hover' phantom), Table(styles ignored),
+  Stepper(4, careful: required stepNumber), BigCalendar(height/width impl;
+  availableEventTypes/Statuses del), MenuItem(dense/divider/selected impl),
+  RadioGroup(showGlyph + sacred-default JSDoc lie), PricingTable(defaultBilling
+  impl), List(dense on 3 subs), Tabs(TabProps.styles).
+- Scripts READY, not yet wired: scripts/lint-story-coverage.ts (46 uncovered now;
+  needs Card.X alias handling for compound usage) + scripts/lint-styles-props-read.ts
+  (304 hits pre-Wave-2; wire as lint:jsdoc-surface AFTER Wave 2 + tune false
+  positives). Wire into lint:all + package.json when green.
+- THEN: Waves 3 (coverage), 4 (themes+taxonomy renames incl. PascalCase story
+  files two-step git mv), 5 (JSDoc debt), 6 (interaction net + alert() removal
+  done already + CI: .github/workflows chromatic + test-runner). Standing user
+  order: FINISH EVERYTHING, don't stop. Push still user-gated (classifier).
+
 ## WAVE 1 — original plan (kept for context)
 - DONE: `tsconfig.stories.json` created (stories + .storybook typecheck; 3 peer files
   excluded with R13 comment); `typecheck` script now runs both configs.

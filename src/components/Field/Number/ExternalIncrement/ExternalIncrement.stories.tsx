@@ -86,6 +86,29 @@ export const CustomLabel: Story = {
   ),
 }
 
+/**
+ * Light theme via `styles.theme: 'light'` on a light canvas — the FieldShell
+ * default palette: white field surface, dark text, slate control border.
+ */
+export const LightTheme: Story = {
+  args: {
+    ...commonArgs,
+    styles: {
+      theme: 'light',
+    },
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Dark theme via `styles.theme: 'dark'` on the dark canvas — dark field
+ * surface with light text from the FieldShell `[data-theme='dark']` block.
+ */
 export const DarkTheme: Story = {
   args: {
     ...commonArgs,
@@ -94,12 +117,17 @@ export const DarkTheme: Story = {
     },
   },
   render: (args: any) => (
-    <div style={{ padding: '20px', backgroundColor: '#1a1a1a' }}>
+    <div style={{ padding: '20px' }}>
       <ExternalIncrementNumberField {...args} />
     </div>
   ),
+  globals: { backgrounds: { value: 'dark' } },
 }
 
+/**
+ * Sacred theme via `styles.theme: 'sacred'` on the sacred canvas — the gold
+ * accent palette from the FieldShell `[data-theme='sacred']` block.
+ */
 export const SacredTheme: Story = {
   args: {
     ...commonArgs,
@@ -108,10 +136,11 @@ export const SacredTheme: Story = {
     },
   },
   render: (args: any) => (
-    <div style={{ padding: '20px', backgroundColor: '#0a0a0a' }}>
+    <div style={{ padding: '20px' }}>
       <ExternalIncrementNumberField {...args} />
     </div>
   ),
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 export const Required: Story = {

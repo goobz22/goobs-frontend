@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import MoneyText from './MoneyText'
 
 const meta: Meta<typeof MoneyText> = {
-  title: 'Components/Field/USD/MoneyText',
+  title: 'Components/Field/MoneyText',
   component: MoneyText,
   argTypes: {
     value: { control: 'text' },

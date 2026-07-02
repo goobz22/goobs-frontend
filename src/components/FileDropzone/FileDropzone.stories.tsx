@@ -7,7 +7,7 @@ import Form from '../Form'
 import CustomButton from '../Button'
 
 const meta: Meta<typeof FileDropzone> = {
-  title: 'Primitives/FileDropzone',
+  title: 'Components/FileDropzone',
   component: FileDropzone,
   parameters: { layout: 'padded' },
 }
@@ -124,4 +124,24 @@ export const WithError: Story = {
       onFileSelect={() => {}}
     />
   ),
+}
+
+/**
+ * The dark theme (`styles.theme: 'dark'`) on the dark canvas: the preview
+ * tile switches to the slate surface (#0f172a) with a #334155 border, the
+ * drop-target label and hint render in the blue-accent dark palette
+ * (#60a5fa / #93c5fd accents, #cbd5e1 text), and the typeface flips from
+ * Cinzel to Inter — the `[data-theme='dark']` override block in
+ * FileDropzone.module.css.
+ */
+export const DarkTheme: Story = {
+  name: 'Theme/Dark',
+  args: {
+    label: 'Product Image',
+    variant: 'image',
+    value: '',
+    onFileSelect: fn(),
+    styles: { theme: 'dark' },
+  },
+  globals: { backgrounds: { value: 'dark' } },
 }

@@ -4,7 +4,7 @@ import ListItemCard from './index'
 import IconButton from '../IconButton'
 
 const meta: Meta<typeof ListItemCard> = {
-  title: 'Primitives/ListItemCard',
+  title: 'Components/ListItemCard',
   component: ListItemCard,
   parameters: { layout: 'padded' },
 }
