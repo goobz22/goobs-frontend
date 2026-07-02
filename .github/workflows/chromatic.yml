@@ -1,0 +1,48 @@
+# CI for the story+JSDoc program (docs/audits/story-jsdoc-standard-proposal.md §4.5).
+# goobs has no unit tests — stories + Chromatic ARE the regression net, so this
+# workflow is what makes every gate real instead of conventional:
+#   typecheck (root + stories) → lint:all (eslint, stylelint, story rules,
+#   styles-key-is-read, story-coverage) → library build → storybook build →
+#   Chromatic visual regression.
+#
+# CHROMATIC_PROJECT_TOKEN must be set in the repo's Actions secrets (owner
+# action — get it from chromatic.com project settings). Until the secret
+# exists, the chromatic step is skipped rather than failing the whole run.
+name: ci
+
+on:
+  push:
+    branches: [production]
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Chromatic needs full history to find its baseline ancestor.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck (library + stories)
+        run: bun run typecheck
+
+      - name: Lint (eslint + stylelint + story rules + coverage gates)
+        run: bun run lint:all
+
+      - name: Build library
+        run: bun run build
+
+      - name: Build Storybook
+        run: bun run build-storybook
+
+      - name: Chromatic visual regression
+        if: ${{ env.CHROMATIC_PROJECT_TOKEN != '' }}
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        run: bunx chromatic --storybook-build-dir storybook-static --exit-zero-on-changes
