@@ -23,22 +23,34 @@ Audit: `docs/audits/story-jsdoc-audit-2026-07-01.md`.
   370 storybook/no-redundant-story-name, 88 storybook/no-renderer-packages,
   26 no-restricted-globals.
 
-## IN FLIGHT
-- Workflow `goobs-wave0-story-sweep` (run wf_b6668d5e-c21, task w963t0ird): 85 agents,
-  one per tracked story file. Per file: `@storybook/react`→`@storybook/nextjs` import,
-  remove per-meta autodocs tags, `parameters.backgrounds.default`→story `globals`,
-  alert()→fn() spies, remove ONLY eslint-flagged redundant `name:` annotations.
-  Each agent self-verifies `bunx eslint <file> --max-warnings=0` (no --fix) exits 0.
+## WAVE 0 COMPLETE (2026-07-01) — commits on `production`
+- `5ecf864` setup re-baseline (addon-docs, fonts, SB10 globals/toolbar, vercel, deps)
+- `c9c32f5` 85-file story sweep + eslint guards (86 files, +443/−1145)
+- storybook-static rebuild + docs/audits commits follow.
+- Sweep execution note: 34 files by workflow agents (run wf_b6668d5e-c21; 51 agents
+  died on session limit but ~11 had already written their edits), remainder by
+  deterministic codemods (scratchpad wave0-codemod.ts / wave0-shapeb.ts /
+  remove-redundant-names.ts) + 5 hand-edited alert()→fn() sites.
+- VERIFIED: lint:stories 0, repo lint 0, tsc 0, build-storybook green,
+  index.json = 88 docs + 780 stories (docs were 0), 48 woff2 font assets bundled,
+  banned patterns grep = only the 3 peer files (carved out, documented).
 
-## NEXT (in order)
-1. Sweep completes → central gates: grep guards = 0 (excl. 3 peer files),
-   `bun run lint:stories`, `bun run lint`, `bun run typecheck`, `bun run lint:css`,
-   `bun run build-storybook` → `storybook-static/index.json` must contain
-   `"type": "docs"` entries > 0 (was 639 stories / 0 docs).
-2. Commit 1 = setup core (package.json, bun.lock, .storybook/*, vercel.json).
-   Commit 2 = 85-file sweep + eslint.config.mjs guards (guards land green with the sweep).
-3. Chromatic full re-baseline run is USER-gated (needs project token; every snapshot
-   changes deliberately). Note in final report.
+## Known-open (not Wave-0 scope)
+- `bun run lint:css` PRE-EXISTING red at HEAD: 138 stylelint errors
+  (formatting class, 99 auto-fixable) across ~20 .module.css — untouched by
+  Wave 0 (0 css files modified). Separate fix-forward commit candidate.
+- Pre-commit AI review hook HANGS and fails open (nested claude hit the same
+  session token limit) — commits landed unreviewed; re-review when limit resets.
+- Chromatic full re-baseline run is USER-gated (needs project token; every
+  snapshot changes deliberately).
+- storybook-static remains git-tracked (rebuilt fresh); untracking is a later-wave
+  decision now that Vercel builds on deploy.
+
+## NEXT
+Wave 1 per the proposal §3: `tsconfig.stories.json` into `typecheck`, then fix the
+~16 phantom/false stories + the 4 real component bugs it flags (Tabs aria-controls
+mismatch, Snackbar autoHideDuration:0, Typography outline inversion, TreeView empty
+glyph).
 
 ## Decisions already made (do not re-litigate)
 - argTypes-description ban DEFERRED to Wave 5 (docgen descriptions must exist on props
