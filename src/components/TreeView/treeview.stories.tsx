@@ -596,6 +596,89 @@ export const SacredTheme: Story = {
   globals: { backgrounds: { value: 'sacred' } },
 }
 
+/**
+ * Sacred theme with `styles.sacredBackgroundGlyphColor` overridden — the
+ * drifting SACRED_GLYPHS hieroglyph particles on the background canvas render
+ * emerald (#34d399) instead of the default gold #FFD700, while the tree items
+ * keep the stock sacred gold styling.
+ */
+export const SacredCustomGlyphColor: Story = {
+  name: 'Themes/Sacred Custom Glyph Color',
+  args: {
+    items: elementTreeData,
+    defaultExpandedItems: ['elements', 'fire'],
+    defaultSelectedItems: ['phoenix'],
+    styles: {
+      theme: 'sacred',
+      sacredBackgroundGlyphColor: '#34d399',
+    },
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+}
+
+// --------------------------------------------------------------------------
+// CALLER-OVERRIDE STYLING
+// --------------------------------------------------------------------------
+
+/**
+ * Exercises every per-state caller override on the styles contract. Pinned
+ * observable state: the selected row ('Available Item') renders the purple
+ * override (violet background/border/text, weight 700, violet glow), the
+ * expanded rows ('Root Folder', 'Mixed Folder') render the teal override with
+ * the underline text-shadow, disabled rows render the overridden slate text
+ * on the slate-tinted background at 0.45 opacity, the expanded chevrons are
+ * magenta and rotated 135deg, and each children group carries a dotted violet
+ * left border with 28px padding and 12px margin. The hover overrides (amber
+ * row, amber chevron, 6px slide) and the focus overrides (dashed violet
+ * outline, violet halo, faint violet fill) appear on pointer hover /
+ * keyboard focus respectively.
+ */
+export const CustomStateOverrides: Story = {
+  name: 'Styling/Custom State Overrides',
+  args: {
+    items: disabledItemsData,
+    defaultExpandedItems: ['root', 'folder'],
+    defaultSelectedItems: ['available'],
+    styles: {
+      theme: 'light',
+      itemSelectedBackgroundColor: 'rgba(147, 51, 234, 0.12)',
+      itemSelectedBorderColor: 'rgba(147, 51, 234, 0.5)',
+      itemSelectedColor: '#7c3aed',
+      itemSelectedFontWeight: 700,
+      itemSelectedTextShadow: '0 1px 2px rgba(147, 51, 234, 0.3)',
+      itemSelectedBoxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)',
+      itemSelectedBackgroundImage:
+        'linear-gradient(90deg, rgba(147, 51, 234, 0.08), transparent)',
+      itemExpandedBackgroundColor: 'rgba(20, 184, 166, 0.08)',
+      itemExpandedBorderColor: 'rgba(20, 184, 166, 0.35)',
+      itemExpandedColor: '#0f766e',
+      itemExpandedFontWeight: 600,
+      itemExpandedTextShadow: '0 1px 0 rgba(20, 184, 166, 0.35)',
+      itemHoverBackgroundColor: 'rgba(245, 158, 11, 0.12)',
+      itemHoverBorderColor: 'rgba(245, 158, 11, 0.4)',
+      itemHoverColor: '#b45309',
+      itemHoverTransform: 'translateX(6px)',
+      itemHoverTextShadow: '0 1px 1px rgba(245, 158, 11, 0.3)',
+      itemHoverBoxShadow: '0 2px 6px rgba(245, 158, 11, 0.25)',
+      itemDisabledBackgroundColor: 'rgba(100, 116, 139, 0.1)',
+      itemDisabledColor: '#64748b',
+      itemDisabledOpacity: 0.45,
+      itemDisabledBorderColor: 'rgba(100, 116, 139, 0.3)',
+      itemFocusedOutline: '2px dashed #7c3aed',
+      itemFocusedOutlineOffset: '3px',
+      itemFocusedBoxShadow: '0 0 0 4px rgba(147, 51, 234, 0.15)',
+      itemFocusedBackgroundColor: 'rgba(147, 51, 234, 0.05)',
+      expandIconExpandedColor: '#d946ef',
+      expandIconExpandedTransform: 'rotate(135deg)',
+      expandIconHoverColor: '#f59e0b',
+      expandIconHoverTransform: 'scale(1.3)',
+      contentPaddingLeft: '28px',
+      contentBorderLeft: '2px dotted rgba(147, 51, 234, 0.4)',
+      contentMarginLeft: '12px',
+    },
+  },
+}
+
 // --------------------------------------------------------------------------
 // COMPREHENSIVE SHOWCASE
 // --------------------------------------------------------------------------

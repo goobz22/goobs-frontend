@@ -28,11 +28,14 @@ import { SACRED_GLYPHS } from '../Icons/sacredGlyphs'
 export type TreeViewItemId = string
 
 /**
- * Public styling contract for TreeView. Transcribed from the old
- * theme/treeview.ts `TreeViewStyles` so caller-supplied overrides keep the
- * exact same prop surface after the CSS-module migration. The `theme` field
- * selects the variant (rendered as data-theme); the remaining fields are
- * caller-supplied overrides applied via the small JS dynamicStyle object.
+ * Public styling contract for TreeView. Descended from the old
+ * theme/treeview.ts `TreeViewStyles`; every remaining key is live. The
+ * `theme` field selects the variant (rendered as data-theme); the remaining
+ * fields are caller-supplied overrides applied via the small JS dynamicStyle
+ * objects. Per-state item overrides (the itemHover, itemSelected,
+ * itemExpanded, and itemDisabled groups) follow the state cascade
+ * disabled > selected > expanded > hover, with the itemFocused overrides
+ * layered last on top.
  */
 export interface TreeViewStyles {
   // Theme selection
@@ -140,18 +143,15 @@ export interface TreeViewStyles {
   labelTextShadow?: string
 
   // Indentation
-  itemChildrenIndentation?: string | number
   levelIndentBase?: number
   levelIndentIncrement?: number
 
   // Sacred theme styling
-  sacredGlyphColor?: string
-  sacredGlyphFontSize?: string
-  sacredGlyphAnimation?: string
-  sacredShimmerBackground?: string
-  sacredShimmerAnimation?: string
+  /**
+   * Fill + glow color of the drifting SACRED_GLYPHS hieroglyph particles on
+   * the sacred theme's background canvas. Defaults to gold (#FFD700).
+   */
   sacredBackgroundGlyphColor?: string
-  sacredBackgroundGlyphAnimation?: string
 
   // Layout and spacing
   margin?: string
@@ -166,13 +166,8 @@ export interface TreeViewStyles {
 
   // States
   disabled?: boolean
+  /** @deprecated No-op since the CSS-module migration — scheduled for removal. */
   outline?: boolean
-
-  // Behavior
-  multiSelect?: boolean
-  checkboxSelection?: boolean
-  disableSelection?: boolean
-  expandOnClick?: boolean
 }
 
 export interface TreeViewItem {
@@ -401,6 +396,17 @@ interface TreeViewContextValue {
 
 const TreeViewContext = createContext<TreeViewContextValue | null>(null)
 
+/**
+ * Access the internal TreeView context from a descendant (custom tree-item
+ * renderers or controls composed inside a `<TreeView>`). Exposes the current
+ * selection / expansion / focus / disabled sets, the item / parent / children
+ * lookup maps, the behavior flags (multiSelect, checkboxSelection, …), the
+ * resolved `styles` object, and the toggle / focus callbacks.
+ *
+ * Must be called from a component rendered INSIDE a `<TreeView>` — it throws
+ * `Error('useTreeViewContext must be used within a TreeView')` when no
+ * provider is above it in the React tree.
+ */
 const useTreeViewContext = () => {
   const context = useContext(TreeViewContext)
   if (!context) {
@@ -629,10 +635,26 @@ const buildContainerOverrideStyle = (styles: TreeViewStyles): CSSProperties => {
   return overrides
 }
 
-/** Caller-supplied item overrides → inline style object (tree item <div>). */
+/** Per-item interaction/selection state, used to pick the caller overrides. */
+interface TreeItemStateFlags {
+  isHovered: boolean
+  isSelected: boolean
+  isExpanded: boolean
+  isFocused: boolean
+  isDisabled: boolean
+}
+
+/**
+ * Caller-supplied item overrides → inline style object (tree item <div>).
+ * Base overrides apply first; the per-state overrides then win following the
+ * same cascade the CSS module encodes (disabled > selected > expanded >
+ * hover), with the focused overrides layered last — mirroring the pre-CSS-
+ * module JS state resolution.
+ */
 const buildItemOverrideStyle = (
   styles: TreeViewStyles,
-  totalIndent: number
+  totalIndent: number,
+  state: TreeItemStateFlags
 ): CSSProperties => {
   // The level-based indent is a runtime-measured scalar → CSS custom property.
   const overrides: CSSProperties = {
@@ -652,6 +674,95 @@ const buildItemOverrideStyle = (
   if (styles.itemPadding) overrides.padding = styles.itemPadding
   if (styles.itemMinHeight) overrides.minHeight = styles.itemMinHeight
   if (styles.itemMargin) overrides.margin = styles.itemMargin
+
+  // Per-state caller overrides — applied inline so they win over the CSS-
+  // module state rules, exactly like the base overrides above. The else-if
+  // chain mirrors the CSS :not() guards (hover never paints over a
+  // selected/expanded/disabled row).
+  if (state.isDisabled) {
+    if (styles.itemDisabledBackgroundColor)
+      overrides.backgroundColor = styles.itemDisabledBackgroundColor
+    if (styles.itemDisabledColor) overrides.color = styles.itemDisabledColor
+    if (styles.itemDisabledOpacity !== undefined)
+      overrides.opacity = styles.itemDisabledOpacity
+    if (styles.itemDisabledBorderColor)
+      overrides.borderColor = styles.itemDisabledBorderColor
+  } else if (state.isSelected) {
+    if (styles.itemSelectedBackgroundColor)
+      overrides.backgroundColor = styles.itemSelectedBackgroundColor
+    if (styles.itemSelectedBorderColor)
+      overrides.borderColor = styles.itemSelectedBorderColor
+    if (styles.itemSelectedColor) overrides.color = styles.itemSelectedColor
+    if (styles.itemSelectedFontWeight)
+      overrides.fontWeight = styles.itemSelectedFontWeight
+    if (styles.itemSelectedTextShadow)
+      overrides.textShadow = styles.itemSelectedTextShadow
+    if (styles.itemSelectedBoxShadow)
+      overrides.boxShadow = styles.itemSelectedBoxShadow
+    if (styles.itemSelectedBackgroundImage)
+      overrides.backgroundImage = styles.itemSelectedBackgroundImage
+  } else if (state.isExpanded) {
+    if (styles.itemExpandedBackgroundColor)
+      overrides.backgroundColor = styles.itemExpandedBackgroundColor
+    if (styles.itemExpandedBorderColor)
+      overrides.borderColor = styles.itemExpandedBorderColor
+    if (styles.itemExpandedColor) overrides.color = styles.itemExpandedColor
+    if (styles.itemExpandedFontWeight)
+      overrides.fontWeight = styles.itemExpandedFontWeight
+    if (styles.itemExpandedTextShadow)
+      overrides.textShadow = styles.itemExpandedTextShadow
+  } else if (state.isHovered) {
+    if (styles.itemHoverBackgroundColor)
+      overrides.backgroundColor = styles.itemHoverBackgroundColor
+    if (styles.itemHoverBorderColor)
+      overrides.borderColor = styles.itemHoverBorderColor
+    if (styles.itemHoverColor) overrides.color = styles.itemHoverColor
+    if (styles.itemHoverTransform)
+      overrides.transform = styles.itemHoverTransform
+    if (styles.itemHoverTextShadow)
+      overrides.textShadow = styles.itemHoverTextShadow
+    if (styles.itemHoverBoxShadow)
+      overrides.boxShadow = styles.itemHoverBoxShadow
+  }
+
+  // Focus overrides layer on top of whatever state won above (the old JS
+  // applied focus unconditionally after the state cascade).
+  if (state.isFocused) {
+    if (styles.itemFocusedOutline) overrides.outline = styles.itemFocusedOutline
+    if (styles.itemFocusedOutlineOffset)
+      overrides.outlineOffset = styles.itemFocusedOutlineOffset
+    if (styles.itemFocusedBoxShadow)
+      overrides.boxShadow = styles.itemFocusedBoxShadow
+    if (styles.itemFocusedBackgroundColor)
+      overrides.backgroundColor = styles.itemFocusedBackgroundColor
+  }
+
+  return overrides
+}
+
+/**
+ * Caller-supplied children-group overrides → inline style object (the
+ * recursive children wrapper). The top-level `itemChildrenIndentation` prop
+ * rides along as the --tree-children-indent custom property;
+ * `styles.contentPaddingLeft` wins over it when both are supplied (inline
+ * padding-left beats the CSS var the class rule reads).
+ */
+const buildChildrenGroupOverrideStyle = (
+  styles: TreeViewStyles,
+  itemChildrenIndentation: string | number
+): CSSProperties => {
+  const overrides: CSSProperties = {
+    // Caller-supplied indentation is a dynamic scalar → CSS var.
+    // Match React's number→px coercion for the bare-number case.
+    ['--tree-children-indent' as string]:
+      typeof itemChildrenIndentation === 'number'
+        ? `${itemChildrenIndentation}px`
+        : itemChildrenIndentation,
+  }
+  if (styles.contentPaddingLeft)
+    overrides.paddingLeft = styles.contentPaddingLeft
+  if (styles.contentBorderLeft) overrides.borderLeft = styles.contentBorderLeft
+  if (styles.contentMarginLeft) overrides.marginLeft = styles.contentMarginLeft
   return overrides
 }
 
@@ -776,9 +887,25 @@ const buildExpandIconStyle = (
     }
   }
 
-  // Caller overrides
+  // Caller overrides — generic first, then per-state (state-specific wins).
+  // The disabled dimming is never overridden, matching the item cascade.
   if (styles.expandIconColor) resolved.color = styles.expandIconColor
   if (styles.expandIconFontSize) resolved.fontSize = styles.expandIconFontSize
+  if (!isDisabled) {
+    if (isExpanded) {
+      if (styles.expandIconExpandedColor)
+        resolved.color = styles.expandIconExpandedColor
+      if (styles.expandIconExpandedTransform)
+        resolved.transform = styles.expandIconExpandedTransform
+    } else if (isHovered) {
+      if (styles.expandIconHoverColor)
+        resolved.color = styles.expandIconHoverColor
+      // Row-level hover transform; set inline it wins over the CSS-module
+      // .iconContainer:hover svg scale flourish.
+      if (styles.expandIconHoverTransform)
+        resolved.transform = styles.expandIconHoverTransform
+    }
+  }
 
   return resolved
 }
@@ -787,10 +914,12 @@ const buildExpandIconStyle = (
 // SACRED DECORATIONS
 // --------------------------------------------------------------------------
 
-const SacredBackground: FC<{ width: number; height: number }> = ({
-  width,
-  height,
-}) => {
+const SacredBackground: FC<{
+  width: number
+  height: number
+  /** Particle fill + glow color (styles.sacredBackgroundGlyphColor). */
+  glyphColor?: string
+}> = ({ width, height, glyphColor }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -846,11 +975,11 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
 
         ctx.save()
         ctx.globalAlpha = particle.opacity
-        ctx.fillStyle = '#FFD700'
+        ctx.fillStyle = glyphColor ?? '#FFD700'
         ctx.font = `${particle.size}px serif`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.shadowColor = 'rgba(255, 215, 0, 0.3)'
+        ctx.shadowColor = glyphColor ?? 'rgba(255, 215, 0, 0.3)'
         ctx.shadowBlur = 2
         ctx.fillText(particle.glyph, particle.x, particle.y)
         ctx.restore()
@@ -860,7 +989,7 @@ const SacredBackground: FC<{ width: number; height: number }> = ({
     animate(0)
 
     return () => cancelAnimationFrame(animationId)
-  }, [width, height])
+  }, [width, height, glyphColor])
 
   return <canvas ref={canvasRef} className={cssStyles.sacredBackground} />
 }
@@ -909,8 +1038,23 @@ const TreeItem: FC<TreeItemProps> = ({
   // state styling now lives in TreeView.module.css; these carry only the
   // styles?.itemX overrides plus the --tree-item-indent custom property.
   const itemOverrideStyle = useMemo(
-    () => buildItemOverrideStyle(styles, totalIndent),
-    [styles, totalIndent]
+    () =>
+      buildItemOverrideStyle(styles, totalIndent, {
+        isHovered,
+        isSelected,
+        isExpanded,
+        isFocused,
+        isDisabled,
+      }),
+    [
+      styles,
+      totalIndent,
+      isHovered,
+      isSelected,
+      isExpanded,
+      isFocused,
+      isDisabled,
+    ]
   )
   const iconContainerOverrideStyle = useMemo(
     () => buildIconContainerOverrideStyle(styles),
@@ -1377,14 +1521,10 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                 <div
                   className={cssStyles.childrenGroup}
                   data-theme={styles.theme || 'light'}
-                  style={{
-                    // Caller-supplied indentation is a dynamic scalar → CSS var.
-                    // Match React's number→px coercion for the bare-number case.
-                    ['--tree-children-indent' as string]:
-                      typeof itemChildrenIndentation === 'number'
-                        ? `${itemChildrenIndentation}px`
-                        : itemChildrenIndentation,
-                  }}
+                  style={buildChildrenGroupOverrideStyle(
+                    styles,
+                    itemChildrenIndentation
+                  )}
                 >
                   {renderTree(children, level + 1)}
                 </div>
@@ -1485,6 +1625,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
             <SacredBackground
               width={containerSize.width}
               height={containerSize.height}
+              glyphColor={styles.sacredBackgroundGlyphColor}
             />
           )}
 

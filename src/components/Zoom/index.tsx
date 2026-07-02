@@ -22,9 +22,6 @@ export interface ZoomStyles {
   // Animation properties
   in?: boolean
   timeout?: number
-  appear?: boolean
-  enter?: boolean
-  exit?: boolean
 
   // Transform properties
   transformOrigin?: string

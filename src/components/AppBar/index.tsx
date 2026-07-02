@@ -15,9 +15,9 @@ import cssStyles from './AppBar.module.css'
 // --------------------------------------------------------------------------
 // STYLES INTERFACE
 // --------------------------------------------------------------------------
-// Inlined (no theme import) so the AppBar component owns its public styling
-// contract directly, matching the Button/Chip/Card convention. Field set
-// kept in lockstep with theme/appbar.ts AppBarStyles.
+// The AppBar component owns its public styling contract directly, matching
+// the Button/Chip/Card convention. Every key here is read in this file and
+// wired to a CSS custom property consumed by AppBar.module.css.
 
 export interface AppBarStyles {
   // Theme selection
@@ -58,22 +58,12 @@ export interface AppBarStyles {
   minHeight?: string
   zIndex?: number
 
-  // Glyph styling
-  glyphColor?: string
-  glyphFontSize?: string
-  glyphAnimation?: string
-
-  // Shimmer effect (sacred theme)
-  shimmerBackground?: string
-  shimmerAnimation?: string
-
   // Transitions
   transitionDuration?: string
   transitionEasing?: string
 
   // States
   disabled?: boolean
-  elevated?: boolean
 }
 
 // --------------------------------------------------------------------------

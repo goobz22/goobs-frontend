@@ -20,9 +20,6 @@ export interface SlideStyles {
   // Animation properties
   in?: boolean
   timeout?: number
-  appear?: boolean
-  enter?: boolean
-  exit?: boolean
 
   // Slide direction
   direction?: 'up' | 'down' | 'left' | 'right'

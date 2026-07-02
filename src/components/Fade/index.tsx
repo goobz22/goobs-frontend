@@ -18,9 +18,6 @@ export interface FadeStyles {
   // Animation properties
   in?: boolean
   timeout?: number
-  appear?: boolean
-  enter?: boolean
-  exit?: boolean
 
   // Custom transition
   transition?: string
