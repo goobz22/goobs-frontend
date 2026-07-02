@@ -5,7 +5,7 @@
 import React, { useState, useCallback } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect, userEvent } from 'storybook/test'
-import Popover from './index'
+import Popover, { type PopoverStyles } from './index'
 import Button from '../Button'
 
 const meta: Meta<typeof Popover> = {
@@ -56,9 +56,7 @@ const PopoverContent = ({ theme }: { theme?: string }) => (
       elements.
     </p>
     <div style={{ display: 'flex', gap: '8px' }}>
-      <Button
-        styles={{ theme: (theme as any) || 'light', fontSize: '0.875rem' }}
-      >
+      <Button styles={{ theme: theme || 'light', fontSize: '0.875rem' }}>
         Action
       </Button>
     </div>
@@ -70,7 +68,7 @@ const InteractivePopover = ({
   styles,
   children,
 }: {
-  styles?: any
+  styles: PopoverStyles
   children: React.ReactNode
 }) => {
   const [open, setOpen] = useState(false)
@@ -84,7 +82,7 @@ const InteractivePopover = ({
     <div style={{ padding: '100px' }}>
       <Button
         ref={anchorRefCallback}
-        styles={{ theme: styles?.theme || 'light' }}
+        styles={{ theme: styles.theme || 'light' }}
         onClick={() => setOpen(!open)}
       >
         Toggle Popover
@@ -357,15 +355,23 @@ export const CustomColors: Story = {
   ),
 }
 
+/**
+ * Demonstrates the positioning overrides `PopoverStyles` actually supports.
+ * The popover surface is `position: fixed`; `top` and `left` replace the
+ * anchor-derived coordinates (piped in as `--popover-top` / `--popover-left`),
+ * and `marginTop: '0'` removes the default 0.5rem gap below the anchor. The
+ * popover therefore renders pinned to the top-left corner of the viewport
+ * instead of hanging below its trigger button.
+ */
 export const CustomPosition: Story = {
   name: 'Customization/Custom Position',
   render: () => (
     <InteractivePopover
       styles={{
         theme: 'light',
-        marginTop: '2rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        top: '24px',
+        left: '24px',
+        marginTop: '0',
       }}
     >
       <div style={{ padding: '16px', minWidth: '200px', textAlign: 'center' }}>
@@ -375,7 +381,8 @@ export const CustomPosition: Story = {
           Custom Position
         </h3>
         <p style={{ margin: '0', fontSize: '0.875rem', color: '#666' }}>
-          This popover has custom positioning with centered alignment.
+          This popover overrides top and left, so it is pinned to the
+          viewport&apos;s top-left corner instead of its anchor.
         </p>
       </div>
     </InteractivePopover>

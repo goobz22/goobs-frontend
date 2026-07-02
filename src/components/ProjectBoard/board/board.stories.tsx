@@ -6,8 +6,6 @@ import ProjectBoard from '../index'
 import { ProjectBoardProvider } from '../context/ProjectBoardContext'
 import {
   Task,
-  BoardVariant,
-  BoardType,
   RawStatus,
   RawSubStatus,
   RawTopic,
@@ -17,6 +15,14 @@ import {
   RawEmployee,
   RawCompany,
   RawSeverityLevel,
+  RawService,
+  RawRegion,
+  RawProduct,
+  TaskMeeting,
+  NewMeetingData,
+  AdministratorBoardProps,
+  CompanyBoardProps,
+  CustomerBoardProps,
 } from '../types'
 
 // Sample raw data for all the components
@@ -126,6 +132,52 @@ const sampleRawSeverityLevels: RawSeverityLevel[] = [
   { _id: 's4', severityLevel: 4, description: 'Low' },
 ]
 
+const sampleRawServices: RawService[] = [
+  { _id: 'svc1', serviceName: 'Managed IT Support' },
+  { _id: 'svc2', serviceName: 'Network Monitoring' },
+  { _id: 'svc3', serviceName: 'Cloud Backup' },
+]
+
+const sampleRawProducts: RawProduct[] = [
+  { _id: 'p1', productName: 'Product A' },
+  { _id: 'p2', productName: 'Analytics Suite' },
+  { _id: 'p3', productName: 'Firewall Appliance' },
+]
+
+const sampleRawRegions: RawRegion[] = [
+  { _id: 'r1', regionName: 'North America' },
+  { _id: 'r2', regionName: 'Europe' },
+  { _id: 'r3', regionName: 'Asia Pacific' },
+]
+
+const sampleMeetings: TaskMeeting[] = [
+  {
+    _id: 'm1',
+    eventTypeName: 'Troubleshooting Call',
+    attendeeName: 'John Doe',
+    attendeeEmail: 'john.doe@example.com',
+    startTime: '2023-12-15T15:00:00.000Z',
+    endTime: '2023-12-15T15:30:00.000Z',
+    status: 'confirmed',
+    location: 'Zoom',
+    notes: 'Walk through the login failure together',
+    meetingType: 'video',
+    taskId: 't1',
+  },
+  {
+    _id: 'm2',
+    eventTypeName: 'Billing Review',
+    attendeeName: 'Jane Smith',
+    attendeeEmail: 'jane.smith@example.com',
+    startTime: '2023-12-18T17:00:00.000Z',
+    endTime: '2023-12-18T17:30:00.000Z',
+    status: 'pending',
+    location: 'Phone',
+    meetingType: 'phone',
+    taskId: 't2',
+  },
+]
+
 const sampleColumns = [
   { _id: '1', title: 'Open', description: 'Open tasks' },
   {
@@ -215,7 +267,9 @@ const sampleTasks: Task[] = [
   },
 ]
 
-const commonArgs = {
+// The full shared prop set, typed against the REAL props union (minus the discriminant and
+// the administrator-only company roster) so a phantom or missing prop fails typecheck here.
+const commonArgs: Omit<AdministratorBoardProps, 'variant' | 'rawCompanies'> = {
   columns: sampleColumns,
   tasks: sampleTasks,
   rawStatuses: sampleRawStatuses,
@@ -225,21 +279,55 @@ const commonArgs = {
   rawArticles: sampleRawArticles,
   rawCustomers: sampleRawCustomers,
   rawEmployees: sampleRawEmployees,
-  rawCompanies: sampleRawCompanies,
   rawSeverityLevels: sampleRawSeverityLevels,
+  rawServices: sampleRawServices,
+  rawProducts: sampleRawProducts,
+  rawRegions: sampleRawRegions,
   currentUser: { _id: 'u1', firstName: 'Test', lastName: 'User' },
+  customerId: 'c1',
+  companyId: 'comp1',
+  preferDropdown: true,
+  permissions: { access: 'write' },
+  meetings: sampleMeetings,
+  currentDate: new Date('2023-12-14T12:00:00.000Z'),
   onAdd: (task: Omit<Task, '_id'>) => console.log('Add task:', task),
   onEdit: (task: { _id: string }) => console.log('Edit task:', task),
   onDelete: (task: { _id: string }) => console.log('Delete task:', task),
-  onDuplicate: (task: { _id: string }) => console.log('Duplicate task:', task),
   onComment: (text: string, taskId: string) =>
     console.log('Add comment:', text, 'to task:', taskId),
   onEditComment: (commentId: string, text: string, taskId: string) =>
     console.log('Edit comment:', commentId, text, 'to task:', taskId),
-  onRevisionHistory: (commentId: string, revisionHistory: any[]) =>
-    console.log('Revision history:', commentId, revisionHistory),
-  variant: 'administrator' as BoardVariant,
-  boardType: 'status' as BoardType,
+  onScheduleMeeting: (meetingData: NewMeetingData) =>
+    console.log('Schedule meeting:', meetingData),
+  onCancelMeeting: (meetingId: string, reason: string) =>
+    console.log('Cancel meeting:', meetingId, 'reason:', reason),
+  onConfirmMeeting: (meetingId: string) =>
+    console.log('Confirm meeting:', meetingId),
+  onRescheduleMeeting: (
+    meetingId: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => console.log('Reschedule meeting:', meetingId, newStartTime, newEndTime),
+  boardType: 'status',
+  styles: { theme: 'light' },
+}
+
+// Per-variant arg sets, each typed as its exact union member — rawCompanies exists ONLY on the
+// administrator variant, so the company/customer stories can no longer smuggle it in.
+const administratorArgs: AdministratorBoardProps = {
+  ...commonArgs,
+  variant: 'administrator',
+  rawCompanies: sampleRawCompanies,
+}
+
+const companyArgs: CompanyBoardProps = {
+  ...commonArgs,
+  variant: 'company',
+}
+
+const customerArgs: CustomerBoardProps = {
+  ...commonArgs,
+  variant: 'customer',
 }
 
 const meta: Meta<typeof ProjectBoard> = {
@@ -293,7 +381,7 @@ export const LightTheme: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
+    ...administratorArgs,
     styles: {
       theme: 'light',
     },
@@ -326,7 +414,7 @@ export const DarkTheme: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
+    ...administratorArgs,
     styles: {
       theme: 'dark',
     },
@@ -359,7 +447,7 @@ export const SacredTheme: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
+    ...administratorArgs,
     styles: {
       theme: 'sacred',
     },
@@ -392,7 +480,7 @@ export const SeverityBoard: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
+    ...administratorArgs,
     boardType: 'severityLevel',
     columns: [
       { _id: 's1', title: 'Critical', description: 'Critical issues' },
@@ -432,7 +520,7 @@ export const TopicBoard: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
+    ...administratorArgs,
     boardType: 'topic',
     columns: [
       {
@@ -480,9 +568,7 @@ export const CompanyVariant: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
-    variant: 'company',
-    companyId: 'comp1',
+    ...companyArgs,
     styles: {
       theme: 'light',
     },
@@ -515,9 +601,7 @@ export const CustomerVariant: Story = {
     </ProjectBoardProvider>
   ),
   args: {
-    ...commonArgs,
-    variant: 'customer',
-    customerId: 'c1',
+    ...customerArgs,
     styles: {
       theme: 'sacred',
     },

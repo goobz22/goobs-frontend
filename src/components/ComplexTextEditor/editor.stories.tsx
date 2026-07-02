@@ -527,6 +527,17 @@ export const ComprehensiveShowcase: Story = {
 // MODE SWITCHING DEMONSTRATION
 // --------------------------------------------------------------------------
 
+/**
+ * External mode-switching demo. ComplexTextEditor has NO controlled `mode`
+ * prop — `initialMode` / `styles.defaultMode` are read exactly once, as the
+ * initializer of its internal `useState<EditorMode>` (see
+ * `determineStartMode` in ./index.tsx). Re-rendering with a new
+ * `defaultMode` therefore does nothing. To drive the mode from outside, the
+ * demo remounts the editor via `key={mode}` and feeds the selection through
+ * `initialMode={mode}`, which is what the component's contract supports.
+ * Content survives the remount because `value`/`onChange` are controlled
+ * from this wrapper's state, not the editor's internal state.
+ */
 const ModeSwitchingDemo = () => {
   const [value, setValue] = useState(
     '# Welcome\n\nThis editor supports **multiple modes**:\n\n- Simple text\n- **Rich text** with formatting\n- Markdown editing'
@@ -578,13 +589,14 @@ const ModeSwitchingDemo = () => {
       </div>
 
       <ComplexTextEditor
+        key={mode}
         label={`${mode.charAt(0).toUpperCase() + mode.slice(1)} Editor`}
         value={value}
         onChange={setValue}
         editorType="complex"
+        initialMode={mode}
         styles={{
           theme: 'light',
-          defaultMode: mode,
           showModeToggle: true,
         }}
       />
