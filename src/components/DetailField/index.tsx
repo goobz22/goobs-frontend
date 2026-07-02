@@ -70,6 +70,13 @@ function isEmptyValue(value: ReactNode): boolean {
   return value === null || value === undefined || value === ''
 }
 
+/**
+ * Read-only label/value couplet rendered as a `<dt>`/`<dd>` pair wrapped in a
+ * `<div>` — valid `<dl>` content, so it slots into `<DetailGrid>` (or any
+ * definition list) while also working standalone. `hideWhenEmpty` renders
+ * nothing for null/undefined/empty values, `mono` switches the value to the
+ * mono stack, and `valueColor` overrides the value color inline.
+ */
 const DetailField = forwardRef<HTMLDivElement, DetailFieldProps>(
   function DetailField({ label, value, mono, valueColor, hideWhenEmpty }, ref) {
     if (hideWhenEmpty && isEmptyValue(value)) return null
@@ -128,6 +135,13 @@ export interface DetailGridProps {
   children?: ReactNode
 }
 
+/**
+ * Responsive definition-list grid of `DetailField` couplets: composes
+ * `FieldGrid` for the column track (min column width via `minColWidth`,
+ * default 200px) but renders as a `<dl>` so the block is one semantic group
+ * of term/description pairs. Populate via the `fields` array or by nesting
+ * `<DetailField>` children.
+ */
 const DetailGrid = forwardRef<HTMLDListElement, DetailGridProps>(
   function DetailGrid(
     { fields, minColWidth = '200px', gap, ariaLabel, className, children },
