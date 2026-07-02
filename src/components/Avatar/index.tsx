@@ -71,12 +71,13 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     const isDisabled = styles?.disabled || false
 
     // Caller-supplied scalar overrides layer on top of the CSS defaults.
-    // Border resolution mirrors the old getAvatarTheme: only `borderColor`
-    // (with optional `borderWidth`) produces a border override here — a bare
-    // `styles.border` was never read by the original theme logic.
-    const resolvedBorder = styles?.borderColor
-      ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
-      : undefined
+    // Border precedence: a full `border` shorthand wins; otherwise
+    // `borderColor` (with optional `borderWidth`) composes one.
+    const resolvedBorder =
+      styles?.border ??
+      (styles?.borderColor
+        ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
+        : undefined)
 
     const dynamicStyle: CSSProperties = {
       ...(styles?.width !== undefined && { width: styles.width }),

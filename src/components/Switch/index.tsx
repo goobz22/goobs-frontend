@@ -13,14 +13,10 @@ import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 // --------------------------------------------------------------------------
 
 export interface SwitchStyles {
-  /** Theme selection: light, dark, or sacred (default). */
+  /** Theme selection: 'light', 'dark' (default), or 'sacred'. */
   theme?: 'light' | 'dark' | 'sacred'
   /** Whether to show outline. */
   outline?: boolean
-  /** Whether the switch is disabled. */
-  disabled?: boolean
-  /** Whether the switch is checked. */
-  checked?: boolean
   /** Custom track width. */
   trackWidth?: string
   /** Custom track height. */
@@ -51,14 +47,8 @@ export interface SwitchStyles {
   checkedTrackColor?: string
   /** Custom checked thumb color. */
   checkedThumbColor?: string
-  /** Custom hover effects. */
-  hoverEffects?: boolean
-  /** Custom focus effects. */
+  /** Set false to suppress the focus-visible ring (data-focus-effects). */
   focusEffects?: boolean
-  /** Custom sacred glyph left. */
-  sacredGlyphLeft?: string
-  /** Custom sacred glyph right. */
-  sacredGlyphRight?: string
 }
 
 // --------------------------------------------------------------------------

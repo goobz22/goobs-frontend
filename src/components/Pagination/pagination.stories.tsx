@@ -36,11 +36,6 @@ const meta: Meta<typeof Pagination> = {
       control: 'boolean',
       description: 'Show the jump-to-last-page button',
     },
-    color: {
-      control: 'select',
-      options: ['primary', 'secondary', 'standard'],
-      description: 'Color variant',
-    },
     styles: {
       control: 'object',
       description: 'Styling options including theme, disabled, gap, and padding',

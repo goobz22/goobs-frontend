@@ -250,6 +250,12 @@ const Alert: React.FC<AlertProps> = ({
     dynamicStyle['--alert-hover-box-shadow'] = styles.hoverBoxShadow
   if (styles?.hoverBorderColor)
     dynamicStyle['--alert-hover-border-color'] = styles.hoverBorderColor
+  if (styles?.hoverBackgroundColor)
+    dynamicStyle['--alert-hover-background'] = styles.hoverBackgroundColor
+  // Caller borderColor overrides the severity border (highest-precedence hook
+  // in the border cascade: caller > severity > theme fallback).
+  if (styles?.borderColor)
+    dynamicStyle['--alert-border-color-override'] = styles.borderColor
 
   // Per-severity overrides (background/border/color/text-shadow).
   if (styles?.errorBackgroundColor)
@@ -342,6 +348,8 @@ const Alert: React.FC<AlertProps> = ({
   if (iconFilter) iconStyle.filter = iconFilter
   if (styles?.iconHoverTransform)
     dynamicStyle['--alert-icon-hover-transform'] = styles.iconHoverTransform
+  if (styles?.iconHoverFilter)
+    dynamicStyle['--alert-icon-hover-filter'] = styles.iconHoverFilter
 
   // Defensive guard: an out-of-enum `severity` leaves `Icon` undefined, which
   // would throw "Element type is invalid / is not a function" when React tries

@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: var(--pagination-padding, 8px);
 }
 
 /* --------------------------------------------------------------------------
@@ -34,7 +34,7 @@
 .buttonContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--pagination-gap, 8px);
 }
 
 /* ==========================================================================

@@ -121,6 +121,9 @@ const MetricCard = memo(function MetricCard({
   if (propStyles?.width) {
     dynamicStyle['--mc-min-width'] = propStyles.width
   }
+  if (propStyles?.height) {
+    dynamicStyle['--mc-height'] = propStyles.height
+  }
   if (propStyles?.padding) {
     dynamicStyle['--mc-padding'] = propStyles.padding
   }

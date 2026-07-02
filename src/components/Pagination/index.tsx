@@ -22,7 +22,6 @@ export interface PaginationProps {
   hideNextButton?: boolean
   showFirstButton?: boolean
   showLastButton?: boolean
-  color?: 'primary' | 'secondary' | 'standard'
   /**
    * Stable test selector — emitted as `data-pagination-field` on the
    * <nav> root. Use when the page has multiple pagination instances (e.g.
@@ -38,9 +37,13 @@ export interface PaginationProps {
    */
   ariaLabel?: string
   styles?: {
+    /** Disables every page/nav button. */
     disabled?: boolean
+    /** 'sacred' renders the gold palette; anything else keeps the default. */
     theme?: string
+    /** Gap between the button container's children (CSS length). */
     gap?: string
+    /** Padding on the root nav (CSS length; default 8px). */
     padding?: string
   }
   renderItem?: (item: PaginationRenderItemParams) => ReactNode
@@ -283,6 +286,14 @@ const Pagination: FC<PaginationProps> = ({
       data-pagination-current-page={page}
       data-pagination-count={count}
       {...(dataField !== undefined && { 'data-pagination-field': dataField })}
+      style={
+        {
+          ...(styles?.gap !== undefined && { '--pagination-gap': styles.gap }),
+          ...(styles?.padding !== undefined && {
+            '--pagination-padding': styles.padding,
+          }),
+        } as React.CSSProperties
+      }
       {...rest}
     >
       <div className={cssStyles.buttonContainer}>

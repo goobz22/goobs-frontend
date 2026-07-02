@@ -40,7 +40,7 @@
   border-width: var(--alert-border-width, 1px);
   border-style: solid;
   /* severity blocks below set border-color; this is the theme fallback */
-  border-color: rgba(229, 231, 235, 0.8);
+  border-color: var(--alert-border-color-override, rgba(229, 231, 235, 0.8));
   border-radius: var(--alert-border-radius, var(--goobs-radius-xl));
   box-shadow: var(
     --alert-box-shadow,
@@ -78,22 +78,22 @@
    -------------------------------------------------------------------------- */
 .root[data-severity='error'] {
   background-color: var(--alert-error-bg, rgba(254, 242, 242, 0.9));
-  border-color: var(--alert-error-border, rgba(248, 113, 113, 0.4));
+  border-color: var(--alert-border-color-override, var(--alert-error-border, rgba(248, 113, 113, 0.4)));
   color: var(--alert-error-color, rgb(153, 27, 27));
 }
 .root[data-severity='warning'] {
   background-color: var(--alert-warning-bg, rgba(255, 251, 235, 0.9));
-  border-color: var(--alert-warning-border, rgba(251, 191, 36, 0.4));
+  border-color: var(--alert-border-color-override, var(--alert-warning-border, rgba(251, 191, 36, 0.4)));
   color: var(--alert-warning-color, rgb(146, 64, 14));
 }
 .root[data-severity='info'] {
   background-color: var(--alert-info-bg, rgba(239, 246, 255, 0.9));
-  border-color: var(--alert-info-border, var(--goobs-blue-light-a40));
+  border-color: var(--alert-border-color-override, var(--alert-info-border, var(--goobs-blue-light-a40)));
   color: var(--alert-info-color, rgb(30, 64, 175));
 }
 .root[data-severity='success'] {
   background-color: var(--alert-success-bg, rgba(240, 253, 244, 0.9));
-  border-color: var(--alert-success-border, var(--goobs-green-a40));
+  border-color: var(--alert-border-color-override, var(--alert-success-border, var(--goobs-green-a40)));
   color: var(--alert-success-color, rgb(21, 128, 61));
 }
 
@@ -107,6 +107,16 @@
     0 4px 12px var(--goobs-black-a12),
     0 2px 6px rgba(0, 0, 0, 0.08)
   );
+
+  /* Caller hover-background hook — the var is set only when the caller passed
+     styles.hoverBackgroundColor; unset, the declaration is invalid at
+     computed-value time and the severity/theme background stays in charge. */
+  background: var(--alert-hover-background);
+}
+
+/* Caller iconHoverFilter hook (same set-only-when-passed contract). */
+.root:hover .icon {
+  filter: var(--alert-icon-hover-filter);
 }
 
 /* ==========================================================================
@@ -114,7 +124,7 @@
    ========================================================================== */
 .root[data-theme='dark'] {
   background: var(--goobs-slate-a95);
-  border-color: rgba(75, 85, 99, 0.8);
+  border-color: var(--alert-border-color-override, rgba(75, 85, 99, 0.8));
   box-shadow: var(
     --alert-box-shadow,
     0 2px 8px var(--goobs-black-a30),
@@ -124,22 +134,22 @@
 
 .root[data-theme='dark'][data-severity='error'] {
   background-color: var(--alert-error-bg, rgba(127, 29, 29, 0.3));
-  border-color: var(--alert-error-border, rgba(248, 113, 113, 0.4));
+  border-color: var(--alert-border-color-override, var(--alert-error-border, rgba(248, 113, 113, 0.4)));
   color: var(--alert-error-color, rgb(252, 165, 165));
 }
 .root[data-theme='dark'][data-severity='warning'] {
   background-color: var(--alert-warning-bg, rgba(120, 53, 15, 0.3));
-  border-color: var(--alert-warning-border, rgba(251, 191, 36, 0.4));
+  border-color: var(--alert-border-color-override, var(--alert-warning-border, rgba(251, 191, 36, 0.4)));
   color: var(--alert-warning-color, rgb(254, 215, 170));
 }
 .root[data-theme='dark'][data-severity='info'] {
   background-color: var(--alert-info-bg, rgba(30, 64, 175, 0.3));
-  border-color: var(--alert-info-border, var(--goobs-blue-light-a40));
+  border-color: var(--alert-border-color-override, var(--alert-info-border, var(--goobs-blue-light-a40)));
   color: var(--alert-info-color, rgb(191, 219, 254));
 }
 .root[data-theme='dark'][data-severity='success'] {
   background-color: var(--alert-success-bg, rgba(20, 83, 45, 0.3));
-  border-color: var(--alert-success-border, var(--goobs-green-a40));
+  border-color: var(--alert-border-color-override, var(--alert-success-border, var(--goobs-green-a40)));
   color: var(--alert-success-color, rgb(187, 247, 208));
 }
 
@@ -150,6 +160,7 @@
     0 4px 12px var(--goobs-black-a40),
     0 2px 6px var(--goobs-black-a30)
   );
+  background: var(--alert-hover-background);
 }
 
 /* ==========================================================================
@@ -158,7 +169,7 @@
 .root[data-theme='sacred'] {
   background: var(--goobs-sacred-surface);
   border-width: var(--alert-border-width, 2px);
-  border-color: var(--goobs-gold-a40);
+  border-color: var(--alert-border-color-override, var(--goobs-gold-a40));
   box-shadow: var(--alert-box-shadow, var(--goobs-shadow-sacred-sm));
   font-family: var(--alert-font-family, var(--goobs-font-sacred));
   font-size: var(--alert-font-size, var(--goobs-text-xl));
@@ -186,7 +197,7 @@
    glass card), only color + text-shadow change. */
 .root[data-theme='sacred'][data-severity='error'] {
   background-color: var(--alert-error-bg, var(--goobs-sacred-surface));
-  border-color: var(--alert-error-border, var(--goobs-gold-a40));
+  border-color: var(--alert-border-color-override, var(--alert-error-border, var(--goobs-gold-a40)));
   color: var(--alert-error-color, rgba(255, 120, 120, 0.9));
   text-shadow: var(
     --alert-error-text-shadow,
@@ -195,19 +206,19 @@
 }
 .root[data-theme='sacred'][data-severity='warning'] {
   background-color: var(--alert-warning-bg, var(--goobs-sacred-surface));
-  border-color: var(--alert-warning-border, var(--goobs-gold-a40));
+  border-color: var(--alert-border-color-override, var(--alert-warning-border, var(--goobs-gold-a40)));
   color: var(--alert-warning-color, var(--goobs-gold-a90));
   text-shadow: var(--alert-warning-text-shadow, 0 0 10px var(--goobs-gold-a50));
 }
 .root[data-theme='sacred'][data-severity='info'] {
   background-color: var(--alert-info-bg, var(--goobs-sacred-surface));
-  border-color: var(--alert-info-border, var(--goobs-gold-a40));
+  border-color: var(--alert-border-color-override, var(--alert-info-border, var(--goobs-gold-a40)));
   color: var(--alert-info-color, rgba(120, 200, 255, 0.9));
   text-shadow: var(--alert-info-text-shadow, 0 0 10px rgba(120, 200, 255, 0.5));
 }
 .root[data-theme='sacred'][data-severity='success'] {
   background-color: var(--alert-success-bg, var(--goobs-sacred-surface));
-  border-color: var(--alert-success-border, var(--goobs-gold-a40));
+  border-color: var(--alert-border-color-override, var(--alert-success-border, var(--goobs-gold-a40)));
   color: var(--alert-success-color, rgba(120, 255, 150, 0.9));
   text-shadow: var(
     --alert-success-text-shadow,
@@ -220,6 +231,7 @@
   transform: var(--alert-hover-transform, translateY(-2px));
   box-shadow: var(--alert-hover-box-shadow, var(--goobs-shadow-sacred-glow));
   border-color: var(--alert-hover-border-color, var(--goobs-gold-a60));
+  background: var(--alert-hover-background);
 }
 
 /* --------------------------------------------------------------------------
