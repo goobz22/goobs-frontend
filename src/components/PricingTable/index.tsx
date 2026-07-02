@@ -33,7 +33,6 @@ export interface PricingProps {
   /** Disabled state */
   disabled?: boolean
   highlightedPackageIndex?: number
-  defaultBilling?: 'monthly' | 'annual'
 }
 
 export interface SubFeature {

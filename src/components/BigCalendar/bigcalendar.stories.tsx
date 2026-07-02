@@ -180,7 +180,6 @@ export const WithFilters: Story = {
     currentDate: anchor,
     view: 'month',
     showFilters: true,
-    availableEventTypes: ['meeting', 'task', 'holiday'],
     availableResources: [
       { id: 'eng', title: 'Engineering' },
       { id: 'billing', title: 'Billing' },

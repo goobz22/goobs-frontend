@@ -121,8 +121,6 @@ export interface BigCalendarProps {
   onViewChange?: (view: CalendarView) => void
   onDateChange?: (date: Date) => void
   eventRenderer?: (event: CalendarEvent) => React.ReactNode
-  height?: string | number
-  width?: string | number
   showToolbar?: boolean
   minCellHeight?: number
   hourHeight?: number
@@ -132,9 +130,7 @@ export interface BigCalendarProps {
   showFilters?: boolean
   filters?: CalendarFilterOptions
   onFiltersChange?: (filters: CalendarFilterOptions) => void
-  availableEventTypes?: string[]
   availableResources?: { id: string; title: string }[]
-  availableStatuses?: string[]
   // Inline standardized dropdown datasets
   cities?: string[]
   propertyTypes?: string[]
@@ -157,8 +153,6 @@ export default function BigCalendar({
   onViewChange,
   onDateChange,
   eventRenderer,
-  // height and width props are intentionally ignored to enforce full-height layout
-  // Deprecated: height and width are ignored to enforce full-height layout
   showToolbar = true,
   minCellHeight = 80,
   hourHeight = 60,

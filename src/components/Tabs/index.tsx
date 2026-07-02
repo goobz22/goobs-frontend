@@ -347,12 +347,6 @@ export interface TabProps {
   /** Forwarded keyboard handler — parent owns the arrow-key/home/end
    *  routing across the tablist. */
   onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void
-  styles?: {
-    theme?: string
-    padding?: string
-    fontSize?: string
-    fontWeight?: string | number
-  }
 }
 
 export const Tab: React.FC<TabProps> = ({
