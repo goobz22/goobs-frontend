@@ -61,7 +61,7 @@ const DropdownWithState: React.FC<DropdownWithStateProps> = ({
         helperTextType: error ? 'error' : 'info',
       }}
       value={value}
-      onChange={e => setValue(e.target.value)}
+      onChange={nextValue => setValue(nextValue)}
     />
   )
 }
@@ -215,7 +215,6 @@ export const RequiredDropdown: Story = {
         styles={{
           theme: 'sacred',
           requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
         }}
       />
     </div>
@@ -258,7 +257,7 @@ export const ErrorStates: Story = {
           theme: 'dark',
           borderErrorColor: 'rgba(255, 99, 71, 1)',
           labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          helperTextErrorColor: 'rgba(255, 99, 71, 1)',
         }}
       />
       <DropdownWithState
@@ -636,7 +635,7 @@ const InteractiveDemo: React.FC = () => {
         label="Interactive Dropdown"
         options={sampleOptions}
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={nextValue => setValue(nextValue)}
         {...(error ? { helperText: error } : {})}
         styles={{
           theme,

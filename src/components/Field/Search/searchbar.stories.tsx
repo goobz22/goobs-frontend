@@ -11,8 +11,8 @@ import SearchBar from './index'
 // Wrapper component for state management
 const SearchBarWithState = ({ initialValue = '', ...props }) => {
   const [value, setValue] = useState(initialValue)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value)
+  const handleChange = (newValue: string) => {
+    setValue(newValue)
   }
   return <SearchBar {...props} value={value} onChange={handleChange} />
 }
@@ -489,8 +489,7 @@ const SearchDemo = () => {
     'Nintendo Switch',
   ]
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchQuery = e.target.value
+  const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery)
     setIsSearching(true)
 

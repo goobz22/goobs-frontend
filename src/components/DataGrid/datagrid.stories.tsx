@@ -477,7 +477,7 @@ const sampleFilters: DataGridFilter[] = [
   },
 ]
 
-const commonArgs: Partial<DatagridProps> = {
+const commonArgs = {
   columns: sampleColumns,
   rows: sampleRows,
   buttons: [{ text: 'Add New' }] as ButtonProps[],
@@ -508,9 +508,7 @@ const commonArgs: Partial<DatagridProps> = {
     // In a real app, this would save to backend
     return Promise.resolve()
   },
-  allowRowCreation: true,
-  creationRowPosition: 'top',
-}
+} satisfies DatagridProps
 
 const meta: Meta<typeof DataGrid> = {
   title: 'Components/DataGrid',
@@ -1183,8 +1181,6 @@ export const SacredThemeWithMetrics: Story = {
           theme: 'sacred',
         }}
         showIdColumns={true}
-        allowRowCreation={true}
-        creationRowPosition="top"
         onRowCreation={(rowData: Record<string, any>) => {
           console.log('Row creation:', rowData)
           return Promise.resolve()
@@ -1200,8 +1196,6 @@ export const SacredThemeWithMetrics: Story = {
     rows: sampleRows,
     filters: sampleFilters,
     metrics: employeeMetrics,
-    allowRowCreation: true,
-    creationRowPosition: 'top',
     styles: {
       theme: 'sacred',
     },
@@ -1339,8 +1333,6 @@ const InlineRowCreationDemo: React.FC<DatagridProps> = args => {
         {...args}
         rows={rows}
         onRowCreation={handleRowCreation}
-        allowRowCreation={true}
-        creationRowPosition="top"
         onCellSave={(rowId: string, field: string, value: string) => {
           console.log('Cell save:', { rowId, field, value })
           // Update existing row
@@ -1418,8 +1410,6 @@ const ValidationTestDemo: React.FC<DatagridProps> = args => {
         {...args}
         rows={rows}
         onRowCreation={handleRowCreation}
-        allowRowCreation={true}
-        creationRowPosition="top"
         onCellSave={(rowId: string, field: string, value: string) => {
           console.log('Cell save:', { rowId, field, value })
           setRows(prev =>
@@ -1607,8 +1597,6 @@ const BillingInformationExampleDemo: React.FC = () => {
         columns={billingColumns}
         rows={rows}
         onRowCreation={handleRowCreation}
-        allowRowCreation={true}
-        creationRowPosition="top"
         onCellSave={(rowId: string, field: string, value: string) => {
           console.log('Cell save:', { rowId, field, value })
           setRows(prev =>

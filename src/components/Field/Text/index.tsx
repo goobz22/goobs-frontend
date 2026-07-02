@@ -20,7 +20,7 @@ export interface TextFieldProps {
   label?: React.ReactNode
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
-  error?: string | boolean
+  error?: string | boolean | undefined
   /**
    * Marks the field required — renders the required indicator next to the label
    * and sets `aria-required` on the input. Top-level ergonomic alias for

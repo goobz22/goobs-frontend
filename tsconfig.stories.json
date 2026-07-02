@@ -1,0 +1,30 @@
+{
+  // Stories-only type gate. The root tsconfig excludes *.stories.tsx, which is
+  // how phantom-prop stories (props the component doesn't declare) shipped
+  // undetected — see docs/audits/story-jsdoc-audit-2026-07-01.md §6-B/§6-C.
+  // Run via `bun run typecheck` (tsc -p tsconfig.stories.json).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "incremental": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    // Peer-authored, still-untracked story batch (repo rule R13: flag, never
+    // edit another agent's in-flight files). Remove once their author commits
+    // + migrates them to the Wave-0/1 standard.
+    "src/components/Card/card.stories.tsx",
+    "src/components/Filter/Section/filterSection.stories.tsx",
+    "src/components/Metric/Accordion/metricsAccordion.stories.tsx"
+  ]
+}

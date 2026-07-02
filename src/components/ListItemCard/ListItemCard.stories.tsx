@@ -40,6 +40,7 @@ function EditableList() {
       const target = index + delta
       if (target < 0 || target >= next.length) return prev
       const [item] = next.splice(index, 1)
+      if (!item) return prev
       next.splice(target, 0, item)
       return next
     })
@@ -53,10 +54,10 @@ function EditableList() {
           selected={selectedId === step.id}
           onSelect={() => setSelectedId(step.id)}
           onRemove={() => setSteps(prev => prev.filter(s => s.id !== step.id))}
-          onMoveUp={index > 0 ? () => move(index, -1) : undefined}
-          onMoveDown={
-            index < steps.length - 1 ? () => move(index, +1) : undefined
-          }
+          {...(index > 0 ? { onMoveUp: () => move(index, -1) } : {})}
+          {...(index < steps.length - 1
+            ? { onMoveDown: () => move(index, +1) }
+            : {})}
           reorderLabel={`Reorder ${step.name}`}
           accentColor="#22c55e"
         >

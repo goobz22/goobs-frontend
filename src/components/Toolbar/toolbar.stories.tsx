@@ -16,7 +16,7 @@ const sampleSearchProps: SearchbarProps = {
   label: 'Search Something',
   placeholder: 'Type here...',
   value: '',
-  onChange: e => console.log('Searching =>', e.target.value),
+  onChange: value => console.log('Searching =>', value),
 }
 
 const meta: Meta<typeof CustomToolbar> = {

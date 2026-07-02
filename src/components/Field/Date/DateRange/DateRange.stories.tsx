@@ -6,12 +6,17 @@
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect, fn } from 'storybook/test'
-import DateRangeComponent, { DateRange } from './index'
+import DateRangeComponent, {
+  type DateRange,
+  type DateRangeProps,
+} from './index'
 
 // Wrapper component for state management
 const DateRangeWithState = ({
-  initialValue = { start: null, end: null } as DateRange,
+  initialValue = { start: null, end: null },
   ...props
+}: Omit<DateRangeProps, 'value' | 'onChange'> & {
+  initialValue?: DateRange
 }) => {
   const [value, setValue] = useState<DateRange>(initialValue)
   const handleChange = (dateRange: DateRange) => {
@@ -32,7 +37,6 @@ const meta: Meta<typeof DateRangeComponent> = {
   argTypes: {
     value: { control: 'object' },
     onChange: { action: 'changed' },
-    disabled: { control: 'boolean' },
     startLabel: { control: 'text' },
     endLabel: { control: 'text' },
     error: { control: 'text' },
@@ -238,7 +242,7 @@ export const ErrorStates: Story = {
           theme: 'dark',
           borderErrorColor: 'rgba(255, 99, 71, 1)',
           labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          helperTextErrorColor: 'rgba(255, 99, 71, 1)',
         }}
       />
       <DateRangeWithState
@@ -261,30 +265,27 @@ export const RequiredFields: Story = {
       <DateRangeWithState
         startLabel="Required Start"
         endLabel="Required End"
-        required
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', required: true }}
       />
       <DateRangeWithState
         startLabel="Project Start"
         endLabel="Project End"
-        required
         error="Both dates are required"
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', required: true }}
       />
       <DateRangeWithState
         startLabel="Planning Start"
         endLabel="Planning End"
-        required
-        styles={{ theme: 'dark' }}
+        styles={{ theme: 'dark', required: true }}
       />
       <DateRangeWithState
         startLabel="Custom Required Start"
         endLabel="Custom Required End"
-        required
         styles={{
           theme: 'sacred',
+          required: true,
           requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          '--field-required-indicator': 'rgba(255, 215, 0, 1)',
         }}
       />
     </div>
@@ -323,8 +324,7 @@ export const ComprehensiveShowcase: Story = {
           <DateRangeWithState
             startLabel="Required Start"
             endLabel="Required End"
-            required
-            styles={{ theme: 'light' }}
+            styles={{ theme: 'light', required: true }}
           />
         </div>
       </div>
@@ -456,8 +456,7 @@ export const DisabledStates: Story = {
           start: new Date('2024-01-01'),
           end: new Date('2024-01-31'),
         }}
-        disabled
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', disabled: true }}
       />
       <DateRangeWithState
         startLabel="Disabled Dark Start"
@@ -466,8 +465,7 @@ export const DisabledStates: Story = {
           start: new Date('2024-01-01'),
           end: new Date('2024-01-31'),
         }}
-        disabled
-        styles={{ theme: 'dark' }}
+        styles={{ theme: 'dark', disabled: true }}
       />
       <DateRangeWithState
         startLabel="Disabled Sacred Start"
@@ -476,8 +474,7 @@ export const DisabledStates: Story = {
           start: new Date('2024-01-01'),
           end: new Date('2024-01-31'),
         }}
-        disabled
-        styles={{ theme: 'sacred' }}
+        styles={{ theme: 'sacred', disabled: true }}
       />
     </div>
   ),
@@ -531,9 +528,8 @@ const DateRangeValidationDemo = () => {
           setDateRange(value)
           if (error) validateDateRange(value)
         }}
-        required
         error={error}
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', required: true }}
       />
       <button
         onClick={handleSubmit}

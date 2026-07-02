@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { within, expect } from 'storybook/test'
 import FieldGrid from './index'
-import TextField from '../Field/Text'
+import TextField, { type TextFieldProps } from '../Field/Text'
 
 // State-wrapper mirroring the TextField stories' idiom so the fields are live.
 const StatefulTextField = ({
@@ -15,10 +15,7 @@ const StatefulTextField = ({
   ...props
 }: {
   initialValue?: string
-  label?: string
-  placeholder?: string
-  styles?: Record<string, unknown>
-}) => {
+} & Omit<TextFieldProps, 'value' | 'onChange'>) => {
   const [value, setValue] = useState(initialValue)
   return <TextField {...props} value={value} onChange={setValue} />
 }

@@ -102,7 +102,6 @@ export const HighErrorCorrection: Story = {
 export const NoValue: Story = {
   name: 'No Value (Error State)',
   args: {
-    value: undefined,
     styles: { theme: 'light' },
   },
 }

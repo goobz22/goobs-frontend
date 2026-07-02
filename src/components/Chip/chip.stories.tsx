@@ -126,14 +126,19 @@ export const SacredDisabled: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
-/** The chip without its default outline. */
+/**
+ * The chip without its default outline, achieved via the real styling API:
+ * `borderColor` / `hoverBorderColor` set to `'transparent'` (there is no
+ * boolean `outline` prop on `ChipStyles`).
+ */
 export const NoOutline: Story = {
   name: 'Theme/No Outline',
   args: {
     label: 'No Outline',
     styles: {
       theme: 'light',
-      outline: false,
+      borderColor: 'transparent',
+      hoverBorderColor: 'transparent',
     },
   },
 }

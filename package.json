@@ -32,7 +32,7 @@
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
     "start": "storybook dev -p 6006",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.stories.json",
     "typecheck:file": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{jsx,ts,tsx}\" --fix --max-warnings=0",
     "lint:file": "eslint --fix --max-warnings=0",

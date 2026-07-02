@@ -11,8 +11,8 @@ import PasswordField from './index'
 // Wrapper component for state management
 const PasswordFieldWithState = ({ initialValue = '', ...props }) => {
   const [value, setValue] = useState(initialValue)
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value)
+  const handleChange = (newValue: string) => {
+    setValue(newValue)
   }
   return <PasswordField {...props} value={value} onChange={handleChange} />
 }
@@ -521,8 +521,7 @@ const PasswordValidationDemo = () => {
     })
   }
 
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = event.target.value
+  const handlePasswordChange = (newPassword: string) => {
     setPassword(newPassword)
     setErrors(prev => ({
       ...prev,
@@ -531,10 +530,7 @@ const PasswordValidationDemo = () => {
     }))
   }
 
-  const handleConfirmPasswordChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newConfirmPassword = event.target.value
+  const handleConfirmPasswordChange = (newConfirmPassword: string) => {
     setConfirmPassword(newConfirmPassword)
     setErrors(prev => ({
       ...prev,

@@ -177,8 +177,8 @@ const UserProfileForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           <PasswordField
             label="Password"
             value={formData.password}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, password: e.target.value }))
+            onChange={value =>
+              setFormData(prev => ({ ...prev, password: value }))
             }
             placeholder="Enter password"
             styles={{ theme, required: true }}
@@ -189,8 +189,8 @@ const UserProfileForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           label="Department"
           options={departmentOptions}
           value={formData.department}
-          onChange={e =>
-            setFormData(prev => ({ ...prev, department: e.target.value }))
+          onChange={value =>
+            setFormData(prev => ({ ...prev, department: value }))
           }
           styles={{ theme, required: true }}
         />
@@ -458,8 +458,8 @@ const TallContentForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
             label="Department"
             options={options}
             value={formData.dropdown1}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, dropdown1: e.target.value }))
+            onChange={value =>
+              setFormData(prev => ({ ...prev, dropdown1: value }))
             }
             styles={{ theme }}
           />
@@ -467,8 +467,8 @@ const TallContentForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
             label="Level"
             options={options}
             value={formData.dropdown2}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, dropdown2: e.target.value }))
+            onChange={value =>
+              setFormData(prev => ({ ...prev, dropdown2: value }))
             }
             styles={{ theme }}
           />
@@ -527,8 +527,8 @@ const TallContentForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
             label="Final Dropdown"
             options={options}
             value={formData.dropdown5}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, dropdown5: e.target.value }))
+            onChange={value =>
+              setFormData(prev => ({ ...prev, dropdown5: value }))
             }
             styles={{ theme }}
           />
@@ -726,8 +726,8 @@ const SettingsDialog = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           label="Privacy"
           options={privacyOptions}
           value={settings.privacy}
-          onChange={e =>
-            setSettings(prev => ({ ...prev, privacy: e.target.value }))
+          onChange={value =>
+            setSettings(prev => ({ ...prev, privacy: value }))
           }
           styles={{ theme }}
         />
@@ -738,8 +738,8 @@ const SettingsDialog = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
           label="Language"
           options={languageOptions}
           value={settings.language}
-          onChange={e =>
-            setSettings(prev => ({ ...prev, language: e.target.value }))
+          onChange={value =>
+            setSettings(prev => ({ ...prev, language: value }))
           }
           styles={{ theme }}
         />
