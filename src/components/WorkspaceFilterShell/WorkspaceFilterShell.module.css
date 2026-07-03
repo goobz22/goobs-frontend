@@ -1,0 +1,171 @@
+/* =============================================================================
+ * WORKSPACE FILTER SHELL — CSS MODULE
+ *
+ * Owns ONLY the vertical rhythm of the metrics → nav → filter → content stack.
+ * The slotted goobs primitives keep their own internal styling; the shell just
+ * spaces them so the region reads as one system across workspaces.
+ *
+ * Rhythm (custom properties so a consumer can retune per-workspace via inline
+ * style overrides without new props):
+ *   --wfs-gap        normal inter-zone gap  (metrics → nav)
+ *   --wfs-gap-tight  HALF that              (nav → filter, filter → content)
+ * =========================================================================== */
+
+.shell {
+  --wfs-gap: clamp(16px, 3vw, 24px);
+  --wfs-gap-tight: clamp(10px, 2vw, 14px);
+  /* The shell OWNS the content-region inset, so every workspace gets the same
+     padding around its metrics / nav / filter / cards without hand-rolling a
+     padded wrapper of its own (override with the `style`/`className` escape
+     hatch if a host truly needs a different inset). */
+  --wfs-pad: clamp(12px, 3vw, 24px);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  padding: var(--wfs-pad);
+  box-sizing: border-box;
+}
+
+/* Metrics sits above the nav with the normal inter-zone rhythm. */
+.metrics {
+  margin-bottom: var(--wfs-gap);
+  min-width: 0;
+}
+
+/* Nav (chip tabs) sits directly above the filter with the TIGHT gap so the
+   section tabs bind visually to the filter+content block they act on. Chip
+   Tabs ship margin-bottom:0, so this margin is the whole nav→filter gap. */
+.nav {
+  margin-bottom: var(--wfs-gap-tight);
+  min-width: 0;
+}
+
+/* Secondary nav row (e.g. a sub-section chip strip) sits tight under the
+   primary nav and tight above the filter — both nav levels read as one group. */
+.subNav {
+  margin-bottom: var(--wfs-gap-tight);
+  min-width: 0;
+}
+
+/* Filter + content form one integrated block: the filter reads as the head of
+   the card area, separated from it by only the tight gap. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wfs-gap-tight);
+  width: 100%;
+  min-width: 0;
+}
+
+.filter {
+  width: 100%;
+  min-width: 0;
+}
+
+.content {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Built-in pagination, rendered below the content (the cards). */
+.pagination {
+  /* border-box so the box's own padding + border fit INSIDE its 100% width —
+     otherwise it renders wider than the card section above it. */
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1vw, 8px);
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--wfs-gap-tight);
+  padding: clamp(10px, 2.5vw, 14px);
+  border-radius: clamp(6px, 1.5vw, 10px);
+  border: 1px solid var(--goobs-gold-a20);
+  background-color: var(--goobs-black-a15);
+}
+
+.pageBtn {
+  min-width: clamp(32px, 8vw, 40px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2.5vw, 16px);
+  border-radius: clamp(4px, 1vw, 6px);
+  border: 1px solid var(--goobs-gold-a30);
+  background: transparent;
+  color: var(--goobs-sacred-text-secondary);
+  font-family: var(--goobs-font-standard);
+  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  cursor: pointer;
+  transition: var(--goobs-transition-medium);
+}
+
+.pageBtn:hover:not(:disabled, .pageBtnActive) {
+  border-color: var(--goobs-gold-a50);
+  color: var(--goobs-gold-a90);
+}
+
+.pageBtnActive {
+  border-color: var(--goobs-gold);
+  background: var(--goobs-gold-a20);
+  color: var(--goobs-gold);
+  font-weight: 700;
+}
+
+.pageBtn:disabled {
+  color: var(--goobs-sacred-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pageEllipsis,
+.pageInfo {
+  color: var(--goobs-sacred-text-muted);
+  font-family: var(--goobs-font-standard);
+  font-size: clamp(0.65rem, 1.6vw, 0.8rem);
+  padding: 0 clamp(4px, 1vw, 8px);
+}
+
+/* Light-theme pagination */
+.shell[data-theme='light'] .pagination {
+  border-color: var(--goobs-light-border);
+  background-color: var(--goobs-black-a04);
+}
+
+.shell[data-theme='light'] .pageBtn {
+  border-color: var(--goobs-light-border);
+  color: var(--goobs-light-text-secondary);
+}
+
+.shell[data-theme='light'] .pageBtn:hover:not(:disabled, .pageBtnActive) {
+  border-color: var(--goobs-light-primary);
+  color: var(--goobs-light-primary);
+}
+
+.shell[data-theme='light'] .pageBtnActive {
+  border-color: var(--goobs-light-primary);
+  background: var(--goobs-blue-a15);
+  color: rgb(29, 78, 216);
+}
+
+/* Dark-theme pagination */
+.shell[data-theme='dark'] .pagination {
+  border-color: var(--goobs-dark-border);
+}
+
+.shell[data-theme='dark'] .pageBtn {
+  border-color: var(--goobs-dark-border);
+  color: var(--goobs-dark-text);
+}
+
+.shell[data-theme='dark'] .pageBtn:hover:not(:disabled, .pageBtnActive) {
+  border-color: var(--goobs-dark-primary);
+  color: var(--goobs-dark-primary);
+}
+
+.shell[data-theme='dark'] .pageBtnActive {
+  border-color: var(--goobs-dark-primary);
+  background: var(--goobs-blue-light-a20);
+  color: var(--goobs-dark-primary);
+}

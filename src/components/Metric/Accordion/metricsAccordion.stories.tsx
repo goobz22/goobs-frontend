@@ -1,0 +1,320 @@
+/**
+ * @fileoverview Storybook stories for the MetricsAccordion component.
+ *
+ * `MetricsAccordion` is the canonical collapsible shell for KPI / metric cards.
+ * It has TWO usage shapes:
+ *   1. `metrics` array mode — pass a flat `MetricCardData[]` (one responsive row)
+ *      or a grouped `MetricsGroup[]` (multiple labelled rows); the component
+ *      renders the `MetricCard`s itself.
+ *   2. children mode — pass arbitrary children and control the inner layout.
+ *
+ * Themes follow the real prop API: `styles.theme === 'sacred'` selects the
+ * dark/gold palette on the accordion wrapper; every other value resolves to the
+ * light shell. The inner `MetricCard`s honor the same `styles` object, so a
+ * `theme: 'dark'` passes through to give dark-slate cards.
+ *
+ * Default state is COLLAPSED — the `initiallyOpen` prop renders the panel
+ * expanded on first paint (used by the expanded-state stories here).
+ */
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import MetricsAccordion, { type MetricsGroup } from './index'
+import type { MetricCardData } from '../types'
+
+// --------------------------------------------------------------------------
+// MOCK DATA
+// --------------------------------------------------------------------------
+
+const sampleMetrics: MetricCardData[] = [
+  {
+    title: 'Total Revenue',
+    value: '$125,000',
+    trend: { value: 12.5, isPositive: true },
+    icon: '💰',
+  },
+  {
+    title: 'Active Users',
+    value: 1234,
+    subtitle: 'Active',
+    trend: { value: 4.2, isPositive: true },
+    icon: '👥',
+  },
+  {
+    title: 'Open Tickets',
+    value: 42,
+    trend: { value: 8.0, isPositive: false },
+    icon: '🎫',
+  },
+  {
+    title: 'Churn',
+    value: '2.1%',
+    trend: { value: 0.8, isPositive: false },
+    icon: '📉',
+  },
+]
+
+const groupedMetrics: MetricsGroup[] = [
+  {
+    label: 'Templates',
+    cards: [
+      { title: 'Active', value: 12, icon: '✓' },
+      { title: 'Draft', value: 3, icon: '✎' },
+    ],
+  },
+  {
+    label: 'By Target',
+    cards: [
+      { title: 'Email', value: 8, icon: '✉', trend: { value: 3.5, isPositive: true } },
+      { title: 'SMS', value: 4, icon: '☎' },
+    ],
+  },
+  {
+    label: 'Step Types',
+    cards: [
+      { title: 'Delay', value: 6, icon: '⏳' },
+      { title: 'Branch', value: 2, icon: '⑂' },
+    ],
+  },
+]
+
+// --------------------------------------------------------------------------
+// STORYBOOK METADATA
+// --------------------------------------------------------------------------
+
+const meta: Meta<typeof MetricsAccordion> = {
+  title: 'Components/MetricsAccordion',
+  component: MetricsAccordion,
+  argTypes: {
+    title: {
+      control: 'text',
+      description: 'Toggle label (default "Metrics Summary")',
+    },
+    initiallyOpen: {
+      control: 'boolean',
+      description: 'Render the panel expanded on first paint (default collapsed)',
+    },
+    collapsible: {
+      control: 'boolean',
+      description:
+        'Force the accordion shell to render even in metrics-array mode (default true)',
+    },
+    responsiveCollapseOnTablet: {
+      control: 'boolean',
+      description:
+        'In metrics-array mode, auto-render inside the accordion at ≤ 1023px width',
+    },
+    dataField: {
+      control: 'text',
+      description: 'Stable identifier surfaced as data-metrics-accordion-field',
+    },
+    metrics: {
+      control: false,
+      description:
+        'Data-driven mode: a flat MetricCardData[] or a grouped MetricsGroup[]',
+    },
+    children: {
+      control: false,
+      description: 'Children mode: caller-supplied inner layout',
+    },
+    styles: {
+      control: 'object',
+      description:
+        'Style configuration — theme (sacred selects the dark/gold palette; everything else resolves to the light shell) plus an optional accent color.',
+    },
+  },
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  decorators: [
+    Story => (
+      <div style={{ width: '680px', padding: '1rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
+}
+export default meta
+
+type Story = StoryObj<typeof MetricsAccordion>
+
+// --------------------------------------------------------------------------
+// DEFAULT
+// --------------------------------------------------------------------------
+
+/**
+ * The default accordion: data-driven array mode, light shell, expanded so the
+ * responsive card row is visible.
+ */
+export const Default: Story = {
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// THEME STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Light theme — the default shell. `styles.theme` resolves any non-sacred
+ * value to the light `[data-theme='light']` block.
+ */
+export const LightTheme: Story = {
+  name: 'Themes/Light Theme',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/**
+ * Dark theme — the `styles` object passes through to the inner `MetricCard`s,
+ * which have their own `[data-theme='dark']` block for dark-slate cards. Shot
+ * on a dark canvas so the cards read correctly.
+ */
+export const DarkTheme: Story = {
+  name: 'Themes/Dark Theme',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'dark' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+/**
+ * Sacred theme — the dark/gold palette on both the accordion shell and its
+ * cards.
+ */
+export const SacredTheme: Story = {
+  name: 'Themes/Sacred Theme',
+  args: {
+    title: 'Automation Metrics',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'sacred' },
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+// --------------------------------------------------------------------------
+// STATE STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Collapsed state — the default. Only the toggle button is shown; the panel is
+ * not mounted until opened.
+ */
+export const Collapsed: Story = {
+  name: 'States/Collapsed',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: false,
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/**
+ * Expanded state — `initiallyOpen` renders the panel open on first paint.
+ */
+export const Expanded: Story = {
+  name: 'States/Expanded',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/**
+ * Grouped mode — a `MetricsGroup[]` renders multiple labelled rows of cards
+ * (e.g. automations: Templates / By Target / Step Types).
+ */
+export const GroupedMode: Story = {
+  name: 'States/Grouped Mode',
+  args: {
+    title: 'Automation Metrics',
+    metrics: groupedMetrics,
+    initiallyOpen: true,
+    styles: { theme: 'light' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/**
+ * Children mode — the caller supplies the inner layout instead of a `metrics`
+ * array. The accordion is always rendered in this mode.
+ */
+export const ChildrenMode: Story = {
+  name: 'States/Children Mode',
+  render: () => (
+    <MetricsAccordion
+      title="Workspace Summary"
+      initiallyOpen
+      styles={{ theme: 'light' }}
+    >
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: '120px', textAlign: 'center' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>12</div>
+          <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>Active Projects</div>
+        </div>
+        <div style={{ flex: 1, minWidth: '120px', textAlign: 'center' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>3</div>
+          <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>Pending Reviews</div>
+        </div>
+        <div style={{ flex: 1, minWidth: '120px', textAlign: 'center' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>98%</div>
+          <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>Uptime</div>
+        </div>
+      </div>
+    </MetricsAccordion>
+  ),
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}
+
+/**
+ * Accent-color override — `styles.color` sets the `--ma-accent` CSS custom
+ * property on the accordion shell.
+ */
+export const CustomAccent: Story = {
+  name: 'States/Custom Accent',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    dataField: 'workspace-metrics',
+    styles: { theme: 'light', color: 'rgba(147, 51, 234, 1)' },
+  },
+  parameters: {
+    backgrounds: { default: 'light' },
+  },
+}

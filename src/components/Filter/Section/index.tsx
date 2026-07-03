@@ -167,6 +167,11 @@ export interface FilterSectionProps {
   onSearchChange?: (value: string) => void
   searchPlaceholder?: string
   searchDataField?: string
+  /** Slot rendered INSIDE the filter surface, directly below the search row
+   *  (above the dropdown / chip filters). Use for a section sub-nav (a chip
+   *  `<Tabs>`) that should live inside the filter card rather than float above
+   *  it. Optional. */
+  belowSearch?: React.ReactNode
 
   // Filter controls -----------------------------------------------
   dropdowns?: FilterDropdownDef[]
@@ -193,6 +198,21 @@ export interface FilterSectionProps {
 
   // Misc ----------------------------------------------------------
   styles?: { theme?: 'sacred' | 'light' }
+  /**
+   * Give the (non-collapsible) row a self-contained surface — padding, a
+   * subtle border, tinted background, and rounded corners — so it reads as
+   * one grouped card instead of a bare edge-to-edge row (matching the visual
+   * weight of MetricsAccordion beside it). Defaults to false (the unchanged
+   * bare row) so DataGrid and every existing callsite are byte-identical.
+   * Ignored in collapsible mode, which already renders the accordion panel
+   * surface.
+   */
+  surface?: boolean
+  /** Escape hatch — extra className merged onto the section root. */
+  className?: string
+  /** Escape hatch — inline style merged onto the section root (e.g. a margin
+   *  the host layout needs; the component itself ships `margin-bottom: 0`). */
+  style?: React.CSSProperties
   /** Stable test selector for the whole section. Surfaced as
    *  `data-filter-section-field` on the wrapper. */
   dataField?: string
@@ -207,6 +227,10 @@ function kebab(input: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/** Join class names, dropping falsy entries (house helper — no clsx). */
+const cx = (...names: Array<string | false | undefined>): string =>
+  names.filter(Boolean).join(' ')
+
 const AUTO_SEARCHABLE_THRESHOLD = 8
 
 export const FilterSection: React.FC<FilterSectionProps> = ({
@@ -214,6 +238,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   onSearchChange,
   searchPlaceholder = 'Search...',
   searchDataField,
+  belowSearch,
   dropdowns,
   chipClusters,
   dateRanges,
@@ -222,6 +247,9 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   collapsible = false,
   initiallyOpen = true,
   title = 'Filters',
+  surface = false,
+  className,
+  style,
   styles: propStyles,
   dataField,
 }) => {
@@ -385,6 +413,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   key={`btn-${i}-${b.text}`}
                   text={b.text}
                   onClick={b.onClick}
+                  {...(b.icon !== undefined && { icon: b.icon })}
                   {...(b.disabled !== undefined && { disabled: b.disabled })}
                   {...(b.action !== undefined && { action: b.action })}
                   {...(b.subject !== undefined && { subject: b.subject })}
@@ -393,6 +422,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {belowSearch != null && (
+        <div className={styles.belowSearch} data-filter-below-search="true">
+          {belowSearch}
         </div>
       )}
 
@@ -472,14 +507,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   if (!collapsible) {
     return (
       <div
-        className={styles.root}
+        className={cx(styles.root, className)}
         data-theme={theme}
         data-component="FilterSection"
         data-filter-section="true"
+        {...(surface && { 'data-surface': 'true' })}
         {...(dataField !== undefined && {
           'data-subject': dataField,
           'data-filter-section-field': dataField,
         })}
+        {...(style !== undefined && { style })}
       >
         {filterContent}
       </div>
@@ -488,7 +525,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
   return (
     <div
-      className={styles.root}
+      className={cx(styles.root, className)}
       data-theme={theme}
       data-component="FilterSection"
       data-filter-section="true"
@@ -497,6 +534,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         'data-subject': dataField,
         'data-filter-section-field': dataField,
       })}
+      {...(style !== undefined && { style })}
     >
       <button
         type="button"

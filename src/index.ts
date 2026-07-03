@@ -425,6 +425,17 @@ export {
   type FilterToggleDef,
   type FilterButtonDef,
 } from './components/Filter/Section'
+
+// Workspace Filter Shell — a slot-based layout that arranges a metrics slot, a
+// chip-Tabs nav slot, a FilterSection filter slot, and the card content into
+// one consistently-spaced stack (tight nav↔filter gap; filter integrated with
+// the cards). Composes the primitives via slots — does NOT wrap them — so every
+// list/browse workspace gets the same scaffold instead of hand-rolling it.
+export {
+  default as WorkspaceFilterShell,
+  type WorkspaceFilterShellProps,
+  type WorkspaceFilterShellPagination,
+} from './components/WorkspaceFilterShell'
 export type {
   ColumnDef,
   CompositeFieldConfig,
