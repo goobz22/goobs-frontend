@@ -313,3 +313,63 @@ export const WithPanelsAriaPairing: Story = {
     await expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
   },
 }
+
+const chipNavTabs: TabsItem[] = [
+  { title: 'Statements', id: 'statements', count: 12, trigger: 'onClick', onClick: fn() },
+  { title: 'Ledger', id: 'ledger', count: 3, trigger: 'onClick', onClick: fn() },
+  { title: 'Billing', id: 'billing', count: 0, trigger: 'onClick', onClick: fn() },
+  { title: 'Drafts', id: 'drafts', trigger: 'onClick', onClick: fn() },
+]
+
+const ChipAppearanceRenderer = () => {
+  const [activeTab, setActiveTab] = React.useState(0)
+  return (
+    <div style={{ background: '#000000', padding: '24px' }}>
+      <Tabs
+        items={chipNavTabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        appearance="chips"
+        alignment="left"
+        ariaLabel="Chip appearance demo"
+        styles={{ theme: 'sacred' }}
+      />
+      <div style={{ padding: '16px', color: '#ffe680' }}>
+        <p>Chip-appearance tab strip — rounded pills instead of an underline row.</p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * 5) Chip Appearance (regression)
+ *
+ * `appearance="chips"` renders each tab as a rounded pill and drops the
+ * tablist's bottom border. It is PURELY cosmetic: this play test pins the
+ * contract that the markup is otherwise identical — the strip is still
+ * `role="tablist"`, each tab is still `role="tab"` with `aria-selected`,
+ * activation still flips `data-tab-active`, and the count badge still renders —
+ * so switching to chips can never silently regress the a11y / generated-spec
+ * contract (which locates section nav by `role="tab"` and `data-tab-id`).
+ */
+export const ChipAppearance: Story = {
+  render: () => <ChipAppearanceRenderer />,
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const tablist = canvas.getByRole('tablist', {
+      name: 'Chip appearance demo',
+    })
+    await expect(tablist).toHaveAttribute('data-tabs-appearance', 'chips')
+
+    // role="tab" + count badge survive the chip appearance.
+    const ledgerTab = canvas.getByRole('tab', { name: /Ledger/ })
+    await expect(ledgerTab).toHaveTextContent('3')
+
+    // Activation still flips aria-selected + data-tab-active (unchanged).
+    await userEvent.click(ledgerTab)
+    await expect(ledgerTab).toHaveAttribute('aria-selected', 'true')
+    await expect(ledgerTab).toHaveAttribute('data-tab-active', 'true')
+  },
+}

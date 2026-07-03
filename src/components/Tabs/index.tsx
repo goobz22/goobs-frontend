@@ -87,6 +87,15 @@ export interface TabsProps {
   onChange?: (index: number) => void
   alignment?: 'left' | 'center' | 'right' | 'justify'
   /**
+   * Visual treatment of the tab strip. `'underline'` (default) is the
+   * classic bottom-border tab row; `'chips'` renders each tab as a rounded
+   * pill (bordered, tonal fill when active) and drops the strip's bottom
+   * border. Purely cosmetic — `role="tab"`/`role="tablist"` semantics, the
+   * count badge, keyboard roving nav, and every `data-*` selector are
+   * identical in both appearances, so existing tests and AT are unaffected.
+   */
+  appearance?: 'underline' | 'chips'
+  /**
    * `aria-label` on the tablist. Defaults to `"Workspace sections"`.
    * Override when several `<Tabs>` render on the same page.
    */
@@ -125,6 +134,7 @@ const Tabs: React.FC<TabsProps> = ({
   activeTab = 0,
   onChange,
   alignment = 'center',
+  appearance = 'underline',
   ariaLabel = 'Workspace sections',
   styles,
 }) => {
@@ -243,6 +253,7 @@ const Tabs: React.FC<TabsProps> = ({
       className={cssStyles.root}
       data-component="Tabs"
       data-theme={theme}
+      data-tabs-appearance={appearance}
       data-state={String(activeTab)}
       style={containerStyle}
       role="tablist"

@@ -220,3 +220,83 @@
 .tab[data-theme='dark'][data-tab-active='true'] .count {
   background-color: rgba(96, 165, 250, 0.25);
 }
+
+/* ==========================================================================
+   CHIP APPEARANCE ([data-tabs-appearance='chips'])
+   Opt-in via <Tabs appearance="chips">. Renders each tab as a rounded pill
+   instead of an underline tab, and drops the tablist's bottom border. Purely
+   visual — the role="tab"/tablist markup, count badge, keyboard nav, and every
+   data-* selector are unchanged, so tests and AT behave identically. Higher
+   specificity than the base .tab rules (compound .root[attr] .tab) so it wins.
+   ========================================================================== */
+.root[data-tabs-appearance='chips'] {
+  --tabs-border-bottom: none;
+  --tabs-gap: var(--goobs-space-sm);
+  /* Chips carry no underline strip, so the 16px strip-spacing the underline
+     variant needs would just be dead space — the consumer (e.g.
+     WorkspaceFilterShell) owns the gap below a chip nav. */
+  margin-bottom: 0;
+}
+
+.root[data-tabs-appearance='chips'] .tab {
+  border: 1px solid var(--goobs-gold-a30);
+  border-radius: var(--goobs-radius-pill);
+  padding: var(--goobs-space-xs) var(--goobs-space-md);
+  background: var(--goobs-gold-a05);
+}
+
+.root[data-tabs-appearance='chips']
+  .tab:hover:not(:disabled, [data-tab-active='true']) {
+  background: var(--goobs-gold-a10);
+  border-color: var(--goobs-gold-a50);
+  color: var(--goobs-gold-a90);
+}
+
+.root[data-tabs-appearance='chips'] .tab[data-tab-active='true'] {
+  background: var(--goobs-gold-a20);
+  border-color: var(--goobs-gold);
+  color: var(--goobs-gold);
+  box-shadow: 0 0 12px var(--goobs-gold-a30);
+}
+
+/* Light-theme chips */
+.root[data-tabs-appearance='chips'] .tab[data-theme='light'] {
+  border-color: var(--goobs-light-border);
+  background: transparent;
+}
+
+.root[data-tabs-appearance='chips']
+  .tab[data-theme='light']:hover:not(:disabled, [data-tab-active='true']) {
+  background: var(--goobs-blue-a10);
+  border-color: var(--goobs-light-primary);
+  color: rgb(29, 78, 216);
+}
+
+.root[data-tabs-appearance='chips']
+  .tab[data-theme='light'][data-tab-active='true'] {
+  background: var(--goobs-blue-a15);
+  border-color: var(--goobs-light-primary);
+  color: rgb(29, 78, 216);
+  box-shadow: 0 2px 4px var(--goobs-blue-a20);
+}
+
+/* Dark-theme chips */
+.root[data-tabs-appearance='chips'] .tab[data-theme='dark'] {
+  border-color: var(--goobs-dark-border);
+  background: transparent;
+}
+
+.root[data-tabs-appearance='chips']
+  .tab[data-theme='dark']:hover:not(:disabled, [data-tab-active='true']) {
+  background: var(--goobs-blue-light-a15);
+  border-color: var(--goobs-dark-primary);
+  color: var(--goobs-dark-primary);
+}
+
+.root[data-tabs-appearance='chips']
+  .tab[data-theme='dark'][data-tab-active='true'] {
+  background: var(--goobs-blue-light-a20);
+  border-color: var(--goobs-dark-primary);
+  color: var(--goobs-dark-primary);
+  box-shadow: 0 2px 4px var(--goobs-blue-light-a30);
+}
