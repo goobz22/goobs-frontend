@@ -132,6 +132,12 @@
   margin-left: auto;
 }
 
+/* Slot below the search row (inside the surface) — e.g. a section sub-nav. */
+.belowSearch {
+  width: 100%;
+  min-width: 0;
+}
+
 /* Second sub-row holds dropdowns + dateRanges + toggles in a responsive
    grid. Each cell sizes to content; rows wrap on narrow viewports. */
 .controlsRow {
@@ -186,4 +192,39 @@
   flex-wrap: wrap;
   gap: clamp(8px, 2vw, 16px);
   align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   SURFACE variant — opt-in via the `surface` prop (non-collapsible mode).
+   Gives the bare row a self-contained card (padding, subtle border, tinted
+   background, rounded corners) so it reads as one grouped block with the same
+   visual weight as MetricsAccordion beside it. Gated on [data-surface='true'],
+   which no existing callsite (DataGrid included) sets — so their layout is
+   byte-identical.
+   -------------------------------------------------------------------------- */
+.root[data-surface='true'] {
+  /* border-box so the surface's own padding + border fit INSIDE its 100%
+     width — otherwise (content-box default) width:100% + padding + border
+     overflows the parent by ~42px and the card runs off the right edge. */
+  box-sizing: border-box;
+  padding: clamp(12px, 3vw, 18px) clamp(14px, 3vw, 20px);
+  border: 1px solid color-mix(in srgb, var(--fs-accent) 30%, transparent);
+  border-radius: clamp(8px, 2vw, 14px);
+  background-color: var(--fs-panel-bg);
+}
+
+/* Polish scoped to the surface so it cannot regress the bare/DataGrid layout:
+   more separation between the stacked zones, a capped search width so a lone
+   search box doesn't stretch full-bleed, and a slightly larger label→chips gap
+   so each label binds visually to its own chip row. */
+.root[data-surface='true'] .row {
+  gap: clamp(12px, 2.5vw, 18px);
+}
+
+.root[data-surface='true'] .searchRow > .searchCell {
+  max-width: clamp(320px, 45vw, 520px);
+}
+
+.root[data-surface='true'] .chipCluster {
+  gap: clamp(6px, 1.5vw, 8px);
 }
