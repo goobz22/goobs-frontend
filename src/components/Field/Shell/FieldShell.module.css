@@ -43,6 +43,16 @@
   width: 100%;
   font-family: var(--field-font-family);
   color: var(--field-text);
+  /* Containing block for absolutely-positioned field popovers. The Regular
+     Dropdown renders its menu (position:absolute; top:100%; left:0; right:0)
+     as a direct child of the shell with no positioned wrapper of its own
+     (unlike MultiSelect's .wrapper), so without this the menu anchors to
+     whatever distant positioned ancestor the page happens to provide — e.g.
+     the dashboard's fixed layout container, rendering the menu full-width at
+     the bottom of the screen. Every other field's absolute internals sit
+     inside their own local position:relative wrapper, so they re-anchor
+     nowhere and are unaffected. */
+  position: relative;
 }
 
 .shell[data-theme='dark'] {
