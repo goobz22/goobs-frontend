@@ -159,9 +159,15 @@
    own label + wrapping chip-row. Spacing between clusters is generous so
    the dimensions don't visually merge. */
 .chipClusters {
+  /* Chip GROUPS sit side-by-side on ONE row (each group keeps its label above
+     its chips), separated by a visible divider — rather than stacking each
+     group in its own row. Wraps gracefully if a row can't hold them (though
+     callers keep groups < 3 so they fit; ≥3 dimensions use dropdowns). */
   display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vw, 12px);
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: clamp(10px, 2.5vw, 16px);
   width: 100%;
 }
 
@@ -169,6 +175,12 @@
   display: flex;
   flex-direction: column;
   gap: clamp(4px, 1vw, 6px);
+}
+
+/* Visible vertical divider between adjacent chip groups on the same row. */
+.chipCluster:not(:first-child) {
+  padding-left: clamp(10px, 2.5vw, 16px);
+  border-left: 1px solid color-mix(in srgb, var(--fs-accent) 25%, transparent);
 }
 
 .chipClusterLabel {
