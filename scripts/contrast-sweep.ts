@@ -84,9 +84,13 @@ function serveStatic(): Promise<{ server: http.Server; port: number }> {
     try {
       const body = readFileSync(filePath)
       const ext = filePath.slice(filePath.lastIndexOf('.'))
+      // The static build is immutable for the lifetime of a sweep — let the
+      // browser cache aggressively so story navigations don't re-fetch the
+      // whole bundle (re-fetching every chunk per story exhausts winsock
+      // buffers on this machine: net::ERR_NO_BUFFER_SPACE).
       res.writeHead(200, {
         'content-type': MIME[ext] ?? 'application/octet-stream',
-        'cache-control': 'no-store',
+        'cache-control': 'max-age=3600',
       })
       res.end(body)
     } catch {
@@ -122,10 +126,22 @@ async function auditStory(page: Page, base: string, story: StoryEntry): Promise<
   page.on('pageerror', onPageError)
   page.on('console', onConsole)
   try {
-    await page.goto(`${base}/iframe.html?id=${story.id}&viewMode=story`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 20_000,
-    })
+    // Transient loopback failures (buffer exhaustion, nav races) get retries.
+    let lastNavError: unknown
+    for (let navAttempt = 0; navAttempt < 3; navAttempt++) {
+      try {
+        await page.goto(`${base}/iframe.html?id=${story.id}&viewMode=story`, {
+          waitUntil: 'domcontentloaded',
+          timeout: 20_000,
+        })
+        lastNavError = undefined
+        break
+      } catch (err) {
+        lastNavError = err
+        await page.waitForTimeout(1_000)
+      }
+    }
+    if (lastNavError) throw lastNavError
     // Wait for the story root to have rendered children or an error state.
     await page.waitForFunction(
       () => {
