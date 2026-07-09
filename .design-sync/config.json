@@ -36,11 +36,15 @@
     "Toolbar": "CustomToolbar",
     "Tooltip": "StyledTooltip",
     "CVV": "CVVField",
-    "QRCode": "QRCodeComponent"
+    "QRCode": "QRCodeComponent",
+    "MultiSelect": "MultiSelectChip"
   },
   "overrides": {
     "Accordion": { "cardMode": "column" },
     "BigCalendar": { "cardMode": "column" },
+    "Card": { "cardMode": "column" },
+    "FilterSection": { "cardMode": "column" },
+    "MetricsAccordion": { "cardMode": "column" },
     "Fade": { "cardMode": "column" },
     "Zoom": { "cardMode": "column" },
     "MenuItem": { "cardMode": "column" },
