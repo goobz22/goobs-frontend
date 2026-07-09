@@ -25,7 +25,10 @@ const STATIC_DIR = join(ROOT, 'storybook-static')
 const AXE_SOURCE = readFileSync(join(ROOT, 'node_modules/axe-core/axe.min.js'), 'utf8')
 const CHROME_PATH =
   process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-const CDP_PORT = Number(process.env.CDP_PORT ?? 9333)
+const CDP_PORT = Number(process.env.CDP_PORT ?? 9444)
+
+/** Step log to stderr so progress is visible even when stdout is piped/buffered. */
+const step = (msg: string) => console.error(`[sweep ${new Date().toISOString().slice(11, 19)}] ${msg}`)
 
 const args = process.argv.slice(2)
 const argOf = (flag: string) => {
@@ -103,6 +106,7 @@ function serveStatic(): Promise<{ server: http.Server; port: number }> {
 
 async function launchChrome(): Promise<{ proc: ChildProcess; browser: Browser }> {
   const profileDir = mkdtempSync(join(tmpdir(), 'contrast-sweep-chrome-'))
+  step(`launching chrome: ${CHROME_PATH} (cdp :${CDP_PORT})`)
   const proc = spawn(
     CHROME_PATH,
     [
@@ -117,12 +121,18 @@ async function launchChrome(): Promise<{ proc: ChildProcess; browser: Browser }>
     ],
     { stdio: 'ignore', detached: false },
   )
+  proc.on('exit', code => step(`chrome process exited (code ${code})`))
   // Poll CDP until it answers (chrome takes a moment to open the port).
-  for (let attempt = 0; attempt < 60; attempt++) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    if (proc.exitCode !== null) throw new Error(`chrome exited early with code ${proc.exitCode}`)
     try {
-      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`)
+      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`, {
+        timeout: 3000,
+      })
+      step('CDP connected')
       return { proc, browser }
     } catch {
+      if (attempt % 8 === 7) step(`still waiting for CDP (attempt ${attempt + 1}/40)…`)
       await new Promise(r => setTimeout(r, 500))
     }
   }
@@ -208,32 +218,59 @@ async function main() {
   const index = JSON.parse(readFileSync(join(STATIC_DIR, 'index.json'), 'utf8'))
   let stories = (Object.values(index.entries) as StoryEntry[]).filter(e => e.type === 'story')
   if (FILTER) stories = stories.filter(s => s.id.includes(FILTER) || s.title.includes(FILTER))
-  console.log(`sweeping ${stories.length} stories with ${WORKERS} workers…`)
+  step(`sweeping ${stories.length} stories with ${WORKERS} workers…`)
 
   const { server, port } = await serveStatic()
+  step(`static server on :${port}`)
   const base = `http://127.0.0.1:${port}`
   const { proc, browser } = await launchChrome()
   const context = browser.contexts()[0] ?? (await browser.newContext())
+  step('context ready, starting workers')
 
   const results: StoryResult[] = []
   let cursor = 0
   let done = 0
-  const worker = async () => {
-    const page = await context.newPage()
+  const worker = async (workerId: number) => {
+    let page = await context.newPage()
     for (;;) {
       const i = cursor++
       if (i >= stories.length) break
-      const r = await auditStory(page, base, stories[i])
+      const story = stories[i]
+      // Hard watchdog: nothing inside auditStory may hang the worker (evaluate
+      // calls like axe.run have no protocol timeout of their own).
+      let r: StoryResult
+      try {
+        r = await Promise.race([
+          auditStory(page, base, story),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('watchdog: story exceeded 45s')), 45_000),
+          ),
+        ])
+      } catch (err) {
+        r = {
+          id: story.id,
+          title: story.title,
+          name: story.name,
+          status: 'timeout',
+          violations: [],
+          errors: [String(err).slice(0, 200)],
+        }
+        // The page may be wedged mid-evaluate — replace it.
+        await page.close().catch(() => {})
+        page = await context.newPage()
+        step(`worker ${workerId}: page recycled after watchdog on ${story.id}`)
+      }
       results.push(r)
       done++
-      if (done % 50 === 0 || r.status !== 'clean') {
-        const tag = r.status === 'clean' ? `progress ${done}/${stories.length}` : `${r.status.toUpperCase()} ${r.id}`
-        console.log(tag)
+      if (done % 25 === 0 || r.status !== 'clean') {
+        const tag =
+          r.status === 'clean' ? `progress ${done}/${stories.length}` : `${r.status.toUpperCase()} ${r.id}`
+        step(tag)
       }
     }
-    await page.close()
+    await page.close().catch(() => {})
   }
-  await Promise.all(Array.from({ length: WORKERS }, worker))
+  await Promise.all(Array.from({ length: WORKERS }, (_, workerId) => worker(workerId)))
 
   await browser.close().catch(() => {})
   proc.kill()
