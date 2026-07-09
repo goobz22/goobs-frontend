@@ -1,6 +1,6 @@
 # goobs-frontend
 
-goobs-frontend is a comprehensive React-based UI component library featuring a custom design system with 85+ components, built with TypeScript and modern React patterns.
+goobs-frontend is a comprehensive React-based UI component library featuring a custom design system with 100+ components and 260+ icons, built with TypeScript and modern React patterns.
 
 The NPM repo is available here - https://www.npmjs.com/package/goobs-frontend
 
@@ -12,7 +12,9 @@ See component design and documentation in Storybook available here - https://sto
 
 ## Integrating goobs-frontend with Next.js
 
-This guide explains how to integrate goobs-frontend with a Next.js project
+This guide explains how to integrate goobs-frontend with a Next.js project.
+
+Peer dependencies: `react` ^19 and `react-dom` ^19 (required); `next` ^16 (optional — enables the built-in Link/Image integrations).
 
 **Step 1: Install the project**
 
@@ -24,31 +26,49 @@ In your Next.js project directory, run the following command to install goobs-fr
 npm i goobs-frontend
 ```
 
+#### bun
+
+```bash
+bun add goobs-frontend
+```
+
 #### yarn
 
 ```bash
 yarn add goobs-frontend
 ```
 
-**Step 2: Import and use**
+**Step 2: Import the stylesheet (required)**
+
+Component CSS ships as a separate stylesheet — it is not injected by the JS bundle. Import it once at your app root (e.g. `app/layout.tsx`). The self-hosted brand fonts are a separate, optional import:
+
+```tsx
+import 'goobs-frontend/styles' // required — design tokens + all component CSS
+import 'goobs-frontend/fonts' // optional — self-hosted brand fonts (Cinzel, Merriweather, Inter, …)
+```
+
+**Step 3: Import and use components**
 
 goobs-frontend works out of the box with Next.js 16 (Turbopack, Cache Components) — no `transpilePackages` or custom config needed. Just import and use:
 
 ```tsx
-import { Button, DataGrid, Icons } from 'goobs-frontend'
+import { CustomButton, DataGrid, Icons } from 'goobs-frontend'
 ```
+
+A UMD build is also available for script-tag / non-ESM consumers via `goobs-frontend/umd` (global name `GoobsFrontend`; react and react-dom are externalized).
 
 ## Component Library Overview
 
-goobs-frontend provides 85+ fully-featured React components organized into logical categories. All components are built with TypeScript, custom theming, and responsive design principles. For detailed documentation, examples, and interactive demos, visit our [Storybook](https://storybook.technologiesunlimited.net/).
+goobs-frontend provides 100+ fully-featured React components organized into logical categories. All components are built with TypeScript, custom theming, and responsive design principles. For detailed documentation, examples, and interactive demos, visit our [Storybook](https://storybook.technologiesunlimited.net/).
 
 ## Core Component Categories
 
 ### 🎨 Layout & Structure
 
 - **Paper** - Elevated surface container for content sections
-- **Panel** - Sectioned surface with header/body/footer subcomponents
+- **Panel** - Sectioned surface with `Panel.Header` / `Panel.Body` / `Panel.Footer` subcomponents (also importable directly as `PanelHeader` / `PanelBody` / `PanelFooter`)
 - **Content** - Dynamic content renderer supporting multiple content types
+- **WorkspaceFilterShell** - Slot-based scaffold for list/browse workspaces (metrics, nav, filter, and content slots) with a built-in paginator
 - **FieldGrid** - Responsive form-field layout grid
 - **Drawer** - Slide-in side panel for navigation and detail views
 - **Divider** - Visual separators for content organization
@@ -59,8 +79,12 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 **Form Engine**
 
 - **Form** - Zod-native form engine: schema-driven validation, per-field
-  binding by `name`, and submit gating (`useFormField`, `useFieldArray`,
-  `useFieldValues` for dynamic shapes, `SaveButton`)
+  binding by `name`, and submit gating (`SaveButton`, `useFormField`,
+  `useFieldArray`, `useFieldValues` for dynamic shapes, `useFormContext` /
+  `useOptionalFormContext`)
+- **FieldShell** - The canonical field wrapper every input builds on — label,
+  error, and required rendering, plus `useFieldBinding` for wiring custom
+  fields into the engine
 
 **Text Inputs**
 
@@ -71,7 +95,7 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 
 **Specialized Inputs**
 
-- **PhoneNumberField** - Auto-formatting phone number input (+1-xxx-xxx-xxxx)
+- **PhoneNumberField** - Auto-formatting phone number input (+1 xxx-xxx-xxxx)
 - **USDField** / **MoneyText** - Currency input and display with dollar formatting
 - **PercentageField** - Percentage input with % symbol and range validation
 - **ConfirmationCodeInput** - OTP-style multi-digit input with auto-focus progression
@@ -90,7 +114,7 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 
 - **DateField** - Date picker with calendar popup and keyboard navigation
 - **DateRange** - Start/end date selection with range validation
-- **TimeField** / **TimeRange** - Time selection with 12/24 hour support
+- **TimeField** / **TimeRange** - Native time inputs emitting normalized 24-hour `HH:mm` values
 
 **Selection Components**
 
@@ -113,37 +137,39 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 ### 🗂️ Data Display
 
 - **DataGrid** - Advanced data table with sorting, filtering, pagination, and row management
-- **Table** - Lightweight table component for simple data display
-- **Card** - Compound card family (header/body/footer/metrics/grid and more subcomponents)
-- **List** / **ListItemCard** - Flexible lists with custom item rendering
+- **Table** - Lightweight table with composable `TableContainer` / `TableHead` / `TableBody` / `TableRow` / `TableCell` subcomponents
+- **Card** - Compound card family with 25 directly-importable subcomponents (`Card.Header`, `Card.Body`, `Card.Metrics`, `Card.Stats`, `Card.Grid`, and more)
+- **List** / **ListItemCard** - Flexible lists (`ListItem` / `ListItemIcon` / `ListItemText`; `ListItemCard.Order` / `.Icon` / `.Content` / `.Actions`)
 - **DetailField** / **DetailGrid** - Read-only labeled value display
-- **Metric** / **MetricsAccordion** - KPI cards and grouped metric panels
+- **MetricCard** / **MetricsAccordion** - KPI cards and grouped metric panels
 - **PricingTable** - Specialized pricing comparison table with feature highlights
-- **ProjectBoard** - Kanban-style board with drag-and-drop task management
+- **ProjectBoard** - Kanban-style board with drag-and-drop task management (plus `InlineAddTask` / `InlineShowTask` task forms)
 - **BigCalendar** - Month/week/day event calendar with filtering
 - **Markdown** - Rendered markdown display
-- **FilterSection** - Faceted filter panel for list/grid views
+- **FilterSection** - Faceted filter panel for list/grid views, with a collapsible accordion mode, a standalone `surface` mode, and a `belowSearch` slot
 
 ### 🧭 Navigation
 
-- **Tabs** - Horizontal tab navigation with route integration
+- **AppBar** - Top application bar
+- **Tabs** - Horizontal tab navigation with route integration and `underline` or `chips` appearances (standalone `Tab` / `TabPanel` also exported)
 - **Breadcrumb** - Breadcrumb navigation with custom separators
 - **Stepper** - Step-by-step process indicator with customizable states
-- **TreeView** - Hierarchical tree navigation with expand/collapse
-- **Pagination** - Page navigation with customizable page size options
+- **TreeView** - Hierarchical tree navigation with expand/collapse (`useTreeViewApiRef` / `useTreeViewContext` hooks)
+- **Pagination** - Page navigation with sibling/boundary control and first/last buttons
+- **MenuItem** - Menu entry building block for menus and toolbars
 
 ### 🎯 Action Components
 
-- **Button** - Highly customizable button with icon support and flexible positioning
+- **CustomButton** / **ButtonGroup** - Highly customizable button with icon support and flexible positioning, plus grouped button rows
 - **IconButton** - Icon-only buttons with hover states and accessibility
-- **ToggleButton** - Toggle button with active/inactive states
+- **ToggleButton** / **ToggleButtonGroup** - Toggle buttons with active/inactive states
 
 ### 💬 Feedback & Overlays
 
 - **Alert** - Contextual alerts with multiple severity levels
 - **Dialog** - Modal dialogs for complex interactions
-- **Snackbar** - Toast notifications with action buttons
-- **Tooltip** - Enhanced tooltips with custom positioning and styling
+- **Snackbar** - Toast notifications with severity styling and configurable auto-hide
+- **StyledTooltip** - Enhanced tooltips with custom positioning and styling
 - **Popover** - Positioned popup containers
 
 ### 🔧 Utility Components
@@ -151,10 +177,10 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 - **Accordion** - Collapsible content sections with smooth animations
 - **Badge** - Notification badges with custom positioning
 - **Chip** - Compact information chips with delete functionality
-- **Avatar** - User avatars with fallback text and image support
+- **Avatar** - Themed circular avatar container for icon, text, or image children
 - **ProgressBar** - Progress indicators with customizable styling
 - **CodeCopy** - Syntax-highlighted code blocks with one-click copying
-- **QRCodeComponent** - Dynamic QR code generator with TOTP integration
+- **QRCodeComponent** - QR code renderer with an MFA-setup flow (optional confirmation-code input and verify gate)
 - **TransferList** - Dual-list component for moving items between collections
 
 ### 🎨 Design & Animation
@@ -165,9 +191,15 @@ goobs-frontend provides 85+ fully-featured React components organized into logic
 
 ### 🏗️ Advanced Components
 
-- **Toolbar** / **CustomToolbar** - Flexible toolbars with multiple sections and responsive behavior
+- **CustomToolbar** - Flexible toolbar with multiple sections and responsive behavior
 - **FormDataGrid** / **FormProjectBoard** - DataGrid and ProjectBoard wired into the Form engine
 - **FileDropzone** - Drag-and-drop file upload surface
+
+### 🧰 Utilities
+
+- **alpha(color, opacity)** - Hex/RGB → rgba color helper
+- **keyframes** / **css** / **commonKeyframes** - Runtime `@keyframes` helpers, including the sacred glow/float/rotate presets
+- **SACRED_GLYPHS** - The 24-glyph Egyptian-hieroglyph set behind the sacred theme's ornamentation
 
 ### 📱 Mobile-First Design
 
@@ -175,7 +207,7 @@ All components are built with mobile-first responsive design principles, ensurin
 
 ### 🎨 Comprehensive Icon Library
 
-260+ carefully crafted icons covering:
+260+ carefully crafted icons, each importable via the `Icons` namespace (e.g. `Icons.AddIcon`), covering:
 
 - Navigation (arrows, chevrons, menu controls)
 - Actions (add, delete, edit, save, settings)
@@ -188,7 +220,7 @@ All components are built with mobile-first responsive design principles, ensurin
 
 ### 🔧 Customization
 
-- **Three built-in themes** - `sacred` (default), `light`, and `dark` via each component's `styles.theme`
+- **Three built-in themes** - `sacred`, `light`, and `dark` via each component's `styles.theme` prop (defaults are per-component: core surfaces and form fields default to `sacred`; most feedback/utility components and all icons default to `light`)
 - **Token-driven styling** - CSS Modules on a shared `--goobs-*` design-token layer (import `goobs-frontend/styles`; brand fonts via `goobs-frontend/fonts`)
 - **Component Variants** - Multiple pre-built variants for common use cases
 
