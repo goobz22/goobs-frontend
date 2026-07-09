@@ -9,24 +9,18 @@
  *
  * Usage:
  *   bun scripts/contrast-sweep.ts [--filter <substr>] [--out <path>] [--workers N]
- * Requires: a chrome.exe reachable at CHROME_PATH (default install path).
- * Serves storybook-static itself on an ephemeral port; launches its own
- * isolated headless Chrome (separate user-data-dir; never the user's session).
+ * Serves storybook-static itself on an ephemeral port; launches Playwright's
+ * bundled Chromium headless (its own isolated instance; never the user's
+ * Chrome session).
  */
-import { chromium, type Browser, type Page } from 'playwright-core'
-import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs'
-import { spawn, type ChildProcess } from 'node:child_process'
-import { tmpdir } from 'node:os'
+import { chromium, type Browser, type Page } from 'playwright'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import http from 'node:http'
 
 const ROOT = resolve(import.meta.dir, '..')
 const STATIC_DIR = join(ROOT, 'storybook-static')
 const AXE_SOURCE = readFileSync(join(ROOT, 'node_modules/axe-core/axe.min.js'), 'utf8')
-const CHROME_PATH =
-  process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-const CDP_PORT = Number(process.env.CDP_PORT ?? 9444)
-
 /** Step log to stderr so progress is visible even when stdout is piped/buffered. */
 const step = (msg: string) => console.error(`[sweep ${new Date().toISOString().slice(11, 19)}] ${msg}`)
 
@@ -104,40 +98,14 @@ function serveStatic(): Promise<{ server: http.Server; port: number }> {
   })
 }
 
-async function launchChrome(): Promise<{ proc: ChildProcess; browser: Browser }> {
-  const profileDir = mkdtempSync(join(tmpdir(), 'contrast-sweep-chrome-'))
-  step(`launching chrome: ${CHROME_PATH} (cdp :${CDP_PORT})`)
-  const proc = spawn(
-    CHROME_PATH,
-    [
-      '--headless=new',
-      `--remote-debugging-port=${CDP_PORT}`,
-      `--user-data-dir=${profileDir}`,
-      '--no-first-run',
-      '--disable-extensions',
-      '--disable-background-networking',
-      '--window-size=1280,900',
-      'about:blank',
-    ],
-    { stdio: 'ignore', detached: false },
-  )
-  proc.on('exit', code => step(`chrome process exited (code ${code})`))
-  // Poll CDP until it answers (chrome takes a moment to open the port).
-  for (let attempt = 0; attempt < 40; attempt++) {
-    if (proc.exitCode !== null) throw new Error(`chrome exited early with code ${proc.exitCode}`)
-    try {
-      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`, {
-        timeout: 3000,
-      })
-      step('CDP connected')
-      return { proc, browser }
-    } catch {
-      if (attempt % 8 === 7) step(`still waiting for CDP (attempt ${attempt + 1}/40)…`)
-      await new Promise(r => setTimeout(r, 500))
-    }
-  }
-  proc.kill()
-  throw new Error('Chrome CDP endpoint never came up')
+async function launchChrome(): Promise<{ browser: Browser }> {
+  // Playwright's bundled Chromium — the same engine the ThothOS Playwright
+  // suite runs on this machine daily. (Driving the system chrome.exe over
+  // --remote-debugging-port proved unreliable here: the CDP port never opens.)
+  step('launching playwright chromium (headless)…')
+  const browser = await chromium.launch({ headless: true, timeout: 60_000 })
+  step(`chromium up (${browser.version()})`)
+  return { browser }
 }
 
 async function auditStory(page: Page, base: string, story: StoryEntry): Promise<StoryResult> {
@@ -223,8 +191,8 @@ async function main() {
   const { server, port } = await serveStatic()
   step(`static server on :${port}`)
   const base = `http://127.0.0.1:${port}`
-  const { proc, browser } = await launchChrome()
-  const context = browser.contexts()[0] ?? (await browser.newContext())
+  const { browser } = await launchChrome()
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   step('context ready, starting workers')
 
   const results: StoryResult[] = []
@@ -273,7 +241,6 @@ async function main() {
   await Promise.all(Array.from({ length: WORKERS }, (_, workerId) => worker(workerId)))
 
   await browser.close().catch(() => {})
-  proc.kill()
   server.close()
 
   results.sort((a, b) => a.id.localeCompare(b.id))
