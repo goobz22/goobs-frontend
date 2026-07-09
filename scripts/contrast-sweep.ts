@@ -15,10 +15,15 @@
  */
 import { chromium, type Browser, type Page } from 'playwright'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import http from 'node:http'
 
-const ROOT = resolve(import.meta.dir, '..')
+// RUN UNDER NODE, NOT BUN: `node scripts/contrast-sweep.ts` (Node 22.6+ strips
+// types natively). Under Bun on Windows, Chromium's --remote-debugging-pipe
+// handshake never completes (launched pid, 60s timeout) — Bun's extra-stdio
+// pipes don't carry it. Node is the engine Playwright is battle-tested on.
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const STATIC_DIR = join(ROOT, 'storybook-static')
 const AXE_SOURCE = readFileSync(join(ROOT, 'node_modules/axe-core/axe.min.js'), 'utf8')
 /** Step log to stderr so progress is visible even when stdout is piped/buffered. */
