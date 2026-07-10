@@ -240,12 +240,23 @@
   --goobs-sacred-border-strong: var(--goobs-gold-a50);
   --goobs-sacred-text: rgba(255, 255, 255, 0.9);
   --goobs-sacred-text-secondary: rgba(255, 255, 255, 0.6);
-  --goobs-sacred-text-muted: rgba(255, 255, 255, 0.4);
+  /* muted lifted 0.4 → 0.5 for WCAG AA: 0.4 composited ≈ #6e6e6e on #0e0e0e
+     (3.78:1, fails 4.5); 0.5 composites ≈ #868686 → 5.30:1 on #0e0e0e,
+     5.32:1 on #000. */
+  --goobs-sacred-text-muted: rgba(255, 255, 255, 0.5);
   --goobs-sacred-primary: var(--goobs-gold); /* gold is the accent */
   --goobs-sacred-primary-contrast: rgba(10, 10, 10, 0.95);
   --goobs-sacred-control-bg: rgba(0, 0, 0, 0.4);
   --goobs-sacred-control-border: var(--goobs-gold-a40);
   --goobs-sacred-focus-ring: var(--goobs-gold-a60);
+  /* Severity TEXT grades for sacred surfaces (see group 8 — the shared
+     severity bases stay for fills/borders; text must be theme-graded to
+     hold ≥4.5:1). All proven against #0e0e0e/#040404: danger 5.13–5.45,
+     warn 8.99, info 5.25, success 8.47. */
+  --goobs-sacred-danger-text: #ef4444;
+  --goobs-sacred-warn-text: #f59e0b;
+  --goobs-sacred-info-text: #3b82f6;
+  --goobs-sacred-success-text: #22c55e;
   /* Ambient gold radials that make sacred surfaces feel lit-from-within.
      Drop into background-image to add the signature inner glow. */
   --goobs-sacred-ambient:
@@ -262,22 +273,45 @@
 
   /* ---- LIGHT ----------------------------------------------------------- */
   /* Neutral slate palette; blue is the accent. Unified #1976d2 + #3b82f6 onto
-     a single canonical primary (#3b82f6, the dominant value, 97 uses) and the
-     #374151/#1f2937 text pair onto primary + a darker heading-grade option. */
+     a single canonical primary (originally #3b82f6, the dominant value,
+     97 uses; darkened to #2563eb in the 2026-07 contrast pass so white-on-
+     primary meets WCAG AA) and the #374151/#1f2937 text pair onto primary +
+     a darker heading-grade option. */
   --goobs-light-surface: #ffffff;
   --goobs-light-surface-raised: #f8fafc;
   --goobs-light-border: #e2e8f0;
   --goobs-light-border-strong: #cbd5e1;
   --goobs-light-text: #1f2937;
   --goobs-light-text-secondary: #374151;
-  --goobs-light-text-muted: #6b7280;
-  --goobs-light-text-disabled: #9ca3af;
-  --goobs-light-primary: #3b82f6;
-  --goobs-light-primary-strong: #2563eb;
+  /* muted #6b7280 → #4b5563 (gray-600): #6b7280 sat at 4.36:1 on the #f3f3f3
+     surfaces the sweep renders (translucent white cards over the canvas) —
+     #4b5563 holds 6.17–7.56:1 across #ffffff/#f8fafc/#f3f3f3/#e2e9f0. */
+  --goobs-light-text-muted: #4b5563;
+  /* disabled #9ca3af → #646e7e: #9ca3af was 2.54:1 on #ffffff (sweep: 62
+     hits as stat labels / hints / placeholder-grade text, i.e. real text,
+     not axe-exempt disabled controls). #646e7e = 5.16 on #ffffff, 4.65 on
+     #f3f3f3, 4.68 on #f3f4f6 — the lightest cool gray that clears 4.5 on
+     every flagged light surface, keeping the muted<disabled hierarchy. */
+  --goobs-light-text-disabled: #646e7e;
+  /* primary #3b82f6 → #2563eb (blue-600, was primary-strong): white text on
+     #3b82f6 was 3.67:1; on #2563eb it is 5.17:1, and #2563eb as text holds
+     4.66–5.17:1 on white/near-white. strong steps down to #1d4ed8 (blue-700,
+     white-on 6.70:1) to keep the primary<strong emphasis ladder. */
+  --goobs-light-primary: #2563eb;
+  --goobs-light-primary-strong: #1d4ed8;
   --goobs-light-primary-contrast: #ffffff;
   --goobs-light-control-bg: #ffffff;
   --goobs-light-control-border: #cbd5e1;
   --goobs-light-focus-ring: rgba(59, 130, 246, 0.4);
+  /* Severity TEXT grades for light surfaces (shared group-8 bases fail as
+     text on white: #ef4444 3.76:1, #22c55e 2.27:1, #3b82f6 3.5:1). Proven:
+     danger #b91c1c 5.83–6.47 on #ffffff/#f3f3f3/#fef2f2; warn #b45309
+     4.60–5.02; info #1d4ed8 5.84–6.70; success #15803d 4.52–5.02 on
+     #ffffff/#f1fbf7/#e4f8ec. */
+  --goobs-light-danger-text: #b91c1c;
+  --goobs-light-warn-text: #b45309;
+  --goobs-light-info-text: #1d4ed8;
+  --goobs-light-success-text: #15803d;
 
   /* ---- DARK ------------------------------------------------------------ */
   /* Deep slate palette; the same blue accent as light for cross-theme
@@ -289,21 +323,40 @@
   --goobs-dark-border-strong: #475569;
   --goobs-dark-text: #e2e8f0;
   --goobs-dark-text-secondary: #cbd5e1;
-  --goobs-dark-text-muted: #64748b;
+  /* muted #64748b → #94a3b8 (slate-400): #64748b was 3.07–4.05:1 on the
+     dark surfaces (#1e293b/#0f172a/#111827/#0e0e0e). #94a3b8 holds
+     4.76–8.19:1 on every dark surface incl. raised #273746, staying on the
+     slate ramp below -secondary #cbd5e1. */
+  --goobs-dark-text-muted: #94a3b8;
   --goobs-dark-primary: #60a5fa;
   --goobs-dark-primary-strong: #3b82f6;
   --goobs-dark-primary-contrast: #0b1220;
   --goobs-dark-control-bg: #1e293b;
   --goobs-dark-control-border: #334155;
   --goobs-dark-focus-ring: rgba(96, 165, 250, 0.45);
+  /* Severity TEXT grades for dark surfaces (400-scale so they read as the
+     same hue family lifted for dark). Proven on #1e293b/#111827/#273746:
+     danger #f87171 5.29/6.41/4.41*; warn #fbbf24 8.76+; info #60a5fa
+     4.80+; success #4ade80 7.00+. (*danger on the raised #273746 surface
+     is 4.41 — keep danger text on -surface, not -surface-raised.) */
+  --goobs-dark-danger-text: #f87171;
+  --goobs-dark-warn-text: #fbbf24;
+  --goobs-dark-info-text: #60a5fa;
+  --goobs-dark-success-text: #4ade80;
 
   /* ========================================================================
-     8. SEVERITY — shared across all themes.
+     8. SEVERITY — shared bases for fills/borders across all themes.
      ------------------------------------------------------------------------
      Base color + a translucent fill + a translucent border per severity,
      matching the existing Alert/Card severity tables (≈0.12 bg, ≈0.35 border).
      Themes can layer their own surface behind these (sacred keeps the dark
      glass and only tints the text/border; light/dark use the fill).
+     ⚠ CONTRAST: these bases are tuned for dark surfaces and for fills/
+     borders. As TEXT they fail WCAG on light surfaces (#ef4444 on #ffffff
+     3.76:1, #22c55e 2.27:1, #3b82f6 3.5:1). For severity-colored TEXT use
+     the per-theme grades in group 7: --goobs-<theme>-{danger,warn,info,
+     success}-text. Sacred's text grades equal these bases (they pass on
+     near-black), so only light/dark consumers need the graded tokens.
      ======================================================================== */
   --goobs-danger: #ef4444;
   --goobs-danger-rgb: 239, 68, 68;
