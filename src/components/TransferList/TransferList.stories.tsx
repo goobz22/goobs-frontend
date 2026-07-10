@@ -300,7 +300,60 @@ const InteractiveDemoRenderer = () => {
 }
 
 /**
- * 3) Interactive Demo
+ * 3) Dark Theme
+ *
+ * Exercises the `styles={{ theme: 'dark' }}` API (the legacy `sacredtheme`
+ * boolean can only express sacred-vs-light, so a dark canvas fell back to the
+ * light palette and rendered invisible headings). The column headings now use
+ * --goobs-dark-text #e2e8f0 = 14.39:1 on the #111827 canvas; item labels use
+ * the same on the #1e293b list surface = 11.87:1. Pinned to the dark canvas so
+ * the contrast sweep audits the dark palette on its intended background.
+ */
+const DarkThemeRenderer = () => {
+  const [left, setLeft] = React.useState(singleLeftItems)
+  const [right, setRight] = React.useState(singleRightItems)
+  const handleChange = (newLeft: string[], newRight: string[]) => {
+    setLeft(newLeft)
+    setRight(newRight)
+  }
+  return (
+    <div
+      style={{
+        width: '700px',
+        padding: '24px',
+        background: '#111827',
+        borderRadius: '8px',
+        border: '1px solid #334155',
+      }}
+    >
+      <h3
+        style={{
+          fontSize: '20px',
+          fontWeight: 700,
+          color: '#e2e8f0',
+          marginBottom: '16px',
+          fontFamily: "'Inter', sans-serif",
+        }}
+      >
+        Dark TransferList
+      </h3>
+      <TransferList
+        leftItems={left}
+        rightItems={right}
+        onChange={handleChange}
+        styles={{ theme: 'dark' }}
+      />
+    </div>
+  )
+}
+
+export const DarkTheme: Story = {
+  render: () => <DarkThemeRenderer />,
+  globals: { backgrounds: { value: 'dark' } },
+}
+
+/**
+ * 4) Interactive Demo
  */
 export const InteractiveDemo: Story = {
   render: () => <InteractiveDemoRenderer />,

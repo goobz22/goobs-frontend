@@ -35,6 +35,11 @@
   --appbar-toolbar-padding: 0 var(--goobs-space-md);
   --appbar-toolbar-min-height: 48px;
   --appbar-toolbar-gap: var(--goobs-space-xs);
+  /* Toolbar text color: `inherit` while enabled (children own their color, as
+     before); the disabled state swaps this to a per-theme muted token so
+     inheriting content dims accessibly instead of via a contrast-breaking
+     container opacity. */
+  --appbar-toolbar-text: inherit;
 
   /* Layout tokens — defaults that callers can override via JS-set vars */
   --appbar-position: static;
@@ -122,11 +127,29 @@
 }
 
 /* --------------------------------------------------------------------------
-   DISABLED — opacity 0.5 + pointer-events none. Mirrors isDisabled branch.
+   DISABLED — non-interactive + a per-theme muted TEXT token (NOT a container
+   opacity). A container-wide `opacity: 0.5` composited the toolbar text with
+   the surface below the WCAG AA 4.5:1 floor: on the light surface the nav text
+   #1f2937 rendered as #8f949b = 3.05:1 (axe: components-appbar--disabled). Any
+   opacity < 1 over white keeps even pure black under 4.5:1, so the dim is now
+   expressed as a dedicated disabled/muted text token — each proven ≥4.5:1 on
+   its theme surface — while still reading as clearly disabled.
    -------------------------------------------------------------------------- */
 .container[data-disabled='true'] {
-  opacity: 0.5;
   pointer-events: none;
+  /* #646e7e — 5.16:1 on #ffffff (the light surface). */
+  --appbar-toolbar-text: var(--goobs-light-text-disabled);
+}
+
+.container[data-theme='dark'][data-disabled='true'] {
+  /* #94a3b8 — 5.71:1 on #1e293b, 4.76:1 on the raised #273746 plate. */
+  --appbar-toolbar-text: var(--goobs-dark-text-muted);
+}
+
+.container[data-theme='sacred'][data-disabled='true'] {
+  /* rgba(255,255,255,0.5) ≈ #878787 — 5.37:1 on the near-black sacred surface;
+     sacred stays gold-on-near-black (surface + gold accent untouched). */
+  --appbar-toolbar-text: var(--goobs-sacred-text-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -139,6 +162,7 @@
   min-height: var(--appbar-toolbar-min-height);
   padding: var(--appbar-toolbar-padding);
   gap: var(--appbar-toolbar-gap);
+  color: var(--appbar-toolbar-text);
   position: relative;
   z-index: 2;
 }

@@ -88,6 +88,12 @@
   --card-accent: #60a5fa;
   --card-title: #e2e8f0;
   --card-subtitle: #94a3b8;
+  /* Metric-chip LABEL is lightened one grade above --card-subtitle so it
+     clears WCAG AA (4.5:1) on the tone-tinted metric surfaces (12% severity
+     mixed over the #1e293b card): #94a3b8 was only 4.40 on the success tint
+     #233f43 and 4.41 on the warn tint #393b38. #a2b0c4 → 5.12 / 5.14 worst
+     case (and ≥5.39 on the info/danger/accent tints), still reads muted. */
+  --card-metric-label: #a2b0c4;
   --card-text: #cbd5e1;
   --card-meta: var(--goobs-dark-text-muted);
   --card-success-text: var(--goobs-dark-success-text);
@@ -313,7 +319,10 @@
 }
 
 .metricLabel {
-  color: var(--card-subtitle);
+  /* Falls back to --card-subtitle for sacred/light (untouched); the dark theme
+     sets --card-metric-label to a lighter grade that clears AA on tone-tinted
+     metric chips (see the dark block). */
+  color: var(--card-metric-label, var(--card-subtitle));
 }
 
 .metricValue {

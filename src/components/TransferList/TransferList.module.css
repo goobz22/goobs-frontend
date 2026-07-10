@@ -85,6 +85,16 @@
   position: static;
 }
 
+/* Dark mirrors light's neutral, chromeless container — the dark surfaces live
+   on the list boxes below, exactly as the light theme puts them on white. */
+.container[data-theme='dark'] {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  border: none;
+  position: static;
+}
+
 /* --------------------------------------------------------------------------
    COLUMN (theme-agnostic)
    -------------------------------------------------------------------------- */
@@ -114,6 +124,16 @@
   text-shadow: none;
 }
 
+/* The column headings sit on the (transparent) container over the page canvas,
+   so on a dark canvas they need light text. --goobs-dark-text #e2e8f0 = 14.39:1
+   on the #111827 dark canvas (the light-grade #1f2937 was 1.21:1 — invisible). */
+.container[data-theme='dark'] .title {
+  color: var(--goobs-dark-text);
+  font-family: var(--goobs-font-standard);
+  letter-spacing: normal;
+  text-shadow: none;
+}
+
 /* --------------------------------------------------------------------------
    LIST
    -------------------------------------------------------------------------- */
@@ -134,6 +154,15 @@
 .container[data-theme='light'] .list {
   border: 1px solid var(--goobs-light-border);
   background-color: var(--goobs-light-surface);
+  box-shadow: inset 0 1px 2px var(--goobs-black-a05);
+  animation: none;
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+
+.container[data-theme='dark'] .list {
+  border: 1px solid var(--goobs-dark-border);
+  background-color: var(--goobs-dark-surface);
   box-shadow: inset 0 1px 2px var(--goobs-black-a05);
   animation: none;
   scrollbar-width: auto;
@@ -180,6 +209,18 @@
   box-shadow: none;
 }
 
+.container[data-theme='dark'] .listItem {
+  color: var(--goobs-dark-text);
+  border-top: none;
+  border-right: none;
+  border-bottom: 1px solid var(--goobs-dark-border);
+  border-left: none;
+  background-color: transparent;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
 /* hover (sacred default) */
 .listItem:hover {
   background-color: var(--goobs-gold-a10);
@@ -189,6 +230,12 @@
 
 .container[data-theme='light'] .listItem:hover {
   background-color: var(--goobs-light-surface-raised);
+  transform: none;
+  box-shadow: none;
+}
+
+.container[data-theme='dark'] .listItem:hover {
+  background-color: var(--goobs-dark-surface-raised);
   transform: none;
   box-shadow: none;
 }
@@ -203,6 +250,12 @@
 .container[data-theme='light'] .listItem[data-checked='true'] {
   background-color: rgb(239, 246, 255);
   border-left: 4px solid var(--goobs-light-primary);
+  box-shadow: none;
+}
+
+.container[data-theme='dark'] .listItem[data-checked='true'] {
+  background-color: var(--goobs-dark-surface-raised);
+  border-left: 4px solid var(--goobs-dark-primary);
   box-shadow: none;
 }
 
@@ -231,6 +284,15 @@
 
 .container[data-theme='light'] .label {
   color: var(--goobs-light-text);
+  text-shadow: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Item labels sit on the dark list surface — #e2e8f0 = 11.87:1 on #1e293b. */
+.container[data-theme='dark'] .label {
+  color: var(--goobs-dark-text);
   text-shadow: none;
   white-space: normal;
   overflow: visible;
@@ -271,6 +333,14 @@
   animation: none;
 }
 
+/* Transfer buttons: #cbd5e1 secondary text = 9.85:1 on the #1e293b control bg. */
+.container[data-theme='dark'] .button {
+  border: 1px solid var(--goobs-dark-control-border);
+  background-color: var(--goobs-dark-control-bg);
+  color: var(--goobs-dark-text-secondary);
+  animation: none;
+}
+
 /* The former sacred TransferButton applied animationDelay: 0.5s to the
    'all-left' button only; preserved via data-animation-delay. */
 .button[data-animation-delay='all-left'] {
@@ -290,6 +360,12 @@
   box-shadow: none;
 }
 
+.container[data-theme='dark'] .button:hover:not(:disabled) {
+  background-color: var(--goobs-dark-surface-raised);
+  transform: none;
+  box-shadow: none;
+}
+
 /* disabled */
 .button:disabled {
   opacity: 0.5;
@@ -302,6 +378,13 @@
 .container[data-theme='light'] .button:disabled {
   color: var(--goobs-light-text-secondary);
   border-color: var(--goobs-light-border);
+}
+
+/* Disabled keeps the neutral secondary color + the base opacity:0.5 above, so
+   a disabled transfer button still reads as disabled (not sacred-gold). */
+.container[data-theme='dark'] .button:disabled {
+  color: var(--goobs-dark-text-secondary);
+  border-color: var(--goobs-dark-control-border);
 }
 
 /* --------------------------------------------------------------------------

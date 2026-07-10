@@ -142,7 +142,14 @@
 }
 
 .button[data-theme='sacred'][data-selected='true'] {
-  background-color: var(--goobs-gold-a20);
+  /* OPAQUE dark-gold, not the translucent --goobs-gold-a20. The a20 fill
+     composited dark on the near-black sacred canvas (passes) but composited to
+     ~#807636 on the lighter FormBoundFields sacred surface, dropping #ffd700
+     text to 3.28:1 (axe). #3e360b is EXACTLY what gold-a20 renders as over the
+     near-black canvas (#0e0e0e), so the standalone sacred look is unchanged,
+     but being opaque it is surface-independent: #ffd700 now holds 8.62:1 on
+     ANY background. */
+  background-color: #3e360b;
   color: var(--goobs-gold);
   border-color: var(--goobs-gold-a80);
   text-shadow: 0 0 4px var(--goobs-gold-a60);
@@ -160,7 +167,11 @@
 }
 
 .button[data-theme='sacred'][data-selected='true']:hover:not(:disabled) {
-  background-color: var(--goobs-gold-a30);
+  /* Opaque hover twin of the selected fill (same surface-independence fix).
+     #564a0a is exactly what --goobs-gold-a30 composited to over the near-black
+     canvas, so hover still brightens over rest (#3e360b) while #ffd700 stays
+     6.29:1 on any surface. */
+  background-color: #564a0a;
   box-shadow:
     0 0 16px var(--goobs-gold-a40),
     inset 0 0 8px var(--goobs-gold-a10);

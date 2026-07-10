@@ -20,6 +20,12 @@ function mergeClassNames(...names: Array<string | undefined>): string {
 
 export type TransferListVariant = 'singleSelection' | 'multipleSelection'
 
+/**
+ * The three palettes TransferList themes, matching the canonical `FieldTheme`
+ * every sibling field exposes via `styles={{ theme }}`.
+ */
+export type TransferListTheme = 'light' | 'dark' | 'sacred'
+
 export interface TransferListDropdownDataMap {
   [dropdownValue: string]: {
     leftItems: string[]
@@ -43,6 +49,13 @@ export interface TransferListProps {
   leftTitle?: string
   rightTitle?: string
   sacredtheme?: boolean
+  /**
+   * Full theme selector, matching every sibling field's `styles={{ theme }}`
+   * API. When provided it takes precedence over the legacy `sacredtheme`
+   * boolean — which can only express sacred-vs-light — letting a consumer
+   * request the `dark` palette. Omitted → falls back to `sacredtheme`.
+   */
+  styles?: { theme?: TransferListTheme }
   className?: string
   style?: React.CSSProperties
   /**
@@ -98,6 +111,7 @@ const TransferList: React.FC<TransferListProps> = ({
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
   sacredtheme = false,
+  styles,
   className,
   style,
   name,
@@ -155,7 +169,11 @@ const TransferList: React.FC<TransferListProps> = ({
     [variant]
   )
 
-  const theme = sacredtheme ? 'sacred' : 'light'
+  // Explicit `styles.theme` wins; otherwise the legacy boolean maps to
+  // sacred-or-light exactly as before (back-compat for callers that never
+  // adopted the `styles={{ theme }}` API).
+  const theme: TransferListTheme =
+    styles?.theme ?? (sacredtheme ? 'sacred' : 'light')
 
   let currentLeft: readonly string[] = leftItems
   let currentRight: readonly string[] = rightItems
@@ -245,9 +263,7 @@ const TransferList: React.FC<TransferListProps> = ({
                   checked={isChecked}
                   onChange={() => {}}
                   aria-labelledby={labelId}
-                  styles={{
-                    theme: sacredtheme ? 'sacred' : 'light',
-                  }}
+                  styles={{ theme }}
                 />
               </div>
               <span id={labelId} className={cssStyles.label}>
@@ -276,7 +292,7 @@ const TransferList: React.FC<TransferListProps> = ({
           options={dropdownOptions}
           value={selectedDropdownValue}
           onChange={value => setSelectedDropdownValue(value)}
-          styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
+          styles={{ theme }}
         />
         {renderList(currentLeft, 'left')}
       </div>
@@ -298,7 +314,7 @@ const TransferList: React.FC<TransferListProps> = ({
       {...(engineError && { 'data-error': 'true' })}
       style={style}
     >
-      {sacredtheme && <div className={cssStyles.glyph}>𓊨</div>}
+      {theme === 'sacred' && <div className={cssStyles.glyph}>𓊨</div>}
       <div className={cssStyles.column}>{renderLeftColumn()}</div>
       <div className={cssStyles.buttonGroup}>
         <TransferButton

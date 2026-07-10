@@ -127,9 +127,12 @@ export const Flat: Story = {
 
 export const Disabled: Story = {
   name: 'State/Disabled',
+  // `color="inherit"` lets the nav text pick up the AppBar's disabled token
+  // (--goobs-light-text-disabled #646e7e, 5.16:1 on #ffffff) rather than a
+  // hardcoded enabled color — so it reads as disabled AND clears WCAG AA.
   args: {
     styles: { theme: 'light', disabled: true },
-    children: <NavContent color="#1F2937" />,
+    children: <NavContent color="inherit" />,
   },
   globals: { backgrounds: { value: 'light' } },
 }
