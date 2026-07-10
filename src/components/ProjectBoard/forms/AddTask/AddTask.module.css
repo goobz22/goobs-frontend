@@ -511,7 +511,9 @@
 .root[data-theme='light'] .validationError {
   background-color: #fef2f2;
   border-color: #fecaca;
-  color: #dc2626;
+  /* #dc2626 is 4.41:1 on the #fef2f2 tint; the light danger text grade
+     #b91c1c holds 5.91:1. */
+  color: var(--goobs-light-danger-text);
 }
 
 .root[data-theme='dark'] .validationError {

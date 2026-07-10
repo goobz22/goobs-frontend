@@ -530,7 +530,11 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* dark-themed editor: dark chip so its label isn't muted-on-white */}
+          {/* dark-themed editor: dark chip so its label isn't muted-on-white.
+              Neon purple is the brighter purple-400 (rgb 192,132,252) not
+              purple-600 (#9333ea): label rgba(...,.8)=4.72 on #111827 and text
+              rgba(...,1)=5.54 on the #1e293b dark surface both clear 4.5:1,
+              where the darker #9333ea read 2.5/2.7. Same hue, readable. */}
           <div
             style={{
               background: '#111827',
@@ -544,10 +548,10 @@ export const ComprehensiveShowcase: Story = {
               styles={{
                 theme: 'dark',
                 backgroundColor: 'rgba(0, 0, 0, 0.95)',
-                borderColor: 'rgba(147, 51, 234, 0.5)',
-                borderFocusedColor: 'rgba(147, 51, 234, 1)',
-                textColor: 'rgba(147, 51, 234, 1)',
-                labelColor: 'rgba(147, 51, 234, 0.8)',
+                borderColor: 'rgba(192, 132, 252, 0.5)',
+                borderFocusedColor: 'rgba(192, 132, 252, 1)',
+                textColor: 'rgba(192, 132, 252, 1)',
+                labelColor: 'rgba(192, 132, 252, 0.8)',
                 borderRadius: '20px',
                 borderWidth: '2px',
               }}

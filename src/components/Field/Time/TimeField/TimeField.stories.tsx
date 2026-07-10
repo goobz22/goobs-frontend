@@ -117,18 +117,38 @@ export const WithHelperText: Story = {
 export const WithError: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <TimeFieldWithState
-        label="Start Time"
-        initialValue={timeAt(22, 0)}
-        error="Outside allowed hours"
-        styles={{ theme: 'light' }}
-      />
-      <TimeFieldWithState
-        label="Start Time"
-        initialValue={timeAt(22, 0)}
-        error="Outside allowed hours"
-        styles={{ theme: 'dark' }}
-      />
+      {/* Each error field sits on the surface its theme is designed for so its
+          danger-text grade meets contrast: light danger #b91c1c is 6.47:1 on
+          white but only 2.98:1 on the default sacred canvas; dark danger
+          #f87171 is 6.41:1 on the dark #111827 surface. */}
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <TimeFieldWithState
+          label="Start Time"
+          initialValue={timeAt(22, 0)}
+          error="Outside allowed hours"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{
+          backgroundColor: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <TimeFieldWithState
+          label="Start Time"
+          initialValue={timeAt(22, 0)}
+          error="Outside allowed hours"
+          styles={{ theme: 'dark' }}
+        />
+      </div>
     </div>
   ),
 }

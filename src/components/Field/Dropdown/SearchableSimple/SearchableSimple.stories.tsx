@@ -305,26 +305,39 @@ export const OptionVariations: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
+  // Mixed-theme story: each themed error block sits on the surface its palette
+  // is designed for (the canvas itself stays sacred for the sacred field). The
+  // light danger text (#b91c1c) needs the white surface — it is 2.98:1 on the
+  // sacred #0e0e0e canvas but 6.47:1 on white; the dark error palette belongs
+  // on the #111827 dark surface, not the sacred near-black.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SearchableSimpleWithState
-        label="Select Option"
-        placeholder="Search an option"
-        error="Please select a valid option."
-        styles={{ theme: 'light' }}
-      />
-      <SearchableSimpleWithState
-        label="Country Selection"
-        placeholder="Search a country"
-        error="Country selection is required."
-        options={countryOptions}
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
-        }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchableSimpleWithState
+          label="Select Option"
+          placeholder="Search an option"
+          error="Please select a valid option."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchableSimpleWithState
+          label="Country Selection"
+          placeholder="Search a country"
+          error="Country selection is required."
+          options={countryOptions}
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
       <SearchableSimpleWithState
         label="Sacred Choice"
         placeholder="Search sacred option"

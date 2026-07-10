@@ -181,3 +181,63 @@
   color: var(--goobs-gold-a60);
   font-family: var(--goobs-font-sacred);
 }
+
+/* ==========================================================================
+   DARK THEME OVERRIDE (styles.theme === 'dark')
+   -------------------------------------------------------------------------
+   The bare `.root` default is the MUI light palette (black-on-white). A
+   dark-theme callsite emits data-theme='dark' but had NO dark rules, so the
+   page numbers fell through to the default color: var(--goobs-black-a87) —
+   near-black text on the dark canvas (~#020305 on #111827, 1.16:1). Lift
+   text/border/surface onto the slate dark palette (the same
+   --goobs-dark-* tokens Button's dark override uses) so page numbers read
+   ≥4.5:1 on dark surfaces:
+     unselected text #e2e8f0 on #111827  → 14.39:1
+     ellipsis       #94a3b8 on #111827   → 6.92:1
+     selected text  #60a5fa on the info-a18 selected fill (#192b4c) → 5.54:1
+   ========================================================================== */
+
+/* NAV BUTTON — dark */
+.root[data-theme='dark'] .navButton {
+  border: 1px solid var(--goobs-dark-border);
+  background-color: transparent;
+  color: var(--goobs-dark-text);
+}
+
+.root[data-theme='dark'] .navButton:hover:not(:disabled) {
+  border-color: var(--goobs-dark-border-strong);
+  background-color: var(--goobs-dark-surface-raised);
+}
+
+.root[data-theme='dark'] .navButton:disabled {
+  border-color: var(--goobs-dark-border);
+  background-color: var(--goobs-dark-surface);
+  color: var(--goobs-dark-text-muted);
+}
+
+/* PAGE BUTTON — dark */
+.root[data-theme='dark'] .pageButton {
+  border: 1px solid var(--goobs-dark-border);
+  background-color: transparent;
+  color: var(--goobs-dark-text);
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.root[data-theme='dark'] .pageButton:hover {
+  border-color: var(--goobs-dark-border-strong);
+  background-color: var(--goobs-dark-surface-raised);
+}
+
+.root[data-theme='dark'] .pageButton[data-pagination-selected='true'] {
+  border-color: var(--goobs-dark-primary-strong);
+  background-color: rgba(var(--goobs-info-rgb), 0.18);
+  color: var(--goobs-dark-primary);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* ELLIPSIS — dark */
+.root[data-theme='dark'] .ellipsis {
+  color: var(--goobs-dark-text-muted);
+}

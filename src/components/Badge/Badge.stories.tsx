@@ -400,7 +400,7 @@ export const CustomColors: Story = {
       </div>
     ),
     styles: {
-      backgroundColor: '#2196f3',
+      backgroundColor: '#1565c0',
       color: 'white',
     },
   },
@@ -413,7 +413,7 @@ export const ColorVariantsLight: Story = {
     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
       <Badge
         content="Error"
-        styles={{ backgroundColor: '#f44336', color: 'white', theme: 'light' }}
+        styles={{ backgroundColor: '#d32f2f', color: 'white', theme: 'light' }}
       >
         <div
           style={{
@@ -431,7 +431,7 @@ export const ColorVariantsLight: Story = {
       </Badge>
       <Badge
         content="Success"
-        styles={{ backgroundColor: '#4caf50', color: 'white', theme: 'light' }}
+        styles={{ backgroundColor: '#2e7d32', color: 'white', theme: 'light' }}
       >
         <div
           style={{
@@ -449,7 +449,7 @@ export const ColorVariantsLight: Story = {
       </Badge>
       <Badge
         content="Warning"
-        styles={{ backgroundColor: '#ff9800', color: 'white', theme: 'light' }}
+        styles={{ backgroundColor: '#bf360c', color: 'white', theme: 'light' }}
       >
         <div
           style={{
@@ -467,7 +467,7 @@ export const ColorVariantsLight: Story = {
       </Badge>
       <Badge
         content="Info"
-        styles={{ backgroundColor: '#2196f3', color: 'white', theme: 'light' }}
+        styles={{ backgroundColor: '#1565c0', color: 'white', theme: 'light' }}
       >
         <div
           style={{
@@ -495,7 +495,7 @@ export const ColorVariantsDark: Story = {
     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
       <Badge
         content="Error"
-        styles={{ backgroundColor: '#ef4444', color: 'white', theme: 'dark' }}
+        styles={{ backgroundColor: '#b91c1c', color: 'white', theme: 'dark' }}
       >
         <div
           style={{
@@ -514,7 +514,7 @@ export const ColorVariantsDark: Story = {
       </Badge>
       <Badge
         content="Success"
-        styles={{ backgroundColor: '#10b981', color: 'white', theme: 'dark' }}
+        styles={{ backgroundColor: '#047857', color: 'white', theme: 'dark' }}
       >
         <div
           style={{
@@ -533,7 +533,7 @@ export const ColorVariantsDark: Story = {
       </Badge>
       <Badge
         content="Warning"
-        styles={{ backgroundColor: '#f59e0b', color: 'white', theme: 'dark' }}
+        styles={{ backgroundColor: '#b45309', color: 'white', theme: 'dark' }}
       >
         <div
           style={{
@@ -552,7 +552,7 @@ export const ColorVariantsDark: Story = {
       </Badge>
       <Badge
         content="Info"
-        styles={{ backgroundColor: '#3b82f6', color: 'white', theme: 'dark' }}
+        styles={{ backgroundColor: '#1d4ed8', color: 'white', theme: 'dark' }}
       >
         <div
           style={{
@@ -803,7 +803,7 @@ export const NotificationIcon: Story = {
         🔔
       </div>
     ),
-    styles: { backgroundColor: '#f44336' },
+    styles: { backgroundColor: '#d32f2f' },
   },
 }
 
@@ -829,7 +829,7 @@ export const ShoppingCart: Story = {
         🛒
       </div>
     ),
-    styles: { backgroundColor: '#4caf50' },
+    styles: { backgroundColor: '#2e7d32' },
   },
 }
 
@@ -857,7 +857,7 @@ export const UserAvatar: Story = {
       </div>
     ),
     styles: {
-      backgroundColor: '#4caf50',
+      backgroundColor: '#2e7d32',
       color: 'white',
       position: 'bottom-right',
       offset: 2,
@@ -884,7 +884,7 @@ export const MenuItem: Story = {
       </div>
     ),
     styles: {
-      backgroundColor: '#ff9800',
+      backgroundColor: '#bf360c',
       color: 'white',
       position: 'top-right',
     },
@@ -938,7 +938,7 @@ export const MultipleBadges: Story = {
   name: 'Composition/Multiple Badges',
   render: () => (
     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-      <Badge content="5" styles={{ backgroundColor: '#f44336' }}>
+      <Badge content="5" styles={{ backgroundColor: '#d32f2f' }}>
         <div
           style={{
             width: '50px',
@@ -953,7 +953,7 @@ export const MultipleBadges: Story = {
           📧
         </div>
       </Badge>
-      <Badge content="12" styles={{ backgroundColor: '#2196f3' }}>
+      <Badge content="12" styles={{ backgroundColor: '#1565c0' }}>
         <div
           style={{
             width: '50px',
@@ -968,7 +968,7 @@ export const MultipleBadges: Story = {
           🔔
         </div>
       </Badge>
-      <Badge content="3" styles={{ backgroundColor: '#4caf50' }}>
+      <Badge content="3" styles={{ backgroundColor: '#2e7d32' }}>
         <div
           style={{
             width: '50px',
@@ -983,7 +983,7 @@ export const MultipleBadges: Story = {
           🛒
         </div>
       </Badge>
-      <Badge content="!" styles={{ backgroundColor: '#ff9800' }}>
+      <Badge content="!" styles={{ backgroundColor: '#bf360c' }}>
         <div
           style={{
             width: '50px',

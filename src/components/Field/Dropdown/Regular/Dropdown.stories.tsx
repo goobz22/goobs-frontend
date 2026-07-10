@@ -174,12 +174,23 @@ export const BasicOptions: Story = {
   globals: { backgrounds: { value: 'light' } },
 }
 
+// Options whose displayed value carries the "attribute" annotation the play
+// asserts on. DropdownOption renders `String(option.value)` verbatim, so the
+// attributes live in the value string (there is no separate label field).
+const complexOptions: DropdownOption[] = [
+  { value: 'JavaScript (Language | Frontend)' },
+  { value: 'TypeScript (Language | Frontend)' },
+  { value: 'React (Library | Frontend)' },
+  { value: 'Node.js (Runtime | Backend)' },
+  { value: 'Python (Language | Backend)' },
+]
+
 export const ComplexOptions: Story = {
   name: 'Complex Options with Attributes',
   render: () => (
     <DropdownWithState
       label="Technology Stack"
-      options={sampleOptions}
+      options={complexOptions}
       styles={{ theme: 'light' }}
     />
   ),
@@ -535,7 +546,10 @@ export const ComprehensiveShowcase: Story = {
               borderColor: 'rgba(147, 51, 234, 0.5)',
               borderFocusedColor: 'rgba(147, 51, 234, 1)',
               textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
+              // Full-opacity purple-600 (#9333ea) so the label — which sits on
+              // the white showcase canvas, not the near-black field — clears
+              // 4.5:1 (5.38). At 0.8 alpha it composited to #a95cee = 3.85.
+              labelColor: 'rgba(147, 51, 234, 1)',
               borderRadius: '20px',
               borderWidth: '2px',
             }}
@@ -596,11 +610,18 @@ export const InteractionTest: Story = {
     expect(label).toBeVisible()
     expect(select).toBeVisible()
 
-    // Open dropdown and select an option
-    await userEvent.selectOptions(select, 'typescript')
+    // This is a custom combobox (button[role="combobox"] + a listbox of
+    // button[role="option"]), not a native <select> — drive it by opening
+    // the menu and clicking the option rather than userEvent.selectOptions.
+    await userEvent.click(select)
+    expect(select).toHaveAttribute('aria-expanded', 'true')
 
-    // Check value was set
-    await expect(select).toHaveValue('typescript')
+    const option = await canvas.findByRole('option', { name: 'typescript' })
+    await userEvent.click(option)
+
+    // The trigger reflects the chosen value and the menu closes.
+    await expect(select).toHaveTextContent('typescript')
+    expect(select).toHaveAttribute('aria-expanded', 'false')
   },
 }
 

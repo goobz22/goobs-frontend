@@ -102,9 +102,11 @@ export const Themes: Story = {
                 theme: theme,
                 ...(currentTheme === theme
                   ? {
-                      backgroundColor: 'rgba(59, 130, 246, 1)',
+                      // blue-600 (#2563eb) — white text scores 5.17:1 (>=4.5);
+                      // blue-500 (#3b82f6) only made 3.68:1 and failed contrast.
+                      backgroundColor: 'rgba(37, 99, 235, 1)',
                       color: 'white',
-                      borderColor: 'rgba(59, 130, 246, 1)',
+                      borderColor: 'rgba(37, 99, 235, 1)',
                     }
                   : {}),
               }}

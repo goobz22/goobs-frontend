@@ -259,30 +259,45 @@ export const CustomTypography: Story = {
 
 export const ErrorStates: Story = {
   render: () => (
+    // Mixed-theme story: each field sits on its own theme-matched surface so
+    // the light-theme danger text (#b91c1c) isn't measured against the default
+    // sacred canvas (#0e0e0e) — it was 2.98:1 there, 6.47:1 on white.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PhoneNumberFieldWithState
-        label="Phone Number"
-        initialValue="555-123"
-        error="Please enter a valid phone number."
-        styles={{ theme: 'light' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Contact Number"
-        placeholder="This field is required"
-        error="Phone number is required."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
-        }}
-      />
-      <PhoneNumberFieldWithState
-        label="Sacred Contact"
-        initialValue="invalid-number"
-        error="The sacred digits are not aligned."
-        styles={{ theme: 'sacred' }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Phone Number"
+          initialValue="555-123"
+          error="Please enter a valid phone number."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Contact Number"
+          placeholder="This field is required"
+          error="Phone number is required."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Sacred Contact"
+          initialValue="invalid-number"
+          error="The sacred digits are not aligned."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }

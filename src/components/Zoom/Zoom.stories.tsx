@@ -114,24 +114,35 @@ export const Themes: Story = {
         }}
       >
         <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-          {themes.map(theme => (
-            <CustomButton
-              key={theme}
-              onClick={() => setCurrentTheme(theme)}
-              styles={{
-                theme: theme,
-                ...(currentTheme === theme
-                  ? {
-                      backgroundColor: 'rgba(59, 130, 246, 1)',
-                      color: 'white',
-                      borderColor: 'rgba(59, 130, 246, 1)',
-                    }
-                  : {}),
-              }}
-            >
-              {theme} theme
-            </CustomButton>
-          ))}
+          {themes.map(theme => {
+            const isActive = currentTheme === theme
+            return (
+              <CustomButton
+                key={theme}
+                onClick={() => setCurrentTheme(theme)}
+                // Render EVERY picker button in the active canvas theme, not in
+                // its own label theme. A sacred-themed button carries a
+                // translucent control-bg (rgba(0,0,0,0.4)); on the white canvas
+                // that composites to #999999 and its #f5f5f5 sacred text read
+                // 2.61. Matching the canvas keeps each button opaque against its
+                // own surface. The selected button uses the blue-600 primary
+                // (#2563eb) — white text clears 4.5 at 5.17; the old blue-500
+                // (#3b82f6) was only 3.67.
+                styles={{
+                  theme: currentTheme,
+                  ...(isActive
+                    ? {
+                        backgroundColor: '#2563eb',
+                        color: '#ffffff',
+                        borderColor: '#2563eb',
+                      }
+                    : {}),
+                }}
+              >
+                {theme} theme
+              </CustomButton>
+            )
+          })}
           <CustomButton
             onClick={() => setIsVisible(!isVisible)}
             styles={{ theme: currentTheme }}

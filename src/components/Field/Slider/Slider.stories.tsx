@@ -160,22 +160,41 @@ export const WithHelperText: Story = {
 export const WithError: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <SliderWithState
-        label="Threshold"
-        min={0}
-        max={100}
-        initialValue={10}
-        error="Value must be at least 25"
-        styles={{ theme: 'light' }}
-      />
-      <SliderWithState
-        label="Threshold"
-        min={0}
-        max={100}
-        initialValue={10}
-        error="Value must be at least 25"
-        styles={{ theme: 'dark' }}
-      />
+      {/* Light-themed error surface: light-danger token (#b91c1c) needs a
+          white backing to reach 4.5:1 (2.98 on the sacred canvas). */}
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1.5rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SliderWithState
+          label="Threshold"
+          min={0}
+          max={100}
+          initialValue={10}
+          error="Value must be at least 25"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      {/* Dark-themed error surface: dark-danger token (#f87171) on #111827. */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1.5rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SliderWithState
+          label="Threshold"
+          min={0}
+          max={100}
+          initialValue={10}
+          error="Value must be at least 25"
+          styles={{ theme: 'dark' }}
+        />
+      </div>
     </div>
   ),
 }

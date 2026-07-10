@@ -209,8 +209,15 @@ export const SacredThemeInfo: Story = {
 // SEVERITY STORIES
 // --------------------------------------------------------------------------
 
-// Component for All Severities Light
-const AllSeveritiesLightComponent: React.FC = () => {
+// Shared "All Severities" component. `theme` threads through to each Snackbar's
+// inner Alert so the toast palette matches the story's canvas: a light-themed
+// Alert rendered on the dark/sacred canvas failed WCAG contrast (the success
+// message sat at ~3.9:1 on the composited alert surface). Demo-button
+// backgrounds use the campaign light severity-text grades, each verified ≥4.5:1
+// under white text (success 5.02, error 6.47, warning 5.02, info 6.70).
+const AllSeveritiesComponent: React.FC<{
+  theme: 'light' | 'dark' | 'sacred'
+}> = ({ theme }) => {
   const [openStates, setOpenStates] = useState({
     success: true,
     error: false,
@@ -226,94 +233,64 @@ const AllSeveritiesLightComponent: React.FC = () => {
     setOpenStates(prev => ({ ...prev, [severity]: true }))
   }
 
+  // Heading color follows the canvas (gold on sacred, white on dark, default on
+  // light). Only affects the demo chrome, not the Snackbars themselves.
+  const headingColor =
+    theme === 'sacred' ? '#FFD700' : theme === 'dark' ? 'white' : undefined
+
+  const triggers: {
+    severity: keyof typeof openStates
+    label: string
+    background: string
+  }[] = [
+    { severity: 'success', label: 'Show Success', background: '#15803d' },
+    { severity: 'error', label: 'Show Error', background: '#b91c1c' },
+    { severity: 'warning', label: 'Show Warning', background: '#b45309' },
+    { severity: 'info', label: 'Show Info', background: '#1d4ed8' },
+  ]
+
+  const messages: Record<keyof typeof openStates, string> = {
+    success: 'Operation completed successfully!',
+    error: 'An error occurred while processing your request.',
+    warning: 'Please review your input before proceeding.',
+    info: 'Your session will expire in 5 minutes.',
+  }
+
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{ padding: '2rem', color: headingColor }}>
       <div style={{ marginBottom: '2rem' }}>
         <h3>Click buttons to show different snackbars:</h3>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => handleShow('success')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#4caf50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Success
-          </button>
-          <button
-            onClick={() => handleShow('error')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Error
-          </button>
-          <button
-            onClick={() => handleShow('warning')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Warning
-          </button>
-          <button
-            onClick={() => handleShow('info')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#2196f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Info
-          </button>
+          {triggers.map(trigger => (
+            <button
+              key={trigger.severity}
+              onClick={() => handleShow(trigger.severity)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: trigger.background,
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              {trigger.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <Snackbar
-        open={openStates.success}
-        onClose={() => handleClose('success')}
-        message="Operation completed successfully!"
-        severity="success"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.error}
-        onClose={() => handleClose('error')}
-        message="An error occurred while processing your request."
-        severity="error"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.warning}
-        onClose={() => handleClose('warning')}
-        message="Please review your input before proceeding."
-        severity="warning"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.info}
-        onClose={() => handleClose('info')}
-        message="Your session will expire in 5 minutes."
-        severity="info"
-        autoHideDuration={6000}
-      />
+      {triggers.map(trigger => (
+        <Snackbar
+          key={trigger.severity}
+          open={openStates[trigger.severity]}
+          onClose={() => handleClose(trigger.severity)}
+          message={messages[trigger.severity]}
+          severity={trigger.severity}
+          autoHideDuration={6000}
+          styles={{ theme }}
+        />
+      ))}
     </div>
   )
 }
@@ -321,240 +298,22 @@ const AllSeveritiesLightComponent: React.FC = () => {
 /** All severity levels in light theme. */
 export const AllSeveritiesLight: Story = {
   name: 'Severity/All Severities - Light Theme',
-  render: () => <AllSeveritiesLightComponent />,
+  render: () => <AllSeveritiesComponent theme="light" />,
   globals: { backgrounds: { value: 'light' } },
-}
-
-// Component for All Severities Dark
-const AllSeveritiesDarkComponent: React.FC = () => {
-  const [openStates, setOpenStates] = useState({
-    success: true,
-    error: false,
-    warning: false,
-    info: false,
-  })
-
-  const handleClose = (severity: keyof typeof openStates) => {
-    setOpenStates(prev => ({ ...prev, [severity]: false }))
-  }
-
-  const handleShow = (severity: keyof typeof openStates) => {
-    setOpenStates(prev => ({ ...prev, [severity]: true }))
-  }
-
-  return (
-    <div style={{ padding: '2rem', color: 'white' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Click buttons to show different snackbars:</h3>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => handleShow('success')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#4caf50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Success
-          </button>
-          <button
-            onClick={() => handleShow('error')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Error
-          </button>
-          <button
-            onClick={() => handleShow('warning')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Warning
-          </button>
-          <button
-            onClick={() => handleShow('info')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#2196f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Info
-          </button>
-        </div>
-      </div>
-
-      <Snackbar
-        open={openStates.success}
-        onClose={() => handleClose('success')}
-        message="Operation completed successfully!"
-        severity="success"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.error}
-        onClose={() => handleClose('error')}
-        message="An error occurred while processing your request."
-        severity="error"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.warning}
-        onClose={() => handleClose('warning')}
-        message="Please review your input before proceeding."
-        severity="warning"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.info}
-        onClose={() => handleClose('info')}
-        message="Your session will expire in 5 minutes."
-        severity="info"
-        autoHideDuration={6000}
-      />
-    </div>
-  )
 }
 
 /** All severity levels in dark theme. */
 export const AllSeveritiesDark: Story = {
   name: 'Severity/All Severities - Dark Theme',
-  render: () => <AllSeveritiesDarkComponent />,
+  render: () => <AllSeveritiesComponent theme="dark" />,
   globals: { backgrounds: { value: 'dark' } },
-}
-
-// Component for All Severities Sacred
-const AllSeveritiesSacredComponent: React.FC = () => {
-  const [openStates, setOpenStates] = useState({
-    success: true,
-    error: false,
-    warning: false,
-    info: false,
-  })
-
-  const handleClose = (severity: keyof typeof openStates) => {
-    setOpenStates(prev => ({ ...prev, [severity]: false }))
-  }
-
-  const handleShow = (severity: keyof typeof openStates) => {
-    setOpenStates(prev => ({ ...prev, [severity]: true }))
-  }
-
-  return (
-    <div style={{ padding: '2rem', color: '#FFD700' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Click buttons to show different snackbars:</h3>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => handleShow('success')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#4caf50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Success
-          </button>
-          <button
-            onClick={() => handleShow('error')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Error
-          </button>
-          <button
-            onClick={() => handleShow('warning')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Warning
-          </button>
-          <button
-            onClick={() => handleShow('info')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#2196f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Info
-          </button>
-        </div>
-      </div>
-
-      <Snackbar
-        open={openStates.success}
-        onClose={() => handleClose('success')}
-        message="Operation completed successfully!"
-        severity="success"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.error}
-        onClose={() => handleClose('error')}
-        message="An error occurred while processing your request."
-        severity="error"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.warning}
-        onClose={() => handleClose('warning')}
-        message="Please review your input before proceeding."
-        severity="warning"
-        autoHideDuration={6000}
-      />
-      <Snackbar
-        open={openStates.info}
-        onClose={() => handleClose('info')}
-        message="Your session will expire in 5 minutes."
-        severity="info"
-        autoHideDuration={6000}
-      />
-    </div>
-  )
 }
 
 /** All severity levels in sacred theme. */
 export const AllSeveritiesSacred: Story = {
   name: 'Severity/All Severities - Sacred Theme',
-  render: () => <AllSeveritiesSacredComponent />,
-  globals: { backgrounds: { value: 'dark' } },
+  render: () => <AllSeveritiesComponent theme="sacred" />,
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -681,7 +440,7 @@ const FormSubmissionComponent: React.FC = () => {
             onClick={() => handleSubmit(true)}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#4caf50',
+              backgroundColor: '#15803d',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -694,7 +453,7 @@ const FormSubmissionComponent: React.FC = () => {
             onClick={() => handleSubmit(false)}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#f44336',
+              backgroundColor: '#b91c1c',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -767,7 +526,7 @@ const FileUploadComponent: React.FC = () => {
             onClick={() => handleUpload('success')}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#4caf50',
+              backgroundColor: '#15803d',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -780,7 +539,7 @@ const FileUploadComponent: React.FC = () => {
             onClick={() => handleUpload('error')}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#f44336',
+              backgroundColor: '#b91c1c',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -793,7 +552,7 @@ const FileUploadComponent: React.FC = () => {
             onClick={() => handleUpload('warning')}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#ff9800',
+              backgroundColor: '#b45309',
               color: 'white',
               border: 'none',
               borderRadius: '4px',

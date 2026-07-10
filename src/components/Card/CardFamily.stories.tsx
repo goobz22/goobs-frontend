@@ -66,11 +66,44 @@ type Story = StoryObj<typeof Card>
 // Card, parameterized by theme so the trio differs ONLY by `styles.theme`.
 // --------------------------------------------------------------------------
 
+// Per-theme severity colors for the composed showcase. The Overdue stat value
+// sits on the FLAT card surface, so the canonical --goobs-<theme>-danger-text
+// token clears 4.5 on all three skins (light #b91c1c 6.47, dark #f87171 5.29,
+// sacred #ef4444 5.45). A Metric value instead tints ITS OWN chip background
+// (12% of the same color over the card surface), which drags a light-theme
+// -text token just under 4.5 (green-700 #15803d → 4.27) — so the light
+// success/warn values step ONE grade darker (green-800 / amber-800) to clear
+// 4.5 on the self-tinted chip (#166534 → 5.95, #92400e → 5.88), while
+// sacred/dark keep their -text tokens (all ≥6.4). Sacred is unchanged from the
+// original raw --goobs-success/-warn/-danger values, so its render is identical.
+const severityPalette: Record<
+  CardTheme,
+  { danger: string; success: string; warn: string }
+> = {
+  sacred: {
+    danger: 'var(--goobs-sacred-danger-text)',
+    success: 'var(--goobs-sacred-success-text)',
+    warn: 'var(--goobs-sacred-warn-text)',
+  },
+  light: {
+    danger: 'var(--goobs-light-danger-text)',
+    success: '#166534',
+    warn: '#92400e',
+  },
+  dark: {
+    danger: 'var(--goobs-dark-danger-text)',
+    success: 'var(--goobs-dark-success-text)',
+    warn: 'var(--goobs-dark-warn-text)',
+  },
+}
+
 const ComposedShowcase = ({
   theme,
 }: {
   theme: CardTheme
-}): React.JSX.Element => (
+}): React.JSX.Element => {
+  const severity = severityPalette[theme]
+  return (
   <div style={{ width: '420px' }}>
     <Card cardType="revenue-report" cardId="report-2026-q2" styles={{ theme }}>
       <CardHeader>
@@ -99,7 +132,7 @@ const ComposedShowcase = ({
           <CardStatCell
             label="Overdue"
             value="$3,210"
-            valueColor="var(--goobs-danger)"
+            valueColor={severity.danger}
           />
           <CardStatCell label="Largest Account" value="Acme Inc" />
           <CardStatCell label="Net Terms" value="NET-30" mono />
@@ -109,13 +142,13 @@ const ComposedShowcase = ({
             icon="🧾"
             label="Paid"
             value={34}
-            color="var(--goobs-success)"
+            color={severity.success}
           />
           <CardMetric
             icon="⏳"
             label="Open"
             value={8}
-            color="var(--goobs-warn)"
+            color={severity.warn}
           />
         </CardMetrics>
         <CardProgress value={0.7} label="Quarter close" />
@@ -132,7 +165,8 @@ const ComposedShowcase = ({
       </CardFooter>
     </Card>
   </div>
-)
+  )
+}
 
 /**
  * Pins the full stacked composition on the sacred (default) surface: the warn

@@ -72,6 +72,9 @@ function AddCard({
           text: '#E2E8F0',
           secondaryText: '#94A3B8',
           primary: '#3B82F6',
+          // dark-danger-text: #f87171 is 5.29:1 on #1E293B; the bare #ef4444
+          // (used on the near-black sacred card) is only 3.89:1 here.
+          danger: '#F87171',
         }
       case 'sacred':
         return {
@@ -79,6 +82,7 @@ function AddCard({
           text: '#FBBF24',
           secondaryText: '#D97706',
           primary: '#FFD700',
+          danger: '#EF4444',
         }
       default: // light
         return {
@@ -86,6 +90,8 @@ function AddCard({
           text: '#374151',
           secondaryText: '#6B7280',
           primary: '#3B82F6',
+          // light-danger-text: #b91c1c is 6.47:1 on #FFFFFF; #ef4444 is 3.76:1.
+          danger: '#B91C1C',
         }
     }
   }
@@ -390,12 +396,12 @@ function AddCard({
       gap: '0.25rem',
     },
     required: {
-      color: '#ef4444',
+      color: themeConfig.danger,
       fontSize: '0.875rem',
     },
     error: {
       fontSize: '0.75rem',
-      color: '#ef4444',
+      color: themeConfig.danger,
       marginTop: '0.25rem',
     },
     buttonContainer: {

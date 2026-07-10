@@ -239,12 +239,19 @@ export const CustomTypography: Story = {
 export const ErrorStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PercentageFieldWithState
-        label="Percentage"
-        initialValue="150"
-        error="Percentage cannot exceed 100%."
-        styles={{ theme: 'light' }}
-      />
+      {/* Mixed-theme story on the sacred canvas: the light-themed field sits
+          on its own light surface so its danger-red label/helper are read
+          against white (#b91c1c is 6.47:1 on white, only 2.98:1 on #0e0e0e). */}
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PercentageFieldWithState
+          label="Percentage"
+          initialValue="150"
+          error="Percentage cannot exceed 100%."
+          styles={{ theme: 'light' }}
+        />
+      </div>
       <PercentageFieldWithState
         label="Completion Rate"
         placeholder="Enter completion rate"

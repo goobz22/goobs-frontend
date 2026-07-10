@@ -307,25 +307,38 @@ export const WithAdornments: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
+  // Mixed-theme story on the sacred canvas: the light/dark error variants get
+  // their own themed surfaces so the danger-text label + helper are judged
+  // against the background they are designed for (light danger-text #b91c1c is
+  // 6.47:1 on white but only 2.98:1 on the sacred #0e0e0e canvas); the sacred
+  // variant sits on the canvas itself.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <TextFieldWithState
-        label="Email Address"
-        initialValue="invalid-email"
-        error="Please enter a valid email address."
-        styles={{ theme: 'light' }}
-      />
-      <TextFieldWithState
-        label="Full Name"
-        placeholder="This field is required"
-        error="This field cannot be empty."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
-        }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <TextFieldWithState
+          label="Email Address"
+          initialValue="invalid-email"
+          error="Please enter a valid email address."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <TextFieldWithState
+          label="Full Name"
+          placeholder="This field is required"
+          error="This field cannot be empty."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
       <TextFieldWithState
         label="Ancient Inscription"
         initialValue="forbidden text"

@@ -22,7 +22,8 @@ const sampleEvents: CalendarEvent[] = [
     title: 'Team Standup',
     startDate: at(15, 9, 0),
     endDate: at(15, 9, 30),
-    color: '#2196f3',
+    // Tailwind blue-700: 6.70 white-on-bg contrast (event text is hardcoded white).
+    color: '#1d4ed8',
     resource: 'Engineering',
     description: 'Daily sync',
     type: 'meeting',
@@ -32,7 +33,8 @@ const sampleEvents: CalendarEvent[] = [
     title: 'Client Onboarding',
     startDate: at(15, 11, 0),
     endDate: at(15, 12, 30),
-    color: '#22c55e',
+    // Tailwind green-700: 5.02 white-on-bg contrast.
+    color: '#15803d',
     resource: 'Acme Corp',
     description: 'Kickoff walkthrough',
     type: 'meeting',
@@ -42,7 +44,8 @@ const sampleEvents: CalendarEvent[] = [
     title: 'Invoice Run',
     startDate: at(16, 14, 0),
     endDate: at(16, 15, 0),
-    color: '#f59e0b',
+    // Tailwind amber-700: 5.02 white-on-bg contrast.
+    color: '#b45309',
     resource: 'Billing',
     type: 'task',
   },
@@ -51,7 +54,8 @@ const sampleEvents: CalendarEvent[] = [
     title: 'Quarterly Review',
     startDate: at(18, 13, 0),
     endDate: at(18, 16, 0),
-    color: '#8b5cf6',
+    // Tailwind violet-700: 7.10 white-on-bg contrast.
+    color: '#6d28d9',
     resource: 'Leadership',
     description: 'Q2 metrics',
     type: 'meeting',
@@ -61,7 +65,8 @@ const sampleEvents: CalendarEvent[] = [
     title: 'Company Holiday',
     startDate: at(22, 0, 0),
     endDate: at(22, 23, 59),
-    color: '#ef4444',
+    // Tailwind red-700: 6.47 white-on-bg contrast.
+    color: '#b91c1c',
     allDay: true,
     type: 'holiday',
   },

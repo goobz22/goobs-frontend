@@ -140,12 +140,18 @@ export const Dark: Story = {
 }
 
 /**
- * Scalar CSS-variable overrides — pins the inheritance pathway: the Table's
- * `backgroundColor` fills the `<table>` surface (`--table-bg`, midnight navy),
- * while the header/cell overrides set on the WRAPPERS (not the leaves)
- * inherit down — teal header bg (`--table-header-bg`) with white header text
- * from the Table, lavender cell text + monospace font + coral cell borders
- * from the container. No cell/head element carries its own override.
+ * Scalar CSS-variable overrides — pins the inheritance pathway AND the
+ * closest-wins rule. The Table sets the `<table>` surface (`--table-bg`,
+ * midnight navy), the teal header bg (`--table-header-bg`), and white header
+ * text (`--table-header-color`); the container sets lavender cell text
+ * (`--table-cell-color`), monospace font, and coral cell borders — all
+ * inheriting down. A header-row cell here is a plain `<td>` (not a
+ * `data-header-cell` th), so it would otherwise inherit the container's
+ * lavender `--table-cell-color` and render lavender-on-teal (2.96:1, fails
+ * contrast); each header cell therefore re-sets `--table-cell-color` to white
+ * on itself (a closer override beats the inherited value, matching the Table's
+ * white `headerColor`) → white-on-teal 5.47:1. The body cells keep the
+ * container's lavender on the navy surface (9.52:1).
  */
 export const StyleOverrides: Story = {
   globals: { backgrounds: { value: 'dark' } },
@@ -168,10 +174,10 @@ export const StyleOverrides: Story = {
       >
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Category</TableCell>
-            <TableCell>Status</TableCell>
+            <TableCell styles={{ color: '#ffffff' }}>ID</TableCell>
+            <TableCell styles={{ color: '#ffffff' }}>Name</TableCell>
+            <TableCell styles={{ color: '#ffffff' }}>Category</TableCell>
+            <TableCell styles={{ color: '#ffffff' }}>Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

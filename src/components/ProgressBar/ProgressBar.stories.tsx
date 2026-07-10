@@ -426,7 +426,8 @@ const LoadingSimulationComponent = () => {
           onClick={handleRestart}
           style={{
             padding: '8px 16px',
-            backgroundColor: '#3b82f6',
+            // blue-600 (#2563eb): white text = 5.17 (blue-500 #3b82f6 = 3.68, fails)
+            backgroundColor: '#2563eb',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
@@ -558,7 +559,8 @@ const FileUploadSimulationComponent = () => {
         onClick={handleRestart}
         style={{
           padding: '8px 16px',
-          backgroundColor: '#3b82f6',
+          // blue-600 (#2563eb): white text = 5.17 (blue-500 #3b82f6 = 3.68, fails)
+          backgroundColor: '#2563eb',
           color: 'white',
           border: 'none',
           borderRadius: '6px',

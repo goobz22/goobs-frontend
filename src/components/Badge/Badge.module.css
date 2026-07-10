@@ -48,7 +48,9 @@
 /* ---- theme overrides --------------------------------------------------- */
 
 .badge[data-theme='light'] {
-  background-color: var(--badge-background-color, #f44336);
+  /* darkened from Material red 500 (#f44336, 3.68:1 on white) to red 700 so
+     the default white badge text clears WCAG AA 4.5:1 (#d32f2f = 4.98:1). */
+  background-color: var(--badge-background-color, #d32f2f);
   color: var(--badge-color, white);
   box-shadow: var(
     --badge-box-shadow,
@@ -61,7 +63,10 @@
 }
 
 .badge[data-theme='dark'] {
-  background-color: var(--badge-background-color, var(--goobs-danger));
+  /* --goobs-danger (#ef4444) is a severity *fill* base tuned for colored text,
+     not white — white on it is only 3.76:1. Use the darker red-700 grade so the
+     default white badge text clears WCAG AA 4.5:1 (#b91c1c = 6.47:1 on white). */
+  background-color: var(--badge-background-color, #b91c1c);
   color: var(--badge-color, white);
   box-shadow: var(--badge-box-shadow, 0 2px 8px var(--goobs-black-a40));
   backdrop-filter: var(--badge-backdrop-filter, blur(4px));

@@ -132,7 +132,7 @@ export type CalendarEvent = {
   startDate: Date
   /** Event end; with `startDate` it decides which day and hour cells the event occupies. */
   endDate: Date
-  /** Chip background color. Default: '#2196f3', or translucent gold on the sacred theme. */
+  /** Chip background color. Default: '#1d4ed8' (event text is white; this passes 4.5:1), or translucent gold on the sacred theme. */
   color?: string
   /** In week/day views, shows the event in every visible hour cell of its start day. */
   allDay?: boolean
@@ -1030,6 +1030,12 @@ export default function BigCalendar({
           propertyTypes={propertyTypes}
           bedroomOptions={bedroomOptions}
           priceRanges={priceRanges}
+          // Forward the calendar's theme so the filter panel matches it.
+          // Without this it defaulted to 'sacred', rendering gold Cinzel
+          // headings + gold field labels on a light calendar — a theme
+          // mismatch that also failed contrast (gold on the light-composited
+          // grey surface, ~1.8:1).
+          styles={{ theme }}
         />
       )}
 

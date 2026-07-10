@@ -233,31 +233,56 @@ export const CustomTypography: Story = {
 export const ErrorStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* Light-themed error field — its danger token (#b91c1c) is designed
+          for a white surface (6.47:1); it fails on the default sacred canvas,
+          so this block stays on the light-pinned canvas. */}
       <SearchBarWithState
         label="Search Query"
         initialValue="invalid@#$%"
         error="Search contains invalid characters."
         styles={{ theme: 'light' }}
       />
-      <SearchBarWithState
-        label="Product Search"
-        placeholder="Enter product name"
-        error="No results found for your search."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+      {/* Mixed-theme story: the dark and sacred error fields render on their
+          own themed surfaces so their danger labels/helpers are measured
+          against the surface they were designed for (dark tomato #ff6347 =
+          6.02:1 on #111827; sacred #ef4444 = 5.13:1 on #0e0e0e — both fail
+          on white). */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
         }}
-      />
-      <SearchBarWithState
-        label="Sacred Search"
-        initialValue="forbidden-knowledge"
-        error="This knowledge is forbidden to mortals."
-        styles={{ theme: 'sacred' }}
-      />
+      >
+        <SearchBarWithState
+          label="Product Search"
+          placeholder="Enter product name"
+          error="No results found for your search."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SearchBarWithState
+          label="Sacred Search"
+          initialValue="forbidden-knowledge"
+          error="This knowledge is forbidden to mortals."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------

@@ -247,7 +247,12 @@
 .item[data-theme='dark'][data-selected='true']:not([data-disabled='true']) {
   background-color: var(--goobs-blue-light-a15);
   border-color: rgba(96, 165, 250, 0.5);
-  color: var(--goobs-dark-primary);
+  /* --goobs-dark-primary (#60a5fa) only reaches 4.40:1 on this blue-tinted
+     selected background (blue-light-a15 over the dark surface composites to
+     ~#283c58) — one step lighter on the same blue ramp (blue-300 #93c5fd)
+     clears WCAG AA text (6.2:1) while keeping the blue selection accent. No
+     lighter-blue token exists in global.css, so the literal is component-local. */
+  color: #93c5fd;
   font-weight: var(--goobs-weight-semibold);
   box-shadow: 0 2px 4px var(--goobs-blue-light-a20);
 }

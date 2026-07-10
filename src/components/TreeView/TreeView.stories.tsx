@@ -731,7 +731,7 @@ export const ComprehensiveShowcase: Story = {
 
       {/* Dark Theme Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#6B7280' }}>Dark Theme</h3>
         <div
           style={{
             height: '400px',
@@ -758,7 +758,7 @@ export const ComprehensiveShowcase: Story = {
 
       {/* Dark Theme Elements Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#6B7280' }}>
           Dark Theme Elements
         </h3>
         <div
@@ -778,7 +778,7 @@ export const ComprehensiveShowcase: Story = {
           />
         </div>
         <p
-          style={{ margin: '0.5rem 0 0 0', fontSize: '14px', color: '#9CA3AF' }}
+          style={{ margin: '0.5rem 0 0 0', fontSize: '14px', color: '#6B7280' }}
         >
           Dark theme with element hierarchy
         </p>

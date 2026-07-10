@@ -24,6 +24,7 @@
   --sh-text: var(--goobs-sacred-text);
   --sh-label: var(--goobs-gold-a80);
   --sh-footer: var(--goobs-sacred-text-secondary);
+  --sh-required: var(--goobs-sacred-danger-text);
   --sh-font: 'Crimson Text', serif;
 
   position: relative;
@@ -38,6 +39,7 @@
   --sh-text: var(--goobs-light-text);
   --sh-label: var(--goobs-light-text-muted);
   --sh-footer: var(--goobs-light-text-muted);
+  --sh-required: var(--goobs-light-danger-text);
   --sh-font: var(--goobs-font-standard);
 }
 
@@ -48,18 +50,31 @@
   --sh-text: var(--goobs-dark-text);
   --sh-label: var(--goobs-dark-text-muted);
   --sh-footer: var(--goobs-dark-text-muted);
+  --sh-required: var(--goobs-dark-danger-text);
   --sh-font: var(--goobs-font-standard);
 }
 
 /* Error state (helperTextType === 'error') — reddens label, footer and the
-   search-box / dropdown borders. Mirrors the deleted getSharedFormFieldStyles
-   isError branch (border.error / label.error / footerText.error all
-   rgba(239, 68, 68, 1) across every theme). Applied regardless of theme. */
+   search-box / dropdown borders. The label + footer are TEXT, so they take the
+   per-theme *-danger-text grade (WCAG-AA on each theme's own canvas — the flat
+   --goobs-danger #ef4444 only scored 3.76 on the light/white canvas); the
+   borders are UI chrome (3:1) so they stay on the shared --goobs-danger. Sacred
+   is the default; light/dark refine the text colour below. */
 .container[data-error='true'] {
-  --sh-label: var(--goobs-danger);
-  --sh-footer: var(--goobs-danger);
+  --sh-label: var(--goobs-sacred-danger-text);
+  --sh-footer: var(--goobs-sacred-danger-text);
   --sh-border: var(--goobs-danger);
   --sh-border-focus: var(--goobs-danger);
+}
+
+.container[data-theme='light'][data-error='true'] {
+  --sh-label: var(--goobs-light-danger-text);
+  --sh-footer: var(--goobs-light-danger-text);
+}
+
+.container[data-theme='dark'][data-error='true'] {
+  --sh-label: var(--goobs-dark-danger-text);
+  --sh-footer: var(--goobs-dark-danger-text);
 }
 
 .label {
@@ -72,7 +87,7 @@
 }
 
 .requiredIndicator {
-  color: var(--goobs-danger);
+  color: var(--sh-required);
   margin-left: 2px;
   font-weight: var(--goobs-weight-semibold);
 }

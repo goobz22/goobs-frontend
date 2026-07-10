@@ -208,12 +208,12 @@
 
 .errorText[data-theme='light'] {
   font-family: Merriweather, serif;
-  color: var(--qr-error-text-color, var(--goobs-danger));
+  color: var(--qr-error-text-color, var(--goobs-light-danger-text));
 }
 
 .errorText[data-theme='dark'] {
   font-family: Merriweather, serif;
-  color: var(--qr-error-text-color, var(--goobs-danger));
+  color: var(--qr-error-text-color, var(--goobs-dark-danger-text));
 }
 
 /* --------------------------------------------------------------------------

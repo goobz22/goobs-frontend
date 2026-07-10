@@ -143,7 +143,7 @@ export const OpenLight: Story = {
   render: args => (
     <div style={{ padding: '5rem', display: 'flex', justifyContent: 'center' }}>
       <StyledTooltip {...args}>
-        <Button>Anchor</Button>
+        <Button styles={{ theme: 'light' }}>Anchor</Button>
       </StyledTooltip>
     </div>
   ),

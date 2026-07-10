@@ -254,9 +254,25 @@
   --ct-label-font-family: 'Crimson Text', serif;
 }
 
-/* error footerText is the same across themes (rgba(239,68,68,1)) */
+/* error footerText — per-theme severity *-text token so it clears 4.5:1 on
+   each theme's surface. The generic --goobs-danger (#ef4444) only reads 3.76
+   on the light white surface; the per-theme overrides below (higher specificity)
+   swap in the graded danger-text token for light/dark/sacred. The generic rule
+   stays as the theme-less fallback (sacred near-black base, where #ef4444 passes). */
 .helperText[data-helper-type='error'] {
   color: var(--goobs-danger);
+}
+
+.helperText[data-theme='light'][data-helper-type='error'] {
+  color: var(--goobs-light-danger-text);
+}
+
+.helperText[data-theme='dark'][data-helper-type='error'] {
+  color: var(--goobs-dark-danger-text);
+}
+
+.helperText[data-theme='sacred'][data-helper-type='error'] {
+  color: var(--goobs-sacred-danger-text);
 }
 
 /* --------------------------------------------------------------------------

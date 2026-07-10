@@ -120,15 +120,18 @@ export const AllDirections: Story = {
               }}
               styles={{
                 theme: 'light',
+                // Active fill darkened blue-500 → blue-600 (#2563eb, the
+                // --goobs-light-primary grade) so white label text clears 4.5:1
+                // (was #3b82f6 = 3.68). Matching border darkened in lockstep.
                 backgroundColor:
                   activeDirection === direction
-                    ? 'rgba(59, 130, 246, 1)'
+                    ? 'rgba(37, 99, 235, 1)'
                     : 'rgba(255, 255, 255, 0.95)',
                 color:
                   activeDirection === direction ? 'white' : 'rgb(55, 65, 81)',
                 borderColor:
                   activeDirection === direction
-                    ? 'rgba(59, 130, 246, 1)'
+                    ? 'rgba(37, 99, 235, 1)'
                     : 'rgba(226, 232, 240, 0.8)',
               }}
             >
@@ -214,11 +217,14 @@ export const Themes: Story = {
               onClick={() => setCurrentTheme(theme)}
               styles={{
                 theme: theme,
+                // Active fill darkened blue-500 → blue-600 (#2563eb, the
+                // --goobs-light-primary grade) so white label text clears 4.5:1
+                // (was #3b82f6 = 3.68). Matching border darkened in lockstep.
                 ...(currentTheme === theme
                   ? {
-                      backgroundColor: 'rgba(59, 130, 246, 1)',
+                      backgroundColor: 'rgba(37, 99, 235, 1)',
                       color: 'white',
-                      borderColor: 'rgba(59, 130, 246, 1)',
+                      borderColor: 'rgba(37, 99, 235, 1)',
                     }
                   : {}),
               }}

@@ -106,7 +106,9 @@
 
 .button[data-theme='dark'][data-selected='true'] {
   background-color: var(--goobs-blue-a30);
-  color: var(--goobs-dark-primary);
+  /* blue-300, not --goobs-dark-primary #60a5fa: over the blue-a30 selected
+     fill (~#274473) #60a5fa is 3.82:1; #93c5fd holds 5.39:1. */
+  color: #93c5fd;
   border-color: var(--goobs-dark-primary);
 }
 

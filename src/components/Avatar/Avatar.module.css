@@ -81,8 +81,22 @@
 
 /* --------------------------------------------------------------------------
    DISABLED STATE
+   Dark/sacred avatars sit on dark surfaces, so a 0.6 opacity fade dims the
+   whole disc while keeping the initials legible (fg + bg fade toward the dark
+   backdrop together). The LIGHT avatar's fill (#f0f0f0) is already near-white,
+   so the same fade barely dims the disc yet washes the initials out toward the
+   surface — dropping "MG" to ~3.09 contrast. For light we therefore convey
+   disabled with an explicit muted treatment (fill fades toward the surface,
+   text drops to the disabled token) instead of blunt opacity, keeping the
+   initials at >= 4.5.
    -------------------------------------------------------------------------- */
 .root[data-disabled='true'] {
   opacity: 0.6;
   pointer-events: none;
+}
+
+.root[data-theme='light'][data-disabled='true'] {
+  opacity: 1;
+  background-color: #f7f7f7;
+  color: var(--goobs-light-text-disabled);
 }
