@@ -174,7 +174,10 @@
 }
 
 .tab[data-theme='light'][data-tab-active='true'] .count {
-  background-color: var(--goobs-blue-a25);
+  /* Solid white, not blue-a25: the translucent badge composites over the
+     active tab's blue fill to ~#b8d2fc, dropping the #1d4ed8 count text to
+     4.36:1; on white it holds 6.70:1. */
+  background-color: #ffffff;
 }
 
 /* ==========================================================================

@@ -88,15 +88,17 @@
 .root[data-theme='light'] {
   --chip-bg: var(--goobs-blue-a10);
   --chip-border: var(--goobs-blue-a25);
-  --chip-text: var(--goobs-light-primary);
+
+  /* Resting text: #2563eb is 4.62:1 over pure white but only 4.46:1 when the
+     blue-a10 tint composites over a filter-card surface (~#fafbfb) — the
+     WorkspaceFilterShell case. primary-strong #1d4ed8 holds 5.79:1 there. */
+  --chip-text: var(--goobs-light-primary-strong);
   --chip-hover-bg: var(--goobs-blue-a15);
   --chip-hover-border: var(--goobs-blue-a40);
   --chip-active-bg: rgba(59, 130, 246, 0.18);
   --chip-active-border: rgba(59, 130, 246, 0.5);
-  /* Resting text --goobs-light-primary #2563eb is 4.62:1 on the #ebf3fe rest
-     tint, but only 4.21:1 on the darker #dce9fd active tint (rgba(59,130,246,
-     0.18) over white). Step the active text down to the blue-700 info grade
-     #1d4ed8 → 5.46:1 on #dce9fd. */
+  /* Active tint #dce9fd is darker still; the blue-700 info grade #1d4ed8 is
+     5.46:1 on it. */
   --chip-active-text: var(--goobs-light-info-text);
   --chip-font: var(--goobs-font-standard);
   --chip-shadow: none;
