@@ -64,6 +64,7 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -106,7 +107,15 @@ export const SimpleEditor: Story = {
         />
       </div>
 
-      <div>
+      {/* Dark-themed block sits on its own dark surface (mixed-theme story:
+          per-block themed wrappers; the story canvas itself is light). */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1.5rem',
+          borderRadius: '12px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <ComplexTextEditorWithState
           label="Simple Text Editor"
@@ -116,7 +125,15 @@ export const SimpleEditor: Story = {
         />
       </div>
 
-      <div>
+      {/* Sacred block on the sacred near-black surface — gold-on-near-black
+          is the design language; gold labels are unreadable on white. */}
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1.5rem',
+          borderRadius: '12px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <ComplexTextEditorWithState
           label="Sacred Text Editor"
@@ -142,6 +159,7 @@ export const MarkdownEditor: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const RichTextEditor: Story = {
@@ -153,6 +171,7 @@ export const RichTextEditor: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const ComplexEditor: Story = {
@@ -165,6 +184,7 @@ export const ComplexEditor: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -227,6 +247,7 @@ export const CustomColors: Story = {
       }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -290,6 +311,7 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -317,17 +339,27 @@ export const EditorConfiguration: Story = {
           defaultMode: 'rich',
         }}
       />
-      <ComplexTextEditorWithState
-        label="Default to Markdown"
-        editorType="complex"
-        initialValue="# Markdown Mode\n\nStarts in **markdown** editing mode."
-        styles={{
-          theme: 'dark',
-          defaultMode: 'markdown',
+      {/* Dark-themed editor gets its own dark surface on the light canvas */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '12px',
         }}
-      />
+      >
+        <ComplexTextEditorWithState
+          label="Default to Markdown"
+          editorType="complex"
+          initialValue="# Markdown Mode\n\nStarts in **markdown** editing mode."
+          styles={{
+            theme: 'dark',
+            defaultMode: 'markdown',
+          }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -353,17 +385,27 @@ export const HelperTextAndErrors: Story = {
           helperTextType: 'error',
         }}
       />
-      <ComplexTextEditorWithState
-        label="Info Helper"
-        initialValue="Informational content"
-        helperText="Pro tip: Use Ctrl+B for bold and Ctrl+I for italic in rich text mode."
-        styles={{
-          theme: 'dark',
-          helperTextType: 'info',
+      {/* Dark-themed editor gets its own dark surface on the light canvas */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '12px',
         }}
-      />
+      >
+        <ComplexTextEditorWithState
+          label="Info Helper"
+          initialValue="Informational content"
+          helperText="Pro tip: Use Ctrl+B for bold and Ctrl+I for italic in rich text mode."
+          styles={{
+            theme: 'dark',
+            helperTextType: 'info',
+          }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -408,8 +450,15 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — its own dark surface on the light canvas
+          (mixed-theme story: per-block themed wrappers). */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1.5rem',
+          borderRadius: '12px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <ComplexTextEditorWithState
@@ -440,8 +489,15 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — near-black surface; gold-on-near-black is
+          the sacred design language and fails on white. */}
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1.5rem',
+          borderRadius: '12px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <ComplexTextEditorWithState
@@ -474,20 +530,29 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <ComplexTextEditorWithState
-            label="Neon Style"
-            initialValue="Futuristic editor"
-            styles={{
-              theme: 'dark',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              borderColor: 'rgba(147, 51, 234, 0.5)',
-              borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
-              borderRadius: '20px',
-              borderWidth: '2px',
+          {/* dark-themed editor: dark chip so its label isn't muted-on-white */}
+          <div
+            style={{
+              background: '#111827',
+              padding: '1rem',
+              borderRadius: '12px',
             }}
-          />
+          >
+            <ComplexTextEditorWithState
+              label="Neon Style"
+              initialValue="Futuristic editor"
+              styles={{
+                theme: 'dark',
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                borderColor: 'rgba(147, 51, 234, 0.5)',
+                borderFocusedColor: 'rgba(147, 51, 234, 1)',
+                textColor: 'rgba(147, 51, 234, 1)',
+                labelColor: 'rgba(147, 51, 234, 0.8)',
+                borderRadius: '20px',
+                borderWidth: '2px',
+              }}
+            />
+          </div>
           <ComplexTextEditorWithState
             label="Soft Rounded"
             initialValue="Gentle appearance"
@@ -551,7 +616,7 @@ const ModeSwitchingDemo = () => {
           onClick={() => setMode('simple')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'simple' ? '#3B82F6' : '#E5E7EB',
+            backgroundColor: mode === 'simple' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
             color: mode === 'simple' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',
@@ -564,7 +629,7 @@ const ModeSwitchingDemo = () => {
           onClick={() => setMode('rich')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'rich' ? '#3B82F6' : '#E5E7EB',
+            backgroundColor: mode === 'rich' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
             color: mode === 'rich' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',
@@ -577,7 +642,7 @@ const ModeSwitchingDemo = () => {
           onClick={() => setMode('markdown')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'markdown' ? '#3B82F6' : '#E5E7EB',
+            backgroundColor: mode === 'markdown' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
             color: mode === 'markdown' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',
@@ -623,6 +688,7 @@ const ModeSwitchingDemo = () => {
 export const ModeSwitching: Story = {
   name: 'Mode Switching Demo',
   render: () => <ModeSwitchingDemo />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -657,6 +723,7 @@ export const InteractionTest: Story = {
     // Check value
     await expect(textarea).toHaveValue('Hello, Complex Editor!')
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const AccordionInteractionTest: Story = {
@@ -715,6 +782,7 @@ export const ComplexModeTest: Story = {
     // The editor should switch to markdown mode
     // (More specific assertions would depend on the implementation details)
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Add argTypes for new props
