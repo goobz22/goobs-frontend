@@ -108,6 +108,7 @@ export const Default: Story = {
     view: 'month',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -129,7 +130,7 @@ export const SacredTheme: Story = {
     view: 'month',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -145,6 +146,7 @@ export const WeekView: Story = {
     endHour: 19,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DayView: Story = {
@@ -156,6 +158,7 @@ export const DayView: Story = {
     endHour: 19,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -171,6 +174,7 @@ export const NoToolbar: Story = {
     showToolbar: false,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const WithFilters: Story = {
@@ -186,6 +190,7 @@ export const WithFilters: Story = {
     ],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -199,4 +204,5 @@ export const NoEvents: Story = {
     view: 'month',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }

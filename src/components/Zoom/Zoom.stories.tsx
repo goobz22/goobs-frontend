@@ -75,6 +75,7 @@ export const Default: Story = {
       </div>
     )
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Story showing different themes
@@ -91,8 +92,27 @@ export const Themes: Story = {
       'sacred',
     ]
 
+    // The theme switches at runtime, so a single static canvas pin can't match
+    // all three states — give the demo block its own background that tracks the
+    // active theme (light #ffffff / dark #111827 / sacred #0e0e0e) instead.
+    const canvasBg =
+      currentTheme === 'light'
+        ? '#ffffff'
+        : currentTheme === 'dark'
+          ? '#111827'
+          : '#0e0e0e'
+
     return (
-      <div style={{ width: '500px', height: '350px' }}>
+      <div
+        style={{
+          width: '500px',
+          height: '350px',
+          background: canvasBg,
+          padding: '20px',
+          borderRadius: '8px',
+          transition: 'background 200ms ease',
+        }}
+      >
         <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
           {themes.map(theme => (
             <CustomButton
@@ -207,7 +227,7 @@ export const SacredTheme: Story = {
       </div>
     )
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // Story with a custom scale + transform origin
@@ -247,4 +267,5 @@ export const CustomScale: Story = {
       </div>
     )
   },
+  globals: { backgrounds: { value: 'light' } },
 }

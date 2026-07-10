@@ -51,7 +51,7 @@
   --panel-border: rgba(15, 23, 42, 0.12);
   --panel-accent: #1976d2;
   --panel-title: #1f2937;
-  --panel-subtitle: #6b7280;
+  --panel-subtitle: var(--goobs-light-text-muted);
   --panel-text: #374151;
   --panel-header-bg: rgba(15, 23, 42, 0.02);
   --panel-footer-bg: rgba(15, 23, 42, 0.02);

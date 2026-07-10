@@ -93,6 +93,14 @@ export const LightParagraph: Story = {
   },
 }
 
+/**
+ * Light-theme helper text on the LIGHT canvas. Regression baseline: the merri
+ * helper/footer pin used to be rgba(255,255,255,0.6) for EVERY non-sacred
+ * theme — on a light surface that composites to white-on-white (1.0:1,
+ * invisible; this story only "passed" because it inherited the sacred
+ * near-black canvas). The light theme now pins the AA-tuned muted role token
+ * --goobs-light-text-muted (#4b5563 — 7.56:1 on #ffffff).
+ */
 export const LightHelperText: Story = {
   name: 'Light/Helper Text',
   args: {
@@ -101,6 +109,15 @@ export const LightHelperText: Story = {
       theme: 'light',
       variant: 'merrihelperfooter',
     },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const helper = canvas.getByText(
+      'This is helper text for captions or footers.'
+    )
+    // --goobs-light-text-muted resolves to #4b5563 = rgb(75, 85, 99).
+    await expect(window.getComputedStyle(helper).color).toBe('rgb(75, 85, 99)')
   },
 }
 
@@ -188,7 +205,9 @@ export const SacredH1: Story = {
       variant: 'merrih1',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  // Sacred design language is gold-on-near-black: pin the sacred canvas
+  // (#0e0e0e — gold is 13.76:1 there, WCAG AA pass).
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 export const SacredParagraph: Story = {
@@ -200,7 +219,7 @@ export const SacredParagraph: Story = {
       variant: 'merriparagraph',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**
@@ -217,7 +236,7 @@ export const SacredWithOutline: Story = {
       outline: true,
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -240,6 +259,9 @@ export const Centered: Story = {
 
 export const GutterBottom: Story = {
   name: 'Spacing/Gutter Bottom',
+  // Sacred-themed demo content: pin the sacred canvas explicitly rather than
+  // relying on it being the default (gold on #0e0e0e is 13.76:1).
+  globals: { backgrounds: { value: 'sacred' } },
   render: () => (
     <div>
       <Typography

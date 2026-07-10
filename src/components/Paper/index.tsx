@@ -92,6 +92,11 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
     ref
   ) => {
     const isSacredTheme = styles?.theme === 'sacred'
+    const isDarkTheme = styles?.theme === 'dark'
+    // Real three-theme surface selection. 'sacred' and 'dark' each get their
+    // own [data-theme] block in Paper.module.css; anything else (incl. 'light'
+    // and unset) falls through to the base .root (the historical light surface).
+    const dataTheme = isSacredTheme ? 'sacred' : isDarkTheme ? 'dark' : 'light'
 
     // Elevation-driven box-shadow. This is a scalar function of `elevation`,
     // so it is computed here and handed to CSS via the --paper-shadow custom
@@ -112,7 +117,13 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
       : styles?.borderColor
         ? `${styles.borderWidth || '1px'} solid ${styles.borderColor}`
         : styles?.borderWidth
-          ? `${styles.borderWidth} solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.3)' : 'rgba(0, 0, 0, 0.12)'}`
+          ? `${styles.borderWidth} solid ${
+              isSacredTheme
+                ? 'rgba(255, 215, 0, 0.3)'
+                : isDarkTheme
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(0, 0, 0, 0.12)'
+            }`
           : undefined
 
     // Caller-supplied scalar overrides layer on top of the CSS defaults. The
@@ -165,7 +176,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
         ref={ref}
         className={[cssStyles.root, className].filter(Boolean).join(' ')}
         data-component="Paper"
-        data-theme={isSacredTheme ? 'sacred' : 'default'}
+        data-theme={dataTheme}
         style={dynamicStyle}
         data-form={dataForm}
         data-subject={dataSubject}

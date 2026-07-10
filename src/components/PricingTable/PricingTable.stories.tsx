@@ -90,6 +90,7 @@ export const PremiumTheme: Story = {
     theme: 'light',
     highlightedPackageIndex: 1,
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const SacredTheme: Story = {
@@ -110,6 +111,7 @@ export const SacredTheme: Story = {
     theme: 'sacred',
     highlightedPackageIndex: 1,
   },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**
@@ -176,6 +178,7 @@ const InteractiveDemoRenderer = () => {
 
 export const InteractiveDemo: Story = {
   render: () => <InteractiveDemoRenderer />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const BothPrices: Story = {
@@ -197,4 +200,5 @@ export const BothPrices: Story = {
     theme: 'light',
     highlightedPackageIndex: 2,
   },
+  globals: { backgrounds: { value: 'light' } },
 }

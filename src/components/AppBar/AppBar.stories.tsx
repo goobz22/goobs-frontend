@@ -98,7 +98,7 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred' },
     children: <NavContent color="#FFD700" />,
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

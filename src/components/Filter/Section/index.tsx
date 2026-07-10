@@ -197,7 +197,7 @@ export interface FilterSectionProps {
   title?: string
 
   // Misc ----------------------------------------------------------
-  styles?: { theme?: 'sacred' | 'light' }
+  styles?: { theme?: 'sacred' | 'light' | 'dark' }
   /**
    * Give the (non-collapsible) row a self-contained surface — padding, a
    * subtle border, tinted background, and rounded corners — so it reads as
@@ -273,19 +273,26 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       return next
     })
   }
-  // Theme attribute resolves to 'sacred' only when explicitly requested;
-  // every other value (undefined / 'light') falls through to the light
-  // override block in the CSS module — preserving the original behaviour
-  // where an unset theme rendered light. (Mirrors Accordion's pattern.)
+  // Theme attribute resolves 'sacred' and 'dark' only when explicitly
+  // requested; every other value (undefined / 'light') falls through to the
+  // light override block in the CSS module — preserving the original
+  // behaviour where an unset theme rendered light. (Mirrors Accordion's
+  // pattern: sacred base class, [data-theme='light'|'dark'] overrides.)
   //
   // The resolved theme is forwarded to EVERY themed child (search bar,
   // dropdowns, date ranges, switches, buttons, chips). Children default to
   // 'sacred' when given no styles (goobs-wide convention), so a light
   // FilterSection that forwarded nothing used to render sacred-gold field
   // labels and gold chips on its light surface — a WCAG contrast failure
-  // (gold-a80 on the light panel ≈ 1.66:1).
-  const theme: 'sacred' | 'light' =
-    propStyles?.theme === 'sacred' ? 'sacred' : 'light'
+  // (gold-a80 on the light panel ≈ 1.66:1). The same class of bug hit the
+  // DataGrid dark theme: an un-forwarded 'dark' collapsed to the light block,
+  // painting the light-theme toggle color (#070a0e) on the dark surface.
+  const theme: 'sacred' | 'light' | 'dark' =
+    propStyles?.theme === 'sacred'
+      ? 'sacred'
+      : propStyles?.theme === 'dark'
+        ? 'dark'
+        : 'light'
 
   // Only render the search/buttons row if any of those props were provided.
   const hasSearch = onSearchChange !== undefined

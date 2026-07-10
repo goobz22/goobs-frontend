@@ -255,6 +255,9 @@ function styleOverridesToCss(
   if (styles.helperTextErrorColor !== undefined) {
     out['--field-helper-error'] = styles.helperTextErrorColor
   }
+  if (styles.requiredIndicatorColor !== undefined) {
+    out['--field-required-indicator'] = styles.requiredIndicatorColor
+  }
   // CSS-variable passthrough — any key starting with `--` is a custom
   // property override. The index signature on FieldStyleOverrides
   // permits these.

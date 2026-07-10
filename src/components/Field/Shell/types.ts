@@ -49,6 +49,13 @@ export interface FieldStyleOverrides {
    */
   requiredIndicatorText?: string
   /**
+   * Color of the required indicator glyph. Friendly alias for the
+   * `--field-required-indicator` CSS variable (e.g. `'rgba(255,215,0,1)'`
+   * to render the sacred gold asterisk). When omitted, the indicator
+   * follows the per-theme danger-text grade from `FieldShell.module.css`.
+   */
+  requiredIndicatorColor?: string
+  /**
    * Force the helper text region into error-styled colors even when
    * no validation message is set. Mostly used by components that
    * propagate validation state via CSS class. Leave undefined to

@@ -79,7 +79,7 @@ export const SacredTheme: Story = {
       theme: 'sacred',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** A sacred theme checkbox that is also disabled. */
@@ -92,7 +92,7 @@ export const SacredDisabled: Story = {
       theme: 'sacred',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**

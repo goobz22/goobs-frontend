@@ -295,6 +295,16 @@ export interface ButtonProps extends Omit<
 > {
   /** Button label, rendered in a `<span>` beside/below the icon per `styles.iconLocation`. Omit for an icon-only button. */
   text?: string
+  /**
+   * Button label supplied as JSX children — the ergonomic alternative to
+   * `text` (`<Button>Save</Button>` ≡ `<Button text="Save" />`). Rendered in
+   * the same `<span>` label slot, positioned beside/below the icon per
+   * `styles.iconLocation`. When BOTH `children` and `text` are set, `children`
+   * win. (Before 2026-07-09 children were silently dropped — they fell into
+   * the native-attribute passthrough and were overridden by the explicit JSX
+   * body, producing an empty button.)
+   */
+  children?: ReactNode
   /** Icon node, rendered in a sized wrapper (1.15em, tracking the button's font-size) positioned by `styles.iconLocation` (`'left'` default). */
   icon?: ReactNode
   /** Styling overrides — theme, inline-CSS keys, and hover intent. See ButtonStyles. */
@@ -373,6 +383,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       text,
+      children,
       icon,
       styles,
       onClick,
@@ -561,6 +572,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       return icon ? <span className={cssStyles.iconWrapper}>{icon}</span> : null
     }, [icon])
 
+    // Label content. JSX `children` (when provided) take precedence over the
+    // `text` prop so `<Button>Save</Button>` and `<Button text="Save" />`
+    // render identically; both flow through the same `<span>` label slot.
+    // This closes the bug where children were silently dropped — they landed
+    // in the native-attribute passthrough (`restProps` → `filteredProps`) and
+    // were overridden by the explicit JSX body, yielding an empty button.
+    const labelSource =
+      children !== undefined &&
+      children !== null &&
+      children !== false &&
+      children !== ''
+        ? children
+        : text
+    const labelComponent = labelSource ? <span>{labelSource}</span> : null
+
     return (
       <button
         ref={ref}
@@ -577,7 +603,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {iconLocation === 'above' && iconComponent}
         {iconLocation === 'left' && iconComponent}
-        {text && <span>{text}</span>}
+        {labelComponent}
         {iconLocation === 'right' && iconComponent}
       </button>
     )

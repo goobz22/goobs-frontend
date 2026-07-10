@@ -386,6 +386,7 @@ export const LightTheme: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -492,6 +493,7 @@ export const SeverityBoard: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const TopicBoard: Story = {
@@ -573,6 +575,7 @@ export const CompanyVariant: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomerVariant: Story = {

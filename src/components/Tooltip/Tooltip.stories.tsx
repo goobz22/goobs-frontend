@@ -80,7 +80,7 @@ export const SacredTheme: Story = {
       theme: 'sacred',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // Different placements
@@ -153,6 +153,7 @@ export const OpenLight: Story = {
     open: true,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: assertOpenBubble('light', 'Light bubble, always open'),
 }
 

@@ -53,6 +53,7 @@ export const LightSuccess: Story = {
     message: 'Your operation was completed successfully.',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A light-themed alert for informational messages. */
@@ -63,6 +64,7 @@ export const LightInfo: Story = {
     message: 'Here is some information that might be useful to you.',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A light-themed alert for warnings. */
@@ -73,6 +75,7 @@ export const LightWarning: Story = {
     message: 'Warning: This action may have unintended consequences.',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A light-themed alert for errors. */
@@ -83,6 +86,7 @@ export const LightError: Story = {
     message: 'An error occurred while processing your request.',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A dismissible light-themed alert. */
@@ -94,6 +98,7 @@ export const LightDismissible: Story = {
     onClose: fn(),
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -156,7 +161,7 @@ export const SacredSuccess: Story = {
     message: 'The sacred ritual has been successfully completed.',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** A sacred-themed alert for informational messages. */
@@ -167,7 +172,7 @@ export const SacredInfo: Story = {
     message: 'Ancient scrolls of wisdom have been unearthed.',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** A sacred-themed alert for warnings. */
@@ -178,7 +183,7 @@ export const SacredWarning: Story = {
     message: 'The celestial alignment is imminent. Prepare yourself.',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** A sacred-themed alert for errors. */
@@ -189,7 +194,7 @@ export const SacredError: Story = {
     message: 'A dark energy has corrupted the sacred artifacts.',
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -203,6 +208,7 @@ export const InteractionTest: Story = {
     onClose: () => {}, // Provide a mock function for the test
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
     const closeButton = canvas.getByText('✕')

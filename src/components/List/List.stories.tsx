@@ -109,7 +109,7 @@ export const DarkTheme: Story = {
  */
 export const SacredTheme: Story = {
   render: () => renderList('sacred'),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

@@ -233,7 +233,7 @@ type Story = StoryObj<typeof Form>
 // --------------------------------------------------------------------------
 
 /**
- * All eight bound fields in the sacred theme on the sacred canvas. Pins the
+ * All eight bound fields in the sacred theme on a dark canvas. Pins the
  * bound INITIAL state flowing engine→UI with zero per-field wiring: Select
  * shows "Pro", the "Invoicing" skill sits in the Assigned column (and is
  * absent from Available), the "Monthly" toggle renders pressed, the Switch /
@@ -242,7 +242,14 @@ type Story = StoryObj<typeof Form>
  */
 export const SacredTheme: Story = {
   render: () => <BoundFieldsForm theme="sacred" />,
-  globals: { backgrounds: { value: 'sacred' } },
+  // Pin the DARK canvas (#111827), not 'sacred' (#0e0e0e). 'sacred' equals the
+  // preview's `initialGlobals` default, so setting it is a no-op the backgrounds
+  // decorator may not re-apply — leaving the sacred translucent surfaces on a
+  // mid-gray fallback where the gold/light text fails contrast. Pinning 'dark'
+  // (a value that differs from the initial global) reliably applies a near-black
+  // canvas on which every sacred field passes. Matches the house pattern
+  // (Content.stories.tsx SacredTheme, which pins 'dark' for the same reason).
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**

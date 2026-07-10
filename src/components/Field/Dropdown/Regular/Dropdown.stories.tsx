@@ -171,6 +171,7 @@ export const BasicOptions: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const ComplexOptions: Story = {
@@ -182,6 +183,7 @@ export const ComplexOptions: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const select = canvas.getByRole('combobox')
@@ -204,31 +206,49 @@ export const WithDefaultValue: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const RequiredDropdown: Story = {
+  // Mixed-theme story: each themed field sits on the surface its palette is
+  // designed for; the canvas stays sacred #0e0e0e for the sacred field.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <DropdownWithState
-        label="Required Selection"
-        options={sampleOptions}
-        required
-        styles={{ theme: 'light' }}
-      />
-      <DropdownWithState
-        label="Required Country"
-        options={countryOptions}
-        required
-        error="This field is required"
-        styles={{ theme: 'light' }}
-      />
-      <DropdownWithState
-        label="Required Tech Stack"
-        options={sampleOptions}
-        required
-        initialValue="react"
-        styles={{ theme: 'dark' }}
-      />
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <DropdownWithState
+          label="Required Selection"
+          options={sampleOptions}
+          required
+          styles={{ theme: 'light' }}
+        />
+        <DropdownWithState
+          label="Required Country"
+          options={countryOptions}
+          required
+          error="This field is required"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <DropdownWithState
+          label="Required Tech Stack"
+          options={sampleOptions}
+          required
+          initialValue="react"
+          styles={{ theme: 'dark' }}
+        />
+      </div>
       <DropdownWithState
         label="Custom Required Indicator"
         options={sampleOptions}
@@ -262,25 +282,35 @@ export const RequiredDropdown: Story = {
 // --------------------------------------------------------------------------
 
 export const ErrorStates: Story = {
+  // Mixed-theme story: each themed field sits on the surface its palette is
+  // designed for; the canvas stays sacred #0e0e0e for the sacred field.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <DropdownWithState
-        label="Required Selection"
-        options={sampleOptions}
-        error="Please select an option."
-        styles={{ theme: 'light' }}
-      />
-      <DropdownWithState
-        label="Invalid Choice"
-        options={countryOptions}
-        error="This selection is not available."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          helperTextErrorColor: 'rgba(255, 99, 71, 1)',
-        }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <DropdownWithState
+          label="Required Selection"
+          options={sampleOptions}
+          error="Please select an option."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <DropdownWithState
+          label="Invalid Choice"
+          options={countryOptions}
+          error="This selection is not available."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            helperTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
       <DropdownWithState
         label="Sacred Error"
         options={sampleOptions}
@@ -310,6 +340,7 @@ export const CustomColors: Story = {
       }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomLayout: Story = {
@@ -340,6 +371,7 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -347,6 +379,8 @@ export const CustomLayout: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
+  // Mixed light/dark story: the two dark fields sit on their own dark surface;
+  // the light field and the pinned canvas stay light.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <DropdownWithState
@@ -355,20 +389,32 @@ export const DisabledStates: Story = {
         disabled
         styles={{ theme: 'light' }}
       />
-      <DropdownWithState
-        label="Disabled Dark"
-        options={countryOptions}
-        disabled
-        styles={{ theme: 'dark' }}
-      />
-      <DropdownWithState
-        label="Disabled Alternative"
-        options={sampleOptions}
-        disabled
-        styles={{ theme: 'dark' }}
-      />
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <DropdownWithState
+          label="Disabled Dark"
+          options={countryOptions}
+          disabled
+          styles={{ theme: 'dark' }}
+        />
+        <DropdownWithState
+          label="Disabled Alternative"
+          options={sampleOptions}
+          disabled
+          styles={{ theme: 'dark' }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -409,8 +455,10 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark fields sit on their own dark surface */}
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <DropdownWithState
@@ -440,8 +488,10 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Alternative Dark Theme Section */}
-      <div>
+      {/* Alternative Dark Theme Section — dark fields on their own surface */}
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
           Alternative Dark Theme
         </h3>
@@ -536,6 +586,7 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const select = canvas.getByRole('combobox')

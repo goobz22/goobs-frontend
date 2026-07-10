@@ -39,17 +39,19 @@
     );
   --ct-border-glow: 0 0 20px var(--goobs-gold-a30);
 
-  /* Editor-area tokens (sacred.editorArea) */
+  /* Editor-area tokens (sacred.editorArea). Caller FormField overrides
+     (borderColor / borderFocusedColor / padding) layer in via var(--ct-cb-*)
+     with the sacred token as the fallback default. */
   --ct-editor-bg: var(--goobs-black-a80);
-  --ct-editor-border: var(--goobs-gold-a30);
-  --ct-editor-border-focused: var(--goobs-gold-a70);
+  --ct-editor-border: var(--ct-cb-border, var(--goobs-gold-a30));
+  --ct-editor-border-focused: var(--ct-cb-border-focused, var(--goobs-gold-a70));
   --ct-editor-border-error: var(--goobs-danger);
   --ct-editor-color: var(--goobs-gold-a90);
   --ct-editor-color-error: var(--goobs-sacred-text-secondary);
   --ct-editor-font-family: var(--goobs-font-sacred);
   --ct-editor-font-size: var(--goobs-text-xl);
   --ct-editor-line-height: 1.6;
-  --ct-editor-padding: var(--goobs-space-lg);
+  --ct-editor-padding: var(--ct-cb-padding, var(--goobs-space-lg));
   --ct-editor-min-height: 150px;
   --ct-editor-radius: 0 0 var(--goobs-radius-xl) var(--goobs-radius-xl);
   /* SHADOWS.sacred.small */
@@ -92,15 +94,15 @@
   --ct-border-glow: none;
 
   --ct-editor-bg: var(--goobs-light-surface);
-  --ct-editor-border: var(--goobs-light-border-strong);
-  --ct-editor-border-focused: var(--goobs-light-primary);
+  --ct-editor-border: var(--ct-cb-border, var(--goobs-light-border-strong));
+  --ct-editor-border-focused: var(--ct-cb-border-focused, var(--goobs-light-primary));
   --ct-editor-border-error: var(--goobs-danger);
   --ct-editor-color: var(--goobs-light-text);
   --ct-editor-color-error: var(--goobs-danger);
   --ct-editor-font-family: var(--goobs-font-standard);
   --ct-editor-font-size: var(--goobs-text-md);
   --ct-editor-line-height: 1.5;
-  --ct-editor-padding: var(--goobs-space-md);
+  --ct-editor-padding: var(--ct-cb-padding, var(--goobs-space-md));
   --ct-editor-min-height: 120px;
   --ct-editor-radius: 0 0 var(--goobs-radius-lg) var(--goobs-radius-lg);
   /* SHADOWS.light.small */
@@ -124,15 +126,15 @@
   --ct-border-glow: none;
 
   --ct-editor-bg: rgba(17, 24, 39, 1);
-  --ct-editor-border: var(--goobs-dark-border-strong);
-  --ct-editor-border-focused: var(--goobs-dark-primary);
+  --ct-editor-border: var(--ct-cb-border, var(--goobs-dark-border-strong));
+  --ct-editor-border-focused: var(--ct-cb-border-focused, var(--goobs-dark-primary));
   --ct-editor-border-error: var(--goobs-danger);
   --ct-editor-color: var(--goobs-dark-text);
   --ct-editor-color-error: var(--goobs-danger);
   --ct-editor-font-family: var(--goobs-font-standard);
   --ct-editor-font-size: var(--goobs-text-md);
   --ct-editor-line-height: 1.5;
-  --ct-editor-padding: var(--goobs-space-md);
+  --ct-editor-padding: var(--ct-cb-padding, var(--goobs-space-md));
   --ct-editor-min-height: 120px;
   --ct-editor-radius: 0 0 var(--goobs-radius-lg) var(--goobs-radius-lg);
   /* dark editorArea boxShadow (literal from theme/complextexteditor.ts) */
@@ -174,7 +176,10 @@
   margin-bottom: var(--goobs-space-2xs);
   font-size: var(--goobs-text-md);
   font-family: var(--ct-label-font-family, 'Crimson Text', serif);
-  color: var(--goobs-gold-a80); /* formField sacred label.default (default) */
+  color: var(
+    --ct-label-color,
+    var(--goobs-gold-a80)
+  ); /* formField sacred label.default (default) */
   transition: all 0.2s ease;
   background: transparent;
   background-color: transparent;
@@ -186,24 +191,33 @@
 
 .label[data-theme='light'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: var(--goobs-light-text-muted); /* formField light label.default */
+  color: var(
+    --ct-label-color,
+    var(--goobs-light-text-muted)
+  ); /* formField light label.default */
 }
 
 .label[data-theme='dark'] {
   --ct-label-font-family: 'Inter', sans-serif;
-  color: var(--goobs-dark-text-muted); /* formField dark label.default */
+  color: var(
+    --ct-label-color,
+    var(--goobs-dark-text-muted)
+  ); /* formField dark label.default */
 }
 
 .label[data-theme='sacred'] {
   --ct-label-font-family: 'Crimson Text', serif;
-  color: var(--goobs-gold-a80); /* formField sacred label.default */
+  color: var(
+    --ct-label-color,
+    var(--goobs-gold-a80)
+  ); /* formField sacred label.default */
 }
 
 /* Sacred decorative branch — only when styles.theme === 'sacred'
    (index.tsx isSacredTheme block). Overrides colour + font with the gold
    glow treatment. */
 .label[data-sacred='true'] {
-  color: var(--goobs-gold-a90); /* Sacred gold */
+  color: var(--ct-label-color, var(--goobs-gold-a90)); /* Sacred gold */
   font-family: var(--goobs-font-sacred);
   text-shadow: 0 0 3px var(--goobs-gold-a30);
   letter-spacing: var(--goobs-tracking-sacred-wide);
@@ -285,7 +299,11 @@
    -------------------------------------------------------------------------- */
 .editorArea {
   background: var(--ct-editor-bg);
-  border: 1px solid var(--ct-editor-border);
+  /* Longhands (not the `border` shorthand) so a caller `borderWidth` may be a
+     multi-value edge width such as '0px 0px 2px 0px' (underline style). */
+  border-style: solid;
+  border-width: var(--ct-cb-border-width, 1px);
+  border-color: var(--ct-editor-border);
   border-radius: var(--ct-editor-radius);
   color: var(--ct-editor-color);
   font-family: var(--ct-editor-font-family);
@@ -335,16 +353,20 @@
    (minRows * 1.5rem) → passed as --ct-simple-min-height.
    -------------------------------------------------------------------------- */
 .simpleTextarea {
-  /* light defaults */
+  /* light defaults. Caller FormField overrides (borderColor / textColor)
+     layer in via var(--ct-cb-*) with the theme token as the fallback. */
   --ct-simple-bg: var(--goobs-light-surface);
-  --ct-simple-border: var(--goobs-light-border);
-  --ct-simple-color: var(--goobs-light-text);
+  --ct-simple-border: var(--ct-cb-border, var(--goobs-light-border));
+  --ct-simple-color: var(--ct-cb-text, var(--goobs-light-text));
   --ct-simple-shadow: none;
 
   width: 100%;
-  padding: 0.75rem;
+  padding: var(--ct-cb-padding, 0.75rem);
   border-radius: var(--goobs-radius-md);
-  border: 1px solid var(--ct-simple-border);
+  /* Longhands so a caller `borderWidth` may be a multi-value edge width. */
+  border-style: solid;
+  border-width: var(--ct-cb-border-width, 1px);
+  border-color: var(--ct-simple-border);
   background-color: var(--ct-simple-bg);
   color: var(--ct-simple-color);
   font-size: 0.875rem;
@@ -359,21 +381,30 @@
 
 .simpleTextarea[data-theme='dark'] {
   --ct-simple-bg: var(--goobs-dark-surface);
-  --ct-simple-border: var(--goobs-dark-border);
-  --ct-simple-color: var(--goobs-dark-text);
+  --ct-simple-border: var(--ct-cb-border, var(--goobs-dark-border));
+  --ct-simple-color: var(--ct-cb-text, var(--goobs-dark-text));
 }
 
 .simpleTextarea[data-theme='sacred'] {
   --ct-simple-bg: rgba(0, 0, 0, 0.95);
-  --ct-simple-border: var(--goobs-gold-a30);
-  --ct-simple-color: var(--goobs-gold);
+  --ct-simple-border: var(--ct-cb-border, var(--goobs-gold-a30));
+  --ct-simple-color: var(--ct-cb-text, var(--goobs-gold));
   /* unfocused sacred shadow */
   --ct-simple-shadow: 0 0 8px var(--goobs-gold-a10);
 }
 
-/* Sacred focus state (was isFocused branch): brighter border + stronger glow */
+/* Caller focus border override (borderFocusedColor). Falls back to the
+   current per-theme border colour, so with no override the focus border is
+   unchanged (no light/dark regression); the higher-specificity sacred-focus
+   rule below still drives the sacred glow via --ct-simple-border. */
+.simpleTextarea:focus {
+  border-color: var(--ct-cb-border-focused, var(--ct-simple-border));
+}
+
+/* Sacred focus state (was isFocused branch): brighter border + stronger glow.
+   A caller borderFocusedColor still wins via var(--ct-cb-border-focused). */
 .simpleTextarea[data-theme='sacred']:focus {
-  --ct-simple-border: var(--goobs-gold-a50);
+  --ct-simple-border: var(--ct-cb-border-focused, var(--goobs-gold-a50));
   --ct-simple-shadow: 0 0 20px var(--goobs-gold-a30);
 }
 

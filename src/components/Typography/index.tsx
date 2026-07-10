@@ -142,10 +142,12 @@ interface VariantResolution {
   fontWeight: number
   /** undefined => the variant does not pin a family (body1/body2). */
   fontFamily?: string
-  /** non-sacred merri helper/footer color; undefined for every other variant. */
+  /** non-sacred (dark/unset) merri helper/footer color; undefined for every other variant. */
   merriColorNonSacred?: string
   /** sacred merri helper/footer color; undefined for every other variant. */
   merriColorSacred?: string
+  /** light-theme merri helper/footer color; undefined for every other variant. */
+  merriColorLight?: string
 }
 
 function resolveVariant(variant: string): VariantResolution {
@@ -209,6 +211,11 @@ function resolveVariant(variant: string): VariantResolution {
         fontFamily: '"Merriweather", serif',
         merriColorNonSacred: 'rgba(255, 255, 255, 0.6)',
         merriColorSacred: 'rgba(255, 215, 0, 0.7)',
+        // WCAG fix: the non-sacred white-60% pin is a DARK-surface color —
+        // on a light surface it composites to ~white (1.0:1, invisible).
+        // The light theme gets the light role's AA-tuned muted token
+        // (#4b5563 — 7.56:1 on #ffffff at the 0.85rem helper size).
+        merriColorLight: 'var(--goobs-light-text-muted)',
       }
     }
     // Merri headings reuse the standard heading font-size classes; the
@@ -360,10 +367,15 @@ const Typography: React.FC<TypographyProps> = ({
   // Only merri pins a variant color. For every other variant the resolved
   // color is finalColor; but when the caller passed nothing we leave the var
   // unset so the CSS theme fallback (white base / gold [data-theme='sacred'])
-  // governs — keeping the sacred/non-sacred decision in CSS.
+  // governs — keeping the sacred/non-sacred decision in CSS. The merri
+  // helper pin is theme-aware: sacred → translucent gold, light → the light
+  // muted role token (the white-60% dark-surface pin is invisible on light
+  // surfaces), dark/unset → the legacy white-60%.
   const merriColor = isSacred
     ? resolved.merriColorSacred
-    : resolved.merriColorNonSacred
+    : styles?.theme === 'light'
+      ? resolved.merriColorLight
+      : resolved.merriColorNonSacred
   const explicitColor = styles?.color || color
   const resolvedColor = merriColor ?? explicitColor
 

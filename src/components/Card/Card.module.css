@@ -31,7 +31,11 @@
   --card-title: #ffd700;
   --card-subtitle: rgba(255, 215, 0, 0.7);
   --card-text: rgba(255, 255, 255, 0.85);
-  --card-meta: rgba(255, 255, 255, 0.45);
+  --card-meta: var(--goobs-sacred-text-muted);
+  --card-success-text: var(--goobs-sacred-success-text);
+  --card-danger-text: var(--goobs-sacred-danger-text);
+  --card-warn-text: var(--goobs-sacred-warn-text);
+  --card-info-text: var(--goobs-sacred-info-text);
   --card-hover-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
   --card-selected-ring: var(--goobs-amber-a60);
 
@@ -62,9 +66,13 @@
   --card-border: rgba(25, 118, 210, 0.2);
   --card-accent: #1976d2;
   --card-title: #1f2937;
-  --card-subtitle: #6b7280;
+  --card-subtitle: var(--goobs-light-text-muted);
   --card-text: #374151;
-  --card-meta: #9ca3af;
+  --card-meta: var(--goobs-light-text-disabled);
+  --card-success-text: var(--goobs-light-success-text);
+  --card-danger-text: var(--goobs-light-danger-text);
+  --card-warn-text: var(--goobs-light-warn-text);
+  --card-info-text: var(--goobs-light-info-text);
   --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   --card-selected-ring: rgba(25, 118, 210, 0.5);
 
@@ -81,7 +89,11 @@
   --card-title: #e2e8f0;
   --card-subtitle: #94a3b8;
   --card-text: #cbd5e1;
-  --card-meta: #64748b;
+  --card-meta: var(--goobs-dark-text-muted);
+  --card-success-text: var(--goobs-dark-success-text);
+  --card-danger-text: var(--goobs-dark-danger-text);
+  --card-warn-text: var(--goobs-dark-warn-text);
+  --card-info-text: var(--goobs-dark-info-text);
   --card-hover-shadow: 0 4px 12px var(--goobs-black-a40);
   --card-selected-ring: rgba(96, 165, 250, 0.6);
 
@@ -482,25 +494,25 @@
 .banner[data-banner-tone='info'] {
   background-color: var(--goobs-blue-a12);
   border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #3b82f6;
+  color: var(--card-info-text);
 }
 
 .banner[data-banner-tone='success'] {
   background-color: rgba(34, 197, 94, 0.12);
   border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #22c55e;
+  color: var(--card-success-text);
 }
 
 .banner[data-banner-tone='warn'] {
   background-color: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #f59e0b;
+  color: var(--card-warn-text);
 }
 
 .banner[data-banner-tone='danger'] {
   background-color: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #ef4444;
+  color: var(--card-danger-text);
 }
 
 .banner[data-banner-tone='neutral'] {
@@ -562,16 +574,16 @@
 }
 
 .bigValueNumber[data-tone='success'] {
-  color: #22c55e;
+  color: var(--card-success-text);
 }
 .bigValueNumber[data-tone='warn'] {
-  color: #f59e0b;
+  color: var(--card-warn-text);
 }
 .bigValueNumber[data-tone='danger'] {
-  color: #ef4444;
+  color: var(--card-danger-text);
 }
 .bigValueNumber[data-tone='info'] {
-  color: #3b82f6;
+  color: var(--card-info-text);
 }
 .bigValueNumber[data-tone='neutral'] {
   color: var(--card-meta);
@@ -612,7 +624,7 @@
 
 .confirmDeleteMessage {
   font-size: clamp(0.75rem, 1.8vw, 0.85rem);
-  color: #ef4444;
+  color: var(--card-danger-text);
   font-family: 'Inter', system-ui, sans-serif;
   margin: 0;
 }

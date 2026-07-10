@@ -121,7 +121,7 @@ export const SacredTheme: Story = {
     ),
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** All themes displayed together for comparison. */
@@ -677,7 +677,7 @@ export const ColorVariantsSacred: Story = {
       </Badge>
     </div>
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

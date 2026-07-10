@@ -41,7 +41,7 @@
   --list-border: rgba(25, 118, 210, 0.2);
   --list-accent: #1976d2;
   --list-title: #1f2937;
-  --list-subtitle: #6b7280;
+  --list-subtitle: var(--goobs-light-text-muted);
   --list-text: #374151;
   --list-order-bg: rgba(25, 118, 210, 0.12);
   font-family: 'Inter', system-ui, sans-serif;

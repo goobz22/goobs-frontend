@@ -130,7 +130,7 @@ export const DarkTheme: Story = {
 export const SacredTheme: Story = {
   name: 'Themes/Sacred Theme',
   render: () => <InteractiveDrawer theme="sacred" />,
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

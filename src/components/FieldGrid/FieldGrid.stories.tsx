@@ -83,6 +83,7 @@ export const TightColumns: Story = {
       <StatefulTextField label="Country" styles={{ theme: 'light' }} />
     </FieldGrid>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Wider min column width — fewer, roomier columns. */
@@ -103,6 +104,7 @@ export const WideColumns: Story = {
       />
     </FieldGrid>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -115,6 +117,7 @@ export const InteractionTest: Story = {
       <StatefulTextField label="Two" styles={{ theme: 'light' }} />
     </FieldGrid>
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const group = canvas.getByRole('group', { name: 'Test Group' })

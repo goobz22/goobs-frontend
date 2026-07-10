@@ -81,7 +81,7 @@ export const SacredTheme: Story = {
     children: initials,
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -100,6 +100,7 @@ export const Sizes: Story = {
       <Avatar styles={{ theme: 'light', size: 'xl' }}>XL</Avatar>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -111,11 +112,42 @@ export const Sizes: Story = {
  */
 export const DisabledStates: Story = {
   name: 'State/Disabled',
+  // Mixed themes in one story: no single canvas fits all three, so each avatar
+  // sits on its OWN theme-matched surface (#ffffff / #111827 / #0e0e0e) with a
+  // delineating border, so every disabled state is judged against the right
+  // background regardless of the outer canvas.
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <Avatar styles={{ theme: 'light', disabled: true }}>{initials}</Avatar>
-      <Avatar styles={{ theme: 'dark', disabled: true }}>{initials}</Avatar>
-      <Avatar styles={{ theme: 'sacred', disabled: true }}>{initials}</Avatar>
+      <div
+        style={{
+          padding: '1.5rem',
+          borderRadius: 12,
+          background: '#ffffff',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <Avatar styles={{ theme: 'light', disabled: true }}>{initials}</Avatar>
+      </div>
+      <div
+        style={{
+          padding: '1.5rem',
+          borderRadius: 12,
+          background: '#111827',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+        }}
+      >
+        <Avatar styles={{ theme: 'dark', disabled: true }}>{initials}</Avatar>
+      </div>
+      <div
+        style={{
+          padding: '1.5rem',
+          borderRadius: 12,
+          background: '#0e0e0e',
+          border: '1px solid rgba(255, 215, 0, 0.3)',
+        }}
+      >
+        <Avatar styles={{ theme: 'sacred', disabled: true }}>{initials}</Avatar>
+      </div>
     </div>
   ),
   globals: { backgrounds: { value: 'dark' } },

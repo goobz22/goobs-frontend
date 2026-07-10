@@ -25,17 +25,21 @@
   --field-text: var(--goobs-light-text);
   --field-label-default: var(--goobs-light-text-muted);
   --field-label-focus: var(--goobs-light-primary);
-  --field-label-error: var(--goobs-danger);
+  /* Severity TEXT roles use the light *-text grades (base --goobs-danger
+     #ef4444 is 3.76:1 on white — fails as text; --goobs-light-danger-text
+     #b91c1c is 6.47:1). border-error stays on the base token — a 3.76:1
+     border clears the 3.0:1 non-text UI threshold. */
+  --field-label-error: var(--goobs-light-danger-text);
   --field-label-shrunk-bg: var(--goobs-light-surface);
   --field-adornment-default: var(--goobs-light-text-muted);
   --field-adornment-focus: var(--goobs-light-primary);
   --field-helper-default: var(--goobs-light-text-muted);
-  --field-helper-error: var(--goobs-danger);
-  --field-helper-info: var(--goobs-info);
+  --field-helper-error: var(--goobs-light-danger-text);
+  --field-helper-info: var(--goobs-light-info-text);
   --field-font-family: var(--goobs-font-standard);
   --field-transition:
     border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
-  --field-required-indicator: var(--goobs-danger);
+  --field-required-indicator: var(--goobs-light-danger-text);
 
   display: flex;
   flex-direction: column;
@@ -63,12 +67,17 @@
   --field-text: var(--goobs-dark-text);
   --field-label-default: var(--goobs-dark-text-muted);
   --field-label-focus: var(--goobs-dark-primary);
-  --field-label-error: var(--goobs-danger);
+  /* Severity TEXT roles use the dark *-text grades (lifted 400-scale so they
+     read on dark surfaces). Must be set explicitly here: the .shell default
+     now carries the light grade (#b91c1c), which is only 2.26:1 on dark. */
+  --field-label-error: var(--goobs-dark-danger-text);
   --field-label-shrunk-bg: var(--goobs-dark-surface);
   --field-adornment-default: var(--goobs-dark-text-muted);
   --field-adornment-focus: var(--goobs-dark-primary);
   --field-helper-default: var(--goobs-dark-text-muted);
-  --field-helper-info: var(--goobs-dark-primary);
+  --field-helper-error: var(--goobs-dark-danger-text);
+  --field-helper-info: var(--goobs-dark-info-text);
+  --field-required-indicator: var(--goobs-dark-danger-text);
 }
 
 .shell[data-theme='sacred'] {
@@ -79,12 +88,18 @@
   --field-text: var(--goobs-sacred-text);
   --field-label-default: var(--goobs-gold-a80);
   --field-label-focus: var(--goobs-gold);
-  --field-label-error: var(--goobs-danger);
+  /* Severity TEXT roles use the sacred *-text grades (equal to the bases —
+     they already pass on near-black, e.g. #ef4444 is 5.13:1 on #0e0e0e).
+     Set explicitly so the light default grade (#b91c1c, 2.98:1 on sacred)
+     can't leak through. */
+  --field-label-error: var(--goobs-sacred-danger-text);
   --field-label-shrunk-bg: var(--goobs-sacred-control-bg);
   --field-adornment-default: var(--goobs-gold-a60);
   --field-adornment-focus: var(--goobs-gold);
   --field-helper-default: var(--goobs-sacred-text-secondary);
-  --field-helper-info: var(--goobs-info);
+  --field-helper-error: var(--goobs-sacred-danger-text);
+  --field-helper-info: var(--goobs-sacred-info-text);
+  --field-required-indicator: var(--goobs-sacred-danger-text);
   --field-font-family: '"Crimson Text", serif';
 }
 
@@ -164,7 +179,12 @@
   background-color: transparent;
   border: none;
   outline: none;
-  color: inherit;
+  /* Explicit themed color, not `inherit`: some UA stylesheets set an
+     explicit `color` on native form controls (a `color:inherit` reset can
+     be defeated by a control-specific UA rule), which would drop the text
+     to #000000 on the dark/sacred glass surfaces. --field-text is defined
+     on .shell and cascades in for every theme (#1f2937 / #e2e8f0 / sacred). */
+  color: var(--field-text);
   font-family: inherit;
   font-size: 1rem;
   padding: var(--goobs-space-xs) var(--goobs-space-sm);

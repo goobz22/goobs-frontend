@@ -137,6 +137,7 @@ export const WithHelperText: Story = {
     name: 'navigation',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -152,6 +153,7 @@ export const ErrorState: Story = {
     name: 'navigation',
     styles: { theme: 'light', helperTextType: 'error' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -166,6 +168,7 @@ export const Required: Story = {
     name: 'navigation',
     styles: { theme: 'light', required: true },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Disabled: Story = {
@@ -176,6 +179,7 @@ export const Disabled: Story = {
     name: 'navigation',
     styles: { theme: 'light', disabled: true },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -191,6 +195,7 @@ export const NoItems: Story = {
     name: 'navigation',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -219,4 +224,5 @@ export const InteractiveDemo: Story = {
       </div>
     )
   },
+  globals: { backgrounds: { value: 'light' } },
 }

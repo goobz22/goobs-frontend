@@ -149,6 +149,14 @@
   color: rgb(29, 78, 216);
 }
 
+/* pageInfo/pageEllipsis default to the SACRED muted token (near-white); on the
+   light pagination surface that reads invisible, so remap to the light muted
+   role token. Proven: #4b5563 on the light pagination fill ≈ 6.3:1 (text ✓). */
+.shell[data-theme='light'] .pageInfo,
+.shell[data-theme='light'] .pageEllipsis {
+  color: var(--goobs-light-text-muted);
+}
+
 /* Dark-theme pagination */
 .shell[data-theme='dark'] .pagination {
   border-color: var(--goobs-dark-border);
@@ -168,4 +176,9 @@
   border-color: var(--goobs-dark-primary);
   background: var(--goobs-blue-light-a20);
   color: var(--goobs-dark-primary);
+}
+
+.shell[data-theme='dark'] .pageInfo,
+.shell[data-theme='dark'] .pageEllipsis {
+  color: var(--goobs-dark-text-muted);
 }

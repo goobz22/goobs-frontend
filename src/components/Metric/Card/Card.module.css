@@ -21,6 +21,12 @@
   --mc-padding: var(--goobs-space-sm) var(--goobs-space-md);
   --mc-radius: var(--goobs-radius-lg);
   --mc-min-width: 80px;
+  /* Trend pill severity — theme-scoped so each surface gets a legible grade.
+     Sacred base: the sacred *-text tokens equal the global severity colors
+     (#22c55e / #ef4444), so sacred appearance is unchanged (8.47 / 5.13 on
+     the near-black sacred surface). */
+  --mc-trend-up: var(--goobs-sacred-success-text);
+  --mc-trend-down: var(--goobs-sacred-danger-text);
 
   display: flex;
   flex-direction: column;
@@ -45,6 +51,10 @@
   --mc-accent: var(--goobs-light-primary);
   --mc-label: var(--goobs-light-text-muted);
   --mc-value-family: var(--goobs-font-standard);
+  /* On white, the global success #22c55e / danger #ef4444 are only 2.28 / 3.76
+     — both fail. The darker light-*-text grades pass (5.02 / 6.47). */
+  --mc-trend-up: var(--goobs-light-success-text);
+  --mc-trend-down: var(--goobs-light-danger-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -59,6 +69,10 @@
   --mc-accent: var(--goobs-dark-primary);
   --mc-label: var(--goobs-dark-text-muted);
   --mc-value-family: var(--goobs-font-standard);
+  /* On the #1e293b dark surface the global danger #ef4444 is only 3.89 (fails);
+     the lighter dark-*-text grades pass (up 8.40, down 5.29). */
+  --mc-trend-up: var(--goobs-dark-success-text);
+  --mc-trend-down: var(--goobs-dark-danger-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -102,9 +116,9 @@
 }
 
 .trend.positive {
-  color: var(--goobs-success);
+  color: var(--mc-trend-up);
 }
 
 .trend.negative {
-  color: var(--goobs-danger);
+  color: var(--mc-trend-down);
 }

@@ -125,7 +125,7 @@ export const SacredTheme: Story = {
     trend: { value: 12.5, isPositive: true },
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -246,7 +246,7 @@ export const AccordionGroupedSacred: Story = {
       />
     </div>
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**

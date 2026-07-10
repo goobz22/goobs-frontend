@@ -77,6 +77,7 @@ function EditableList() {
 
 export const EditableReorderableList: Story = {
   render: () => <EditableList />,
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 export const SingleRow: Story = {
@@ -91,6 +92,7 @@ export const SingleRow: Story = {
       </ListItemCard>
     </ul>
   ),
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 export const SelectedDark: Story = {
@@ -102,4 +104,5 @@ export const SelectedDark: Story = {
       </ListItemCard>
     </ul>
   ),
+  globals: { backgrounds: { value: 'dark' } },
 }

@@ -300,7 +300,9 @@ type Story = StoryObj<typeof InlineAddTask>
  * Customer, Type, Product, Severity, Status, and Region dropdowns plus the
  * Topics multi-select, with Create Task / Cancel buttons at the bottom.
  */
-export const AddTaskLight: Story = {}
+export const AddTaskLight: Story = {
+  globals: { backgrounds: { value: 'light' } },
+}
 
 /**
  * Pins the sacred-theme rendering of the same fully-populated add-task form:
@@ -327,6 +329,7 @@ export const AddTaskSubmitFlow: Story = {
     rawProducts: [],
     rawServices: [],
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement)
 
@@ -371,6 +374,7 @@ export const AddTaskSubmitFlow: Story = {
  * never called.
  */
 export const AddTaskValidationError: Story = {
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement)
 
@@ -401,6 +405,7 @@ export const AddTaskValidationError: Story = {
  */
 export const ShowTaskLight: Story = {
   render: () => <InlineShowTask {...showTaskProps} />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**

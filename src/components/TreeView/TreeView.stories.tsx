@@ -218,6 +218,7 @@ export const LightTheme: Story = {
     defaultExpandedItems: ['documents'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A tree view with dark theme. */
@@ -267,6 +268,7 @@ const SingleSelectionExample = () => {
 export const SingleSelection: Story = {
   name: 'Selection/Single Selection',
   render: () => <SingleSelectionExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const MultiSelectionExample = () => {
@@ -296,6 +298,7 @@ const MultiSelectionExample = () => {
 export const MultiSelection: Story = {
   name: 'Selection/Multi Selection',
   render: () => <MultiSelectionExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const CheckboxSelectionExample = () => {
@@ -323,6 +326,7 @@ const CheckboxSelectionExample = () => {
 export const CheckboxSelection: Story = {
   name: 'Selection/Checkbox Selection',
   render: () => <CheckboxSelectionExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Disabled selection mode. */
@@ -334,6 +338,7 @@ export const DisabledSelection: Story = {
     defaultExpandedItems: ['documents'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -349,6 +354,7 @@ export const ExpandedByDefault: Story = {
     defaultSelectedItems: ['react-dev'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Tree with disabled items. */
@@ -361,6 +367,7 @@ export const DisabledItems: Story = {
     multiSelect: true,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Disabled items can still be focused. */
@@ -372,6 +379,7 @@ export const DisabledItemsFocusable: Story = {
     disabledItemsFocusable: true,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -387,6 +395,7 @@ export const IconOnlyExpansion: Story = {
     defaultExpandedItems: ['documents'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Custom indentation between levels. */
@@ -398,6 +407,7 @@ export const CustomIndentation: Story = {
     defaultExpandedItems: ['company', 'engineering'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -505,6 +515,7 @@ const ApiReferenceExample = () => {
 export const ApiReference: Story = {
   name: 'API/Imperative API',
   render: () => <ApiReferenceExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -677,6 +688,7 @@ export const CustomStateOverrides: Story = {
       contentMarginLeft: '12px',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -817,6 +829,7 @@ export const InteractionTest: Story = {
     defaultExpandedItems: ['documents'],
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
@@ -875,4 +888,5 @@ export const LargeTree: Story = {
       },
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }

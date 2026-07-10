@@ -135,6 +135,11 @@ const TransferList: React.FC<TransferListProps> = ({
     [isBound, boundOnChange, onChange]
   )
 
+  // Per-instance id base so label ids are unique across multiple TransferLists
+  // on the same page and never leak raw item values (with spaces / special
+  // chars) into an id attribute referenced by aria-labelledby.
+  const reactId = React.useId()
+
   const [selectedDropdownValue, setSelectedDropdownValueInternal] =
     useState<string>('')
   const [checked, setChecked] = useState<readonly string[]>([])
@@ -216,11 +221,15 @@ const TransferList: React.FC<TransferListProps> = ({
     setChecked([])
   }
 
-  const renderList = (items: readonly string[]) => (
+  const renderList = (items: readonly string[], listKey: string) => (
     <div className={cssStyles.list}>
       <div className={cssStyles.listInner}>
-        {items.map(value => {
-          const labelId = `transfer-list-item-${value}-label`
+        {items.map((value, index) => {
+          // Index- and instance-scoped id: valid (no spaces/special chars from
+          // the raw value), unique across the left/right lists (listKey) and
+          // across component instances (reactId). aria-labelledby below points
+          // at the matching <span id={labelId}>, preserving the association.
+          const labelId = `${reactId}-${listKey}-item-${index}-label`
           const isChecked = checked.indexOf(value) !== -1
           const displayedLabel = itemLabelMap?.[value] || value
 
@@ -256,7 +265,7 @@ const TransferList: React.FC<TransferListProps> = ({
       return (
         <div className={cssStyles.column}>
           <h3 className={cssStyles.title}>{leftTitle}</h3>
-          {renderList(currentLeft)}
+          {renderList(currentLeft, 'left')}
         </div>
       )
     }
@@ -269,7 +278,7 @@ const TransferList: React.FC<TransferListProps> = ({
           onChange={value => setSelectedDropdownValue(value)}
           styles={{ theme: sacredtheme ? 'sacred' : 'light' }}
         />
-        {renderList(currentLeft)}
+        {renderList(currentLeft, 'left')}
       </div>
     )
   }
@@ -327,7 +336,7 @@ const TransferList: React.FC<TransferListProps> = ({
       </div>
       <div className={cssStyles.column}>
         <h3 className={cssStyles.title}>{rightTitle}</h3>
-        {renderList(currentRight)}
+        {renderList(currentRight, 'right')}
       </div>
     </div>
   )

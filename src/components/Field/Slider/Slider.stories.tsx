@@ -271,7 +271,13 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      <div
+        style={{
+          background: '#111827',
+          padding: '1.5rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <SliderWithState
@@ -299,7 +305,13 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1.5rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <SliderWithState

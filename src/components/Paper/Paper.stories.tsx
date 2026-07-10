@@ -55,9 +55,11 @@ const SampleContent = ({
 // --------------------------------------------------------------------------
 // THEME STORIES
 // --------------------------------------------------------------------------
-// Paper only special-cases the `sacred` theme (gold glow); every other theme
-// value renders the default surface. Light and dark stories therefore share
-// the default surface and differ only by backdrop + content color.
+// Paper has three real surfaces, each a [data-theme] block in Paper.module.css:
+// the base light surface (white, subtle drop shadow), the dark surface (slate
+// --goobs-dark-surface with light text), and the sacred surface (translucent
+// black, gold border + glow). Any theme value other than 'sacred'/'dark' falls
+// through to the light base.
 
 export const LightTheme: Story = {
   name: 'Themes/Light Theme',
@@ -71,11 +73,13 @@ export const LightTheme: Story = {
 export const DarkTheme: Story = {
   name: 'Themes/Dark Theme',
   args: {
+    // No backgroundColor override — Paper's real [data-theme='dark'] block
+    // supplies the slate surface (--goobs-dark-surface), so this story proves
+    // dark content no longer lands on the white default surface.
     styles: {
       theme: 'dark',
       width: '320px',
       padding: '24px',
-      backgroundColor: '#1f2937',
     },
     children: <SampleContent color="#F9FAFB" />,
   },
@@ -88,7 +92,7 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred', width: '320px', padding: '24px' },
     children: <SampleContent color="#FFD700" />,
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

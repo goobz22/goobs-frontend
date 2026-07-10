@@ -68,7 +68,7 @@ export const SacredTheme: Story = {
     children: <EditIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -108,6 +108,11 @@ export const Sizes: Story = {
  */
 export const Colors: Story = {
   name: 'Variants/Colors',
+  // Every button is light-themed; the six semantic colors render as solid
+  // colored circles with a white icon (the button's `color` drives the icon
+  // via currentColor), and the `default` button shows a dark icon on the
+  // white canvas — so the whole set belongs on the light canvas, with no
+  // per-block wrappers needed.
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
       <IconButton color="primary" styles={{ theme: 'light' }}>
@@ -145,18 +150,27 @@ export const Colors: Story = {
  */
 export const DisabledStates: Story = {
   name: 'State/Disabled',
+  // Mixed-theme story: each disabled button sits on the surface its palette is
+  // designed for; the canvas stays sacred #0e0e0e for the sacred button.
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <IconButton styles={{ theme: 'light', disabled: true }}>
-        <AddIcon styles={{ theme: 'light' }} />
-      </IconButton>
-      <IconButton styles={{ theme: 'dark', disabled: true }}>
-        <AddIcon styles={{ theme: 'dark' }} />
-      </IconButton>
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <IconButton styles={{ theme: 'light', disabled: true }}>
+          <AddIcon styles={{ theme: 'light' }} />
+        </IconButton>
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <IconButton styles={{ theme: 'dark', disabled: true }}>
+          <AddIcon styles={{ theme: 'dark' }} />
+        </IconButton>
+      </div>
       <IconButton styles={{ theme: 'sacred', disabled: true }}>
         <AddIcon styles={{ theme: 'sacred' }} />
       </IconButton>
     </div>
   ),
-  globals: { backgrounds: { value: 'dark' } },
 }

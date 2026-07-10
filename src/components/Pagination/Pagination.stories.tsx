@@ -126,7 +126,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------

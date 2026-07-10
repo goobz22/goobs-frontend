@@ -400,7 +400,7 @@
   --pb-card-save-bg: #f0fdf4;
   --pb-card-save-text: #16a34a;
   --pb-card-cancel-bg: #f9fafb;
-  --pb-card-cancel-text: var(--goobs-light-text-muted);
+  --pb-card-cancel-text: var(--goobs-light-text-disabled);
 
   --pb-sacred-title-font: inherit;
   --pb-sacred-body-font: inherit;

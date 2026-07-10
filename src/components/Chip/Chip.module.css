@@ -32,6 +32,11 @@
   --chip-hover-border: var(--goobs-gold-a50);
   --chip-active-bg: var(--goobs-gold-a20);
   --chip-active-border: var(--goobs-gold-a60);
+  /* Text color while active. Defaults to the resting --chip-text (sacred gold
+     on gold-a20 = 8.62:1, dark #93c5fd on the deeper active tint = 6.44:1 —
+     both pass, so only light overrides this below where the resting blue
+     #2563eb drops to 4.21:1 on the #dce9fd active tint). */
+  --chip-active-text: var(--chip-text);
   --chip-font: var(--goobs-font-sacred);
   --chip-shadow: none;
   --chip-hover-shadow: 0 0 8px var(--goobs-gold-a20);
@@ -68,6 +73,7 @@
 .root[data-chip-active='true'] {
   background-color: var(--chip-active-bg);
   border-color: var(--chip-active-border);
+  color: var(--chip-active-text);
 }
 
 .root[data-chip-disabled='true'] {
@@ -87,6 +93,11 @@
   --chip-hover-border: var(--goobs-blue-a40);
   --chip-active-bg: rgba(59, 130, 246, 0.18);
   --chip-active-border: rgba(59, 130, 246, 0.5);
+  /* Resting text --goobs-light-primary #2563eb is 4.62:1 on the #ebf3fe rest
+     tint, but only 4.21:1 on the darker #dce9fd active tint (rgba(59,130,246,
+     0.18) over white). Step the active text down to the blue-700 info grade
+     #1d4ed8 → 5.46:1 on #dce9fd. */
+  --chip-active-text: var(--goobs-light-info-text);
   --chip-font: var(--goobs-font-standard);
   --chip-shadow: none;
   --chip-hover-shadow: 0 1px 4px var(--goobs-blue-a12);
@@ -158,7 +169,11 @@
 .root[data-chip-tone='neutral'] {
   --chip-bg: rgba(156, 163, 175, 0.18);
   --chip-border: rgba(156, 163, 175, 0.4);
-  --chip-text: var(--goobs-light-text-disabled);
+  /* Light slate for the default (sacred) + dark surfaces: #646e7e was a
+     light-surface disabled gray reading 2.82:1 (sacred) / 2.53:1 (dark) on
+     the grey tint; #94a3b8 clears 5.68:1 (sacred) / 5.09:1 (dark). Light
+     theme flips back to the dark slate below. */
+  --chip-text: var(--goobs-dark-text-muted);
   --chip-hover-bg: rgba(156, 163, 175, 0.25);
   --chip-hover-border: rgba(156, 163, 175, 0.55);
   --chip-active-bg: rgba(156, 163, 175, 0.32);
@@ -174,6 +189,52 @@
   --chip-active-bg: var(--goobs-gold-a30);
   --chip-active-border: var(--goobs-gold-a60);
 }
+
+/* --------------------------------------------------------------------------
+   TONE TEXT — per-theme grades.
+   The tone bases above are tuned for the SACRED near-black default (all clear
+   4.5:1 there: success 7.16, info 4.65, warn 7.52, danger 4.63, neutral 5.68,
+   gold 9.97). On the light/dark surfaces the SAME translucent tone fill
+   composites to a light/dark tint where the bases fail as text (e.g. light
+   success #22c55e 2.05:1, light warn #f59e0b 1.96:1, dark info #3b82f6 4.16:1,
+   dark danger #ef4444 4.24:1). Swap in the per-theme severity grades so tone
+   text clears 4.5:1 on every surface; the fills/borders are unchanged.
+   -------------------------------------------------------------------------- */
+.root[data-theme='light'][data-chip-tone='success'] {
+  --chip-text: var(--goobs-light-success-text); /* #15803d → 4.52:1 */
+}
+.root[data-theme='light'][data-chip-tone='info'] {
+  --chip-text: var(--goobs-light-info-text); /* #1d4ed8 → 5.84:1 */
+}
+.root[data-theme='light'][data-chip-tone='warn'] {
+  --chip-text: var(--goobs-light-warn-text); /* #b45309 → 4.58:1 */
+}
+.root[data-theme='light'][data-chip-tone='danger'] {
+  --chip-text: var(--goobs-light-danger-text); /* #b91c1c → 5.55:1 */
+}
+.root[data-theme='light'][data-chip-tone='neutral'] {
+  --chip-text: var(--goobs-light-text-muted); /* #4b5563 → 6.51:1 */
+}
+.root[data-theme='light'][data-chip-tone='gold'] {
+  /* Bright gold #ffd700 is 1.32:1 on the pale-gold light tint; the dark amber
+     warn grade #b45309 → 4.74:1 keeps the "featured" gold/amber semantic. */
+  --chip-text: var(--goobs-light-warn-text);
+}
+
+.root[data-theme='dark'][data-chip-tone='success'] {
+  --chip-text: var(--goobs-dark-success-text); /* #4ade80 → 8.35:1 */
+}
+.root[data-theme='dark'][data-chip-tone='info'] {
+  --chip-text: var(--goobs-dark-info-text); /* #60a5fa → 6.02:1 (base 4.16 fails) */
+}
+.root[data-theme='dark'][data-chip-tone='warn'] {
+  --chip-text: var(--goobs-dark-warn-text); /* #fbbf24 → 8.76:1 */
+}
+.root[data-theme='dark'][data-chip-tone='danger'] {
+  --chip-text: var(--goobs-dark-danger-text); /* #f87171 → 5.77:1 (base 4.24 fails) */
+}
+/* dark neutral base (#94a3b8) is 5.09:1 and dark gold (#ffd700) is 8.90:1 on
+   their dark tints — both already pass, so no dark override for those two. */
 
 /* --------------------------------------------------------------------------
    Variant: chip (default) — interactive token, comfortable padding

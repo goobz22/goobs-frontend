@@ -197,7 +197,7 @@
 .item[data-expanded='true']:not([data-disabled='true'], [data-selected='true']) {
   background-color: rgba(16, 185, 129, 0.06);
   border-color: rgba(16, 185, 129, 0.2);
-  color: var(--goobs-success);
+  color: var(--goobs-light-success-text);
   font-weight: var(--goobs-weight-semibold);
 }
 
@@ -240,7 +240,7 @@
 .item[data-theme='dark'][data-expanded='true']:not([data-disabled='true'], [data-selected='true']) {
   background-color: rgba(52, 211, 153, 0.1);
   border-color: rgba(52, 211, 153, 0.3);
-  color: var(--goobs-success);
+  color: var(--goobs-dark-success-text);
   font-weight: var(--goobs-weight-semibold);
 }
 

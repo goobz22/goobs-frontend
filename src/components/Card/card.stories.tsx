@@ -114,9 +114,7 @@ export const Default: Story = {
       <CourseCard theme="light" />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -130,9 +128,7 @@ export const LightTheme: Story = {
       <CourseCard theme="light" />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -142,9 +138,7 @@ export const DarkTheme: Story = {
       <CourseCard theme="dark" />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 export const SacredTheme: Story = {
@@ -154,9 +148,7 @@ export const SacredTheme: Story = {
       <CourseCard theme="sacred" />
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -196,9 +188,7 @@ export const WithBadgesAndActions: Story = {
       </Card>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -229,9 +219,7 @@ export const ClickableTitle: Story = {
       </Card>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -266,9 +254,7 @@ export const Selected: Story = {
       </Card>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -297,14 +283,12 @@ export const CompactWithStats: Story = {
             <Card.StatCell
               label="Completion"
               value="62%"
-              valueColor="#16a34a"
+              valueColor="#15803d"
             />
           </Card.Stats>
         </Card.Body>
       </Card>
     </div>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

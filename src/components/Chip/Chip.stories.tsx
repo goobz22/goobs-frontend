@@ -49,6 +49,7 @@ export const Default: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A chip that can be deleted. */
@@ -60,6 +61,7 @@ export const Deletable: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A disabled chip that cannot be interacted with. */
@@ -73,6 +75,7 @@ export const Disabled: Story = {
       disabled: true,
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -89,6 +92,7 @@ export const LightTheme: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** The dark theme provides a sophisticated appearance. */
@@ -114,7 +118,7 @@ export const SacredTheme: Story = {
       theme: 'sacred',
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /** A sacred theme chip that is also disabled. */
@@ -128,7 +132,7 @@ export const SacredDisabled: Story = {
       disabled: true,
     },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**
@@ -146,13 +150,18 @@ export const NoOutline: Story = {
       hoverBorderColor: 'transparent',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
 // Customization Stories
 // --------------------------------------------------------------------------
 
-/** A chip with custom colors. */
+/**
+ * A chip with custom colors via the styling API. Uses an accessible pairing —
+ * the dark-green text grade #15803d on the translucent green fill reads 4.52:1
+ * on white (the raw #22c55e brand green would be only ~2.1:1 there).
+ */
 export const CustomColors: Story = {
   name: 'Customization/Custom Colors',
   args: {
@@ -160,13 +169,14 @@ export const CustomColors: Story = {
     onDelete: fn(),
     styles: {
       theme: 'light',
-      backgroundColor: 'rgba(34, 197, 94, 0.1)',
-      borderColor: 'rgba(34, 197, 94, 0.3)',
-      color: 'rgb(34, 197, 94)',
-      hoverBackgroundColor: 'rgba(34, 197, 94, 0.15)',
-      hoverBorderColor: 'rgba(34, 197, 94, 0.4)',
+      backgroundColor: 'rgba(34, 197, 94, 0.12)',
+      borderColor: 'rgba(34, 197, 94, 0.35)',
+      color: '#15803d',
+      hoverBackgroundColor: 'rgba(34, 197, 94, 0.18)',
+      hoverBorderColor: 'rgba(34, 197, 94, 0.45)',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A chip with custom dimensions. */
@@ -182,6 +192,7 @@ export const CustomSize: Story = {
       fontSize: '16px',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -213,8 +224,10 @@ const PILL_TONES: ChipTone[] = [
 
 /**
  * The read-only `variant="pill"` in all six semantic tones (success / info /
- * warn / danger / neutral / gold), side-by-side on a dark backdrop — the
- * shipped replacement for the deleted StatusPill / StatusBadge / Pill
+ * warn / danger / neutral / gold), side-by-side on the sacred near-black
+ * backdrop (the pills carry no `theme`, so they render sacred-default, and the
+ * tone text bases are tuned to clear 4.5:1 there) — the shipped replacement
+ * for the deleted StatusPill / StatusBadge / Pill
  * components. Pins the observable pill contract: fully rounded (999px)
  * compact status indicators, each deriving its translucent background +
  * matching border + solid text triplet from `data-chip-tone` alone (no
@@ -251,7 +264,7 @@ export const PillTones: Story = {
       </div>
     </div>
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 

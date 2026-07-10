@@ -53,3 +53,20 @@
   font-family: 'Crimson Text', serif;
   backdrop-filter: blur(20px);
 }
+
+/* --------------------------------------------------------------------------
+   DARK THEME — slate surface for dark-mode content.
+   Mirrors the light base and the sacred override: a real surface so
+   dark-themed children no longer land on the white default surface.
+     bg       var(--goobs-dark-surface)   (#1e293b)
+     border   var(--goobs-dark-border)    (#334155)
+     color    var(--goobs-dark-text)      (#e2e8f0 — 11.87:1 on the surface)
+   The box-shadow stays elevation-driven via --paper-shadow; the dark-shadow
+   token is the fallback for the rare unset case.
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  background-color: var(--goobs-dark-surface);
+  border: 1px solid var(--goobs-dark-border);
+  color: var(--goobs-dark-text);
+  box-shadow: var(--paper-shadow, var(--goobs-shadow-dark-sm));
+}

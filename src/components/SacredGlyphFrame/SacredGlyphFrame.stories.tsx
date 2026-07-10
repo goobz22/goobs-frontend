@@ -40,7 +40,7 @@ const meta: Meta<typeof SacredGlyphFrame> = {
   parameters: {
     layout: 'centered',
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
   decorators: [
     Story => (
       <div style={{ padding: '3rem', minWidth: '420px' }}>

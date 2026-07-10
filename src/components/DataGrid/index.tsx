@@ -1302,9 +1302,12 @@ function DataGridContent({
             collapsible={filtersCollapsible ?? true}
             initiallyOpen={filtersDefaultExpanded ?? true}
             title="Search & Filters"
-            {...(styles?.theme === 'sacred' && {
-              styles: { theme: 'sacred' as const },
-            })}
+            // Forward the grid's RESOLVED theme (sacred | light | dark) so the
+            // Search & Filters toggle + panel match the grid. FilterSection now
+            // accepts all three; previously only 'sacred' was forwarded and a
+            // 'dark' grid collapsed FilterSection to its light block — painting
+            // the light-theme toggle color (#070a0e) on the dark surface.
+            styles={{ theme }}
           />
         </div>
 

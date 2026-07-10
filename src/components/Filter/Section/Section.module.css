@@ -52,6 +52,26 @@
 }
 
 /* --------------------------------------------------------------------------
+   ROOT — dark theme (explicit dark-slate override; non-sacred branch)
+
+   The DataGrid dark surface is --goobs-dark-surface (#1e293b); the toggle +
+   panel sit on --goobs-dark-surface-raised (#273746) so the filter card reads
+   as a distinct block raised above the grid content, mirroring how the
+   light/sacred panels differ from their surroundings. Proven ratios (WCAG AA):
+     toggle text  #e2e8f0 on #273746 = 9.90  (text ≥ 4.5 ✓)
+     chip label   #94a3b8 on #273746 = 4.76  (text ≥ 4.5 ✓)
+     accent (UI)  #60a5fa on #273746 = 4.80  (UI  ≥ 3.0 ✓)
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  --fs-accent: var(--goobs-dark-primary);
+  --fs-toggle-bg: var(--goobs-dark-surface-raised);
+  --fs-toggle-color: var(--goobs-dark-text);
+  --fs-toggle-font: inherit;
+  --fs-panel-bg: var(--goobs-dark-surface-raised);
+  --fs-chip-label-color: var(--goobs-dark-text-muted);
+}
+
+/* --------------------------------------------------------------------------
    Toggle button (only rendered when collapsible)
    -------------------------------------------------------------------------- */
 .toggle {

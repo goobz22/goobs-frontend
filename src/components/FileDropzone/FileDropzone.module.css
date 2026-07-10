@@ -26,7 +26,7 @@
   --drop-bg: rgba(0, 0, 0, 0.03);
   --drop-border: rgba(25, 118, 210, 0.3);
   --drop-text: #1f2937;
-  --drop-hint: #6b7280;
+  --drop-hint: var(--goobs-light-text-muted);
   --drop-remove: #d32f2f;
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -37,7 +37,7 @@
   --drop-bg: #0f172a;
   --drop-border: #334155;
   --drop-text: #cbd5e1;
-  --drop-hint: #64748b;
+  --drop-hint: var(--goobs-dark-text-muted);
   --drop-remove: #f87171;
   font-family: 'Inter', system-ui, sans-serif;
 }

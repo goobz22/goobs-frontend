@@ -67,7 +67,30 @@ const ShellDemo = ({
   const [category, setCategory] = React.useState<string[]>(['service'])
   const [status, setStatus] = React.useState<string[]>(['all'])
   const [page, setPage] = React.useState(1)
-  const accent = theme === 'sacred' ? '#d4af37' : '#2563eb'
+  const accent = theme === 'sacred' ? '#d4af37' : '#1e40af'
+  // Per-option chip accents. The sacred palette is tuned for the dark gold
+  // surface; the light palette uses darker Material shades because an ACTIVE
+  // chip renders its color as TEXT over a 20%-tint of the same color — light
+  // Material 300/400 hues (fine on the dark surface) drop below 4.5:1 on the
+  // light filter card, so light gets the 800/900 equivalents (all proven ≥ 4.5).
+  const chipColors =
+    theme === 'sacred'
+      ? {
+          service: '#64B5F6',
+          lodging: '#FFB74D',
+          products: '#81C784',
+          paid: '#4CAF50',
+          unpaid: '#9E9E9E',
+          overdue: '#F44336',
+        }
+      : {
+          service: '#0D47A1',
+          lodging: '#7C2D12',
+          products: '#14532D',
+          paid: '#1B5E20',
+          unpaid: '#374151',
+          overdue: '#991B1B',
+        }
 
   return (
     <div
@@ -103,6 +126,7 @@ const ShellDemo = ({
             activeTab={activeTab}
             onChange={setActiveTab}
             items={SECTION_TABS}
+            styles={{ theme }}
           />
         }
         subNav={
@@ -115,6 +139,7 @@ const ShellDemo = ({
               { id: 'all', label: 'All', count: 5 },
               { id: 'open', label: 'Open', count: 2 },
             ]}
+            styles={{ theme }}
           />
         }
         filter={
@@ -130,9 +155,21 @@ const ShellDemo = ({
                 onChange: setCategory,
                 exclusive: true,
                 options: [
-                  { label: 'Services', value: 'service', color: '#64B5F6' },
-                  { label: 'Lodging', value: 'lodging', color: '#FFB74D' },
-                  { label: 'Products', value: 'products', color: '#81C784' },
+                  {
+                    label: 'Services',
+                    value: 'service',
+                    color: chipColors.service,
+                  },
+                  {
+                    label: 'Lodging',
+                    value: 'lodging',
+                    color: chipColors.lodging,
+                  },
+                  {
+                    label: 'Products',
+                    value: 'products',
+                    color: chipColors.products,
+                  },
                 ],
               },
               {
@@ -142,9 +179,17 @@ const ShellDemo = ({
                 exclusive: true,
                 options: [
                   { label: 'All Status', value: 'all', color: accent },
-                  { label: 'Paid', value: 'paid', color: '#4CAF50' },
-                  { label: 'Unpaid', value: 'unpaid', color: '#9E9E9E' },
-                  { label: 'Overdue', value: 'overdue', color: '#F44336' },
+                  { label: 'Paid', value: 'paid', color: chipColors.paid },
+                  {
+                    label: 'Unpaid',
+                    value: 'unpaid',
+                    color: chipColors.unpaid,
+                  },
+                  {
+                    label: 'Overdue',
+                    value: 'overdue',
+                    color: chipColors.overdue,
+                  },
                 ],
               },
             ]}

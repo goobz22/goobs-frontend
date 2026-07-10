@@ -367,7 +367,10 @@ export default function BigCalendar({
   const childThemeStyle = { theme }
 
   // Per-theme default event color (theme/bigcalendar.ts event.defaultColor).
-  const defaultEventColor = isSacredTheme ? 'rgba(255, 215, 0, 0.8)' : '#2196f3'
+  // Event text is hardcoded white (renderEvent Typography color:'white') painted on
+  // --bc-event-bg = this color. #2196f3 gave only 3.12 white-on-bg contrast; #1d4ed8
+  // (goobs light-primary-strong) gives 6.70, clearing the 4.5 text threshold.
+  const defaultEventColor = isSacredTheme ? 'rgba(255, 215, 0, 0.8)' : '#1d4ed8'
 
   // Caller-supplied layout/style overrides stay in JS (recipe step 3). These
   // mirror the old containerStyle override fields; theme defaults live in CSS.

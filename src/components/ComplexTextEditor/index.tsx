@@ -111,7 +111,17 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // Caller-supplied layout overrides + runtime CSS vars stay in JS. These are
   // the FormFieldStyles passthroughs the old containerStyle applied inline;
   // visual theming now lives in the CSS module.
-  const containerDynamicStyle: React.CSSProperties = {
+  //
+  // The `--ct-cb-*` custom properties surface the caller's FormField colour /
+  // border / padding overrides (textColor, borderColor, borderFocusedColor,
+  // borderWidth, padding). They're set on the OUTER container and inherit down
+  // through the nested `.container` wrappers to every rendered editor surface
+  // (`.editorArea` for rich/markdown, `.simpleTextarea` for simple), where the
+  // module CSS reads them as `var(--ct-cb-*, <themed default>)` so an unset
+  // override leaves the contrast-checked theme default in place, and the more
+  // specific editor-area props (editorBorderColor/editorPadding, applied inline
+  // by buildEditorAreaOverrideStyle) still win over these container defaults.
+  const containerDynamicStyle = {
     margin: styles?.margin,
     marginTop: styles?.marginTop,
     marginBottom: styles?.marginBottom,
@@ -126,16 +136,32 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     ...(styles?.backgroundColor && { background: styles.backgroundColor }),
     ...(styles?.borderRadius && { borderRadius: styles.borderRadius }),
     ...(styles?.fontFamily && { fontFamily: styles.fontFamily }),
-  }
+    ...(styles?.textColor && { ['--ct-cb-text']: styles.textColor }),
+    ...(styles?.borderColor && { ['--ct-cb-border']: styles.borderColor }),
+    ...(styles?.borderFocusedColor && {
+      ['--ct-cb-border-focused']: styles.borderFocusedColor,
+    }),
+    ...(styles?.borderWidth && { ['--ct-cb-border-width']: styles.borderWidth }),
+    ...(styles?.padding && { ['--ct-cb-padding']: styles.padding }),
+  } as React.CSSProperties
 
-  // Label caller-font override (was getSharedLabelStyles' fontFamily, which
-  // the old getFormFieldTheme derived from styles.fontFamily). Surfaced as
-  // --ct-label-font-family so it wins over the CSS-module default.
-  const labelStyle: React.CSSProperties | undefined = styles?.fontFamily
-    ? ({
-        ['--ct-label-font-family']: styles.fontFamily,
-      } as React.CSSProperties)
-    : undefined
+  // Label caller overrides. The font-family (was getSharedLabelStyles'
+  // fontFamily, derived from styles.fontFamily) surfaces as
+  // --ct-label-font-family; the caller `labelColor` surfaces as
+  // --ct-label-color. The label is rendered OUTSIDE the container in
+  // non-accordion mode, so the caller override must sit on the label element
+  // itself (container `--ct-cb-*` vars can't inherit to a sibling). The module
+  // CSS reads `var(--ct-label-color, <themed default>)` so an unset override
+  // keeps the contrast-checked per-theme default.
+  const labelStyle: React.CSSProperties | undefined = (() => {
+    const overrides: Record<string, string> = {}
+    if (styles?.fontFamily)
+      overrides['--ct-label-font-family'] = styles.fontFamily
+    if (styles?.labelColor) overrides['--ct-label-color'] = styles.labelColor
+    return Object.keys(overrides).length > 0
+      ? (overrides as React.CSSProperties)
+      : undefined
+  })()
 
   // Helper text overrides: font-size (was styles?.fontSize || '12px'),
   // caller font-family (--ct-label-font-family), and the footerTextColor

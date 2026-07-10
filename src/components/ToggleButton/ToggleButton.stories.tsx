@@ -411,8 +411,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark surface so the translucent dark-theme
+          tokens composite correctly (they read as light-gray on white). */}
+      <div
+        style={{ background: '#111827', padding: '1.5rem', borderRadius: '12px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
@@ -420,7 +423,7 @@ export const ComprehensiveShowcase: Story = {
               style={{
                 margin: '0 0 0.5rem 0',
                 fontSize: '14px',
-                color: '#6B7280',
+                color: '#94a3b8',
               }}
             >
               Single Buttons
@@ -450,7 +453,7 @@ export const ComprehensiveShowcase: Story = {
               style={{
                 margin: '0 0 0.5rem 0',
                 fontSize: '14px',
-                color: '#6B7280',
+                color: '#94a3b8',
               }}
             >
               Button Group
@@ -469,8 +472,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — sacred (near-black) surface so the gold
+          tokens composite correctly (gold-on-white is unreadable). */}
+      <div
+        style={{ background: '#0e0e0e', padding: '1.5rem', borderRadius: '12px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
