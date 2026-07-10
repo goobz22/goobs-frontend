@@ -556,7 +556,9 @@
   --mr-divider: #e5e7eb;
   --mr-count-active-bg: var(--goobs-blue-a10);
   --mr-count-active-text: var(--goobs-light-primary);
-  --mr-add-color: var(--goobs-success);
+  /* light-success-text (#15803d, 5.02:1 on the #ffffff light-surface); the
+     shared --goobs-success base (#22c55e) is only 2.28:1 as this 9px label. */
+  --mr-add-color: var(--goobs-light-success-text);
   --mr-add-hover-bg: var(--goobs-success-bg);
 }
 
@@ -572,7 +574,9 @@
   --mr-divider: var(--goobs-dark-border-strong);
   --mr-count-active-bg: var(--goobs-blue-a15);
   --mr-count-active-text: var(--goobs-dark-primary-strong);
-  --mr-add-color: var(--goobs-success);
+  /* dark-success-text (#4ade80, 8.40:1 on the #1e293b dark-surface) — the
+     per-theme severity-text token matching the light block above. */
+  --mr-add-color: var(--goobs-dark-success-text);
   --mr-add-hover-bg: var(--goobs-success-bg);
 }
 
