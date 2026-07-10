@@ -16,9 +16,15 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   ROOT CONTAINER — sacred defaults (overridden by [data-theme])
+   THEME TOKENS — sacred defaults (overridden by [data-theme]).
+   Scoped to BOTH root elements: `.root` (input branch) and
+   `.successContainer` (success branch renders .successContainer as its
+   root, so tokens scoped only to .root never reached it — the success
+   message/icon/background rendered with unresolved vars, e.g. black text
+   inherited onto a dark canvas).
    -------------------------------------------------------------------------- */
-.root {
+.root,
+.successContainer {
   /* sacred container */
   --cci-container-bg: rgba(10, 10, 10, 0.95);
   --cci-container-border-width: 2px;
@@ -89,7 +95,12 @@
   --cci-success-message-letter-spacing: 0.1em;
   --cci-success-message-text-transform: uppercase;
   --cci-success-message-text-shadow: 0 0 10px var(--goobs-gold-a70);
+}
 
+/* --------------------------------------------------------------------------
+   ROOT CONTAINER — layout (input branch only)
+   -------------------------------------------------------------------------- */
+.root {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -110,7 +121,8 @@
   transition: var(--cci-transition);
 }
 
-.root[data-theme='light'] {
+.root[data-theme='light'],
+.successContainer[data-theme='light'] {
   --cci-container-bg: var(--goobs-white-a95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(226, 232, 240, 0.8);
@@ -155,7 +167,8 @@
   --cci-success-message-text-shadow: none;
 }
 
-.root[data-theme='dark'] {
+.root[data-theme='dark'],
+.successContainer[data-theme='dark'] {
   --cci-container-bg: var(--goobs-slate-a95);
   --cci-container-border-width: 1px;
   --cci-container-border-color: rgba(75, 85, 99, 0.8);

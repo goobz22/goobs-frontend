@@ -62,7 +62,7 @@ const ThemedContactForm: React.FC<{ theme: Theme }> = ({ theme }) => {
         id="contact-form"
         onSubmit={values => setSubmitted(values)}
       >
-        <Form.AutoFields />
+        <Form.AutoFields theme={theme} />
         <Button
           type="submit"
           action="submit"
@@ -118,7 +118,7 @@ const ServerErrorForm: React.FC<{ theme: Theme }> = ({ theme }) => (
     id="contact-server-error"
     onSubmit={() => undefined}
   >
-    <Form.AutoFields only={['fullName', 'email']} />
+    <Form.AutoFields only={['fullName', 'email']} theme={theme} />
     <InjectServerErrorButton theme={theme} />
   </Form>
 )
@@ -170,7 +170,7 @@ export const DarkTheme: Story = {
  */
 export const SacredTheme: Story = {
   render: () => <ThemedContactForm theme="sacred" />,
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -190,7 +190,7 @@ export const AutoFieldsScaffold: Story = {
       subject="contact"
       onSubmit={() => undefined}
     >
-      <Form.AutoFields />
+      <Form.AutoFields theme="light" />
       <Button
         type="submit"
         action="submit"
@@ -293,7 +293,7 @@ const ChecklistForm: React.FC = () => {
         id="checklist-form"
         onSubmit={values => setSubmitted(values)}
       >
-        <Form.AutoFields only={['title']} />
+        <Form.AutoFields only={['title']} theme="light" />
         <TasksEditor />
         <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
       </Form>
@@ -381,7 +381,7 @@ const ArticleForm: React.FC = () => {
         id="article-form"
         onSubmit={values => setSubmitted(values)}
       >
-        <Form.AutoFields only={['title']} />
+        <Form.AutoFields only={['title']} theme="light" />
         <DynamicFieldSet />
         <Button type="submit" action="submit" text="Save" styles={{ theme: 'light' }} />
       </Form>
@@ -419,7 +419,7 @@ export const PartialFields: Story = {
       subject="contact"
       onSubmit={() => undefined}
     >
-      <Form.AutoFields only={['fullName', 'email']} />
+      <Form.AutoFields only={['fullName', 'email']} theme="light" />
       <Button
         type="submit"
         action="submit"

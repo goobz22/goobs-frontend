@@ -788,6 +788,9 @@ export const ColumnResizeDemo: Story = {
       theme: 'light',
     },
   },
+  // Light-themed demo with an unpainted wrapper: pin the light canvas so the
+  // #666 helper text doesn't inherit the default sacred (#0e0e0e) backdrop.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Financial Statements Data and Filters
@@ -1287,6 +1290,9 @@ export const ManageRowDemo: Story = {
       theme: 'light',
     },
   },
+  // Light-themed demo with an unpainted wrapper: pin the light canvas so the
+  // #666 instruction text doesn't inherit the default sacred (#0e0e0e) backdrop.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // Inline Row Creation Demo Component

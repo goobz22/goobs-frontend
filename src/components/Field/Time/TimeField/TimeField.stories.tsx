@@ -62,6 +62,7 @@ export const LightTheme: Story = {
   render: () => (
     <TimeFieldWithState label="Start Time" styles={{ theme: 'light' }} />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -90,6 +91,7 @@ export const WithValue: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -105,6 +107,7 @@ export const WithHelperText: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -167,6 +170,7 @@ export const Required: Story = {
       styles={{ theme: 'light', required: true }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -183,7 +187,13 @@ export const ComprehensiveShowcase: Story = {
         padding: '1rem',
       }}
     >
-      <div>
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <TimeFieldWithState label="Empty" styles={{ theme: 'light' }} />
@@ -205,7 +215,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      {/* Dark-themed block sits on its own dark surface so the dark-theme
+          labels/inputs (and the muted heading, 6.99:1 on #111827) are judged
+          against the surface they're designed for, not the light canvas. */}
+      <div
+        style={{
+          backgroundColor: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <TimeFieldWithState label="Empty" styles={{ theme: 'dark' }} />
@@ -222,7 +241,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      {/* Sacred is gold-on-near-black by design — its translucent control bg
+          and gold labels only meet contrast on a near-black surface
+          (gold #FFD700 heading is 13.76:1 on #0e0e0e vs 1.4:1 on white). */}
+      <div
+        style={{
+          backgroundColor: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <TimeFieldWithState label="Empty" styles={{ theme: 'sacred' }} />

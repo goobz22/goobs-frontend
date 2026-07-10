@@ -105,6 +105,9 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content — pin the light canvas (the global default canvas
+  // is sacred #0e0e0e, which the light label palette is not designed for).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -145,10 +148,14 @@ export const CustomColors: Story = {
         borderColor: 'rgba(79, 70, 229, 0.4)',
         borderFocusedColor: 'rgba(79, 70, 229, 1)',
         textColor: 'rgba(55, 48, 163, 1)',
-        labelColor: 'rgba(55, 48, 163, 0.7)',
+        // 0.8 alpha composites to #5f59b5 on the light canvas — 5.86:1.
+        // (0.7 composited to 4.46:1, just under the 4.5 WCAG minimum.)
+        labelColor: 'rgba(55, 48, 163, 0.8)',
       }}
     />
   ),
+  // Light-styled custom palette — belongs on the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -162,7 +169,9 @@ export const NeonStyle: Story = {
         borderColor: 'rgba(16, 185, 129, 0.5)',
         borderFocusedColor: 'rgba(16, 185, 129, 1)',
         textColor: 'rgba(16, 185, 129, 1)',
-        labelColor: 'rgba(16, 185, 129, 0.7)',
+        // 0.85 alpha composites to 5.38:1 on the dark #111827 canvas
+        // (0.7 composited to #108966 — 4.04:1, under the 4.5 minimum).
+        labelColor: 'rgba(16, 185, 129, 0.85)',
         borderRadius: '12px',
         borderWidth: '2px',
       }}
@@ -210,6 +219,8 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  // All fields are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -252,6 +263,8 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  // All fields are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -283,6 +296,8 @@ export const OptionVariations: Story = {
       />
     </div>
   ),
+  // All fields are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -325,28 +340,45 @@ export const ErrorStates: Story = {
 // --------------------------------------------------------------------------
 
 export const RequiredFields: Story = {
+  // Mixed-theme story: each themed block sits on the surface its palette is
+  // designed for (the canvas itself stays sacred for the sacred field).
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SearchableSimpleWithState
-        label="Required Selection"
-        placeholder="Search an option"
-        required
-        styles={{ theme: 'light' }}
-      />
-      <SearchableSimpleWithState
-        label="Country"
-        placeholder="Search a country"
-        required
-        error="This field is required"
-        options={countryOptions}
-        styles={{ theme: 'light' }}
-      />
-      <SearchableSimpleWithState
-        label="Category"
-        placeholder="Search a category"
-        required
-        styles={{ theme: 'dark' }}
-      />
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <SearchableSimpleWithState
+          label="Required Selection"
+          placeholder="Search an option"
+          required
+          styles={{ theme: 'light' }}
+        />
+        <SearchableSimpleWithState
+          label="Country"
+          placeholder="Search a country"
+          required
+          error="This field is required"
+          options={countryOptions}
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchableSimpleWithState
+          label="Category"
+          placeholder="Search a category"
+          required
+          styles={{ theme: 'dark' }}
+        />
+      </div>
       <SearchableSimpleWithState
         label="Custom Required Dropdown"
         placeholder="Search divine option"
@@ -366,26 +398,35 @@ export const RequiredFields: Story = {
 // --------------------------------------------------------------------------
 
 export const DisabledStates: Story = {
+  // The component reads the disabled flag from `styles.disabled` (a bare
+  // top-level `disabled` prop is silently ignored), so the flag lives in
+  // `styles` — otherwise this story demos enabled fields. Mixed-theme story:
+  // each themed block sits on the surface its palette is designed for.
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SearchableSimpleWithState
-        label="Disabled Light"
-        initialValue="apple"
-        disabled
-        styles={{ theme: 'light' }}
-      />
-      <SearchableSimpleWithState
-        label="Disabled Dark"
-        initialValue="us"
-        options={countryOptions}
-        disabled
-        styles={{ theme: 'dark' }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchableSimpleWithState
+          label="Disabled Light"
+          initialValue="apple"
+          styles={{ theme: 'light', disabled: true }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchableSimpleWithState
+          label="Disabled Dark"
+          initialValue="us"
+          options={countryOptions}
+          styles={{ theme: 'dark', disabled: true }}
+        />
+      </div>
       <SearchableSimpleWithState
         label="Disabled Sacred"
         initialValue="banana"
-        disabled
-        styles={{ theme: 'sacred' }}
+        styles={{ theme: 'sacred', disabled: true }}
       />
     </div>
   ),
@@ -446,7 +487,7 @@ const SearchableSimpleDemo = () => {
         styles={{ theme: 'light' }}
       />
       {error && (
-        <div style={{ color: 'rgba(239, 68, 68, 1)', fontSize: '14px' }}>
+        <div style={{ color: 'rgba(220, 38, 38, 1)', fontSize: '14px' }}>
           {error}
         </div>
       )}
@@ -454,7 +495,8 @@ const SearchableSimpleDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // #2563eb keeps white text at 5.17:1 (#3b82f6 was 3.67:1).
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -465,7 +507,7 @@ const SearchableSimpleDemo = () => {
       >
         Submit Selection
       </button>
-      <div style={{ fontSize: '14px', color: '#6B7280' }}>
+      <div style={{ fontSize: '14px', color: '#4B5563' }}>
         <p>Simple searchable dropdown features:</p>
         <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
           <li>Type to search and filter options</li>
@@ -480,6 +522,8 @@ const SearchableSimpleDemo = () => {
 
 export const SearchDemo: Story = {
   render: () => <SearchableSimpleDemo />,
+  // Light-themed demo content — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -520,8 +564,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark-themed fields sit on their own dark
+          surface (the showcase canvas is light) */}
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SearchableSimpleWithState
@@ -551,8 +598,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — gold-on-near-black is the sacred design
+          language, so these fields sit on their own near-black surface */}
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SearchableSimpleWithState
@@ -592,8 +642,11 @@ export const ComprehensiveShowcase: Story = {
               backgroundColor: 'rgba(0, 0, 0, 0.95)',
               borderColor: 'rgba(147, 51, 234, 0.5)',
               borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
+              // Purple-500 (#a855f7) reads 4.91:1 on the near-black control
+              // (purple-600 was ~3.5:1); the label at full purple-600 reads
+              // 5.38:1 on the white canvas (0.8 alpha composited to 3.85:1).
+              textColor: 'rgba(168, 85, 247, 1)',
+              labelColor: 'rgba(147, 51, 234, 1)',
               borderRadius: '20px',
               borderWidth: '2px',
             }}
@@ -645,19 +698,26 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const label = canvas.getByText('Test Searchable Simple')
-    const dropdown = canvas.getByRole('button')
+    // The trigger intentionally exposes role="combobox" (WAI-ARIA combobox
+    // 1.2 pattern) — there is no role="button" in this story's tree.
+    const dropdown = canvas.getByRole('combobox')
 
     // Initial state
     expect(label).toBeVisible()
     expect(dropdown).toBeVisible()
+    expect(dropdown).toHaveAttribute('aria-expanded', 'false')
 
-    // Click to open dropdown
+    // Click to open the dropdown (the listbox portals to document.body)
     await userEvent.click(dropdown)
+    expect(dropdown).toHaveAttribute('aria-expanded', 'true')
 
-    // The dropdown should be interactive
-    expect(dropdown).toBeVisible()
+    // Click again to close, leaving the story in its resting state
+    await userEvent.click(dropdown)
+    expect(dropdown).toHaveAttribute('aria-expanded', 'false')
   },
 }

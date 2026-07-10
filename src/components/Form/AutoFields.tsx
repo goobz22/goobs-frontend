@@ -28,6 +28,7 @@ import React, { type ReactElement, type ReactNode } from 'react'
 import { useFormContext } from './context'
 import { useFormField } from './useFormField'
 import { humanize, zodTypeToFieldKind, type FieldKind } from './schema'
+import type { FieldTheme } from '../Field/Shell'
 import TextField from '../Field/Text'
 import DateField from '../Field/Date/DateField'
 import InternalIncrementNumberField from '../Field/Number/InternalIncrement'
@@ -62,6 +63,13 @@ export interface AutoFieldsProps {
    * `undefined`/`null` to fall back to the default component for its kind.
    */
   render?: (context: AutoFieldRenderContext) => ReactNode
+  /**
+   * Theme forwarded to every emitted field (`styles.theme`). Without it each
+   * component falls back to its OWN default — `sacred` for FieldShell fields,
+   * `light` for Checkbox — which mismatches any light/dark form surface (e.g.
+   * sacred gold labels on a white page). Pass the form's surrounding theme.
+   */
+  theme?: FieldTheme | undefined
 }
 
 /** Structural view of a zod object schema's shape. */
@@ -110,6 +118,7 @@ interface AutoFieldProps {
   label: string
   kind: FieldKind
   options: DropdownOption[]
+  theme: FieldTheme | undefined
 }
 
 /**
@@ -122,9 +131,13 @@ const AutoField: React.FC<AutoFieldProps> = ({
   label,
   kind,
   options,
+  theme,
 }) => {
   const { value, onChange, onBlur, error, required } = useFormField(name)
   const errorProp = error ?? false
+  // exactOptionalPropertyTypes: only carry `theme` when the caller set it, so
+  // each component's own default (sacred fields / light checkbox) still applies.
+  const fieldStyles = theme ? { required, theme } : { required }
 
   switch (kind) {
     case 'enum':
@@ -137,7 +150,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
-          styles={{ required }}
+          styles={fieldStyles}
         />
       )
     case 'number':
@@ -149,7 +162,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
-          styles={{ required }}
+          styles={fieldStyles}
         />
       )
     case 'date':
@@ -160,7 +173,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           value={asDate(value)}
           onChange={next => onChange(next)}
           error={errorProp}
-          styles={{ required }}
+          styles={fieldStyles}
         />
       )
     case 'boolean':
@@ -172,6 +185,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           checked={Boolean(value)}
           onChange={next => onChange(next)}
           onBlur={onBlur}
+          {...(theme ? { styles: { theme } } : {})}
         >
           {label}
         </Checkbox>
@@ -186,7 +200,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
-          styles={{ required }}
+          styles={fieldStyles}
         />
       )
     case 'stringArray':
@@ -200,7 +214,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           onChange={next => onChange(next)}
           onBlur={onBlur}
           error={errorProp}
-          styles={{ required }}
+          styles={fieldStyles}
         />
       )
   }
@@ -213,6 +227,7 @@ const AutoFields: React.FC<AutoFieldsProps> = ({
   omit,
   optionsMap,
   render,
+  theme,
 }) => {
   const { schema } = useFormContext()
   const shape = (schema as ZodObjectLike | null | undefined)?.shape
@@ -248,6 +263,7 @@ const AutoFields: React.FC<AutoFieldsProps> = ({
         label={label}
         kind={kind}
         options={options}
+        theme={theme}
       />
     )
   }

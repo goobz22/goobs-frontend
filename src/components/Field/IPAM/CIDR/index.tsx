@@ -282,7 +282,14 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
       </FieldShell>
 
       {showSubnetInfo && (
-        <div className={cssStyles.subnetInfo}>
+        // The readout sits outside FieldShell, so mirror the shell's theme
+        // resolution (styles.theme, sacred default) for the module's
+        // [data-theme] color overrides — otherwise it renders page-default
+        // black on dark/sacred surfaces.
+        <div
+          className={cssStyles.subnetInfo}
+          data-theme={styles?.theme ?? 'sacred'}
+        >
           <div>Subnet Mask: {cidrInfo.mask}</div>
           <div>
             Total Hosts: {cidrInfo.totalHosts} ({cidrInfo.usableHosts} usable)

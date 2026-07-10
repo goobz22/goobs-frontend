@@ -611,12 +611,14 @@ const ModeSwitchingDemo = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* Active buttons use #2563EB (not #3B82F6): white text needs a >=4.5:1
+          contrast ratio — 5.17 on #2563EB vs a failing 3.67 on #3B82F6. */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
         <button
           onClick={() => setMode('simple')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'simple' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
+            backgroundColor: mode === 'simple' ? '#2563EB' : '#E5E7EB',
             color: mode === 'simple' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',
@@ -629,7 +631,7 @@ const ModeSwitchingDemo = () => {
           onClick={() => setMode('rich')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'rich' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
+            backgroundColor: mode === 'rich' ? '#2563EB' : '#E5E7EB',
             color: mode === 'rich' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',
@@ -642,7 +644,7 @@ const ModeSwitchingDemo = () => {
           onClick={() => setMode('markdown')}
           style={{
             padding: '8px 16px',
-            backgroundColor: mode === 'markdown' ? '#2563EB' /* was #3B82F6 — white text needs >=4.5:1 (this is 5.17) */ : '#E5E7EB',
+            backgroundColor: mode === 'markdown' ? '#2563EB' : '#E5E7EB',
             color: mode === 'markdown' ? 'white' : '#374151',
             border: 'none',
             borderRadius: '6px',

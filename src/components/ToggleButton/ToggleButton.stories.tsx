@@ -53,6 +53,7 @@ export const LightTheme: Story = {
     children: 'Light Theme',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A toggle button with dark theme. */
@@ -88,6 +89,7 @@ export const SelectedByDefault: Story = {
     selected: true,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** A disabled toggle button that cannot be interacted with. */
@@ -155,6 +157,7 @@ export const Sizes: Story = {
       </ToggleButton>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Small toggle buttons. */
@@ -166,6 +169,7 @@ export const Small: Story = {
     size: 'small',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Large toggle buttons. */
@@ -177,6 +181,7 @@ export const Large: Story = {
     size: 'large',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -203,6 +208,7 @@ const ToggleGroupExample = () => {
 export const ToggleGroup: Story = {
   name: 'Group/Exclusive Selection',
   render: () => <ToggleGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const NonExclusiveGroupExample = () => {
@@ -225,6 +231,7 @@ const NonExclusiveGroupExample = () => {
 export const NonExclusiveGroup: Story = {
   name: 'Group/Non-Exclusive Selection',
   render: () => <NonExclusiveGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -305,6 +312,7 @@ const SmallGroupExample = () => {
 export const SmallGroup: Story = {
   name: 'Group/Small Size',
   render: () => <SmallGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const LargeGroupExample = () => {
@@ -328,6 +336,7 @@ const LargeGroupExample = () => {
 export const LargeGroup: Story = {
   name: 'Group/Large Size',
   render: () => <LargeGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------

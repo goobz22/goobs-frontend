@@ -123,7 +123,7 @@ export const SacredTheme: Story = {
       </div>
     ),
   ],
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -139,6 +139,8 @@ export const CenterAligned: Story = {
     align: 'center',
     maxWidth: 480,
   },
+  // Color is `inherit` (black here) — needs the light canvas, not sacred.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Right alignment within a bounded width. */
@@ -150,6 +152,8 @@ export const RightAligned: Story = {
     align: 'right',
     maxWidth: 480,
   },
+  // Color is `inherit` (black here) — needs the light canvas, not sacred.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -170,4 +174,6 @@ export const FullWidth: Story = {
       </div>
     ),
   ],
+  // Color is `inherit` (black here) — needs the light canvas, not sacred.
+  globals: { backgrounds: { value: 'light' } },
 }

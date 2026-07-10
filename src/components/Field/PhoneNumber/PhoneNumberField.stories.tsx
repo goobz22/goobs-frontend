@@ -59,23 +59,39 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content must not sit on the default sacred canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DefaultPlaceholder: Story = {
   render: () => (
+    // Mixed-theme story: each field sits on its own theme-matched surface so
+    // light/dark content never renders on the default sacred canvas.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PhoneNumberFieldWithState
-        label="Light Theme - Default Placeholder"
-        styles={{ theme: 'light' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Dark Theme - Default Placeholder"
-        styles={{ theme: 'dark' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Sacred Theme - Default Placeholder"
-        styles={{ theme: 'sacred' }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Light Theme - Default Placeholder"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Dark Theme - Default Placeholder"
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Sacred Theme - Default Placeholder"
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }
@@ -117,10 +133,13 @@ export const CustomColors: Story = {
         borderColor: 'rgba(59, 130, 246, 0.4)',
         borderFocusedColor: 'rgba(59, 130, 246, 1)',
         textColor: 'rgba(30, 64, 175, 1)',
-        labelColor: 'rgba(30, 64, 175, 0.7)',
+        // 0.85 alpha composites to #405dbb on white — 6.00:1 (0.7 was 4.13:1).
+        labelColor: 'rgba(30, 64, 175, 0.85)',
       }}
     />
   ),
+  // Light-themed demo: pin the light canvas (was inheriting sacred #0e0e0e).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -134,7 +153,9 @@ export const NeonStyle: Story = {
         borderColor: 'rgba(34, 197, 94, 0.5)',
         borderFocusedColor: 'rgba(34, 197, 94, 1)',
         textColor: 'rgba(34, 197, 94, 1)',
-        labelColor: 'rgba(34, 197, 94, 0.7)',
+        // 0.8 alpha composites to #1fa253 on the #111827 canvas — 5.37:1
+        // (0.7 landed at 4.40:1, just under the 4.5 requirement).
+        labelColor: 'rgba(34, 197, 94, 0.8)',
         borderRadius: '12px',
         borderWidth: '2px',
       }}
@@ -184,6 +205,8 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  // All-light-themed demo: pin the light canvas (was inheriting sacred).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -226,6 +249,8 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  // All-light-themed demo: pin the light canvas (was inheriting sacred).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -268,36 +293,57 @@ export const ErrorStates: Story = {
 
 export const RequiredFields: Story = {
   render: () => (
+    // Mixed-theme story: each theme block sits on its own matched surface so
+    // light/dark content never renders on the default sacred canvas.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PhoneNumberFieldWithState
-        label="Required Phone"
-        placeholder="(555) 123-4567"
-        required
-        styles={{ theme: 'light' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Emergency Contact"
-        placeholder="Enter emergency contact"
-        required
-        error="This field is required"
-        styles={{ theme: 'light' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Business Phone"
-        placeholder="Enter business number"
-        required
-        styles={{ theme: 'dark' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Custom Required Indicator"
-        placeholder="Enter divine number"
-        required
-        styles={{
-          theme: 'sacred',
-          requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
         }}
-      />
+      >
+        <PhoneNumberFieldWithState
+          label="Required Phone"
+          placeholder="(555) 123-4567"
+          required
+          styles={{ theme: 'light' }}
+        />
+        <PhoneNumberFieldWithState
+          label="Emergency Contact"
+          placeholder="Enter emergency contact"
+          required
+          error="This field is required"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Business Phone"
+          placeholder="Enter business number"
+          required
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Custom Required Indicator"
+          placeholder="Enter divine number"
+          required
+          styles={{
+            theme: 'sacred',
+            requiredIndicatorText: ' (required)',
+            requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          }}
+        />
+      </div>
     </div>
   ),
 }
@@ -340,8 +386,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — rendered on its own dark surface so the
+          dark-themed labels/heading aren't measured against the light canvas */}
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PhoneNumberFieldWithState
@@ -371,8 +420,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — rendered on its own near-black surface (the
+          sacred control bg is translucent black, unreadable over white) */}
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PhoneNumberFieldWithState
@@ -404,20 +456,31 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <PhoneNumberFieldWithState
-            label="Neon Style"
-            placeholder="(555) 123-4567"
-            styles={{
-              theme: 'dark',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              borderColor: 'rgba(147, 51, 234, 0.5)',
-              borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
-              borderRadius: '20px',
-              borderWidth: '2px',
+          {/* Dark neon field on a matching dark sub-surface; purple-400
+              #c084fc reads 6.71:1 on #111827 and 7.90:1 on the near-black
+              input bg (the old #9333ea was 3.61:1 on its own background). */}
+          <div
+            style={{
+              background: '#111827',
+              padding: '1rem',
+              borderRadius: '8px',
             }}
-          />
+          >
+            <PhoneNumberFieldWithState
+              label="Neon Style"
+              placeholder="(555) 123-4567"
+              styles={{
+                theme: 'dark',
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                borderColor: 'rgba(147, 51, 234, 0.5)',
+                borderFocusedColor: 'rgba(147, 51, 234, 1)',
+                textColor: 'rgba(192, 132, 252, 1)',
+                labelColor: 'rgba(192, 132, 252, 1)',
+                borderRadius: '20px',
+                borderWidth: '2px',
+              }}
+            />
+          </div>
           <PhoneNumberFieldWithState
             label="Soft Rounded"
             placeholder="(555) 123-4567"
@@ -459,25 +522,39 @@ export const ComprehensiveShowcase: Story = {
 
 export const DisabledStates: Story = {
   render: () => (
+    // Mixed-theme story: each field sits on its own theme-matched surface so
+    // light/dark content never renders on the default sacred canvas.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PhoneNumberFieldWithState
-        label="Disabled Light"
-        initialValue="(555) 123-4567"
-        disabled
-        styles={{ theme: 'light' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Disabled Dark"
-        initialValue="(555) 123-4567"
-        disabled
-        styles={{ theme: 'dark' }}
-      />
-      <PhoneNumberFieldWithState
-        label="Disabled Sacred"
-        initialValue="(555) 123-4567"
-        disabled
-        styles={{ theme: 'sacred' }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Disabled Light"
+          initialValue="(555) 123-4567"
+          disabled
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Disabled Dark"
+          initialValue="(555) 123-4567"
+          disabled
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Disabled Sacred"
+          initialValue="(555) 123-4567"
+          disabled
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }
@@ -535,7 +612,8 @@ const PhoneValidationDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // Blue-600: white text reads 5.17:1 (blue-500 #3B82F6 was 3.67:1).
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -556,6 +634,9 @@ const PhoneValidationDemo = () => {
 
 export const ValidationDemo: Story = {
   render: () => <PhoneValidationDemo />,
+  // Light-themed demo (default-color heading/copy + light field): pin the
+  // light canvas — on the inherited sacred canvas the #000 heading was 1.08:1.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -570,6 +651,9 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content: pin the light canvas (same canvas-mismatch class
+  // as LightTheme; unflagged only because the play fn fills the field).
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByPlaceholderText('(555) 123-4567')

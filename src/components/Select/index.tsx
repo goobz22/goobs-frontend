@@ -153,7 +153,8 @@ const Select: React.FC<SelectProps> = ({
   // `helperTextType: 'error'` rendered the error border in the old
   // getFormFieldTheme path even when the boolean `error` prop wasn't set.
   // Surface it as a separate data attribute so the CSS can color the border
-  // without conflating it with the boolean-error red (#d32f2f) used above.
+  // without conflating it with the boolean-error per-theme --select-error
+  // red used above.
   const hasHelperError = styles?.helperTextType === 'error'
 
   // `data-filled` reflects a non-empty current selection (engine/caller value).

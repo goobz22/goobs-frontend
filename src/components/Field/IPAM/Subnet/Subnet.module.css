@@ -21,6 +21,13 @@
   padding: 8px 60px 8px 16px;
   font-size: 16px;
   box-sizing: border-box;
+
+  /* Inputs don't inherit color from the UA stylesheet (UA default is black),
+     so without an explicit color this input renders black on dark/sacred
+     surfaces. --field-text is FieldShell's per-theme text token, inherited
+     from the .shell wrapper this input renders inside. Same fix as the CIDR
+     sibling (Field/IPAM/CIDR/CIDR.module.css). */
+  color: var(--field-text);
 }
 
 .buttonContainer {
@@ -62,10 +69,24 @@
   width: 100%;
 }
 
-/* Subnet-info readout rendered below the field. */
+/* Subnet-info readout rendered below the field. It sits OUTSIDE the
+   FieldShell wrapper (sibling), so it never sees the shell's data-theme
+   tokens — the TSX mirrors the shell's theme resolution (styles.theme,
+   sacred default) onto this element's data-theme. Sacred is the hardcoded
+   default; light/dark are overrides (house pattern; twin of
+   Field/IPAM/CIDR/CIDR.module.css .subnetInfo). */
 .subnetInfo {
   margin-top: 0.5rem;
   font-size: 0.875rem;
+  color: var(--goobs-sacred-text-secondary);
+}
+
+.subnetInfo[data-theme='light'] {
+  color: var(--goobs-light-text-secondary);
+}
+
+.subnetInfo[data-theme='dark'] {
+  color: var(--goobs-dark-text-secondary);
 }
 
 .supernetCidr {

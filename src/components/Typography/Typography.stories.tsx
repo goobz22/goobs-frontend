@@ -45,6 +45,7 @@ export const LightH1: Story = {
       variant: 'merrih1',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const heading = canvas.getByText('Heading 1 - Light Theme')
@@ -63,6 +64,7 @@ export const LightH2: Story = {
       variant: 'merrih2',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -79,6 +81,7 @@ export const LightParagraph: Story = {
       variant: 'merriparagraph',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const paragraph = canvas.getByText(
@@ -117,6 +120,7 @@ export const LightWithOutline: Story = {
       outline: true,
     },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const heading = canvas.getByText('Outlined Light Heading')
@@ -231,6 +235,7 @@ export const Centered: Story = {
       width: '300px',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const GutterBottom: Story = {
@@ -267,6 +272,7 @@ export const AsChild: Story = {
       variant: 'merrih1',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomColor: Story = {
@@ -279,6 +285,7 @@ export const CustomColor: Story = {
       color: '#e11d48',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomFontSize: Story = {
@@ -291,6 +298,7 @@ export const CustomFontSize: Story = {
       fontSize: '1.25rem',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -298,6 +306,10 @@ export const CustomFontSize: Story = {
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {
   name: 'Interaction and A11y Test',
+  // Sacred-themed typography is gold-on-near-black; the demo surface must be
+  // the sacred near-black (#0e0e0e), not a light gray — gold #ffd700 on
+  // #f0f0f0 is 1.23:1, on #0e0e0e it is 13.76:1 (WCAG AA pass).
+  globals: { backgrounds: { value: 'sacred' } },
   render: () => (
     <div
       style={{
@@ -305,7 +317,7 @@ export const InteractionTest: Story = {
         flexDirection: 'column',
         gap: '1rem',
         padding: '2rem',
-        background: '#f0f0f0',
+        background: '#0e0e0e',
       }}
     >
       <Typography styles={{ theme: 'sacred', variant: 'cinzelh1' }}>

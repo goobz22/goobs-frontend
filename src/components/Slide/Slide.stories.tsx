@@ -285,7 +285,16 @@ export const CustomTiming: Story = {
           >
             Toggle Slide
           </CustomButton>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              // Demo label sits directly on the sacred #0e0e0e canvas — follow
+              // the sacred theme (composites to ~#e7e7e7, 15.6:1 contrast).
+              color: 'var(--goobs-sacred-text)',
+            }}
+          >
             Duration:
             <input
               type="range"

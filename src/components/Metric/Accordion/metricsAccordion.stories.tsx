@@ -9,9 +9,14 @@
  *   2. children mode — pass arbitrary children and control the inner layout.
  *
  * Themes follow the real prop API: `styles.theme === 'sacred'` selects the
- * dark/gold palette on the accordion wrapper; every other value resolves to the
- * light shell. The inner `MetricCard`s honor the same `styles` object, so a
- * `theme: 'dark'` passes through to give dark-slate cards.
+ * dark/gold palette on the accordion wrapper, `'dark'` the dark-slate shell,
+ * and every other value resolves to the light shell. The inner `MetricCard`s
+ * honor the same `styles` object, so a `theme: 'dark'` gives dark-slate cards
+ * inside the dark shell.
+ *
+ * Canvas pins use the SB10 API — `globals: { backgrounds: { value } }` — the
+ * old `parameters.backgrounds.default` form is dead and silently leaves the
+ * sacred #0e0e0e canvas under light-themed stories.
  *
  * Default state is COLLAPSED — the `initiallyOpen` prop renders the panel
  * expanded on first paint (used by the expanded-state stories here).
@@ -119,7 +124,7 @@ const meta: Meta<typeof MetricsAccordion> = {
     styles: {
       control: 'object',
       description:
-        'Style configuration — theme (sacred selects the dark/gold palette; everything else resolves to the light shell) plus an optional accent color.',
+        'Style configuration — theme (sacred selects the dark/gold palette, dark the dark-slate shell; everything else resolves to the light shell) plus an optional accent color.',
     },
   },
   parameters: {
@@ -153,9 +158,7 @@ export const Default: Story = {
     initiallyOpen: true,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -174,15 +177,14 @@ export const LightTheme: Story = {
     initiallyOpen: true,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
- * Dark theme — the `styles` object passes through to the inner `MetricCard`s,
- * which have their own `[data-theme='dark']` block for dark-slate cards. Shot
- * on a dark canvas so the cards read correctly.
+ * Dark theme — the accordion shell renders its own `[data-theme='dark']`
+ * dark-slate block, and the `styles` object passes through to the inner
+ * `MetricCard`s, which do the same for dark-slate cards. Shot on the dark
+ * canvas so the shell and cards read correctly.
  */
 export const DarkTheme: Story = {
   name: 'Themes/Dark Theme',
@@ -192,9 +194,7 @@ export const DarkTheme: Story = {
     initiallyOpen: true,
     styles: { theme: 'dark' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'dark' } },
 }
 
 /**
@@ -209,9 +209,7 @@ export const SacredTheme: Story = {
     initiallyOpen: true,
     styles: { theme: 'sacred' },
   },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -230,9 +228,7 @@ export const Collapsed: Story = {
     initiallyOpen: false,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -246,9 +242,7 @@ export const Expanded: Story = {
     initiallyOpen: true,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -263,9 +257,7 @@ export const GroupedMode: Story = {
     initiallyOpen: true,
     styles: { theme: 'light' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -296,9 +288,7 @@ export const ChildrenMode: Story = {
       </div>
     </MetricsAccordion>
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -314,7 +304,5 @@ export const CustomAccent: Story = {
     dataField: 'workspace-metrics',
     styles: { theme: 'light', color: 'rgba(147, 51, 234, 1)' },
   },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }

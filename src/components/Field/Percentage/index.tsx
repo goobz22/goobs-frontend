@@ -48,8 +48,9 @@ export interface PercentageFieldProps {
 /**
  * Percentage entry built on FieldShell: an auto-width numeric input that
  * appends a % symbol, with stacked +/- buttons that auto-repeat while held.
- * Typed input is stripped to digits and clamped to [min, max]; `onChange`
- * emits the parsed number — not a DOM event. Auto-binds by `name` inside a
+ * Typed input is stripped to digits and a single decimal point (max 2
+ * decimal places) and clamped to [min, max]; `onChange` emits the parsed
+ * number — not a DOM event. Auto-binds by `name` inside a
  * goobs `<Form>` (the engine stores the number); otherwise the string `value`
  * prop controls the display.
  */
@@ -116,7 +117,17 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
-  const currentValue = value || internalValue
+  // While the user is mid-entry of a decimal ('75.', or '0.0' on the way to
+  // '0.05'), the controlled round-trip (onChange(75) → parent echoes value
+  // '75') would erase the in-progress characters. Prefer the internal typed
+  // string whenever it is a numerically-equal elaboration of the controlled
+  // value; handleBlur normalizes it once focus leaves.
+  const inProgressTyping =
+    value !== undefined &&
+    value !== '' &&
+    internalValue !== value &&
+    parseFloat(internalValue) === parseFloat(value)
+  const currentValue = inProgressTyping ? internalValue : value || internalValue
   const displayValue =
     showPercentSymbol && currentValue ? `${currentValue}%` : currentValue
 
@@ -138,8 +149,9 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   }, [])
 
   // formatValue takes a raw input string, strips non-numerics, clamps
-  // to [min, max], and returns a display string. Used for both typed
-  // input and native-input event handling.
+  // to [min, max], and returns a canonical display string (integers bare,
+  // decimals capped at 2 places with no trailing-zero padding). Used for
+  // stepped (+/-) values and blur-time normalization.
   const formatValue = useCallback(
     (val: string): string => {
       const numericValue = val.replace(/[^0-9.]/g, '')
@@ -150,9 +162,41 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       else if (max !== undefined && parsedValue > max) parsedValue = max
       return parsedValue % 1 === 0
         ? parsedValue.toString()
-        : parsedValue.toFixed(2).replace(/\.00$/, '')
+        : parsedValue.toFixed(2).replace(/\.?0+$/, '')
     },
     [min, max]
+  )
+
+  // sanitizeTypedValue handles KEYSTROKE input. Unlike formatValue it must
+  // never parse-and-reprint an in-progress entry: reformatting '75.' to '75'
+  // made decimal entry impossible — the next '5' produced '755', which
+  // clamped to max and corrupted a typed 75.5 into 100. It strips
+  // non-numerics (including the display '%') and leading zeros, keeps a
+  // single '.', caps at 2 decimal places, and only round-trips through
+  // formatValue when the number actually leaves [min, max] (clamping).
+  const sanitizeTypedValue = useCallback(
+    (raw: string): string => {
+      let sanitized = raw.replace(/[^0-9.]/g, '')
+      const firstDot = sanitized.indexOf('.')
+      if (firstDot !== -1) {
+        sanitized =
+          sanitized.slice(0, firstDot + 1) +
+          sanitized.slice(firstDot + 1).replace(/\./g, '')
+        sanitized = sanitized.slice(0, firstDot + 3)
+      }
+      sanitized = sanitized.replace(/^0+(?=\d)/, '')
+      if (sanitized === '' || sanitized === '.') return ''
+      const parsed = parseFloat(sanitized)
+      if (isNaN(parsed)) return ''
+      if (
+        (min !== undefined && parsed < min) ||
+        (max !== undefined && parsed > max)
+      ) {
+        return formatValue(sanitized)
+      }
+      return sanitized
+    },
+    [min, max, formatValue]
   )
 
   // Listen for native 'input' events to support browser automation tools
@@ -163,13 +207,12 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     const handleNativeInput = (e: Event) => {
       const target = e.target as HTMLInputElement
       const rawValue = target.value
-      const numericInput = rawValue.replace(/%/g, '')
       const currentDisplay =
         showPercentSymbol && (value || internalValue)
           ? `${value || internalValue}%`
           : value || internalValue
       if (rawValue !== currentDisplay) {
-        const formattedValue = formatValue(numericInput)
+        const formattedValue = sanitizeTypedValue(rawValue)
         setInternalValue(formattedValue)
         const numericResult = parseFloat(formattedValue)
         onChange?.(isNaN(numericResult) ? 0 : numericResult)
@@ -178,7 +221,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
 
     el.addEventListener('input', handleNativeInput)
     return () => el.removeEventListener('input', handleNativeInput)
-  }, [onChange, value, internalValue, showPercentSymbol, formatValue])
+  }, [onChange, value, internalValue, showPercentSymbol, sanitizeTypedValue])
 
   const handleIncrement = useCallback(() => {
     const currentValue = value || internalValue
@@ -214,15 +257,23 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = event.target.value
-      const numericInput = rawValue.replace(/%/g, '')
-      const formattedValue = formatValue(numericInput)
+      const formattedValue = sanitizeTypedValue(event.target.value)
       setInternalValue(formattedValue)
       const numericResult = parseFloat(formattedValue)
       onChange?.(isNaN(numericResult) ? 0 : numericResult)
     },
-    [onChange, formatValue]
+    [onChange, sanitizeTypedValue]
   )
+
+  // Normalize any in-progress entry ('75.' → '75') once focus leaves, then
+  // run the binding's blur (touched-marking) behavior.
+  const handleBlur = useCallback(() => {
+    setInternalValue(prev => {
+      const normalized = formatValue(prev)
+      return normalized === prev ? prev : normalized
+    })
+    onBlur?.()
+  }, [formatValue, onBlur])
 
   // Inner chrome lives in Percentage.module.css: the increment/decrement
   // buttons are absolutely positioned over the auto-sized input so the
@@ -300,7 +351,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
             data-field-name={dataFieldName}
             value={displayValue}
             onChange={handleChange}
-            onBlur={onBlur}
+            onBlur={handleBlur}
             disabled={disabled}
             required={required}
             placeholder={placeholder}

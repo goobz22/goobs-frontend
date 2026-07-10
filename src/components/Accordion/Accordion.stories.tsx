@@ -236,7 +236,7 @@ const ControlledAccordionExample = () => {
         onClick={() => setExpanded(prev => !prev)}
         style={{
           padding: '8px 16px',
-          backgroundColor: '#3B82F6',
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
@@ -301,7 +301,7 @@ export const ComprehensiveShowcase: Story = {
 
       {/* Dark Theme Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Accordion
             summary="Basic Dark"
@@ -324,7 +324,7 @@ export const ComprehensiveShowcase: Story = {
 
       {/* Alternative Dark Theme Section */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
           Alternative Dark Theme
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -361,7 +361,7 @@ export const ComprehensiveShowcase: Story = {
               backgroundColor: 'rgba(147, 51, 234, 0.1)',
               borderColor: 'rgba(147, 51, 234, 0.3)',
               summaryBackgroundColor: 'rgba(147, 51, 234, 0.2)',
-              summaryColor: 'rgba(147, 51, 234, 1)',
+              summaryColor: 'rgba(107, 33, 168, 1)',
             }}
           />
           <Accordion
@@ -793,7 +793,7 @@ export const SixLevelNavigationTest: Story = {
 
       {/* Dark Theme Navigation */}
       <div style={{ minWidth: 'fit-content' }}>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>
           Dark Theme Navigation
         </h3>
         <div
@@ -939,7 +939,7 @@ export const IndentationVariations: Story = {
 
       {/* Sacred Theme Dynamic Width */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#A16207' }}>
           Sacred Theme - Dynamic Width Expansion
         </h3>
         <div
@@ -1194,7 +1194,7 @@ export const IndentationVariations: Story = {
 
       {/* With Base Indentation */}
       <div>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>
+        <h3 style={{ margin: '0 0 1rem 0', color: '#A16207' }}>
           Sacred Theme with Base Indentation (30px base + 15px per level)
         </h3>
         <div

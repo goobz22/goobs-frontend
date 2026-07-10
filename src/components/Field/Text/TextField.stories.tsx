@@ -112,6 +112,7 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -155,6 +156,7 @@ export const CustomColors: Story = {
       }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -218,6 +220,7 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -260,6 +263,7 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -295,6 +299,7 @@ export const WithAdornments: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -356,6 +361,7 @@ export const LabelsAndPlaceholders: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -385,6 +391,7 @@ export const CustomTransitions: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -425,8 +432,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark-themed fields sit on a dark surface so
+          their labels/placeholders are judged against the surface they are
+          designed for (the showcase canvas is light). */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <TextFieldWithState
@@ -456,8 +471,15 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — gold-on-near-black design language needs its
+          near-black surface. */}
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <TextFieldWithState
@@ -490,20 +512,32 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <TextFieldWithState
-            label="Neon Style"
-            placeholder="Futuristic"
-            styles={{
-              theme: 'dark',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              borderColor: 'rgba(147, 51, 234, 0.5)',
-              borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
-              borderRadius: '20px',
-              borderWidth: '2px',
+          {/* Neon is a dark-surface design — host it on a dark card, and use
+              the brighter purple-400 so text/label clear 4.5:1 on it
+              (#c084fc on #111827 = 6.71, on the near-black field = 7.89;
+              the old rgba(147,51,234,…) sat at 2.5-3.6). */}
+          <div
+            style={{
+              background: '#111827',
+              padding: '1rem',
+              borderRadius: '8px',
             }}
-          />
+          >
+            <TextFieldWithState
+              label="Neon Style"
+              placeholder="Futuristic"
+              styles={{
+                theme: 'dark',
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                borderColor: 'rgba(147, 51, 234, 0.5)',
+                borderFocusedColor: 'rgba(147, 51, 234, 1)',
+                textColor: 'rgba(192, 132, 252, 1)',
+                labelColor: 'rgba(192, 132, 252, 1)',
+                borderRadius: '20px',
+                borderWidth: '2px',
+              }}
+            />
+          </div>
           <TextFieldWithState
             label="Soft Rounded"
             placeholder="Gentle appearance"
@@ -543,22 +577,43 @@ export const ComprehensiveShowcase: Story = {
             placeholder="This field is required"
             styles={{ theme: 'light', required: true }}
           />
-          <TextFieldWithState
-            label="Required Dark"
-            placeholder="Enter value"
-            error="This field is required"
-            styles={{ theme: 'dark', required: true }}
-          />
-          <TextFieldWithState
-            label="Custom Required"
-            placeholder="Ancient text"
-            styles={{
-              theme: 'sacred',
-              required: true,
-              requiredIndicatorText: ' (required)',
-              requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          {/* Dark/sacred required demos sit on their own themed surfaces —
+              the error-red label and gold label are designed against dark. */}
+          <div
+            style={{
+              background: '#111827',
+              padding: '1rem',
+              borderRadius: '8px',
             }}
-          />
+          >
+            <TextFieldWithState
+              label="Required Dark"
+              placeholder="Enter value"
+              error="This field is required"
+              styles={{ theme: 'dark', required: true }}
+            />
+          </div>
+          <div
+            style={{
+              background: '#0e0e0e',
+              padding: '1rem',
+              borderRadius: '8px',
+            }}
+          >
+            <TextFieldWithState
+              label="Custom Required"
+              placeholder="Ancient text"
+              styles={{
+                theme: 'sacred',
+                required: true,
+                requiredIndicatorText: ' (required)',
+                // The supported CSS-var passthrough — a `requiredIndicatorColor`
+                // key is not part of FieldStyleOverrides and was silently
+                // ignored (the indicator rendered the default danger red).
+                '--field-required-indicator': 'rgba(255, 215, 0, 1)',
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -575,19 +630,30 @@ export const ComprehensiveShowcase: Story = {
 
 export const DisabledStates: Story = {
   render: () => (
+    // Mixed-theme story on the sacred canvas: the light/dark variants get
+    // their own themed surfaces so labels are judged against the background
+    // they are designed for; the sacred variant sits on the canvas itself.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <TextFieldWithState
-        label="Disabled Light"
-        initialValue="Cannot be edited"
-        disabled
-        styles={{ theme: 'light' }}
-      />
-      <TextFieldWithState
-        label="Disabled Dark"
-        initialValue="Cannot be edited"
-        disabled
-        styles={{ theme: 'dark' }}
-      />
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <TextFieldWithState
+          label="Disabled Light"
+          initialValue="Cannot be edited"
+          disabled
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <TextFieldWithState
+          label="Disabled Dark"
+          initialValue="Cannot be edited"
+          disabled
+          styles={{ theme: 'dark' }}
+        />
+      </div>
       <TextFieldWithState
         label="Disabled Sacred"
         initialValue="Sealed knowledge"
@@ -604,25 +670,42 @@ export const DisabledStates: Story = {
 
 export const RequiredFields: Story = {
   render: () => (
+    // Mixed-theme story on the sacred canvas: light/dark variants sit on
+    // their own themed surfaces; the sacred variant uses the canvas itself.
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <TextFieldWithState
-        label="Required Field"
-        placeholder="This field is required"
-        styles={{ theme: 'light', required: true }}
-      />
-      <TextFieldWithState
-        label="Required Email"
-        placeholder="Enter your email"
-        error="This field is required"
-        styles={{ theme: 'light', required: true }}
-      />
-      <TextFieldWithState
-        label="Required Password"
-        placeholder="Create a password"
-        type="password"
-        endAdornment={<LockIcon />}
-        styles={{ theme: 'dark', required: true }}
-      />
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <TextFieldWithState
+          label="Required Field"
+          placeholder="This field is required"
+          styles={{ theme: 'light', required: true }}
+        />
+        <TextFieldWithState
+          label="Required Email"
+          placeholder="Enter your email"
+          error="This field is required"
+          styles={{ theme: 'light', required: true }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <TextFieldWithState
+          label="Required Password"
+          placeholder="Create a password"
+          type="password"
+          endAdornment={<LockIcon />}
+          styles={{ theme: 'dark', required: true }}
+        />
+      </div>
       <TextFieldWithState
         label="Custom Required Indicator"
         placeholder="Enter ancient knowledge"
@@ -630,7 +713,9 @@ export const RequiredFields: Story = {
           theme: 'sacred',
           required: true,
           requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          // Supported CSS-var passthrough — `requiredIndicatorColor` is not a
+          // FieldStyleOverrides key and was silently ignored.
+          '--field-required-indicator': 'rgba(255, 215, 0, 1)',
         }}
       />
     </div>
@@ -701,7 +786,9 @@ const RequiredValidationDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // primary-600 — white text clears 4.5:1 (5.17); the old #3B82F6
+          // sat at 3.67.
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -723,6 +810,9 @@ const RequiredValidationDemo = () => {
 export const RequiredValidation: Story = {
   name: 'Required Validation Demo',
   render: () => <RequiredValidationDemo />,
+  // The demo is light-themed (light fields, black heading, white button
+  // text) — pin the light canvas instead of inheriting sacred #0e0e0e.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 const SharedRequiredSystemDemo = () => {
@@ -825,7 +915,8 @@ const SharedRequiredSystemDemo = () => {
           }}
         >
           Country
-          <span style={{ color: 'rgba(239, 68, 68, 1)' }}> *</span>
+          {/* danger-600 — 4.83 on white; rgba(239,68,68) was 3.76 */}
+          <span style={{ color: 'rgba(220, 38, 38, 1)' }}> *</span>
         </label>
         <select
           value={country}
@@ -859,7 +950,8 @@ const SharedRequiredSystemDemo = () => {
           <div
             style={{
               fontSize: '12px',
-              color: 'rgba(239, 68, 68, 1)',
+              // danger-600 — 4.83 on white; rgba(239,68,68) was 3.76
+              color: 'rgba(220, 38, 38, 1)',
               marginTop: '8px',
             }}
           >
@@ -872,7 +964,9 @@ const SharedRequiredSystemDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // primary-600 — white text clears 4.5:1 (5.17); the old #3B82F6
+          // sat at 3.67.
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -915,6 +1009,9 @@ export const SharedRequiredSystem: Story = {
   parameters: {
     layout: 'centered',
   },
+  // Light-themed demo (dark headings, light fields, white select) — pin the
+  // light canvas instead of inheriting sacred #0e0e0e.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -929,6 +1026,7 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByPlaceholderText('Type here for testing...')
@@ -981,6 +1079,7 @@ export const TopLevelRequiredProp: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 

@@ -89,7 +89,10 @@ const SignOffForm: React.FC = () => {
         id="signoff-form"
         onSubmit={values => setSubmitted(values)}
       >
-        <Form.AutoFields only={['signerName']} />
+        {/* theme="light" threads the surrounding surface's theme into the
+            auto-emitted TextField — without it, FieldShell defaults to sacred
+            (gold label #ffdf33, unreadable on this story's white canvas). */}
+        <Form.AutoFields only={['signerName']} theme="light" />
         <SignatureField
           name="signatureImage"
           label="Signature"

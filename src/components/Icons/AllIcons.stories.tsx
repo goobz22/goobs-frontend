@@ -168,7 +168,9 @@ const IconShowcase: React.FC = () => {
                     style={{
                       marginBottom: '8px',
                       fontSize: '12px',
-                      color: '#d4af37',
+                      // Dark antique gold: keeps the sacred-gold identity while
+                      // passing WCAG on the white card (4.90:1 vs 2.10:1 for #d4af37).
+                      color: '#8a6d1a',
                       fontWeight: '500',
                     }}
                   >
@@ -245,6 +247,10 @@ const IconShowcase: React.FC = () => {
 
 export const AllIconsShowcase: Story = {
   render: () => <IconShowcase />,
+  // The showcase is a light-themed sheet (#f8f9fa page, white cards, dark
+  // headings) — pin the light canvas so it doesn't inherit the sacred #0e0e0e
+  // default around the padded layout.
+  globals: { backgrounds: { value: 'light' } },
   parameters: {
     docs: {
       description: {

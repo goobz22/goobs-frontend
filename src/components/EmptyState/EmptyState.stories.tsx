@@ -44,7 +44,7 @@ export const Light: Story = {
     icon: '🗂️',
     title: 'No categories yet',
     description: 'Create your first category to organize products.',
-    actions: <CustomButton text="New category" />,
+    actions: <CustomButton text="New category" styles={{ theme: 'light' }} />,
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },

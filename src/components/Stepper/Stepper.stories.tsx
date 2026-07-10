@@ -5,7 +5,12 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import { expect, userEvent, within } from 'storybook/test'
 import Stepper, { StepperProps } from './index'
 
-// Mock Dialog Component
+// Mock Dialog Component.
+// NOTE: these demo mocks previously styled themselves with Tailwind utility
+// classes, but this Storybook loads no Tailwind — none of them applied, so
+// the dark dialogs rendered UA-default black text directly on the stories'
+// dark page backgrounds (axe: #000000 on #111827 at 1.18:1). Everything is
+// now plain inline CSS with WCAG-verified colors (ratios noted per pair).
 const Dialog: React.FC<{
   isOpen: boolean
   onClose: () => void
@@ -15,51 +20,104 @@ const Dialog: React.FC<{
 }> = ({ isOpen, onClose, title, children, theme = 'light' }) => {
   if (!isOpen) return null
 
-  const themeStyles = {
+  const themeStyles: Record<
+    'light' | 'dark' | 'sacred',
+    {
+      overlay: React.CSSProperties
+      dialog: React.CSSProperties
+      header: React.CSSProperties
+      title: React.CSSProperties
+      close: React.CSSProperties
+    }
+  > = {
     light: {
-      overlay: 'fixed inset-0 bg-black/50 backdrop-blur-sm',
-      dialog:
-        'fixed inset-4 max-w-4xl mx-auto my-8 bg-white rounded-xl shadow-2xl',
-      header: 'px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl',
-      title: 'text-xl font-semibold text-gray-900',
-      content: 'p-6 max-h-[70vh] overflow-y-auto',
+      overlay: { background: 'rgba(0, 0, 0, 0.5)' },
+      dialog: { background: '#ffffff' },
+      header: { background: '#f9fafb', borderBottom: '1px solid #e5e7eb' },
+      title: { color: '#111827' }, // 16.98:1 on #f9fafb
+      close: { color: '#374151' }, // 9.86:1 on #f9fafb
     },
     dark: {
-      overlay: 'fixed inset-0 bg-black/70 backdrop-blur-sm',
-      dialog:
-        'fixed inset-4 max-w-4xl mx-auto my-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700',
-      header: 'px-6 py-4 border-b border-gray-700 bg-gray-900 rounded-t-xl',
-      title: 'text-xl font-semibold text-gray-100',
-      content: 'p-6 max-h-[70vh] overflow-y-auto',
+      overlay: { background: 'rgba(0, 0, 0, 0.7)' },
+      dialog: { background: '#1f2937', border: '1px solid #374151' },
+      header: { background: '#111827', borderBottom: '1px solid #374151' },
+      title: { color: '#f3f4f6' }, // 16.12:1 on #111827
+      close: { color: '#d1d5db' }, // 12.04:1 on #111827
     },
     sacred: {
-      overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm',
-      dialog:
-        'fixed inset-4 max-w-4xl mx-auto my-8 bg-black/95 rounded-xl shadow-2xl border-2 border-yellow-400/30',
-      header:
-        'px-6 py-4 border-b border-yellow-400/30 bg-black/80 rounded-t-xl',
-      title: 'text-xl font-semibold text-yellow-400 font-serif',
-      content: 'p-6 max-h-[70vh] overflow-y-auto',
+      overlay: { background: 'rgba(0, 0, 0, 0.8)' },
+      dialog: {
+        background: '#0a0a0a',
+        border: '2px solid rgba(255, 215, 0, 0.3)',
+      },
+      header: {
+        background: '#0e0e0e',
+        borderBottom: '1px solid rgba(255, 215, 0, 0.3)',
+      },
+      title: { color: '#ffd700', fontFamily: 'Georgia, serif' }, // 13.76:1 on #0e0e0e
+      close: { color: '#ffd700' },
     },
   }
 
   const styles = themeStyles[theme]
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.dialog} onClick={e => e.stopPropagation()}>
-        <div className={styles.header}>
-          <div className="flex items-center justify-between">
-            <h2 className={styles.title}>{title}</h2>
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 50, ...styles.overlay }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          position: 'fixed',
+          inset: '16px',
+          maxWidth: '56rem',
+          height: 'fit-content',
+          margin: '32px auto',
+          borderRadius: '12px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          ...styles.dialog,
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div
+          style={{
+            padding: '16px 24px',
+            borderTopLeftRadius: '12px',
+            borderTopRightRadius: '12px',
+            ...styles.header,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <h2 style={{ fontSize: '20px', fontWeight: 600, ...styles.title }}>
+              {title}
+            </h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              aria-label="Close"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '8px',
+                fontSize: '20px',
+                lineHeight: 1,
+                cursor: 'pointer',
+                borderRadius: '8px',
+                ...styles.close,
+              }}
             >
               ×
             </button>
           </div>
         </div>
-        <div className={styles.content}>{children}</div>
+        <div style={{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }}>
+          {children}
+        </div>
       </div>
     </div>
   )
@@ -71,15 +129,26 @@ const FormField: React.FC<{
   children: React.ReactNode
   theme?: 'light' | 'dark' | 'sacred'
 }> = ({ label, children, theme = 'light' }) => {
-  const labelStyles = {
-    light: 'block text-sm font-medium text-gray-700 mb-2',
-    dark: 'block text-sm font-medium text-gray-300 mb-2',
-    sacred: 'block text-sm font-medium text-yellow-400 mb-2 font-serif',
-  }
+  const labelStyles: Record<'light' | 'dark' | 'sacred', React.CSSProperties> =
+    {
+      light: { color: '#374151' }, // 9.33:1+ on the light card surfaces
+      dark: { color: '#d1d5db' }, // 7.99:1+ on the dark card surfaces
+      sacred: { color: '#ffd700', fontFamily: 'Georgia, serif' },
+    }
 
   return (
-    <div className="mb-4">
-      <label className={labelStyles[theme]}>{label}</label>
+    <div style={{ marginBottom: '16px' }}>
+      <label
+        style={{
+          display: 'block',
+          fontSize: '14px',
+          fontWeight: 500,
+          marginBottom: '8px',
+          ...labelStyles[theme],
+        }}
+      >
+        {label}
+      </label>
       {children}
     </div>
   )
@@ -90,19 +159,28 @@ const Input: React.FC<{
   type?: string
   theme?: 'light' | 'dark' | 'sacred'
 }> = ({ placeholder, type = 'text', theme = 'light' }) => {
-  const inputStyles = {
-    light:
-      'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-    dark: 'w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-    sacred:
-      'w-full px-3 py-2 border border-yellow-400/30 bg-black/50 text-yellow-100 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent',
+  // The field surface stays white in every theme (only the border tints):
+  // inline styles can't reach ::placeholder, and the UA-default placeholder
+  // gray (#757575) passes 4.5:1 only on a white background.
+  const inputBorders: Record<'light' | 'dark' | 'sacred', string> = {
+    light: '1px solid #d1d5db',
+    dark: '1px solid #4b5563',
+    sacred: '1px solid rgba(255, 215, 0, 0.4)',
   }
 
   return (
     <input
       type={type}
       placeholder={placeholder}
-      className={inputStyles[theme]}
+      style={{
+        width: '100%',
+        padding: '8px 12px',
+        border: inputBorders[theme],
+        borderRadius: '8px',
+        background: '#ffffff',
+        color: '#111827',
+        boxSizing: 'border-box',
+      }}
     />
   )
 }
@@ -120,28 +198,39 @@ const Button: React.FC<{
   onClick,
   disabled,
 }) => {
-  const baseStyles =
-    'px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-
-  const variantStyles = {
+  const variantStyles: Record<
+    'light' | 'dark' | 'sacred',
+    Record<'primary' | 'secondary', React.CSSProperties>
+  > = {
     light: {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700',
-      secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+      primary: { background: '#2563eb', color: '#ffffff' }, // 5.17:1
+      secondary: { background: '#e5e7eb', color: '#111827' }, // 14.33:1
     },
     dark: {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700',
-      secondary: 'bg-gray-600 text-gray-100 hover:bg-gray-500',
+      primary: { background: '#2563eb', color: '#ffffff' }, // 5.17:1
+      secondary: { background: '#4b5563', color: '#f3f4f6' }, // 6.87:1
     },
     sacred: {
-      primary: 'bg-yellow-600 text-black hover:bg-yellow-500',
-      secondary:
-        'bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30 border border-yellow-400/30',
+      primary: { background: '#ca8a04', color: '#000000' }, // 7.15:1
+      secondary: {
+        background: 'rgba(250, 204, 21, 0.15)',
+        color: '#facc15', // 10.63:1 over the near-black sacred surfaces
+        border: '1px solid rgba(250, 204, 21, 0.3)',
+      },
     },
   }
 
   return (
     <button
-      className={`${baseStyles} ${variantStyles[theme][variant]}`}
+      style={{
+        padding: '8px 16px',
+        borderRadius: '8px',
+        fontWeight: 500,
+        border: 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        ...variantStyles[theme][variant],
+      }}
       onClick={onClick}
       disabled={disabled}
     >

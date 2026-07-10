@@ -283,6 +283,12 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                             onDelete: () => handleToggle(selectedValue),
                           })}
                       styles={{
+                        // Forward the field's theme so chips follow the
+                        // light/dark palettes instead of always rendering
+                        // the sacred default (gold text on translucent
+                        // black — which composites to #999999 over a light
+                        // trigger surface, a 2.03 contrast ratio).
+                        ...(styles?.theme ? { theme: styles.theme } : {}),
                         padding: '6px 12px',
                         height: 'auto',
                         fontSize: '14px',

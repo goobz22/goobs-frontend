@@ -20,6 +20,12 @@
   padding: 8px 60px 8px 16px;
   font-size: 16px;
   box-sizing: border-box;
+
+  /* Inputs don't inherit color from the UA stylesheet, and this input is
+     not wrapped in FieldShell's .inputSlot reset — without an explicit
+     color it renders UA black on dark/sacred surfaces. --field-text is the
+     shell's per-theme text token, inherited from the .shell wrapper. */
+  color: var(--field-text);
 }
 
 .buttonContainer {

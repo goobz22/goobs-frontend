@@ -1,38 +1,21 @@
 /* ==========================================================================
    TEXT FIELD COMPONENT - CSS MODULE
    Prevents FOUC by using CSS instead of JavaScript for styling
-   Sacred theme is the default (hardcoded), light/dark are overrides
+   Sacred theme is the default (hardcoded), light/dark are overrides.
+
+   Label, helper text, and the required indicator are rendered (and themed)
+   by FieldShell — see FieldShell.module.css. This module styles only what
+   TextField renders itself: the input frame, the input/textarea, and the
+   adornments.
+
+   Theme overrides are scoped to the FieldShell wrapper, which carries
+   `data-component="FieldShell"` + `data-theme`. (Historically they were
+   scoped under a local `.container` class that no element received after
+   the FieldShell refactor, so every override below was dead and TextField
+   rendered its sacred frame under every theme — the source of the
+   ComprehensiveShowcase "Soft Rounded" #feffff-on-#f9fafb contrast
+   violation.)
    ========================================================================== */
-
-/* --------------------------------------------------------------------------
-   Container
-   -------------------------------------------------------------------------- */
-
-.container {
-  position: relative;
-  width: 100%;
-  height: auto;
-  margin-top: 0;
-  margin-bottom: 16px;
-}
-
-/* --------------------------------------------------------------------------
-   Label - Sacred Theme Default
-   -------------------------------------------------------------------------- */
-
-.label {
-  display: block;
-  margin-bottom: 8px;
-  color: #ffd700;
-  font-size: 14px;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.05em;
-}
-
-.requiredIndicator {
-  color: #ffd700;
-  margin-left: 4px;
-}
 
 /* --------------------------------------------------------------------------
    Input Wrapper - Sacred Theme Default
@@ -140,124 +123,81 @@
 }
 
 /* --------------------------------------------------------------------------
-   Helper Text
-   -------------------------------------------------------------------------- */
-
-.helperText {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  font-family: 'Crimson Text', serif;
-}
-
-.helperText.error {
-  color: #ff6b6b;
-}
-
-/* --------------------------------------------------------------------------
    Light Theme Override
    -------------------------------------------------------------------------- */
 
-.container[data-theme='light'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+[data-component='FieldShell'][data-theme='light'] .inputWrapper {
+  background-color: var(--goobs-light-surface);
+  border-color: var(--goobs-light-border);
 }
 
-.container[data-theme='light'] .inputWrapper {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-}
-
-.container[data-theme='light'] .inputWrapper.focused {
+[data-component='FieldShell'][data-theme='light'] .inputWrapper.focused {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
-.container[data-theme='light'] .inputWrapper.disabled {
+[data-component='FieldShell'][data-theme='light'] .inputWrapper.disabled {
   background-color: #f3f4f6;
 }
 
-.container[data-theme='light'] .input,
-.container[data-theme='light'] .textarea {
+[data-component='FieldShell'][data-theme='light'] .input,
+[data-component='FieldShell'][data-theme='light'] .textarea {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #374151;
+  color: var(--goobs-light-text-secondary);
 }
 
-.container[data-theme='light'] .input::placeholder,
-.container[data-theme='light'] .textarea::placeholder {
-  color: #9ca3af;
+[data-component='FieldShell'][data-theme='light'] .input::placeholder,
+[data-component='FieldShell'][data-theme='light'] .textarea::placeholder {
+  color: var(--goobs-light-text-muted);
 }
 
-.container[data-theme='light'] .input:disabled,
-.container[data-theme='light'] .textarea:disabled {
-  color: #9ca3af;
+[data-component='FieldShell'][data-theme='light'] .input:disabled,
+[data-component='FieldShell'][data-theme='light'] .textarea:disabled {
+  color: var(--goobs-light-text-disabled);
 }
 
-.container[data-theme='light'] .adornment {
+[data-component='FieldShell'][data-theme='light'] .adornment {
   color: #6b7280;
-}
-
-.container[data-theme='light'] .helperText {
-  color: #6b7280;
-}
-
-.container[data-theme='light'] .requiredIndicator {
-  color: #ef4444;
 }
 
 /* --------------------------------------------------------------------------
    Dark Theme Override
    -------------------------------------------------------------------------- */
 
-.container[data-theme='dark'] .label {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+[data-component='FieldShell'][data-theme='dark'] .inputWrapper {
+  background-color: var(--goobs-dark-surface);
+  border-color: var(--goobs-dark-border);
 }
 
-.container[data-theme='dark'] .inputWrapper {
-  background-color: #1e293b;
-  border-color: #334155;
-}
-
-.container[data-theme='dark'] .inputWrapper.focused {
+[data-component='FieldShell'][data-theme='dark'] .inputWrapper.focused {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
 
-.container[data-theme='dark'] .inputWrapper.disabled {
+[data-component='FieldShell'][data-theme='dark'] .inputWrapper.disabled {
   background-color: #0f172a;
 }
 
-.container[data-theme='dark'] .input,
-.container[data-theme='dark'] .textarea {
+[data-component='FieldShell'][data-theme='dark'] .input,
+[data-component='FieldShell'][data-theme='dark'] .textarea {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #e2e8f0;
+  color: var(--goobs-dark-text);
 }
 
-.container[data-theme='dark'] .input::placeholder,
-.container[data-theme='dark'] .textarea::placeholder {
+[data-component='FieldShell'][data-theme='dark'] .input::placeholder,
+[data-component='FieldShell'][data-theme='dark'] .textarea::placeholder {
+  color: var(--goobs-dark-text-muted);
+}
+
+[data-component='FieldShell'][data-theme='dark'] .input:disabled,
+[data-component='FieldShell'][data-theme='dark'] .textarea:disabled {
   color: #64748b;
 }
 
-.container[data-theme='dark'] .input:disabled,
-.container[data-theme='dark'] .textarea:disabled {
-  color: #64748b;
-}
-
-.container[data-theme='dark'] .adornment {
-  color: #94a3b8;
-}
-
-.container[data-theme='dark'] .helperText {
-  color: #94a3b8;
-}
-
-.container[data-theme='dark'] .requiredIndicator {
-  color: #ef4444;
+[data-component='FieldShell'][data-theme='dark'] .adornment {
+  color: var(--goobs-dark-text-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -265,15 +205,6 @@
    -------------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  .container {
-    margin-bottom: 12px;
-  }
-
-  .label {
-    font-size: 12px;
-    margin-bottom: 6px;
-  }
-
   .inputWrapper {
     min-height: 36px;
   }
@@ -298,9 +229,5 @@
 
   .adornmentEnd {
     right: 12px;
-  }
-
-  .helperText {
-    font-size: 11px;
   }
 }

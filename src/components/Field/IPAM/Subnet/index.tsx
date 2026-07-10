@@ -618,7 +618,14 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         {...(shellError !== undefined ? { error: shellError } : {})}
         {...(styles !== undefined ? { styles } : {})}
       />
-      <div className={cssStyles.subnetInfo}>
+      {/* The readout sits outside FieldShell, so mirror the shell's theme
+          resolution (styles.theme, sacred default) for the module's
+          [data-theme] color overrides — otherwise it renders page-default
+          black on dark/sacred surfaces. */}
+      <div
+        className={cssStyles.subnetInfo}
+        data-theme={styles?.theme ?? 'sacred'}
+      >
         <div>Subnet CIDR: /{mask}</div>
         <div>
           Total Hosts: {subnetInfo.hosts} ({subnetInfo.usableHosts} usable)

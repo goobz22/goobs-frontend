@@ -240,7 +240,12 @@ export const ComprehensiveShowcase: Story = {
         padding: '1rem',
       }}
     >
-      <div>
+      {/* Mixed-theme showcase on the light canvas: the dark and sacred blocks
+          each get their own themed wrapper surface so their translucent /
+          dark-designed controls and labels are measured against the backdrop
+          they are designed for (sacred's control bg is rgba(0,0,0,0.4) — on a
+          white canvas it composites to a failing mid-gray). */}
+      <div style={{ padding: '1rem' }}>
         <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
         <SelectWithState theme="light" initialValue="b">
           <MenuItem value="a" styles={{ theme: 'light' }}>
@@ -258,7 +263,14 @@ export const ComprehensiveShowcase: Story = {
         </SelectWithState>
       </div>
 
-      <div>
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        {/* #9CA3AF on #111827 = 6.99:1 */}
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <SelectWithState theme="dark" initialValue="b">
           <MenuItem value="a" styles={{ theme: 'dark' }}>
@@ -276,7 +288,16 @@ export const ComprehensiveShowcase: Story = {
         </SelectWithState>
       </div>
 
-      <div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        {/* #FFD700 on #0e0e0e = 13.76:1; the sacred control bg rgba(0,0,0,0.4)
+            composites over #0e0e0e to #080808, its rgba(255,255,255,0.9) text
+            to #e6e6e6 = 16.05:1 */}
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <SelectWithState theme="sacred" initialValue="b">
           <MenuItem value="a" styles={{ theme: 'sacred' }}>

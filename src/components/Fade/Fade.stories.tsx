@@ -128,7 +128,21 @@ export const Themes: Story = {
               timeout: 500,
             }}
           >
-            <Paper styles={{ theme: currentTheme, padding: '25px' }}>
+            {/* Paper renders its default WHITE surface for any non-sacred
+                theme, so the dark state must supply a dark surface or the
+                dark Typography (#e2e8f0) fails contrast on white. */}
+            <Paper
+              styles={{
+                theme: currentTheme,
+                padding: '25px',
+                ...(currentTheme === 'dark'
+                  ? {
+                      backgroundColor: 'var(--goobs-dark-surface)',
+                      borderColor: 'var(--goobs-dark-border)',
+                    }
+                  : {}),
+              }}
+            >
               <Typography styles={{ variant: 'merrih5', theme: currentTheme }}>
                 {currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}{' '}
                 Theme
@@ -161,7 +175,17 @@ export const DarkTheme: Story = {
         </CustomButton>
         <div style={{ marginTop: '20px', height: '200px' }}>
           <Fade styles={{ in: isVisible, theme: 'dark', timeout: 400 }}>
-            <Paper styles={{ theme: 'dark', padding: '20px' }}>
+            {/* Paper's contract renders the default WHITE surface for any
+                non-sacred theme — override to a real dark surface so the
+                dark Typography (#e2e8f0, 11.87:1 on #1e293b) passes. */}
+            <Paper
+              styles={{
+                theme: 'dark',
+                padding: '20px',
+                backgroundColor: 'var(--goobs-dark-surface)',
+                borderColor: 'var(--goobs-dark-border)',
+              }}
+            >
               <Typography styles={{ variant: 'merrih6', theme: 'dark' }}>
                 Dark Theme Fade
               </Typography>
@@ -261,4 +285,7 @@ export const CustomTiming: Story = {
       </div>
     )
   },
+  // Light-themed demo (raw black-text <label>, light Paper/Button) — pin the
+  // light canvas so the label isn't black-on-#0e0e0e under the sacred default.
+  globals: { backgrounds: { value: 'light' } },
 }

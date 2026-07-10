@@ -319,6 +319,10 @@ export const EnhancedFeatures: Story = {
       </div>
     </div>
   ),
+  // Every section renders theme:'light' content with no wrapper surface —
+  // pin the light canvas so h4s/labels aren't judged against the sacred
+  // #0e0e0e default. (h4 #000 on #fff = 21.0; label #374151 on #fff = 10.31)
+  globals: { backgrounds: { value: 'light' } },
   parameters: {
     docs: {
       description: {
@@ -591,8 +595,17 @@ export const ThemeComparison: Story = {
         width: '400px',
       }}
     >
-      <div>
-        <h4>Light Theme</h4>
+      {/* Mixed-theme story: each block carries its own themed surface, so the
+          light block gets a light wrapper instead of sitting on the sacred
+          canvas. (h4 #1f2937 on #f8f9fa = 13.93; label #374151 = 9.78) */}
+      <div
+        style={{
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+        }}
+      >
+        <h4 style={{ color: '#1f2937', margin: '0 0 10px 0' }}>Light Theme</h4>
         <ProgressBar
           value={60}
           showLabel

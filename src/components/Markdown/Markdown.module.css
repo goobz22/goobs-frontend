@@ -44,3 +44,16 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+/* --------------------------------------------------------------------------
+   LINKS
+   mdToHtml emits bare <a href> tags, which pick up the UA-default link blue
+   (#0000ee) — unreadable on dark/sacred surfaces (contrast ~2:1). This
+   component is deliberately theme-less: it inherits the surrounding surface's
+   text color, so links inherit it too and keep the underline as the
+   non-color affordance that distinguishes them from body text.
+   -------------------------------------------------------------------------- */
+.root a {
+  color: inherit;
+  text-decoration: underline;
+}

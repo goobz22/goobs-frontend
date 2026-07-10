@@ -30,6 +30,7 @@ export const Light: Story = {
     items: sampleItems,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Dark: Story = {

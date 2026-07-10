@@ -351,8 +351,7 @@ export const ComprehensiveShowcase: Story = {
           <SearchBarWithState
             label="Required Search"
             placeholder="Required field"
-            required
-            styles={{ theme: 'light' }}
+            styles={{ theme: 'light', required: true }}
           />
         </div>
       </div>

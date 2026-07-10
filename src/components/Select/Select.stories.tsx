@@ -126,6 +126,10 @@ export const Variants: Story = {
       </SelectWithState>
     </div>
   ),
+  // All three selects are light-themed; the translucent light `filled`
+  // variant needs the light canvas (it composites to near-black on the
+  // default sacred canvas, hiding its dark text).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -262,6 +266,10 @@ export const CustomColors: Story = {
 // --------------------------------------------------------------------------
 
 export const ComprehensiveShowcase: Story = {
+  // Mixed-theme story: each column sits on its OWN theme surface (light
+  // canvas + dark #111827 / sacred #0e0e0e wrapper blocks) so the
+  // translucent dark/sacred controls and their labels keep WCAG contrast
+  // instead of compositing against the white canvas.
   render: () => (
     <div
       style={{
@@ -271,7 +279,9 @@ export const ComprehensiveShowcase: Story = {
         padding: '1rem',
       }}
     >
-      <div>
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#374151' }}>Light Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SelectWithState styles={{ theme: 'light' }} displayEmpty>
@@ -289,7 +299,9 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SelectWithState styles={{ theme: 'dark' }} displayEmpty>
@@ -307,7 +319,9 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      <div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SelectWithState styles={{ theme: 'sacred' }} displayEmpty>

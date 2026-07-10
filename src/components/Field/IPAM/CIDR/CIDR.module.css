@@ -21,6 +21,12 @@
     var(--goobs-space-md);
   font-size: var(--goobs-text-xl);
   box-sizing: border-box;
+
+  /* Inputs don't inherit color from the UA stylesheet, and this input is
+     not wrapped in FieldShell's .inputSlot reset — without an explicit
+     color it renders UA black on dark/sacred surfaces. --field-text is the
+     shell's per-theme text token, inherited from the .shell wrapper. */
+  color: var(--field-text);
 }
 
 .buttonContainer {
@@ -57,8 +63,21 @@
   opacity: 0.5;
 }
 
-/* Subnet-info readout rendered below the field. */
+/* Subnet-info readout rendered below the field. It sits OUTSIDE the
+   FieldShell wrapper (sibling), so it never sees the shell's data-theme
+   tokens — the TSX mirrors the shell's theme resolution (styles.theme,
+   sacred default) onto this element's data-theme. Sacred is the hardcoded
+   default; light/dark are overrides (house pattern). */
 .subnetInfo {
   margin-top: var(--goobs-space-xs);
   font-size: var(--goobs-text-md);
+  color: var(--goobs-sacred-text-secondary);
+}
+
+.subnetInfo[data-theme='light'] {
+  color: var(--goobs-light-text-secondary);
+}
+
+.subnetInfo[data-theme='dark'] {
+  color: var(--goobs-dark-text-secondary);
 }

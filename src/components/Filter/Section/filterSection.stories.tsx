@@ -296,9 +296,7 @@ const FilterSectionDemo = ({
 export const Default: Story = {
   name: 'Default',
   render: () => <FilterSectionDemo />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -309,31 +307,40 @@ export const Default: Story = {
 export const LightTheme: Story = {
   name: 'Themes/Light',
   render: () => <FilterSectionDemo theme="light" />,
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
  * "Dark" showcase. FilterSection has no `theme: 'dark'` value — its theme prop
  * accepts only `'light' | 'sacred'` — so this renders the light surface on a
  * dark Storybook backdrop rather than passing an unsupported theme value.
+ * The light theme is designed for light surfaces (dark text / blue chips), so
+ * on the dark canvas the demo sits inside a solid white card — the way a
+ * light-themed filter row actually appears inside a dark app shell. Rendering
+ * the transparent light row directly on #111827 would put dark text on a dark
+ * canvas (a real WCAG failure, not a component bug).
  */
 export const DarkBackdrop: Story = {
   name: 'Themes/Dark Backdrop',
-  render: () => <FilterSectionDemo theme="light" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  render: () => (
+    <div
+      style={{
+        background: '#ffffff',
+        padding: '1.25rem',
+        borderRadius: '12px',
+      }}
+    >
+      <FilterSectionDemo theme="light" />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
 }
 
-/** Sacred theme (gold accented surface — best viewed on a dark backdrop). */
+/** Sacred theme (gold accented surface — designed for the near-black canvas). */
 export const SacredTheme: Story = {
   name: 'Themes/Sacred',
   render: () => <FilterSectionDemo theme="sacred" />,
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -351,9 +358,7 @@ export const SearchOnly: Story = {
       withChips={false}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** The full kitchen-sink row: search + create button, simple + searchable
@@ -368,9 +373,7 @@ export const AllControls: Story = {
       title="Course Filters"
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Wrapped in the collapsible accordion shell, expanded on first paint (the
@@ -385,9 +388,7 @@ export const CollapsibleOpen: Story = {
       title="Course Filters"
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /** Collapsible shell that starts collapsed — only the toggle header renders
@@ -402,9 +403,7 @@ export const CollapsibleClosed: Story = {
       title="Course Filters"
     />
   ),
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -420,9 +419,7 @@ export const SurfaceVariant: Story = {
   render: () => (
     <FilterSectionDemo theme="sacred" surface withButtons={false} />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 /**
@@ -440,7 +437,5 @@ export const BelowSearchSlot: Story = {
       withButtons={false}
     />
   ),
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
+  globals: { backgrounds: { value: 'sacred' } },
 }

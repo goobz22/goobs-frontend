@@ -39,7 +39,8 @@ const basicOptions: RadioOption[] = [
 const coloredOptions: RadioOption[] = [
   { label: 'Red Option', color: '#dc2626' },
   { label: 'Blue Option', color: '#2563eb' },
-  { label: 'Green Option', color: '#16a34a' },
+  // green-700 — #16a34a is only 3.30:1 on the white canvas (needs 4.5)
+  { label: 'Green Option', color: '#15803d' },
   { label: 'Purple Option', color: '#9333ea' },
 ]
 
@@ -78,6 +79,7 @@ export const Light: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const LightWithLabelText: Story = {
@@ -91,6 +93,7 @@ export const LightWithLabelText: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const LightWithColoredOptions: Story = {
@@ -104,6 +107,7 @@ export const LightWithColoredOptions: Story = {
       theme: 'light',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const LightCustomSize: Story = {
@@ -120,6 +124,7 @@ export const LightCustomSize: Story = {
       padding: '0.75rem 0',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -266,13 +271,16 @@ export const CustomBrandColors: Story = {
     defaultValue: 'Option 2',
     styles: {
       theme: 'light',
-      labelColor: '#059669',
+      // emerald-700 label — #059669 is only 3.77:1 on the white canvas
+      // (needs 4.5); the controls keep the brighter #059669 brand emerald
+      labelColor: '#047857',
       radioOuterBorderColor: '#059669',
       radioInnerColor: '#059669',
       radioHoverBorderColor: '#047857',
       textColor: '#065f46',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomSizing: Story = {
@@ -291,6 +299,7 @@ export const CustomSizing: Story = {
       marginBottom: '1rem',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomFonts: Story = {
@@ -308,6 +317,7 @@ export const CustomFonts: Story = {
       labelFontSize: '1.125rem',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -355,6 +365,7 @@ const InteractiveDemoComponent: React.FC = () => {
 export const InteractiveDemo: Story = {
   name: 'Interactive/State Management',
   render: () => <InteractiveDemoComponent />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const MultipleGroups: Story = {
@@ -391,6 +402,7 @@ export const MultipleGroups: Story = {
       </div>
     )
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -447,7 +459,17 @@ const FormIntegrationComponent: React.FC = () => {
         />
       </div>
 
-      <div style={{ marginBottom: '30px' }}>
+      {/* Dark-themed group rendered on its own dark surface so the dark
+          palette (#e2e8f0 / #cbd5e1 text) stays compliant on the story's
+          light canvas (14.39:1 / 11.95:1 on #111827). */}
+      <div
+        style={{
+          marginBottom: '30px',
+          padding: '15px',
+          backgroundColor: '#111827',
+          borderRadius: '8px',
+        }}
+      >
         <RadioGroup
           name="theme"
           labelText="Choose your theme:"
@@ -478,6 +500,7 @@ const FormIntegrationComponent: React.FC = () => {
 export const FormIntegration: Story = {
   name: 'Interactive/Form Integration',
   render: () => <FormIntegrationComponent />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -493,6 +516,7 @@ export const InteractionTest: Story = {
     defaultValue: 'Option 1',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 

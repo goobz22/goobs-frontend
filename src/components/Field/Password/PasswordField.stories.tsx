@@ -8,6 +8,17 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import { userEvent, within, expect } from 'storybook/test'
 import PasswordField from './index'
 
+// Themed demo surfaces for mixed-theme stories. The Password input has a
+// transparent background, so its theme text color composites directly against
+// whatever is behind it — each themed block must render on the canvas color of
+// its own theme (sacred #0e0e0e / light #ffffff / dark #111827) to hold WCAG
+// contrast.
+const demoSurface: Record<'light' | 'dark' | 'sacred', React.CSSProperties> = {
+  light: { backgroundColor: '#ffffff', padding: '1rem', borderRadius: '8px' },
+  dark: { backgroundColor: '#111827', padding: '1rem', borderRadius: '8px' },
+  sacred: { backgroundColor: '#0e0e0e', padding: '1rem', borderRadius: '8px' },
+}
+
 // Wrapper component for state management
 const PasswordFieldWithState = ({ initialValue = '', ...props }) => {
   const [value, setValue] = useState(initialValue)
@@ -63,6 +74,7 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -106,6 +118,7 @@ export const CustomColors: Story = {
       }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -169,6 +182,7 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -211,6 +225,7 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -220,29 +235,35 @@ export const CustomTypography: Story = {
 export const ErrorStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PasswordFieldWithState
-        label="Password"
-        initialValue="weak"
-        error="Password is too weak. Must be at least 8 characters."
-        styles={{ theme: 'light' }}
-      />
-      <PasswordFieldWithState
-        label="Confirm Password"
-        placeholder="Confirm your password"
-        error="Passwords do not match."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          footerTextErrorColor: 'rgba(255, 99, 71, 1)',
-        }}
-      />
-      <PasswordFieldWithState
-        label="Sacred Key"
-        initialValue="forbidden"
-        error="The sacred key is corrupted."
-        styles={{ theme: 'sacred' }}
-      />
+      <div style={demoSurface.light}>
+        <PasswordFieldWithState
+          label="Password"
+          initialValue="weak"
+          error="Password is too weak. Must be at least 8 characters."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div style={demoSurface.dark}>
+        <PasswordFieldWithState
+          label="Confirm Password"
+          placeholder="Confirm your password"
+          error="Passwords do not match."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            footerTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
+      <div style={demoSurface.sacred}>
+        <PasswordFieldWithState
+          label="Sacred Key"
+          initialValue="forbidden"
+          error="The sacred key is corrupted."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }
@@ -254,35 +275,43 @@ export const ErrorStates: Story = {
 export const RequiredFields: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PasswordFieldWithState
-        label="Required Password"
-        placeholder="Enter your password"
-        required
-        styles={{ theme: 'light' }}
-      />
-      <PasswordFieldWithState
-        label="Current Password"
-        placeholder="Enter current password"
-        required
-        error="This field is required"
-        styles={{ theme: 'light' }}
-      />
-      <PasswordFieldWithState
-        label="New Password"
-        placeholder="Enter new password"
-        required
-        styles={{ theme: 'dark' }}
-      />
-      <PasswordFieldWithState
-        label="Custom Required Password"
-        placeholder="Enter sacred password"
-        required
-        styles={{
-          theme: 'sacred',
-          requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
-        }}
-      />
+      <div style={demoSurface.light}>
+        <PasswordFieldWithState
+          label="Required Password"
+          placeholder="Enter your password"
+          required
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div style={demoSurface.light}>
+        <PasswordFieldWithState
+          label="Current Password"
+          placeholder="Enter current password"
+          required
+          error="This field is required"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div style={demoSurface.dark}>
+        <PasswordFieldWithState
+          label="New Password"
+          placeholder="Enter new password"
+          required
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div style={demoSurface.sacred}>
+        <PasswordFieldWithState
+          label="Custom Required Password"
+          placeholder="Enter sacred password"
+          required
+          styles={{
+            theme: 'sacred',
+            requiredIndicatorText: ' (required)',
+            requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          }}
+        />
+      </div>
     </div>
   ),
 }
@@ -325,8 +354,10 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — rendered on its own dark surface so the
+          transparent inputs and dark-theme text composite against the
+          background they were designed for */}
+      <div style={demoSurface.dark}>
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PasswordFieldWithState
@@ -356,8 +387,9 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — gold-on-near-black by design; needs the
+          sacred canvas color behind it */}
+      <div style={demoSurface.sacred}>
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PasswordFieldWithState
@@ -389,20 +421,26 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <PasswordFieldWithState
-            label="Neon Style"
-            placeholder="Enter password"
-            styles={{
-              theme: 'dark',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              borderColor: 'rgba(147, 51, 234, 0.5)',
-              borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
-              borderRadius: '20px',
-              borderWidth: '2px',
-            }}
-          />
+          {/* Dark-themed neon field: sits on its own dark surface, and the
+              neon purple is purple-400 (#c084fc) — 6.71:1 on #111827 and
+              7.90:1 on the near-black input (deep purple 147,51,234 only
+              reaches ~2.5:1 on dark) */}
+          <div style={demoSurface.dark}>
+            <PasswordFieldWithState
+              label="Neon Style"
+              placeholder="Enter password"
+              styles={{
+                theme: 'dark',
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                borderColor: 'rgba(147, 51, 234, 0.5)',
+                borderFocusedColor: 'rgba(147, 51, 234, 1)',
+                textColor: 'rgba(192, 132, 252, 1)',
+                labelColor: 'rgba(192, 132, 252, 1)',
+                borderRadius: '20px',
+                borderWidth: '2px',
+              }}
+            />
+          </div>
           <PasswordFieldWithState
             label="Soft Rounded"
             placeholder="Enter password"
@@ -445,24 +483,30 @@ export const ComprehensiveShowcase: Story = {
 export const DisabledStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PasswordFieldWithState
-        label="Disabled Light"
-        initialValue="cannot-edit"
-        disabled
-        styles={{ theme: 'light' }}
-      />
-      <PasswordFieldWithState
-        label="Disabled Dark"
-        initialValue="locked-password"
-        disabled
-        styles={{ theme: 'dark' }}
-      />
-      <PasswordFieldWithState
-        label="Disabled Sacred"
-        initialValue="sealed-key"
-        disabled
-        styles={{ theme: 'sacred' }}
-      />
+      <div style={demoSurface.light}>
+        <PasswordFieldWithState
+          label="Disabled Light"
+          initialValue="cannot-edit"
+          disabled
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div style={demoSurface.dark}>
+        <PasswordFieldWithState
+          label="Disabled Dark"
+          initialValue="locked-password"
+          disabled
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div style={demoSurface.sacred}>
+        <PasswordFieldWithState
+          label="Disabled Sacred"
+          initialValue="sealed-key"
+          disabled
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }
@@ -560,7 +604,8 @@ const PasswordValidationDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // blue-600: white text reaches 5.17:1 (blue-500 #3B82F6 was 3.67:1)
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -575,6 +620,7 @@ const PasswordValidationDemo = () => {
 
 export const ValidationDemo: Story = {
   render: () => <PasswordValidationDemo />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------

@@ -49,6 +49,7 @@ export const Default: Story = {
     title: 'Scan to set up MFA',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -83,6 +84,7 @@ export const PlainUrl: Story = {
     title: 'thothos.com',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const HighErrorCorrection: Story = {
@@ -93,6 +95,7 @@ export const HighErrorCorrection: Story = {
     title: 'High redundancy (level H)',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -123,6 +126,7 @@ export const CustomFrame: Story = {
       size: 240,
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -153,6 +157,7 @@ export const NoValue: Story = {
   args: {
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -167,6 +172,7 @@ export const SuccessState: Story = {
     successMessage: 'Verification Successful',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const SuccessStateSacred: Story = {
@@ -202,4 +208,5 @@ export const WithConfirmationInput: Story = {
       />
     )
   },
+  globals: { backgrounds: { value: 'light' } },
 }

@@ -56,9 +56,13 @@ const PopoverContent = ({ theme }: { theme?: string }) => (
       elements.
     </p>
     <div style={{ display: 'flex', gap: '8px' }}>
-      <Button styles={{ theme: theme || 'light', fontSize: '0.875rem' }}>
-        Action
-      </Button>
+      {/* Button renders its label from the `text` prop — JSX children are
+          dropped by the component, so children-based labels render an
+          EMPTY button (no accessible name). */}
+      <Button
+        text="Action"
+        styles={{ theme: theme || 'light', fontSize: '0.875rem' }}
+      />
     </div>
   </div>
 )
@@ -82,11 +86,10 @@ const InteractivePopover = ({
     <div style={{ padding: '100px' }}>
       <Button
         ref={anchorRefCallback}
+        text="Toggle Popover"
         styles={{ theme: styles.theme || 'light' }}
         onClick={() => setOpen(!open)}
-      >
-        Toggle Popover
-      </Button>
+      />
       <Popover
         open={open}
         onClose={() => setOpen(false)}
@@ -110,6 +113,7 @@ export const Light: Story = {
       <PopoverContent theme="light" />
     </InteractivePopover>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const LightWithCustomContent: Story = {
@@ -150,13 +154,15 @@ export const LightWithCustomContent: Story = {
           </div>
         </div>
         <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px' }}>
-          <Button styles={{ theme: 'light', width: '100%' }}>
-            View Profile
-          </Button>
+          <Button
+            text="View Profile"
+            styles={{ theme: 'light', width: '100%' }}
+          />
         </div>
       </div>
     </InteractivePopover>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const LightCustomSize: Story = {
@@ -200,6 +206,7 @@ export const LightCustomSize: Story = {
       </div>
     </InteractivePopover>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -297,9 +304,10 @@ export const DarkWithContent: Story = {
             )
           )}
         </div>
-        <Button styles={{ theme: 'dark', width: '100%' }}>
-          Activate Power
-        </Button>
+        <Button
+          text="Activate Power"
+          styles={{ theme: 'dark', width: '100%' }}
+        />
       </div>
     </InteractivePopover>
   ),
@@ -358,7 +366,10 @@ export const CustomColors: Story = {
             margin: '0 0 8px 0',
             fontSize: '1rem',
             fontWeight: 'bold',
-            color: '#dc2626',
+            // #b91c1c (not #dc2626): 16px bold is below the WCAG large-text
+            // threshold, and #dc2626 on the pink surface is 4.45 (< 4.5).
+            // #b91c1c reads the same warning red at 5.96.
+            color: '#b91c1c',
           }}
         >
           Warning
@@ -373,17 +384,17 @@ export const CustomColors: Story = {
           This popover uses custom colors to indicate a warning state.
         </p>
         <Button
+          text="Acknowledge"
           styles={{
             theme: 'light',
             backgroundColor: '#dc2626',
             color: 'white',
           }}
-        >
-          Acknowledge
-        </Button>
+        />
       </div>
     </InteractivePopover>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -418,6 +429,7 @@ export const CustomPosition: Story = {
       </div>
     </InteractivePopover>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -437,12 +449,11 @@ const InteractionTestComponent: React.FC = () => {
     <div style={{ padding: '100px' }}>
       <Button
         ref={anchorRefCallback}
+        text="Toggle Test Popover"
         styles={{ theme: 'light' }}
         onClick={() => setOpen(!open)}
         data-testid="toggle-popover"
-      >
-        Toggle Test Popover
-      </Button>
+      />
       <Popover
         open={open}
         onClose={() => setOpen(false)}
@@ -455,12 +466,11 @@ const InteractionTestComponent: React.FC = () => {
             This popover can be closed by clicking outside or pressing Escape.
           </p>
           <Button
+            text="Close Popover"
             styles={{ theme: 'light' }}
             onClick={() => setOpen(false)}
             data-testid="close-popover"
-          >
-            Close Popover
-          </Button>
+          />
         </div>
       </Popover>
     </div>
@@ -470,22 +480,26 @@ const InteractionTestComponent: React.FC = () => {
 export const InteractionTest: Story = {
   name: 'Interaction and A11y Test',
   render: () => <InteractionTestComponent />,
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // Test opening popover
+    // Test opening popover — the trigger lives inside the canvas...
     const toggleButton = canvas.getByTestId('toggle-popover')
     await userEvent.click(toggleButton)
 
-    // Check popover is visible
-    const popoverTitle = canvas.getByTestId('popover-title')
+    // ...but the popover PORTALS to document.body, outside the canvas
+    // element, so its content must be queried against the whole document
+    // (same pattern as the Themes/Sacred play).
+    const body = within(canvasElement.ownerDocument.body)
+    const popoverTitle = await body.findByTestId('popover-title')
     await expect(popoverTitle).toBeVisible()
 
-    // Test closing popover
-    const closeButton = canvas.getByTestId('close-popover')
+    // Test closing popover — the close button is portalled too
+    const closeButton = body.getByTestId('close-popover')
     await userEvent.click(closeButton)
 
-    // Check popover is closed
+    // Check popover is closed (unmounted — detached nodes are not visible)
     await expect(popoverTitle).not.toBeVisible()
   },
 }

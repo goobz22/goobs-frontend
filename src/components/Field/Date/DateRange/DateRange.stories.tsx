@@ -71,6 +71,9 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content — pin the light canvas so the light-theme label
+  // color is measured (and seen) on the surface it is designed for.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -92,7 +95,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -110,10 +113,15 @@ export const CustomColors: Story = {
         borderColor: 'rgba(255, 165, 0, 0.4)',
         borderFocusedColor: 'rgba(255, 165, 0, 1)',
         textColor: 'rgba(139, 69, 19, 1)',
-        labelColor: 'rgba(139, 69, 19, 0.7)',
+        // Full-opacity saddle-brown: the 0.7-alpha variant blends to
+        // #ae7d5a on white (3.57:1 < 4.5). Solid #8b4513 is 7.10:1.
+        labelColor: 'rgba(139, 69, 19, 1)',
       }}
     />
   ),
+  // Light-themed demo — pin the light canvas (it previously inherited the
+  // sacred #0e0e0e canvas, where the brown label measured 1.91:1).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -127,7 +135,9 @@ export const NeonStyle: Story = {
         borderColor: 'rgba(255, 0, 255, 0.5)',
         borderFocusedColor: 'rgba(255, 0, 255, 1)',
         textColor: 'rgba(255, 0, 255, 1)',
-        labelColor: 'rgba(255, 0, 255, 0.7)',
+        // Full-opacity magenta: 0.7 alpha blends to #b807be on the dark
+        // canvas (3.22:1 < 4.5). Solid #ff00ff is 5.66:1 on #111827.
+        labelColor: 'rgba(255, 0, 255, 1)',
         borderRadius: '12px',
         borderWidth: '2px',
       }}
@@ -177,6 +187,8 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  // All three demos are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -219,38 +231,67 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  // All three demos are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
 // ERROR STATES
 // --------------------------------------------------------------------------
 
+// Mixed-theme story: each block sits on its own theme-matched surface so
+// every field is rendered (and contrast-measured) against the background it
+// is designed for, instead of all three inheriting one canvas.
 export const ErrorStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <DateRangeWithState
-        startLabel="Start Date"
-        endLabel="End Date"
-        error="Please select a valid date range."
-        styles={{ theme: 'light' }}
-      />
-      <DateRangeWithState
-        startLabel="From Date"
-        endLabel="To Date"
-        error="End date cannot be before start date."
-        styles={{
-          theme: 'dark',
-          borderErrorColor: 'rgba(255, 99, 71, 1)',
-          labelErrorColor: 'rgba(255, 99, 71, 1)',
-          helperTextErrorColor: 'rgba(255, 99, 71, 1)',
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
         }}
-      />
-      <DateRangeWithState
-        startLabel="Era Beginning"
-        endLabel="Era End"
-        error="The sacred timeline is misaligned."
-        styles={{ theme: 'sacred' }}
-      />
+      >
+        <DateRangeWithState
+          startLabel="Start Date"
+          endLabel="End Date"
+          error="Please select a valid date range."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <DateRangeWithState
+          startLabel="From Date"
+          endLabel="To Date"
+          error="End date cannot be before start date."
+          styles={{
+            theme: 'dark',
+            borderErrorColor: 'rgba(255, 99, 71, 1)',
+            labelErrorColor: 'rgba(255, 99, 71, 1)',
+            helperTextErrorColor: 'rgba(255, 99, 71, 1)',
+          }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <DateRangeWithState
+          startLabel="Era Beginning"
+          endLabel="Era End"
+          error="The sacred timeline is misaligned."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
     </div>
   ),
 }
@@ -259,35 +300,63 @@ export const ErrorStates: Story = {
 // REQUIRED FIELDS
 // --------------------------------------------------------------------------
 
+// Mixed-theme story: per-block theme-matched surfaces (see ErrorStates).
 export const RequiredFields: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <DateRangeWithState
-        startLabel="Required Start"
-        endLabel="Required End"
-        styles={{ theme: 'light', required: true }}
-      />
-      <DateRangeWithState
-        startLabel="Project Start"
-        endLabel="Project End"
-        error="Both dates are required"
-        styles={{ theme: 'light', required: true }}
-      />
-      <DateRangeWithState
-        startLabel="Planning Start"
-        endLabel="Planning End"
-        styles={{ theme: 'dark', required: true }}
-      />
-      <DateRangeWithState
-        startLabel="Custom Required Start"
-        endLabel="Custom Required End"
-        styles={{
-          theme: 'sacred',
-          required: true,
-          requiredIndicatorText: ' (required)',
-          '--field-required-indicator': 'rgba(255, 215, 0, 1)',
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
         }}
-      />
+      >
+        <DateRangeWithState
+          startLabel="Required Start"
+          endLabel="Required End"
+          styles={{ theme: 'light', required: true }}
+        />
+        <DateRangeWithState
+          startLabel="Project Start"
+          endLabel="Project End"
+          error="Both dates are required"
+          styles={{ theme: 'light', required: true }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <DateRangeWithState
+          startLabel="Planning Start"
+          endLabel="Planning End"
+          styles={{ theme: 'dark', required: true }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <DateRangeWithState
+          startLabel="Custom Required Start"
+          endLabel="Custom Required End"
+          styles={{
+            theme: 'sacred',
+            required: true,
+            requiredIndicatorText: ' (required)',
+            '--field-required-indicator': 'rgba(255, 215, 0, 1)',
+          }}
+        />
+      </div>
     </div>
   ),
 }
@@ -329,8 +398,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark-themed fields sit on a dark surface so
+          they are shown (and contrast-measured) on the background they are
+          designed for; #9CA3AF on #111827 is 6.99:1. */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <DateRangeWithState
@@ -360,8 +437,17 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — sacred fields use a translucent near-black
+          control bg (rgba(0,0,0,0.4)) and gold labels, which only work on a
+          near-black surface; on the white canvas they measured #999999 with
+          1.3–2.6:1 text. Gold #FFD700 on #0e0e0e is 13.76:1. */}
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <DateRangeWithState
@@ -393,20 +479,32 @@ export const ComprehensiveShowcase: Story = {
           Custom Styling
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <DateRangeWithState
-            startLabel="Neon Start"
-            endLabel="Neon End"
-            styles={{
-              theme: 'dark',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              borderColor: 'rgba(147, 51, 234, 0.5)',
-              borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
-              borderRadius: '20px',
-              borderWidth: '2px',
+          {/* Dark-themed neon demo on a dark surface. Label/text use the
+              lighter neon purple #c084fc: 6.71:1 on #111827 and 7.90:1 on
+              the near-black input bg (solid #9333ea only reaches 3.3:1 on
+              dark surfaces). */}
+          <div
+            style={{
+              background: '#111827',
+              padding: '1rem',
+              borderRadius: '8px',
             }}
-          />
+          >
+            <DateRangeWithState
+              startLabel="Neon Start"
+              endLabel="Neon End"
+              styles={{
+                theme: 'dark',
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                borderColor: 'rgba(147, 51, 234, 0.5)',
+                borderFocusedColor: 'rgba(147, 51, 234, 1)',
+                textColor: 'rgba(192, 132, 252, 1)',
+                labelColor: 'rgba(192, 132, 252, 1)',
+                borderRadius: '20px',
+                borderWidth: '2px',
+              }}
+            />
+          </div>
           <DateRangeWithState
             startLabel="Soft Start"
             endLabel="Soft End"
@@ -535,7 +633,8 @@ const DateRangeValidationDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // blue-600: white-on-#2563EB is 5.17:1 (white-on-#3B82F6 was 3.67:1)
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -555,6 +654,9 @@ const DateRangeValidationDemo = () => {
 
 export const ValidationDemo: Story = {
   render: () => <DateRangeValidationDemo />,
+  // Light-themed demo (default-color heading/copy + theme:'light' field) —
+  // pin the light canvas it is designed for.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -569,6 +671,8 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 

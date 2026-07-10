@@ -56,7 +56,8 @@ export interface MetricsAccordionProps {
    */
   dataField?: string
   /** Style configuration. `theme: 'sacred'` switches to the dark/gold
-   *  palette via a CSS-module class; `color` overrides the accent. */
+   *  palette, `'dark'` to the dark-slate shell (any other value renders the
+   *  light shell) via CSS-module blocks; `color` overrides the accent. */
   styles?: {
     theme?: string
     color?: string

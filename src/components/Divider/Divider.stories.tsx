@@ -44,6 +44,7 @@ export const LightTheme: Story = {
   args: {
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -57,7 +58,7 @@ export const SacredTheme: Story = {
   args: {
     styles: { theme: 'sacred' },
   },
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +71,7 @@ export const WithText: Story = {
     children: 'OR',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const WithoutText: Story = {
@@ -77,6 +79,7 @@ export const WithoutText: Story = {
   args: {
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // ---------------------------------------------------------------------------
@@ -94,10 +97,13 @@ export const DisabledStates: Story = {
         width: '480px',
       }}
     >
-      <div>
-        <span>Section A</span>
+      {/* Mixed-theme showcase on the sacred canvas: each block carries its own
+          themed surface so its labels stay readable (light block would otherwise
+          inherit near-black text on the near-black canvas). */}
+      <div style={{ background: '#ffffff', padding: '0.5rem' }}>
+        <span style={{ color: '#1f2937' }}>Section A</span>
         <Divider styles={{ theme: 'light', disabled: true }} />
-        <span>Section B</span>
+        <span style={{ color: '#1f2937' }}>Section B</span>
       </div>
       <div style={{ background: '#0f172a', padding: '0.5rem' }}>
         <span style={{ color: '#cbd5e1' }}>Section A</span>
@@ -119,6 +125,9 @@ export const DisabledStates: Story = {
 
 export const VerticalOrientation: Story = {
   name: 'Orientation/Vertical',
+  // Light-themed demo content (default near-black text, light border) —
+  // pin the light canvas so it doesn't inherit the sacred #0e0e0e default.
+  globals: { backgrounds: { value: 'light' } },
   render: () => (
     <div
       style={{
@@ -156,10 +165,14 @@ export const CustomColors: Story = {
       margin: '24px 0',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const SpacingExamples: Story = {
   name: 'Styling/Spacing Examples',
+  // Light-themed demo content (default near-black text) — pin the light
+  // canvas so it doesn't inherit the sacred #0e0e0e default.
+  globals: { backgrounds: { value: 'light' } },
   render: () => (
     <div style={{ width: '480px' }}>
       <div>

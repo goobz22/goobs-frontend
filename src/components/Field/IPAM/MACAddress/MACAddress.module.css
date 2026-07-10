@@ -14,4 +14,14 @@
   padding: var(--goobs-space-xs) var(--goobs-space-md);
   font-size: var(--goobs-text-xl);
   box-sizing: border-box;
+
+  /* The input renders directly under .shell (not inside the shell's
+     .inputSlot, whose :where(input) reset supplies color:inherit), so
+     without this the text color fell back to the UA default #000000 —
+     invisible on the dark (#0f172a) and sacred (#1c1917) themes
+     (contrast 1.17:1 / 1.2:1). --field-text is the FieldShell per-theme
+     token (light #1f2937, dark #e2e8f0, sacred rgba(255,255,255,.9));
+     all three resolve to >=14:1 on their theme surfaces. Same pattern
+     as the sibling IPAM CIDR/Subnet inputs. */
+  color: var(--field-text);
 }

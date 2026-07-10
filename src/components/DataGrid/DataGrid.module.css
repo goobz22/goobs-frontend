@@ -519,7 +519,10 @@
   --mr-bg: var(--goobs-sacred-surface);
   --mr-border: var(--goobs-gold-a30);
   --mr-text: var(--goobs-gold);
-  --mr-text-muted: var(--goobs-gold-a50);
+  /* a60 not a50: a50 gold blends to ~#857105 on the sacred surface — 4.11:1,
+     under the 4.5:1 WCAG floor for this 12px label. a60 blends to ~#9d8504
+     (5.46:1) while keeping the muted-vs-selected gold hierarchy. */
+  --mr-text-muted: var(--goobs-gold-a60);
   --mr-icon: var(--goobs-gold);
   --mr-button-hover-bg: var(--goobs-gold-a12);
   --mr-delete-icon: var(--goobs-gold);

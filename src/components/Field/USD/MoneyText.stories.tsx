@@ -10,6 +10,21 @@ import MoneyText from './MoneyText'
 const meta: Meta<typeof MoneyText> = {
   title: 'Components/Field/MoneyText',
   component: MoneyText,
+  decorators: [
+    /**
+     * MoneyText's neutral tone is `color: inherit` by design — it drops into
+     * running text and takes the surrounding surface's color. On the sacred
+     * canvas a real consumer's running text is light, so the stories provide
+     * that inherited context (Storybook's bare canvas otherwise inherits the
+     * default black body color → 1.08:1 on #0e0e0e). Tone/negative/empty
+     * variants set their own colors and are unaffected.
+     */
+    StoryComponent => (
+      <div style={{ color: 'var(--goobs-sacred-text)' }}>
+        <StoryComponent />
+      </div>
+    ),
+  ],
   argTypes: {
     value: { control: 'text' },
     currency: { control: 'text' },

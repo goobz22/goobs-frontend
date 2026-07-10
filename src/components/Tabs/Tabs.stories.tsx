@@ -57,9 +57,14 @@ type Story = StoryObj<typeof Tabs>
  */
 export const LightTheme: Story = {
   render: args => (
-    <div style={{ background: '#1f2937' }}>
+    // Light-theme tabs are designed for light surfaces (#374151 labels,
+    // #1d4ed8 active over a translucent blue wash) — the wrapper and canvas
+    // must be light or every label fails contrast. Verified: #374151 on
+    // #ffffff = 10.31, #1d4ed8 on the blue-a15 wash over #ffffff (#e2ecfe)
+    // = 5.64, #1f2937 on #ffffff = 14.68 (all >= 4.5).
+    <div style={{ background: '#ffffff' }}>
       <Tabs {...args} />
-      <div style={{ padding: '32px', color: '#ffffff' }}>
+      <div style={{ padding: '32px', color: '#1f2937' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 700 }}>Page Content</h1>
         <p>A static light-theme tab strip rendered above page content.</p>
       </div>
@@ -73,6 +78,7 @@ export const LightTheme: Story = {
       height: '60px',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -144,6 +150,12 @@ const InteractiveDemoRenderer = () => {
   const [alignment, setAlignment] = React.useState<
     'left' | 'center' | 'right' | 'justify'
   >('left')
+  // <Tabs> is a CONTROLLED component — `activeTab` (default 0) never moves on
+  // its own; clicks only fire onChange/tab.onClick (see index.tsx
+  // handleTabClick). Without this state the play assertion that clicking
+  // "Settings" flips aria-selected can never pass. Same wiring as
+  // WithPanelsRenderer / ChipAppearanceRenderer below.
+  const [activeTab, setActiveTab] = React.useState(0)
 
   const wrapperBackground =
     theme === 'sacred' ? '#000000' : theme === 'dark' ? '#1f2937' : '#f3f4f6'
@@ -208,6 +220,8 @@ const InteractiveDemoRenderer = () => {
 
       <Tabs
         items={mixedTriggerTabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
         alignment={alignment}
         styles={{
           theme,

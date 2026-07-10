@@ -73,6 +73,7 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -112,10 +113,13 @@ export const CustomColors: Story = {
         borderColor: 'rgba(99, 102, 241, 0.4)',
         borderFocusedColor: 'rgba(99, 102, 241, 1)',
         textColor: 'rgba(67, 56, 202, 1)',
-        labelColor: 'rgba(67, 56, 202, 0.7)',
+        // Full-opacity indigo: at 0.7 alpha the label composited to
+        // #7b74da on white (3.92:1); #4338ca is 7.90:1.
+        labelColor: 'rgba(67, 56, 202, 1)',
       }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -129,7 +133,10 @@ export const NeonStyle: Story = {
         borderColor: 'rgba(168, 85, 247, 0.5)',
         borderFocusedColor: 'rgba(168, 85, 247, 1)',
         textColor: 'rgba(168, 85, 247, 1)',
-        labelColor: 'rgba(168, 85, 247, 0.7)',
+        // Lighter neon purple for the label, which sits on the #111827
+        // canvas: 0.7-alpha #a855f7 composited to 2.82:1 and even full
+        // opacity only reaches 4.48:1; #c084fc is 6.71:1.
+        labelColor: 'rgba(192, 132, 252, 1)',
         borderRadius: '12px',
         borderWidth: '2px',
       }}
@@ -179,6 +186,7 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -221,6 +229,7 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -264,19 +273,32 @@ export const ErrorStates: Story = {
 export const RequiredFields: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PercentageFieldWithState
-        label="Required Percentage"
-        placeholder="Enter percentage"
-        required
-        styles={{ theme: 'light' }}
-      />
-      <PercentageFieldWithState
-        label="Completion Rate"
-        placeholder="Enter completion rate"
-        required
-        error="This field is required"
-        styles={{ theme: 'light' }}
-      />
+      {/* Mixed-theme story on the sacred canvas: light-themed fields sit on
+          their own light surface so their labels are read against white. */}
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <PercentageFieldWithState
+          label="Required Percentage"
+          placeholder="Enter percentage"
+          required
+          styles={{ theme: 'light' }}
+        />
+        <PercentageFieldWithState
+          label="Completion Rate"
+          placeholder="Enter completion rate"
+          required
+          error="This field is required"
+          styles={{ theme: 'light' }}
+        />
+      </div>
       <PercentageFieldWithState
         label="Progress Percentage"
         placeholder="Enter progress"
@@ -335,8 +357,11 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — on its own dark surface so dark-themed
+          labels/headings are read against #111827, not the light canvas */}
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PercentageFieldWithState
@@ -366,8 +391,12 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — gold-on-near-black is the sacred design
+          language; the near-black surface is what makes the gold headings,
+          labels, and translucent control backgrounds compliant */}
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <PercentageFieldWithState
@@ -407,8 +436,12 @@ export const ComprehensiveShowcase: Story = {
               backgroundColor: 'rgba(0, 0, 0, 0.95)',
               borderColor: 'rgba(147, 51, 234, 0.5)',
               borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
+              // Light neon purple on the near-black input (#9333ea was
+              // 3.61:1 there; #c084fc is 7.36:1)…
+              textColor: 'rgba(192, 132, 252, 1)',
+              // …and full-opacity deep purple for the label on the white
+              // canvas (0.8 alpha composited to 3.85:1; #9333ea is 5.38:1).
+              labelColor: 'rgba(147, 51, 234, 1)',
               borderRadius: '20px',
               borderWidth: '2px',
             }}
@@ -455,12 +488,18 @@ export const ComprehensiveShowcase: Story = {
 export const DisabledStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <PercentageFieldWithState
-        label="Disabled Light"
-        initialValue="75"
-        disabled
-        styles={{ theme: 'light' }}
-      />
+      {/* Mixed-theme story on the sacred canvas: the light-themed field
+          sits on its own light surface so its label reads against white. */}
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PercentageFieldWithState
+          label="Disabled Light"
+          initialValue="75"
+          disabled
+          styles={{ theme: 'light' }}
+        />
+      </div>
       <PercentageFieldWithState
         label="Disabled Dark"
         initialValue="50"
@@ -536,7 +575,8 @@ const PercentageValidationDemo = () => {
         onClick={handleSubmit}
         style={{
           padding: '12px 24px',
-          backgroundColor: '#3B82F6',
+          // Blue-600: white on #3B82F6 was 3.67:1; on #2563EB it is 5.17:1.
+          backgroundColor: '#2563EB',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
@@ -562,6 +602,7 @@ const PercentageValidationDemo = () => {
 
 export const ValidationDemo: Story = {
   render: () => <PercentageValidationDemo />,
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -576,6 +617,7 @@ export const InteractionTest: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByPlaceholderText('Enter percentage for testing')
@@ -589,7 +631,9 @@ export const InteractionTest: Story = {
     await userEvent.click(input)
     await userEvent.type(input, '75.5', { delay: 50 })
 
-    // Check value
-    await expect(input).toHaveValue('75.5')
+    // Check value. The displayed value carries the '%' suffix by design
+    // (showPercentSymbol defaults to true); the decimal must survive typing
+    // — the old keystroke reformatter turned '75.5' into '100%'.
+    await expect(input).toHaveValue('75.5%')
   },
 }

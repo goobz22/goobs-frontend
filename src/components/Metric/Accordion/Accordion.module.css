@@ -1,9 +1,9 @@
 /* ==========================================================================
    METRICS ACCORDION - CSS MODULE
    Theme via [data-theme] on the root. Sacred (dark + gold) is the hardcoded
-   base default; [data-theme='light'] is the explicit override block. The TSX
-   resolves the attribute to 'sacred' only when styles.theme === 'sacred',
-   otherwise 'light' (matching the prior two-branch isSacredTheme behaviour).
+   base default; [data-theme='light'] and [data-theme='dark'] are explicit
+   override blocks. The TSX emits 'sacred' | 'dark' verbatim and resolves
+   every other value (undefined / 'light' / unrecognised) to 'light'.
    Renders either a bare cards row (no shell) or a full collapsible accordion
    depending on props. The accent override rides in as the --ma-accent CSS var.
    ========================================================================== */
@@ -40,6 +40,23 @@
   /* In the light theme the dim-on-dark color isn't readable on a light
      panel — invert to a dim-on-light grey. */
   --ma-group-label-color: var(--goobs-light-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme — was previously MISSING, so theme:'dark' fell through to the
+   light block above: a translucent light shell + #1f2937 toggle text around
+   the dark-slate MetricCards (unreadable on a dark backdrop; contrast 1.32
+   in the components-metricsaccordion--dark-theme sweep). Remap to the dark
+   role tokens, mirroring MetricCard's [data-theme='dark'] block.
+   Verified: #e2e8f0 on #1e293b = 11.87, #94a3b8 on #1e293b = 5.71.
+   -------------------------------------------------------------------------- */
+.root[data-theme='dark'] {
+  --ma-accent: var(--goobs-dark-primary);
+  --ma-toggle-bg: var(--goobs-dark-control-bg);
+  --ma-toggle-color: var(--goobs-dark-text);
+  --ma-toggle-font: inherit;
+  --ma-panel-bg: var(--goobs-dark-surface);
+  --ma-group-label-color: var(--goobs-dark-text-muted);
 }
 
 /* --------------------------------------------------------------------------

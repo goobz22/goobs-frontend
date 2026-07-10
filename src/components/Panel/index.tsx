@@ -194,7 +194,11 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
     ref
   ) {
     const { titleId, variant } = usePanelContext()
-    const iconTheme = variant === 'sacred' ? 'sacred' : 'light'
+    // Fullscreen keeps the sacred dark chrome (`.fullscreen` in Panel.module.css
+    // inherits the sacred palette from `.root`), so only the `standard` variant
+    // gets light-theme text/icons — light text on the dark takeover fails WCAG
+    // contrast (#1f2937 on near-black is 1.43:1; sacred gold is 14.97:1).
+    const headerTheme = variant === 'standard' ? 'light' : 'sacred'
     return (
       <div
         ref={ref}
@@ -209,9 +213,9 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
             onClick={onBack}
             data-panel-back="true"
             data-action="cancel"
-            styles={{ theme: iconTheme }}
+            styles={{ theme: headerTheme }}
           >
-            <ArrowBackIcon styles={{ theme: iconTheme }} />
+            <ArrowBackIcon styles={{ theme: headerTheme }} />
           </IconButton>
         )}
         <div
@@ -223,12 +227,12 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
             <Typography
               text={title}
               variant="cinzelh5"
-              styles={{ theme: variant === 'sacred' ? 'sacred' : 'light' }}
+              styles={{ theme: headerTheme }}
             />
           ) : (
             <Typography
               variant="cinzelh5"
-              styles={{ theme: variant === 'sacred' ? 'sacred' : 'light' }}
+              styles={{ theme: headerTheme }}
             >
               {title}
             </Typography>

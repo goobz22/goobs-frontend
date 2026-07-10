@@ -65,7 +65,11 @@
   --accordion-border-color: var(--goobs-light-border);
   --accordion-summary-color: var(--goobs-light-text);
   --accordion-summary-active-bg: var(--goobs-info-bg);
-  --accordion-summary-active-color: var(--goobs-light-primary);
+  /* primary-strong, not primary: active text sits on the info-bg tint
+     (#e7f0fe over white) — plain --goobs-light-primary lands at ~4.50:1
+     (zero margin; the previously-published #3b82f6 was 3.20:1). The strong
+     shade gives 5.84:1. */
+  --accordion-summary-active-color: var(--goobs-light-primary-strong);
   --accordion-summary-hover-bg: var(--goobs-light-surface-raised);
   --accordion-summary-font-family: inherit;
   --accordion-icon-color: var(--goobs-light-text-muted);

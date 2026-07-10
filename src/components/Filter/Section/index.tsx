@@ -284,7 +284,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   // FilterSection that forwarded nothing used to render sacred-gold field
   // labels and gold chips on its light surface — a WCAG contrast failure
   // (gold-a80 on the light panel ≈ 1.66:1).
-  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
+  const theme: 'sacred' | 'light' =
+    propStyles?.theme === 'sacred' ? 'sacred' : 'light'
 
   // Only render the search/buttons row if any of those props were provided.
   const hasSearch = onSearchChange !== undefined

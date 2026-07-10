@@ -85,6 +85,7 @@ export const LightTheme: Story = {
   args: {
     grids: buildGrids('light'),
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -135,6 +136,7 @@ export const TypographyOnly: Story = {
       },
     ],
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -159,6 +161,7 @@ export const MultipleGrids: Story = {
       },
     ],
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 /**
@@ -183,8 +186,9 @@ export const CustomComponent: Story = {
               marginTop: '0.75rem',
               padding: '0.75rem 1rem',
               borderRadius: 8,
-              background: 'rgba(147, 51, 234, 0.12)',
-              color: 'rgba(147, 51, 234, 1)',
+              // purple-700 on its 12% tint over the light canvas = 5.71:1 (WCAG AA)
+              background: 'rgba(126, 34, 206, 0.12)',
+              color: 'rgba(126, 34, 206, 1)',
               fontFamily: 'sans-serif',
             }}
           >
@@ -194,4 +198,5 @@ export const CustomComponent: Story = {
       },
     ],
   },
+  globals: { backgrounds: { value: 'light' } },
 }

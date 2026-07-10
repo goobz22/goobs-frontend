@@ -208,6 +208,12 @@ const Stepper: React.FC<StepperProps> = ({
     return <div className={cssStyles.wizardContent}>{currentStep.content}</div>
   }
 
+  // The built-in Back/Continue/Finish/Start Over controls thread the
+  // Stepper's own theme into Button. Without it Button falls back to its
+  // sacred default (near-white text over a translucent-black control bg),
+  // which fails WCAG contrast when a light/dark-themed wizard sits on a
+  // light surface (rgba(255,255,255,0.9) over rgba(0,0,0,0.4) on white
+  // computes to #f5f5f5 on #999999 — 2.61:1).
   const renderWizardNavigation = () => {
     if (!isWizardMode) return null
 
@@ -223,7 +229,13 @@ const Stepper: React.FC<StepperProps> = ({
           </div>
           <div className={cssStyles.wizardCompletedActions}>
             {finalActions}
-            {onReset && <CustomButton text="Start Over" onClick={onReset} />}
+            {onReset && (
+              <CustomButton
+                text="Start Over"
+                onClick={onReset}
+                styles={{ theme }}
+              />
+            )}
           </div>
         </div>
       )
@@ -233,7 +245,7 @@ const Stepper: React.FC<StepperProps> = ({
       <div className={cssStyles.wizardNavigation}>
         <div>
           {!isFirstStep && onBack && (
-            <CustomButton text="← Back" onClick={onBack} />
+            <CustomButton text="← Back" onClick={onBack} styles={{ theme }} />
           )}
         </div>
 
@@ -247,6 +259,7 @@ const Stepper: React.FC<StepperProps> = ({
             <CustomButton
               text={isLastStep ? 'Finish' : 'Continue'}
               onClick={onNext}
+              styles={{ theme }}
             />
           )}
         </div>

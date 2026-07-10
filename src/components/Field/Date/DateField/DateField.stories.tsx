@@ -26,6 +26,7 @@ export const LightTheme: Story = {
     label: 'Select Date',
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
   decorators: [
     Story => (
       <div
@@ -43,6 +44,7 @@ export const DarkTheme: Story = {
     label: 'Select Date',
     styles: { theme: 'dark' },
   },
+  globals: { backgrounds: { value: 'dark' } },
   decorators: [
     Story => (
       <div
@@ -71,12 +73,17 @@ export const SacredTheme: Story = {
   ],
 }
 
+// The light-themed stories below pin the light canvas: without a pin they
+// inherit the sacred #0e0e0e default canvas, putting the light-theme muted
+// label on a near-black surface (axe: 3.99 < 4.5). On the light canvas the
+// label token passes (var(--goobs-light-text-muted) #4b5563 on #ffffff = 7.56).
 export const Disabled: Story = {
   render: args => <DateField {...args} />,
   args: {
     label: 'Disabled Date',
     styles: { theme: 'light', disabled: true },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const WithError: Story = {
@@ -85,6 +92,7 @@ export const WithError: Story = {
     label: 'Date with Error',
     styles: { theme: 'light', helperTextType: 'error' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Required: Story = {
@@ -93,6 +101,7 @@ export const Required: Story = {
     label: 'Required Date',
     styles: { theme: 'light', required: true },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const CustomStyled: Story = {
@@ -106,6 +115,20 @@ export const CustomStyled: Story = {
       borderRadius: '12px',
     },
   },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// Demo-chrome surface + text color that follow the selected theme, so the
+// story's own control labels stay WCAG-compliant on every theme. Verified
+// ratios: light #111827/#ffffff = 17.74, dark #f9fafb/#111827 = 16.98,
+// sacred #ffd700 (--goobs-gold) /#0e0e0e = 13.76 — all >= 4.5.
+const demoSurfaces: Record<
+  'light' | 'dark' | 'sacred',
+  { backgroundColor: string; color: string }
+> = {
+  light: { backgroundColor: '#ffffff', color: '#111827' },
+  dark: { backgroundColor: '#111827', color: '#f9fafb' },
+  sacred: { backgroundColor: '#0e0e0e', color: '#ffd700' },
 }
 
 const InteractiveComponent = () => {
@@ -115,7 +138,7 @@ const InteractiveComponent = () => {
   const [value, setValue] = React.useState<Date | null>(null)
 
   return (
-    <div style={{ width: '500px', padding: '2rem' }}>
+    <div style={{ width: '500px', padding: '2rem', ...demoSurfaces[theme] }}>
       <div style={{ marginBottom: '1rem' }}>
         <label>Theme: </label>
         <select
@@ -157,4 +180,7 @@ const InteractiveComponent = () => {
 
 export const InteractiveDemo: Story = {
   render: () => <InteractiveComponent />,
+  // Initial demo state is theme 'light'; pin the matching canvas (the demo
+  // wrapper above carries its own themed surface when the theme is switched).
+  globals: { backgrounds: { value: 'light' } },
 }

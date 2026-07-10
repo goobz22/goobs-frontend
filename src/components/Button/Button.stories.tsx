@@ -244,9 +244,14 @@ export const InteractionTest: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const enabledButton = canvas.getByText('Enabled')
-    const disabledButton = canvas.getByText('Disabled')
-    const clickMeButton = canvas.getByText('Click Me')
+    // Query the <button> elements by role, NOT getByText: getByText
+    // returns the label <span>, and jest-dom's toBeDisabled only ever
+    // passes on an element that can itself be disabled (form elements),
+    // so asserting on the span failed deterministically — and
+    // toBeEnabled on a span passes vacuously, asserting nothing.
+    const enabledButton = canvas.getByRole('button', { name: 'Enabled' })
+    const disabledButton = canvas.getByRole('button', { name: 'Disabled' })
+    const clickMeButton = canvas.getByRole('button', { name: 'Click Me' })
 
     // Test that the enabled button is interactive
     await userEvent.hover(enabledButton)
@@ -265,6 +270,12 @@ export const InteractionTest: Story = {
 
 export const LightThemeGroup: Story = {
   name: 'Group/Light Theme',
+  // Light-themed content on the light canvas: the light `.selected`
+  // background is a translucent blue tint (--goobs-blue-a08) that
+  // composites over the page canvas — over the default sacred #0e0e0e
+  // canvas it produced #121721 behind #374151 text (1.74:1); over the
+  // intended light canvas it composites to #eff5fe (9.41:1).
+  globals: { backgrounds: { value: 'light' } },
   render: () => {
     const Component = () => {
       const [value, setValue] = useState('send')

@@ -307,19 +307,33 @@ export const InteractiveDemo: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // Move Item A from the left list to the right list.
-    const itemToMove = await canvas.findByText('Item A')
-    const leftListElement = itemToMove.closest('ul')
-    await userEvent.click(itemToMove)
+    // The component renders each side as an h3 title + div-based list inside
+    // one column element (there is NO <ul> in the markup — a former version
+    // of this play anchored on closest('ul'), which was null on both sides
+    // and made the move assertion vacuously fail). Anchor on the column that
+    // owns each heading instead.
+    const leftColumn = canvas.getByRole('heading', {
+      name: 'Unassigned',
+    }).parentElement
+    const rightColumn = canvas.getByRole('heading', {
+      name: 'Assigned',
+    }).parentElement
 
+    // Item A starts in the Unassigned (left) column.
+    const itemToMove = await canvas.findByText('Item A')
+    await expect(leftColumn).toContainElement(itemToMove)
+
+    // Select it and move it right.
+    await userEvent.click(itemToMove)
     const moveRightButton = await canvas.findByRole('button', {
       name: 'move selected right',
     })
     await userEvent.click(moveRightButton)
 
-    // Assert the move actually happened: Item A now lives in a DIFFERENT
-    // list element than the one it started in.
+    // Assert the move actually happened: Item A now renders inside the
+    // Assigned column and no longer inside Unassigned.
     const movedItem = await canvas.findByText('Item A')
-    await expect(movedItem.closest('ul')).not.toBe(leftListElement)
+    await expect(rightColumn).toContainElement(movedItem)
+    await expect(leftColumn).not.toContainElement(movedItem)
   },
 }

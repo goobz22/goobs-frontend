@@ -15,6 +15,13 @@
   padding: var(--goobs-space-xs) var(--goobs-space-md);
   font-size: var(--goobs-text-xl);
   box-sizing: border-box;
+
+  /* Inputs don't inherit color from the UA stylesheet, and this input is
+     not wrapped in FieldShell's .inputSlot reset — without an explicit
+     color it renders UA black on dark/sacred surfaces (axe: #000000 on
+     #0f172a / #1c1917, ratio ~1.2). --field-text is the shell's per-theme
+     text token, inherited from the .shell wrapper (same fix as CIDR). */
+  color: var(--field-text);
 }
 
 /* Range mode (renderAsRange): two inputs side-by-side with a dash between. */

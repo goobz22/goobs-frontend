@@ -24,6 +24,7 @@
   --select-disabled-text: var(--goobs-gold-a40);
   --select-arrow-color: var(--goobs-gold-a50);
   --select-arrow-disabled-color: var(--goobs-gold-a25);
+  --select-error: var(--goobs-sacred-danger-text);
 
   position: relative;
   display: inline-block;
@@ -40,6 +41,7 @@
   --select-disabled-text: var(--goobs-black-a38);
   --select-arrow-color: rgba(0, 0, 0, 0.54);
   --select-arrow-disabled-color: rgba(0, 0, 0, 0.26);
+  --select-error: var(--goobs-light-danger-text);
 }
 
 .root[data-theme='dark'] {
@@ -52,6 +54,7 @@
   --select-disabled-text: rgba(255, 255, 255, 0.38);
   --select-arrow-color: rgba(255, 255, 255, 0.54);
   --select-arrow-disabled-color: rgba(255, 255, 255, 0.26);
+  --select-error: var(--goobs-dark-danger-text);
 }
 
 .root.fullWidth {
@@ -137,7 +140,8 @@
    border with the rgba(239, 68, 68, 1) error token when the caller set
    `helperTextType: 'error'`, even without the boolean `error` prop. Declared
    BEFORE the boolean-error block below so the stronger boolean signal (and
-   its literal #d32f2f) wins on cascade source order when both are present.
+   its per-theme --select-error color) wins on cascade source order when both
+   are present.
    -------------------------------------------------------------------------- */
 
 .root[data-helper-error='true'] .outlined,
@@ -154,26 +158,28 @@
 }
 
 /* --------------------------------------------------------------------------
-   State: error. Error text + border color is the literal #d32f2f the old
-   inline style used (NOT the theme's rgba error token). Only the visible
-   border edges per variant get colored; hover does not override error.
+   State: error. Error text + border use the per-theme --select-error custom
+   property (the contrast-proven --goobs-<theme>-danger-text tokens). The old
+   literal #d32f2f failed WCAG on non-light surfaces (2.93 on the dark
+   #1e293b control bg, needs 4.5). Only the visible border edges per variant
+   get colored; hover does not override error.
    -------------------------------------------------------------------------- */
 
 .root[data-error='true'] .select {
-  color: #d32f2f;
+  color: var(--select-error);
 }
 
 .root[data-error='true'] .outlined,
 .root[data-error='true'] .outlined:hover:not(:disabled) {
-  border-top-color: #d32f2f;
-  border-right-color: #d32f2f;
-  border-bottom-color: #d32f2f;
-  border-left-color: #d32f2f;
+  border-top-color: var(--select-error);
+  border-right-color: var(--select-error);
+  border-bottom-color: var(--select-error);
+  border-left-color: var(--select-error);
 }
 
 .root[data-error='true'] .standard,
 .root[data-error='true'] .standard:hover:not(:disabled) {
-  border-bottom-color: #d32f2f;
+  border-bottom-color: var(--select-error);
 }
 
 /* --------------------------------------------------------------------------
