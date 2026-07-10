@@ -277,8 +277,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   // every other value (undefined / 'light') falls through to the light
   // override block in the CSS module — preserving the original behaviour
   // where an unset theme rendered light. (Mirrors Accordion's pattern.)
+  //
+  // The resolved theme is forwarded to EVERY themed child (search bar,
+  // dropdowns, date ranges, switches, buttons, chips). Children default to
+  // 'sacred' when given no styles (goobs-wide convention), so a light
+  // FilterSection that forwarded nothing used to render sacred-gold field
+  // labels and gold chips on its light surface — a WCAG contrast failure
+  // (gold-a80 on the light panel ≈ 1.66:1).
   const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
-  const isSacredTheme = theme === 'sacred'
 
   // Only render the search/buttons row if any of those props were provided.
   const hasSearch = onSearchChange !== undefined
@@ -311,7 +317,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       options: d.options,
       ...(d.placeholder !== undefined && { placeholder: d.placeholder }),
       dataField: computedField,
-      ...(isSacredTheme && { styles: { theme: 'sacred' as const } }),
+      styles: { theme },
     }
     // Caller-supplied width is a runtime value → passed as a CSS custom
     // property that overrides the cell's default responsive flex.
@@ -372,7 +378,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           cluster.dataField ?? (cluster.label ? kebab(cluster.label) : 'filter')
         }
         dataValue={opt.value}
-        {...(chipStyles !== undefined && { styles: chipStyles })}
+        styles={{ theme, ...chipStyles }}
         onClick={() => {
           if (cluster.exclusive !== false) {
             // Default: exclusive (radio-like). Toggling the active one off
@@ -402,7 +408,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 onChange={onSearchChange!}
                 placeholder={searchPlaceholder}
                 dataField={searchDataField ?? 'search'}
-                {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                styles={{ theme }}
               />
             </div>
           )}
@@ -417,7 +423,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   {...(b.disabled !== undefined && { disabled: b.disabled })}
                   {...(b.action !== undefined && { action: b.action })}
                   {...(b.subject !== undefined && { subject: b.subject })}
-                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                  styles={{ theme }}
                 />
               ))}
             </div>
@@ -450,7 +456,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   {...(dr.value !== undefined && { value: dr.value })}
                   onChange={range => dr.onChange(range)}
                   dataField={computedField}
-                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                  styles={{ theme }}
                 />
               </div>
             )
@@ -464,7 +470,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                   onChange={e => t.onChange(e.target.checked)}
                   rightLabel={t.label}
                   data-field={t.dataField ?? kebab(t.label)}
-                  {...(isSacredTheme && { styles: { theme: 'sacred' } })}
+                  styles={{ theme }}
                 />
               ))}
             </div>
