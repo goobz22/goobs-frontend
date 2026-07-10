@@ -47,6 +47,7 @@ export const Light: Story = {
     actions: <CustomButton text="New category" />,
     styles: { theme: 'light' },
   },
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const Dark: Story = {
@@ -56,4 +57,5 @@ export const Dark: Story = {
     description: 'New notifications will appear here as they arrive.',
     styles: { theme: 'dark' },
   },
+  globals: { backgrounds: { value: 'dark' } },
 }
