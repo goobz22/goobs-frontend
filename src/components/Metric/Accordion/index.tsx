@@ -142,10 +142,16 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       return next
     })
   }
-  // Sacred is the CSS base default; every other value (undefined / 'light' /
-  // 'dark') resolves to the [data-theme='light'] override block — exactly the
-  // prior two-branch isSacredTheme behaviour.
-  const theme = propStyles?.theme === 'sacred' ? 'sacred' : 'light'
+  // Sacred is the CSS base default; 'dark' emits verbatim so the shell gets
+  // the dark-slate block (matching MetricCard, whose missing dark block once
+  // caused the same fall-through-to-light bug); every other value (undefined /
+  // 'light' / unrecognised) resolves to the [data-theme='light'] override.
+  const theme =
+    propStyles?.theme === 'sacred'
+      ? 'sacred'
+      : propStyles?.theme === 'dark'
+        ? 'dark'
+        : 'light'
   const screenSize = useScreenSize()
 
   // Accent override via CSS custom property — only emit when the caller
