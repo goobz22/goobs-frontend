@@ -124,16 +124,16 @@ const BoundFieldsInner: React.FC<{ theme: Theme }> = ({ theme }) => {
       />
 
       <span style={captionStyle}>Skills (TransferList)</span>
-      {/* TransferList only themes light/sacred; dark reuses light. The left
-          list is derived from the engine value so a transfer moves the item
-          out of "Available" AND into the engine's string[] in one write. */}
+      {/* The left list is derived from the engine value so a transfer moves
+          the item out of "Available" AND into the engine's string[] in one
+          write. */}
       <TransferList
         name="assignedSkills"
         leftItems={availableSkills}
         leftTitle="Available"
         rightTitle="Assigned"
         onChange={onSkillsTransfer}
-        sacredtheme={theme === 'sacred'}
+        styles={{ theme }}
       />
 
       <span style={captionStyle}>Verification code (ConfirmationCodeInput)</span>

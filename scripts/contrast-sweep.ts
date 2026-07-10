@@ -152,7 +152,21 @@ async function auditStory(page: Page, base: string, story: StoryEntry): Promise<
       undefined,
       { timeout: 15_000 },
     )
-    await page.waitForTimeout(350) // fonts/transitions settle
+    // Settle: fonts/transitions AND the backgrounds decorator. Under parallel
+    // worker load Storybook can paint the story before the canvas background
+    // applies, so axe would read the default white body and report phantom
+    // failures — wait until the body background is stable across two frames.
+    await page.waitForFunction(
+      async () => {
+        const read = () => getComputedStyle(document.body).backgroundColor
+        const first = read()
+        await new Promise(r => setTimeout(r, 250))
+        return read() === first
+      },
+      undefined,
+      { timeout: 10_000 },
+    ).catch(() => {})
+    await page.waitForTimeout(350)
     const showsError = await page.evaluate(
       () => document.querySelector('.sb-show-errordisplay') !== null,
     )
