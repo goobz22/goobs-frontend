@@ -164,11 +164,24 @@ async function auditStory(page: Page, base: string, story: StoryEntry): Promise<
     }
     await page.evaluate(AXE_SOURCE)
     const axeResult = (await page.evaluate(async () => {
-      // @ts-expect-error axe injected above
-      const res = await axe.run(document.getElementById('storybook-root') ?? document.body, {
-        runOnly: ['color-contrast'],
-        resultTypes: ['violations'],
-      })
+      // A story's own tooling can hold an axe run open ("Axe is already
+      // running") — retry briefly instead of failing the story.
+      const runAxe = async (attempt = 0): Promise<any> => {
+        try {
+          // @ts-expect-error axe injected above
+          return await axe.run(document.getElementById('storybook-root') ?? document.body, {
+            runOnly: ['color-contrast'],
+            resultTypes: ['violations'],
+          })
+        } catch (err) {
+          if (attempt < 4 && String(err).includes('already running')) {
+            await new Promise(r => setTimeout(r, 700))
+            return runAxe(attempt + 1)
+          }
+          throw err
+        }
+      }
+      const res = await runAxe()
       return res.violations.flatMap(
         (v: { nodes: Array<{ target: string[]; any: Array<{ data: Record<string, unknown> }>; html: string }> }) =>
           v.nodes.map(n => {
