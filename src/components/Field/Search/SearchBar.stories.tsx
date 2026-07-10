@@ -63,6 +63,9 @@ export const LightTheme: Story = {
       styles={{ theme: 'light' }}
     />
   ),
+  // Light-themed content must sit on the light canvas — on the default
+  // sacred canvas the light muted label fails contrast.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const DarkTheme: Story = {
@@ -84,7 +87,7 @@ export const SacredTheme: Story = {
       styles={{ theme: 'sacred' }}
     />
   ),
-  globals: { backgrounds: { value: 'dark' } },
+  globals: { backgrounds: { value: 'sacred' } },
 }
 
 // --------------------------------------------------------------------------
@@ -102,10 +105,14 @@ export const CustomColors: Story = {
         borderColor: 'rgba(34, 197, 94, 0.4)',
         borderFocusedColor: 'rgba(34, 197, 94, 1)',
         textColor: 'rgba(21, 128, 61, 1)',
-        labelColor: 'rgba(21, 128, 61, 0.7)',
+        // Full-opacity green-700: at 0.7 alpha the composited label fails
+        // contrast on every canvas (2.45:1 on sacred, ~2.9:1 on white).
+        labelColor: 'rgba(21, 128, 61, 1)',
       }}
     />
   ),
+  // Light-themed demo — pin the light canvas (5.02:1 label, 4.80:1 input).
+  globals: { backgrounds: { value: 'light' } },
 }
 
 export const NeonStyle: Story = {
@@ -119,7 +126,9 @@ export const NeonStyle: Story = {
         borderColor: 'rgba(236, 72, 153, 0.5)',
         borderFocusedColor: 'rgba(236, 72, 153, 1)',
         textColor: 'rgba(236, 72, 153, 1)',
-        labelColor: 'rgba(236, 72, 153, 0.7)',
+        // Full-opacity pink: 0.7 alpha composites to 3.02:1 on the dark
+        // canvas; full #ec4899 reads 5.03:1.
+        labelColor: 'rgba(236, 72, 153, 1)',
         borderRadius: '12px',
         borderWidth: '2px',
       }}
@@ -169,6 +178,8 @@ export const CustomLayout: Story = {
       />
     </div>
   ),
+  // All three fields are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -211,6 +222,8 @@ export const CustomTypography: Story = {
       />
     </div>
   ),
+  // All three fields are light-themed — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -254,37 +267,56 @@ export const ErrorStates: Story = {
 export const RequiredFields: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* `required` lives on styles — SearchbarProps has no top-level
+          `required` prop, so passing it as one silently did nothing. */}
       <SearchBarWithState
         label="Required Search"
         placeholder="Enter search query"
-        required
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', required: true }}
       />
       <SearchBarWithState
         label="Product Search"
         placeholder="Search for products"
-        required
         error="Search query is required"
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', required: true }}
       />
-      <SearchBarWithState
-        label="User Search"
-        placeholder="Search for users"
-        required
-        styles={{ theme: 'dark' }}
-      />
-      <SearchBarWithState
-        label="Custom Required Search"
-        placeholder="Enter divine query"
-        required
-        styles={{
-          theme: 'sacred',
-          requiredIndicatorText: ' (required)',
-          requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+      {/* Mixed-theme story: dark and sacred fields render on their own
+          themed surfaces so labels are measured against the surface they
+          are designed for. */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
         }}
-      />
+      >
+        <SearchBarWithState
+          label="User Search"
+          placeholder="Search for users"
+          styles={{ theme: 'dark', required: true }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SearchBarWithState
+          label="Custom Required Search"
+          placeholder="Enter divine query"
+          styles={{
+            theme: 'sacred',
+            required: true,
+            requiredIndicatorText: ' (required)',
+            requiredIndicatorColor: 'rgba(255, 215, 0, 1)',
+          }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -325,8 +357,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Dark Theme Section */}
-      <div>
+      {/* Dark Theme Section — dark-themed fields (and their muted slate
+          labels) are designed for a dark surface, so the block carries its
+          own #111827 surface inside the light-pinned canvas. */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#9CA3AF' }}>Dark Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SearchBarWithState
@@ -356,8 +396,16 @@ export const ComprehensiveShowcase: Story = {
         </div>
       </div>
 
-      {/* Sacred Theme Section */}
-      <div>
+      {/* Sacred Theme Section — gold-on-near-black is the sacred design
+          language; gold text can never pass on white, so the block carries
+          its own #0e0e0e surface inside the light-pinned canvas. */}
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
         <h3 style={{ margin: '0 0 1rem 0', color: '#FFD700' }}>Sacred Theme</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SearchBarWithState
@@ -397,8 +445,12 @@ export const ComprehensiveShowcase: Story = {
               backgroundColor: 'rgba(0, 0, 0, 0.95)',
               borderColor: 'rgba(147, 51, 234, 0.5)',
               borderFocusedColor: 'rgba(147, 51, 234, 1)',
-              textColor: 'rgba(147, 51, 234, 1)',
-              labelColor: 'rgba(147, 51, 234, 0.8)',
+              // Lighter purple inside the near-black input: #9333ea reads
+              // 3.61:1 there; #a855f7 reads 4.91:1.
+              textColor: 'rgba(168, 85, 247, 1)',
+              // Full-opacity #9333ea for the label on the white canvas
+              // (5.38:1); the 0.8-alpha composite read 3.85:1.
+              labelColor: 'rgba(147, 51, 234, 1)',
               borderRadius: '20px',
               borderWidth: '2px',
             }}
@@ -445,26 +497,47 @@ export const ComprehensiveShowcase: Story = {
 export const DisabledStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* `disabled` lives on styles — SearchbarProps has no top-level
+          `disabled` prop, so passing it as one silently rendered ENABLED
+          fields (which is also why axe measured their labels at full
+          strength). styles.disabled natively disables the input and puts
+          aria-disabled on the shell. */}
       <SearchBarWithState
         label="Disabled Light"
         initialValue="cannot-search"
-        disabled
-        styles={{ theme: 'light' }}
+        styles={{ theme: 'light', disabled: true }}
       />
-      <SearchBarWithState
-        label="Disabled Dark"
-        initialValue="locked-search"
-        disabled
-        styles={{ theme: 'dark' }}
-      />
-      <SearchBarWithState
-        label="Disabled Sacred"
-        initialValue="sealed-knowledge"
-        disabled
-        styles={{ theme: 'sacred' }}
-      />
+      {/* Mixed-theme story: dark and sacred fields render on their own
+          themed surfaces. */}
+      <div
+        style={{
+          background: '#111827',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SearchBarWithState
+          label="Disabled Dark"
+          initialValue="locked-search"
+          styles={{ theme: 'dark', disabled: true }}
+        />
+      </div>
+      <div
+        style={{
+          background: '#0e0e0e',
+          padding: '1rem',
+          borderRadius: '8px',
+        }}
+      >
+        <SearchBarWithState
+          label="Disabled Sacred"
+          initialValue="sealed-knowledge"
+          styles={{ theme: 'sacred', disabled: true }}
+        />
+      </div>
     </div>
   ),
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -595,6 +668,9 @@ const SearchDemo = () => {
 export const SearchDemoStory: Story = {
   name: 'Search Demo',
   render: () => <SearchDemo />,
+  // The demo is light-themed (black h3, gray body copy, light field) —
+  // pin the light canvas it was written for.
+  globals: { backgrounds: { value: 'light' } },
 }
 
 // --------------------------------------------------------------------------
@@ -625,4 +701,6 @@ export const InteractionTest: Story = {
     // Check value
     await expect(input).toHaveValue('testing search functionality')
   },
+  // Light-themed field — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
 }
