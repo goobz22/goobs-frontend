@@ -688,3 +688,67 @@ export const InteractionTest: Story = {
     expect(endInput).toBeVisible()
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: GROUP SEMANTICS + CROSS-FIELD ERROR
+// --------------------------------------------------------------------------
+
+// The start/end inputs are two related controls forming ONE range, so the
+// wrapper is exposed as a named role="group" (WCAG 1.3.1). A cross-field
+// error (start > end) is a property of the whole range, so it must mark BOTH
+// inputs aria-invalid — not just the start — and be announced once via a
+// role="alert" region (WCAG 4.1.2 / 4.1.3).
+export const GroupSemanticsAndError: Story = {
+  name: 'A11y: Group Semantics & Range Error',
+  render: () => (
+    <DateRangeWithState
+      startLabel="Trip Start"
+      endLabel="Trip End"
+      ariaLabel="Trip dates"
+      error="End date cannot be before start date."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The pair is announced as one named group.
+    const group = canvas.getByRole('group', { name: 'Trip dates' })
+    await expect(group).toBeInTheDocument()
+
+    // A cross-field error marks BOTH date inputs invalid, not just the start.
+    const startInput = canvas.getByLabelText('Trip Start')
+    const endInput = canvas.getByLabelText('Trip End')
+    await expect(startInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(endInput).toHaveAttribute('aria-invalid', 'true')
+
+    // The message is announced once via a live alert region and the start
+    // input is programmatically described by it.
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveTextContent(
+      'End date cannot be before start date.'
+    )
+    await expect(startInput).toHaveAttribute('aria-describedby', alert.id)
+  },
+}
+
+// The wrapper is always a named group even without an explicit ariaLabel —
+// the default accessible name is 'Date range'.
+export const DefaultGroupLabel: Story = {
+  name: 'A11y: Default Group Label',
+  render: () => (
+    <DateRangeWithState
+      startLabel="Start Date"
+      endLabel="End Date"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByRole('group', { name: 'Date range' })
+    ).toBeInTheDocument()
+  },
+}

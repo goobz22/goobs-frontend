@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import DateField from './index'
 
 const meta: Meta<typeof DateField> = {
@@ -93,6 +94,34 @@ export const WithError: Story = {
     styles: { theme: 'light', helperTextType: 'error' },
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+// a11y regression: a real `error` string must (a) set aria-invalid on the
+// input, (b) render the message in a role="alert" region, and (c) link the
+// two via aria-describedby, so a screenreader announces the error and can
+// re-read it while the field has focus (WCAG 3.3.1 / 4.1.2 / 4.1.3). The
+// module.css also gives the invalid input a themed danger border so the
+// error isn't conveyed by the helper text alone (WCAG 1.4.1).
+export const ErrorAssociated: Story = {
+  render: args => <DateField {...args} />,
+  args: {
+    label: 'Deadline',
+    error: 'Please choose a date in the future.',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Deadline')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+
+    // The message renders in a live alert region…
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveTextContent('Please choose a date in the future.')
+
+    // …and the input is programmatically described by exactly that region.
+    await expect(input).toHaveAttribute('aria-describedby', alert.id)
+  },
 }
 
 export const Required: Story = {

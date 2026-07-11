@@ -192,11 +192,16 @@ const DateRange: React.FC<DateRangeProps> = ({
 
   // Two FieldShells side-by-side share the start/end labels and helper
   // wiring. Only the start shell carries `error` + `helperText` so the
-  // helper region renders once below the pair (the end shell skips
-  // both, leaving the wider error message anchored to the first input
-  // for screenreader announcement). The flex layout lives in
-  // DateRange.module.css; the caller-supplied `gap` override is passed
-  // through as the `--date-range-gap` CSS custom property.
+  // helper region (role="alert" + aria-live) renders once below the pair
+  // for screenreader announcement — rendering it on both shells would
+  // duplicate the message. To avoid marking only ONE control invalid on a
+  // cross-field range error, aria-invalid is set directly on BOTH inputs
+  // (the start input via FieldShell's inputAriaProps, the end input via the
+  // explicit prop below), so both fields are programmatically invalid and
+  // both pick up the themed danger border (WCAG 1.3.1 / 4.1.2). The flex
+  // layout lives in DateRange.module.css; the caller-supplied `gap` override
+  // is passed through as the `--date-range-gap` CSS custom property.
+  const hasError = Boolean(error)
   const fieldsWrapperStyle: React.CSSProperties | undefined =
     styles?.gap !== undefined
       ? ({ ['--date-range-gap']: styles.gap } as React.CSSProperties)
@@ -205,6 +210,8 @@ const DateRange: React.FC<DateRangeProps> = ({
   return (
     <div
       style={style}
+      role="group"
+      aria-label={ariaLabel ?? 'Date range'}
       data-field={dataField}
       data-field-name={dataFieldName ?? name}
     >
@@ -265,6 +272,13 @@ const DateRange: React.FC<DateRangeProps> = ({
                     : undefined
                 }
                 {...inputAriaProps}
+                // The end shell isn't passed `error` (the message renders once
+                // under the start shell), so its inputAriaProps carry no
+                // aria-invalid. Set it here so a range error marks BOTH inputs
+                // invalid, not just the start (WCAG 1.3.1 / 4.1.2). Undefined
+                // when there's no error so aria-invalid="false" is never
+                // emitted, preserving the test-selector contract.
+                aria-invalid={hasError || undefined}
               />
             )}
           </FieldShell>

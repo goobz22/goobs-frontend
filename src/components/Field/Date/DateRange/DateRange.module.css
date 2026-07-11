@@ -197,6 +197,37 @@
 }
 
 /* --------------------------------------------------------------------------
+   Error State (WCAG 1.4.1 — Use of Color)
+
+   FieldShell sets aria-invalid on the input when `error` is present, but its
+   own error-border rule targets `.inputSlot` (a class this component's inputs
+   do not use), so without this an invalid date input showed no on-field cue —
+   the error was conveyed by the red helper text alone. Anchoring on the
+   inherited `--field-border-error` custom property (defined per-theme on the
+   FieldShell `.shell` ancestor) gives each invalid input a themed danger
+   border in every theme. Both the start input (aria-invalid from FieldShell)
+   and the end input (aria-invalid set directly in index.tsx so a range error
+   marks both controls) pick this up. Placed after the theme blocks so it wins
+   the equal-specificity tie with the `[data-theme='…'] .input` border rules.
+   -------------------------------------------------------------------------- */
+
+.input[aria-invalid='true'] {
+  border-color: var(--field-border-error);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced Motion (WCAG 2.3.3)
+
+   Drop the border/box-shadow transition for users who request reduced motion.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Tablet Responsive (769px - 1024px)
    -------------------------------------------------------------------------- */
 
