@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useId } from 'react'
 import TextField from '../../Field/Text'
 import DateField from '../../Field/Date/DateField'
 import TimeField from '../../Field/Time/TimeField'
@@ -60,6 +60,13 @@ function AddCard({
   styles,
 }: AddCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // Stable id base for per-field label→control association. Each field's
+  // visible <label> carries `${labelIdBase}-${field}` and its wrapper is a
+  // labelled `role="group"` via aria-labelledby, so the goobs field control it
+  // names has a programmatic accessible name (WCAG 1.3.1 / 3.3.2 / 4.1.2). A
+  // single useId() base + per-field suffix keeps this hook-rules-safe inside the
+  // renderableFields.map() below.
+  const labelIdBase = useId()
 
   const theme = styles?.theme || 'sacred'
 
@@ -424,27 +431,37 @@ function AddCard({
     >
       <div style={cardStyles.header}>Add New Item</div>
 
-      {renderableFields.map(fieldDef => (
-        <div
-          key={fieldDef.field}
-          style={cardStyles.fieldContainer}
-          // Per-field wrapper carries the field key so tests can
-          // target a specific input as
-          // `[data-creation-card] [data-field-name="email"] input`.
-          data-field-name={fieldDef.field}
-        >
-          <label style={cardStyles.label}>
-            {fieldDef.label}
-            {fieldDef.required && <span style={cardStyles.required}>*</span>}
-          </label>
-          {renderField(fieldDef)}
-          {creationRowErrors[fieldDef.field] && (
-            <div style={cardStyles.error} role="alert">
-              {creationRowErrors[fieldDef.field]}
-            </div>
-          )}
-        </div>
-      ))}
+      {renderableFields.map(fieldDef => {
+        // Ties the visible <label> to the goobs field control it names: the
+        // wrapper is a labelled group (aria-labelledby → the label's id), which
+        // gives the control an accessible name across every field type without
+        // per-component wiring. The label is a valid aria-labelledby target once
+        // it carries this id (the form-label-not-associated escape hatch).
+        const labelId = `${labelIdBase}-${fieldDef.field}`
+        return (
+          <div
+            key={fieldDef.field}
+            style={cardStyles.fieldContainer}
+            // Per-field wrapper carries the field key so tests can
+            // target a specific input as
+            // `[data-creation-card] [data-field-name="email"] input`.
+            data-field-name={fieldDef.field}
+            role="group"
+            aria-labelledby={labelId}
+          >
+            <label id={labelId} style={cardStyles.label}>
+              {fieldDef.label}
+              {fieldDef.required && <span style={cardStyles.required}>*</span>}
+            </label>
+            {renderField(fieldDef)}
+            {creationRowErrors[fieldDef.field] && (
+              <div style={cardStyles.error} role="alert">
+                {creationRowErrors[fieldDef.field]}
+              </div>
+            )}
+          </div>
+        )
+      })}
 
       <div style={cardStyles.buttonContainer}>
         <Button
