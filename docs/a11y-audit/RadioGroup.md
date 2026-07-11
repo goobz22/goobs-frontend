@@ -1,0 +1,165 @@
+# RadioGroup — a11y audit (2026-07-11)
+
+**Status:** FIXED
+
+**APG pattern:** [Radio Group](https://www.w3.org/WAI/ARIA/apg/patterns/radio/) —
+implemented with **native `<input type="radio">`** controls (all sharing one `name`)
+wrapped in per-option `<label>`s, inside a `<div role="radiogroup" aria-labelledby>`.
+Native radios sharing a `name` provide the pattern's entire keyboard contract for free
+(single tab-stop into the group, Arrow/Home/End roving selection, Space) and expose
+role/checked/name to assistive tech automatically — provided they are **not removed from
+the accessibility tree**, which was the dominant defect here.
+
+## Issues found
+
+| # | Severity | WCAG | Location | Pattern | Status |
+|---|----------|------|----------|---------|--------|
+| 1 | Critical | 2.1.1 Keyboard (A), 4.1.2 Name/Role/Value (A) | `RadioGroup.module.css` `.input { display: none }` (was lines 167-169) | `display-none-hides-native-control` | **FIXED** |
+| 2 | Serious | 2.4.7 Focus Visible (AA), 2.4.11 Focus Appearance (AA) | `RadioGroup.module.css` — no `:focus-visible` rule anywhere in the file | `missing-focus-visible-style` | **FIXED** |
+| 3 | Moderate | 1.3.1 Info & Relationships (A), 4.1.2 Name/Role/Value (A) | `index.tsx` — `aria-labelledby` always pointed at a `<label>` that is empty when neither `label` nor `labelText` is set (was line 241) | `missing-accessible-name` | **FIXED** |
+| 4 | Minor | 1.3.1 Info & Relationships (A) | `index.tsx` — group heading rendered as an orphan `<label>` with no `htmlFor` (was line 238) | `orphan-label-element` | **FIXED** |
+
+### Issue 1 — `display: none` removes the radios from the a11y tree and keyboard order (Critical)
+
+The native `<input type="radio">` was styled `display: none` (`.input`), used only so its
+`:checked` sibling selector could drive the decorative ring/dot. `display: none` (like
+`visibility: hidden`) **removes the element from the accessibility tree AND the tab order**.
+Consequences:
+
+- **Keyboard (2.1.1):** the group was **completely non-operable by keyboard** — you could
+  not Tab to any radio, and Arrow/Space did nothing. The only way to change the selection
+  was a mouse click on the label. A keyboard or switch-device user could not use the control
+  at all.
+- **Name/Role/Value (4.1.2):** with the inputs gone from the a11y tree, a screen reader saw
+  **no radios** — no `radio` role, no checked state, no per-option name. The "selected"
+  option was conveyed purely by the CSS-filled ring, i.e. **visually only**.
+
+**Root cause:** the state that AT and keyboard depend on lived on an element that was
+removed from the a11y tree. Fix: keep the native input in the tree (visually-hidden, still
+focusable) instead of `display: none`.
+
+### Issue 2 — No visible keyboard focus indicator (Serious)
+
+A direct corollary of Issue 1: with the input `display:none` there was nothing to focus,
+and the module contained **no `:focus-visible` rule of any kind**. Once the input is
+restored to the tab order it is clipped to 1px, so its own browser focus ring is painted
+off-screen — a keyboard user would still have zero indication of which radio held focus.
+Fails 2.4.7 (a visible focus indicator must exist) and 2.4.11 (it must be perceivable).
+
+### Issue 3 — Radiogroup can have no accessible name (Moderate)
+
+`aria-labelledby={\`${name}-label\`}` was emitted **unconditionally**, pointing at the
+`<label id>` whose content is `{labelText || label}`. Both props are optional, so a
+consumer rendering `<RadioGroup name="x" options={…} />` produced an **empty** label
+element → the group's computed accessible name was the empty string → the radiogroup was
+effectively unnamed (1.3.1 / 4.1.2), while still emitting a dangling id reference.
+
+### Issue 4 — Group heading was an orphan `<label>` (Minor)
+
+The group heading was a real HTML `<label>` element with no `htmlFor`/wrapped control — an
+orphan label. `<label>` semantically implies association with a single form control; for a
+*group* heading the correct element is a plain text element referenced by the group's
+`aria-labelledby`. Orphan `<label>`s are flagged by HTML/a11y validators and can confuse AT.
+
+## Hearing
+
+No `Audio`, `AudioContext`, `<audio>`/`<video>`, `navigator.vibrate`, or `speechSynthesis`
+usage anywhere in the component (grep clean). No information is conveyed by sound, so WCAG
+1.2.x / 1.4.2 do not apply. **No issues.**
+
+## Reading & screen reader
+
+- **Semantic HTML:** real native `<input type="radio">` inside real `<label>`s — the ideal
+  APG implementation (no `role="radio"` divs). Kept as-is; the fix only stopped hiding them
+  from the tree.
+- **Accessible name (per option):** each `<input>` is wrapped by its `<label>`, whose text
+  span (`option.label`) supplies the accessible name. The decorative ring/dot span is now
+  `aria-hidden="true"` so it cannot leak into the name. Verified by the new story resolving
+  each control via `getByRole('radio', { name: 'Option N' })`.
+- **Accessible name (group):** `role="radiogroup"` + `aria-labelledby` → the visible group
+  heading. **Fixed** (Issue 3) so `aria-labelledby` is only emitted when heading text
+  actually exists.
+- **Keyboard interaction:** restored to the full native radiogroup contract for free once
+  the inputs are back in the tab order — single Tab stop into the group landing on the
+  checked radio (or the first when none checked), Arrow keys roving selection, Home/End,
+  Space. No custom key handling needed or added. Verified by the `A11y/Keyboard Navigation`
+  story (Tab focuses the checked radio, ArrowDown moves the selection).
+- **Focus visible:** **Fixed** (Issue 2) — `:focus-visible` outline mirrored onto the
+  visible outer ring, per theme.
+- **State never color-alone (1.4.1):** the checked option is conveyed by the native radio's
+  programmatic `checked` state (now exposed to AT) **plus** the filled ring / inner dot —
+  not color-only.
+- **Motion:** `@media (prefers-reduced-motion: reduce)` was already present and remains;
+  the new focus treatment uses a static `outline` (not animated), so reduced-motion is
+  unaffected. WCAG 2.3.3 satisfied.
+
+## SEO semantics
+
+RadioGroup is a form control group, not a heading/landmark/link/list/table, so the
+SEO-semantic checklist items (real `<h1-6>`, landmarks, `<a href>`, lists/tables) do not
+apply. A group *heading* is a label, not a document heading, so no `headingLevel` prop is
+warranted — the APG `aria-labelledby` labelling is the correct mechanism and is now
+correctly conditional. All controls render as real `<input>`/`<label>` in SSR HTML with no
+client-only injection of primary content. **No issues.**
+
+## Fixes applied
+
+1. **Radios kept in the a11y tree + tab order (Issue 1)** — replaced `.input { display: none }`
+   with the visually-hidden-but-accessible clip pattern (`position: absolute; width/height:
+   1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0`). The input
+   takes no layout space yet stays focusable and in the a11y tree; the `~` sibling selectors
+   that drive the ring/dot are unaffected (general-sibling matching is DOM-order based, not
+   layout based). Added `position: relative` to `.optionLabel` so the clipped input scopes to
+   its own row. (Used `clip-path` alone — stylelint's `property-no-deprecated` rejects the
+   legacy `clip` property, and `clip-path: inset(50%)` covers all modern targets.)
+2. **Keyboard focus ring (Issue 2)** — added a `FOCUS-VISIBLE` section:
+   `.input:focus-visible ~ .radioSpan .radioOuter` gets `outline: 2px solid` +
+   `outline-offset: 2px`, using the solid theme primaries (`--goobs-light-primary` /
+   `--goobs-dark-primary` / `--goobs-gold`) via per-theme overrides — matching the sibling
+   Checkbox component's established pattern. `:focus-visible` (not `:focus`) shows the ring
+   for keyboard users only; `outline` (not `box-shadow`) avoids colliding with the checked/
+   hover background.
+3. **Group name only when labelled (Issue 3)** — compute `groupLabel = labelText || label`
+   once; render the heading element and emit `aria-labelledby` only when `groupLabel` is
+   truthy, otherwise `aria-labelledby={undefined}` (no dangling empty reference).
+4. **Orphan label → span (Issue 4)** — the group heading is now a `<span id>` (still
+   `className={formLabel}`, still referenced by `aria-labelledby`) instead of a `<label>`.
+   `.formLabel` already sets `display: block`, so the rendering is visually identical.
+5. **Decorative ring/dot hidden (hardening)** — added `aria-hidden="true"` to the presentational
+   `.radioSpan` so the graphic representation cannot add screen-reader noise or leak into the
+   per-option name; the native input already conveys checked state.
+
+No public API change: no prop renamed/removed/retyped, no export changed. The only rendered
+markup changes are the group heading element (`<label>` → `<span>`, both structural) and an
+additive `aria-hidden` — every existing `data-*` test selector (`data-component`,
+`data-field-name`, `data-filled`, `data-inner-dot`, `data-theme`, per-option `data-has-color`),
+the `role="radiogroup"`, and the forwarded first-input `ref` are all preserved.
+
+## Stories updated
+
+Added one `play`-backed regression story to `RadioGroup.stories.tsx`, matching the repo's
+`storybook/test` + `within`/`userEvent`/`expect` convention:
+
+- **`A11y/Keyboard Navigation`** — the fail-first guard for Issue 1. It asserts the
+  radiogroup exposes its accessible name, `getAllByRole('radio')` returns all three options
+  (this query returns `[]` against the old `display:none` markup, so it fails before the
+  fix), `userEvent.tab()` moves focus into the group onto the checked radio, and
+  `{ArrowDown}` moves the native selection to the next option. The story therefore exercises
+  the tree-membership, tab-order, and native-keyboard behaviours all at once.
+
+The existing `Interaction and A11y Test` story (click-to-select) is retained.
+
+Gates run per-file and passing: `bun lint:file` on `index.tsx` + `RadioGroup.stories.tsx`
+(exit 0), `stylelint` on `RadioGroup.module.css` (exit 0).
+
+## Deferred
+
+- **Group name when neither `label` nor `labelText` is supplied.** After Issue 3's fix, an
+  unlabelled group emits no `aria-labelledby` rather than a broken empty one — but it then
+  has *no* accessible name. This is **not fixable inside the component**: there is no human
+  text to derive a name from, and the library must not fabricate one from the machine-key
+  `name` prop (which would announce e.g. "basic-radio"). Accessible-by-default is met
+  whenever `label`/`labelText` is provided (the intended usage, and the case in every story).
+  Consumer responsibility; no code change.
+- **No cross-file (unowned) fixes were required** — both root-cause fixes lived entirely
+  inside the RadioGroup directory. No `deferred` edits to shared/unowned files.
