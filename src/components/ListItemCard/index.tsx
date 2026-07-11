@@ -45,11 +45,15 @@
  *
  * SELECTION
  *
- *   When `onSelect` is provided the whole row becomes a selection target
- *   (`role="button"`, Enter/Space activate). Inner interactive elements
- *   (drag buttons, remove, custom actions) `stopPropagation` so clicking them
- *   never toggles row selection. `selected` drives `data-selected` + the
- *   accent ring.
+ *   When `onSelect` is provided, the row's NON-interactive naming content
+ *   (order + icon + content) is wrapped in a real `<button>` — the select
+ *   target: Enter/Space activate it natively and `aria-pressed` reflects
+ *   `selected`. The `<li>` KEEPS its implicit `listitem` role (no `role`
+ *   override), and the reorder / remove / `Actions` controls render as SIBLINGS
+ *   of that button — never nested inside it — so the button holds no focusable
+ *   descendants (ARIA button-role contract) and a `<ul>` of these rows keeps
+ *   valid `listitem` children. `selected` drives `data-selected` + the accent
+ *   ring.
  *
  * =============================================================================
  */
@@ -76,9 +80,9 @@ interface ListItemCardContextValue {
   theme: ListItemCardTheme
   selected: boolean
   /**
-   * Stable id applied to `<ListItemCard.Content>`'s title span so a
-   * SELECTABLE row (`role="button"`) can name itself via `aria-labelledby`
-   * instead of concatenating every descendant's text (which would pull in the
+   * Stable id applied to `<ListItemCard.Content>`'s title span so a SELECTABLE
+   * row's select `<button>` can name itself via `aria-labelledby` instead of
+   * concatenating every descendant's text (which would pull the
    * reorder/remove/action button labels into a garbled accessible name).
    */
   titleId: string
@@ -208,6 +212,11 @@ function ListItemCardInner({
     [ref]
   )
 
+  // The selectable row's <button> select target. The aria-labelledby
+  // reconciliation effect below points its accessible name at the Content
+  // title/subtitle spans (the row's real name, not its nested-control labels).
+  const selectButtonRef = React.useRef<HTMLButtonElement | null>(null)
+
   // Edge-triggered selection diagnostic (no-op without a host bus). Mirrors the
   // Card root's data-state beacon: report only genuine selection transitions.
   const previousSelected = React.useRef<boolean | null>(null)
@@ -226,18 +235,16 @@ function ListItemCardInner({
     }
   }, [selected])
 
-  // aria-labelledby reconciliation. Only a SELECTABLE row (`role="button"`)
-  // needs a computed name, and `<ListItemCard.Content>` — which owns the
-  // title/subtitle id elements — is OPTIONAL and arbitrarily nested, so the
-  // root cannot know at render time whether it mounted. The SSR markup emits
-  // `aria-labelledby={titleId}` (identical hydration output); after mount we
-  // reconcile as a plain DOM mutation: point it at whichever of the
-  // title/subtitle ids actually resolved, or drop it entirely when neither
-  // did (a dangling idref is what a11y scanners flag). Mirrors Card's title
-  // reconciliation.
+  // aria-labelledby reconciliation for the selectable row's <button>. The name
+  // is already computed at RENDER time from the children (see `nameIds` below),
+  // so the SSR / no-JS markup references only ids a `<ListItemCard.Content>`
+  // child actually stamps — no dangling idref. This post-mount effect is a
+  // robustness fallback for arbitrarily-nested Content: it re-points
+  // aria-labelledby at whichever of the title/subtitle ids truly resolved in the
+  // DOM, or drops it if neither did. Mirrors Card's title reconciliation.
   React.useEffect(() => {
     if (!selectable) return
-    const node = rootElementRef.current
+    const node = selectButtonRef.current
     if (node === null) return
     const resolvedIds = [titleId, subtitleId].filter(
       id => document.getElementById(id) !== null
@@ -253,17 +260,6 @@ function ListItemCardInner({
     onSelect?.()
   }
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>): void => {
-    if (!selectable) return
-    // Only handle when the row itself is the event target — keystrokes inside
-    // nested controls (drag buttons, remove, custom actions) belong to them.
-    if (event.target !== event.currentTarget) return
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      handleSelect()
-    }
-  }
-
   const mergedStyle: CSSProperties | undefined = accentColor
     ? {
         ...(style ?? {}),
@@ -271,18 +267,32 @@ function ListItemCardInner({
       }
     : style
 
-  const selectionProps = selectable
-    ? {
-        role: 'button',
-        tabIndex: 0,
-        'aria-pressed': selected,
-        // Named by its own title (SSR baseline; the effect above upgrades this
-        // to include the subtitle and drops it if no title element mounted).
-        'aria-labelledby': titleId,
-        onClick: handleSelect,
-        onKeyDown: handleKeyDown,
-      }
-    : {}
+  // Partition the composed children. A SELECTABLE row wraps only its
+  // non-interactive naming content (Order / Icon / Content) in the select
+  // <button>; the interactive `Actions` slot renders as a SIBLING outside it so
+  // the button never contains focusable descendants (ARIA button-role contract).
+  const childArray = React.Children.toArray(children)
+  const actionChildren = childArray.filter(
+    child => React.isValidElement(child) && child.type === ListItemCardActions
+  )
+  const labelChildren = childArray.filter(
+    child => !(React.isValidElement(child) && child.type === ListItemCardActions)
+  )
+
+  // Accessible name of the selectable row, computed at RENDER time so the SSR /
+  // no-JS markup references only ids a `<ListItemCard.Content>` child will stamp
+  // — no dangling idref. `title` is required on Content (always renders →
+  // titleId resolves); the subtitle span only mounts when a `subtitle` is given.
+  const contentChild = childArray.find(
+    (child): child is React.ReactElement<ListItemCardContentProps> =>
+      React.isValidElement(child) && child.type === ListItemCardContent
+  )
+  const nameIds =
+    contentChild === undefined
+      ? undefined
+      : contentChild.props.subtitle !== undefined
+        ? `${titleId} ${subtitleId}`
+        : titleId
 
   return (
     <li
@@ -296,7 +306,6 @@ function ListItemCardInner({
       {...(selectable && { 'data-selectable': 'true' })}
       {...(accentColor !== undefined && { 'data-accent': 'true' })}
       style={mergedStyle}
-      {...selectionProps}
       {...restProps}
     >
       <ListItemCardContext.Provider value={contextValue}>
@@ -315,7 +324,29 @@ function ListItemCardInner({
           </div>
         )}
 
-        {children}
+        {selectable ? (
+          <>
+            {/* Native <button> select target: Enter/Space activate it natively,
+                `aria-pressed` reflects `selected`, and it wraps ONLY the
+                non-interactive naming content, so it holds no focusable
+                descendants. The <li> keeps its implicit `listitem` role; the
+                reorder / remove / Actions controls stay siblings of this button. */}
+            <button
+              type="button"
+              ref={selectButtonRef}
+              className={cssStyles.select}
+              data-list-item-select="true"
+              aria-pressed={selected}
+              {...(nameIds !== undefined && { 'aria-labelledby': nameIds })}
+              onClick={handleSelect}
+            >
+              {labelChildren}
+            </button>
+            {actionChildren}
+          </>
+        ) : (
+          children
+        )}
 
         {onRemove !== undefined && (
           <div
