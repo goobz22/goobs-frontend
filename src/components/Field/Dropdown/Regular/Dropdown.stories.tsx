@@ -626,6 +626,64 @@ export const InteractionTest: Story = {
 }
 
 // --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Arrow-key navigation over the listbox options
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `missing-keyboard-arrow-nav` class (WCAG 2.1.1 /
+ * 2.4.7 / 4.1.2). The combobox trigger keeps DOM focus while the Arrow keys
+ * rove a highlight through the `role="option"` list. Previously that highlight
+ * had NO visual treatment (the `.active` class had no CSS rule) AND was invisible
+ * to assistive tech (no `aria-activedescendant`, options had no `id`). This play
+ * function proves the fix: ArrowDown opens the menu, a second ArrowDown roves the
+ * highlight (mirrored to `data-active` on the option and `aria-activedescendant`
+ * on the combobox), and Enter selects the active option. The Regular menu renders
+ * inline (not portalled), so the options live inside the story canvas.
+ */
+export const KeyboardArrowNavigation: Story = {
+  name: 'A11y: keyboard arrow navigation',
+  render: () => (
+    <DropdownWithState
+      label="Keyboard Nav"
+      options={sampleOptions}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Open via the keyboard (combobox 1.2 open-on-ArrowDown). The first
+    // ArrowDown only opens — nothing is highlighted yet.
+    combobox.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    expect(combobox).not.toHaveAttribute('aria-activedescendant')
+
+    const options = canvas.getAllByRole('option')
+    expect(options.length).toBeGreaterThan(1)
+
+    // ArrowDown highlights the first option: it gets data-active and the
+    // combobox points aria-activedescendant at its id (announced by AT).
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[0]).toHaveAttribute('data-active', 'true')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[0]!.id)
+
+    // A second ArrowDown advances the roving highlight to the next option.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[1]).toHaveAttribute('data-active', 'true')
+    expect(options[0]).not.toHaveAttribute('data-active')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[1]!.id)
+
+    // Enter activates the highlighted option and closes the menu.
+    await userEvent.keyboard('{Enter}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'false')
+    await expect(combobox).toHaveTextContent(String(sampleOptions[1]!.value))
+  },
+}
+
+// --------------------------------------------------------------------------
 // INTERACTIVE DEMO
 // --------------------------------------------------------------------------
 

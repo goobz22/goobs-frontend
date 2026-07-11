@@ -208,6 +208,17 @@ const Dropdown: React.FC<DropdownProps> = ({
     >
       {({ inputId, inputAriaProps }) => {
         const listboxId = `${inputId}-listbox`
+        // Stable per-option DOM ids so the combobox can point
+        // aria-activedescendant at the arrow-key-highlighted option — the
+        // WAI-ARIA combobox model where focus stays on the trigger and the
+        // active option is exposed to assistive tech via its id (WCAG 4.1.2 /
+        // 2.1.1). Mirrors the SearchableHistory implementation.
+        const optionDomId = (index: number): string =>
+          `${listboxId}-option-${index}`
+        const activeOptionId =
+          activeIndex >= 0 && filteredOptions[activeIndex]
+            ? optionDomId(activeIndex)
+            : undefined
         return (
           <>
             <button
@@ -218,6 +229,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               aria-haspopup="listbox"
               aria-expanded={isOpen}
               aria-controls={listboxId}
+              aria-activedescendant={activeOptionId}
               aria-label={label}
               data-action={isOpen ? 'close' : 'open'}
               data-subject={dataField}
@@ -284,9 +296,11 @@ const Dropdown: React.FC<DropdownProps> = ({
                     return (
                       <button
                         key={`${option._id ?? ''}-${option.value}-${index}`}
+                        id={optionDomId(index)}
                         type="button"
                         role="option"
                         aria-selected={isSelected}
+                        {...(isActive && { 'data-active': 'true' })}
                         data-value={option.value}
                         data-option-id={option._id}
                         className={optionClassNames}
