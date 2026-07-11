@@ -189,7 +189,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Suppress the perpetual gold shimmer sweep AND any caller-supplied looping
+     container animation (e.g. a sacredGlow via `containerAnimation`) for users
+     who request reduced motion (WCAG 2.3.3). State transitions are left intact
+     — they are short, non-distracting, and not covered by the guideline. */
   .shimmer {
+    animation: none;
+  }
+
+  .container {
     animation: none;
   }
 }

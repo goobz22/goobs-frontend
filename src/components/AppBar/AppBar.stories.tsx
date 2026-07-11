@@ -164,3 +164,34 @@ export const CustomColors: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY
+// --------------------------------------------------------------------------
+
+/**
+ * The AppBar renders as a native `<header>` exposing the `banner` landmark. When
+ * a page has more than one app bar/banner, pass `ariaLabel` so assistive-tech
+ * users can tell them apart in the landmarks rotor. Here two labelled bars are
+ * stacked; each surfaces its own accessible name.
+ */
+export const LabelledLandmarks: Story = {
+  name: 'Accessibility/Labelled Landmarks',
+  render: () => (
+    <div>
+      <AppBar
+        ariaLabel="Primary navigation"
+        styles={{ theme: 'light' }}
+      >
+        <NavContent color="#1F2937" />
+      </AppBar>
+      <AppBar
+        ariaLabel="Account tools"
+        styles={{ theme: 'dark' }}
+      >
+        <NavContent color="#F9FAFB" />
+      </AppBar>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}

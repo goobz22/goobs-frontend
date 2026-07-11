@@ -112,6 +112,12 @@ export interface AppBarProps {
   styles?: AppBarStyles
   /** Additional CSS class name */
   className?: string
+  /**
+   * Accessible name for the `banner` landmark, exposed as `aria-label` on the
+   * root `<header>`. Set this to disambiguate when a page renders more than one
+   * banner/app-bar landmark (assistive tech otherwise lists them identically).
+   */
+  ariaLabel?: string
   /** Callback fired when the app bar is clicked */
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
@@ -138,6 +144,7 @@ const AppBar: FC<AppBarProps> = props => {
     elevated = true,
     styles,
     className,
+    ariaLabel,
     onClick,
     ...rest
   } = props
@@ -150,9 +157,12 @@ const AppBar: FC<AppBarProps> = props => {
   const resolvedPosition = styles?.position || position
 
   const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
+    (event: React.MouseEvent<HTMLElement>) => {
       if (!isDisabled && onClick) {
-        onClick(event)
+        // The root landmark renders as a native <header> (HTMLElement); the
+        // public onClick keeps its historical HTMLDivElement event type to stay
+        // additive-only. The concrete element is API-compatible for callers.
+        onClick(event as React.MouseEvent<HTMLDivElement>)
       }
     },
     [isDisabled, onClick]
@@ -229,8 +239,14 @@ const AppBar: FC<AppBarProps> = props => {
     )
   }
 
+  // Renders as a native <header> — an app bar IS the page's banner landmark, so
+  // the semantically correct element gives that landmark to assistive tech AND
+  // to crawlers/SSR HTML natively (matching Breadcrumb/Pagination's native
+  // <nav>). role="banner" is kept explicitly: it preserves the machine-test
+  // selector contract AND guarantees the banner role even when a <header> is
+  // nested inside sectioning content (where its implicit role degrades).
   return (
-    <div
+    <header
       className={mergeClassNames(cssStyles.container, className)}
       data-component="AppBar"
       data-theme={theme}
@@ -241,6 +257,7 @@ const AppBar: FC<AppBarProps> = props => {
       style={dynamicStyle}
       onClick={handleClick}
       role="banner"
+      aria-label={ariaLabel}
       data-testid="app-bar"
       {...rest}
     >
@@ -249,7 +266,7 @@ const AppBar: FC<AppBarProps> = props => {
       )}
 
       <div className={cssStyles.toolbar}>{children}</div>
-    </div>
+    </header>
   )
 }
 
