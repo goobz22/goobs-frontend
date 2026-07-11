@@ -96,6 +96,7 @@ function getFocusableWithin(container: HTMLElement): HTMLElement[] {
 
 interface PanelContextValue {
   titleId: string
+  subtitleId: string
   variant: PanelVariant
 }
 
@@ -165,9 +166,10 @@ function PanelInner({
   ...restProps
 }: PanelProps & React.RefAttributes<HTMLElement>): ReactElement | null {
   const titleId = useId()
+  const subtitleId = useId()
   const contextValue = useMemo<PanelContextValue>(
-    () => ({ titleId, variant }),
-    [titleId, variant]
+    () => ({ titleId, subtitleId, variant }),
+    [titleId, subtitleId, variant]
   )
 
   // The region labels itself via the header title's id — but ONLY when a
@@ -177,11 +179,24 @@ function PanelInner({
   // trips AT/validators. Detect a direct Panel.Header child and gate the attr
   // so the header-less case degrades to an un-named region (or a consumer's
   // own `aria-label`/`aria-labelledby` via restProps) rather than a broken ref.
-  const hasHeader = React.Children.toArray(children).some(
+  // Capture the header element itself (not just presence) so we can also see
+  // whether it carries a `subtitle` — the subtitle is the panel's DESCRIPTION
+  // and is wired to the root via `aria-describedby` below.
+  const headerChild = React.Children.toArray(children).find(
     child =>
       React.isValidElement(child) &&
       child.type === (PanelHeader as React.ElementType)
-  )
+  ) as React.ReactElement<PanelHeaderProps> | undefined
+  const hasHeader = headerChild !== undefined
+
+  // Does the composed header carry a subtitle? The subtitle is the panel's
+  // primary description; associating it via `aria-describedby` on the root
+  // means AT announces it alongside the title when a named region is entered
+  // or the fullscreen dialog opens (APG dialog description; WCAG 4.1.2). Gate
+  // the attribute on the subtitle actually rendering (Panel.Header renders the
+  // subtitle only when `subtitle !== undefined`) so the IDREF is never dangling.
+  const hasSubtitle =
+    hasHeader && headerChild.props.subtitle !== undefined
 
   // Does the region have an accessible NAME? Either the header title, or a
   // consumer-supplied `aria-label`/`aria-labelledby` passed through restProps.
@@ -315,6 +330,10 @@ function PanelInner({
         role={resolvedRole}
         aria-modal={variant === 'fullscreen' ? true : undefined}
         aria-labelledby={hasHeader ? titleId : undefined}
+        // Wire the header subtitle in as the panel's description (announced with
+        // the title on region entry / dialog open). Placed before restProps so a
+        // consumer can still override with their own `aria-describedby`.
+        aria-describedby={hasSubtitle ? subtitleId : undefined}
         // Fullscreen (modal) root is a programmatic focus target for the trap's
         // initial/no-focusable-children fallback.
         tabIndex={variant === 'fullscreen' ? -1 : undefined}
@@ -378,7 +397,7 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
     },
     ref
   ) {
-    const { titleId, variant } = usePanelContext()
+    const { titleId, subtitleId, variant } = usePanelContext()
     // Fullscreen keeps the sacred dark chrome (`.fullscreen` in Panel.module.css
     // inherits the sacred palette from `.root`), so only the `standard` variant
     // gets light-theme text/icons — light text on the dark takeover fails WCAG
@@ -429,6 +448,7 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
           </HeadingTag>
           {subtitle !== undefined && (
             <span
+              id={subtitleId}
               className={cssStyles.headerSubtitle}
               data-panel-subtitle="true"
             >
