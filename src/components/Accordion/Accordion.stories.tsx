@@ -427,6 +427,128 @@ export const InteractionTest: Story = {
 }
 
 // --------------------------------------------------------------------------
+// ACCESSIBILITY TESTS
+// --------------------------------------------------------------------------
+
+/**
+ * Keyboard operability (WCAG 2.1.1) + disclosure ARIA (4.1.2). The header row
+ * is a real `<button>`, so it is reachable by Tab and toggled with Enter/Space;
+ * `aria-expanded` tracks state and `aria-controls` points at the panel while
+ * open. (The former `<div role="button">` had no key handler and could not be
+ * operated from the keyboard at all.)
+ */
+export const KeyboardInteraction: Story = {
+  name: 'A11y/Keyboard Toggle',
+  args: {
+    summary: 'Keyboard Accordion',
+    details: sampleDetails,
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Keyboard Accordion' })
+
+    // Starts collapsed, no dangling aria-controls.
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).not.toHaveAttribute('aria-controls')
+
+    // Tab reaches it, Enter expands.
+    trigger.focus()
+    await expect(trigger).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect(
+      canvas.getByText('This is the detailed content', { exact: false })
+    ).toBeVisible()
+
+    // The panel is wired to the trigger via aria-controls ⇄ id.
+    const panelId = trigger.getAttribute('aria-controls')
+    await expect(panelId).toBeTruthy()
+    const panel = canvasElement.querySelector(`#${panelId}`)
+    await expect(panel).toHaveAttribute('role', 'region')
+    await expect(panel).toHaveAttribute(
+      'aria-labelledby',
+      trigger.getAttribute('id') ?? ''
+    )
+
+    // Space collapses again (focus stays on the trigger).
+    await userEvent.keyboard(' ')
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  },
+}
+
+/**
+ * Menu-type items are real, crawlable `<a href>` links (2.1.1 / 4.1.2 / SEO),
+ * and the active item is programmatically the current page via
+ * `aria-current="page"` — not colour alone (1.4.1).
+ */
+export const MenuLinkAccessibility: Story = {
+  name: 'A11y/Menu Link Semantics',
+  render: () => (
+    <div style={{ width: '300px' }}>
+      <Accordion
+        type="menu"
+        summary="Dashboard"
+        href="/dashboard"
+        isActive={true}
+        styles={{ theme: 'light' }}
+      />
+      <Accordion
+        type="menu"
+        summary="Reports"
+        href="/reports"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Both render as real links with a crawlable href.
+    const active = canvas.getByRole('link', { name: 'Dashboard' })
+    await expect(active).toHaveAttribute('href', '/dashboard')
+    await expect(active).toHaveAttribute('aria-current', 'page')
+
+    const inactive = canvas.getByRole('link', { name: 'Reports' })
+    await expect(inactive).toHaveAttribute('href', '/reports')
+    // Never emit aria-current on non-active items.
+    await expect(inactive).not.toHaveAttribute('aria-current')
+  },
+}
+
+/**
+ * `headingLevel` wraps the toggle in a real `<h1>`–`<h6>` so the collapsible
+ * section is exposed as a document heading (1.3.1 / SEO). The button remains
+ * inside the heading and keeps its disclosure semantics.
+ */
+export const HeadingLevel: Story = {
+  name: 'A11y/Heading Level',
+  args: {
+    summary: 'Section Title',
+    details: sampleDetails,
+    headingLevel: 3,
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const heading = canvas.getByRole('heading', {
+      level: 3,
+      name: 'Section Title',
+    })
+    await expect(heading).toBeInTheDocument()
+
+    // The toggle button lives inside the heading and still toggles.
+    const trigger = within(heading).getByRole('button', {
+      name: 'Section Title',
+    })
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(trigger)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  },
+}
+
+// --------------------------------------------------------------------------
 // LEVEL TESTING STORY
 // --------------------------------------------------------------------------
 

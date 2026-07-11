@@ -258,6 +258,7 @@ const Accordion: FC<AccordionProps> = props => {
       <button
         type="button"
         className={cssStyles.summary}
+        data-active={isActive ? 'true' : undefined}
         data-disabled={disabled ? 'true' : undefined}
         onClick={handleClick}
         {...rest}

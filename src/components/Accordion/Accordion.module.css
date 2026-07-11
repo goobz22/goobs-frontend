@@ -108,6 +108,15 @@
    -------------------------------------------------------------------------- */
 .summary {
   position: relative;
+  /* Native-element reset: this row renders as a <button> (accordion / menu
+     onClick) or an <a> (menu href). Strip UA button chrome so all three read
+     identically and fill the container like the old block <div> did. */
+  appearance: none;
+  border: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
   padding: var(--accordion-padding);
   /* accordion type: 40px base; overridden to 16px base for menu type */
   padding-left: calc(40px + var(--accordion-level-indent));
@@ -148,6 +157,32 @@
   cursor: not-allowed;
 }
 
+/* Keyboard/AT focus ring — mirrors Button's treatment (outline, per-theme
+   colour) but INSET (negative outline-offset) because .container clips with
+   overflow:hidden, which would crop an outset ring at the row edges. */
+.summary:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: -2px;
+}
+
+.container[data-theme='light'] .summary:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.container[data-theme='dark'] .summary:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   HEADING WRAPPER (optional headingLevel prop)
+   -------------------------------------------------------------------------- */
+/* Purely structural — the button inside carries all visual styling, so the
+   heading neutralises its own default margins/size to avoid layout shift. */
+.heading {
+  margin: 0;
+  font: inherit;
+}
+
 /* --------------------------------------------------------------------------
    ICON (expand/collapse chevron)
    -------------------------------------------------------------------------- */
@@ -176,4 +211,17 @@
   font-family: var(--accordion-details-font-family);
   font-size: var(--goobs-text-md);
   border-top: 1px solid var(--accordion-details-border-top-color);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3)
+   -------------------------------------------------------------------------- */
+/* Drop the row/container transitions and the chevron spin for users who opt
+   out of motion. */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .summary,
+  .icon {
+    transition: none;
+  }
 }
