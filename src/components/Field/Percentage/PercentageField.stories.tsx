@@ -693,6 +693,9 @@ export const KeyboardStepping: Story = {
  * The +/- buttons are reachable by Tab and activate with Enter/Space — a
  * regression guard for the old mousedown-only handlers, which fired on
  * `mousedown` only and were completely inert for keyboard users (WCAG 2.1.1).
+ * Each stepper's accessible name references the field label ("Increase Stepper
+ * Percentage" / "Decrease Stepper Percentage") so multiple steppers on a page
+ * stay distinguishable to AT (WCAG 2.4.6 / 4.1.2).
  */
 export const ButtonKeyboardActivation: Story = {
   name: 'A11y — Button Keyboard Activation (Tab + Enter)',
@@ -707,8 +710,13 @@ export const ButtonKeyboardActivation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('spinbutton', { name: /Stepper Percentage/i })
-    const incrementButton = canvas.getByRole('button', { name: 'increment' })
-    const decrementButton = canvas.getByRole('button', { name: 'decrement' })
+    // The stepper names are label-scoped, not the bare "increment"/"decrement".
+    const incrementButton = canvas.getByRole('button', {
+      name: 'Increase Stepper Percentage',
+    })
+    const decrementButton = canvas.getByRole('button', {
+      name: 'Decrease Stepper Percentage',
+    })
 
     // Tab from the input reaches the increment button, and Enter activates it.
     await userEvent.click(input)
@@ -722,5 +730,145 @@ export const ButtonKeyboardActivation: Story = {
     await expect(decrementButton).toHaveFocus()
     await userEvent.keyboard(' ')
     await expect(input).toHaveValue('10%')
+
+    // The data-action selector contract the ThothOS Playwright suite keys on is
+    // preserved even though the aria-label is now label-scoped.
+    await expect(incrementButton).toHaveAttribute('data-action', 'increment')
+    await expect(decrementButton).toHaveAttribute('data-action', 'decrement')
+  },
+}
+
+/**
+ * Out-of-range seeds must not leak an aria-valuenow that violates the declared
+ * min/max: with initialValue "150" against the default max=100 (the error-state
+ * case), the spinbutton exposes aria-valuenow clamped to "100" while the visible
+ * display and aria-valuetext still show the true "150%". Guards the WAI-ARIA
+ * spinbutton range constraint (aria-valuenow ∈ [aria-valuemin, aria-valuemax]).
+ */
+export const OutOfRangeAriaClamp: Story = {
+  name: 'A11y — aria-valuenow Clamped To Range (out-of-range seed)',
+  render: () => (
+    <PercentageField
+      label="Over Max Percentage"
+      initialValue="150"
+      error="Percentage cannot exceed 100%."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('spinbutton', {
+      name: /Over Max Percentage/i,
+    })
+
+    // The declared range and the true human-readable value.
+    await expect(input).toHaveAttribute('aria-valuemin', '0')
+    await expect(input).toHaveAttribute('aria-valuemax', '100')
+    await expect(input).toHaveValue('150%')
+    await expect(input).toHaveAttribute('aria-valuetext', '150%')
+
+    // aria-valuenow is clamped into [min, max] — never the raw out-of-range 150.
+    await expect(input).toHaveAttribute('aria-valuenow', '100')
+  },
+}
+
+/**
+ * The below-min mirror of the clamp: initialValue "-25" against the default
+ * min=0 must expose aria-valuenow "0" (not the raw -25) while the display and
+ * aria-valuetext keep the truthful "-25%".
+ */
+export const BelowMinAriaClamp: Story = {
+  name: 'A11y — aria-valuenow Clamped To Range (below-min seed)',
+  render: () => (
+    <PercentageField
+      label="Under Min Percentage"
+      initialValue="-25"
+      error="Percentage cannot be negative."
+      styles={{ theme: 'sacred' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('spinbutton', {
+      name: /Under Min Percentage/i,
+    })
+
+    await expect(input).toHaveAttribute('aria-valuemin', '0')
+    await expect(input).toHaveValue('-25%')
+    await expect(input).toHaveAttribute('aria-valuetext', '-25%')
+    // Clamped up to the floor, never the raw -25.
+    await expect(input).toHaveAttribute('aria-valuenow', '0')
+  },
+}
+
+/**
+ * Pins the two CSS-only a11y states that the Chromatic baseline is the only
+ * regression test for: (1) the keyboard focus rings on the input and the +/-
+ * buttons (`.input:focus-visible` / `.button:focus-visible`, WCAG 2.4.7), and
+ * (2) the prefers-reduced-motion transition-off guard (WCAG 2.3.3). Keyboard
+ * focus (via Tab) triggers :focus-visible so the ring renders in the snapshot,
+ * and the play function asserts a real outline is applied. The reduced-motion
+ * rule is asserted structurally from the injected stylesheet so a rebuild that
+ * drops it fails here regardless of the runner's OS motion setting.
+ */
+export const FocusVisibleAndReducedMotion: Story = {
+  name: 'A11y — Focus Rings + Reduced-Motion Guard',
+  render: () => (
+    <PercentageFieldWithState
+      label="Focus Ring Percentage"
+      initialValue="42"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('spinbutton', {
+      name: /Focus Ring Percentage/i,
+    })
+    const incrementButton = canvas.getByRole('button', {
+      name: 'Increase Focus Ring Percentage',
+    })
+
+    // Keyboard focus (Tab) → :focus-visible applies a real outline ring on the
+    // input. Programmatic .focus() would not reliably match :focus-visible, so
+    // drive it with the keyboard the way a real AT/keyboard user would.
+    await userEvent.tab()
+    await expect(input).toHaveFocus()
+    const inputOutline = getComputedStyle(input).outlineStyle
+    expect(inputOutline).toBe('solid')
+
+    // Tab onward to the increment stepper — it, too, shows its own ring so a
+    // keyboard user can tell WHICH control is focused.
+    await userEvent.tab()
+    await expect(incrementButton).toHaveFocus()
+    const buttonOutline = getComputedStyle(incrementButton).outlineStyle
+    expect(buttonOutline).toBe('solid')
+
+    // Structural guard for the reduced-motion rule: a
+    // @media (prefers-reduced-motion: reduce) block that zeroes the transition
+    // must exist in the injected CSS, independent of the runner's motion pref.
+    const hasReducedMotionRule = Array.from(document.styleSheets).some(sheet => {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        // Cross-origin sheet — skip.
+        return false
+      }
+      return Array.from(rules).some(
+        rule =>
+          rule instanceof CSSMediaRule &&
+          rule.conditionText.includes('prefers-reduced-motion') &&
+          Array.from(rule.cssRules).some(
+            inner =>
+              inner instanceof CSSStyleRule &&
+              inner.style.transition === 'none'
+          )
+      )
+    })
+    expect(hasReducedMotionRule).toBe(true)
   },
 }
