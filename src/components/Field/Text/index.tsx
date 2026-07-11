@@ -36,6 +36,22 @@ export interface TextFieldProps {
   /** Node rendered inside the field frame after the input. */
   endAdornment?: React.ReactNode
   placeholder?: string | undefined
+  /**
+   * Accessible name for the input when no visible `label` is rendered (bare
+   * inputs in toolbars, data-table cells, search bars, …). A placeholder is
+   * NOT an accessible name — it is not exposed as one to assistive tech and
+   * vanishes on input, so an unlabelled field is anonymous to screen readers.
+   * Forwarded as `aria-label` on the input/textarea. Prefer a visible `label`
+   * when the UI allows; use this only for genuinely label-less layouts.
+   */
+  ariaLabel?: string
+  /**
+   * IDs of the element(s) that name the input, when its accessible name lives
+   * in a separate visible element rather than the `label` prop. Forwarded as
+   * `aria-labelledby` on the input/textarea (takes precedence over `ariaLabel`
+   * per the ARIA name-computation order).
+   */
+  ariaLabelledby?: string
   /** Native input `type` (default 'text'). Ignored when `multiline` is set. */
   type?: string
   /** Renders a `<textarea>` instead of a single-line input (default false). */
@@ -84,6 +100,8 @@ const TextField: React.FC<TextFieldProps> = ({
   startAdornment,
   endAdornment,
   placeholder,
+  ariaLabel,
+  ariaLabelledby,
   type = 'text',
   multiline = false,
   minRows = 3,
@@ -293,6 +311,8 @@ const TextField: React.FC<TextFieldProps> = ({
               disabled={disabled}
               required={required}
               placeholder={placeholder}
+              aria-label={ariaLabel}
+              aria-labelledby={ariaLabelledby}
               data-field-name={dataFieldName ?? name}
               style={
                 Object.keys(inputStyleOverrides).length > 0
@@ -316,6 +336,8 @@ const TextField: React.FC<TextFieldProps> = ({
               disabled={disabled}
               required={required}
               placeholder={placeholder}
+              aria-label={ariaLabel}
+              aria-labelledby={ariaLabelledby}
               data-field-name={dataFieldName ?? name}
               style={
                 Object.keys(inputStyleOverrides).length > 0

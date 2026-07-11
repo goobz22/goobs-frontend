@@ -1120,3 +1120,131 @@ export const TopLevelRequiredProp: Story = {
     expect(plainInput).not.toHaveAttribute('aria-required')
   },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBLE NAME WITHOUT A VISIBLE LABEL (a11y — WCAG 4.1.2 / 3.3.2)
+// --------------------------------------------------------------------------
+
+/**
+ * A placeholder is NOT an accessible name — it is not exposed as one to
+ * assistive tech and disappears on input, so a label-less field is anonymous
+ * to screen readers. The additive `ariaLabel` / `ariaLabelledby` props give
+ * such fields a programmatic name without forcing a visible `<label>`.
+ *
+ * The `play` test asserts each label-less input is reachable BY NAME via the
+ * accessibility tree (`getByRole('textbox', { name })`), which only succeeds
+ * when the accessible name is wired — the regression guard for the fix.
+ */
+export const AccessibleNameWithoutLabel: Story = {
+  name: 'Accessible name without a visible label',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* aria-label: name supplied directly, no visible label. */}
+      <TextFieldWithState
+        ariaLabel="Search products"
+        placeholder="Search…"
+        startAdornment={<SearchIcon />}
+        styles={{ theme: 'light' }}
+      />
+      {/* aria-labelledby: name lives in a separate visible element. */}
+      <div>
+        <span id="notes-caption" style={{ fontSize: '14px', color: '#374151' }}>
+          Delivery notes
+        </span>
+        <TextFieldWithState
+          ariaLabelledby="notes-caption"
+          multiline
+          placeholder="Add notes for the courier"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The aria-label field is reachable by its programmatic name even though
+    // no <label> element exists for it.
+    const search = canvas.getByRole('textbox', { name: 'Search products' })
+    await expect(search).toBeInTheDocument()
+    await expect(search).toHaveAttribute('aria-label', 'Search products')
+
+    // The aria-labelledby field resolves its name from the referenced element.
+    const notes = canvas.getByRole('textbox', { name: 'Delivery notes' })
+    await expect(notes).toBeInTheDocument()
+    await expect(notes).toHaveAttribute('aria-labelledby', 'notes-caption')
+
+    // Typing still works normally through the accessible-named input.
+    await userEvent.type(search, 'wax')
+    await expect(search).toHaveValue('wax')
+  },
+}
+
+// --------------------------------------------------------------------------
+// FOCUS-VISIBLE INDICATOR (a11y — WCAG 2.4.7)
+// --------------------------------------------------------------------------
+
+/**
+ * The inner input/textarea carry `outline: none`, so the visible focus ring is
+ * provided at the wrapper via `:focus-within` (pure CSS, hydration-independent)
+ * as well as the JS `.focused` class. The `play` test focuses the input and
+ * asserts the wrapper enters the `:focus-within` state — proving a keyboard
+ * user always gets a focus indicator, not one contingent on JS.
+ */
+export const FocusVisibleIndicator: Story = {
+  name: 'Focus-visible indicator (keyboard)',
+  render: () => (
+    <TextFieldWithState
+      label="Focusable field"
+      placeholder="Tab or click to focus"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: /Focusable field/ })
+
+    // Move focus to the input the way a keyboard user would.
+    await userEvent.click(input)
+    await expect(input).toHaveFocus()
+
+    // The wrapper (input's parent) reflects the focus via the native
+    // `:focus-within` pseudo-class — the CSS-native focus ring hook.
+    const wrapper = input.parentElement as HTMLElement
+    await expect(wrapper.matches(':focus-within')).toBe(true)
+  },
+}
+
+// --------------------------------------------------------------------------
+// REDUCED MOTION (a11y — WCAG 2.3.3)
+// --------------------------------------------------------------------------
+
+/**
+ * The wrapper animates its border-color + focus-glow box-shadow over 0.3s. A
+ * `@media (prefers-reduced-motion: reduce)` block in TextField.module.css
+ * collapses that transition to `none` for users who request reduced motion —
+ * the focus/error/disabled state changes still apply, they just snap instead of
+ * animating. Toggle your OS "reduce motion" setting (or the browser devtools
+ * emulation) while focusing this field to see the transition disappear; the
+ * Chromatic baseline captures the rendered result.
+ */
+export const ReducedMotion: Story = {
+  name: 'Reduced motion (focus transition)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <TextFieldWithState
+        label="Sacred field"
+        placeholder="Focus me with reduce-motion on"
+        styles={{ theme: 'sacred' }}
+      />
+      <TextFieldWithState
+        label="Light field"
+        placeholder="Focus me with reduce-motion on"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+}

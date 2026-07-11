@@ -39,7 +39,16 @@
   min-height: auto;
 }
 
-.inputWrapper.focused {
+/* Focus ring — driven by BOTH the JS `.focused` class and the native
+   `:focus-within` pseudo-class. The inner input/textarea carry `outline: none`
+   (below), so without a wrapper-level indicator a keyboard user would have NO
+   visible focus if the JS state ever failed to apply. `:focus-within` makes the
+   ring pure-CSS and hydration-independent (WCAG 2.4.7 Focus Visible), matching
+   FieldShell's own `.inputSlot:focus-within` pattern. Both selectors resolve to
+   the identical treatment, so mouse- and keyboard-focus render the same as
+   before. */
+.inputWrapper.focused,
+.inputWrapper:focus-within {
   border-color: var(--goobs-amber-a60);
   box-shadow: 0 0 15px var(--goobs-amber-a30);
 }
@@ -131,7 +140,8 @@
   border-color: var(--goobs-light-border);
 }
 
-[data-component='FieldShell'][data-theme='light'] .inputWrapper.focused {
+[data-component='FieldShell'][data-theme='light'] .inputWrapper.focused,
+[data-component='FieldShell'][data-theme='light'] .inputWrapper:focus-within {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
@@ -170,7 +180,8 @@
   border-color: var(--goobs-dark-border);
 }
 
-[data-component='FieldShell'][data-theme='dark'] .inputWrapper.focused {
+[data-component='FieldShell'][data-theme='dark'] .inputWrapper.focused,
+[data-component='FieldShell'][data-theme='dark'] .inputWrapper:focus-within {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
@@ -229,5 +240,18 @@
 
   .adornmentEnd {
     right: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced Motion (WCAG 2.3.3 Animation from Interactions)
+   The wrapper animates border-color + box-shadow (the focus glow) over 0.3s.
+   Users who request reduced motion get the state changes instantly — the
+   focus/error/disabled indicators still apply, they just don't animate.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .inputWrapper {
+    transition: none;
   }
 }
