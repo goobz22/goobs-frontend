@@ -655,3 +655,158 @@ export const InteractionTest: Story = {
     await expect(input).toHaveValue('SecurePassword123!')
   },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES (regression guards for the 2026-07-11 a11y audit)
+// --------------------------------------------------------------------------
+
+/**
+ * The show/hide eye is a toggle BUTTON. This pins its programmatic state
+ * (`aria-pressed`), its STABLE accessible name (which must NOT invert against
+ * the pressed state), the input `type` flip, and the polite `role="status"`
+ * live region that speaks the visibility change to screen readers.
+ * WCAG 4.1.2 (Name, Role, Value) + 4.1.3 (Status Messages).
+ */
+export const AccessibleToggleState: Story = {
+  name: 'A11y: toggle pressed-state + announcement',
+  render: () => (
+    <PasswordFieldWithState
+      label="Password"
+      initialValue="s3cr3t-value"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Password')
+    const toggle = canvas.getByRole('button', { name: 'Show password' })
+    const status = canvas.getByRole('status')
+
+    // Resting: masked, toggle not pressed, nothing announced yet.
+    expect(input).toHaveAttribute('type', 'password')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(status).toBeEmptyDOMElement()
+
+    // Reveal → type flips, pressed flips, state is announced.
+    await userEvent.click(toggle)
+    expect(input).toHaveAttribute('type', 'text')
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(status).toHaveTextContent('Password shown')
+    // The name stays stable so it never contradicts aria-pressed.
+    expect(toggle).toHaveAccessibleName('Show password')
+
+    // Mask again → everything reverts and the change is announced.
+    await userEvent.click(toggle)
+    expect(input).toHaveAttribute('type', 'password')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(status).toHaveTextContent('Password hidden')
+  },
+}
+
+/**
+ * Both the input and the eye toggle expose a visible keyboard-focus indicator
+ * via CSS `:focus-visible` (the native outline is reset for layout). The input
+ * ring is pure-CSS and hydration-independent. WCAG 2.4.7 (Focus Visible).
+ */
+export const FocusVisibleIndicator: Story = {
+  name: 'A11y: input & toggle focus-visible',
+  render: () => (
+    <PasswordFieldWithState
+      label="Password"
+      placeholder="Enter password"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Password')
+    const toggle = canvas.getByRole('button', { name: 'Show password' })
+
+    await userEvent.click(input)
+    expect(input).toHaveFocus()
+    // A text input matches :focus-visible on any focus, so the ring shows.
+    expect(input.matches(':focus-visible')).toBe(true)
+
+    // Tab to the toggle — it gets its own keyboard-focus ring.
+    await userEvent.tab()
+    expect(toggle).toHaveFocus()
+    expect(toggle.matches(':focus-visible')).toBe(true)
+  },
+}
+
+/**
+ * A label-less usage (`label=""`) can still be named via `ariaLabel`, advertise
+ * its purpose via `autoComplete` (password managers / WCAG 1.3.5), and — the
+ * cardinal password-field rule — must NEVER block paste. WCAG 4.1.2 / 1.3.5.
+ */
+export const AccessibleNameAndPurpose: Story = {
+  name: 'A11y: name without label + autocomplete + paste',
+  render: () => (
+    <PasswordFieldWithState
+      label=""
+      ariaLabel="Account password"
+      autoComplete="current-password"
+      placeholder="Password"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Account password')
+    expect(input).toHaveAttribute('aria-label', 'Account password')
+    expect(input).toHaveAttribute('autocomplete', 'current-password')
+
+    // Paste must work — password managers and clipboard fills depend on it.
+    await userEvent.click(input)
+    await userEvent.paste('P@ste-Works-123')
+    expect(input).toHaveValue('P@ste-Works-123')
+  },
+}
+
+/**
+ * The focus/border transition is dropped under `prefers-reduced-motion`
+ * (WCAG 2.3.3). The `@media` query is engine-evaluated from the OS setting and
+ * can't be toggled from a play fn, so this asserts the guard STRUCTURALLY: a
+ * reduced-motion block sets `transition: none` on this field's input class.
+ */
+export const ReducedMotion: Story = {
+  name: 'A11y: reduced-motion guard',
+  render: () => (
+    <PasswordFieldWithState
+      label="Password"
+      placeholder="Enter password"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Password')
+    const inputClass = Array.from(input.classList).find(c => /input/i.test(c))
+    expect(inputClass).toBeTruthy()
+
+    let guarded = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        continue // cross-origin sheet — skip
+      }
+      for (const rule of Array.from(rules)) {
+        if (
+          rule instanceof CSSMediaRule &&
+          rule.conditionText.includes('prefers-reduced-motion') &&
+          rule.cssText.includes(inputClass as string) &&
+          /transition:\s*none/.test(rule.cssText)
+        ) {
+          guarded = true
+        }
+      }
+    }
+    expect(guarded).toBe(true)
+  },
+}

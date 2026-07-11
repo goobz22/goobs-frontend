@@ -29,6 +29,27 @@ export interface PasswordFieldProps {
   dataFieldName?: string
   /** Forwarded to the input as `name` for native form submission. */
   name?: string
+  /**
+   * Accessible name for the input when NO visible `label` is rendered
+   * (e.g. `label=""` in a compact/table context). Forwarded as the input's
+   * `aria-label`. Prefer the visible `<label>` when present — an `aria-label`
+   * OVERRIDES it as the accessible name. Additive; omitted when unset.
+   */
+  ariaLabel?: string
+  /**
+   * Id of an external element that labels the input, forwarded as
+   * `aria-labelledby` (wins over `aria-label` per ARIA). For label-less
+   * usages where the name lives in a sibling node. Additive; omitted when unset.
+   */
+  ariaLabelledby?: string
+  /**
+   * Native autocomplete hint forwarded to the input — e.g. `'current-password'`
+   * on a sign-in form or `'new-password'` on a change-password / signup form.
+   * Lets browsers and password managers recognise the field's purpose, which
+   * matters most for cognitive/motor users (WCAG 1.3.5 Identify Input Purpose).
+   * Additive; omitted when unset.
+   */
+  autoComplete?: string
   /** Per-instance style overrides. */
   styles?: FieldStyleOverrides
 }
@@ -52,6 +73,9 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   dataField,
   dataFieldName,
   name,
+  ariaLabel,
+  ariaLabelledby,
+  autoComplete,
   styles,
 }) => {
   // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
@@ -72,6 +96,12 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
 
   const [passwordVisible, setPasswordVisible] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Screen-reader announcement channel for the show/hide toggle. Sighted users
+  // see the input unmask directly (the eye icon also flips shape), but AT users
+  // need the visibility change spoken. Starts empty so nothing is announced on
+  // mount — it is populated only when the user toggles.
+  const [announcement, setAnnouncement] = useState('')
 
   // Chain the engine touched-mark (no-op outside a <Form>) before the caller's
   // FocusEvent onBlur, which keeps its original signature unchanged.
@@ -104,10 +134,11 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
     return () => el.removeEventListener('input', handleNativeInput)
   }, [onChange, value])
 
-  const togglePasswordVisibility = useCallback(
-    () => setPasswordVisible(prev => !prev),
-    []
-  )
+  const togglePasswordVisibility = useCallback(() => {
+    const next = !passwordVisible
+    setPasswordVisible(next)
+    setAnnouncement(next ? 'Password shown' : 'Password hidden')
+  }, [passwordVisible])
 
   // Inner frame lives in Password.module.css so the eye-toggle button can be
   // absolutely positioned over the input. FieldShell handles the outer label
@@ -178,23 +209,51 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
+            autoComplete={autoComplete}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
             className={cssStyles.input}
             {...inputAriaProps}
           />
 
+          {/*
+           * Show/hide is a toggle BUTTON. `aria-pressed` carries the on/off
+           * state programmatically (WCAG 4.1.2) so screen-reader and
+           * color-blind users get it without relying on the icon shape alone;
+           * `pressed` === "password is currently shown". The accessible name is
+           * kept STABLE ("Show password") because a name that inverts with the
+           * action ("Hide password") contradicts `aria-pressed` — a pressed
+           * button labelled "Hide password" reads as "hiding is on" when the
+           * password is actually shown. The eye icon (decorative, aria-hidden)
+           * still flips shape for sighted users, and the live region below
+           * speaks the resulting state.
+           */}
           <button
             type="button"
             onClick={togglePasswordVisibility}
             className={cssStyles.eyeButton}
             data-action="toggle-password"
             disabled={disabled}
-            aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+            aria-pressed={passwordVisible}
+            aria-label="Show password"
           >
             <ShowHideEyeIcon
               visible={passwordVisible}
               styles={{ theme: styles?.theme || 'sacred' }}
             />
           </button>
+
+          {/* Polite live region announcing the visibility change to screen
+              readers (WCAG 4.1.3 Status Messages). Empty until the first
+              toggle so it never fires on mount. */}
+          <span
+            role="status"
+            aria-live="polite"
+            className={cssStyles.srOnly}
+            data-password-visibility=""
+          >
+            {announcement}
+          </span>
         </div>
       )}
     </FieldShell>
