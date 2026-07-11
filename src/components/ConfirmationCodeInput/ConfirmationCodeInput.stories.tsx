@@ -343,3 +343,128 @@ export const MinimalLayout: Story = {
     },
   },
 }
+
+/**
+ * Valid state (not yet the full success screen). `isValid` flips the status
+ * dot green AND renders a checkmark glyph inside it, so the valid/invalid
+ * distinction is carried by shape, not colour alone (WCAG 1.4.1). The dot is
+ * a `role="status"` live region whose visually-hidden text ("Code is valid")
+ * is announced to assistive tech on the transition (WCAG 4.1.3).
+ */
+export const ValidState: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Valid State:</strong> The status indicator turns green and
+          shows a checkmark glyph (a non-colour cue) when the code is valid.
+        </div>
+        <ConfirmationCodeInput {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    isValid: true,
+    value: '123456',
+    styles: {
+      theme: 'light',
+    },
+  },
+}
+
+/**
+ * Disabled state. `styles.disabled` sets `data-disabled` on the root, dims the
+ * container, and applies the native `disabled` attribute to every digit cell
+ * (so the disabled state is programmatic, not colour-only — WCAG 1.4.1/4.1.2).
+ */
+export const DisabledState: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Disabled State:</strong> Every digit cell is natively disabled
+          and the container is dimmed via <code>data-disabled</code>.
+        </div>
+        <ConfirmationCodeInput {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    value: '12',
+    styles: {
+      theme: 'light',
+      disabled: true,
+    },
+  },
+}
+
+/**
+ * Consumer-controlled heading level. The success message renders as a real
+ * heading whose level is set by `headingLevel` (here `2`) so it slots into the
+ * host document outline without skipping levels (WCAG 1.3.1 / 2.4.6). The
+ * success container is a `role="status"` region so the confirmation is
+ * announced when it appears (WCAG 4.1.3).
+ */
+export const CustomHeadingLevel: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Custom Heading Level:</strong> The success message renders as
+          an <code>&lt;h2&gt;</code> via <code>headingLevel</code>.
+        </div>
+        <ConfirmationCodeInput {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    isValid: true,
+    showSuccessState: true,
+    headingLevel: 2,
+    styles: {
+      theme: 'light',
+    },
+  },
+}
