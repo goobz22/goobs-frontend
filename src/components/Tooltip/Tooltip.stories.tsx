@@ -122,15 +122,27 @@ const assertOpenBubble =
   (theme: 'light' | 'dark' | 'sacred', titleText: string) =>
   async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
-    // The bubble is force-open via the controlled `open` prop — no hover.
-    const bubble = await canvas.findByText(titleText)
-    await expect(bubble).toBeVisible()
-    const bubbleRoot = canvasElement.querySelector(
-      '[data-component="Tooltip"]'
-    )
+    // The visual bubble is force-open via the controlled `open` prop — no hover.
+    // Query it by its data-component selector rather than by text: the title
+    // now also lives in the persistent, visually hidden role="tooltip"
+    // description, so a text query would ambiguously match two elements.
+    const bubbleRoot = canvasElement.querySelector('[data-component="Tooltip"]')
     await expect(bubbleRoot).not.toBeNull()
+    await expect(bubbleRoot).toHaveTextContent(titleText)
     await expect(bubbleRoot).toHaveAttribute('data-state', 'open')
     await expect(bubbleRoot).toHaveAttribute('data-theme', theme)
+    // The visual bubble is decorative; screen readers get the text from the
+    // persistent role="tooltip" description referenced by aria-describedby.
+    await expect(bubbleRoot).toHaveAttribute('aria-hidden', 'true')
+    const trigger = canvas.getByRole('button')
+    const describedby = trigger.getAttribute('aria-describedby')
+    await expect(describedby).toBeTruthy()
+    const description = canvasElement.ownerDocument.getElementById(
+      describedby as string
+    )
+    await expect(description).not.toBeNull()
+    await expect(description).toHaveAttribute('role', 'tooltip')
+    await expect(description).toHaveTextContent(titleText)
   }
 
 /**
@@ -203,6 +215,72 @@ export const OpenSacred: Story = {
   },
   globals: { backgrounds: { value: 'sacred' } },
   play: assertOpenBubble('sacred', 'Sacred bubble, always open'),
+}
+
+// --------------------------------------------------------------------------
+// A11Y — keyboard + screen-reader behavior. Pins the accessibility contract
+// that hover-only stories can't reach: the tooltip opens on keyboard FOCUS
+// (WCAG 2.1.1), the trigger is programmatically described by the tooltip text
+// via aria-describedby -> a persistent role="tooltip" element (WCAG 1.3.1 /
+// 4.1.2), and Escape dismisses it without moving focus (WCAG 1.4.13).
+// --------------------------------------------------------------------------
+export const KeyboardFocusAndEscape: Story = {
+  name: 'A11y/Keyboard Focus & Escape',
+  render: args => (
+    <div style={{ padding: '5rem', display: 'flex', justifyContent: 'center' }}>
+      <StyledTooltip {...args}>
+        <Button>Focus me</Button>
+      </StyledTooltip>
+    </div>
+  ),
+  args: {
+    ...defaultArgs,
+    title: 'Shown on focus, dismissable with Escape',
+    enterDelay: 0,
+    leaveDelay: 0,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button')
+
+    // Association is present even before the tooltip is shown (WCAG 1.3.1 /
+    // 4.1.2): the trigger is described by a persistent role="tooltip" element.
+    const describedby = trigger.getAttribute('aria-describedby')
+    await expect(describedby).toBeTruthy()
+    const description = canvasElement.ownerDocument.getElementById(
+      describedby as string
+    )
+    await expect(description).not.toBeNull()
+    await expect(description).toHaveAttribute('role', 'tooltip')
+    await expect(description).toHaveTextContent(
+      'Shown on focus, dismissable with Escape'
+    )
+
+    // Closed initially — the animated visual bubble is not mounted.
+    await expect(
+      canvasElement.querySelector('[data-component="Tooltip"]')
+    ).toBeNull()
+
+    // Keyboard focus opens the visual bubble, same as a pointer hover (WCAG
+    // 2.1.1 Keyboard) — hover-only tooltips are invisible to keyboard users.
+    trigger.focus()
+    await expect(trigger).toHaveFocus()
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('[data-component="Tooltip"]')
+      ).not.toBeNull()
+    )
+
+    // Escape dismisses the tooltip WITHOUT moving focus (WCAG 1.4.13
+    // Dismissable) — focus stays on the trigger.
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('[data-component="Tooltip"]')
+      ).toBeNull()
+    )
+    await expect(trigger).toHaveFocus()
+  },
 }
 
 // With and without arrow

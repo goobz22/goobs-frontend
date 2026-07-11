@@ -337,21 +337,13 @@ const StyledTooltip: React.FC<TooltipProps> = ({
   // When children is not a single element the association is skipped gracefully
   // — a focusable element child is required for full screen-reader support.
   const describedChildren =
-    title && React.isValidElement(children)
-      ? React.cloneElement(
-          children as React.ReactElement<{ 'aria-describedby'?: string }>,
-          {
-            'aria-describedby':
-              [
-                (children.props as { 'aria-describedby'?: string })[
-                  'aria-describedby'
-                ],
-                tooltipId,
-              ]
-                .filter(Boolean)
-                .join(' ') || undefined,
-          }
-        )
+    title && React.isValidElement<{ 'aria-describedby'?: string }>(children)
+      ? React.cloneElement(children, {
+          'aria-describedby':
+            [children.props['aria-describedby'], tooltipId]
+              .filter(Boolean)
+              .join(' ') || undefined,
+        })
       : children
 
   return (
