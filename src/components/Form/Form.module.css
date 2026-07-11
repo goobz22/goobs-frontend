@@ -1,0 +1,26 @@
+/* ==========================================================================
+   FORM - CSS MODULE
+   The <Form> element itself is theme-agnostic (theme lives on the child fields),
+   so this module carries only the visually-hidden live region used to announce
+   form-level submit/validation status to assistive tech (WCAG 4.1.3).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   VISUALLY HIDDEN — off-screen but exposed to the accessibility tree. Used for
+   the role="alert" submit-status region: when a submit is blocked by
+   validation, per-field errors appear WITHOUT moving focus, so a screen-reader
+   user would otherwise get no feedback that the submit failed. The live region
+   announces a concise summary while remaining invisible to sighted users (the
+   visible per-field errors are their equivalent).
+   -------------------------------------------------------------------------- */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

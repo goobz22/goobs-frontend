@@ -52,6 +52,10 @@
 }
 
 .title {
+  /* Reset the native heading margin — the element is now a real <h1>–<h6>, so
+     the browser's default heading margin/size would otherwise shift the layout
+     vs. the former <div>. */
+  margin: 0;
   width: 100%;
   text-align: left;
   font-family: Merriweather, serif;
@@ -72,6 +76,8 @@
 }
 
 .description {
+  /* Reset the native <p> margin — the description is now a real paragraph. */
+  margin: 0;
   width: 100%;
   text-align: left;
   font-family: Merriweather, serif;
@@ -162,5 +168,21 @@
   }
   to {
     transform: translateY(-6px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.2.2 Pause/Stop/Hide, 2.3.3 Animation from Interactions)
+   The sacred container's glow-pulse and the shimmer's data-flow run infinitely
+   and auto-start; users who prefer reduced motion get them stilled. The static
+   gold border/glow remains, so no information is lost.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .container[data-theme='sacred'] {
+    animation: none;
+  }
+
+  .shimmer::after {
+    animation: none;
   }
 }

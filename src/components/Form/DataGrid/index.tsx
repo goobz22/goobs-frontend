@@ -198,13 +198,13 @@ function FormDataGrid<TRow extends RowData = RowData>({
           Contains title, description, and optional shimmer effect (sacred theme)
           ───────────────────────────────────────────────────────────────────── */}
       <div className={cssStyles.titleContainer} data-theme={theme}>
-        <div className={cssStyles.title} data-theme={theme}>
+        <HeadingTag className={cssStyles.title} data-theme={theme}>
           {title}
-        </div>
-        <div className={cssStyles.description} data-theme={theme}>
+        </HeadingTag>
+        <p className={cssStyles.description} data-theme={theme}>
           {description}
-        </div>
-        {sacredtheme && <div className={cssStyles.shimmer} />}
+        </p>
+        {sacredtheme && <div className={cssStyles.shimmer} aria-hidden="true" />}
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────

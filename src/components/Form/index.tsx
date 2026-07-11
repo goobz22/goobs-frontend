@@ -134,7 +134,7 @@ function FormInner<TValues extends Record<string, unknown>>({
 
   const handleFormSubmit = useCallback(
     (event: FormEvent): void => {
-      const parsed = schema.safeParse(engine.values) as SafeParseLike
+      const parsed = schema.safeParse(engine.values) as unknown as SafeParseLike
       if (parsed.success) {
         setSubmitStatus('')
       } else {

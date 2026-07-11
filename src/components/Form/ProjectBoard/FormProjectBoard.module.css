@@ -51,7 +51,10 @@
    sacred ← sacredStyles.title
    -------------------------------------------------------------------------- */
 .title {
-  margin-bottom: 2px;
+  /* Reset the native heading margin (top especially) — the element is now a
+     real <h1>–<h6>, so the browser default would shift layout vs. the former
+     <div>. The original 2px bottom gap is preserved explicitly. */
+  margin: 0 0 2px;
   width: 100%;
   text-align: left;
   font-family: Merriweather, serif;
@@ -78,6 +81,8 @@
    sacred ← sacredStyles.description
    -------------------------------------------------------------------------- */
 .description {
+  /* Reset the native <p> margin — the description is now a real paragraph. */
+  margin: 0;
   width: 100%;
   text-align: left;
   font-family: Merriweather, serif;
