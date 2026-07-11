@@ -1221,6 +1221,7 @@ function DataGridContent({
         // can wait for the error state and grab the message via
         // `[data-datagrid="<id>"][data-grid-status="error"] .error`.
         data-datagrid={dataGrid}
+        data-component="DataGrid"
         data-grid-status="error"
       >
         <div className={cssStyles.error} role="alert">
@@ -1244,6 +1245,7 @@ function DataGridContent({
       className={cssStyles.datagrid}
       data-theme={theme}
       data-datagrid={dataGrid}
+      data-component="DataGrid"
       data-grid-status={gridStatus}
       // NOTE: `role="grid"` + `aria-rowcount`/`aria-colcount` used to live here,
       // on the wrapper that contains BOTH the mobile card view AND the desktop

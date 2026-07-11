@@ -555,6 +555,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   return (
     <div
       className={cssStyles.container}
+      data-component="ProjectBoard"
       data-theme={theme}
       {...(isDisabled && { 'data-disabled': 'true' })}
       style={containerStyle}

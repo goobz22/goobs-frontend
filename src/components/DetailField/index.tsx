@@ -103,6 +103,7 @@ const DetailField = forwardRef<HTMLDivElement, DetailFieldProps>(
         ref={ref}
         className={cssStyles.field}
         data-detail-field="true"
+        data-component="DetailField"
         data-theme={theme}
       >
         <dt className={cssStyles.label} data-detail-label="true">
