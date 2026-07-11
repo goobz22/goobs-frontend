@@ -10,6 +10,16 @@ CSSOM story; (c) the 1st report **overstated** that the `AccessibilityChecks` pl
 "verified" when only `lint`/`stylelint` had run locally → corrected to describe it as the
 `test-storybook`/CI regression gate (see "Gates & evidence").
 
+**3rd review (2026-07-11):** one remaining item closed at root cause — **Issue 7 /
+WCAG 2.4.7** the switch was invisible to keyboard users in **forced-colors / Windows High
+Contrast Mode**: its only focus cue was a `box-shadow` (stripped by the UA in forced-colors),
+and with the `<input>` at `opacity: 0` no native ring showed either, so keyboard focus
+disappeared entirely; the track/thumb backgrounds also collapse to one system colour,
+erasing the on/off cue. Fixed with a `@media (forced-colors: active)` block (transparent
+UA-promoted focus outline + `canvastext` thumb border), matching the library's existing
+outline-based forced-colors focus convention. Regression-gated by a new
+`AccessibilityForcedColors` CSSOM story.
+
 **APG pattern:** [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/). The
 component is built on a native `<input type="checkbox">` wrapped in a `<label>`
 (`index.tsx:158-213`) — the "semantic HTML first" implementation. The APG's
@@ -30,6 +40,7 @@ to move focus, `Space` to toggle).
 | 4 | Minor (by design — consumer responsibility) | 4.1.2 Name, Role, Value (A) | `index.tsx` — no accessible name when neither label nor `aria-label` is supplied | **DEFERRED (documented, not a defect)** |
 | 5 | Minor (opt-in — documented) | 2.4.7 Focus Visible (AA) | `Switch.module.css:250` focus ring is suppressible via `styles.focusEffects === false` | **DEFERRED (public API, default is accessible)** |
 | 6 | Moderate | 1.4.11 Non-text Contrast (AA) | `Switch.module.css` light-theme OFF state — track border `rgba(156,163,175,0.2)` (~1.2:1 vs a light page), track fill ~1.3:1, white thumb ~1.3:1: the OFF control was effectively invisible to low-vision users | **FIXED (2nd review)** |
+| 7 | Serious | 2.4.7 Focus Visible (AA); 1.4.1 (A) / 1.4.11 (AA) secondary | `Switch.module.css:260` focus ring is `box-shadow`-only (dropped in forced-colors) + `<input>` is `opacity:0` → no keyboard focus indicator in Windows High Contrast; track/thumb backgrounds collapse to one system colour | **FIXED (3rd review)** |
 
 ### Issue 1 — Switch announced as a plain checkbox (Serious)
 
@@ -91,6 +102,40 @@ against the 3:1 non-text-contrast requirement.
 overrides the border to `transparent` (blue fill carries the boundary there), so the
 change is OFF-state-only in effect. Width unchanged (1px → no layout shift).
 
+### Issue 7 — keyboard focus invisible in forced-colors / Windows High Contrast (Serious) — 3rd review
+
+Found by the third review, which assessed **forced-colors / Windows High Contrast Mode**
+(the one axis the 1st/2nd passes never covered). The entire control is CSS-painted — the
+real `<input>` is `opacity: 0` (`Switch.module.css:277-286`) — and the *only* focus
+indicator is a **box-shadow** on the track (`Switch.module.css:260-262`,
+`--switch-track-focus-shadow`). In forced-colors mode the UA **drops every `box-shadow`**
+and repaints backgrounds with a small system palette. Consequences:
+
+- **Focus vanishes (2.4.7).** The box-shadow ring is gone, and the `<input>`'s own native
+  focus ring is invisible because the input is `opacity: 0` — so a keyboard user in HCM
+  had **no focus indicator at all**.
+- **On/off cue collapses (1.4.1 / 1.4.11).** The track fill and the thumb fill are both
+  forced to the same system surface colour, and in light/dark the thumb has
+  `border-width: 0` (`Switch.module.css:151,203`) — so the moving thumb (the primary
+  *non-colour* on/off cue) could become imperceptible against the track.
+
+**Root cause:** a box-shadow-only focus treatment — exactly the anti-pattern the rest of
+the library already migrated away from. `SacredGlyphFrame.module.css:34-39` and
+`SignatureField.module.css:40-49` both use an **outline** for focus specifically "so the
+ring survives Windows forced-colors / high-contrast mode." Switch was the outlier.
+
+**Fix:** added a `@media (forced-colors: active)` block (`Switch.module.css:447-457`):
+`.track:has(.input:focus-visible)` gets `outline: 2px solid transparent; outline-offset:
+2px` — a **transparent** outline is invisible in normal rendering (the box-shadow glow
+stays the visible default ring, so the standard look is unchanged) but is **promoted to the
+system focus colour by the UA** in forced-colors (the in-repo-proven trick from
+`SignatureField.module.css:43-49`). The block is **deliberately ungated** by
+`[data-focus-effects]`, so even a consumer who sets `focusEffects: false` (Deferred #5)
+keeps a focus indicator in HCM, where it is non-negotiable. `.thumb` gets `border: 1px
+solid canvastext` so the moving thumb keeps a real system-colour boundary when its fill
+collapses. Uses only `transparent` + the lowercase CSS4 system colour `canvastext`;
+`stylelint src/components/Switch/Switch.module.css` → 0 warnings.
+
 ## Hearing
 
 No audio, video, `Audio`, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate`
@@ -127,9 +172,12 @@ WCAG 1.2.x / 1.4.2 do not apply. **No issues.**
   the new story (`kb.focus()` + `userEvent.keyboard(' ')` → `toBeChecked()`). No custom
   key handling needed or added. Good.
 - **Focus visible:** a `:focus-visible` ring exists
-  (`Switch.module.css:250`, `--switch-track-focus-shadow`, per-theme). It is only shown
-  for keyboard focus (`:focus-visible`, not `:focus`). Good by default (see Deferred #5
-  on the `focusEffects` opt-out).
+  (`Switch.module.css:260`, `--switch-track-focus-shadow`, per-theme). It is only shown
+  for keyboard focus (`:focus-visible`, not `:focus`). **Fixed** (Issue 7, 3rd review) the
+  forced-colors gap — the box-shadow ring is dropped in Windows High Contrast, so a
+  `@media (forced-colors: active)` block adds a UA-promoted transparent focus outline
+  (ungated by `focusEffects` so HCM keyboard focus is always visible) and a `canvastext`
+  thumb border. Good by default (see Deferred #5 on the `focusEffects` opt-out).
 - **Disabled:** conveyed by the native `disabled` attribute (programmatic) plus
   `data-disabled` styling — not visual-only. Good.
 - **Motion:** **Fixed** (Issue 3) — added `@media (prefers-reduced-motion: reduce)`.
@@ -171,6 +219,15 @@ primary content. **No issues.**
    the brand literals stylelint forbids, and the file already carries per-theme
    literals) because no `--goobs-*` token sits in the required 4–5:1 band; see Deferred
    for the token that should own this.
+5. **Forced-colors focus + on/off cue (Issue 7, 3rd review)** — added a
+   `@media (forced-colors: active)` block to `Switch.module.css` (`:447-457`):
+   `.track:has(.input:focus-visible)` → `outline: 2px solid transparent; outline-offset:
+   2px` (UA-promoted focus ring that survives HCM where box-shadow is dropped; ungated by
+   `[data-focus-effects]`), and `.thumb` → `border: 1px solid canvastext` (keeps the
+   moving thumb perceivable when backgrounds collapse to system colours). Additive,
+   forced-colors-only; the default rendering and Chromatic baselines are unchanged.
+   Uses only `transparent` + the lowercase CSS4 system colour `canvastext` — token-leak
+   clean. Regression-gated by the new `AccessibilityForcedColors` story. Commit `625ce4c3`.
 
 **Markup change note (required disclosure):** the only DOM change is the **addition**
 of `role="switch"` (and two `aria-hidden` attributes). No element was swapped, and no
@@ -208,16 +265,27 @@ changes are additive attributes + additive CSS.
   to Switch's own hashed track class, and asserts Switch's
   `@media (prefers-reduced-motion: reduce)` block exists and sets both `animation: none`
   and `transition: none`. This re-fails if the reduced-motion block is dropped.
+- **(3rd review)** Added **`AccessibilityForcedColors`**
+  (`Accessibility - Forced Colors (WCAG 2.4.7)`): renders the sacred checked switch on a
+  dark backdrop; because a `play` cannot flip the OS forced-colors preference, it mirrors
+  the reduced-motion CSSOM pattern — it collects every hashed CSS-module class token in the
+  switch's track subtree (track/input/shimmer/thumb) to scope the search, walks the CSSOM
+  for `@media (forced-colors: active)` rules matching those tokens, and asserts (a) a
+  `:focus-visible` rule restores an `outline` and (b) a rule restores a thumb `border`.
+  Re-fails if the forced-colors block is dropped or weakened.
 
 ## Gates & evidence
 
 **Run locally, per-file (this is the complete list of what was executed here):**
-- `bun lint:file src/components/Switch/Switch.stories.tsx` → exit 0.
+- `bun lint:file src/components/Switch/Switch.stories.tsx` → exit 0 (2nd + 3rd review).
 - `bunx stylelint src/components/Switch/Switch.module.css` → exit 0 (token-leak clean;
-  `#6b7280` is not a forbidden brand literal).
-- `index.tsx` was **not** modified in the 2nd review, so it was not re-linted here.
+  `#6b7280` and the lowercase system colour `canvastext` are not forbidden literals, and
+  the transparent focus outline uses no colour keyword).
+- `index.tsx` was **not** modified in the 2nd or 3rd review, so it was not re-linted here.
 - WCAG contrast figures above were computed with a standalone sRGB-luminance script and
-  are additionally encoded as live assertions in the two new stories.
+  are additionally encoded as live assertions in the stories.
+- **3rd review is pure CSS + a new story** — no `index.tsx`/markup/DOM/API change, so no
+  role-query or selector-contract impact.
 
 **NOT run locally (deliberately):** the `test-storybook` (`@storybook/test-runner`) run
 that actually executes the `play` functions, and the full `bun run build` / Chromatic
