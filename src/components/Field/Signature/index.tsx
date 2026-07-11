@@ -100,6 +100,13 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
   // can tell an external/initial value (repaint) from our own echo (skip).
   const lastEmittedRef = useRef<string>('')
   const [hasInk, setHasInk] = useState<boolean>(Boolean(value))
+  // Screen-reader announcement channel. The signature surface is a pointer-only
+  // <canvas> whose success/clear feedback is otherwise conveyed only by pixels
+  // appearing — invisible to AT. This polite live region announces each state
+  // transition so a non-sighted user learns their stroke or clear took effect
+  // (WCAG 4.1.3 Status Messages). Empty on mount so nothing is announced until
+  // the user acts.
+  const [announcement, setAnnouncement] = useState<string>('')
 
   // Size the canvas backing store to its CSS box × devicePixelRatio so strokes
   // stay crisp, and scale the context so we can draw in CSS pixels. Repaints the
@@ -216,6 +223,7 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
     const dataUrl = canvas.toDataURL('image/png')
     lastEmittedRef.current = dataUrl
     setHasInk(true)
+    setAnnouncement('Signature captured.')
     onChange?.(dataUrl)
     onBlur?.()
   }, [onChange, onBlur])
@@ -225,6 +233,7 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
     setupCanvas()
     lastEmittedRef.current = ''
     setHasInk(false)
+    setAnnouncement('Signature cleared.')
     onChange?.('')
     onBlur?.()
   }, [disabled, setupCanvas, onChange, onBlur])
@@ -237,6 +246,18 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
             : styles.height,
       } as React.CSSProperties)
     : undefined
+
+  // Accessible name for the pointer-only canvas. `htmlFor` on FieldShell's
+  // <label> does not name a non-labelable <canvas>, so the canvas carries its
+  // own name — and that name must expose the CURRENT state (signed vs empty)
+  // and whether the field is required, since neither the aria-hidden required
+  // glyph nor aria-required (unsupported on role="img") reaches AT here. This
+  // makes signed/empty perceivable to a screen reader on focus (WCAG 1.1.1,
+  // 1.3.1, 4.1.2).
+  const baseLabel = typeof label === 'string' && label ? label : 'Signature pad'
+  const canvasAriaLabel = `${baseLabel}${required ? ', required' : ''}, ${
+    hasInk ? 'signature present' : 'no signature, draw to sign'
+  }`
 
   return (
     <FieldShell
@@ -256,6 +277,7 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
           <div
             className={cssStyles.surface}
             data-disabled={disabled || undefined}
+            data-signed={hasInk || undefined}
             style={surfaceStyle}
           >
             <canvas
@@ -263,9 +285,13 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
               id={inputId}
               className={cssStyles.canvas}
               role="img"
-              aria-label={
-                typeof label === 'string' ? label : 'Signature pad'
-              }
+              aria-label={canvasAriaLabel}
+              // Reachable by keyboard/AT so a non-pointer user can perceive the
+              // field's name, state, and error (aria-describedby) — the freehand
+              // drawing itself is an inherent pointer/handwriting gesture (no
+              // keyboard-draw is required), but the field must not be skippable.
+              // Not focusable while disabled.
+              tabIndex={disabled ? -1 : 0}
               data-field-name={dataFieldName ?? name}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -274,7 +300,11 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
               {...inputAriaProps}
             />
             {!hasInk && (
-              <div className={cssStyles.placeholder}>{placeholder}</div>
+              // Purely visual affordance — the same "draw to sign" instruction
+              // is in the canvas's accessible name, so hide the duplicate from AT.
+              <div className={cssStyles.placeholder} aria-hidden="true">
+                {placeholder}
+              </div>
             )}
           </div>
           <div className={cssStyles.toolbar}>
@@ -287,6 +317,16 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
             >
               {clearText}
             </button>
+          </div>
+          {/* Polite live region: announces signed/cleared to screen readers
+              (visual users see the ink/placeholder change directly). */}
+          <div
+            role="status"
+            aria-live="polite"
+            className={cssStyles.srOnly}
+            data-signature-status=""
+          >
+            {announcement}
           </div>
         </div>
       )}

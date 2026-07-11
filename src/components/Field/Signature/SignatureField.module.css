@@ -23,6 +23,17 @@
   display: block;
 }
 
+/*
+ * Visible keyboard-focus ring on the (now focusable) canvas. The parent
+ * .surface uses overflow:hidden to clip strokes, so a normal outward outline
+ * would be clipped — offset it inward so the ring stays inside the surface.
+ * :focus-visible keeps it keyboard-only (no ring on pointer drawing).
+ */
+.canvas:focus-visible {
+  outline: 2px solid var(--field-border-focus, #d4af37);
+  outline-offset: -2px;
+}
+
 .surface[data-disabled='true'] .canvas {
   cursor: not-allowed;
 }
@@ -60,7 +71,36 @@
   background: rgba(212, 175, 55, 0.12);
 }
 
+/* Visible keyboard-focus indicator (WCAG 2.4.7). */
+.clearButton:focus-visible {
+  outline: 2px solid var(--field-border-focus, #d4af37);
+  outline-offset: 2px;
+}
+
 .clearButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/*
+ * Visually-hidden but AT-exposed. Used for the polite status live region that
+ * announces signed/cleared to screen readers without affecting the layout.
+ */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Respect reduced-motion: drop the clear-button hover transition (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  .clearButton {
+    transition: none;
+  }
 }
