@@ -1,6 +1,8 @@
 # TransferList — a11y audit (2026-07-11)
 
-**Status: FIXED**
+**Status: FIXED** — every in-directory issue resolved (14 of 15); one minor
+cross-file naming improvement (issue 15) is **DEFERRED** to `Field/Dropdown`
+because a rendering-neutral fix lives in that component's API, not here.
 
 **APG pattern:** WAI-ARIA _list of related checkboxes_ (two multi-select item
 lists) driving a pair of _move buttons_. Each list is a real `<ul>` of `<li>`s;
@@ -36,6 +38,13 @@ to fire a button) is satisfied by native semantics with no custom key handling.
 | 11 | Moderate | 1.3.1 Info & Relationships | `index.tsx` `renderList` (the `<ul>`/`<li>`) | The list-semantics fix (#2) was silently defeated on WebKit/Safari + VoiceOver: `.listInner` sets `list-style: none`, and Safari strips the implicit `list`/`listitem` roles from a `<ul>`/`<li>` styled that way, so "list, N items / item X of N" was never announced there. jsdom keeps the implicit roles, so `getByRole('list')` false-passed. | FIXED |
 | 12 | Minor | 4.1.2 Name, Role, Value | `index.tsx` container (`role="group"`) | The composite `role="group"` had no accessible name — only an `aria-describedby` (a description) when an engine error was present — so AT announced a bare, context-free "group". | FIXED |
 | 13 | Moderate | 3.2.4 / affordance + test contract | `index.tsx` `<li>` + `TransferList.module.css` `.listItem` | `data-action="toggle"`/`data-checked` sat on a non-interactive `<li>` that still carried `cursor: pointer` + a `:hover` transform — signalling the whole row was clickable when only the checkbox/label toggled, and a consumer test clicking `[data-action="toggle"]` on the row padding silently no-op'd. | FIXED |
+
+### Fresh owner-pass (2026-07-11, second owner)
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| 14 | Minor | 2.4.3 Focus Order / 2.4.7 Focus Visible | `index.tsx` transfer handlers + the four `<button>`s | Activating a transfer arrow can flip that same button to `disabled` — "move all right" empties the left list so its own precondition (`currentLeft.length === 0`) becomes true; the three other arrows disable the same way at their saturating move. When a **focused** element becomes disabled the browser blurs it and focus falls to `<body>`, so a keyboard user is silently dropped out of the control (every transfer button exhibits this at its saturating case). Issue 3 fixed focus *visibility* (the ring); it did not address focus *retention*. | FIXED |
+| 15 | Minor | 4.1.2 Name, Role, Value | `index.tsx` `renderLeftColumn` (`multipleSelection`, L~423) | In the `multipleSelection` variant the category `Dropdown` is given `label={dropdownLabel \|\| ''}`; the empty string leaves the `role="combobox"` with only a weak content-derived name (its display text, "Select…") when a consumer omits `dropdownLabel`. The paired list already falls back to `aria-label="Available items"`, but the combobox does not get an equivalent fallback. | DEFERRED |
 
 **Hearing-impaired (A):** CLEAN. Grep for `new Audio` / `AudioContext` /
 `navigator.vibrate` / `<audio>` / `<video>` / `speechSynthesis` in the component
@@ -101,6 +110,20 @@ All fixes are inside the component directory (`src/components/TransferList/`).
   introduced. `data-action="toggle"` / `data-checked` stayed on the `<li>`
   (selector contract unchanged).
 
+#### Fresh owner-pass (2026-07-11, second owner)
+- **Keyboard focus retained across a transfer (issue 14).** A `buttonGroupRef`
+  on the `.buttonGroup` div plus a `transferNonce` bumped by every transfer
+  handler (`noteTransfer()`) drive a `useEffect` that, after each move, redirects
+  focus to the **first still-enabled transfer button** when the just-activated
+  button became disabled (jsdom keeps it as `activeElement`) or when focus
+  already fell to `<body>` (real DOM blur-on-disable). A move always leaves the
+  reciprocal "move all …" button enabled (the destination list is now
+  non-empty), so focus never drops out of the control. `focus({ preventScroll:
+  true })` keeps the viewport steady; `:focus-visible` stays keyboard-gated, so a
+  pointer user gets no spurious ring from the programmatic focus. Purely additive
+  — no prop, DOM, `data-*`/`role`/`aria` change; the machine-test selector
+  contract is untouched.
+
 ### Styling — `TransferList.module.css`
 - **`:focus-visible` ring on the transfer buttons (issue 3)** — themed
   `outline` (gold / light-primary / dark-primary), using `outline` (not
@@ -140,6 +163,12 @@ a `play` that fails against the pre-fix markup:
   `data-checked`, exercising the guarded row `onClick` / the
   `[data-action="toggle"]` selector. `InteractiveDemo` already guards the
   no-double-toggle-on-label invariant (a label click ends single-toggled).
+- **`FocusRetainedAfterTransfer`** (new, fresh owner-pass, issue 14): starts with
+  a full left list and empty right list, clicks "move all right" (which disables
+  itself), then asserts focus landed on the now-enabled "move all left" — not on
+  the disabled button and not on `<body>`. jsdom does not auto-blur a disabled
+  element, so pre-fix the assertion fails with focus trapped on the disabled
+  button; it also fails against a real browser's fall-to-`<body>`.
 
 ---
 
@@ -148,12 +177,29 @@ a `play` that fails against the pre-fix markup:
 - `a759e90c` — stories exercising the new states
 - `7b651e37` — review follow-ups: explicit list/listitem roles, named group, whole-row-clickable toggle
 - `4fa192fb` — stories pinning the review follow-ups
+- `72a5f77f` — fresh owner-pass: retain keyboard focus when a transfer button self-disables (issue 14) + `FocusRetainedAfterTransfer` story
 
 ---
 
 ## Deferred
 
-None. Every fix landed inside the component directory. The row checkboxes reuse
+- **Issue 15 (Minor, WCAG 4.1.2).** In the `multipleSelection` variant the
+  category `Dropdown` receives `label={dropdownLabel || ''}`; when a consumer
+  omits `dropdownLabel` the `role="combobox"` has only a weak content-derived
+  name ("Select…"). A fallback could be passed from *inside* this directory
+  (`label={dropdownLabel || 'Category'}`), but that would render a *visible*
+  floating label — a rendering change to a variant that currently has **no story
+  coverage** to validate it — and the combobox is not fully nameless. The clean,
+  rendering-neutral fix belongs to the `Field/Dropdown/Regular` API: let the
+  combobox take an `aria-label` independent of the visible `label` (today
+  `aria-label={label}` ties them together). **Suggested change** in
+  `src/components/Field/Dropdown/Regular/index.tsx` (~L221): accept an optional
+  `ariaLabel?: string` prop and emit `aria-label={ariaLabel ?? label}` on the
+  trigger `<button role="combobox">`, so TransferList can name the category
+  selector without forcing a visible label. Not fixed here (file outside this
+  component's ownership; low severity; degenerate config).
+
+Everything else landed inside the component directory. The row checkboxes reuse
 `../Checkbox` (`CustomCheckbox`) unchanged — its own `:focus-visible` ring,
 themed label, and `prefers-reduced-motion` handling already satisfy the
 per-checkbox requirements, so no shared file needed editing.
