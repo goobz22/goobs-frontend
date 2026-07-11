@@ -332,7 +332,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
     >
       {({ inputId, inputAriaProps }) => (
         <div className={cssStyles.inputWrapper}>
-          <div className={cssStyles.adornment}>
+          <div className={cssStyles.adornment} aria-hidden="true">
             <span>{getCardIcon()}</span>
           </div>
           <input

@@ -149,6 +149,39 @@ const ExternalIncrementNumberField: React.FC<
     [onChange]
   )
 
+  // Keyboard operability for the spinbutton (WCAG 2.1.1 / APG spinbutton):
+  // Up/Down arrows step the value and Home jumps to the floor (0). The
+  // buttons are already keyboard-operable (native <button> onClick); this
+  // makes the input itself a proper stepper for keyboard/AT users.
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (disabled) return
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault()
+          handleIncrement()
+          break
+        case 'ArrowDown':
+          event.preventDefault()
+          handleDecrement()
+          break
+        case 'Home':
+          event.preventDefault()
+          setInternalValue('0')
+          onChange?.(0)
+          break
+        default:
+          break
+      }
+    },
+    [disabled, handleIncrement, handleDecrement, onChange]
+  )
+
+  // Numeric snapshot for the spinbutton ARIA value semantics. Omitted (so
+  // React drops the attribute) while the field is empty/non-numeric.
+  const numericValue = Number.parseInt(internalValue, 10)
+  const hasNumericValue = !Number.isNaN(numericValue)
+
   // Chrome lives in ExternalIncrement.module.css: a flex row so the +/-
   // buttons sit on either side of the centered numeric input. Colors fall
   // back to the FieldShell CSS variables; the disabled state is driven by
@@ -181,10 +214,15 @@ const ExternalIncrementNumberField: React.FC<
           <input
             ref={inputRef}
             type="text"
+            inputMode="numeric"
+            role="spinbutton"
+            aria-valuenow={hasNumericValue ? numericValue : undefined}
+            aria-valuemin={0}
             id={id ?? inputId}
             name={name}
             value={internalValue}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             onBlur={onBlur}
             disabled={disabled}
             placeholder={placeholder}

@@ -222,7 +222,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
     >
       {({ inputId, inputAriaProps }) => (
         <div className={cssStyles.inputWrapper}>
-          <div className={cssStyles.adornment}>
+          <div className={cssStyles.adornment} aria-hidden="true">
             <span>#</span>
           </div>
           <input

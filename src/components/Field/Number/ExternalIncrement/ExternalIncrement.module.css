@@ -34,6 +34,13 @@
   opacity: 0.5;
 }
 
+/* Keyboard focus ring for the +/- steppers (WCAG 2.4.7). Matches the
+   library outline convention (Button.module.css). */
+.button:focus-visible {
+  outline: 2px solid var(--field-border-focus, hsl(0, 0%, 60%));
+  outline-offset: 2px;
+}
+
 .input {
   width: 64px;
   height: 40px;
@@ -47,6 +54,14 @@
   font-size: 16px;
   padding: 8px;
   box-sizing: border-box;
+}
+
+/* Visible focus indicator (WCAG 2.4.7). The input drops the UA outline
+   (`outline: none`), so restore a clear, theme-aware ring on focus.
+   --field-border-focus cascades from FieldShell per theme. */
+.input:focus-visible {
+  border-color: var(--field-border-focus, hsl(0, 0%, 60%));
+  box-shadow: 0 0 0 2px var(--field-border-focus, hsl(0, 0%, 60%));
 }
 
 .input:disabled {

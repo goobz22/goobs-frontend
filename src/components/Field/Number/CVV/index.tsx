@@ -205,12 +205,13 @@ const CVV: React.FC<CVVProps> = ({
     >
       {({ inputId, inputAriaProps }) => (
         <div className={cssStyles.inputWrapper}>
-          <div className={cssStyles.adornment}>
+          <div className={cssStyles.adornment} aria-hidden="true">
             <span>🔒</span>
           </div>
           <input
             ref={inputRef}
             type="password"
+            inputMode="numeric"
             id={id ?? inputId}
             name={name}
             value={getDisplayValue()}

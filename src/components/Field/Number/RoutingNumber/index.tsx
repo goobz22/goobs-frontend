@@ -215,12 +215,13 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
     >
       {({ inputId, inputAriaProps }) => (
         <div className={cssStyles.inputWrapper}>
-          <div className={cssStyles.adornment}>
+          <div className={cssStyles.adornment} aria-hidden="true">
             {sacredTheme && <span>⚡</span>}
           </div>
           <input
             ref={inputRef}
             type="text"
+            inputMode="numeric"
             id={id ?? inputId}
             name={name}
             value={getDisplayValue()}

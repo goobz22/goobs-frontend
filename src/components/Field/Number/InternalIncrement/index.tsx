@@ -195,6 +195,48 @@ const InternalIncrementNumberField: React.FC<
     [onChange, min, max]
   )
 
+  // Keyboard operability for the spinbutton (WCAG 2.1.1 / APG spinbutton):
+  // Up/Down arrows step the value, Home jumps to the floor, End to the
+  // ceiling (when a `max` is set). Without this the value could only be
+  // changed with the mouse via the +/- buttons.
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (disabled) return
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault()
+          handleIncrement()
+          break
+        case 'ArrowDown':
+          event.preventDefault()
+          handleDecrement()
+          break
+        case 'Home':
+          if (min !== undefined) {
+            event.preventDefault()
+            setInternalValue(String(min))
+            onChange?.(min)
+          }
+          break
+        case 'End':
+          if (max !== undefined) {
+            event.preventDefault()
+            setInternalValue(String(max))
+            onChange?.(max)
+          }
+          break
+        default:
+          break
+      }
+    },
+    [disabled, handleIncrement, handleDecrement, min, max, onChange]
+  )
+
+  // Numeric snapshot for the spinbutton ARIA value semantics. Omitted (so
+  // React drops the attribute) while the field is empty/non-numeric.
+  const numericValue = Number.parseInt(internalValue, 10)
+  const hasNumericValue = !Number.isNaN(numericValue)
+
   // Inner input chrome (wrapper border + adornment box with stacked +/-
   // buttons) lives in InternalIncrement.module.css. Disabled state is
   // driven by the native :disabled pseudo-class.
@@ -219,10 +261,15 @@ const InternalIncrementNumberField: React.FC<
             ref={inputRef}
             type="text"
             inputMode="numeric"
+            role="spinbutton"
+            aria-valuenow={hasNumericValue ? numericValue : undefined}
+            aria-valuemin={min}
+            aria-valuemax={max}
             id={id ?? inputId}
             name={name}
             value={internalValue}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             onFocus={onFocus}
             onBlur={event => {
               // Mark the field touched in the form engine (when bound), then
@@ -241,20 +288,32 @@ const InternalIncrementNumberField: React.FC<
               <button
                 type="button"
                 onMouseDown={() => handleMouseDown(handleIncrement)}
+                onClick={event => {
+                  // A keyboard-activated click reports detail 0; a pointer
+                  // click reports >= 1. onMouseDown already handles the
+                  // pointer path (immediate step + press-and-hold auto-
+                  // repeat), so only step here for the keyboard path — this
+                  // is what makes the button operable with Enter/Space
+                  // without double-stepping the mouse. (WCAG 2.1.1)
+                  if (event.detail === 0) handleIncrement()
+                }}
                 aria-label="Increase value"
                 disabled={disabled}
                 className={cssStyles.button}
               >
-                <ArrowDropUpIcon style={iconStyle} />
+                <ArrowDropUpIcon aria-hidden="true" style={iconStyle} />
               </button>
               <button
                 type="button"
                 onMouseDown={() => handleMouseDown(handleDecrement)}
+                onClick={event => {
+                  if (event.detail === 0) handleDecrement()
+                }}
                 aria-label="Decrease value"
                 disabled={disabled}
                 className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
               >
-                <ArrowDropDownIcon style={iconStyle} />
+                <ArrowDropDownIcon aria-hidden="true" style={iconStyle} />
               </button>
             </div>
           </div>

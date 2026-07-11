@@ -34,6 +34,15 @@
   box-sizing: border-box;
 }
 
+/* Visible focus indicator (WCAG 2.4.7). The input drops the UA outline
+   (`outline: none`), so restore a clear, theme-aware ring on the wrapper
+   whenever the input inside it is focused. --field-border-focus cascades
+   from FieldShell per theme (light-primary / dark-primary / gold). */
+.inputWrapper:focus-within {
+  border-color: var(--field-border-focus, hsl(0, 0%, 60%));
+  box-shadow: 0 0 0 2px var(--field-border-focus, hsl(0, 0%, 60%));
+}
+
 .adornment {
   position: absolute;
   top: 50%;

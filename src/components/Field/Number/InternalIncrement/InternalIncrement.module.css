@@ -35,6 +35,16 @@
   box-sizing: border-box;
 }
 
+/* Visible focus indicator (WCAG 2.4.7). The input itself drops the UA
+   outline (`outline: none`), so restore a clear, theme-aware ring on the
+   wrapper whenever the input inside it is focused. --field-border-focus
+   cascades from FieldShell per theme (light-primary / dark-primary /
+   gold). */
+.inputWrapper:focus-within {
+  border-color: var(--field-border-focus, hsl(0, 0%, 60%));
+  box-shadow: 0 0 0 2px var(--field-border-focus, hsl(0, 0%, 60%));
+}
+
 .adornment {
   position: absolute;
   top: 50%;
@@ -71,6 +81,13 @@
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Keyboard focus ring for the +/- steppers (WCAG 2.4.7). Matches the
+   library outline convention (Button.module.css). */
+.button:focus-visible {
+  outline: 2px solid var(--field-border-focus, hsl(0, 0%, 60%));
+  outline-offset: 2px;
 }
 
 /* The decrement button sits 2px below the increment button. */
