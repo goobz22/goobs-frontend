@@ -102,11 +102,9 @@ const USDField: React.FC<USDFieldProps> = ({
 
   // Polite live-region text for stepper/arrow-key changes. Focus stays on the
   // pressed button (or in the input for arrow keys), so the new amount would
-  // otherwise never be spoken. `stepOriginRef` gates the announcement to
-  // step-driven changes only — typing keystrokes must NOT be announced here
-  // (the input speaks those itself). WCAG 4.1.3.
+  // otherwise never be spoken. Set ONLY from the step handler below — typing
+  // keystrokes are not announced here (the input speaks those itself). WCAG 4.1.3.
   const [stepAnnouncement, setStepAnnouncement] = useState('')
-  const stepOriginRef = useRef(false)
 
   // When bound, the engine is the source of truth: mirror its value into the
   // local display state whenever it changes externally (e.g. form reset /
@@ -155,32 +153,32 @@ const USDField: React.FC<USDFieldProps> = ({
     if (timerRef.current) clearInterval(timerRef.current)
   }, [])
 
-  const handleIncrement = useCallback(() => {
-    if (disabled) return
-    stepOriginRef.current = true
-    setInternalValue(prev => {
-      const num = parseFloat(prev) || 0
-      const newValue =
-        max !== undefined
-          ? Math.min(max, num + incrementStep)
-          : num + incrementStep
-      const formattedValue = newValue.toFixed(precision)
+  // Single stepping core shared by the buttons (pointer + keyboard) and the
+  // input's Arrow Up/Down keys. Reads the live value off the input ref so the
+  // press-and-hold repeat and rapid key-repeat always operate on the latest
+  // amount, then updates the display value, the polite live-region text (so the
+  // change is announced — focus never moves to the value), and onChange in one
+  // synchronous pass (no setState-in-effect). WCAG 2.1.1 / 4.1.3.
+  const stepValue = useCallback(
+    (direction: 'up' | 'down') => {
+      if (disabled) return
+      const current = parseFloat(inputRef.current?.value ?? internalValue) || 0
+      const next =
+        direction === 'up'
+          ? max !== undefined
+            ? Math.min(max, current + incrementStep)
+            : current + incrementStep
+          : Math.max(min ?? 0, current - incrementStep)
+      const formattedValue = next.toFixed(precision)
+      setInternalValue(formattedValue)
+      setStepAnnouncement(`$${formattedValue}`)
       onChange?.(formattedValue)
-      return formattedValue
-    })
-  }, [onChange, max, incrementStep, precision, disabled])
+    },
+    [onChange, min, max, incrementStep, precision, disabled, internalValue]
+  )
 
-  const handleDecrement = useCallback(() => {
-    if (disabled) return
-    stepOriginRef.current = true
-    setInternalValue(prev => {
-      const num = parseFloat(prev) || 0
-      const newValue = Math.max(min || 0, num - incrementStep)
-      const formattedValue = newValue.toFixed(precision)
-      onChange?.(formattedValue)
-      return formattedValue
-    })
-  }, [onChange, min, incrementStep, precision, disabled])
+  const handleIncrement = useCallback(() => stepValue('up'), [stepValue])
+  const handleDecrement = useCallback(() => stepValue('down'), [stepValue])
 
   const handleMouseDown = (handler: () => void) => {
     if (disabled) return
@@ -206,15 +204,6 @@ const USDField: React.FC<USDFieldProps> = ({
     }
 
   useEffect(() => clearTimers, [clearTimers])
-
-  // Announce step-driven value changes via the polite live region below. Runs
-  // on every internalValue commit but only speaks when the change originated
-  // from a stepper button or an arrow key (typing leaves the flag false).
-  useEffect(() => {
-    if (!stepOriginRef.current) return
-    stepOriginRef.current = false
-    setStepAnnouncement(internalValue ? `$${internalValue}` : '')
-  }, [internalValue])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
