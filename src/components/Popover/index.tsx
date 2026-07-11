@@ -2,6 +2,7 @@
 
 import React, {
   useEffect,
+  useId,
   useRef,
   useState,
   useCallback,
@@ -127,6 +128,11 @@ const Popover: React.FC<PopoverProps> = ({
   dataSubject,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null)
+  // Stable id for the rendered surface. Lets the anchor point an IDREF
+  // (aria-controls / aria-describedby) at this surface so assistive tech knows
+  // WHICH element the trigger controls / is described by (see the trigger
+  // disclosure effect below). SSR-safe via useId.
+  const surfaceId = useId()
   // Use lazy initialization to check if we're on client side
   const [mounted] = useState(() => typeof window !== 'undefined')
   // Bumped on scroll/resize while open so the render-time getBoundingClientRect
@@ -334,20 +340,101 @@ const Popover: React.FC<PopoverProps> = ({
     }
   }, [open, role])
 
+  // Trigger disclosure / description semantics (WCAG 4.1.2 Name, Role, Value;
+  // WAI-ARIA APG menu-button & disclosure patterns). The control that toggles
+  // this surface must tell assistive tech that it OWNS a popup and — for the
+  // non-modal popup roles — WHICH element it controls and whether that popup is
+  // currently expanded. `role="tooltip"` instead links the surface as the
+  // trigger's description (aria-describedby) so the tip text is announced when
+  // the trigger is read. Without this the anchor was a bare control: a screen
+  // reader gave NO "has pop up" / "expanded" cue, and a `role="tooltip"` surface
+  // was never associated with anything, so it was inert to AT.
+  //
+  // The component OWNS the anchor (it already measures its rect and tests
+  // containment), so it manages these by default rather than forcing every
+  // consumer to wire them — the "accessible-by-default" goal. Prior author-set
+  // values are captured and restored on cleanup so nothing the consumer already
+  // put on the anchor is clobbered (same save/restore discipline as the
+  // background-isolation effect). No-op without an anchor.
+  //
+  // Per role:
+  //   dialog  → aria-haspopup="dialog" (advertised whether open or closed, so a
+  //             screen reader announces the popup BEFORE activation). No
+  //             aria-expanded/controls: while a dialog is open the trigger sits
+  //             inside the aria-hidden background, so those would be inert.
+  //   menu/listbox/grid → aria-haspopup=<role> + aria-expanded reflecting open
+  //             state + aria-controls=<surfaceId> while open (the surface, and
+  //             thus the IDREF target, exists only while open).
+  //   tooltip → aria-describedby=<surfaceId> while open (appended, never
+  //             clobbering an existing describedby).
+  //   region  → untouched (a region is not a popup type).
+  useEffect(() => {
+    if (!anchorEl) return undefined
+
+    const hasPopupValue =
+      role === 'dialog' ||
+      role === 'menu' ||
+      role === 'listbox' ||
+      role === 'grid'
+        ? role
+        : null
+    const usesExpanded = role === 'menu' || role === 'listbox' || role === 'grid'
+    const usesControls = usesExpanded && open
+    const usesDescribedBy = role === 'tooltip' && open
+
+    // Nothing to manage for this role/state (e.g. a closed tooltip, or region).
+    if (!hasPopupValue && !usesExpanded && !usesControls && !usesDescribedBy) {
+      return undefined
+    }
+
+    const previous = {
+      haspopup: anchorEl.getAttribute('aria-haspopup'),
+      expanded: anchorEl.getAttribute('aria-expanded'),
+      controls: anchorEl.getAttribute('aria-controls'),
+      describedby: anchorEl.getAttribute('aria-describedby'),
+    }
+
+    if (hasPopupValue) anchorEl.setAttribute('aria-haspopup', hasPopupValue)
+    if (usesExpanded) {
+      anchorEl.setAttribute('aria-expanded', open ? 'true' : 'false')
+    }
+    if (usesControls) anchorEl.setAttribute('aria-controls', surfaceId)
+    if (usesDescribedBy) {
+      anchorEl.setAttribute(
+        'aria-describedby',
+        previous.describedby ? `${previous.describedby} ${surfaceId}` : surfaceId
+      )
+    }
+
+    const restore = (name: string, value: string | null) => {
+      if (value === null) anchorEl.removeAttribute(name)
+      else anchorEl.setAttribute(name, value)
+    }
+
+    return () => {
+      if (hasPopupValue) restore('aria-haspopup', previous.haspopup)
+      if (usesExpanded) restore('aria-expanded', previous.expanded)
+      if (usesControls) restore('aria-controls', previous.controls)
+      if (usesDescribedBy) restore('aria-describedby', previous.describedby)
+    }
+  }, [anchorEl, role, open, surfaceId])
+
   // Accessible name (WCAG 4.1.2 Name, Role, Value) — a `role="dialog"` surface
-  // MUST expose an accessible name. It comes from consumer content via
-  // `ariaLabelledBy` (a heading id inside `children`, preferred) or the
-  // `ariaLabel` fallback; the component cannot invent it. Warn in development
-  // when an OPEN dialog popover has neither so a nameless dialog surfaces at
-  // author time instead of shipping silently to screen-reader users. Dev-only —
-  // compiles out to a no-op in production bundles. Non-dialog roles are exempt
-  // (a nameless tooltip/menu is valid).
+  // MUST expose an accessible name, and a `role="region"` landmark WITHOUT a
+  // name is not exposed as a landmark at all (WCAG 1.3.1). The name comes from
+  // consumer content via `ariaLabelledBy` (a heading id inside `children`,
+  // preferred) or the `ariaLabel` fallback; the component cannot invent it. Warn
+  // in development when an OPEN dialog/region popover has neither so a nameless
+  // surface is caught at author time instead of shipping silently to
+  // screen-reader users. Dev-only — compiles out to a no-op in production
+  // bundles. The other roles are exempt (a nameless tooltip/menu/listbox is
+  // valid — they take their name from content or the referencing trigger).
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return
-    if (!open || role !== 'dialog') return
+    if (!open || (role !== 'dialog' && role !== 'region')) return
     if (!ariaLabel && !ariaLabelledBy) {
       console.warn(
-        'goobs Popover: rendered as role="dialog" without an accessible name. ' +
+        `goobs Popover: rendered as role="${role}" without an accessible name. ` +
           'Pass `ariaLabelledBy` (the id of a heading inside the popover) or, as ' +
           'a fallback, `ariaLabel`, so screen readers announce it (WCAG 4.1.2).'
       )
@@ -433,6 +520,7 @@ const Popover: React.FC<PopoverProps> = ({
   const popoverContent = (
     <div
       ref={popoverRef}
+      id={surfaceId}
       className={cssStyles.popover}
       data-component="Popover"
       data-theme={theme}
