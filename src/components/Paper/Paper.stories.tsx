@@ -157,3 +157,69 @@ export const CustomStyling: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// SEMANTIC ELEMENT (SEO / landmark semantics — WCAG 1.3.1)
+// --------------------------------------------------------------------------
+// Paper defaults to a generic <div>, but a surface that IS a document region
+// should render the correct sectioning/landmark element via the additive
+// `as` prop so assistive tech announces it and the SSR'd outline reflects it.
+// The element keeps its own native role; a landmark is named via aria-label.
+// The default <div> path (all other stories) is unchanged, so the machine-test
+// selectors (data-component / data-form / ...) are emitted regardless.
+
+/** Renders the surface as a labelled <section> landmark. */
+export const SemanticSection: Story = {
+  name: 'Semantics/As Section (landmark)',
+  args: {
+    as: 'section',
+    'aria-label': 'Account summary',
+    styles: { theme: 'light', width: '320px', padding: '24px' },
+    children: <SampleContent color="#1F2937" />,
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/** Renders the surface as an <article> for self-contained content. */
+export const SemanticArticle: Story = {
+  name: 'Semantics/As Article',
+  args: {
+    as: 'article',
+    styles: { theme: 'light', width: '320px', padding: '24px' },
+    children: <SampleContent color="#1F2937" />,
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/** Renders the surface as a labelled complementary <aside> region. */
+export const SemanticAside: Story = {
+  name: 'Semantics/As Aside (complementary)',
+  args: {
+    as: 'aside',
+    'aria-label': 'Related links',
+    styles: { theme: 'light', width: '320px', padding: '24px' },
+    children: <SampleContent color="#1F2937" />,
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// REDUCED MOTION (WCAG 2.3.3)
+// --------------------------------------------------------------------------
+// The base surface carries `transition: all 0.3s ease`, so theme/elevation/
+// scalar-override changes animate. Paper.module.css now disables that
+// transition under `@media (prefers-reduced-motion: reduce)`. This story
+// renders an elevated surface whose transition is the target of that rule;
+// toggle the OS/browser "reduce motion" setting to verify the surface settles
+// instantly (Chromatic captures the reduced-motion end state).
+
+/** Surface whose `transition` is governed by the reduced-motion rule. */
+export const ReducedMotion: Story = {
+  name: 'Motion/Reduced Motion',
+  args: {
+    elevation: 8,
+    styles: { theme: 'light', width: '320px', padding: '24px' },
+    children: <SampleContent color="#1F2937" />,
+  },
+  globals: { backgrounds: { value: 'light' } },
+}

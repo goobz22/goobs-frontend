@@ -1,6 +1,10 @@
 'use client'
 
-import React, { forwardRef, type CSSProperties } from 'react'
+import React, {
+  forwardRef,
+  type CSSProperties,
+  type ElementType,
+} from 'react'
 
 import cssStyles from './Paper.module.css'
 
@@ -55,6 +59,20 @@ export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
   }
   elevation?: number
   /**
+   * Underlying element. Default `'div'` (a generic surface). Because Paper
+   * groups related content, a consumer that IS a document region should pass
+   * the semantically correct sectioning/landmark element so the surface is
+   * announced to assistive tech and reflected in the SSR'd document outline
+   * for crawlers — e.g. `as="section"`, `as="article"`, `as="aside"`,
+   * `as="header"`, `as="footer"`, or `as="main"`. The chosen element keeps
+   * its own native role (Paper adds none); name a landmark via `aria-label`/
+   * `aria-labelledby` forwarded through rest props. All `data-*` test hooks,
+   * `data-component="Paper"`, theming, and rest props are emitted regardless
+   * of the element, so the machine-test contract is unchanged. (WCAG 1.3.1
+   * Info and Relationships.)
+   */
+  as?: ElementType
+  /**
    * When this Paper is the surface for an inline form, set
    * `dataForm="<verb>-<entity>"` (e.g. `"create-contract"`,
    * `"manage-category"`) to mark the form root for tests:
@@ -84,6 +102,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
       styles,
       elevation = 1,
       className,
+      as,
       dataForm,
       dataSubject,
       dataPaper,
@@ -91,6 +110,11 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
     },
     ref
   ) => {
+    // Polymorphic surface element. Defaults to a generic `<div>`; a consumer
+    // that IS a document region passes the correct sectioning/landmark element
+    // (section/article/aside/header/footer/main). The element keeps its own
+    // native role — Paper adds none. Matches the FieldGrid `as` convention.
+    const Element = (as ?? 'div') as ElementType
     const isSacredTheme = styles?.theme === 'sacred'
     const isDarkTheme = styles?.theme === 'dark'
     // Real three-theme surface selection. 'sacred' and 'dark' each get their
@@ -172,7 +196,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
     }
 
     return (
-      <div
+      <Element
         ref={ref}
         className={[cssStyles.root, className].filter(Boolean).join(' ')}
         data-component="Paper"
@@ -184,7 +208,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
         {...restProps}
       >
         {children}
-      </div>
+      </Element>
     )
   }
 )

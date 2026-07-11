@@ -70,3 +70,17 @@
   color: var(--goobs-dark-text);
   box-shadow: var(--paper-shadow, var(--goobs-shadow-dark-sm));
 }
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
+   The base `.root` carries `transition: all 0.3s ease`, so any theme switch,
+   elevation change, or caller-driven scalar override (width/padding/margin/
+   opacity...) animates. Users who request reduced motion get the surface with
+   no transition — the end state renders instantly. Matches the Card/Accordion
+   convention across the library.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+}
