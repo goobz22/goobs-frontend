@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { fn } from 'storybook/test'
+import { fn, userEvent, expect, waitFor } from 'storybook/test'
 import { z } from 'zod'
 import FileDropzone from './index'
 import Form from '../Form'
@@ -173,6 +173,11 @@ export const Uploading: Story = {
  * text stays inside the name so WCAG 2.5.3 Label-in-Name holds) so the control
  * reads with its field context rather than a bare "Remove". The status region
  * reflects the selected state.
+ *
+ * The play function pins the focus-restoration fix (WCAG 2.4.3): activating
+ * Remove clears the value host-side, which unmounts the focused Remove control
+ * — focus must move to the (always-mounted) browse button rather than falling to
+ * `<body>`.
  */
 export const WithValueRemovable: Story = {
   render: () => {
@@ -196,6 +201,71 @@ export const WithValueRemovable: Story = {
       )
     }
     return <RemovableDemo />
+  },
+  play: async ({ canvasElement }) => {
+    const removeButton = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-file-dropzone-remove="true"]'
+    )
+    await expect(removeButton).not.toBeNull()
+    const browseButton = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-file-dropzone-browse="true"]'
+    )
+    await expect(browseButton).not.toBeNull()
+
+    // Focus the Remove control the way a keyboard user would, then activate it.
+    removeButton!.focus()
+    await expect(removeButton).toHaveFocus()
+    await userEvent.click(removeButton!)
+
+    // The value cleared, the Remove control unmounted, and focus landed on the
+    // browse button instead of dropping to <body>.
+    await waitFor(() => expect(browseButton).toHaveFocus())
+    await expect(
+      canvasElement.querySelector('[data-file-dropzone-remove="true"]')
+    ).toBeNull()
+  },
+}
+
+/**
+ * Pins the field-label association (a11y audit follow-up, WCAG 1.3.1 / 3.3.2).
+ * The FieldShell `<label htmlFor>` targets the `display:none` file input (out of
+ * the accessibility tree), so the operable browse `<button>` carries
+ * `aria-labelledby` referencing a visually-hidden, `aria-hidden` mirror of the
+ * field label PLUS its own visible action text. A screen reader on a form with
+ * several upload fields therefore announces "Product Image Upload image" (field
+ * + action) rather than a context-free "Upload image", and WCAG 2.5.3
+ * Label-in-Name still holds because the visible action text stays in the name.
+ */
+export const AccessibleName: Story = {
+  render: () => (
+    <FileDropzone
+      label="Product Image"
+      variant="image"
+      value=""
+      onFileSelect={fn()}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const browseButton = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-file-dropzone-browse="true"]'
+    )
+    await expect(browseButton).not.toBeNull()
+
+    // The field name rides the operable control via aria-labelledby — not the
+    // hidden input the FieldShell label points at.
+    const labelledBy = browseButton!.getAttribute('aria-labelledby')
+    await expect(labelledBy).toBeTruthy()
+
+    // Both reference targets resolve; useId() ids contain colons, so resolve
+    // via getElementById rather than a CSS attribute selector.
+    const ids = (labelledBy ?? '').split(' ')
+    await expect(ids.length).toBe(2)
+    const referencedName = ids
+      .map(id => document.getElementById(id)?.textContent?.trim() ?? '')
+      .join(' ')
+    // Field label first, then the visible action text (Label-in-Name intact).
+    await expect(referencedName).toBe('Product Image Upload image')
+    await expect(referencedName).toContain('Upload image')
   },
 }
 

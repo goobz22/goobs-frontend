@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useId,
   type CSSProperties,
   type ElementType,
   type FC,
@@ -80,22 +81,6 @@ const SacredBottomDecorations: React.FC = () => {
   )
 }
 
-// Visually-hidden (clip-rect) style for the status text held inside the
-// role="status" live region. Kept as a static, non-theme utility object
-// (there is no shared sr-only class in the library) so a state-text content
-// mutation is announced by assistive tech without altering the dot visually.
-const STATUS_TEXT_SR_ONLY: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-}
-
 // --------------------------------------------------------------------------
 // MAIN COMPONENT
 // --------------------------------------------------------------------------
@@ -150,6 +135,11 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     Array.from({ length: codeLength }, () => null)
   )
   const hasAutoFocused = useRef(false)
+
+  // Stable, unique id for the form-error region so each digit cell can point at
+  // it via aria-describedby (WCAG 3.3.1). `useId` keeps it unique across
+  // multiple instances on one page and stable across SSR/CSR hydration.
+  const errorRegionId = `${useId()}-cci-error`
 
   // Use the engine value when bound, the controlled value when the caller wired
   // onChange, otherwise the internal uncontrolled state.
@@ -358,58 +348,53 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
     ...(engineError && { 'data-error': 'true' }),
   }
 
-  if (showSuccessState) {
-    // Render the success message at the consumer-controlled heading level
-    // (default h3). Capitalised tag name so JSX treats it as an element type;
-    // `as ElementType` mirrors the EmptyState/Card heading pattern.
-    const SuccessHeading = `h${headingLevel}` as ElementType
-    return (
-      // role="status" (an aria-live region) so the transition into the success
-      // state is announced to screen-reader users, whose focus was on the now-
-      // unmounted Verify button — otherwise the confirmation is silent (4.1.3).
-      <div
-        className={cssStyles.successContainer}
-        data-theme={theme}
-        role="status"
-        {...rootDataProps}
-      >
-        {/* CheckCircleOutline applies its own inline style to the <svg>, which
-            beats a className. Source the three theme-driven properties from
-            CSS custom properties (defined on .successContainer[data-theme])
-            so the values still live in CSS as a single source of truth. The
-            icon is decorative — the heading already conveys success — so it is
-            hidden from assistive tech (WCAG 1.1.1). */}
-        <CheckCircleOutline
-          aria-hidden="true"
-          focusable="false"
-          style={{
-            fontSize: 'var(--cci-success-icon-size)',
-            color: 'var(--cci-success-icon-color)',
-            filter: 'var(--cci-success-icon-filter)',
+  // Render the success message at the consumer-controlled heading level
+  // (default h3). Capitalised tag name so JSX treats it as an element type;
+  // `as ElementType` mirrors the EmptyState/Card heading pattern.
+  const SuccessHeading = `h${headingLevel}` as ElementType
+
+  const successView = (
+    <div
+      className={cssStyles.successContainer}
+      data-theme={theme}
+      {...rootDataProps}
+    >
+      {/* CheckCircleOutline applies its own inline style to the <svg>, which
+          beats a className. Source the three theme-driven properties from
+          CSS custom properties (defined on .successContainer[data-theme])
+          so the values still live in CSS as a single source of truth. The
+          icon is decorative — the heading already conveys success — so it is
+          hidden from assistive tech (WCAG 1.1.1). */}
+      <CheckCircleOutline
+        aria-hidden="true"
+        focusable="false"
+        style={{
+          fontSize: 'var(--cci-success-icon-size)',
+          color: 'var(--cci-success-icon-color)',
+          filter: 'var(--cci-success-icon-filter)',
+        }}
+      />
+      <SuccessHeading className={cssStyles.successMessage}>
+        {successMessage}
+      </SuccessHeading>
+      <div className={cssStyles.buttonContainer}>
+        <CustomButton
+          text="Disable Verification"
+          styles={{
+            theme: styles?.theme || 'light',
+            width: '100%',
+            height: '40px',
+          }}
+          {...disableVerificationButtonProps}
+          onClick={() => {
+            void onDisableVerification()
           }}
         />
-        <SuccessHeading className={cssStyles.successMessage}>
-          {successMessage}
-        </SuccessHeading>
-        <div className={cssStyles.buttonContainer}>
-          <CustomButton
-            text="Disable Verification"
-            styles={{
-              theme: styles?.theme || 'light',
-              width: '100%',
-              height: '40px',
-            }}
-            {...disableVerificationButtonProps}
-            onClick={() => {
-              void onDisableVerification()
-            }}
-          />
-        </div>
       </div>
-    )
-  }
+    </div>
+  )
 
-  return (
+  const inputView = (
     <div
       className={cssStyles.root}
       data-theme={theme}
@@ -447,28 +432,49 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1} of ${codeLength}`}
                 aria-required={ariaRequired}
                 aria-invalid={resolvedAriaInvalid}
+                // Link every cell to the visible engine-error message so a
+                // form-bound validation failure is IDENTIFIED to assistive
+                // tech, not merely flagged aria-invalid (WCAG 3.3.1).
+                aria-describedby={engineError ? errorRegionId : undefined}
                 disabled={isDisabled}
                 className={cssStyles.input}
               />
             ))}
           </div>
-          {/* The coloured dot is a live region. An empty element whose only
-              state cue is a swapped aria-label does NOT re-announce on change,
-              so the actual state text is rendered as visually-hidden CONTENT —
-              a content mutation the role="status" region announces (4.1.3).
-              The dot itself also shows a checkmark glyph when valid so the
-              valid/invalid distinction is not carried by colour alone (1.4.1). */}
+          {/* The coloured dot is an always-mounted live region: its
+              visually-hidden text CONTENT ("Code is valid"/"…invalid") is what
+              the role="status" region re-announces on a validity change (4.1.3)
+              — an empty element swapping only an attribute does not re-announce,
+              so the text lives as content and the aria-label is intentionally
+              omitted (a label would fix the accessible name and make the
+              content-mutation announcement inconsistent across screen readers).
+              The dot also shows a checkmark glyph when valid so valid/invalid is
+              not carried by colour alone (1.4.1). */}
           <div
             className={cssStyles.statusIndicator}
             data-valid={isValid ? 'true' : 'false'}
             role="status"
-            aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
           >
-            <span style={STATUS_TEXT_SR_ONLY}>
+            <span className={cssStyles.srOnly}>
               {isValid ? 'Code is valid' : 'Code is invalid'}
             </span>
           </div>
         </div>
+        {/* Visible, linked form-error region. role="alert" so a bound
+            field's validation error announces when it appears; the digit cells
+            reference it via aria-describedby (WCAG 3.3.1 / 4.1.3). Rendered
+            only when the form engine reports an error for this field — the
+            component otherwise renders no error UI, preserving its contract. */}
+        {engineError && (
+          <div
+            id={errorRegionId}
+            className={cssStyles.errorMessage}
+            role="alert"
+            aria-live="polite"
+          >
+            {engineError}
+          </div>
+        )}
         {showActionButtons && (
           <div className={cssStyles.buttonContainer}>
             {showSendResendButton && (
@@ -499,6 +505,22 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       </div>
       {isSacredTheme && <SacredBottomDecorations />}
     </div>
+  )
+
+  return (
+    <>
+      {/* PERSISTENT (always-mounted, across BOTH render branches) polite live
+          region. When showSuccessState flips true the input branch unmounts and
+          the success view mounts; announcing the confirmation from a region
+          created together with its content is unreliable (NVDA/JAWS frequently
+          miss it). Writing the message into this pre-existing region as a
+          CONTENT MUTATION guarantees the "Verification Successful" announcement
+          (WCAG 4.1.3). It stays empty (silent) in the input state. */}
+      <div className={cssStyles.srOnly} role="status" aria-live="polite">
+        {showSuccessState ? successMessage : ''}
+      </div>
+      {showSuccessState ? successView : inputView}
+    </>
   )
 }
 

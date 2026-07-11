@@ -1,6 +1,7 @@
 'use client'
 
 import React, {
+  useEffect,
   useId,
   useRef,
   useState,
@@ -121,6 +122,15 @@ function placeholderGlyph(variant: FileDropzoneVariant): ReactNode {
  * same convention the Dropdown combobox uses — and a visually-hidden polite
  * `role="status"` region announces the pick / uploading / selected transition
  * (WCAG 4.1.3) since a disabled button's label change isn't reliably announced.
+ * The visible field label is tied to that operable button too (WCAG 1.3.1 /
+ * 3.3.2): the shell's `<label htmlFor>` targets the out-of-tree input, so the
+ * button carries `aria-labelledby` referencing a visually-hidden, `aria-hidden`
+ * mirror of the field label PLUS its own visible action text — so a screen
+ * reader on a multi-upload form hears "Product Image, Upload image" (field +
+ * action) instead of a context-free "Upload image", while WCAG 2.5.3
+ * Label-in-Name still holds because the visible text stays in the name. On
+ * Remove, focus is restored to the browse button (WCAG 2.4.3) so it never falls
+ * to `<body>` when the conditionally-rendered Remove control unmounts.
  * Emits `data-component="FileDropzone"` plus a `file.select` diagnostics beacon
  * on every pick.
  */
@@ -139,12 +149,25 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   styles,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // The operable control is the browse button; keep a ref so focus can be
+  // restored to it when the conditionally-rendered Remove control unmounts.
+  const browseButtonRef = useRef<HTMLButtonElement>(null)
+  // Set true the instant Remove is clicked; the effect below moves focus back
+  // to the browse button once the host actually clears the value.
+  const pendingRemoveFocusRef = useRef(false)
   const [isDragActive, setIsDragActive] = useState(false)
   const instanceId = useId()
   const theme = styles?.theme ?? 'sacred'
   const resolvedAccept = accept ?? defaultAccept(variant)
   const hasValue = value !== undefined && value !== ''
   const hintId = `${instanceId}-hint`
+  // Reference targets for the button's aria-labelledby (issue 3): the field
+  // label (mirrored into a visually-hidden, aria-hidden span so it's usable as
+  // an accessible-name source without being read twice in browse mode) and the
+  // button's own visible action text (so WCAG 2.5.3 Label-in-Name holds).
+  const labelId = `${instanceId}-label`
+  const browseLabelId = `${instanceId}-browse-label`
+  const hasLabel = label !== undefined && label !== null && label !== ''
   const noun = variant === 'image' ? 'image' : 'file'
 
   // Visually-hidden polite status text (WCAG 4.1.3). While `uploading` the
@@ -192,6 +215,25 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     event.preventDefault()
     setIsDragActive(false)
   }
+
+  // Focus restoration (WCAG 2.4.3). The Remove button renders only while
+  // `hasValue && onRemove`; clicking it clears the value host-side, `hasValue`
+  // flips false, and the currently-focused Remove control unmounts — which
+  // would drop keyboard/SR focus to <body>. Flag the pending removal here and
+  // restore focus to the (always-mounted) browse button once the value has
+  // actually cleared. Works whether the host clears synchronously or after an
+  // async round-trip, since the effect keys off the real `hasValue` transition.
+  const handleRemove = (): void => {
+    pendingRemoveFocusRef.current = true
+    onRemove?.()
+  }
+
+  useEffect(() => {
+    if (pendingRemoveFocusRef.current && !hasValue) {
+      pendingRemoveFocusRef.current = false
+      browseButtonRef.current?.focus()
+    }
+  }, [hasValue])
 
   const browseLabel = uploading
     ? 'Uploading…'
@@ -261,6 +303,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                 {...inputAriaProps}
               />
               <button
+                ref={browseButtonRef}
                 type="button"
                 className={cssStyles.dropTarget}
                 onClick={() => fileInputRef.current?.click()}
@@ -270,20 +313,42 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                 disabled={uploading}
                 {...inputAriaProps}
                 aria-describedby={describedBy}
+                {...(hasLabel && {
+                  'aria-labelledby': `${labelId} ${browseLabelId}`,
+                })}
                 {...(uploading && { 'aria-busy': true })}
                 data-file-dropzone-browse="true"
               >
-                <span className={cssStyles.dropTargetLabel}>{browseLabel}</span>
+                <span id={browseLabelId} className={cssStyles.dropTargetLabel}>
+                  {browseLabel}
+                </span>
                 <span id={hintId} className={cssStyles.dropTargetHint}>
                   Drag &amp; drop or click to browse
                 </span>
               </button>
 
+              {/* Visually-hidden, aria-hidden mirror of the visible field label
+                  (issue 3). It exists solely as an aria-labelledby reference
+                  target for the browse button above so the field name rides the
+                  operable control; `aria-hidden` keeps browse-mode from reading
+                  the label a second time (a directly-referenced hidden element
+                  still contributes to the accessible name per the accname
+                  spec). Omitted entirely when there's no label. */}
+              {hasLabel && (
+                <span
+                  id={labelId}
+                  className={cssStyles.srOnly}
+                  aria-hidden="true"
+                >
+                  {label}
+                </span>
+              )}
+
               {hasValue && onRemove !== undefined && (
                 <button
                   type="button"
                   className={cssStyles.removeButton}
-                  onClick={onRemove}
+                  onClick={handleRemove}
                   disabled={uploading}
                   aria-label={`Remove ${noun}`}
                   data-file-dropzone-remove="true"
