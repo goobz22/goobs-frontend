@@ -24,7 +24,10 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  /* clip-path (not the deprecated `clip: rect(...)`) collapses the box to a
+     zero-area region while it stays in the accessibility tree — forward-clean
+     under stylelint's property-no-deprecated. */
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
