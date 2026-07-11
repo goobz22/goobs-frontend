@@ -73,6 +73,17 @@ export interface AvatarProps extends Omit<
 > {
   /** The content to be displayed within the avatar (icon, text, or image). */
   children: React.ReactNode
+  /**
+   * Optional accessible name announced by assistive technology — typically the
+   * person's or entity's full name (e.g. `"Matthew Goluba"`). When set, the
+   * avatar is exposed as `role="img"` with this `aria-label`, so screen readers
+   * announce the meaningful name once instead of spelling out the raw initials
+   * ("M G") or reading nothing for a decorative glyph/photo. Omit for purely
+   * decorative avatars whose meaning is already conveyed by adjacent visible
+   * text (in that case add `aria-hidden` via the spread props to remove it from
+   * the accessibility tree entirely).
+   */
+  label?: string
   /** Comprehensive styling options including theme, size, colors, and layout properties. */
   styles?: AvatarStyles
 }
@@ -85,9 +96,18 @@ export interface AvatarProps extends Omit<
  * A circular avatar component with theming support for displaying icons, images, or text.
  */
 const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
-  ({ children, styles, ...restProps }, ref) => {
+  ({ children, label, styles, ...restProps }, ref) => {
     const theme = styles?.theme || 'light'
     const isDisabled = styles?.disabled || false
+
+    // When a caller supplies an accessible name, expose the disc as a single
+    // labeled image so AT announces the name (not the raw initials/glyph). An
+    // unlabeled avatar stays a plain container — its text children speak for
+    // themselves, and role="img" without a name would be an unnamed-image
+    // violation. Placed before {...restProps} so a caller's own role/aria-label
+    // still win.
+    const accessibleName =
+      typeof label === 'string' && label.length > 0 ? label : undefined
 
     // Caller-supplied scalar overrides layer on top of the CSS defaults.
     // Border precedence: a full `border` shorthand wins; otherwise
@@ -135,6 +155,10 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
         data-theme={theme}
         {...(styles?.size !== undefined && { 'data-size': styles.size })}
         {...(isDisabled && { 'data-disabled': 'true' })}
+        {...(accessibleName !== undefined && {
+          role: 'img',
+          'aria-label': accessibleName,
+        })}
         style={dynamicStyle}
         {...restProps}
       >

@@ -176,3 +176,58 @@ export const CustomStyling: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * A labeled avatar. Supplying `label` exposes the disc as `role="img"` with an
+ * `aria-label`, so assistive technology announces the meaningful name
+ * ("Matthew Goluba") instead of spelling out the raw initials. Inspect the
+ * rendered node in the a11y/DOM panel: it carries `role="img"` and
+ * `aria-label="Matthew Goluba"` while the visible content remains the initials.
+ */
+export const Labeled: Story = {
+  name: 'Accessibility/Labeled',
+  args: {
+    children: initials,
+    label: 'Matthew Goluba',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * A focusable avatar. Callers can make the disc interactive by spreading
+ * `tabIndex`/`role`/`onClick` through the standard props. Tab to the avatar (or
+ * click it) to see the theme-aware `:focus-visible` ring — the keyboard focus
+ * indicator (WCAG 2.4.7). The outline survives arbitrary border/box-shadow
+ * style overrides because it is drawn as `outline`, not `box-shadow`.
+ */
+export const Focusable: Story = {
+  name: 'Accessibility/Focusable',
+  render: () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <Avatar
+        label="Matthew Goluba"
+        styles={{ theme: 'light' }}
+        tabIndex={0}
+        role="button"
+      >
+        {initials}
+      </Avatar>
+      <div style={{ padding: '1rem', borderRadius: 12, background: '#0e0e0e' }}>
+        <Avatar
+          label="Matthew Goluba"
+          styles={{ theme: 'sacred' }}
+          tabIndex={0}
+          role="button"
+        >
+          {initials}
+        </Avatar>
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}

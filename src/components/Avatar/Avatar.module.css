@@ -80,6 +80,32 @@
 }
 
 /* --------------------------------------------------------------------------
+   FOCUS-VISIBLE
+   The avatar is presentational by default, but callers commonly spread
+   onClick + tabIndex (or role="button") through {...restProps} to make the
+   disc interactive. When that focusable avatar is reached by keyboard, show a
+   theme-aware ring so keyboard users can see where focus is (WCAG 2.4.7 /
+   2.4.11). `outline` is used deliberately: it is immune to the arbitrary
+   inline `border` / `box-shadow` overrides this component applies via the
+   style prop, so the indicator can never be clobbered by caller styling. The
+   focus hues mirror the design system's per-theme focus tokens (sacred = gold,
+   light/dark = the focus-ring blues) at full opacity for >= 3:1 non-text
+   contrast against the surrounding surface.
+   -------------------------------------------------------------------------- */
+.root:focus-visible {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
+.root[data-theme='dark']:focus-visible {
+  outline-color: rgb(96, 165, 250);
+}
+
+.root[data-theme='sacred']:focus-visible {
+  outline-color: var(--goobs-gold);
+}
+
+/* --------------------------------------------------------------------------
    DISABLED STATE
    Dark/sacred avatars sit on dark surfaces, so a 0.6 opacity fade dims the
    whole disc while keeping the initials legible (fg + bg fade toward the dark
