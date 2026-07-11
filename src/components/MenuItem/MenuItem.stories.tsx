@@ -142,6 +142,44 @@ export const Selected: Story = {
 }
 
 // --------------------------------------------------------------------------
+// SELECTED STATE — PROGRAMMATICALLY ANNOUNCED (a11y regression)
+// --------------------------------------------------------------------------
+
+/**
+ * The `selected` prop must not be conveyed by color alone (WCAG 1.4.1). It is
+ * mirrored to `aria-selected="true"` on the native `<option>` so assistive tech
+ * announces the highlighted item, alongside the `data-selected` test hook. This
+ * story pins that contract with a play assertion.
+ */
+export const SelectedStateAnnounced: Story = {
+  render: () => (
+    <SelectWithState theme="light" initialValue="typescript">
+      <MenuItem value="javascript" styles={{ theme: 'light' }}>
+        JavaScript
+      </MenuItem>
+      <MenuItem value="typescript" selected styles={{ theme: 'light' }}>
+        TypeScript (selected)
+      </MenuItem>
+      <MenuItem value="react" styles={{ theme: 'light' }}>
+        React
+      </MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const selectedOption = canvas.getByText('TypeScript (selected)')
+    // Programmatic (screen-reader) exposure, not color alone.
+    await expect(selectedOption).toHaveAttribute('aria-selected', 'true')
+    // Machine-test selector contract preserved.
+    await expect(selectedOption).toHaveAttribute('data-selected', 'true')
+    // Non-selected items must not falsely announce as selected.
+    await expect(canvas.getByText('JavaScript')).not.toHaveAttribute(
+      'aria-selected'
+    )
+  },
+}
+
+// --------------------------------------------------------------------------
 // DISABLED STATE
 // --------------------------------------------------------------------------
 

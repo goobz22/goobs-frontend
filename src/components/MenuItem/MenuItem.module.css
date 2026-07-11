@@ -132,6 +132,19 @@
 }
 
 /* --------------------------------------------------------------------------
+   REDUCED MOTION — honor prefers-reduced-motion (WCAG 2.3.3). The root
+   declares a background/color `transition` (line ~55) and the keyframe below
+   exists for parity; users who request reduced motion get instant state
+   changes and no animation.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    KEYFRAMES — migrated from theme/icon.ts injectSacredKeyframes() which
    previously inserted this rule at runtime. Kept as a static module
    keyframe so no runtime stylesheet injection is needed. (No element in

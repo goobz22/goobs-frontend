@@ -95,6 +95,15 @@ const MenuItem: React.FC<MenuItemProps> = ({
       data-divider={divider ? 'true' : undefined}
       data-selected={selected ? 'true' : undefined}
       data-disabled={disabled ? 'true' : undefined}
+      // Programmatic exposure of the `selected` visual highlight for assistive
+      // tech (WCAG 1.4.1 / 4.1.2): `data-selected` is a test-only attribute a
+      // screen reader never reads, and the tinted background/accent text is
+      // color-alone. `aria-selected` is valid on `<option>` (implicit
+      // role="option") and is additive — we do NOT set the native `selected`
+      // content attribute (React controls selection via the `<select value>`),
+      // so there is no controlled-select conflict. Placed before `{...props}`
+      // so a caller-supplied `aria-selected` still wins.
+      aria-selected={selected ? 'true' : undefined}
       style={dynamicStyle}
       disabled={disabled}
       onClick={handleClick}
