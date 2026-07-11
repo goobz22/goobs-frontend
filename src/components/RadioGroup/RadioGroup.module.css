@@ -149,6 +149,7 @@
    old hoveredLabel useState.
    -------------------------------------------------------------------------- */
 .optionLabel {
+  position: relative;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -161,11 +162,52 @@
 }
 
 /* --------------------------------------------------------------------------
-   HIDDEN NATIVE INPUT — display:none, but its :checked state drives the
-   sibling radioOuter/inner styling below.
+   NATIVE INPUT — visually hidden but KEPT in the accessibility tree and tab
+   order. It is NEVER `display:none` / `visibility:hidden`: those remove the
+   radios from the a11y tree, drop them out of the tab order, and hide the
+   native checked state, leaving the group non-operable by keyboard and its
+   role/state invisible to assistive tech (WCAG 2.1.1 Keyboard, 4.1.2 Name/
+   Role/Value). Instead the input is clipped to a 1px box so it takes no layout
+   space while remaining focusable; the wrapping <label> row stays the pointer
+   click target and the native :checked / :focus-visible state drives the
+   visible ring/dot below via the `~` sibling combinator.
    -------------------------------------------------------------------------- */
 .input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   FOCUS-VISIBLE — the native <input> is clipped to 1px, so its own browser
+   focus ring is painted off-screen. Mirror keyboard focus onto the visible
+   outer ring as a solid, high-contrast outline (WCAG 2.4.7 Focus Visible /
+   2.4.11 Focus Appearance). `:focus-visible` (not `:focus`) shows the ring for
+   keyboard users only, not on mouse click, matching platform convention. The
+   ring is the input's following sibling, so the `~` combinator reaches it;
+   `outline` (not box-shadow) never collides with the checked/hover background.
+   -------------------------------------------------------------------------- */
+.input:focus-visible ~ .radioSpan .radioOuter {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: 2px;
+}
+
+.formControl[data-theme='dark'] .input:focus-visible ~ .radioSpan .radioOuter {
+  outline-color: var(--goobs-dark-primary);
+}
+
+.formControl[data-theme='sacred']
+  .input:focus-visible
+  ~ .radioSpan
+  .radioOuter {
+  outline-color: var(--goobs-gold);
 }
 
 /* --------------------------------------------------------------------------
