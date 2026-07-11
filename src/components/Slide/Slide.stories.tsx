@@ -269,6 +269,114 @@ export const Themes: Story = {
   },
 }
 
+/**
+ * A11y — HIDDEN CONTENT IS INERT (WCAG 1.3.1 / 2.4.3 / 4.1.2).
+ *
+ * When `in` is false the content is not merely translated off-screen — the
+ * module CSS also applies `visibility: hidden` (delayed by the slide duration so
+ * the exit is still animated), which removes the slid-out content from BOTH the
+ * accessibility tree and the keyboard tab order. This story wraps a real focusable
+ * link inside the Slide: with the panel OUT, pressing Tab must NOT land on the
+ * "Focusable link inside the panel" anchor; with it IN, the link is tabbable and
+ * announced. A transform-only hide (the old behaviour) would leave that link
+ * silently focusable off-screen.
+ */
+export const HiddenContentIsInert: Story = {
+  render: function HiddenContentIsInertStory() {
+    const [isVisible, setIsVisible] = useState(false)
+
+    return (
+      <div style={{ width: '460px' }}>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+          <CustomButton
+            onClick={() => setIsVisible(v => !v)}
+            styles={{ theme: 'light' }}
+          >
+            {isVisible ? 'Slide out (make inert)' : 'Slide in (make reachable)'}
+          </CustomButton>
+          <a href="https://example.com" style={{ alignSelf: 'center' }}>
+            Tab-order marker BEFORE the panel
+          </a>
+        </div>
+
+        <div
+          style={{ height: '160px', position: 'relative', overflow: 'hidden' }}
+        >
+          <Slide styles={{ in: isVisible, direction: 'up', theme: 'light' }}>
+            <Paper styles={{ theme: 'light', padding: '20px' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                Panel content
+              </Typography>
+              <a href="https://example.com">Focusable link inside the panel</a>
+            </Paper>
+          </Slide>
+        </div>
+
+        <Typography styles={{ variant: 'merrihelperfooter', theme: 'light' }}>
+          With the panel slid OUT, Tab skips the inner link (visibility:hidden).
+          Slide it IN and the link joins the tab order and is announced.
+        </Typography>
+      </div>
+    )
+  },
+}
+
+/**
+ * A11y — REDUCED MOTION (WCAG 2.3.3 Animation from Interactions).
+ *
+ * `Slide.module.css` carries an `@media (prefers-reduced-motion: reduce)` block
+ * that collapses the transform + visibility transition to `none !important` (the
+ * `!important` beats any caller-supplied inline `transition` shorthand). For users
+ * with that OS preference the content snaps in/out with no sliding movement while
+ * still toggling visibility correctly. Toggle your OS "reduce motion" setting (or
+ * Storybook's a11y motion emulation) to observe: the panel below appears instantly
+ * instead of sliding.
+ */
+export const ReducedMotion: Story = {
+  render: function ReducedMotionStory() {
+    const [isVisible, setIsVisible] = useState(true)
+
+    return (
+      <div style={{ width: '460px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          Toggle Slide
+        </CustomButton>
+
+        <div
+          style={{
+            height: '200px',
+            position: 'relative',
+            overflow: 'hidden',
+            marginTop: '16px',
+          }}
+        >
+          <Slide
+            styles={{
+              in: isVisible,
+              direction: 'right',
+              theme: 'light',
+              timeout: 600,
+            }}
+          >
+            <Paper styles={{ theme: 'light', padding: '20px' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                Motion-safe slide
+              </Typography>
+              <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+                With OS &ldquo;reduce motion&rdquo; on, this content appears and
+                disappears instantly — the 600ms slide is neutralized.
+              </Typography>
+            </Paper>
+          </Slide>
+        </div>
+      </div>
+    )
+  },
+}
+
 // Story with custom timing
 export const CustomTiming: Story = {
   render: function CustomTimingStory() {
