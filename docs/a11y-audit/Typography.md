@@ -84,6 +84,44 @@ the accessibility tree and the crawled document outline?*
   merged `class`/`style`) now appear on the element when passed; nothing is emitted
   when they are absent.
 
+### 3. Interactive Typography has no keyboard focus indicator (UA ring suppressed) — SERIOUS
+
+- **WCAG:** 2.4.7 Focus Visible (AA), 2.4.11 Focus Appearance (AA),
+  1.4.11 Non-text Contrast (AA — the ring colour).
+- **Pattern class:** `missing-focus-visible-style`
+- **Location:** `src/components/Typography/Typography.module.css:81` (the
+  `.root { outline: var(--typography-outline) }` declaration); no `:focus-visible`
+  rule existed anywhere in the module.
+- **Status:** FIXED (2026-07-11 audit pass).
+- **Detail:** `.root` declares `outline: var(--typography-outline)`. With no caller
+  outline the custom property is unset, so `var(--typography-outline)` (no fallback) is
+  a *guaranteed-invalid value*; per the CSS Custom Properties spec the whole `outline`
+  declaration is **invalid at computed-value time** and computes to `outline` = initial
+  = `outline-style: none`. Two consequences: (a) there was no `:focus-visible` rule to
+  draw a ring, and (b) because the author `.root` declaration is the cascade winner it
+  **also suppressed the user-agent `:focus-visible { outline: auto }`** the browser
+  would otherwise draw. Typography renders a non-focusable `<span>` by default, but it
+  is polymorphic via `component` and spreads standard DOM attributes
+  (`extends React.HTMLAttributes<HTMLElement>` + `{...rest}`, `index.tsx:568`), so
+  callers legitimately render it as a focusable interactive element (`component="a"`,
+  `component="button"`, or any `tabIndex` carrier). **Failure scenario:**
+  `<Typography component="a" href="…" text="Read more" />` — a keyboard user Tabs onto
+  it and sees NO focus indicator, because `.root`'s `outline: none` overrode the UA
+  ring and nothing replaced it.
+- **Fix (in-directory):** added a per-theme keyboard focus ring after `.outlined`:
+  `.root:focus-visible { outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px }`, with `.root[data-theme='light']:focus-visible` →
+  `--goobs-light-primary` and `.root[data-theme='dark']:focus-visible` →
+  `--goobs-dark-primary`. Specificity `.root:focus-visible` (0,1,1) beats `.root`
+  (0,1,0) and `.outlined` (0,1,0), so the keyboard ring wins over a decorative/string
+  outline *while focused* and yields it back on blur; `:focus-visible` (not `:focus`)
+  keeps pointer clicks ring-free. Opaque per-theme colours mirror the **Button**
+  convention because the translucent `--goobs-*-focus-ring` tokens composite below the
+  3:1 non-text floor on the light/dark surfaces (1.4.11); the sacred/no-theme base
+  reuses `--goobs-sacred-focus-ring` (gold-a60 on the near-black sacred surface, the
+  same base Button uses). No shared-file change — all tokens already exist in
+  `global.css`.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
 **Clean — N/A.** Grepped the component for `new Audio` / `AudioContext` /
@@ -103,11 +141,13 @@ and no audio-only status.
   helper/footer light-theme contrast bug is already fixed (light theme pins
   `--goobs-light-text-muted` #4b5563 = 7.56:1 on #ffffff; `index.tsx:218`,
   regression story `LightHelperText`).
-- **Focus (`:focus-visible`):** N/A — the rendered element is a non-interactive
-  `<span>` with no `tabindex`/`onClick`, so it is not in the tab order and needs no
-  focus indicator. The `outline: true` opt-in (`.outlined`, `Typography.module.css:96`)
-  is a *decorative* text outline keyed to `currentColor`, not a focus treatment, and
-  is unaffected.
+- **Focus (`:focus-visible`):** FIXED (Issue 3). The DEFAULT `<span>` is non-focusable,
+  but Typography is polymorphic and forwards `tabIndex`/`component="a"`/etc., so
+  interactive usages need — and previously lacked — a focus ring (the `.root` `outline`
+  declaration was even suppressing the UA default). A per-theme `.root:focus-visible`
+  ring was added. The `outline: true` opt-in (`.outlined`, `Typography.module.css:96`)
+  remains a *decorative* text outline keyed to `currentColor`, distinct from the focus
+  ring, and is superseded only while the element is keyboard-focused.
 - **Dynamic updates / live regions:** N/A — Typography renders static content; it
   performs no async loading, validation, or content swapping that would need
   `role="status"`/`aria-live`. (A consumer that puts changing text inside Typography
@@ -146,6 +186,10 @@ and no audio-only status.
   render pattern matches established, building code in `FieldGrid/index.tsx:65`; the
   `extends React.HTMLAttributes<HTMLElement>` + `...rest` spread pattern matches
   `Panel/index.tsx:97,126,161`.
+- **(2026-07-11, Issue 3)** Added `.root:focus-visible` + `[data-theme='light'|'dark']`
+  outline-colour overrides to `Typography.module.css` — a visible 2px per-theme keyboard
+  focus ring for interactive (polymorphic/`tabIndex`) usage, overriding the `.root`
+  `outline: none` that was suppressing the UA ring. Stylelint (token-leak) + ESLint clean.
 
 ## Stories updated
 
@@ -177,8 +221,22 @@ regression tests) cover the a11y behaviors, each with a `play` assertion:
   `className="caller-added-class"`, and `aria-describedby`; asserts the attributes
   ride through, the caller class is MERGED (`>1` class on the element), and
   `data-component`/`data-theme` are NOT clobbered by the pass-through spread.
+- **(New, Issue 3) `A11y/Keyboard Focus Indicator`** (`FocusVisibleIndicator`) —
+  renders a focusable Typography (`tabIndex={0} role="button"`); asserts
+  `outline-style: none` before focus, then `userEvent.tab()` (keyboard modality →
+  engages `:focus-visible`) and asserts the focused element shows a `solid` `2px`
+  outline. Fails against the pre-fix CSS (no `:focus-visible` rule → outline stays
+  `none`), so it locks the regression.
 
 ## Deferred
 
-None. Both defects were fixable in-directory (additive props + render change). No
-shared-file or peer-owned change was required.
+None. All three defects were fixable in-directory (additive props + render change +
+`:focus-visible` CSS). No shared-file or peer-owned change was required — the focus-ring
+colour tokens (`--goobs-sacred-focus-ring`, `--goobs-light-primary`, `--goobs-dark-primary`)
+already exist in `src/styles/global.css` and were consumed, not modified.
+
+Informational (not owned here, no action needed for Typography): `global.css`
+`--goobs-light-focus-ring` (rgba 0.4) / `--goobs-dark-focus-ring` (rgba 0.45) composite
+below the 3:1 non-text floor on their surfaces — which is exactly why this component (like
+Button) uses the opaque `--goobs-*-primary` tokens for its light/dark rings. Raising those
+shared tokens is already tracked in `Button.md`'s Deferred section.
