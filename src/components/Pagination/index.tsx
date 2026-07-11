@@ -47,6 +47,14 @@ export interface PaginationProps {
     padding?: string
   }
   renderItem?: (item: PaginationRenderItemParams) => ReactNode
+  /**
+   * Forwarded ref to the root `<nav>` navigation landmark (React 19
+   * ref-as-prop). Pagination renders a LIST of page/nav `<button>`s, so there is
+   * no single "the button" — the landmark is the meaningful consumer handle
+   * (scroll the pager into view, measure it, or query its buttons). Individual
+   * buttons remain reachable via their `data-action`/`aria-label` selectors.
+   */
+  ref?: React.Ref<HTMLElement>
 }
 
 export interface PaginationRenderItemParams {
@@ -205,6 +213,7 @@ const Pagination: FC<PaginationProps> = ({
   ariaLabel,
   styles,
   renderItem,
+  ref,
   ...rest
 }) => {
   const isDisabled = styles?.disabled
@@ -281,6 +290,7 @@ const Pagination: FC<PaginationProps> = ({
 
   return (
     <nav
+      ref={ref}
       className={cssStyles.root}
       data-component="Pagination"
       data-theme={theme}
