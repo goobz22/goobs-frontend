@@ -79,6 +79,14 @@ export interface StepperProps {
     /** Root bottom margin; overrides the stylesheet default. */
     marginBottom?: string
   }
+  /**
+   * Forwarded ref to the root `<div>` (React 19 ref-as-prop). A Stepper renders
+   * a LIST of step `<button>`/`<a>` controls plus the wizard Back/Continue
+   * controls, so there is no single "the button" — the root is the meaningful
+   * consumer handle (scroll the stepper into view, measure it, or query its
+   * step controls). Individual steps stay reachable via `data-action="goto-step"`.
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 /**
@@ -99,6 +107,7 @@ const Stepper: React.FC<StepperProps> = ({
   finalActions,
   stepActions,
   styles,
+  ref,
 }) => {
   const orientation = styles?.orientation || 'horizontal'
   const theme = styles?.theme || 'sacred'
@@ -418,6 +427,7 @@ const Stepper: React.FC<StepperProps> = ({
 
   return (
     <div
+      ref={ref}
       className={cssStyles.root}
       data-component="Stepper"
       data-theme={theme}
