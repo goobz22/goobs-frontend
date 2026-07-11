@@ -70,7 +70,7 @@
 
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, type ElementType } from 'react'
 import type { DatagridProps, RowData } from '../../DataGrid/types'
 import DataGrid from '../../DataGrid'
 import Alert, { AlertProps } from '../../Alert'
@@ -92,6 +92,14 @@ import cssStyles from './FormDataGrid.module.css'
 export interface FormDataGridProps<TRow extends RowData = RowData> {
   /** Main heading displayed above the DataGrid */
   title: string
+  /**
+   * Semantic level for the `title` heading — the title renders as a real
+   * `<h1>`–`<h6>` element (not a styled `<div>`) so screen-reader users can
+   * jump to it by heading navigation and crawlers see a genuine heading. Set
+   * this to match the wrapper's position in the surrounding document outline
+   * (e.g. `3` when the grid sits inside an `<h2>` section). Default `2`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Subheading/explanatory text below the title */
   description: string
   /**
