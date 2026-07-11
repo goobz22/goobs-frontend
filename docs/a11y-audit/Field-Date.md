@@ -1,6 +1,11 @@
 # Field/Date — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** PARTIAL (all in-directory issues fixed; one Shell-rooted edge case deferred)
+
+> **Re-audit note (2026-07-11, second pass):** the first pass fixed issues #1–#4 below and
+> *deferred* the end input's `aria-describedby` as needing a `Field/Shell` change. This pass
+> found it is fixable **entirely within `DateRange/index.tsx`** and fixed it (issue #5). The
+> only remaining item is a genuine form-engine edge case (see *Deferred*).
 
 **Scope:** the composite `Field/Date` area — two sub-fields:
 - `src/components/Field/Date/DateField` — a single `<input type="date">`.
@@ -37,6 +42,7 @@ here — native date-picker keyboard behaviour is the browser's.
 | 2 | Moderate | 4.1.2 Name/Role/Value (A); 1.3.1 | `DateRange/index.tsx` (end shell) | A cross-field range error (e.g. *end before start*, passed via the top-level `error` prop) set `aria-invalid` on the **start** input only — the end input, often the one actually in error, had no programmatic error state. | **FIXED** |
 | 3 | Moderate | 1.4.1 Use of Color (A) | `DateField.module.css`, `DateRange.module.css` | On error, the date **input itself showed no visual cue** — the red helper text below was the only indicator. FieldShell's error-border rule targets `.inputSlot`, a class these inputs don't use, so it never reached them. Users relying on an on-field state cue had none. | **FIXED** |
 | 4 | Minor | 2.3.3 Animation from Interactions (AAA) | `DateField.module.css:50`, `DateRange.module.css:73` | The `.input` `transition` (border/box-shadow on hover/focus) had no `prefers-reduced-motion` guard. This is the established repo convention (≥30 components ship the media query); the two Date modules were the omission. | **FIXED** |
+| 5 | Minor | 1.3.1 Info & Relationships (A); 3.3.1 Error Identification (A) | `DateRange/index.tsx` (end input) | After #2 both inputs are `aria-invalid`, but only the **start** input was `aria-describedby` the shared error/helper region. A screen-reader user landing on the **end** input heard "invalid" with no reason — the message was not programmatically available on that control. | **FIXED** (this pass) |
 
 No hearing/media issues (checklist A): grep of the directory for `new Audio` / `AudioContext` /
 `<audio>` / `<video>` / `navigator.vibrate` returned nothing — the components emit no sound and
@@ -61,6 +67,17 @@ render form controls only (no headings, links, or landmark content); all markup 
   guarantees `aria-invalid="false"` is never emitted, preserving the field-selector contract
   (same discipline FieldShell uses for `aria-disabled`). The single visible message stays under
   the start shell (no duplicate `role="alert"`).
+- **#5 end input described by the shared region** (`DateRange/index.tsx`, this pass): the end
+  input now sets `aria-describedby={startHelperRendered ? startHelperIdRef.current : undefined}`,
+  pointing at the **same** helper/error region the start input is described by. The start
+  `FieldShell` generates that region's id (`useId`) and exposes it only through its render-prop
+  slot, so the start render-prop stashes it into a `useRef` (`startHelperIdRef`); React evaluates
+  the start shell's render-prop before the end shell's in the same render, and the `useId` is
+  stable across renders, so the ref holds the correct id by the time the end input renders. Gated
+  on `startHelperRendered = hasError || helperText != null` (the region only exists in the DOM
+  then), so no dangling `aria-describedby` is emitted — the test-selector contract is preserved
+  (additive attribute, only present with an error/helper). This closes the first pass's deferred
+  item **without touching `Field/Shell`**.
 
 **On-field error cue (Use of Color)**
 
@@ -89,12 +106,13 @@ Stories are the only regression tests in this repo; each new behaviour is now pi
   `role="alert"` region, and `aria-describedby` points at exactly that region's id. Guards the
   form-error-association wiring (and, via the new CSS, the on-field border). Added the
   `within, expect` import from `storybook/test`.
-- `DateRange.stories.tsx` → **`GroupSemanticsAndError`** (new): `play` asserts the wrapper is a
+- `DateRange.stories.tsx` → **`GroupSemanticsAndError`**: `play` asserts the wrapper is a
   `role="group"` named `Trip dates`, that a range error marks **both** the start and end inputs
-  `aria-invalid="true"`, and that the alert region carries the message and describes the start
-  input. → **`DefaultGroupLabel`** (new): asserts the group is named `Date range` when no
-  `ariaLabel` is passed. The pre-existing `InteractionTest` (label ↔ input association) is
-  retained.
+  `aria-invalid="true"`, and that the alert region carries the message. **Extended this pass** to
+  also assert **both** the start *and* the end input have `aria-describedby === alert.id` (issue
+  #5 regression guard — reverting the describedby wiring re-fails this story). → **`DefaultGroupLabel`**:
+  asserts the group is named `Date range` when no `ariaLabel` is passed. The pre-existing
+  `InteractionTest` (label ↔ input association) is retained.
 
 ## SEO semantics
 
@@ -103,28 +121,30 @@ is no client-only content injection (labels, inputs, and helper text are all in 
 
 ## Deferred
 
-- **End input not `aria-describedby` the error message.** After fix #2 both inputs are
-  `aria-invalid`, and the message is announced when it appears (`role="alert"` + `aria-live`),
-  but only the **start** input is `aria-describedby` the helper region — so a screen-reader user
-  who navigates to the **end** input *after* the error already exists won't have the message
-  re-read on focus. A clean fix needs the two side-by-side `FieldShell`s to **share one helper
-  region id**: each shell generates its own `helperId` internally via `useId`
-  (`Field/Shell/index.tsx:290-292`), and the render-prop scoping makes it impractical for
-  `DateRange` to thread the start shell's `helperId` onto the end input.
-  - **Suggested change (Shell owner):** let `FieldShell` accept an optional
-    `helperId?: string` / `describedById?: string` prop so a composite field can supply one
-    stable id, render the single shared helper region with it, and spread it into *both*
-    children's `aria-describedby`. File `src/components/Field/Shell/index.tsx` — add to
-    `FieldShellProps` (~line 141) and use it in place of the internal `helperId`
-    (line 292 / 349 / 409). Low risk, additive, back-compatible (falls back to `useId`).
-  - Severity: minor — the live-region announcement + dual `aria-invalid` cover the primary
-    need; this only improves *re-reading on late focus*.
+- ~~**End input not `aria-describedby` the error message.**~~ **RESOLVED this pass** (issue #5) —
+  fixed inside `DateRange/index.tsx` by capturing the start shell's render-prop `helperId` into a
+  ref and threading it onto the end input's `aria-describedby`, with no change to `Field/Shell`.
+  The first pass's suggested Shell seam (optional `helperId`/`describedById` on `FieldShellProps`)
+  is a valid future refactor if a *cleaner* multi-input describedby API is ever wanted, but is no
+  longer required for correctness here.
 
-- **Form-engine-derived range error on the end input.** Fix #2 keys the end input's
-  `aria-invalid` on the explicit `error` prop (the documented cross-field channel). If a
-  `DateRange` is bound inside a `<Form>` and its error is derived from the engine/schema on the
-  start shell (via `name`) rather than passed explicitly, the end input won't mirror it (the end
-  shell has no `name`). Range validation is inherently cross-field and is passed explicitly in
-  practice, so this is an edge case. A general fix again wants Shell to expose the composite-field
-  error/describedby seam above, or `DateRange` to read `useOptionalFormContext()` itself — the
-  latter would duplicate Shell's derivation logic and is not worth it in this directory.
+- **Form-engine-derived range error on the end input (still deferred — Shell-rooted).** The end
+  input's `aria-invalid` **and** `aria-describedby` (fixes #2/#5) both key on
+  `hasError = Boolean(error)` / `startHelperRendered` — i.e. the **explicit** `error` prop, which
+  is the documented cross-field channel (the `DateRange.error` JSDoc states range errors are
+  computed by the caller and passed top-level). If a `DateRange` is instead bound inside a `<Form>`
+  with **no explicit `error`**, and the engine derives the error for `name` on the *start* shell,
+  the start input is marked (Shell derives it via `useOptionalFormContext`) but the **end** input
+  is not (it has no `name`, and `DateRange` doesn't read the engine). In practice range validation
+  is always passed explicitly, so this is an edge case.
+  - **Why not fixed in-directory:** closing it means `DateRange` calling
+    `useOptionalFormContext()` + `ctx.engine.getError(name)` itself, which **duplicates**
+    `FieldShell`'s error-derivation logic (`Field/Shell/index.tsx:298-327`) — exactly the kind of
+    duplicated-Shell-logic the repo conventions discourage.
+  - **Suggested change (Shell owner):** expose the resolved `hasError`/`helperId` (or an optional
+    `describedById`) from `FieldShell` back to the composite consumer — e.g. add a
+    `describedById?: string` prop to `FieldShellProps` (`Field/Shell/index.tsx:~141`) and/or return
+    the resolved `hasError` in the render-prop slot, so `DateRange` can mirror the engine-derived
+    error onto the end input without re-deriving it. Low risk, additive, back-compatible.
+  - Severity: minor — the primary explicit-`error` path is fully covered; this only affects the
+    rarely-used form-engine-derived range-error case.
