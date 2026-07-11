@@ -26,6 +26,7 @@ verifies the sub-field's *use* of Shell and fixes what lives in the Search direc
 | 4 | Minor | 1.1.1 Non-text Content (A) | `index.tsx` magnifier `<svg>` had no `aria-hidden`/`focusable` | FIXED |
 | 5 | Minor | 1.4.1 Use of Color (A) — robustness | `Search.module.css` — error state gave the field no visual border feedback | FIXED |
 | 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `Search.module.css:24` wrapper `transition` had no reduced-motion guard | FIXED |
+| 7 | Moderate | 1.4.3 Contrast (Minimum) (AA) | `Search.module.css` `.input` set no `::placeholder` color → UA-default gray | FIXED |
 
 ### 1. No visible focus indicator (Serious, 2.4.7)
 
@@ -79,6 +80,21 @@ focus ring.
 now the focus box-shadow). FIXED with an `@media (prefers-reduced-motion: reduce)` block that
 drops the transition; state changes still apply instantly.
 
+### 7. Placeholder text had no adequate-contrast color (Moderate, 1.4.3)
+
+`.input` set no `::placeholder` rule, so the hint rendered in the **UA-default** placeholder
+color — a translucent tint of the input `color` (and Firefox reduces its opacity further).
+That is ungoverned and, on a light surface, drifts below the 4.5:1 minimum; every sibling
+Field component (`Field/Text`, `Field/PhoneNumber`, `Dropdown/SearchableSimple`) already sets
+an explicit muted-token placeholder, so Search was also the odd one out. This matters *more*
+for Search than for most fields: a **label-less** search bar exposes the placeholder string
+as its `aria-label` (Issue 2), so the hint is doing accessible-name duty and must be legible.
+FIXED by setting `.input::placeholder` to the per-theme muted-text tokens the rest of the
+library uses — sacred `--goobs-sacred-text-muted` (rgba(255,255,255,0.5) ≈ 5.30:1 on #0e0e0e),
+light `--goobs-light-text-muted` (#4b5563 ≈ 6.17:1), dark `--goobs-dark-text-muted`
+(#94a3b8 ≈ 4.76:1) — all ≥ 4.5:1, with `opacity: 1` to reset Firefox's placeholder dimming so
+the proven ratio isn't silently eroded. The hint stays visibly lighter than entered text.
+
 ## Hearing
 
 No audio, video, `AudioContext`, `navigator.vibrate`, or any media API is used anywhere in
@@ -100,6 +116,9 @@ information is conveyed by sound. **Nothing to fix** for WCAG 1.2.x / 1.4.2. Sta
 - **Required** is conveyed programmatically: FieldShell sets `aria-required` and renders the
   ` *` indicator as `aria-hidden` decoration — not asterisk-only.
 - **Decorative icon** hidden from AT (Issue 4).
+- **Placeholder legibility**: the hint now carries a per-theme muted-token colour at full
+  opacity that holds ≥4.5:1 on each surface (Issue 7) — critical because the placeholder is
+  the field's accessible name in the label-less configuration.
 - **Focus** is now visible for keyboard users (Issue 1) and honours reduced-motion (Issue 6).
 - **Keyboard operability**: the input is a native text control — Tab/Shift+Tab to focus,
   standard text editing, no custom key handling needed or removed. The extra native-`input`
@@ -128,9 +147,11 @@ All in `src/components/Field/Search`:
 - `Search.module.css`: `.inputWrapper:focus-within` themed focus border + per-theme focus-ring
   box-shadow (`--goobs-focus-{sacred,light,dark}`); wrapper error-border keyed on the shell's
   error state; `::-webkit-search-cancel-button`/`-decoration` reset; `@media
-  (prefers-reduced-motion: reduce)` guard.
+  (prefers-reduced-motion: reduce)` guard; `.input::placeholder` per-theme muted-token colour +
+  `opacity: 1` (Issue 7).
 
-Per-file gate: `bun lint:file` on both `.tsx` files exits 0.
+Per-file gate: `bun lint:file` exits 0 on the stories file; `Search.module.css` is absent from
+the repo stylelint report (the only failures are pre-existing debt in other components).
 
 ## Stories updated
 
@@ -147,6 +168,11 @@ Per-file gate: `bun lint:file` on both `.tsx` files exits 0.
   fallback and the explicit-`ariaLabel` paths.
 - Existing **`ErrorStates`** story now also serves as the visual regression for the new error
   border (Chromatic).
+- **`PlaceholderContrastTest`** (new, "Placeholder Contrast (WCAG 1.4.3)"): three placeholder-
+  only fields, one per theme, each on its theme-matched surface (Chromatic baseline for the
+  hint colour). The play function reads the resolved `::placeholder` computed style on the light
+  field and asserts `color === rgb(75, 85, 99)` (#4b5563, the muted token) and `opacity === '1'`
+  — i.e. the field no longer falls back to the UA-default placeholder colour (Issue 7).
 
 ## Deferred
 
