@@ -1,8 +1,14 @@
 # Field/USD — a11y audit (2026-07-11)
 
-**Status: PARTIAL** — every issue inside this directory is FIXED; one
-finding (issue 7) has its root cause in `Field/Shell` and is DEFERRED to that
-serial pass.
+**Status: PARTIAL** — every issue inside this directory is FIXED (including the
+adversarial-review range-exposure finding, issue 8); one finding (issue 7) has
+its root cause in `Field/Shell` and is DEFERRED to that serial pass.
+
+**Adversarial-review pass (2026-07-11):** two findings raised — (a) the
+consumer-`id` label-association break (already tracked as issue 7, root cause in
+Shell, remains DEFERRED with a precise suggested change below) and (b) the
+min/max range not being exposed to assistive tech (now tracked + FIXED as issue
+8, entirely within this directory via `aria-describedby`).
 
 Scope: `src/components/Field/USD/` — the editable `<USDField>` (`index.tsx`,
 `USD.module.css`, `USDField.stories.tsx`), its read-only sibling `<MoneyText>`
@@ -32,7 +38,8 @@ formatted `<span>` (no interactive pattern; just non-text-alternative concerns).
 | 4 | Minor | 2.1.1 Keyboard (A) | Arrow Up/Down in the input did nothing when the stepper was enabled — the expected number-field affordance was missing, forcing keyboard users onto the tiny buttons. | index.tsx (input had no `onKeyDown`) | FIXED |
 | 5 | Minor | 1.1.1 Non-text Content (A) | The decorative sacred glyph `𓊹` (U+13029) rendered as a bare `<span>` with no `aria-hidden`, so assistive tech tried to announce a lone Egyptian hieroglyph next to the field — noise with no meaning. | index.tsx (sacred glyph span, was :261) | FIXED |
 | 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `.inputWrapper` and `.button` carry `transition: all 0.3s ease` with no `@media (prefers-reduced-motion: reduce)` fallback. | USD.module.css:21, :85 | FIXED |
-| 7 | Moderate | 1.3.1 / 4.1.2 (A) | A consumer-supplied `id` breaks label association: the input renders `id={id ?? inputId}` but Shell's `<label htmlFor={inputId}>` always points at Shell's own generated `inputId`. When `id` is passed the `<label>` no longer references the input. Root cause is in Shell (no custom-id passthrough). | index.tsx:325 (`id={id ?? inputId}`) + Shell/index.tsx:395 | DEFERRED |
+| 7 | Moderate | 1.3.1 / 4.1.2 (A) | A consumer-supplied `id` breaks label association: the input renders `id={id ?? inputId}` but Shell's `<label htmlFor={inputId}>` always points at Shell's own generated `inputId`. When `id` is passed the `<label>` no longer references the input. Root cause is in Shell (no custom-id passthrough). | index.tsx:349 (`id={id ?? inputId}`) + Shell/index.tsx:395 | DEFERRED |
+| 8 | Minor | 1.3.1 / 4.1.2 (A) | min/max range was not exposed to assistive tech. The field is a free-form currency text input (`type="text"` + `inputMode="decimal"`, deliberately NOT `role="spinbutton"`), so it carries no `aria-valuemin`/`aria-valuemax`/`aria-valuenow`; when `min`/`max` were set a screen-reader user had **no programmatic knowledge of the allowed range** unless the consumer manually wrote helperText. (Adversarial-review finding — the value-CHANGE announcement (issue 3) was addressed but the range-EXPOSURE gap was not.) | index.tsx (input had no range wiring) | FIXED |
 
 No hearing/media issues, no color-only state defects, and no SEO/heading issues
 were found (details below).
@@ -66,6 +73,21 @@ surface is needed.
   `Field/Signature` pattern) that speaks the new `$amount` — set **only** from
   `stepValue`, so typing keystrokes are not announced (the input voices those).
 - **Decorative glyph (issue 5).** `aria-hidden="true"` added to the `𓊹` span.
+- **Min/max range exposure (issue 8).** The field is intentionally a free-form
+  currency **text** input (documented above under APG pattern; endorsed by the
+  adversarial review as "defensible"), so `role="spinbutton"` with native
+  `aria-valuemin`/`aria-valuemax` was **not** adopted — that would reverse the
+  documented design decision and double-announce with the issue-3 live region
+  (the sibling `Number/InternalIncrement` IS a spinbutton, but it is a numeric
+  stepper, not a formatted-currency field). Instead, whenever `min`/`max` is
+  set the input references a **visually-hidden `<span>`** (WCAG technique ARIA1)
+  via `aria-describedby` that spells out the bounds ("Value must be between $0
+  and $1000." / "…at least $0." / "…at most $1000."). The id is merged into
+  `aria-describedby` **without dropping** Shell's helper/error id or any
+  consumer-supplied `aria-describedby` (union of all three), so error text and
+  range bounds are both announced. Exposed on both the stepper and no-stepper
+  configurations; the range BOUNDS (describedby, read on focus) and the value
+  CHANGES (issue-3 live region, read on step) are complementary, not redundant.
 - **The `$` currency adornment (kept, by design).** The `$` renders as a plain
   `<span>` (not `aria-hidden`), so it stays in the accessibility tree as static
   text immediately before the input — a screen-reader user browsing the form
@@ -107,6 +129,12 @@ primary content is client-injected. No SEO fixes required.
     destructured out of `...rest` so it can't clobber the handler).
   - `aria-hidden="true"` on the decorative sacred glyph.
   - Visually-hidden `role="status" aria-live="polite"` live region.
+  - **Range exposure (issue 8):** a `hasRange`/`rangeDescription` derivation
+    plus a visually-hidden `<span id={`${inputId}-range`}>` describing the
+    min/max bounds, its id merged into the input's `aria-describedby` (union of
+    Shell's helper id + any consumer `aria-describedby` + the range id, emitted
+    only when a range is set so the no-range path is byte-for-byte unchanged).
+    No `role`/`type` change — the field stays a currency textbox.
 - **USD.module.css**
   - `.inputWrapper:focus-within` focus ring (themed via the `--goobs-focus-*`
     tokens, with `[data-theme='light'/'dark']` overrides driven by the ancestor
@@ -134,6 +162,12 @@ attribute removed, and the mouse press-and-hold behaviour is preserved.
   issues 1 & 4 (it fails against the pre-fix `onMouseDown`-only component) and
   leaves focus in the field so the Chromatic snapshot also captures the new
   focus ring (issue 2).
+- **`RangeExposedToAT`** (name "Min/max range (aria-describedby)") — renders
+  `min: 0`, `max: 1000` and **no** helperText; the `play` function reads the
+  input's `aria-describedby`, resolves the referenced node(s), and asserts the
+  text matches `/between $0 and $1000/`. Failing-first for issue 8: against the
+  pre-fix component `aria-describedby` is `undefined` (no helper/error, no range
+  wiring), so the `toBeTruthy()` assertion fails.
 
 `MoneyText.stories.tsx` unchanged — no `<MoneyText>` defects found.
 
@@ -141,7 +175,7 @@ attribute removed, and the mouse press-and-hold behaviour is preserved.
 
 - **Consumer `id` breaks `<label>` association (issue 7).** Root cause is in the
   Shell-owned file, not this directory:
-  - `src/components/Field/USD/index.tsx:325` renders `id={id ?? inputId}` on the
+  - `src/components/Field/USD/index.tsx:349` renders `id={id ?? inputId}` on the
     input.
   - `src/components/Field/Shell/index.tsx:395` renders
     `<label htmlFor={inputId}>` using Shell's own generated `inputId` with no way
