@@ -9,7 +9,7 @@
 ## APG pattern
 
 **Progressbar** (WAI-ARIA `progressbar` role). ProgressBar renders a `<div>`
-with `role="progressbar"` on the track (`index.tsx:308`). This is the correct,
+with `role="progressbar"` on the track (`index.tsx:316`). This is the correct,
 APG-sanctioned primitive for a styled/animated/themed progress indicator — the
 native `<progress>` element cannot carry the gradient/stripe/pulse rendering or
 the cross-theme treatment this component needs, and the div+role pattern is the
@@ -19,13 +19,13 @@ The ARIA value contract was already largely correct and is preserved:
 
 - **Determinate** exposes `aria-valuemin={0}`, `aria-valuemax={100}`,
   `aria-valuenow={clampedValue}`, and `aria-valuetext="N percent"`
-  (`index.tsx:310-313`). Value is clamped to 0–100 (`index.tsx:188`).
+  (`index.tsx:318-321`). Value is clamped to 0–100 (`index.tsx:196`).
 - **Indeterminate** correctly **omits** `aria-valuenow`/`aria-valuemin`/
   `aria-valuemax` (they resolve to `undefined`, so React drops the attributes) —
   this is the ARIA-defined signal for an unknown/indeterminate value — and sets
-  `aria-valuetext="Loading"` for context (`index.tsx:291-299, 310-313`).
+  `aria-valuetext="Loading"` for context (`index.tsx:299-307, 318-321`).
 - An accessible **name** is always present: `aria-label` defaults to `'Progress'`
-  when the consumer supplies none (`index.tsx:309`).
+  when the consumer supplies none (`index.tsx:317`).
 
 That correct core is why the findings below are motion + verbosity, not a broken
 value/name contract.
@@ -67,7 +67,8 @@ value/name contract.
 
 ### 2. Visible label is announced twice by screen readers — MINOR
 - **WCAG:** 4.1.2 Name, Role, Value (A) — redundant/verbose exposure.
-- **Where:** `index.tsx:327-336` (pre-fix) — the visible label `<div>` rendered
+- **Where:** `index.tsx:342-350` (`aria-hidden="true"` now at `index.tsx:347`) —
+  the visible label `<div>` rendered
   the same text (`"65%"` / custom `label` / `"Loading..."`) that
   `aria-valuetext` already conveys on the progressbar, but was **not**
   `aria-hidden`, so it remained a separate node in the accessibility tree.
@@ -95,6 +96,15 @@ value/name contract.
   regression, not a fix.
 - **Element stays a `role="progressbar"` div**, not native `<progress>` — see APG
   pattern above.
+- **`aria-valuenow` is left un-rounded (the precise clamped value), while
+  `aria-valuetext` and the visible label are rounded** (`"44 percent"` / `"44%"`
+  for `value={43.78}` — the `FileUploadSimulation` story produces fractional
+  values). Re-audited 2026-07-11 and confirmed this is correct, not a defect:
+  `aria-valuetext` exists precisely to carry the human-readable rounded form
+  (`Math.round(progressValue) percent`, `index.tsx:303-307`) and, when present,
+  is what assistive tech announces in place of `aria-valuenow`; keeping
+  `aria-valuenow` at full precision is spec-intended (the true machine value) and
+  the announced value stays consistent via `aria-valuetext`. No 4.1.2 gap.
 
 ## Hearing
 
@@ -108,7 +118,7 @@ applicable. No hearing-related issue.
 ## Reading & screen reader
 
 - **Accessible name:** always present — `aria-label` defaults to `'Progress'`
-  and accepts a consumer override (`index.tsx:184, 309`). The `aria-label`
+  and accepts a consumer override (`index.tsx:191, 317`). The `aria-label`
   argType is already documented in the stories.
 - **Roles/states/values:** correct progressbar contract — determinate exposes
   min/max/now + valuetext; indeterminate omits the numeric values (ARIA's
