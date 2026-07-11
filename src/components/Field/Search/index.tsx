@@ -7,6 +7,16 @@ import { useFieldBinding } from '../Shell/useFieldBinding'
 
 export interface SearchbarProps {
   label?: string
+  /**
+   * Accessible name for the search input when no visible `label` is
+   * rendered. A `placeholder` is NOT an accessible name (WCAG 4.1.2), so a
+   * label-less search field would otherwise be unnamed for screen-reader /
+   * voice-control users. When `label` is set the input is named by the
+   * `<label htmlFor>` association and this prop is ignored (to avoid
+   * overriding the visible label). When `label` is omitted this value — or,
+   * if unset, the `placeholder` string — becomes the input's `aria-label`.
+   */
+  ariaLabel?: string
   /** Placeholder text (default 'Search...'). */
   placeholder?: string
   /** Controlled query string; the input always mirrors this prop. */
@@ -49,6 +59,7 @@ export interface SearchbarProps {
  */
 const Searchbar: React.FC<SearchbarProps> = ({
   label,
+  ariaLabel,
   placeholder = 'Search...',
   value: valueProp,
   onChange: onChangeProp,
@@ -96,6 +107,18 @@ const Searchbar: React.FC<SearchbarProps> = ({
 
   const disabled = styles?.disabled || false
   const required = styles?.required || false
+
+  // Accessible-name fallback (WCAG 4.1.2 Name, Role, Value). FieldShell only
+  // renders a `<label htmlFor>` when `label` is a non-empty string; without
+  // one the search input's only text would be the placeholder, which is NOT
+  // an accessible name. So when there's no visible label we apply an
+  // aria-label — the explicit `ariaLabel` prop wins, otherwise the visible
+  // placeholder string is used. When a visible label IS present we leave
+  // aria-label undefined so it can't override the `<label>` association.
+  const hasVisibleLabel = Boolean(label)
+  const resolvedAriaLabel = hasVisibleLabel
+    ? undefined
+    : (ariaLabel ?? placeholder)
 
   // Inner frame (icon + input border) lives in Search.module.css — the
   // sacred-gold border is the hardcoded default. Caller-supplied overrides
@@ -168,12 +191,17 @@ const Searchbar: React.FC<SearchbarProps> = ({
           style={wrapperCssVars as React.CSSProperties}
         >
           <div className={cssStyles.searchIcon}>
+            {/* Decorative magnifier — the input is already named by the
+                label/aria-label, so hide the glyph from assistive tech
+                (WCAG 1.1.1) and keep it out of the tab order. */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="20"
               viewBox="0 0 24 24"
               width="20"
               fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
             >
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
@@ -183,12 +211,16 @@ const Searchbar: React.FC<SearchbarProps> = ({
             ref={inputRef}
             id={inputId}
             data-field-name={dataFieldName}
-            type="text"
+            // Native search semantics: role="searchbox", a "search" mobile
+            // enter-key hint, and correct AT announcement (WCAG 1.3.1 /
+            // 4.1.2) — the semantically correct element for a search field.
+            type="search"
             value={value}
             onChange={e => onChange(e.target.value)}
             disabled={disabled}
             required={required}
             placeholder={placeholder}
+            aria-label={resolvedAriaLabel}
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}

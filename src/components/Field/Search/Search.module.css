@@ -30,6 +30,28 @@
 }
 
 /* --------------------------------------------------------------------------
+   FOCUS + ERROR STATE — the inner .input clears its native outline
+   (outline: none), so the visible focus indicator (WCAG 2.4.7 Focus Visible)
+   has to live on the wrapper. :focus-within fires when the input inside is
+   focused: swap to the themed focus border (--field-border-focus, set per
+   theme by FieldShell) and add a soft focus ring. Error state — driven by the
+   shell's data-state='error' / aria-invalid='true' — turns the wrapper border
+   to the danger token so an invalid field is conveyed visually (border) as
+   well as by the error text + aria-invalid (never colour-alone, WCAG 1.4.1).
+   The error selector is more specific than :focus-within, so a focused
+   invalid field keeps its danger border while still showing the focus ring.
+   -------------------------------------------------------------------------- */
+.inputWrapper:focus-within {
+  border-color: var(--field-border-focus, var(--goobs-gold-a70));
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+:global([data-component='FieldShell'][data-state='error']) .inputWrapper,
+:global([data-component='FieldShell'][aria-invalid='true']) .inputWrapper {
+  border-color: var(--field-border-error, var(--goobs-danger));
+}
+
+/* --------------------------------------------------------------------------
    THEME OVERRIDES — the data-theme attribute is emitted by FieldShell on the
    .shell ancestor wrapper (Shell/index.tsx). Remap the wrapper bg/border and
    the input/icon text to the light/dark role tokens so light = light surface
@@ -45,6 +67,11 @@
   background-color: var(--field-bg, var(--goobs-light-surface));
 }
 
+:global([data-component='FieldShell'][data-theme='light'])
+  .inputWrapper:focus-within {
+  box-shadow: var(--goobs-focus-light);
+}
+
 :global([data-component='FieldShell'][data-theme='dark']) .inputWrapper {
   background-color: var(--field-bg, var(--goobs-dark-surface));
   border-color: var(--field-border-default, var(--goobs-dark-border));
@@ -53,6 +80,11 @@
 :global([data-component='FieldShell'][data-theme='dark'])
   .inputWrapper.disabled {
   background-color: var(--field-bg, var(--goobs-dark-surface));
+}
+
+:global([data-component='FieldShell'][data-theme='dark'])
+  .inputWrapper:focus-within {
+  box-shadow: var(--goobs-focus-dark);
 }
 
 .searchIcon {
@@ -94,6 +126,17 @@
   box-sizing: border-box;
 }
 
+/* type="search" adds a webkit-only, mouse-only clear button (and search
+   decoration) that is not keyboard-operable, is not announced by AT, and
+   renders unstyled — strip it for consistent cross-browser appearance. No
+   a11y regression: the field ships no bespoke clear control, and clearing
+   is already possible from the keyboard. */
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .inputWrapper.disabled .input {
   color: var(--search-text-color, var(--goobs-sacred-text-muted));
 }
@@ -116,4 +159,16 @@
   .inputWrapper.disabled
   .input {
   color: var(--search-text-color, var(--goobs-dark-text-muted));
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION — honour a user's prefers-reduced-motion request (WCAG
+   2.3.3) by dropping the border/background/box-shadow transition on the
+   wrapper. State changes still apply instantly; only the animation is
+   removed.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .inputWrapper {
+    transition: none;
+  }
 }

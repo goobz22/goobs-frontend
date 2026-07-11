@@ -718,6 +718,13 @@ export const InteractionTest: Story = {
     expect(label).toBeVisible()
     expect(input).toBeVisible()
 
+    // type="search" exposes the native searchbox role, and the visible
+    // <label> is the accessible name (an aria-label must NOT override it).
+    const searchbox = canvas.getByRole('searchbox', {
+      name: 'Test Search Input',
+    })
+    expect(searchbox).toBe(input)
+
     // Focus and type
     await userEvent.click(input)
     await userEvent.type(input, 'testing search functionality', { delay: 50 })
@@ -726,5 +733,51 @@ export const InteractionTest: Story = {
     await expect(input).toHaveValue('testing search functionality')
   },
   // Light-themed field — pin the light canvas.
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBLE NAME — LABEL-LESS SEARCH (WCAG 4.1.2)
+// --------------------------------------------------------------------------
+
+/**
+ * A label-less search bar still needs an accessible name — a placeholder is
+ * NOT one. When `label` is omitted the input's `aria-label` falls back to
+ * the explicit `ariaLabel` prop, or to the `placeholder` string when
+ * `ariaLabel` is unset. Both fields below render with NO visible label yet
+ * expose a `searchbox` role that carries a real accessible name, so
+ * screen-reader and voice-control users can find and address them.
+ */
+export const AccessibleNameFallback: Story = {
+  name: 'Accessible Name (No Visible Label)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* No label, no ariaLabel → the placeholder becomes the name. */}
+      <SearchBarWithState
+        placeholder="Search everything..."
+        styles={{ theme: 'light' }}
+      />
+      {/* No label, explicit ariaLabel → ariaLabel is the name; the
+          placeholder is free to say something different. */}
+      <SearchBarWithState
+        ariaLabel="Search products"
+        placeholder="Type a product name..."
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Placeholder-derived accessible name.
+    const byPlaceholder = canvas.getByRole('searchbox', {
+      name: 'Search everything...',
+    })
+    expect(byPlaceholder).toBeVisible()
+    // Explicit ariaLabel wins over the placeholder as the accessible name.
+    const byAriaLabel = canvas.getByRole('searchbox', {
+      name: 'Search products',
+    })
+    expect(byAriaLabel).toBeVisible()
+  },
   globals: { backgrounds: { value: 'light' } },
 }
