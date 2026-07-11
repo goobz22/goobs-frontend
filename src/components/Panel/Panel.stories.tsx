@@ -172,11 +172,81 @@ export const InteractionTest: Story = {
     const canvas = within(canvasElement)
     const region = canvasElement.querySelector('[data-component="Panel"]')
     await expect(region).not.toBeNull()
-    // The region is labelled by the header title block.
+    // The region is labelled by the header title.
     const labelledBy = region?.getAttribute('aria-labelledby')
     await expect(labelledBy).toBeTruthy()
+    // aria-labelledby must resolve to a REAL heading element (WCAG 1.3.1):
+    // the title is an <h1>-<h6>, not a styled div/span, and it carries the id.
+    const labelTarget = canvasElement.querySelector(`#${labelledBy}`)
+    await expect(labelTarget).not.toBeNull()
+    await expect((labelTarget as HTMLElement).tagName).toMatch(/^H[1-6]$/)
+    // Default heading level is 2.
+    await expect((labelTarget as HTMLElement).tagName).toBe('H2')
+    // The scroll body is keyboard-reachable (WCAG 2.1.1): tabIndex=0.
+    const body = canvasElement.querySelector('[data-panel-body="true"]')
+    await expect(body).toHaveAttribute('tabindex', '0')
     // The built-in back button is present and reachable by its label.
     const backButton = canvas.getByLabelText('Back')
     await expect(backButton).toBeVisible()
+    // The decorative back-arrow glyph is hidden from AT (button label names it).
+    const backIcon = backButton.querySelector('svg')
+    await expect(backIcon).toHaveAttribute('aria-hidden', 'true')
+  },
+}
+
+/**
+ * Heading level is consumer-controllable via `headingLevel` — the title
+ * renders as a real `<h3>` here (default is `<h2>`). The play function pins
+ * the rendered heading tag and its aria-labelledby linkage so a regression
+ * that reverts the title to a non-semantic span fails.
+ */
+export const HeadingLevel: Story = {
+  name: 'A11y/Heading Level',
+  args: { variant: 'standard' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header
+        onBack={fn()}
+        headingLevel={3}
+        title="Section Heading"
+        subtitle="Rendered as a real <h3>"
+        actions={<CustomButton text="Save" styles={{ theme: 'light' }} />}
+      />
+      <Panel.Body>{sampleBody}</Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector('[data-component="Panel"]')
+    const labelledBy = region?.getAttribute('aria-labelledby')
+    await expect(labelledBy).toBeTruthy()
+    const heading = canvasElement.querySelector(`#${labelledBy}`)
+    await expect(heading).not.toBeNull()
+    await expect((heading as HTMLElement).tagName).toBe('H3')
+    await expect(heading).toHaveTextContent('Section Heading')
+  },
+}
+
+/**
+ * Header-less composition (Body only). The root must NOT emit a dangling
+ * `aria-labelledby` when no `Panel.Header` supplies the title id — the play
+ * function pins that the attribute is absent so the region is never left
+ * pointing at a non-existent element (WCAG 1.3.1 / 4.1.2).
+ */
+export const HeaderlessRegion: Story = {
+  name: 'A11y/Header-less (no dangling label)',
+  args: { variant: 'sacred' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Body>{sampleBody}</Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector('[data-component="Panel"]')
+    await expect(region).not.toBeNull()
+    // No header → no aria-labelledby (rather than a broken IDREF).
+    await expect(region).not.toHaveAttribute('aria-labelledby')
+    // The body is still keyboard-scrollable on its own.
+    const body = canvasElement.querySelector('[data-panel-body="true"]')
+    await expect(body).toHaveAttribute('tabindex', '0')
   },
 }
