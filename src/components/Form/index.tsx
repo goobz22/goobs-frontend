@@ -30,7 +30,10 @@
  */
 
 import React, {
+  useCallback,
+  useState,
   type CSSProperties,
+  type FormEvent,
   type ReactElement,
   type ReactNode,
 } from 'react'
@@ -38,6 +41,19 @@ import { z } from 'zod'
 import { FormContext, type FormContextValue, type FormEngine } from './context'
 import { useZodFormEngine } from './engine/zod'
 import AutoFields from './AutoFields'
+import cssStyles from './Form.module.css'
+
+/**
+ * Structural view of a zod `safeParse` failure — mirrors the engine's own
+ * defensive shape so the submit-status summary doesn't hard-couple to zod's
+ * TS surface.
+ */
+interface SafeParseLike {
+  success: boolean
+  error?: {
+    issues?: ReadonlyArray<{ path: ReadonlyArray<PropertyKey> }>
+  }
+}
 
 export interface FormProps<
   TValues extends Record<string, unknown> = Record<string, unknown>,
@@ -107,6 +123,38 @@ function FormInner<TValues extends Record<string, unknown>>({
     ...(subject !== undefined && { subject }),
   }
 
+  // Form-level submit-status announcement (WCAG 4.1.3 Status Messages). When a
+  // submit is blocked by validation, the per-field errors surface WITHOUT moving
+  // focus, so a screen-reader user gets no feedback that the submit failed. This
+  // wrapper re-parses the current values (the same verdict the engine reaches)
+  // and pushes a concise summary into the role="alert" live region below, then
+  // delegates to the engine's real submit handler. It never changes the engine's
+  // behaviour — it only adds the announcement.
+  const [submitStatus, setSubmitStatus] = useState('')
+
+  const handleFormSubmit = useCallback(
+    (event: FormEvent): void => {
+      const parsed = schema.safeParse(engine.values) as SafeParseLike
+      if (parsed.success) {
+        setSubmitStatus('')
+      } else {
+        const invalidPaths = new Set(
+          (parsed.error?.issues ?? []).map(issue =>
+            issue.path.map(segment => String(segment)).join('.')
+          )
+        )
+        const count = invalidPaths.size
+        setSubmitStatus(
+          count === 1
+            ? '1 field needs attention. Review the highlighted field below.'
+            : `${count} fields need attention. Review the highlighted fields below.`
+        )
+      }
+      engine.handleSubmit(event)
+    },
+    [schema, engine]
+  )
+
   return (
     <form
       data-component="Form"
@@ -114,13 +162,24 @@ function FormInner<TValues extends Record<string, unknown>>({
       {...(subject !== undefined && { 'data-subject': subject })}
       role="form"
       aria-label={subject ?? id}
-      onSubmit={engine.handleSubmit}
+      onSubmit={handleFormSubmit}
       {...(className !== undefined && { className })}
       {...(style !== undefined && { style })}
     >
       <FormContext.Provider value={contextValue}>
         {children}
       </FormContext.Provider>
+      {/* Live region: announces the form-level validation summary on a blocked
+          submit. Empty (silent) until a submit fails; cleared on a valid submit.
+          Visually hidden — the visible per-field errors are the sighted
+          equivalent. */}
+      <div
+        className={cssStyles.visuallyHidden}
+        role="alert"
+        data-form-status=""
+      >
+        {submitStatus}
+      </div>
     </form>
   )
 }
