@@ -75,6 +75,61 @@ const WIDGET_ROLE_RE =
   /\brole\s*=\s*['"](?:tab|menuitem|menuitemradio|menuitemcheckbox|option|treeitem)['"]/
 
 /**
+ * Replace the CONTENT of `//` line comments and `/* ... *\/` block comments
+ * (JSDoc included) with spaces, preserving every newline so byte offsets and
+ * line numbers are unchanged. String/template-literal-aware so a `//` inside a
+ * string attribute (e.g. an `https://` URL) is not mistaken for a comment.
+ * This is what stops JSDoc `@example` snippets — which legitimately contain
+ * `<Button onClick=… />` with no `action` — from being flagged as real code.
+ */
+function blankComments(text: string): string {
+  const out = text.split('')
+  let str: string | null = null
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (str) {
+      if (c === '\\') {
+        i++
+        continue
+      }
+      if (c === str) str = null
+      continue
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      str = c
+      continue
+    }
+    if (c === '/' && text[i + 1] === '/') {
+      // line comment: blank to end of line
+      let j = i
+      while (j < text.length && text[j] !== '\n') {
+        out[j] = ' '
+        j++
+      }
+      i = j - 1
+      continue
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      // block comment: blank through the closing */
+      let j = i
+      while (j < text.length && !(text[j] === '*' && text[j + 1] === '/')) {
+        if (text[j] !== '\n') out[j] = ' '
+        j++
+      }
+      // blank the closing */ too (if present)
+      if (j < text.length) {
+        out[j] = ' '
+        out[j + 1] = ' '
+        j += 1
+      }
+      i = j
+      continue
+    }
+  }
+  return out.join('')
+}
+
+/**
  * Read a JSX opening tag starting at `<` (offset `tagStart`), returning the
  * inclusive index of the tag-closing `>` and the tag body. Brace- and
  * string-aware so the `>` inside `onClick={() => f()}` (arrow, inside `{}`),
@@ -148,7 +203,10 @@ const lint: A11yLint = {
     'Interactive action controls (raw <button> with onClick, or goobs <Button>/<IconButton> used as an action) must carry a canonical kebab-case data-action verb (or the `action` prop) so tests can target them by intent rather than drifting label text — the ACTION analogue of data-field-name. Escape hatches: role="tab"/menuitem/option/etc composite-widget children (own selector contract), and goobs buttons with no literal onClick/type=submit or that spread props. See the module header for the canonical verb vocabulary and drift-normalization decisions.',
   check(files: LintFile[]): Violation[] {
     const violations: Violation[] = []
-    for (const { path, text } of files) {
+    for (const { path, text: raw } of files) {
+      // Scan a comment-blanked copy so JSDoc `@example` JSX is never flagged;
+      // offsets/line numbers are identical to the raw source.
+      const text = blankComments(raw)
       const nl = newlineIndex(text)
 
       // Shape A — raw <button ... onClick ...> without data-action.
