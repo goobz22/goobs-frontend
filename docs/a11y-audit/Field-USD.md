@@ -1,6 +1,8 @@
 # Field/USD — a11y audit (2026-07-11)
 
-**Status: FIXED** (one root-cause item DEFERRED to Field/Shell)
+**Status: PARTIAL** — every issue inside this directory is FIXED; one
+finding (issue 7) has its root cause in `Field/Shell` and is DEFERRED to that
+serial pass.
 
 Scope: `src/components/Field/USD/` — the editable `<USDField>` (`index.tsx`,
 `USD.module.css`, `USDField.stories.tsx`), its read-only sibling `<MoneyText>`
