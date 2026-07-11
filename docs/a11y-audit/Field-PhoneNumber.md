@@ -1,10 +1,18 @@
 # Field/PhoneNumber — a11y audit (2026-07-11)
 
-**Status:** PARTIAL (4 issues fixed in-directory; 1 deferred to the serial Field/Shell pass)
+**Status:** PARTIAL (7 issues fixed in-directory; 1 deferred to the serial Field/Shell pass)
 
 > **Update 2026-07-11 (adversarial-review pass):** placeholder contrast (issue 5) fixed
 > in-directory; the label/custom-`id` divergence (issue 4) re-confirmed as genuinely Shell-owned
 > and correctly deferred (the reviewer verified `FieldShellProps` exposes no `id` prop).
+
+> **Update 2026-07-11 (ownership re-audit pass):** found three additional in-directory issues the
+> prior pass missed — the top-level `required` (6) and `disabled` (7) props were **silently
+> dropped** (only `styles.required` / `styles.disabled` worked), so `<PhoneNumberField required />`
+> / `disabled` conveyed neither state, and the repo's own `RequiredFields` / `DisabledStates`
+> stories were non-functional demos; and there was no `ariaLabel` escape hatch (8) for a
+> `label={null}` field. All three fixed in-directory (additive, API-preserving) with new
+> play-function regression stories.
 
 **Component:** `src/components/Field/PhoneNumber` — a US phone-number text input built on
 `FieldShell` with a fixed, non-interactive `+1` prefix glued to the left of a `type="tel"`
@@ -28,6 +36,9 @@ interactive control.
 | 3 | Minor    | 2.3.3 Animation from Interactions (AAA) | `PhoneNumber.module.css:24` (`transition: var(--goobs-transition-slow)`) | **FIXED** |
 | 4 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A); 3.3.2 Labels or Instructions (A) | `index.tsx:241` (`id={id ?? inputId}`) — root cause `Field/Shell/index.tsx:291,395` | **DEFERRED** |
 | 5 | Minor    | 1.4.3 Contrast — Minimum (AA) | `PhoneNumber.module.css` (no `::placeholder` rule → UA-default gray) | **FIXED** |
+| 6 | Serious  | 1.3.1 Info & Relationships (A); 3.3.2 Labels or Instructions (A); 4.1.2 Name, Role, Value (A) | `index.tsx` — no top-level `required` prop; only `styles.required` honored | **FIXED** |
+| 7 | Serious  | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A) | `index.tsx` — no top-level `disabled` prop; only `styles.disabled` honored | **FIXED** |
+| 8 | Moderate | 4.1.2 Name, Role, Value (A) | `index.tsx` — no `ariaLabel`/`ariaLabelledby` for a `label={null}` field | **FIXED** |
 
 ### 1 — No visible keyboard focus indicator (Serious) — FIXED
 `.input` sets `outline: none` (`PhoneNumber.module.css:97`), removing the UA focus ring. Unlike
@@ -97,6 +108,45 @@ existing `.input` theme structure, each pointing at that theme's already-AA-tune
 placeholder opacity so the token's proven contrast isn't silently reduced. The muted token keeps
 the hint visibly lighter than entered text (`--field-text`) while staying legible. No API change.
 
+### 6 — Top-level `required` prop silently dropped; required-ness not conveyed (Serious) — FIXED
+Every sibling Field (`Text`, `IPAM/*`, `Number/*`, `Signature`, …) and `FieldShell` itself expose
+a top-level `required` prop as the ergonomic norm. PhoneNumber did **not** — it read `required`
+only from `styles?.required` (`const required = styles?.required || false`), and the props
+interface had no top-level `required`. A caller writing the obvious `<PhoneNumberField required />`
+had the prop dropped by the destructure (no such field, no `...rest`), so the field rendered with
+**no required indicator and no `aria-required`** — required-ness conveyed neither visually nor
+programmatically (fails 1.3.1 / 3.3.2 / 4.1.2). The repo's own `RequiredFields` story passed
+`required` top-level and was therefore a **non-functional demo**.
+
+**Fix:** added `required?: boolean` to `PhoneNumberFieldProps`; resolved
+`requiredProp ?? styles?.required ?? false` (top-level wins; `styles.required` fallback preserved
+byte-for-byte — same precedence FieldShell/`Field/Text` use). The resolved value drives the native
+`required` attribute + FieldShell's `aria-required` + the required indicator. Additive, no existing
+prop changed.
+
+### 7 — Top-level `disabled` prop silently dropped; disabled state not applied (Serious) — FIXED
+Same shape as issue 6. `disabled` was read only from `styles?.disabled`, so
+`<PhoneNumberField disabled />` produced a fully **enabled, focusable, editable** field — the
+native `disabled` attribute was never set and FieldShell never marked the wrapper `aria-disabled`
+(fails 1.3.1 / 4.1.2). The `DisabledStates` story (which passes `disabled` top-level) was likewise
+a non-functional demo.
+
+**Fix:** added `disabled?: boolean`; resolved `disabledProp ?? styles?.disabled ?? false`. Now
+drives the native `disabled` attribute (removing the input from the tab order), the `.disabled`
+chrome modifier, and FieldShell's `aria-disabled` on the wrapper. Additive, `styles.disabled`
+path preserved.
+
+### 8 — No accessible-name escape hatch for a label-less field (Moderate) — FIXED
+The field defaults `label = 'Phone Number'`, so it is accessible-by-default. But a caller who
+suppresses the visible label (`label={null}` for a bare input in a toolbar or table cell) left the
+input **anonymous** to assistive tech — a placeholder is not an accessible name (4.1.2). The
+sibling `Field/Text` already added `ariaLabel`/`ariaLabelledby` for exactly this; PhoneNumber
+lacked the escape hatch.
+
+**Fix:** added `ariaLabel?: string` + `ariaLabelledby?: string`, forwarded verbatim as
+`aria-label` / `aria-labelledby` on the input (omitted when undefined, so existing callsites render
+byte-for-byte identically). Matches the `Field/Text` convention.
+
 ---
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
@@ -107,8 +157,13 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
 - **Accessible name:** provided by FieldShell's real `<label htmlFor>` (default `'Phone Number'`).
   Correct in the default path; broken only via the deferred custom-`id` case (issue 4).
 - **Semantic HTML:** native `<input type="tel">` — correct element and virtual-keyboard hint.
-- **Required:** conveyed programmatically (`aria-required` via `inputAriaProps`) **and** visually
-  (the indicator span) — not asterisk-only. Good.
+- **Required:** conveyed programmatically (`aria-required` via `inputAriaProps` + the native
+  `required` attribute) **and** visually (the indicator span) — not asterisk-only. Now settable via
+  the ergonomic top-level `required` prop too, not just `styles.required` (issue 6).
+- **Disabled:** conveyed via the native `disabled` attribute (out of tab order) + `aria-disabled`
+  on the wrapper + dimmed chrome. Now settable via the top-level `disabled` prop (issue 7).
+- **Label-less fields:** `ariaLabel`/`ariaLabelledby` give a `label={null}` field an accessible
+  name (issue 8).
 - **Error text:** linked via `aria-describedby` + `aria-invalid` and announced through Shell's
   `role="alert"` + `aria-live="polite"` region. Good (spread of `inputAriaProps` verified at
   `index.tsx:253`).
@@ -133,6 +188,12 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
   `.input::placeholder` rules using each theme's AA-tuned muted-text token + `opacity: 1`
   (WCAG 1.4.3).
 - `index.tsx`: `autoComplete` now defaults to `'tel'` (WCAG 1.3.5); added prop JSDoc.
+- `index.tsx`: added top-level `required` prop → `requiredProp ?? styles?.required ?? false`,
+  driving native `required` + `aria-required` + indicator (issue 6, WCAG 1.3.1/3.3.2/4.1.2).
+- `index.tsx`: added top-level `disabled` prop → `disabledProp ?? styles?.disabled ?? false`,
+  driving native `disabled` + `aria-disabled` + dim chrome (issue 7, WCAG 1.3.1/4.1.2).
+- `index.tsx`: added `ariaLabel`/`ariaLabelledby` props forwarded as `aria-label`/`aria-labelledby`
+  on the input (issue 8, WCAG 4.1.2).
 
 ## Stories updated
 - `FocusIndicatorTest` (new): Tab-reaches the input (keyboard operability) and asserts the wrapper
@@ -143,6 +204,16 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
   surfaces (Chromatic baseline) and asserts the light field's resolved `::placeholder` color is the
   explicit muted token `rgb(75, 85, 99)` at `opacity: 1`, not the UA default — regression guard for
   issue 5.
+- `RequiredStateA11y` (new): asserts `toBeRequired()` + `aria-required="true"` on the input and the
+  visible required indicator (`*`) in the linked `<label>` — regression guard for issue 6.
+- `DisabledStateA11y` (new): asserts `toBeDisabled()` on the input + `aria-disabled="true"` on the
+  FieldShell wrapper — regression guard for issue 7.
+- `AriaLabelWhenLabelless` (new): renders `label={null}` + `ariaLabel="Mobile phone"` and asserts
+  the input is findable by `getByRole('textbox', { name: 'Mobile phone' })` with `aria-label` set —
+  regression guard for issue 8.
+- The pre-existing `RequiredFields` / `DisabledStates` showcase stories (which already passed the
+  top-level props) now render the states they always claimed to — live Chromatic regressions for
+  issues 6/7 as a side effect.
 
 ## Deferred
 - **Issue 4** (label association breaks with a custom `id`) → `Field/Shell/index.tsx:291,395`.
