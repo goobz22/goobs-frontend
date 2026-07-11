@@ -55,6 +55,18 @@ export interface MetricsAccordionProps {
    * metrics + per-tab metrics) can be disambiguated by tests.
    */
   dataField?: string
+  /**
+   * When set, wraps the toggle button in a real `<h1>`–`<h6>` so the
+   * collapsible section is exposed as a document heading (WCAG 1.3.1 /
+   * SEO / the WAI-ARIA accordion pattern, which wraps each header button in
+   * a heading). Omit to render the bare disclosure button — a
+   * context-agnostic primitive cannot know the correct document-outline
+   * level, so a hardcoded default would itself be a 1.3.1 defect and would
+   * silently change every consumer's DOM. The button keeps all its
+   * disclosure semantics (`aria-expanded`/`aria-controls`) and test
+   * selectors regardless.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Style configuration. `theme: 'sacred'` switches to the dark/gold
    *  palette, `'dark'` to the dark-slate shell (any other value renders the
    *  light shell) via CSS-module blocks; `color` overrides the accent. */
