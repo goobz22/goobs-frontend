@@ -56,13 +56,18 @@ const DECORATIVE_TOKENS = [
   'separator', // item/crumb delimiters
   'lineNumbers', // code-gutter line-number column (container)
   'glyph', // ornamental sacred glyphs / glyph rows
-  'adornment', // decorative field adornments
   'shimmer', // animated overlay chrome (usually empty)
   'connector', // stepper connector lines (usually empty)
   'ornament', // decorative frame ornaments
   'sparkle', // decorative sparkle chrome
   'decorative', // explicitly-decorative elements
 ]
+// NB: `adornment` is deliberately NOT a token. In this library `.adornment*`
+// names a LAYOUT WRAPPER that routinely holds meaningful or interactive content
+// (a currency `$`, consumer-supplied start/end adornments, increment/decrement
+// buttons). Hiding it would remove real content/controls from AT — a worse bug
+// than the one this lint prevents. Decorative glyphs INSIDE such wrappers carry
+// their own `aria-hidden`, which this lint still checks.
 
 /** True when `token` occurs in `classText` as a whole camelCase segment. */
 function classNameHasToken(classText: string): boolean {
