@@ -195,6 +195,17 @@ export interface FilterSectionProps {
   initiallyOpen?: boolean
   /** Accordion title when `collapsible`. Default `"Filters"`. */
   title?: string
+  /**
+   * When `collapsible`, wrap the toggle header in a real heading element of
+   * this level (1–6) so the collapsible "Filters" section appears in the
+   * document outline and screen-reader heading navigation (WCAG 1.3.1 / SEO).
+   * The WAI-ARIA APG Accordion pattern places the disclosure trigger inside a
+   * heading. This is opt-in (not defaulted) because a single filter disclosure
+   * shouldn't force a heading into a consumer's outline unless they choose its
+   * level to fit their page hierarchy. Undefined → no heading wrapper (DOM
+   * unchanged). Ignored when not `collapsible`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 
   // Misc ----------------------------------------------------------
   styles?: { theme?: 'sacred' | 'light' | 'dark' }
