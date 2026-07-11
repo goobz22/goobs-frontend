@@ -1563,7 +1563,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         {resolveAuthorName(comment.createdBy)}
                       </div>
                       <div className={cssStyles.commentTimestamp}>
-                        {new Date(comment.createdAt).toLocaleString()}
+                        {formatLocalDateTime(comment.createdAt)}
                       </div>
                       {commentSection === 'internal' && (
                         <span className={cssStyles.internalBadge}>
@@ -1680,9 +1680,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                                     <span
                                       className={cssStyles.revisionMetaTime}
                                     >
-                                      {new Date(
-                                        revision.editedAt
-                                      ).toLocaleString()}
+                                      {formatLocalDateTime(revision.editedAt)}
                                     </span>
                                   )}
                                 </div>
@@ -1748,7 +1746,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     {update.updatedBy}
                   </div>
                   <div className={cssStyles.caseUpdateTimestamp}>
-                    {new Date(update.updatedAt).toLocaleString()}
+                    {formatLocalDateTime(update.updatedAt)}
                   </div>
                 </div>
                 <div className={cssStyles.caseUpdateBody}>
@@ -1843,10 +1841,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       // Log case update for meeting scheduled
       logCaseUpdate(
         'meeting_scheduled',
-        `Scheduled ${meetingType} meeting with ${meetingAttendeeName} for ${startDateTime.toLocaleString()}`,
+        `Scheduled ${meetingType} meeting with ${meetingAttendeeName} for ${formatLocalDateTime(startDateTime)}`,
         'meeting',
         undefined,
-        `${meetingTitle} - ${startDateTime.toLocaleString()}`
+        `${meetingTitle} - ${formatLocalDateTime(startDateTime)}`
       )
 
       resetMeetingForm()
@@ -1892,7 +1890,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       `Confirmed meeting: ${meeting?.eventTypeName || 'Unknown'}`,
       'meeting',
       undefined,
-      `Confirmed - ${new Date(meeting?.startTime || '').toLocaleString()}`
+      `Confirmed - ${formatLocalDateTime(meeting?.startTime || '')}`
     )
 
     setSelectedMeeting(null)
@@ -1936,8 +1934,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         'meeting_rescheduled',
         `Rescheduled meeting: ${selectedMeeting.eventTypeName}`,
         'meeting',
-        originalStart.toLocaleString(),
-        newStartDateTime.toLocaleString()
+        formatLocalDateTime(originalStart),
+        formatLocalDateTime(newStartDateTime)
       )
 
       setRescheduleDate(null)
@@ -1978,7 +1976,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const formatMeetingTime = (start: string, end: string): string => {
     const startTime = new Date(start)
     const endTime = new Date(end)
-    return `${startTime.toLocaleDateString()} · ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    return `${formatLocalDate(startTime)} · ${formatLocalTime(startTime, { hour: '2-digit', minute: '2-digit' })} - ${formatLocalTime(endTime, { hour: '2-digit', minute: '2-digit' })}`
   }
 
   // Get relative time from now
@@ -2300,7 +2298,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <div>
               <div className={cssStyles.meetingInfoLabel}>Date</div>
               <div className={cssStyles.meetingInfoValue}>
-                {startTime.toLocaleDateString('en-US', {
+                {formatLocalDate(startTime, {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
@@ -2311,12 +2309,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <div>
               <div className={cssStyles.meetingInfoLabel}>Time</div>
               <div className={cssStyles.meetingInfoValue}>
-                {startTime.toLocaleTimeString([], {
+                {formatLocalTime(startTime, {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}{' '}
                 -{' '}
-                {endTime.toLocaleTimeString([], {
+                {formatLocalTime(endTime, {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
@@ -2423,14 +2421,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               {selectedMeeting.eventTypeName}
             </div>
             <div className={cssStyles.currentScheduleSub}>
-              {originalStart.toLocaleDateString('en-US', {
+              {formatLocalDate(originalStart, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
               })}
               {' at '}
-              {originalStart.toLocaleTimeString([], {
+              {formatLocalTime(originalStart, {
                 hour: '2-digit',
                 minute: '2-digit',
               })}
@@ -2496,19 +2494,19 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   )
                   return (
                     <>
-                      {previewDateTime.toLocaleDateString('en-US', {
+                      {formatLocalDate(previewDateTime, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                       })}
                       {' at '}
-                      {previewDateTime.toLocaleTimeString([], {
+                      {formatLocalTime(previewDateTime, {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
                       {' - '}
-                      {endTime.toLocaleTimeString([], {
+                      {formatLocalTime(endTime, {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
