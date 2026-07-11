@@ -62,3 +62,65 @@
   background-color: var(--field-bg, var(--goobs-dark-surface));
   color: var(--goobs-dark-text-muted);
 }
+
+/* --------------------------------------------------------------------------
+   ERROR STATE (WCAG 1.4.1 — Use of Color)
+
+   FieldShell sets aria-invalid on the input when `error` is present, but its
+   own error-border rule targets `.inputSlot` — a class this component's input
+   does NOT use (the input is a bare descendant of `.shell`, not wrapped in
+   `.inputSlot`), so without this the invalid time input showed no on-field cue
+   and the error was conveyed by the red helper text alone. `--field-border-error`
+   is defined per-theme on the FieldShell `.shell` ancestor. One selector per
+   theme scope so it out-specifies the `[data-theme='…'] .input` default-border
+   rules above; placed before the focus block so the focus affordance still wins
+   while the field is being edited.
+   -------------------------------------------------------------------------- */
+
+.input[aria-invalid='true'],
+:global([data-component='FieldShell'][data-theme='light'])
+  .input[aria-invalid='true'],
+:global([data-component='FieldShell'][data-theme='dark'])
+  .input[aria-invalid='true'] {
+  border-color: var(--field-border-error, var(--goobs-danger));
+}
+
+/* --------------------------------------------------------------------------
+   FOCUS RING (WCAG 2.4.7 — Focus Visible)
+
+   The input sets `outline: none`, and — unlike the generic FieldShell input —
+   it isn't wrapped in `.inputSlot`, so it inherits no `:focus-within`
+   affordance from the shell. Provide a visible keyboard-focus indicator. A
+   text-entry control (`type="time"`) matches `:focus-visible` whenever focused
+   (the keyboard-input heuristic), so this shows on both keyboard and pointer
+   focus. One rule per theme so the ring/border read correctly on each surface;
+   the higher-specificity themed selectors out-rank the default-border rules and
+   the equal-specificity error rules above, so focus takes over while editing.
+   -------------------------------------------------------------------------- */
+
+.input:focus-visible {
+  border-color: var(--field-border-focus, var(--goobs-gold-a70));
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+:global([data-component='FieldShell'][data-theme='light']) .input:focus-visible {
+  border-color: var(--field-border-focus, var(--goobs-light-primary));
+  box-shadow: var(--goobs-focus-light);
+}
+
+:global([data-component='FieldShell'][data-theme='dark']) .input:focus-visible {
+  border-color: var(--field-border-focus, var(--goobs-dark-primary));
+  box-shadow: var(--goobs-focus-dark);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3)
+
+   Drop the border/box-shadow transition for users who request reduced motion.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+}
