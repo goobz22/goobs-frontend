@@ -113,34 +113,6 @@ Nothing to change. This is a form control, not heading/landmark/list/link/table 
 is no client-only injection of primary content — label, input, and helper text are all in the
 SSR'd HTML.
 
-## Deferred
-
-Root cause outside `Field/Text` (in `Field/Shell`, owned by a later serial pass). Nothing here
-is a functional gap for the common (labelled) case — these are Shell-level hardening items.
-
-- **`aria-describedby` only set when a helper/error message is present.**
-  `Field/Shell/index.tsx:349` adds `aria-describedby` only when `showHelper` is true. A field
-  with persistent *instructions* passed some other way, or a description that should always be
-  announced, has no seam here. This is by design for the current API, but a composite/consumer
-  wanting a permanent description can't supply one through Text today.
-  - **Suggested change (Shell owner):** accept an optional `describedById?: string` on
-    `FieldShellProps` (`Field/Shell/index.tsx:~141`) and merge it into the
-    `aria-describedby` built at line 349. Additive, back-compatible.
-
-- **`aria-disabled` + native `disabled` both applied to the input when disabled.** Shell's
-  `inputAriaProps` sets `aria-disabled` (`Field/Shell/index.tsx:347`) and Text also sets the
-  native `disabled` attribute (`index.tsx:293,317`). A natively disabled input is already
-  removed from the a11y tree, so `aria-disabled` on the same element is redundant (harmless, but
-  noise). Not fixable from this directory without changing Shell's `inputAriaProps` contract —
-  and the contract note says Shell deliberately omits `aria-disabled="false"`, so the value is
-  never wrong, only redundant.
-  - **Suggested change (Shell owner):** omit `aria-disabled` from `inputAriaProps` for elements
-    that also receive the native `disabled` attribute (or document that consumers pass one or the
-    other). Low priority — cosmetic only.
-
-_(The `autoComplete` / `inputMode` item that was previously deferred here is now **FIXED** —
-see the review follow-up section below.)_
-
 ## Adversarial-review follow-up fixes (2026-07-11)
 
 A review of the pass above found three remaining items. All three are addressed at root cause in
@@ -181,3 +153,28 @@ this directory; none required a Shell change.
   under reduced motion.
 
 ## Deferred (still Shell-owned)
+
+Root cause outside `Field/Text` (in `Field/Shell`, owned by a later serial pass). Nothing here
+is a functional gap for the common (labelled) case — these are Shell-level hardening items. (The
+`autoComplete` / `inputMode` item once listed here is now **FIXED** — see the follow-up fixes
+above.)
+
+- **`aria-describedby` only set when a helper/error message is present.**
+  `Field/Shell/index.tsx:349` adds `aria-describedby` only when `showHelper` is true. A field
+  with persistent *instructions* passed some other way, or a description that should always be
+  announced, has no seam here. This is by design for the current API, but a composite/consumer
+  wanting a permanent description can't supply one through Text today.
+  - **Suggested change (Shell owner):** accept an optional `describedById?: string` on
+    `FieldShellProps` (`Field/Shell/index.tsx:~141`) and merge it into the
+    `aria-describedby` built at line 349. Additive, back-compatible.
+
+- **`aria-disabled` + native `disabled` both applied to the input when disabled.** Shell's
+  `inputAriaProps` sets `aria-disabled` (`Field/Shell/index.tsx:347`) and Text also sets the
+  native `disabled` attribute (`index.tsx:293,317`). A natively disabled input is already
+  removed from the a11y tree, so `aria-disabled` on the same element is redundant (harmless, but
+  noise). Not fixable from this directory without changing Shell's `inputAriaProps` contract —
+  and the contract note says Shell deliberately omits `aria-disabled="false"`, so the value is
+  never wrong, only redundant.
+  - **Suggested change (Shell owner):** omit `aria-disabled` from `inputAriaProps` for elements
+    that also receive the native `disabled` attribute (or document that consumers pass one or the
+    other). Low priority — cosmetic only.

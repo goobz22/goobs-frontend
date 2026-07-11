@@ -1229,6 +1229,14 @@ export const FocusVisibleIndicator: Story = {
  * animating. Toggle your OS "reduce motion" setting (or the browser devtools
  * emulation) while focusing this field to see the transition disappear; the
  * Chromatic baseline captures the rendered result.
+ *
+ * The `play` test is a STRUCTURAL guard rather than a computed-style check: CSS
+ * `@media` queries are evaluated by the rendering engine from the OS/browser
+ * setting and CANNOT be toggled from a play function (mocking
+ * `window.matchMedia` does not change `getComputedStyle` — matchMedia is a
+ * separate JS API), so the test walks the CSSOM and asserts the reduced-motion
+ * rule that sets the wrapper's `transition: none` actually exists. That fails if
+ * the guard block is deleted or a transition is re-added under reduced motion.
  */
 export const ReducedMotion: Story = {
   name: 'Reduced motion (focus transition)',
@@ -1247,4 +1255,112 @@ export const ReducedMotion: Story = {
     </div>
   ),
   globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: /Light field/ })
+    // No adornments on this field, so the input's parent IS the styled wrapper.
+    const wrapper = input.parentElement as HTMLElement
+    const wrapperClasses = wrapper.className.split(/\s+/).filter(Boolean)
+
+    // Assert the reduced-motion guard rule exists in the CSSOM:
+    //   @media (prefers-reduced-motion: reduce) { .inputWrapper { transition: none } }
+    // keyed to THIS wrapper's hashed CSS-module class so we match TextField's
+    // own rule, not another component's.
+    let found = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        for (const rule of Array.from(sheet.cssRules)) {
+          if (
+            rule instanceof CSSMediaRule &&
+            /prefers-reduced-motion/i.test(rule.media.mediaText) &&
+            /reduce/i.test(rule.media.mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (!(inner instanceof CSSStyleRule)) continue
+              const setsTransitionNone =
+                inner.style.transition === 'none' ||
+                inner.style.transitionProperty === 'none' ||
+                /transition:\s*none/i.test(inner.cssText)
+              if (
+                setsTransitionNone &&
+                wrapperClasses.some(cls => inner.selectorText.includes(cls))
+              ) {
+                found = true
+              }
+            }
+          }
+        }
+      } catch {
+        // Cross-origin stylesheet — reading cssRules throws; skip it.
+      }
+    }
+
+    await expect(found).toBe(true)
+  },
+}
+
+// --------------------------------------------------------------------------
+// IDENTIFY INPUT PURPOSE (a11y — WCAG 1.3.5 Identify Input Purpose, AA)
+// --------------------------------------------------------------------------
+
+/**
+ * Fields that collect information about the user (name, email, phone, one-time
+ * code, …) must expose their purpose so browsers can autofill and so the
+ * purpose is programmatically determinable (WCAG 1.3.5). The additive
+ * `autoComplete` token and `inputMode` keyboard hint are forwarded verbatim to
+ * the native input/textarea. The `play` test asserts both attributes land on
+ * the DOM element — the regression guard for the passthrough.
+ */
+export const IdentifyInputPurpose: Story = {
+  name: 'Identify input purpose (autoComplete / inputMode)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <TextFieldWithState
+        label="Full name"
+        placeholder="Jane Doe"
+        autoComplete="name"
+        styles={{ theme: 'light' }}
+      />
+      <TextFieldWithState
+        label="Email"
+        placeholder="you@example.com"
+        type="email"
+        autoComplete="email"
+        inputMode="email"
+        styles={{ theme: 'light' }}
+      />
+      <TextFieldWithState
+        label="One-time code"
+        placeholder="123456"
+        autoComplete="one-time-code"
+        inputMode="numeric"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The autofill token is forwarded so browser autofill + AT can identify the
+    // field's purpose (attribute is lowercased in the DOM).
+    const name = canvas.getByRole('textbox', { name: /Full name/ })
+    await expect(name).toHaveAttribute('autocomplete', 'name')
+
+    // Both the autofill token AND the on-screen-keyboard hint are forwarded.
+    const email = canvas.getByRole('textbox', { name: /Email/ })
+    await expect(email).toHaveAttribute('autocomplete', 'email')
+    await expect(email).toHaveAttribute('inputmode', 'email')
+
+    // inputMode drives the numeric keypad for a code field.
+    const code = canvas.getByRole('textbox', { name: /One-time code/ })
+    await expect(code).toHaveAttribute('autocomplete', 'one-time-code')
+    await expect(code).toHaveAttribute('inputmode', 'numeric')
+
+    // A field with neither prop set must NOT emit the attributes — the
+    // passthrough is purely additive.
+    const plain = canvas.getByRole('textbox', { name: /Full name/ })
+    // (Full name has autoComplete but no inputMode → inputmode absent.)
+    await expect(plain).not.toHaveAttribute('inputmode')
+  },
 }
