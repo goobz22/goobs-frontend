@@ -9,9 +9,11 @@ transition wrapper. It renders a single `<div data-component="Slide">` around
 `children` and slides them in from / out to one of four edges (up/down/left/right)
 using a CSS `transform` transition. Visibility is toggled by the `.in` class
 (`styles.in !== false`); theme (`light`/`dark`/`sacred`) only changes the default
-transition timing; caller timing overrides pass through as the `--slide-duration` /
-`--slide-timing` custom properties (or an inline `transition` shorthand). No interactive
-controls, no roles, no icons, no forms, no audio/media of its own.
+transition timing. Caller timing overrides (`timeout` / `transitionDuration` /
+`transitionTimingFunction` / `transition` / `transitionDelay`) pass through **only** as
+CSS custom properties (`--slide-duration` / `--slide-timing` / `--slide-transition` /
+`--slide-delay`) — never as inline `transition`/`transition-delay` properties (see Issue #3).
+No interactive controls, no roles, no icons, no forms, no audio/media of its own.
 
 ## APG pattern
 
@@ -27,37 +29,60 @@ semantically correct neutral wrapper; no element change was warranted.
 ## Issues found
 
 ### 1. No reduced-motion support — SERIOUS — WCAG 2.3.3 (Animation from Interactions) — FIXED
-`Slide.module.css:33` (old) declared `transition: transform var(--slide-duration) var(--slide-timing)`
+`Slide.module.css` (old) declared `transition: transform var(--slide-duration) var(--slide-timing)`
 with **no** `@media (prefers-reduced-motion: reduce)` guard anywhere in the file. Every
 show/hide animated a translate, ignoring a user's OS "reduce motion" preference — a
 vestibular-disorder trigger. Every other animated component in the library
 (Drawer/Alert/Accordion/Card/Button/…) already ships this guard; Slide was the gap.
 Pattern: `missing-reduced-motion`.
 **Fix:** appended a `@media (prefers-reduced-motion: reduce) { .root { transition: none !important } }`
-block (`Slide.module.css`, after the disabled rule). `!important` is required here because
-the caller-supplied full `transition` shorthand and `transitionDelay` are emitted as **inline**
-styles from `index.tsx` and would otherwise beat a media query; `!important` guarantees the
-preference wins in all cases. Content now snaps in/out instantly for reduced-motion users
-while still toggling visibility correctly.
+block (`Slide.module.css`, after the disabled rule). Content now snaps in/out instantly for
+reduced-motion users while still toggling visibility correctly. The `!important` is kept so the
+preference decisively wins over both the base `.root` transition and the higher-specificity
+`.root[data-disabled='true']` rule regardless of source order. (Historical note: the `!important`
+was originally required to beat the caller-supplied **inline** `transition`/`transitionDelay`
+styles; those are no longer emitted inline — see Issue #3 — so it now only guards the CSS-rule
+specificity cases, but is retained defensively.)
 
 ### 2. Slid-out content stays keyboard-focusable and screen-reader-announced — SERIOUS — WCAG 1.3.1, 2.4.3, 4.1.2 — FIXED
-When `in={false}`, the old CSS hid content **only** via `transform: translate…(-/+100%)`
-(`Slide.module.css:32,55-69`). A transform moves content off-screen visually but leaves it
-fully in the DOM, in the **accessibility tree**, and in the **keyboard tab order**. A
-keyboard user tabbing through a page with a slid-out `Slide` would land on invisible,
-off-screen controls (e.g. a `<button>`/`<a>` inside the panel), and a screen reader would
-announce hidden content — a classic focus-order / name-role-value defect. (Reproducible by
-placing a focusable `<a>` inside a slid-out Slide and pressing Tab — the new
-`HiddenContentIsInert` story pins exactly this.)
+When `in={false}`, the old CSS hid content **only** via `transform: translate…(-/+100%)`.
+A transform moves content off-screen visually but leaves it fully in the DOM, in the
+**accessibility tree**, and in the **keyboard tab order**. A keyboard user tabbing through a
+page with a slid-out `Slide` would land on invisible, off-screen controls (e.g. a
+`<button>`/`<a>` inside the panel), and a screen reader would announce hidden content — a
+classic focus-order / name-role-value defect. (Reproducible by placing a focusable `<a>`
+inside a slid-out Slide and pressing Tab — the `HiddenContentIsInert` story pins exactly this.)
 Pattern: `hidden-content-still-focusable`.
 **Fix:** the hidden state now also carries `visibility: hidden` (removes content from both the
 a11y tree and tab order), and `.root.in` carries `visibility: visible`. The `visibility`
-transition is **delayed by `--slide-duration` on the way out** (`visibility 0s linear var(--slide-duration)`)
-so the exit animation is still seen before the content becomes inert, and flips **instantly on
-the way in** (`visibility 0s`) so it is exposed as it slides in. `visibility` preserves the
-layout box, matching `transform`'s no-reflow behaviour — no visual regression for the common
-`overflow:hidden` container usage. Semantically sound: `styles.in === false` means "hidden",
-and hidden content should not be announced or focusable.
+transition is **delayed by `--slide-visibility-delay` (defaults to `--slide-duration`) on the
+way out** so the exit animation is still seen before the content becomes inert, and the delay
+flips to `0s` on the way in (`.root.in`) so it is exposed as it slides in. `visibility` preserves
+the layout box, matching `transform`'s no-reflow behaviour — no visual regression for the common
+`overflow:hidden` container usage.
+
+### 3. Caller timing override (`styles.transition` / `styles.transitionDelay`) cut the exit animation short and defeated the delayed-inert exit — SERIOUS — WCAG 1.3.1, 2.4.3, 4.1.2 — FIXED
+The Issue-#2 fix keeps slid-out content perceivable/announced during the exit by composing a
+two-part transition in `.root`: the transform half **plus** `visibility 0s linear var(--slide-duration)`.
+But a consumer supplying their own timing hit a defeat path: `index.tsx` emitted a full
+`styles.transition` shorthand as an **inline `transition` property** (and `styles.transitionDelay`
+as inline `transition-delay`). An inline `transition` shorthand *replaces the whole property*,
+so it stripped the `visibility 0s linear var(--slide-duration)` half. Result for that override
+path: on slide-OUT the content flipped to `visibility:hidden` **instantly** — the exit animation
+was cut short (content vanished rather than sliding out) and the content left the a11y tree +
+tab order immediately instead of after the animation, exactly the perceivability/inertness
+regression Issue #2 was meant to prevent. Pattern: `hidden-content-still-focusable`
+(same class — an animated hide whose "stay perceivable until done" guarantee is silently
+stripped by a caller override).
+**Fix:** caller timing overrides now feed **CSS custom properties instead of inline
+`transition`/`transition-delay`** — a full shorthand → `--slide-transition`, and
+`transitionDelay` → `--slide-delay`. The `.root` `transition` reads
+`var(--slide-transition, transform … var(--slide-delay,0s)), visibility 0s linear var(--slide-visibility-delay)`,
+so the stylesheet **always owns the visibility half** no matter what the caller overrides. The
+exit animation now plays in full — and the inner content stays focusable/announced until it
+finishes — for the base path, the per-token override path, AND the full-`transition`/`transitionDelay`
+override paths. The `ExitAnimationSurvivesTimingOverride` story pins both override paths against
+a real focusable `<a>`.
 
 ## Non-issues considered and dismissed
 
@@ -82,24 +107,40 @@ and hidden content should not be announced or focusable.
 ## Fixes applied
 
 All within `src/components/Slide/` (owned):
-- `Slide.module.css` — added `@media (prefers-reduced-motion: reduce)` neutralizing the
-  transition (`!important`, to beat inline `transition`/`transitionDelay`); added
-  `visibility: hidden`+delayed transition to `.root` and `visibility: visible`+instant
-  transition to the `.root.in` group so slid-out content is inert to AT and keyboard.
-- Markup changes to rendered DOM: **none** — both fixes are CSS-only (no element, role,
-  attribute, or prop changes; the public API and every existing `data-*`/`data-component`
-  selector are untouched).
+- `Slide.module.css` —
+  - added `@media (prefers-reduced-motion: reduce)` neutralizing the transition (Issue #1);
+  - added `visibility: hidden` + delayed visibility transition to `.root` and
+    `visibility: visible` (delay → `0s`) to the `.root.in` group so slid-out content is inert
+    to AT and keyboard (Issue #2);
+  - split the transition into a caller-overridable transform half
+    (`var(--slide-transition, transform var(--slide-duration) var(--slide-timing) var(--slide-delay,0s))`)
+    and a stylesheet-owned visibility half (`visibility 0s linear var(--slide-visibility-delay)`),
+    with `--slide-visibility-delay` defaulting to `--slide-duration` and flipping to `0s` in
+    `.root.in`, so no caller timing override can strip the delayed-inert exit (Issue #3).
+- `index.tsx` — caller timing overrides now emit CSS custom properties only: a full `transition`
+  shorthand → `--slide-transition`; `transitionDelay` → `--slide-delay` (Issue #3). Previously
+  these were emitted as inline `transition` / `transition-delay` properties.
+- Markup changes to rendered DOM: **none** — all fixes are CSS + custom-property plumbing (no
+  element, role, attribute, or prop changes; the public API and every existing
+  `data-*`/`data-component` selector are untouched). `styles.transition` / `styles.transitionDelay`
+  keep their exact public meaning; only the internal delivery mechanism (CSS var vs inline
+  property) changed.
 
 ## Stories updated
 
-`Slide.stories.tsx` — two new stories (repo convention: stories are the only regression tests):
+`Slide.stories.tsx` — new stories (repo convention: stories are the only regression tests):
 - **`HiddenContentIsInert`** — wraps a real focusable `<a>` inside the Slide with an
-  in/out toggle; documents and exercises that the inner link leaves the tab order and a11y
-  tree when slid out (fails the old transform-only baseline, where the link stayed focusable).
+  in/out toggle; exercises that the inner link leaves the tab order and a11y tree when slid
+  out (fails the old transform-only baseline, where the link stayed focusable) (Issue #2).
 - **`ReducedMotion`** — a 600ms slide that, under OS "reduce motion", snaps instead of sliding;
-  documents the `prefers-reduced-motion` neutralization.
+  documents the `prefers-reduced-motion` neutralization (Issue #1).
+- **`ExitAnimationSurvivesTimingOverride`** — two panels, each wrapping a real focusable `<a>`:
+  the left overrides the full `transition` shorthand (800ms), the right overrides `transitionDelay`.
+  Both keep their delayed-inert exit (animate fully before the inner link leaves the tab order),
+  pinning that a caller timing override no longer strips the visibility delay (Issue #3).
 
 ## Deferred
 
-None. Both issues were root-caused and fixed entirely within the owned `src/components/Slide/`
-directory. No shared-file (Field/Shell, `src/styles/global.css`, barrel) changes were required.
+None. All three issues were root-caused and fixed entirely within the owned `src/components/Slide/`
+directory. No shared-file (Field/Shell, `src/styles/global.css`, barrel, `package.json`) changes
+were required.
