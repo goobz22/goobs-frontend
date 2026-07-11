@@ -203,6 +203,62 @@ export const WithCorners: Story = {
 }
 
 // --------------------------------------------------------------------------
+// ACCESSIBILITY CONTRACT — the decorative subtrees stay hidden from AT while
+// the framed content stays exposed (WCAG 1.1.1 / 4.1.2). This is the only
+// regression test guarding that a future refactor can't silently drop the
+// aria-hidden on the glyph row or corner ornaments (which would leak the
+// decorative Egyptian glyphs / ornaments into the screen-reader stream) — or,
+// conversely, hide the real children from assistive tech.
+// --------------------------------------------------------------------------
+
+/**
+ * Locks in the frame's accessibility contract: every decorative subtree (the
+ * floating glyph row and the four corner ornaments) is `aria-hidden`, while the
+ * content region that carries `children` is NOT hidden and remains reachable by
+ * assistive tech. Rendered with glow + glyphs + corners all enabled so all
+ * three decoration subtrees are present to assert against.
+ */
+export const AccessibilityContract: Story = {
+  name: 'Accessibility/Decoration Hidden, Content Exposed',
+  args: {
+    glow: true,
+    glyphs: true,
+    corners: '❖',
+    children: (
+      <Card styles={{ theme: 'sacred' }} style={{ paddingTop: '40px' }}>
+        <Card.Header>
+          <Card.Title>Accessible framed content</Card.Title>
+        </Card.Header>
+      </Card>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const frame = canvasElement.querySelector(
+      '[data-component="SacredGlyphFrame"]'
+    )
+    await expect(frame).toBeInTheDocument()
+
+    // The floating glyph row is decorative → must be hidden from AT.
+    const glyphRow = canvasElement.querySelector('[data-sgf-glyph-row="true"]')
+    await expect(glyphRow).toBeInTheDocument()
+    await expect(glyphRow).toHaveAttribute('aria-hidden', 'true')
+
+    // The corner-ornaments container is decorative → must be hidden from AT.
+    const corners = canvasElement.querySelector('[data-sgf-corners="true"]')
+    await expect(corners).toBeInTheDocument()
+    await expect(corners).toHaveAttribute('aria-hidden', 'true')
+
+    // The content region carries `children` → must NOT be hidden from AT, and
+    // its text must be reachable through the accessibility tree.
+    const content = canvasElement.querySelector('[data-sgf-content="true"]')
+    await expect(content).toBeInTheDocument()
+    await expect(content).not.toHaveAttribute('aria-hidden')
+    await expect(canvas.getByText('Accessible framed content')).toBeVisible()
+  },
+}
+
+// --------------------------------------------------------------------------
 // PLAIN CONTENT (no Card) — the frame works around any sacred surface
 // --------------------------------------------------------------------------
 
