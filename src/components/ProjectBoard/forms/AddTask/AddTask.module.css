@@ -158,6 +158,19 @@
   background-color: #374151;
 }
 
+/* Keyboard focus ring for the tab buttons + interactive cards/controls
+   (WCAG 2.4.7). One rule covers every theme; the accent reads well on all. */
+.tab:focus-visible,
+.articleCard:focus-visible,
+.backButton:focus-visible,
+.linkButton:focus-visible,
+.unlinkButton:focus-visible,
+.selectedChipLabel:focus-visible,
+.selectedChipRemove:focus-visible {
+  outline: 2px solid var(--at-text);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    CONTENT AREA
    -------------------------------------------------------------------------- */
@@ -379,7 +392,16 @@
   background-color: #374151;
 }
 
+/* Chip label is a real <button> (was an onClick span) — strip the native
+   button chrome so it reads as the plain inline label it looks like. */
 .selectedChipLabel {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -581,4 +603,20 @@
 
 .root[data-theme='dark'] .cancelButton:hover {
   background-color: #374151;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — drop the tab/card/button transitions for
+   users who ask their OS for less motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .articleCard,
+  .button {
+    transition: none;
+  }
+
+  .tab[data-active='true'] {
+    transform: none;
+  }
 }

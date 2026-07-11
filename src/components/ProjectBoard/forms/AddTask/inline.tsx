@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import type {
   ProjectBoardStyles,
   Task,
@@ -30,6 +30,17 @@ type AddTaskTabType = 'details' | 'knowledgeBase'
 // goobs house pattern (Card / Button) instead of pulling in a class lib.
 const cx = (...names: Array<string | false | undefined>): string =>
   names.filter(Boolean).join(' ')
+
+// Keyboard parity for role="button" cards that contain block content (a
+// heading etc.) and so can't be a native <button>: Enter/Space activate the
+// same handler the onClick fires (WCAG 2.1.1).
+const activateOnKey =
+  (handler: () => void) => (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handler()
+    }
+  }
 
 export interface InlineAddTaskProps {
   onAdd: (newTask: Omit<Task, '_id'>) => void
@@ -72,6 +83,26 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   styles,
 }) => {
   const [activeTab, setActiveTab] = useState<AddTaskTabType>('details')
+  // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern.
+  const tabOrder: AddTaskTabType[] = ['details', 'knowledgeBase']
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    let next: number | null = null
+    if (event.key === 'ArrowRight') next = (index + 1) % tabOrder.length
+    else if (event.key === 'ArrowLeft')
+      next = (index - 1 + tabOrder.length) % tabOrder.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = tabOrder.length - 1
+    if (next === null) return
+    event.preventDefault()
+    const target = tabOrder[next]
+    if (!target) return
+    setActiveTab(target)
+    requestAnimationFrame(() => tabRefs.current[next]?.focus())
+  }
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
@@ -314,27 +345,60 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
 
       {/* Main Content */}
       <div className={cssStyles.mainContent}>
-        {/* Tabs */}
-        <div className={cssStyles.tabsContainer}>
-          <div
+        {/* Tabs — real WAI-ARIA tablist: native <button role="tab">s with
+            aria-selected, roving tabindex, and arrow/Home/End keyboard nav.
+            (They were onClick <div>s: unfocusable and unoperable by keyboard —
+            WCAG 2.1.1 / 4.1.2.) data-active is preserved for the CSS + any
+            existing selectors. */}
+        <div
+          className={cssStyles.tabsContainer}
+          role="tablist"
+          aria-label="Task form sections"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="add-task-tab-details"
+            aria-selected={activeTab === 'details'}
+            aria-controls="add-task-panel-details"
+            tabIndex={activeTab === 'details' ? 0 : -1}
+            ref={el => {
+              tabRefs.current[0] = el
+            }}
             className={cssStyles.tab}
             data-active={activeTab === 'details'}
             onClick={() => setActiveTab('details')}
+            onKeyDown={event => handleTabKeyDown(event, 0)}
           >
             Task Details
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="add-task-tab-knowledgeBase"
+            aria-selected={activeTab === 'knowledgeBase'}
+            aria-controls="add-task-panel-knowledgeBase"
+            tabIndex={activeTab === 'knowledgeBase' ? 0 : -1}
+            ref={el => {
+              tabRefs.current[1] = el
+            }}
             className={cssStyles.tab}
             data-active={activeTab === 'knowledgeBase'}
             onClick={() => setActiveTab('knowledgeBase')}
+            onKeyDown={event => handleTabKeyDown(event, 1)}
           >
             Knowledgebase{' '}
             {selectedArticleIds.length > 0 && `(${selectedArticleIds.length})`}
-          </div>
+          </button>
         </div>
 
-        {/* Content Area */}
-        <div className={cssStyles.contentArea}>
+        {/* Content Area — the active tab's panel. */}
+        <div
+          className={cssStyles.contentArea}
+          role="tabpanel"
+          id={`add-task-panel-${activeTab}`}
+          aria-labelledby={`add-task-tab-${activeTab}`}
+        >
           {activeTab === 'details' ? (
             <>
               <h2 className={cssStyles.heading}>Create New Task</h2>
@@ -520,10 +584,11 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 <div>
                   <div className={cssStyles.articleDetailHeader}>
                     <button
+                      type="button"
                       onClick={() => setViewingArticle(null)}
                       className={cssStyles.backButton}
                     >
-                      ← Back to Articles
+                      <span aria-hidden="true">←</span> Back to Articles
                     </button>
                   </div>
 
@@ -535,6 +600,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   <div className={cssStyles.linkActionRow}>
                     {selectedArticleIds.includes(viewingArticle._id) ? (
                       <button
+                        type="button"
                         onClick={() =>
                           setSelectedArticleIds(prev =>
                             prev.filter(id => id !== viewingArticle._id)
@@ -542,10 +608,12 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                         }
                         className={cssStyles.unlinkButton}
                       >
-                        ✓ Linked - Click to Unlink
+                        <span aria-hidden="true">✓ </span>Linked - Click to
+                        Unlink
                       </button>
                     ) : (
                       <button
+                        type="button"
                         onClick={() =>
                           setSelectedArticleIds(prev => [
                             ...prev,
@@ -684,13 +752,16 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                           if (!article) return null
                           return (
                             <div key={id} className={cssStyles.selectedChip}>
-                              <span
+                              <button
+                                type="button"
                                 className={cssStyles.selectedChipLabel}
                                 onClick={() => setViewingArticle(article)}
                               >
                                 {article.articleTitle}
-                              </span>
+                              </button>
                               <button
+                                type="button"
+                                aria-label={`Remove ${article.articleTitle}`}
                                 onClick={e => {
                                   e.stopPropagation()
                                   setSelectedArticleIds(prev =>
@@ -699,7 +770,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                                 }}
                                 className={cssStyles.selectedChipRemove}
                               >
-                                ×
+                                <span aria-hidden="true">×</span>
                               </button>
                             </div>
                           )
@@ -729,7 +800,15 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                         return (
                           <div
                             key={article._id}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`View article: ${article.articleTitle}${
+                              isSelected ? ' (linked)' : ''
+                            }`}
                             onClick={() => setViewingArticle(article)}
+                            onKeyDown={activateOnKey(() =>
+                              setViewingArticle(article)
+                            )}
                             className={cssStyles.articleCard}
                             data-selected={isSelected}
                           >
@@ -738,7 +817,10 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                                 {article.articleTitle}
                               </h3>
                               {isSelected && (
-                                <span className={cssStyles.articleCardCheck}>
+                                <span
+                                  className={cssStyles.articleCardCheck}
+                                  aria-hidden="true"
+                                >
                                   ✓
                                 </span>
                               )}
@@ -768,14 +850,19 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             </div>
           )}
 
-          {/* Validation Error */}
+          {/* Validation Error — role="alert" so the missing-field summary is
+              announced the moment it appears, without moving focus (WCAG
+              4.1.3). */}
           {validationError && (
-            <div className={cssStyles.validationError}>{validationError}</div>
+            <div className={cssStyles.validationError} role="alert">
+              {validationError}
+            </div>
           )}
 
           {/* Action Buttons */}
           <div className={cssStyles.actionButtons}>
             <button
+              type="button"
               onClick={handleSubmit}
               className={cx(cssStyles.button, cssStyles.submitButton)}
             >
@@ -783,6 +870,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             </button>
             {onCancel && (
               <button
+                type="button"
                 onClick={onCancel}
                 className={cx(cssStyles.button, cssStyles.cancelButton)}
               >
