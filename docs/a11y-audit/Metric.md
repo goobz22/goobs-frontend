@@ -30,6 +30,7 @@ things, audited together:
 | 3 | moderate | 1.3.1 Info and Relationships (+ SEO) | `Accordion/index.tsx` toggle (was line ~254) | The section header ("Metrics Summary" / "Automation Metrics") rendered only as a `<span>` inside a bare `<button>` — **not a heading**, and no way for a consumer to place it in the document outline. The WAI-ARIA accordion pattern wraps each header button in a heading. | FIXED |
 | 4 | minor | 1.3.1 Info and Relationships | `Accordion/index.tsx` `renderCard` / `metricsRow` (was line ~191, ~223) | In `metrics` mode the KPI strip rendered as sibling `<div>`s in a flex `<div>` — **no list semantics**, so screen readers got no "list, N items" affordance; grouped-mode card rows were not programmatically tied to their visible group label. | FIXED |
 | 5 | minor | 2.3.3 Animation from Interactions | `Card/Card.module.css` `.card` (`transition: border-color 0.2s`, line ~42) | Card border-colour transition had **no `prefers-reduced-motion` handling**. | FIXED |
+| 6 | moderate | 1.3.1 Info and Relationships | `Accordion/index.tsx` grouped `<ul>` (line ~247) + flat `<ul>` (line ~258) | **Adversarial-review follow-up to Issue 4.** Both new metric `<ul>`s carried NO explicit `role="list"` while `.metricsRow` sets `list-style:none` (`Accordion.module.css:145`). WebKit removes the implicit `list` role from any bulletless `<ul>`, so VoiceOver (primary iOS/macOS SR) would NOT announce "list, N items" — silently defeating Issue 4's own fix. The library already documents this exact convention (`List/index.tsx:85`, `Card/index.tsx`, `ListItemCard`, `ProjectBoard/board/index.tsx`). | FIXED |
 
 ## Hearing
 
@@ -56,11 +57,14 @@ conveyed by sound; the expand/collapse and trend states are all visual + program
   context-agnostic primitive cannot know the correct outline depth, so a hardcoded level
   would itself be a 1.3.1 defect. This matches the established sibling-`Accordion`
   convention.
-- **List semantics (Issue 4)** — `metrics`-mode rows now render as `<ul>`/`<li>` with the
-  UA list chrome reset in CSS so the flex layout is unchanged. In grouped mode each `<ul>`
-  is `aria-labelledby` its visible group label (`id` derived from `useId`), tying the list
-  to its label programmatically. Children-mode and standalone `MetricCard` are untouched
-  (caller owns that markup).
+- **List semantics (Issues 4 + 6)** — `metrics`-mode rows now render as `<ul>`/`<li>` with the
+  UA list chrome reset in CSS so the flex layout is unchanged. Because that reset sets
+  `list-style:none`, both `<ul>`s carry an **explicit `role="list"`** (WebKit/VoiceOver strip
+  the implicit list role from a bulletless `<ul>`, defeating the "list, N items" announcement) —
+  matching the established library convention (`List/index.tsx:85`, `Card`, `ListItemCard`,
+  `ProjectBoard/board`). In grouped mode each `<ul>` is additionally `aria-labelledby` its
+  visible group label (`id` derived from `useId`), tying the list to its label programmatically.
+  Children-mode and standalone `MetricCard` are untouched (caller owns that markup).
 - **Colour is never the only signal** — trend direction is arrow glyph (↗/↘) + percentage
   text + `aria-label` + `data-metric-trend`; open/closed is `aria-expanded` + `data-state` +
   the (decorative) chevron rotation. Confirmed no colour-alone state (1.4.1).
@@ -84,8 +88,8 @@ conveyed by sound; the expand/collapse and trend states are all visual + program
    `@media (prefers-reduced-motion: reduce)` block for `.toggle`/`.chevron`.
 3. `Accordion/index.tsx`: additive `headingLevel` prop (JSDoc'd); toggle button extracted +
    optionally wrapped in `<hN>`; `renderCard` now returns `<li>`; flat + grouped rows now
-   `<ul>`; grouped rows `aria-labelledby` their group label; `reactId` added to the
-   `renderedMetrics` `useMemo` deps.
+   `<ul>` **with explicit `role="list"`** (Issue 6); grouped rows `aria-labelledby` their group
+   label; `reactId` added to the `renderedMetrics` `useMemo` deps.
 4. `Card/Card.module.css`: `@media (prefers-reduced-motion: reduce)` block for `.card`.
 
 No existing prop, export, `data-*`, `role`, or `aria-*` attribute was renamed or removed;
@@ -96,9 +100,13 @@ all changes are additive. Machine-test selectors preserved
 ## Stories updated
 
 Yes. `Accordion/metricsAccordion.stories.tsx`:
-- `A11y/Heading Level` — `headingLevel: 3` (exercises the `<h3>` wrapper + list markup).
-- `A11y/Grouped List Semantics` — grouped metrics + `headingLevel: 3` (exercises the
-  `aria-labelledby`-associated `<ul>` per group).
+- `A11y/Heading Level` — `headingLevel: 3` (exercises the `<h3>` wrapper + flat list markup).
+  Now carries a **`play` regression assertion** (`storybook/test` `expect`) that the flat
+  `<ul>` has `role="list"` and exactly `sampleMetrics.length` `<li>` children — fails if the
+  role (Issue 6) is dropped.
+- `A11y/Grouped List Semantics` — grouped metrics + `headingLevel: 3`. Now carries a **`play`
+  regression assertion** that EVERY grouped `<ul>` has both `role="list"` and an
+  `aria-labelledby` — pinning both the Issue 4 label association and the Issue 6 explicit role.
 
 `MetricCard.stories.tsx`:
 - `Accordion/Heading Level` — array-mode accordion with `headingLevel={3}`.

@@ -23,6 +23,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { expect } from 'storybook/test'
 import MetricsAccordion, { type MetricsGroup } from './index'
 import type { MetricCardData } from '../types'
 
@@ -325,6 +326,20 @@ export const A11yHeadingLevel: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+  // Regression assertion (goobs has no unit tests — the play fn IS the test):
+  // the flat KPI strip's <ul> carries an EXPLICIT role="list". The stylesheet
+  // sets list-style:none, and WebKit/VoiceOver strip the implicit list role
+  // from a bulletless <ul>, so the explicit role is what keeps the "list, N
+  // items" announcement alive (WCAG 1.3.1). This fails if the role is dropped.
+  play: async ({ canvasElement }) => {
+    const list = canvasElement.querySelector('ul')
+    await expect(list).not.toBeNull()
+    await expect(list).toHaveAttribute('role', 'list')
+    // Each metric card is a real <li> child of that list.
+    await expect(
+      (list as HTMLElement).querySelectorAll(':scope > li').length,
+    ).toBe(sampleMetrics.length)
+  },
 }
 
 /**
@@ -344,4 +359,16 @@ export const A11yGroupedSemantics: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+  // Regression assertion: EVERY grouped row's <ul> carries an explicit
+  // role="list" (defeated by list-style:none in WebKit otherwise) AND is
+  // aria-labelledby its visible group label, tying each list to its heading
+  // text programmatically (WCAG 1.3.1). Fails if either is dropped.
+  play: async ({ canvasElement }) => {
+    const lists = canvasElement.querySelectorAll('ul')
+    await expect(lists.length).toBe(groupedMetrics.length)
+    lists.forEach(list => {
+      expect(list).toHaveAttribute('role', 'list')
+      expect(list).toHaveAttribute('aria-labelledby')
+    })
+  },
 }
