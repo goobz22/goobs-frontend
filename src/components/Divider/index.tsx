@@ -1,6 +1,6 @@
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useId } from 'react'
 import cssStyles from './Divider.module.css'
 
 export interface DividerProps extends Omit<
@@ -58,6 +58,14 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
     const orientation = styles?.orientation || 'horizontal'
     const disabled = styles?.disabled || false
     const theme = styles?.theme || 'sacred'
+
+    // Stable id linking the centered label to the separator's accessible name.
+    // `role="separator"` marks its descendants as presentational (ARIA
+    // "children presentational: true"), so the visible label text would NOT be
+    // exposed on its own; `aria-labelledby` pointing at the label element is
+    // what surfaces "OR"/etc. as the separator's accessible name to AT.
+    const reactId = useId()
+    const contentId = `divider-content-${reactId}`
 
     const rootClassName = mergeClassNames(
       cssStyles.root,
@@ -123,10 +131,25 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
         className={rootClassName}
         data-component="Divider"
         data-theme={theme}
+        data-orientation={orientation}
+        // A divider IS a thematic break between content, so it carries the
+        // native `separator` role (the ARIA equivalent of <hr>) by default.
+        // `aria-orientation` conveys vertical vs horizontal to AT (the role's
+        // implicit default is horizontal). Both sit before `{...restProps}` so
+        // a caller can still override (e.g. `role="presentation"` for a purely
+        // decorative rule) without losing the accessible default.
+        role="separator"
+        aria-orientation={orientation}
+        // When a label is present it names the separator (see contentId note).
+        aria-labelledby={children ? contentId : undefined}
         style={dynamicStyle}
         {...restProps}
       >
-        {children && <div className={cssStyles.content}>{children}</div>}
+        {children && (
+          <div id={contentId} className={cssStyles.content}>
+            {children}
+          </div>
+        )}
       </div>
     )
   }

@@ -198,3 +198,66 @@ export const SpacingExamples: Story = {
     </div>
   ),
 }
+
+// ---------------------------------------------------------------------------
+// ACCESSIBILITY
+// ---------------------------------------------------------------------------
+
+/**
+ * Semantics regression: every Divider renders as an ARIA `separator` (the role
+ * equivalent of a native `<hr>`), so AT announces the thematic break instead of
+ * an anonymous `<div>`. Verify in the accessibility tree:
+ *  • horizontal rule  → role="separator", aria-orientation="horizontal"
+ *  • vertical rule    → role="separator", aria-orientation="vertical"
+ *  • labeled rule     → the label ("OR") is the separator's accessible name via
+ *    aria-labelledby (needed because role="separator" makes descendants
+ *    presentational, hiding the visible text from the tree on its own).
+ */
+export const AccessibleSeparator: Story = {
+  name: 'A11y/Separator Semantics',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <div style={{ width: '480px' }}>
+      <p style={{ margin: 0 }}>Section above</p>
+      {/* Plain horizontal separator: role="separator" + aria-orientation="horizontal". */}
+      <Divider styles={{ theme: 'light' }} />
+      <p style={{ margin: 0 }}>Section below</p>
+      {/* Labeled separator: "OR" becomes the accessible name via aria-labelledby. */}
+      <Divider styles={{ theme: 'light' }}>OR</Divider>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          height: '80px',
+          marginTop: '24px',
+        }}
+      >
+        <span>Left</span>
+        {/* Vertical separator: aria-orientation="vertical". */}
+        <Divider
+          styles={{ theme: 'light', orientation: 'vertical', height: '60px' }}
+        />
+        <span>Right</span>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * Escape hatch: a purely decorative rule can opt out of the separator semantics
+ * by passing `role="presentation"` (and/or `aria-hidden`) through — the pass-
+ * through attributes sit after the accessible defaults, so a caller override
+ * wins. Verify this rule is absent from the accessibility tree.
+ */
+export const DecorativeOverride: Story = {
+  name: 'A11y/Decorative Override',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <div style={{ width: '480px' }}>
+      <p style={{ margin: 0 }}>Above</p>
+      <Divider styles={{ theme: 'light' }} role="presentation" aria-hidden />
+      <p style={{ margin: 0 }}>Below</p>
+    </div>
+  ),
+}
