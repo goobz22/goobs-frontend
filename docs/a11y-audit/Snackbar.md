@@ -74,6 +74,33 @@ positioning `<div>` (no competing role). Consumers: `DataGrid`, plus the public 
   (parent toggle, internal auto-hide, Close button), so every reopen starts unpaused with a fresh
   full-duration countdown. Public API unchanged (fully additive).
 
+### 3. No Escape-key dismissal when focus is within the toast — MINOR — FIXED
+- **WCAG:** 2.1.1 Keyboard (Level A) — keyboard-interaction completeness for a dismissible
+  notification. (WCAG 2.1.1 was already technically met — the Close button is Tab-reachable and
+  Enter/Space-activatable — so this is a keyboard-completeness enhancement, not a bare failure.)
+- **Pattern:** `missing-escape-dismiss`
+- **Where:** `src/components/Snackbar/index.tsx` (root `<div>`, pre-fix) — the root wired
+  `onMouseEnter/Leave/Focus/Blur` but no `onKeyDown`, so a keyboard user who had Tabbed into the
+  toast could dismiss it ONLY by landing Enter/Space precisely on the small Close button. Escape —
+  the library-wide dismiss key for overlays — did nothing.
+- **Rationale (reverses the prior audit's stance):** the prior report treated Escape as "a dialog
+  affordance" not expected on a non-modal toast. But the library itself exposes Escape-to-dismiss
+  on its NON-modal overlay too — `Popover/index.tsx:169` — and modern dismissible-toast patterns
+  (Radix Toast, react-aria `useToast`) implement scoped Escape dismissal. Escape is a general
+  overlay-dismiss affordance here, not a modal-only one.
+- **Failure scenario (pinned by story):** `open`, `autoHideDuration=0` (auto-hide disabled); focus
+  the Close button, press Escape — pre-fix the toast stays visible (no handler); the assertion that
+  the message is removed fails.
+- **Fix:** a delegated `onKeyDown` on the root closes on `Escape` (`src/components/Snackbar/index.tsx`
+  `handleKeyDown`). Scoping is deliberate for a NON-modal toast: because it is a delegated handler
+  on the root, it fires ONLY when a descendant (the Close button) is focused and the keydown
+  bubbles up — it can never hijack Escape for a user typing elsewhere on the page (that is why a
+  document-level listener, correct for the just-opened Popover, is wrong here). `stopPropagation`
+  prevents the same Escape from ALSO dismissing an ancestor overlay (e.g. a Dialog the snackbar
+  renders inside). Dismissal mirrors the auto-hide path exactly (`setIsOpen(false)` + `onClose`, no
+  exit animation) so a reused/remounted instance closes consistently. Fully additive — no prop,
+  markup, role, or `data-*`/machine-selector change.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 CLEAN. Grepped the directory for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
 `navigator.vibrate` — zero matches. The snackbar conveys status purely visually (severity
@@ -96,8 +123,11 @@ or transcript affordance is required.
   not own focus). The new pause-on-focus behavior additionally guarantees the keyboard user can
   actually reach and operate Close before dismissal.
 - **Keyboard:** the only interactive descendant is the native `<button>` Close (Enter/Space
-  activate natively). No arrow/Home/End interaction applies to a single-toast pattern. No Escape
-  handler is expected on a non-modal toast (Escape is a dialog affordance).
+  activate natively). No arrow/Home/End interaction applies to a single-toast pattern. **Escape**
+  now dismisses the toast when focus is within it (issue #3, FIXED) — matching the library's
+  overlay-dismiss convention (incl. the non-modal `Popover`) and Radix/react-aria toast patterns —
+  scoped via delegation so it only acts while the user is interacting with the toast, and
+  `stopPropagation`'d so it never leaks to an ancestor overlay.
 
 ## SEO semantics
 CLEAN / N/A. A snackbar is a transient status notification, not a heading, landmark, list, link,
@@ -122,6 +152,9 @@ handling).
   Snackbar instance (parent keeps it mounted, toggles `open`) that was dismissed while paused
   cannot carry a stuck pause into its next open and lose auto-hide. Fully additive; no markup or
   API change.
+- `src/components/Snackbar/index.tsx` — (fix #3) delegated `onKeyDown` on the root dismisses the
+  toast on `Escape` when focus is within it (WCAG 2.1.1), scoped by event delegation and
+  `stopPropagation`'d. Fully additive; no prop, markup, role, or machine-selector change.
 
 ## Stories updated
 `src/components/Snackbar/Snackbar.stories.tsx`:

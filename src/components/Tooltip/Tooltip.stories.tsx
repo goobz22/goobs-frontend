@@ -7,7 +7,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React from 'react'
-import { expect, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import StyledTooltip from './index'
 import Button from '../Button'
 

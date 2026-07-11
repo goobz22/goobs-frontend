@@ -829,3 +829,113 @@ export const PlaceholderContrastTest: Story = {
     expect(placeholderStyle.opacity).toBe('1')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: REQUIRED STATE CONVEYED PROGRAMMATICALLY (WCAG 1.3.1 / 3.3.2 / 4.1.2)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the top-level `required` prop. Historically PhoneNumber
+ * only read `styles.required`, so a caller passing the ergonomic top-level
+ * `required` (the norm every sibling Field exposes) had it silently dropped —
+ * the field rendered with NO required indicator and NO `aria-required`, so the
+ * required-ness was conveyed neither visually nor programmatically. The play fn
+ * asserts the top-level prop now sets the native `required` attribute AND
+ * `aria-required` on the input (WCAG 4.1.2), and that the visible indicator is
+ * present too (so it is never color/asterisk-alone — WCAG 1.3.1).
+ */
+export const RequiredStateA11y: Story = {
+  name: 'A11y: Required (top-level prop)',
+  render: () => (
+    <PhoneNumberFieldWithState
+      label="Required Phone"
+      placeholder="555-555-5555"
+      required
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByPlaceholderText('555-555-5555')
+
+    // Required conveyed programmatically: native `required` + `aria-required`.
+    expect(input).toBeRequired()
+    expect(input).toHaveAttribute('aria-required', 'true')
+
+    // ...and visually, via FieldShell's required indicator next to the label
+    // (default ' *') — so the state is never conveyed by attribute alone. The
+    // label is linked to the input by htmlFor={input.id}.
+    const label = canvasElement.querySelector(`label[for="${input.id}"]`)
+    expect(label?.textContent).toContain('*')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: DISABLED STATE CONVEYED PROGRAMMATICALLY (WCAG 1.3.1 / 4.1.2)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the top-level `disabled` prop. Like `required`, the
+ * top-level `disabled` was previously dropped (only `styles.disabled` worked),
+ * so `<PhoneNumberField disabled />` rendered a fully ENABLED, focusable field
+ * — the DisabledStates showcase below was a non-functional demo. The play fn
+ * asserts the native `disabled` attribute is set (removing the input from the
+ * tab order) and that FieldShell marks the wrapper `aria-disabled` (WCAG
+ * 4.1.2), so the state is exposed to assistive tech, not color-dimming alone.
+ */
+export const DisabledStateA11y: Story = {
+  name: 'A11y: Disabled (top-level prop)',
+  render: () => (
+    <PhoneNumberFieldWithState
+      label="Disabled Phone"
+      initialValue="5551234567"
+      disabled
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByDisplayValue('555-123-4567')
+
+    // Native disabled removes it from the tab order and blocks input.
+    expect(input).toBeDisabled()
+
+    // FieldShell exposes the disabled state on the wrapper for assistive tech.
+    const wrapper = canvasElement.querySelector('[data-component="FieldShell"]')
+    expect(wrapper).toHaveAttribute('aria-disabled', 'true')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: ACCESSIBLE NAME WITHOUT A VISIBLE LABEL (WCAG 4.1.2)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `ariaLabel` prop. A caller that suppresses the
+ * visible label (`label={null}` for a bare input in a toolbar / table cell)
+ * would otherwise leave the input anonymous to screen readers — a placeholder
+ * is not an accessible name. `ariaLabel` forwards `aria-label` so the input is
+ * still named (WCAG 4.1.2), reachable via its accessible name.
+ */
+export const AriaLabelWhenLabelless: Story = {
+  name: 'A11y: ariaLabel (no visible label)',
+  render: () => (
+    <PhoneNumberFieldWithState
+      label={null}
+      ariaLabel="Mobile phone"
+      placeholder="555-555-5555"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // No visible <label> is rendered, but the input still has an accessible
+    // name via aria-label — findable by its accessible name.
+    const input = canvas.getByRole('textbox', { name: 'Mobile phone' })
+    expect(input).toHaveAttribute('aria-label', 'Mobile phone')
+  },
+}
