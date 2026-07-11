@@ -67,6 +67,14 @@ export interface MetricsAccordionProps {
    * selectors regardless.
    */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
+  /**
+   * Base `data-testid` for this accordion's toggle/panel pair (default
+   * `'metrics-accordion'`): the toggle gets `${base}-toggle`, the panel
+   * `${base}-panel`. Override it to disambiguate multiple metric accordions on
+   * one page so their test ids don't collide. Matches the additive
+   * `data-testid` prop convention (see Markdown).
+   */
+  'data-testid'?: string
   /** Style configuration. `theme: 'sacred'` switches to the dark/gold
    *  palette, `'dark'` to the dark-slate shell (any other value renders the
    *  light shell) via CSS-module blocks; `color` overrides the accent. */
@@ -134,12 +142,17 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   responsiveCollapseOnTablet = false,
   dataField,
   headingLevel,
+  'data-testid': dataTestId = 'metrics-accordion',
   styles: propStyles,
 }) => {
   const [isExpanded, setIsExpanded] = useState(initiallyOpen)
   const reactId = useId()
   const panelId = `metrics-accordion-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
+  // Sibling toggle/panel ids derive from the overridable base testid so two
+  // accordions on one page don't collide on the same fixed selector.
+  const toggleTestId = `${dataTestId}-toggle`
+  const panelTestId = `${dataTestId}-panel`
 
   // Additive diagnostics: on a collapse/expand transition, surface the new
   // open/closed state to the host diagnostics bus (no-op when none present).
@@ -266,7 +279,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       onClick={handleToggle}
       aria-expanded={isExpanded}
       aria-controls={panelId}
-      data-testid="metrics-accordion-toggle"
+      data-testid={toggleTestId}
       data-state={state}
       className={styles.toggle}
     >
@@ -312,7 +325,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
           id={panelId}
           role="region"
           aria-label={title}
-          data-testid="metrics-accordion-panel"
+          data-testid={panelTestId}
           className={styles.panel}
         >
           {content}
