@@ -2,6 +2,21 @@
 
 **Status:** FIXED
 
+> **Pass 2 re-audit (2026-07-11).** Independently re-audited the whole pattern
+> against the full checklist; every prior finding is confirmed and present at
+> HEAD. Mechanically re-verified the invariant: **261/261** non-story icons
+> import `resolveIconA11y`, spread `{...svgA11y}` after `{...rest}`, and render
+> the `{title ? <title>…}` child — zero drift. The `icon-missing-aria-hidden`
+> lint module (`scripts/a11y-lints/`, SHIPPED, 0 violations, in `lint:all`)
+> already guards the shape repo-wide, so the invariant is enforced, not just
+> documented. **One genuine gap closed this pass:** the regression story
+> exercised `aria-label`, `title`, and forced-hidden, but three other *shipped*
+> `resolveIconA11y` naming branches — `aria-labelledby`, explicit-`role`
+> override, and force-**expose** (`aria-hidden={false}` on an unnamed icon) —
+> had no play-assertion. For a published lib whose stories are the only tests,
+> those branches could regress silently. Added the `Accessibility/NamingBranches`
+> story (Issue 3 below).
+
 **APG pattern:** No interactive APG pattern applies — icons are graphics, not
 controls. The governing guidance is the
 [WAI Images tutorial → Functional/Decorative images](https://www.w3.org/WAI/tutorials/images/decorative/)
@@ -62,6 +77,29 @@ one multi-branch `ShowHideEye.tsx`). Representative icons read in full:
   (`data-theme`, `data-disabled`, `{...props}` passthrough) is fully preserved —
   the consumer's remaining props still spread onto the `<svg>` (as `{...rest}`)
   before the computed a11y attributes.
+
+### 3. Three shipped `resolveIconA11y` naming branches had no regression coverage — MINOR — WCAG 4.1.2 (Name, Role, Value, A) — FIXED (pass 2)
+- **Where:** `src/components/Icons/iconA11y.ts:82-104` (the resolver) vs
+  `IconA11y.stories.tsx` before this pass — the `Contract` play function pinned
+  `aria-label`, `title`, and the explicit-`aria-hidden`-wins branches, but not:
+  (a) `aria-labelledby` → `role="img"` + reference kept + `aria-hidden` dropped
+  (`iconA11y.ts:82-83, 100-103`); (b) an explicit consumer `role` surviving over
+  the auto `role="img"` (the `role ?? …` at `:100`); (c) force-**expose**,
+  `aria-hidden={false}` on an unnamed icon dropping `aria-hidden` without
+  inventing a role/name (`:87-94`).
+- **Problem:** these are documented, publicly-consumable accessible-name paths.
+  goobs has no unit tests — the Storybook play function IS the regression test —
+  so an untested branch can break (e.g. a refactor that stops honouring
+  `aria-labelledby`) with nothing failing. The `icon-missing-aria-hidden` lint
+  guards the *decorative default* structurally but does not assert the *named*
+  branch outputs.
+- **Pattern class:** `untested-a11y-contract-branch`.
+- **Fix:** added the `Accessibility/NamingBranches` story to
+  `IconA11y.stories.tsx` — a play function asserting all three branches on
+  `CloseIcon` (`aria-labelledby` → role img + reference + no aria-hidden;
+  `role="button"` preserved alongside `aria-label`; `aria-hidden={false}` unnamed
+  → no `aria-hidden`, no `role`, no name, still `focusable="false"`). No
+  implementation change — the branches already behave correctly; this locks them.
 
 ### 2. Hover motion has no `prefers-reduced-motion` guard — MINOR — WCAG 2.3.3 (Animation from Interactions, AAA) — FIXED
 - **Where:** `src/components/Icons/icon.module.css` — dark-theme hover
@@ -135,6 +173,12 @@ Clean.
     supplied name.
   - `Accessibility/MultiBranchIcon` — pins the multi-branch `ShowHideEye` in both
     decorative and `aria-label` forms.
+  - `Accessibility/NamingBranches` **(added pass 2)** — pins the remaining three
+    documented naming branches on `CloseIcon`: `aria-labelledby` (→ `role="img"`,
+    reference kept, not hidden), explicit `role="button"` surviving over the auto
+    `role="img"` while `aria-label` is also present, and force-**expose**
+    (`aria-hidden={false}` on an unnamed icon → no `aria-hidden`/`role`/name, still
+    `focusable="false"`). Closes Issue 3.
 - `AllIcons.stories.tsx` / `SacredGlyphs.stories.tsx` unchanged: both label their
   cells with visible text, so the icons being `aria-hidden` by default is correct
   there (no update needed).
