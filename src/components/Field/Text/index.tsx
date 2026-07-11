@@ -120,6 +120,8 @@ const TextField: React.FC<TextFieldProps> = ({
   ariaLabel,
   ariaLabelledby,
   type = 'text',
+  autoComplete,
+  inputMode,
   multiline = false,
   minRows = 3,
   dataField,
@@ -147,9 +149,14 @@ const TextField: React.FC<TextFieldProps> = ({
   // unbound; the binding hook supplies a bound handler when bound.
   const onChange = rebindOnChange ?? onChangeProp
 
-  // Focus state still tracked for the multiline textarea wrapper because
-  // CSS modules drive its border styling via a class. Inputs use
-  // `:focus-visible` selectors and don't need this state.
+  // Focus state is tracked in JS and applied as the `.focused` class on the
+  // wrapper for BOTH the single-line input and the multiline textarea. The
+  // stylesheet ALSO matches `.inputWrapper:focus-within` (TextField.module.css),
+  // so the visible focus ring is pure-CSS and hydration-independent even if this
+  // JS state never applies; the class is retained only because handleFocus/
+  // handleBlur additionally fire the consumer onFocus/onBlur callbacks and the
+  // form binding's touched-onBlur. Both selectors resolve to the identical
+  // focus treatment, so the two paths are idempotent.
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -328,6 +335,8 @@ const TextField: React.FC<TextFieldProps> = ({
               disabled={disabled}
               required={required}
               placeholder={placeholder}
+              autoComplete={autoComplete}
+              inputMode={inputMode}
               aria-label={ariaLabel}
               aria-labelledby={ariaLabelledby}
               data-field-name={dataFieldName ?? name}
