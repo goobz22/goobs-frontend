@@ -1,6 +1,9 @@
 # Field/Number — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** FIXED (all in-directory defects fixed) — 3 items **deferred** to
+`Field/Shell` (D1–D3, owned by a later serial pass). 2026-07-11 re-audit added
+issue 7 (accessible error/label state now has executable regression coverage) and
+deferred item D3; issues 1–6 unchanged from the prior pass.
 
 **Component:** `src/components/Field/Number/*` — a family of six number-oriented
 fields, each composed inside the shared `FieldShell` (label / helper / error /
@@ -115,6 +118,23 @@ theme chrome) and driven by `useFieldBinding`:
   (AccountNumber intentionally left as-is — it accepts formatting dashes, which a
   numeric-only keypad would hide.)
 
+### 7. Accessible error / label-association state had no executable coverage — FIXED (2026-07-11 re-audit)
+- **Severity:** minor · **WCAG:** 1.3.1 / 3.3.1 / 4.1.2 / 4.1.3 (A/AA) · **Pattern:** `missing-a11y-regression-story`
+- **Where:** all six `*.stories.tsx` — the four masked fields had only static
+  theme stories (no `play`), and the two steppers exercised only keyboard
+  stepping. **No** Number story asserted the accessible-error contract.
+- **Failure:** the error/label wiring is correct (it flows through FieldShell),
+  but in this repo the Storybook `play` story is the only regression test
+  (`goobs.md`). A regression in a Number field's `aria-invalid` /
+  `aria-describedby` / `role="alert"` / label association would have shipped
+  silently — the wiring was proven-by-reading, not proven-by-test.
+- **Fix:** added an `AccessibleErrorState` `play` story to each of the six
+  components. Each asserts, against the live DOM: label association
+  (`getByLabelText` resolves the input), `aria-invalid="true"`,
+  `aria-describedby` present and equal to the `role="alert"` region's `id`, and
+  the alert announces the message. The two steppers additionally assert the
+  input keeps `role="spinbutton"` while in error. Commit `8b7677f1`.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
 **CLEAN.** Grepped the whole `Field/Number` tree for `Audio` / `AudioContext` /
@@ -177,8 +197,16 @@ and is not an animation in the 2.3.3 sense.)
 5. `aria-hidden="true"` on the four decorative adornments — WCAG 1.1.1.
 6. `inputMode="numeric"` on CVV / RoutingNumber / ExternalIncrement — WCAG 1.3.5-adjacent.
 
-Code: commit `1cce0097` (12 files). Stories: commit `f7d74cb1`. `bun lint:file`
-clean on all six `index.tsx` and both edited `*.stories.tsx`.
+7. `AccessibleErrorState` regression stories on all six fields (label assoc +
+   `aria-invalid` + `aria-describedby`→`role="alert"`) — WCAG 1.3.1 / 3.3.1 / 4.1.2 / 4.1.3.
+
+Code: commit `1cce0097` (12 files). Stories: commits `f7d74cb1` (keyboard),
+`8b7677f1` (error-state, 2026-07-11 re-audit). `bun lint:file` clean on all six
+`index.tsx` and all six `*.stories.tsx`. (`bun typecheck:file` is broken
+repo-wide here — TS5112, tsconfig not loaded for command-line files — so per-file
+typecheck was not runnable; the new stories mirror the exact
+`within`/`expect`/`getByLabelText`/`toHaveAttribute` patterns already type-clean
+in the sibling `KeyboardAccessible` stepper stories.)
 
 ## Stories updated
 
@@ -191,6 +219,12 @@ clean on all six `index.tsx` and both edited `*.stories.tsx`.
 - **ExternalIncrement → `KeyboardAccessible`** (play fn) — asserts spinbutton
   semantics and drives Up/Down/Home on the input plus keyboard activation of the
   Increase button.
+- **All six → `AccessibleErrorState`** (play fn, 2026-07-11) — new. Renders each
+  field with `error=…` + a distinct `label`, then asserts label association
+  (`getByLabelText`), `aria-invalid="true"`, `aria-describedby` === the
+  `role="alert"` region id, and the announced message. Steppers also assert
+  `role="spinbutton"` persists in error. The four masked stories additionally
+  gained the `import { within, expect } from 'storybook/test'` line.
 
 ## Deferred (root cause in Field/Shell — owned by a later serial pass)
 
@@ -223,3 +257,19 @@ clean on all six `index.tsx` and both edited `*.stories.tsx`.
   sub-fields pass their `id` into FieldShell instead of overriding the input's id
   locally. Additive; preserves the existing generated-id default. Not fixable
   inside `Field/Number` alone without the shell honoring the id.
+
+### D3. Stepper +/- buttons can't be disambiguated across multiple steppers
+- **Severity:** minor · **WCAG:** 2.4.6 Headings and Labels (AA) · **Pattern:** `ambiguous-repeated-control-label`
+- The stepper buttons are correctly named ("Increase value" / "Decrease value",
+  `ExternalIncrement/index.tsx:207,237`; `InternalIncrement/index.tsx:300,313`),
+  but with several steppers on one page a screen-reader user hears the same two
+  labels repeated with no field context. Non-blocking — the target is
+  programmatically determinable via the adjacent labeled spinbutton — and not
+  cleanly fixable in-directory: the `label` prop is an arbitrary `ReactNode` (not
+  stringifiable into a per-button `aria-label`), and the `<label>` element that
+  *could* be referenced is minted inside FieldShell, which exposes no label id.
+- **Suggested change (Shell):** give the `<label>` a stable id (e.g.
+  `labelId = \`field-label-${reactId}\``, `Shell/index.tsx:395`) and add `labelId`
+  to `FieldShellSlot` (`Shell/index.tsx:48`). Then each stepper button can set
+  `aria-labelledby={\`<inc-text-id> ${labelId}\`}` so AT announces e.g. "Increase,
+  Order Quantity" instead of a bare "Increase value". Additive, back-compat.
