@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tabs.module.css'
 
@@ -387,13 +387,43 @@ export const Tab: React.FC<TabProps> = ({
     }
   }
 
+  // Own reference to the rendered <button> so the aria-controls reconciliation
+  // effect below can mutate the live node without disturbing the parent's
+  // roving-focus ref or the public consumer ref.
+  const internalButtonRef = useRef<HTMLButtonElement | null>(null)
+
   // Merge the internal `buttonRef` (parent-owned roving focus) with the public
-  // consumer `ref` so a single DOM `ref` slot feeds both.
+  // consumer `ref` so a single DOM `ref` slot feeds both (plus our own node ref).
   const setButtonRef = (el: HTMLButtonElement | null) => {
+    internalButtonRef.current = el
     buttonRef?.(el)
     if (typeof ref === 'function') ref(el)
     else if (ref) (ref as React.RefObject<HTMLButtonElement | null>).current = el
   }
+
+  // aria-controls reconciliation. A `route`/`onClick` tab — the majority usage —
+  // is rendered WITHOUT a matching `<TabPanel>`, so the `aria-controls={panelId}`
+  // emitted for SSR would DANGLE: an idref to an element that never mounts
+  // (automated a11y scanners flag "aria-controls must reference an existing
+  // element"). `<Tabs>` cannot know at render time whether the consumer also
+  // rendered the paired `<TabPanel>` (it is an external sibling, optionally
+  // conditional on the active tab). Mirror `<Card>`'s aria-labelledby handling:
+  // keep the attribute in the server markup (identical SSR/hydration output — no
+  // mismatch) and reconcile it AFTER mount as a plain DOM mutation — assert it
+  // only while the referenced panel is actually in the document, drop it
+  // otherwise. `isActive` is a dependency so a consumer that mounts/unmounts
+  // only the active panel re-reconciles on activation. A `role="tab"` with no
+  // aria-controls is valid ARIA (APG recommends the link but does not require
+  // it), so removal is safe.
+  useEffect(() => {
+    const node = internalButtonRef.current
+    if (node === null) return
+    if (panelId && document.getElementById(panelId) !== null) {
+      node.setAttribute('aria-controls', panelId)
+    } else {
+      node.removeAttribute('aria-controls')
+    }
+  }, [panelId, isActive])
 
   return (
     <button

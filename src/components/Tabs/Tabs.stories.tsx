@@ -315,16 +315,25 @@ export const WithPanelsAriaPairing: Story = {
 
     // …and each tab's aria-controls points at exactly that id (the old
     // code emitted `tabpanel-<useId>-overview` here, which matched no
-    // element in the document).
-    await expect(overviewTab).toHaveAttribute('aria-controls', overviewPanel.id)
-    await expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
+    // element in the document). `aria-controls` is now asserted only when the
+    // referenced panel is really in the DOM (reconciled in a post-mount
+    // effect), so these use `waitFor`. Both panels ARE rendered here → the
+    // links survive.
+    await waitFor(() =>
+      expect(overviewTab).toHaveAttribute('aria-controls', overviewPanel.id)
+    )
+    await waitFor(() =>
+      expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
+    )
 
     // Activating another tab keeps the pairing and flips the active state.
     await userEvent.click(activityTab)
     await expect(activityTab).toHaveAttribute('aria-selected', 'true')
     await expect(activityPanel).toHaveAttribute('data-tab-active', 'true')
     await expect(overviewPanel).toHaveAttribute('data-tab-active', 'false')
-    await expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
+    await waitFor(() =>
+      expect(activityTab).toHaveAttribute('aria-controls', activityPanel.id)
+    )
   },
 }
 
@@ -433,6 +442,38 @@ export const KeyboardNavigation: Story = {
     await userEvent.keyboard('{Home}')
     await waitFor(() => expect(inbox).toHaveFocus())
     await expect(inbox).toHaveAttribute('aria-selected', 'true')
+  },
+}
+
+/**
+ * 5b) aria-controls references a real panel only (a11y regression)
+ *
+ * The 2026-07-11 review found `aria-controls` DANGLED in the common
+ * route/onClick usage: every tab emitted `aria-controls="tabpanel-<id>"`, but
+ * that panel element only exists when the consumer also renders `<TabPanel>` —
+ * which route/onClick navs never do. `<Tab>` now reconciles the idref after
+ * mount (mirroring `<Card>`'s aria-labelledby handling): it keeps
+ * `aria-controls` only while the referenced panel is in the document and drops
+ * it otherwise, so no tab points at a non-existent element. This story renders
+ * the panel-less `onClick` tab set (NO `<TabPanel>`), so every tab must end up
+ * WITHOUT `aria-controls`; the `WithPanelsAriaPairing` story pins the opposite
+ * half (panel present → link kept).
+ */
+export const AriaControlsRequiresPanel: Story = {
+  render: () => <KeyboardNavRenderer />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const inbox = canvas.getByRole('tab', { name: /Inbox/ })
+    const sent = canvas.getByRole('tab', { name: 'Sent' })
+    const archive = canvas.getByRole('tab', { name: 'Archive' })
+
+    // No <TabPanel> is rendered → the SSR aria-controls idref is reconciled
+    // away post-mount, so it must be ABSENT on every tab (not dangling at a
+    // non-existent `tabpanel-<id>`).
+    await waitFor(() => expect(inbox).not.toHaveAttribute('aria-controls'))
+    await expect(sent).not.toHaveAttribute('aria-controls')
+    await expect(archive).not.toHaveAttribute('aria-controls')
   },
 }
 

@@ -110,18 +110,26 @@
    visible even when the roving-tabindex focus lands on a NON-active tab (a
    controlled `activeTab` that hasn't caught up, or a route/onClick tab whose
    host never updates it), a case where the active styling is absent entirely.
-   Per-theme ring colours mirror Button's focus treatment. */
+
+   Ring COLOUR mirrors Button's focus treatment (Button.module.css:182/224) and
+   for the SAME reason: the SOLID per-theme primary is used, NOT the translucent
+   --goobs-{light,dark}-focus-ring tokens. A 40–45%-alpha ring composited over
+   the tab surface computes only ~1.6:1 (light) / ~2.0–2.3:1 (dark), FAILING the
+   WCAG 1.4.11 / 2.4.11 non-text-contrast 3:1 floor; the opaque primary
+   (#2563eb ~5.2:1 / #60a5fa ~4.8–5.8:1) is reliably perceivable regardless of
+   the backdrop the `outline-offset: 2px` exposes. Sacred's gold-a60 ring
+   already clears the floor (~5.3:1) so it keeps the focus-ring token. */
 .tab:focus-visible {
   outline: 2px solid var(--goobs-sacred-focus-ring);
   outline-offset: 2px;
 }
 
 .tab[data-theme='light']:focus-visible {
-  outline-color: var(--goobs-light-focus-ring);
+  outline-color: var(--goobs-light-primary);
 }
 
 .tab[data-theme='dark']:focus-visible {
-  outline-color: var(--goobs-dark-focus-ring);
+  outline-color: var(--goobs-dark-primary);
 }
 
 /* --------------------------------------------------------------------------

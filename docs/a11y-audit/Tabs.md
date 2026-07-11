@@ -60,7 +60,8 @@ visual + programmatic (`aria-selected`, `data-tab-active`). No finding.
 ## Reading & screen reader (1.1.1, 1.3.1, 1.4.1, 2.1.x, 2.4.x, 4.1.2)
 - Accessible names present on every tab (button text content; icons decorative-hidden).
 - Full APG tablist roles/states/properties present (see baseline above).
-- **Fix 1** restores a visible keyboard-focus ring per theme (`--goobs-{sacred,light,dark}-focus-ring`).
+- **Fix 1** restores a visible keyboard-focus ring per theme (sacred `--goobs-sacred-focus-ring`;
+  light/dark use the SOLID `--goobs-{light,dark}-primary` per review R1 for ≥3:1 non-text contrast).
 - **Fix 3** puts the count into the tab's accessible name ("Inbox 5"), matching the visual.
 - Color is never the sole signal: selected state = `aria-selected` + `data-tab-active` +
   weight/underline/glow, not colour alone (1.4.1). No finding.
@@ -74,9 +75,11 @@ visual + programmatic (`aria-selected`, `data-tab-active`). No finding.
 ## Fixes applied
 1. **Focus-visible ring** (`Tabs.module.css`): added `.tab:focus-visible { outline: 2px
    solid var(--goobs-sacred-focus-ring); outline-offset: 2px }` plus
-   `[data-theme='light']`/`[data-theme='dark']` `outline-color` overrides — mirrors the
-   established Button focus treatment and existing `--goobs-*-focus-ring` tokens. The base
-   `outline: none` is kept so pointer users see no ring.
+   `[data-theme='light']`/`[data-theme='dark']` `outline-color` overrides. The base
+   `outline: none` is kept so pointer users see no ring. **Corrected in the review
+   follow-up** (see below): the light/dark overrides now use the SOLID primary tokens
+   (`--goobs-{light,dark}-primary`), not the translucent `--goobs-{light,dark}-focus-ring`
+   tokens, which fail non-text contrast — matching Button.
 2. **Reduced motion** (`Tabs.module.css`): added
    `@media (prefers-reduced-motion: reduce)` zeroing the transition on `.tab` and both
    theme variants (listed explicitly to match specificity); hover/active/focus remain
@@ -111,7 +114,50 @@ avoid changing the public DOM/behavior contract without a product decision:
    test contract, so it is escalated rather than applied here. Pattern class:
    `clickable-noninteractive-element` (navigation-as-tab variant).
 2. **`aria-controls` can dangle** when a consumer renders `<Tabs>` without matching
-   `<TabPanel>`s (route/onClick tabs) — each tab still points `aria-controls` at
-   `tabpanel-<id>`, which then references no element. The component cannot know whether a
-   panel exists; AT tolerates the missing target (it is ignored). Left as-is because
-   removing it would break the documented `<TabPanel>` pairing contract. Low severity.
+   `<TabPanel>`s (route/onClick tabs) — **RESOLVED in the review follow-up** (see below).
+   `<Tab>` now reconciles the idref after mount, keeping `aria-controls` only while the
+   referenced panel is actually in the DOM.
+
+## Adversarial review follow-up (2026-07-11)
+
+A review of the pass above found two remaining issues; both are now fixed.
+
+| # | Severity | WCAG | Location | Status |
+|---|----------|------|----------|--------|
+| R1 | Serious | 1.4.11 Non-text Contrast / 2.4.11 Focus Appearance (AA) | `Tabs.module.css` light/dark `:focus-visible` `outline-color` | FIXED |
+| R2 | Minor   | 4.1.2 / ARIA idref validity | `index.tsx` `<Tab aria-controls>` dangling for panel-less tabs | FIXED |
+
+### R1 — Focus ring failed non-text contrast in light/dark (Serious)
+The original Fix 1 set `outline-color: var(--goobs-light-focus-ring)`
+(`rgba(59,130,246,0.4)`) and `var(--goobs-dark-focus-ring)` (`rgba(96,165,250,0.45)`).
+Over the tab surface (with `outline-offset: 2px` exposing the backdrop) the translucent
+rings composite to ~1.6:1 (light) and ~2.0–2.3:1 (dark) — both below the 3:1 non-text
+floor. Only the sacred ring (`gold-a60`, ~5.3:1) passed. This is the identical defect
+Button.md R1 documented; Button deliberately uses the SOLID primary. **Fix:** the light/dark
+`:focus-visible` overrides now use `var(--goobs-light-primary)` (`#2563eb`, ~5.2:1) and
+`var(--goobs-dark-primary)` (`#60a5fa`, ~4.8–5.8:1), matching Button. Sacred keeps its
+focus-ring token (already ≥3:1). Pattern class: `translucent-focus-ring-below-3to1`
+(shared with Button).
+
+### R2 — `aria-controls` dangled for panel-less tabs (Minor)
+Every `<Tab>` emitted `aria-controls="tabpanel-<id>"` unconditionally, but that panel only
+exists when the consumer also renders `<TabPanel>` — which the majority (route/onClick)
+usage never does, so the idref referenced a non-existent element. `trigger` does NOT
+distinguish the two (the `WithPanelsAriaPairing` case uses `trigger:'onClick'` WITH panels),
+so the only correct signal is whether the panel is actually in the DOM. **Fix:** mirrors the
+established `<Card>` aria-labelledby reconciliation (`Card/index.tsx:354-363`) — the
+attribute stays in the server markup (identical SSR/hydration output, no mismatch) and is
+reconciled after mount by a `useEffect` that asserts `aria-controls` only while
+`document.getElementById(panelId)` resolves, and removes it otherwise. `isActive` is an
+effect dependency so consumers that mount only the active panel re-reconcile on activation.
+A `role="tab"` with no `aria-controls` is valid ARIA. Pattern class: `dangling-aria-idref`
+(shared with Card's `aria-labelledby`).
+
+### Follow-up stories
+- **New `AriaControlsRequiresPanel`** (`Tabs.stories.tsx`): renders the panel-less `onClick`
+  tab set and asserts every tab ends up WITHOUT `aria-controls` (no dangling idref).
+- **`WithPanelsAriaPairing`** now asserts the `aria-controls`↔panel links via `waitFor`
+  (the attribute is set by a post-mount effect); with both panels rendered the links survive,
+  pinning the opposite half of R2.
+- R1 needs no new story — `KeyboardNavigation` already renders the focused `:focus-visible`
+  ring for the Chromatic snapshot; the token swap is a colour change under the same state.
