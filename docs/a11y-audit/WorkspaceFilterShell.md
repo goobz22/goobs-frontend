@@ -44,9 +44,10 @@ exposure. **CLEAN.**
 - **Semantic HTML:** pagination controls are native `<button type="button">`; the landmark
   is now a native `<nav>` (issue 2). No role-annotated divs used for interaction.
 - **State:** active page uses `aria-current="page"` (present before the audit, retained);
-  disabled Prev/Next use the native `disabled` attribute — both are programmatic, not
-  colour-only (satisfies 1.4.1). The active page is additionally distinguished by
-  `font-weight:700` + background, not colour alone.
+  boundary Prev/Next use `aria-disabled="true"` (NOT the native `disabled` attribute — see
+  review finding R1) so they stay focusable while still exposing the disabled state
+  programmatically, not colour-only (satisfies 1.4.1). The active page is additionally
+  distinguished by `font-weight:700` + background, not colour alone.
 - **Focus:** added a visible themed `:focus-visible` ring for sacred/light/dark (issue 1).
   The component owns no overlay/dialog/drawer, so focus-trap / Escape / focus-restore
   requirements do not apply.
@@ -104,9 +105,59 @@ on the module.css → exit 0.
 - The pre-existing `Sacred` play test (tab count, zone presence, `data-shell-zone="pagination"`)
   still holds — the div→nav change keeps the `data-shell-zone` selector intact.
 
+## Adversarial-review follow-ups (2026-07-11)
+
+A fresh adversarial review of the pass above found three remaining minor issues. All fixed at
+root cause inside the component directory.
+
+| # | Severity | WCAG | Issue | Status |
+|---|----------|------|-------|--------|
+| R1 | minor | 2.4.3 Focus Order (A) | Keyboard focus was silently lost to `<body>` at the pagination boundaries: Prev/Next were rendered with the native `disabled` attribute, and because they carry stable keys the SAME focused DOM node became `disabled` after an activation that reached page 1 / the last page (e.g. Tab to Prev on page 2, activate → page 1 → Prev disables). Browsers blur a control that becomes disabled, dropping focus to `document.body`, so the next Tab restarts from the top of the page. | FIXED |
+| R2 | minor | (regression coverage) | Two shipped a11y states were unexercised by any story: nothing keyboard-focused a `.pageBtn` to render/capture the `:focus-visible` ring, and nothing rendered under `prefers-reduced-motion`; the sole pagination story was sacred-only so the light/dark focus-ring token overrides were also visually unpinned. | FIXED |
+| R3 | minor | 2.4.6 Headings & Labels (AA) | Inconsistent accessible-name treatment: numbered buttons got a descriptive `"Page N"` name but Prev/Next kept only the abbreviated visible text with no "page" context, unlike the WAI-ARIA APG Pagination example. | FIXED |
+
+### R1 — boundary focus preservation (root-cause fix)
+
+The internal `btn()` helper no longer emits the native `disabled` attribute. Boundary controls
+now render `aria-disabled="true"` (omitted entirely when enabled — never `aria-disabled="false"`),
+which keeps them in the tab order so focus is preserved across a boundary activation, and their
+`onClick` is guarded to an inert no-op so an aria-disabled control cannot page past the range.
+`index.tsx`. The two `:disabled` / `:not(:disabled, …)` selectors in `WorkspaceFilterShell.module.css`
+(base + light + dark) were retargeted to `[aria-disabled='true']` so the muted/not-allowed boundary
+styling and the hover-exclusion still apply. The `:focus-visible` ring now also (correctly) shows on
+a focused boundary control, per the APG "aria-disabled stays focusable" pattern.
+
+**Markup change (noted per contract):** boundary Prev/Next emit `aria-disabled="true"` instead of the
+native `disabled` attribute. This is additive for assistive tech and preserves every existing
+`data-action="prev"/"next"` / `aria-current` / `data-shell-zone` selector; the boundary state remains
+machine-detectable (now via `aria-disabled` rather than `:disabled`). No prop or export changed.
+
+### R3 — Prev/Next accessible names
+
+Prev/Next now pass `ariaLabel="Previous page"` / `"Next page"` through the existing `btn()` `ariaLabel`
+option (its JSDoc was generalised from "bare digit only" to cover both cases). Each accessible name is a
+superstring of the visible `"Prev"`/`"Next"` text, so 2.5.3 Label in Name still holds.
+
+### R2 — new/extended regression stories
+
+- **`PaginationA11y` (sacred)** — extended: asserts Prev/Next resolve by the new `"Previous page"` /
+  `"Next page"` names, then `userEvent.tab()` moves keyboard focus onto `Page 5` and asserts
+  `toHaveFocus`, driving the **sacred** `:focus-visible` ring for the Chromatic baseline.
+- **`PaginationBoundaryFocus` (new, sacred)** — the R1 regression: starts on page 2 of 3, clicks Prev,
+  and asserts Prev goes `aria-disabled="true"` yet **still holds focus** (fails against the old native
+  `disabled`), the live region updates to `1-10 of 30`, and a second click is an inert no-op.
+- **`PaginationFocusLight` / `PaginationFocusDark` (new)** — Tab-focus a page control on the light and
+  dark surfaces so the **`--goobs-light-focus-ring` / `--goobs-dark-focus-ring`** token overrides are
+  each pinned.
+- **`PaginationReducedMotion` (new)** — renders under the reduced-motion narrative (matching the sibling
+  `Slide` reduced-motion story convention) and its `play` deterministically asserts the
+  `@media (prefers-reduced-motion: reduce)` guard targeting `.pageBtn`'s `transition` shipped in the
+  loaded stylesheet, so the guard cannot silently regress.
+- A shared module-level `PaginationOnly` harness backs the new pagination-only stories.
+
 ## Deferred
 
-None. Every issue was fixable at root cause inside the component directory. No shared
-util, Field/Shell, `src/styles/global.css`, or barrel change was required — the fixes only
-*reference* the existing `--goobs-*-focus-ring` tokens already defined in
+None. Every issue — original and review follow-up — was fixable at root cause inside the component
+directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel change was required; the
+CSS fixes only *reference* the existing `--goobs-*-focus-ring` tokens already defined in
 `src/styles/global.css` (not edited).
