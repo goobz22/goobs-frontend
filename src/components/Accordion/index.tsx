@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useCallback, type FC, type ReactNode } from 'react'
+import React, {
+  useState,
+  useCallback,
+  useId,
+  type FC,
+  type ReactNode,
+} from 'react'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Accordion.module.css'
 
@@ -54,6 +60,13 @@ export interface AccordionProps {
    */
   linkComponent?: React.ElementType
   isActive?: boolean
+  /**
+   * When set (accordion type only), wraps the toggle button in a real
+   * `<h1>`–`<h6>` heading so a collapsible section is exposed as a document
+   * heading for screen-reader navigation and SEO. Omit to render the button
+   * without a heading wrapper (unchanged default). Ignored for `type="menu"`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 }
 
 const useAccordionState = ({
@@ -113,6 +126,7 @@ const Accordion: FC<AccordionProps> = props => {
     href,
     linkComponent,
     isActive,
+    headingLevel,
     expanded: controlledExpanded,
     defaultExpanded,
     onChange,
@@ -205,6 +219,15 @@ const Accordion: FC<AccordionProps> = props => {
   }
   if (outlineValue !== undefined) dynamicStyle.outline = outlineValue
 
+  // Stable ids wiring the disclosure trigger to its panel (button ⇄ region).
+  const reactId = useId()
+  const panelId = `accordion-panel-${reactId}`
+  const triggerId = `accordion-trigger-${reactId}`
+
+  // The expanded body only renders for an accordion-type that is open with
+  // content; the trigger's aria-controls points at it only when it exists.
+  const hasPanel = !isMenuType && expanded && Boolean(details)
+
   const arrowIconSvg = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -212,27 +235,86 @@ const Accordion: FC<AccordionProps> = props => {
       fill="currentColor"
       className={cssStyles.icon}
       data-expanded={expanded ? 'true' : undefined}
+      // Decorative: the chevron only mirrors the button's aria-expanded state,
+      // so it is hidden from AT and removed from the tab order.
+      aria-hidden="true"
+      focusable="false"
     >
       <path d="M7 10l5 5 5-5z" />
     </svg>
   )
 
-  const summaryContent = (
-    <div
-      className={cssStyles.summary}
-      data-menu={isMenuType ? 'true' : undefined}
-      data-active={isActive ? 'true' : undefined}
-      data-disabled={disabled ? 'true' : undefined}
-      onClick={handleClick}
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      aria-expanded={isMenuType ? undefined : expanded}
-      {...rest}
-    >
-      {!isMenuType && arrowIconSvg}
-      {summary}
-    </div>
-  )
+  // The clickable header row renders as the semantically correct NATIVE element
+  // so it is keyboard-operable and exposes the right role for AT:
+  //   • accordion type         → <button> (disclosure: aria-expanded/-controls)
+  //   • menu type + href       → <a href> (a real, crawlable link; linkComponent)
+  //   • menu type without href → <button> (invokes onClick)
+  // A native element gives Enter/Space (button) or Enter (link) activation, tab
+  // order, and `disabled` semantics for free. (The old <div role="button"> had
+  // an onClick but NO key handler, so it was unreachable by keyboard.)
+  let summaryContent: ReactNode
+  if (!isMenuType) {
+    const triggerButton = (
+      <button
+        type="button"
+        className={cssStyles.summary}
+        data-disabled={disabled ? 'true' : undefined}
+        onClick={handleClick}
+        {...rest}
+        id={triggerId}
+        disabled={disabled}
+        aria-expanded={expanded}
+        aria-controls={hasPanel ? panelId : undefined}
+      >
+        {arrowIconSvg}
+        {summary}
+      </button>
+    )
+    // Optional real heading wrapper (an accordion section header IS a heading).
+    summaryContent = headingLevel
+      ? React.createElement(
+          `h${headingLevel}`,
+          { className: cssStyles.heading },
+          triggerButton
+        )
+      : triggerButton
+  } else if (href) {
+    summaryContent = React.createElement(
+      linkComponent ?? 'a',
+      {
+        onClick: handleClick,
+        'data-menu': 'true',
+        'data-active': isActive ? 'true' : undefined,
+        'data-disabled': disabled ? 'true' : undefined,
+        ...rest,
+        className: [cssStyles.summary, cssStyles.link]
+          .filter(Boolean)
+          .join(' '),
+        // A disabled nav item drops its href (not focusable/navigable) and is
+        // announced disabled; the active item is announced as the current page.
+        href: disabled ? undefined : href,
+        'aria-current': isActive ? 'page' : undefined,
+        'aria-disabled': disabled ? 'true' : undefined,
+      },
+      summary
+    )
+  } else {
+    summaryContent = (
+      <button
+        type="button"
+        className={cssStyles.summary}
+        data-menu="true"
+        data-active={isActive ? 'true' : undefined}
+        data-disabled={disabled ? 'true' : undefined}
+        onClick={handleClick}
+        {...rest}
+        disabled={disabled}
+        aria-current={isActive ? 'page' : undefined}
+      >
+        {summary}
+      </button>
+    )
+  }
 
   return (
     <div
@@ -250,18 +332,17 @@ const Accordion: FC<AccordionProps> = props => {
       data-theme={theme}
       style={dynamicStyle}
     >
-      {isMenuType && href ? (
-        React.createElement(
-          linkComponent ?? 'a',
-          { href, className: cssStyles.link },
-          summaryContent
-        )
-      ) : (
-        summaryContent
-      )}
+      {summaryContent}
 
-      {!isMenuType && expanded && details && (
-        <div className={cssStyles.details}>{details}</div>
+      {hasPanel && (
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={triggerId}
+          className={cssStyles.details}
+        >
+          {details}
+        </div>
       )}
     </div>
   )
