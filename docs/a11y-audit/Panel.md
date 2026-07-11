@@ -1,14 +1,20 @@
 # Panel — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** FIXED (initial pass + adversarial-review follow-up, 2026-07-11)
 
-**APG pattern:** No interactive-widget APG pattern applies — `Panel` is a
-**landmark [region](https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/)**
-(a `<section role="region">` named by its header title via `aria-labelledby`). It is a
-stateless shell-surface primitive (compound root + `Panel.Header` / `Panel.Body` /
-`Panel.Footer`), not a dialog/accordion/tabs widget, so it owns no roving-tabindex or
-open/close keyboard contract of its own. The one interactive control it renders is the
-optional back **`<button>`** (via `IconButton`), which already carries an accessible name.
+**APG pattern:** Two patterns apply depending on variant. For `sacred`/`standard`, `Panel`
+is a **landmark [region](https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/)** —
+but the explicit `role="region"` is now emitted **only when the panel has an accessible
+name** (header title, or a consumer `aria-label`/`aria-labelledby`); a nameless panel
+degrades to a plain `<section>` (never an unnamed landmark). The `fullscreen` variant is a
+`position:fixed; inset:0` viewport takeover over an opaque backdrop — semantically a
+**modal**, so it now follows the [dialog (modal)
+APG pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/): `role="dialog"` +
+`aria-modal="true"`, focus moved in on mount, Tab trapped, `Escape` → `onClose`, focus
+restored on unmount. Otherwise `Panel` is a stateless shell-surface primitive (compound root
++ `Panel.Header` / `Panel.Body` / `Panel.Footer`). The one always-present interactive control
+is the optional back **`<button>`** (via `IconButton`), which already carries an accessible
+name.
 
 **Component:** `src/components/Panel/index.tsx` (default `Panel`, plus exported
 `PanelHeader`, `PanelBody`, `PanelFooter`), `src/components/Panel/Panel.module.css`,
@@ -38,6 +44,54 @@ optional back **`<button>`** (via `IconButton`), which already carries an access
 | 2 | Moderate | 1.3.1 (A) / 4.1.2 Name, Role, Value (A) | `index.tsx:144` — root always emits `aria-labelledby={titleId}` | `dangling-aria-labelledby` | FIXED |
 | 3 | Serious  | 2.1.1 Keyboard (A) | `index.tsx:275` + `Panel.module.css:120` — `Panel.Body` `overflow:auto`, not focusable | `scrollable-region-not-keyboard-accessible` | FIXED |
 | 4 | Minor    | 1.1.1 Non-text Content (A) / 4.1.2 (A) | `index.tsx:218` — `ArrowBackIcon` `<svg>` had no `aria-hidden` | `icon-missing-aria-hidden` | FIXED |
+| 5 | Moderate | 2.4.3 Focus Order (A) / 1.3.1 (A) / 4.1.2 (A) | `Panel.module.css:67-73` + `index.tsx` root — `fullscreen` takeover was an unmanaged modal (no focus trap/restore, no Escape, background not inert) | `unmanaged-modal-takeover` | FIXED |
+| 6 | Minor    | 1.3.1 (A) / best-practice `region` | `index.tsx:156` — header-less panel kept a hardcoded `role="region"` with no accessible name | `unnamed-landmark` | FIXED |
+| 7 | Minor    | 2.4.3 Focus Order (A) | `index.tsx:311` — `Panel.Body` got `tabIndex={0}` unconditionally (redundant tab stop / scrolls-nothing focus target) | `over-broad-scrollable-focusable` | FIXED |
+
+### 5 — Fullscreen takeover was an unmanaged modal (Moderate, 2.4.3 / 1.3.1 / 4.1.2)
+`.fullscreen` renders `position:fixed; inset:0; z-index:1300` over an opaque backdrop
+(`--panel-bg` = near-black `goobs-black-a98`), completely obscuring the page — a modal
+takeover in everything but its ARIA. The root was only `role="region"` with **no focus
+trap, no focus restoration, no Escape-to-close, and no inert/aria-hidden on the obscured
+background**, so a keyboard or AT user could Tab straight from the panel into the now-invisible
+page content behind it (WCAG 2.4.3 Focus Order / 1.3.1). Pattern class:
+`unmanaged-modal-takeover`. **Fixed** by giving the `fullscreen` variant the full APG dialog
+contract, mirroring the library's `Dialog` (`Dialog/index.tsx`): the root now renders
+`role="dialog"` + `aria-modal="true"` (so AT treats the background as inert without touching
+the consumer's arbitrary sibling DOM) + `tabIndex={-1}`; a variant-gated effect moves focus
+into the takeover on mount, traps Tab at the boundaries (boundary-only cycling — deliberately
+no "recapture" branch, so a portalled dropdown opened inside stays operable, matching
+`Dialog`), closes on `Escape` via a new additive optional **`onClose`** prop, and restores
+focus to the opener on unmount. A dev-only warning fires if a fullscreen panel mounts with no
+accessible name (no header title and no consumer `aria-label`/`aria-labelledby`), mirroring
+`Dialog`'s nameless-modal warning (WCAG 4.1.2).
+
+### 6 — Header-less panel was an unnamed landmark (Minor, 1.3.1 / best-practice)
+Fix #2 correctly dropped the dangling `aria-labelledby` on a header-less panel, but the root
+still hardcoded `role="region"`. An explicit `region` landmark with **no accessible name** is
+a nameless landmark (axe best-practice `region`; APG: a region should be labelled). Pattern
+class: `unnamed-landmark`. **Fixed** by making the role conditional on the panel actually
+having a name: `role="region"` is emitted when a `Panel.Header` title **or** a consumer
+`aria-label`/`aria-labelledby` supplies one; otherwise the explicit role is dropped and the
+element is a plain `<section>` (which is a landmark **only** when named — so a nameless
+header-less panel registers no landmark at all). The named case (every real ThothOS usage
+composes a `Panel.Header`) still emits `role="region"` exactly as before.
+
+### 7 — `Panel.Body` was an unconditional tab stop (Minor, 2.4.3)
+Fix #3 made the body focusable to remediate the keyboard-scroll trap, but did so
+**unconditionally** (`tabIndex={0}` always). The canonical scrollable-region-focusable
+remediation is conditional: a scroll container should be a tab stop **only when it actually
+overflows AND holds no focusable descendants**. The primitive's own reference use case
+(`InlineManageContact` — a form-filled body) has focusable fields, so an always-focusable
+container becomes a redundant extra tab stop *before* the fields; and when content doesn't
+overflow it is a focusable element that scrolls nothing — both are focus-order noise (WCAG
+2.4.3). Offloading this to "consumers set `tabIndex={-1}`" (as the initial report did) is not
+realistic. Pattern class: `over-broad-scrollable-focusable`. **Fixed** by measuring at runtime
+in `Panel.Body`: a `ResizeObserver` + `MutationObserver`-driven check sets `tabIndex={0}` only
+when `scrollHeight > clientHeight` **and** there are no visible focusable descendants, and
+omits the attribute otherwise (re-measuring when overflow or interactive content changes). A
+consumer-passed `tabIndex` still overrides (it is spread after). The `:focus-visible` outline
+from fix #3 is retained for the cases where the body is genuinely a tab stop.
 
 ### 1 — Panel title is not a real heading (Serious, 1.3.1 / 2.4.6)
 The title was rendered by `Typography variant="cinzelh5"`, and `Typography` **always
@@ -124,6 +178,33 @@ information is conveyed by sound. No finding.
 4. **Decorative icon hidden** (`index.tsx`): passed `aria-hidden="true"` to `ArrowBackIcon`
    at the Panel callsite (props spread onto its `<svg>`); the Icons component itself was not
    touched.
+5. **Fullscreen modal focus management** (`index.tsx`): new additive optional `onClose?:
+   () => void` prop; the `fullscreen` variant renders `role="dialog"` + `aria-modal="true"` +
+   `tabIndex={-1}` and runs a variant-gated APG dialog effect (focus-in on mount, boundary Tab
+   trap, `Escape` → `onClose`, focus restore on unmount) plus a dev-only nameless-modal warning.
+   Shared `FOCUSABLE_SELECTOR` / `getFocusableWithin()` helpers mirror `Dialog`. No CSS change
+   (the existing `.fullscreen` fixed/inset/z-index rules are unchanged and correct).
+6. **Named-landmark gating** (`index.tsx`): `role="region"` is now computed
+   (`hasAccessibleName = hasHeader || consumer aria-label/aria-labelledby`) — emitted only when
+   named, dropped (plain `<section>`) otherwise, and set to `"dialog"` for `fullscreen`.
+7. **Conditional body tab stop** (`index.tsx`): `Panel.Body` measures overflow + focusable
+   descendants at runtime (`ResizeObserver` + `MutationObserver`) and sets `tabIndex={0}` only
+   when it is genuinely an unfocusable scroll trap; the attribute is omitted otherwise. Consumer
+   `tabIndex` still overrides.
+
+## Markup / attribute changes (public DOM — noted per additive-only policy)
+All are additive or correctness-gating; **no existing `data-*` selector, and no `role`/`aria`
+in the machine-test contract, is removed or renamed for the normal (header-composed) case**:
+- **`fullscreen` root `role`: `region` → `dialog`** + new `aria-modal="true"` + `tabIndex="-1"`.
+  A fullscreen takeover genuinely *is* a modal; this is the semantically correct role and is
+  required for `aria-modal` to make the background inert for AT. Sacred/standard roots are
+  unaffected.
+- **Header-less, unnamed panel: `role="region"` is no longer emitted** (plain `<section>`).
+  Any named panel — i.e. every panel with a `Panel.Header` (all real ThothOS usages) or a
+  consumer `aria-label`/`aria-labelledby` — still emits `role="region"` exactly as before.
+- **`Panel.Body` `tabindex` is now conditional** (present only when the body is an unfocusable
+  scroll trap) rather than always `"0"`. The `data-panel-body="true"` selector is unchanged.
+- **New optional prop `onClose`** on `Panel` (additive; ignored by non-fullscreen variants).
 
 ## Stories updated
 - **`InteractionTest` play extended:** now pins that `aria-labelledby` resolves to a real
@@ -133,17 +214,37 @@ information is conveyed by sound. No finding.
 - **New `HeadingLevel` story** (`A11y/Heading Level`): renders `headingLevel={3}` and the
   play test asserts the title is an `<h3>` carrying the `aria-labelledby` id with the right
   text — pins the consumer-controllable-level behavior.
-- **New `HeaderlessRegion` story** (`A11y/Header-less (no dangling label)`): a Body-only
-  panel whose play test asserts the region has **no** `aria-labelledby` (no dangling ref) and
-  the body is still `tabindex="0"`.
-- Existing `Sacred` / `Standard` / `NoBackButton` / `BodyOnly` / `Fullscreen` stories are
-  unchanged and still valid (the `Fullscreen` play test on `position:fixed` +
-  `data-panel-variant` is untouched).
+- **`HeaderlessRegion` story** (`A11y/Header-less (no dangling label, no unnamed landmark)`):
+  a Body-only panel whose play test asserts the region has **no** `aria-labelledby`, **no**
+  explicit `role` (finding #6), and the body is still `tabindex="0"` (it overflows with no
+  focusable children).
+- **New `HeaderlessLabelledRegion` story** (`A11y/Header-less but aria-label (named
+  landmark)`): a header-less panel with a consumer `aria-label` — play asserts it **still**
+  emits `role="region"` (role is gated on a name, not on the header). Pins finding #6's gate.
+- **New `BodyWithInteractiveContent` story** (`A11y/Body — interactive content is not a tab
+  stop`): a body containing focusable buttons — play asserts the body has **no** `tabindex`
+  (no redundant stop). Pins finding #7.
+- **New `BodyShortNoOverflow` story** (`A11y/Body — non-overflowing is not a tab stop`): a
+  body with a single non-overflowing line — play asserts **no** `tabindex`. Pins finding #7.
+- **New `FullscreenModal` story** (`A11y/Fullscreen Modal (focus trap + Escape)`): drives the
+  modal contract — asserts `role="dialog"` + `aria-modal="true"`, that focus is moved into the
+  takeover on mount, that Shift+Tab at the boundary stays trapped inside (never escapes to the
+  obscured page), and that `Escape` invokes `onClose`. Pins finding #5.
+- **`Fullscreen` story play extended:** now also asserts `role="dialog"`, `aria-modal="true"`,
+  and `tabindex="-1"` alongside the existing `position:fixed` + `data-panel-variant` checks.
+- Existing `Sacred` / `Standard` / `NoBackButton` / `BodyOnly` / `HeadingLevel` /
+  `InteractionTest` stories remain valid (`InteractionTest`'s body-`tabindex` assertion is now
+  wrapped in `waitFor` to allow the post-mount measurement to settle).
 
 ## Deferred (out of this directory's ownership OR design decisions to escalate)
 
-None of the fixed issues required edits outside `src/components/Panel/`. Two observations
-are recorded rather than changed:
+None of the seven fixed issues (initial 1–4 or adversarial-review 5–7) required edits outside
+`src/components/Panel/` — all were fixed at root cause in `index.tsx` (+ stories). The
+`fullscreen`-modal background-inert guarantee is delivered via `aria-modal` + focus trap
+rather than mutating the consumer's sibling DOM, because `Panel` is rendered inline in an
+arbitrary consumer tree (it is not portalled), so it cannot safely mark unknown siblings
+`inert` — that half stays a consumer responsibility and is now documented on the `variant`
+prop. Two observations are recorded rather than changed:
 
 1. **`Panel.Header` / `Panel.Footer` are `<div>`, not `<header>`/`<footer>`**
    (`index.tsx:203-208`, `299-319`). Promoting them to semantic sectioning elements would
