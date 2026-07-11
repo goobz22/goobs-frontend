@@ -266,7 +266,7 @@ export const LightThemeVariants: Story = {
     const canvas = within(canvasElement)
 
     // Test that switches are rendered
-    const switches = canvas.getAllByRole('checkbox')
+    const switches = canvas.getAllByRole('switch')
     expect(switches.length).toBeGreaterThan(0)
 
     // Test switch interaction
@@ -516,7 +516,7 @@ export const DarkThemeVariants: Story = {
     const canvas = within(canvasElement)
 
     // Test that switches are rendered
-    const switches = canvas.getAllByRole('checkbox')
+    const switches = canvas.getAllByRole('switch')
     expect(switches.length).toBeGreaterThan(0)
 
     // Test switch interaction
@@ -763,7 +763,7 @@ export const SacredThemeVariants: Story = {
     const canvas = within(canvasElement)
 
     // Test sacred theme switches
-    const sacredSwitches = canvas.getAllByRole('checkbox')
+    const sacredSwitches = canvas.getAllByRole('switch')
     expect(sacredSwitches.length).toBeGreaterThan(0)
 
     // Test sacred switch interaction
@@ -1018,7 +1018,7 @@ export const ThemeComparison: Story = {
     const canvas = within(canvasElement)
 
     // Test all themes
-    const allSwitches = canvas.getAllByRole('checkbox')
+    const allSwitches = canvas.getAllByRole('switch')
     expect(allSwitches.length).toBeGreaterThan(0)
 
     // Test interactions with different themes
@@ -1207,7 +1207,7 @@ export const CustomColors: Story = {
     const canvas = within(canvasElement)
 
     // Test custom color switches
-    const switches = canvas.getAllByRole('checkbox')
+    const switches = canvas.getAllByRole('switch')
     expect(switches.length).toBeGreaterThan(0)
 
     // Test custom switch interaction
@@ -1341,7 +1341,7 @@ export const DualLabelDemo: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const switches = canvas.getAllByRole('checkbox')
+    const switches = canvas.getAllByRole('switch')
     expect(switches.length).toBe(3)
     const firstSwitch = switches.at(0)
     if (firstSwitch) {
@@ -1530,7 +1530,7 @@ export const InteractiveDemo: Story = {
     const canvas = within(canvasElement)
 
     // Test interactive switches
-    const switches = canvas.getAllByRole('checkbox')
+    const switches = canvas.getAllByRole('switch')
     expect(switches.length).toBeGreaterThan(0)
 
     // Test theme selector
@@ -1542,5 +1542,109 @@ export const InteractiveDemo: Story = {
     const fourth = switches.at(3)
     if (first) await userEvent.click(first)
     if (fourth) await userEvent.click(fourth)
+  },
+}
+
+/**
+ * 8) Accessibility — role, name, state & keyboard (WAI-ARIA APG Switch)
+ *
+ * Regression coverage for the a11y contract:
+ *  - the control exposes `role="switch"` (announced as a switch, not a checkbox)
+ *  - `aria-checked` tracks the on/off state (native checkbox → switch mapping)
+ *  - an accessible NAME is present (here via `aria-label`; leftLabel/rightLabel
+ *    inside the wrapping <label> are the other supported source)
+ *  - keyboard: the switch is focusable and Space toggles it
+ *  - the decorative thumb glyph is `aria-hidden` (never leaks into the name)
+ */
+export const AccessibilityChecks: Story = {
+  name: 'Accessibility - Role, Name & Keyboard',
+  render: args => {
+    const Component = () => {
+      const [ariaLabelled, setAriaLabelled] = useState(false)
+      const [leftRight, setLeftRight] = useState(true)
+      const [keyboard, setKeyboard] = useState(false)
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            padding: '24px',
+            background: '#f9fafb',
+            borderRadius: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '18px',
+              fontWeight: 700,
+              color: '#111827',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            Accessible Switch Semantics
+          </h3>
+
+          {/* Named purely programmatically (no visible label) */}
+          <Switch
+            {...args}
+            aria-label="Enable notifications"
+            checked={ariaLabelled}
+            onChange={e => setAriaLabelled(e.target.checked)}
+            styles={{ theme: 'light', outline: true }}
+          />
+
+          {/* Named by the wrapping <label> content */}
+          <Switch
+            {...args}
+            leftLabel="Off"
+            rightLabel="On"
+            checked={leftRight}
+            onChange={e => setLeftRight(e.target.checked)}
+            styles={{ theme: 'light', outline: true }}
+          />
+
+          {/* Keyboard-toggle target */}
+          <Switch
+            {...args}
+            aria-label="Sacred toggle"
+            checked={keyboard}
+            onChange={e => setKeyboard(e.target.checked)}
+            styles={{ theme: 'sacred', outline: true }}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // All three controls expose the switch role (not checkbox).
+    const switches = canvas.getAllByRole('switch')
+    expect(switches.length).toBe(3)
+
+    // Programmatic accessible name via aria-label.
+    const named = canvas.getByRole('switch', { name: 'Enable notifications' })
+    expect(named).toBeInTheDocument()
+    expect(named).not.toBeChecked()
+
+    // Name via the wrapping <label> text, and the decorative glyph must NOT
+    // pollute the name (aria-hidden thumb) — it stays exactly "Off On".
+    const labelled = canvas.getByRole('switch', { name: 'Off On' })
+    expect(labelled).toBeChecked()
+
+    // aria-checked tracks state after a click.
+    await userEvent.click(named)
+    expect(named).toBeChecked()
+
+    // Keyboard: focus the sacred switch and toggle with Space.
+    const kb = canvas.getByRole('switch', { name: 'Sacred toggle' })
+    expect(kb).not.toBeChecked()
+    kb.focus()
+    expect(kb).toHaveFocus()
+    await userEvent.keyboard(' ')
+    expect(kb).toBeChecked()
   },
 }

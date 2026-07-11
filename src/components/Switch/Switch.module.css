@@ -395,3 +395,26 @@
     left: 100%;
   }
 }
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — honour the user's OS "reduce motion" setting.
+   Neutralise the thumb/track/label transitions and, most importantly, the
+   infinite sacred shimmer sweep (continuous animation). State stays fully
+   conveyed by thumb position, colour, glyph, and the switch role/aria-checked.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .track,
+  .thumb,
+  .leftLabel,
+  .rightLabel {
+    transition: none;
+  }
+
+  .container:not([data-theme='light'], [data-theme='dark']):hover
+    .track:has(.input:checked)
+    .shimmer {
+    animation: none;
+    opacity: 0;
+  }
+}

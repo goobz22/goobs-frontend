@@ -170,8 +170,15 @@ const Switch: React.FC<SwitchProps> = ({
       {leftLabel && <span className={cssStyles.leftLabel}>{leftLabel}</span>}
 
       <div className={cssStyles.track}>
+        {/* role="switch" upgrades the native checkbox's exposed role so AT
+            announces it as an on/off switch (WAI-ARIA APG Switch pattern);
+            aria-checked is derived automatically from the checkbox's checked
+            state. Callers can still supply an accessible name via `aria-label`
+            / `aria-labelledby` (spread through `...props`) or via the wrapping
+            <label> (leftLabel/rightLabel live inside it). */}
         <input
           type="checkbox"
+          role="switch"
           className={cssStyles.input}
           disabled={disabled}
           onChange={handleChange}
@@ -183,10 +190,19 @@ const Switch: React.FC<SwitchProps> = ({
         />
 
         {/* Sacred shimmer effect — visibility/animation handled purely in CSS
-            (sacred theme + :checked + :hover). */}
-        {isSacredTheme && <div className={cssStyles.shimmer} />}
+            (sacred theme + :checked + :hover). Decorative → hidden from AT. */}
+        {isSacredTheme && (
+          <div className={cssStyles.shimmer} aria-hidden="true" />
+        )}
 
-        <div className={cssStyles.thumb}>{getThumbContent()}</div>
+        {/* Thumb glyph (✓ / hieroglyph) is a decorative state mirror — the real
+            on/off state is conveyed programmatically by the switch role + the
+            checkbox's checked state. aria-hidden keeps the glyph out of the
+            input's accessible name (implicit <label> subtree traversal would
+            otherwise fold "✓"/"𓊹" into the name). */}
+        <div className={cssStyles.thumb} aria-hidden="true">
+          {getThumbContent()}
+        </div>
       </div>
 
       {rightLabel && <span className={cssStyles.rightLabel}>{rightLabel}</span>}
