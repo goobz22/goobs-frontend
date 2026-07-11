@@ -324,6 +324,95 @@ export const CustomFontSize: Story = {
 }
 
 // --------------------------------------------------------------------------
+// SEMANTIC ELEMENT STORIES (a11y / SEO — the `component` prop)
+// --------------------------------------------------------------------------
+
+/**
+ * A heading `variant` only STYLES the text at heading sizes; the semantic
+ * element is chosen by `component`. Passing `component="h2"` emits a real
+ * `<h2>` so screen-reader heading navigation (rotor / "next heading") and
+ * search crawlers see it in the document outline. Regression baseline: without
+ * `component`, a `merrih2`/`h2` variant renders a non-semantic `<span>`
+ * (WCAG 1.3.1 Info and Relationships, 2.4.6 Headings and Labels).
+ */
+export const SemanticHeadingElement: Story = {
+  name: 'Semantics/Real Heading Element',
+  args: {
+    text: 'Real H2 Section Heading',
+    component: 'h2',
+    styles: {
+      theme: 'light',
+      variant: 'merrih2',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Exposed to AT as a level-2 heading, not just visually large text.
+    const heading = canvas.getByRole('heading', { level: 2 })
+    await expect(heading).toBeVisible()
+    await expect(heading.tagName).toBe('H2')
+    await expect(heading).toHaveTextContent('Real H2 Section Heading')
+    // The machine-test selector contract rides the polymorphic element.
+    await expect(heading).toHaveAttribute('data-component', 'Typography')
+    await expect(heading).toHaveAttribute('data-theme', 'light')
+  },
+}
+
+/**
+ * `component="p"` renders a real paragraph element for standalone body copy,
+ * so the SSR'd HTML carries semantic paragraph structure instead of a bare
+ * styled span.
+ */
+export const SemanticParagraphElement: Story = {
+  name: 'Semantics/Real Paragraph Element',
+  args: {
+    text: 'A real paragraph element carrying semantic body copy.',
+    component: 'p',
+    styles: {
+      theme: 'light',
+      variant: 'merriparagraph',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const para = canvas.getByText(
+      'A real paragraph element carrying semantic body copy.'
+    )
+    await expect(para.tagName).toBe('P')
+    await expect(para).toHaveAttribute('data-component', 'Typography')
+  },
+}
+
+/**
+ * Contract lock: with NO `component`, a heading `variant` styles the text but
+ * still renders a `<span>` — the phrasing-content / hydration-safe default
+ * (Typography must remain valid inside `<button>`/`<a>`/`<h1>`–`<h6>`).
+ * Semantic headings are OPT-IN via `component` (see `Semantics/Real Heading
+ * Element`); this story guards against a regression that would auto-promote
+ * the element and reintroduce the invalid-nesting hydration bug.
+ */
+export const DefaultSpanElement: Story = {
+  name: 'Semantics/Default Span (phrasing content)',
+  args: {
+    text: 'Heading variant, default element',
+    styles: {
+      theme: 'light',
+      variant: 'merrih1',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const el = canvas.getByText('Heading variant, default element')
+    await expect(el.tagName).toBe('SPAN')
+    // A styled heading variant must NOT expose a heading role by default.
+    await expect(canvas.queryByRole('heading')).toBeNull()
+  },
+}
+
+// --------------------------------------------------------------------------
 // INTERACTION TEST
 // --------------------------------------------------------------------------
 export const InteractionTest: Story = {

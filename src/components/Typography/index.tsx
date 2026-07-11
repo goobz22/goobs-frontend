@@ -505,15 +505,25 @@ const Typography: React.FC<TypographyProps> = ({
   // like flow. Inline-context callers (inside button / heading) get
   // correct nesting because <span> stays a <span> at the parser
   // level — no auto-correction.
+  //
+  // Accessibility/SEO polymorphism: `component` lets a caller upgrade the
+  // rendered element to the SEMANTICALLY correct one for standalone content —
+  // `component="h2"` for a real heading (so a heading `variant` becomes a true
+  // <h2> in the accessibility tree + crawled outline, not a styled span),
+  // `component="p"` for a paragraph, `component="label"` for a form label, and
+  // so on. Defaults to 'span' so the phrasing-content contract above and every
+  // existing caller's markup are unchanged. The data-component / data-theme
+  // test-selector contract and all styling ride the resolved element verbatim.
+  const Element = component ?? 'span'
   return (
-    <span
+    <Element
       className={className}
       data-component="Typography"
       data-theme={styles?.theme}
       style={dynamicStyle}
     >
       {content}
-    </span>
+    </Element>
   )
 }
 
