@@ -336,6 +336,7 @@ function ListItemCardInner({
               ref={selectButtonRef}
               className={cssStyles.select}
               data-list-item-select="true"
+              data-action="select"
               aria-pressed={selected}
               {...(nameIds !== undefined && { 'aria-labelledby': nameIds })}
               onClick={handleSelect}
