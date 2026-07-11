@@ -5,7 +5,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect } from 'storybook/test'
+import { within, expect, userEvent } from 'storybook/test'
 import Typography from './index'
 
 const meta: Meta<typeof Typography> = {
@@ -542,6 +542,44 @@ export const LabelAssociation: Story = {
     await expect(label.tagName).toBe('LABEL')
     await expect(label).toHaveAttribute('for', 'email-input')
     await expect(label).toHaveAttribute('data-component', 'Typography')
+  },
+}
+
+/**
+ * Interactive Typography (rendered as a focusable element via `component` or a
+ * `tabIndex`) MUST show a visible keyboard-focus indicator. Regression baseline:
+ * the `.root` CSS declares `outline: var(--typography-outline)`, which — with the
+ * custom property unset — is invalid-at-computed-value-time and computes to
+ * `outline-style: none`, SUPPRESSING even the user-agent focus ring. With no
+ * `:focus-visible` rule, a focusable Typography (a link/button/tabIndex span) had
+ * NO visible focus indicator when reached by keyboard. The `.root:focus-visible`
+ * rule now restores a 2px per-theme outline (WCAG 2.4.7 Focus Visible, 2.4.11
+ * Focus Appearance). Tabbing to it (keyboard modality) is what matches
+ * :focus-visible — a pointer click deliberately shows no ring.
+ */
+export const FocusVisibleIndicator: Story = {
+  name: 'A11y/Keyboard Focus Indicator',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <Typography
+      tabIndex={0}
+      role="button"
+      text="Focusable Typography"
+      styles={{ theme: 'light', variant: 'merriparagraph' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const el = canvas.getByText('Focusable Typography')
+    // Before keyboard focus there is no visible outline.
+    await expect(window.getComputedStyle(el).outlineStyle).toBe('none')
+    // Reach it the way a keyboard user does — Tab moves focus and engages
+    // :focus-visible (unlike a programmatic .focus() after a pointer event).
+    await userEvent.tab()
+    await expect(el).toHaveFocus()
+    const focused = window.getComputedStyle(el)
+    await expect(focused.outlineStyle).toBe('solid')
+    await expect(focused.outlineWidth).toBe('2px')
   },
 }
 

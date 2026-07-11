@@ -99,6 +99,42 @@
 }
 
 /* --------------------------------------------------------------------------
+   KEYBOARD FOCUS INDICATOR — :focus-visible (WCAG 2.4.7 Focus Visible,
+   2.4.11 Focus Appearance)
+   --------------------------------------------------------------------------
+   Typography renders a non-focusable <span> by DEFAULT, but it is polymorphic
+   via `component` and spreads standard DOM attributes, so callers legitimately
+   render it as a focusable interactive element — `component="a"` (a link),
+   `component="button"`, or any element carrying `tabIndex`. In that case a
+   VISIBLE keyboard-focus indicator is required.
+
+   The base `.root` rule declares `outline: var(--typography-outline)`. With the
+   custom property unset that declaration is invalid-at-computed-value-time and
+   computes to `outline-style: none` — which also SUPPRESSES the user-agent
+   focus ring the browser would otherwise draw. So without an explicit
+   :focus-visible rule an interactive Typography had NO focus indicator at all.
+
+   This restores one, keyed per theme for non-text contrast (WCAG 1.4.11).
+   Higher specificity than `.root` (0,1,1 vs 0,1,0) and than `.outlined`
+   (0,1,0), so the keyboard ring wins over a decorative/string outline WHILE
+   focused, then yields it back on blur. Mirrors the Button convention: opaque
+   per-theme ring colours because the translucent --goobs-*-focus-ring tokens
+   composite below the 3:1 floor on their surfaces. :focus-visible (not :focus)
+   so pointer clicks never show the ring. */
+.root:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
+.root[data-theme='light']:focus-visible {
+  outline-color: var(--goobs-light-primary);
+}
+
+.root[data-theme='dark']:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
+/* --------------------------------------------------------------------------
    THEME OVERRIDE — sacred (gold text)
    parity: finalColor default = isSacred ? '#FFD700' : 'var(--goobs-white-a90)'.
    Only changes the FALLBACK; an explicit caller/merri color (the var value)
