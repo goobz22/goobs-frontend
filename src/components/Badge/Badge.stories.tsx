@@ -97,11 +97,18 @@ export const DarkTheme: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
-/** A badge with sacred theme. */
+/**
+ * A badge with sacred theme. The default sacred fill is OPAQUE red-800
+ * (`#991b1b`), not the old translucent `rgba(220,38,38,0.9)`: the sacred badge's
+ * gold text needs a dark, backdrop-independent fill to clear WCAG AA 4.5:1
+ * contrast (the translucent red was only ~3.44:1). The play function pins that
+ * exact computed color so a regression re-fails. (WCAG 1.4.3)
+ */
 export const SacredTheme: Story = {
   name: 'Themes/Sacred Theme',
   args: {
     content: '5',
+    ariaLabel: '5 unread notifications',
     children: (
       <div
         style={{
@@ -122,6 +129,17 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred' },
   },
   globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const badge = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Badge"] > span'
+    )
+    await expect(badge).not.toBeNull()
+    // Opaque red-800 = rgb(153, 27, 27). The old translucent default would read
+    // back as 'rgba(220, 38, 38, 0.9)', so this assertion fails on a revert.
+    await expect(getComputedStyle(badge as HTMLElement).backgroundColor).toBe(
+      'rgb(153, 27, 27)'
+    )
+  },
 }
 
 /** All themes displayed together for comparison. */
@@ -1008,9 +1026,11 @@ export const MultipleBadges: Story = {
 
 /**
  * A bare count like "5" is meaningless to a screen reader out of context.
- * `ariaLabel` gives it meaning, and the badge renders as a `role="status"`
- * live region with `aria-atomic`, so assistive tech announces the full
- * "5 unread notifications" rather than a context-free "5". (WCAG 1.3.1, 4.1.2)
+ * `ariaLabel` gives it meaning: the badge is a `role="status"` region whose
+ * accessible NAME becomes "5 unread notifications" rather than a context-free
+ * "5". This static count is MUTED by default (`aria-live="off"`), so it does not
+ * announce on its own — see LiveCountUpdate for the opt-in announcing variant.
+ * (WCAG 1.3.1, 4.1.2)
  */
 export const LabeledStatus: Story = {
   name: 'Accessibility/Labeled Status',
@@ -1042,16 +1062,63 @@ export const LabeledStatus: Story = {
     const badge = canvas.getByRole('status')
     await expect(badge).toHaveAttribute('aria-label', '5 unread notifications')
     await expect(badge).toHaveAttribute('aria-atomic', 'true')
+    // Muted by default: a labeled static count is a status region but not a
+    // spontaneously-announcing live region.
+    await expect(badge).toHaveAttribute('aria-live', 'off')
     await expect(badge).toHaveTextContent('5')
   },
 }
 
 /**
- * A notification count that updates after render. Because the badge is a
- * `role="status"` / `aria-live="polite"` region, incrementing the count
- * announces the new value to a screen reader WITHOUT moving focus — the
- * classic notification-badge behavior. Click the bell to increment.
- * (WCAG 4.1.3 Status Messages)
+ * The DEFAULT for a plain `<Badge content="5">`: it is exposed as a
+ * `role="status"` region so assistive tech knows it is a status indicator, but
+ * the region is MUTED (`aria-live="off"`) — a static badge, and a whole grid of
+ * them, must never spontaneously announce or flood assistive tech with polite
+ * chatter. Announcements are strictly opt-in via `ariaLive` (see
+ * LiveCountUpdate). In development, an unlabeled numeric count also logs a
+ * once-per-session console warning nudging you toward `ariaLabel`. (WCAG 4.1.3
+ * — status regions must not spam.)
+ */
+export const MutedByDefault: Story = {
+  name: 'Accessibility/Muted By Default',
+  args: {
+    content: '5',
+    children: (
+      <div
+        style={{
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#1976d2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '20px',
+        }}
+      >
+        Bell
+      </div>
+    ),
+    styles: { backgroundColor: '#d32f2f', color: 'white' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // A default badge is a status region (for identity)...
+    const badge = canvas.getByRole('status')
+    // ...but MUTED: aria-live="off" means it never announces on its own, so a
+    // page/grid of static badges is not a swarm of polite live regions.
+    await expect(badge).toHaveAttribute('aria-live', 'off')
+    await expect(badge).toHaveTextContent('5')
+  },
+}
+
+/**
+ * A notification count that updates after render. Announcements are OPT-IN, so
+ * this badge explicitly sets `ariaLive="polite"`: as a `role="status"` /
+ * `aria-live="polite"` region, incrementing the count announces the new value
+ * to a screen reader WITHOUT moving focus — the classic notification-badge
+ * behavior. Click the bell to increment. (WCAG 4.1.3 Status Messages)
  */
 export const LiveCountUpdate: Story = {
   name: 'Accessibility/Live Count Update',
