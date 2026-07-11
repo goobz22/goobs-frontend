@@ -190,18 +190,27 @@ export const DisabledStates: Story = {
       <div
         style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
       >
-        <IconButton styles={{ theme: 'light', disabled: true }}>
+        <IconButton
+          styles={{ theme: 'light', disabled: true }}
+          aria-label="Add item"
+        >
           <AddIcon styles={{ theme: 'light' }} />
         </IconButton>
       </div>
       <div
         style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
       >
-        <IconButton styles={{ theme: 'dark', disabled: true }}>
+        <IconButton
+          styles={{ theme: 'dark', disabled: true }}
+          aria-label="Add item"
+        >
           <AddIcon styles={{ theme: 'dark' }} />
         </IconButton>
       </div>
-      <IconButton styles={{ theme: 'sacred', disabled: true }}>
+      <IconButton
+        styles={{ theme: 'sacred', disabled: true }}
+        aria-label="Add item"
+      >
         <AddIcon styles={{ theme: 'sacred' }} />
       </IconButton>
     </div>
