@@ -209,6 +209,14 @@ export interface WorkspaceFilterShellProps {
   style?: React.CSSProperties
   /** Stable test selector — surfaced as `data-workspace-shell-field`. */
   dataField?: string
+  /**
+   * Forwarded ref to the shell root `<div>` (React 19 ref-as-prop). The shell is
+   * a layout container whose only own interactive elements are the built-in
+   * pagination `<button>`s, so the root is the meaningful consumer handle
+   * (scroll the workspace into view, measure it, or query its zones). The
+   * pagination controls stay reachable via their `data-action`/aria-labels.
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 export const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
@@ -222,10 +230,12 @@ export const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
   className,
   style,
   dataField,
+  ref,
 }) => {
   const theme = propStyles?.theme ?? 'sacred'
   return (
     <div
+      ref={ref}
       className={cx(cssStyles.shell, className)}
       data-component="WorkspaceFilterShell"
       data-theme={theme}
