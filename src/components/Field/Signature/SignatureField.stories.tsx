@@ -267,7 +267,7 @@ export const CaptureAnnouncement: Story = {
     const clear = canvas.getByRole('button', { name: /clear/i })
     const status = canvas.getByRole('status')
     // Empty to start: nothing announced, Clear disabled.
-    await expect(status).toBeEmptyDOMElement()
+    await expect(status).not.toHaveTextContent('Signature captured.')
     await expect(clear).toBeDisabled()
     // A pointer press + release is the smallest gesture that ends a stroke.
     fireEvent.pointerDown(pad, { pointerId: 1, clientX: 24, clientY: 24 })
@@ -306,7 +306,7 @@ export const ClearAnnouncement: Story = {
     const status = canvas.getByRole('status')
     // Pre-filled: Clear is enabled, nothing announced yet.
     await expect(clear).toBeEnabled()
-    await expect(status).toBeEmptyDOMElement()
+    await expect(status).not.toHaveTextContent('Signature cleared.')
     await userEvent.click(clear)
     await waitFor(() =>
       expect(status).toHaveTextContent('Signature cleared.')

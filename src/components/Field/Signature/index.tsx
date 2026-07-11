@@ -316,7 +316,7 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
               onPointerMove={handlePointerMove}
               onPointerUp={endStroke}
               onPointerLeave={endStroke}
-              {...inputAriaProps}
+              {...canvasAriaProps}
             />
             {!hasInk && (
               // Purely visual affordance — the same "draw to sign" instruction
@@ -348,7 +348,8 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
             {announcement}
           </div>
         </div>
-      )}
+        )
+      }}
     </FieldShell>
   )
 }

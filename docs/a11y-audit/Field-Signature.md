@@ -30,7 +30,9 @@ that image self-describing and reachable.
 | 3 | serious | 2.1.1 Keyboard (A), 4.1.2 (A) | `index.tsx` `<canvas>` L261 | The canvas had **no `tabIndex`**, so it was not focusable/reachable by keyboard or AT. Tab skipped straight past the field to the Clear button — the field's name, state, and associated error (`aria-describedby`) were never announced. | **FIXED** |
 | 4 | serious | 2.4.7 Focus Visible (AA) | `SignatureField.module.css` (`.clearButton`, `.canvas`) | **No `:focus-visible` treatment** in the module for the Clear button (or the now-focusable canvas); keyboard focus relied solely on whatever UA default survives resets. | **FIXED** |
 | 5 | minor | 2.3.3 Animation from Interactions (AAA) | `SignatureField.module.css` L56 | `.clearButton { transition: background 0.15s ease }` had **no `prefers-reduced-motion` guard**. | **FIXED** |
-| 6 | minor | 4.1.2 (A) | `Field/Shell/index.tsx:346` (NOT my dir) | FieldShell spreads `aria-required` into `inputAriaProps`; on the Signature canvas that lands on `role="img"`, where **`aria-required` is not a supported attribute** (it is a widget property, not global) so AT ignores it. Root cause is in Shell. Mitigated in-component by conveying required through the accessible name (#2). | **DEFERRED** (see below) |
+| 6 | moderate | 4.1.2 (A) | `index.tsx` (canvas spread) | FieldShell spreads `aria-required` into `inputAriaProps`; on the Signature canvas that lands on `role="img"`, where **`aria-required` is not a supported attribute** (it is a widget property, not global) — invalid ARIA that axe-core `aria-allowed-attr` flags as a Level A 4.1.2 automated failure (rendered in `RequiredEmpty` + `WithError`). Originally deferred-to-Shell, but **fixable in-component**: strip only `aria-required` from the canvas spread while keeping `aria-invalid`/`aria-describedby`/`aria-disabled`. Required-ness stays conveyed through the accessible name (#2). | **FIXED** |
+| 7 | minor | 1.4.11 / 2.4.11 (AA) | `SignatureField.module.css` (`.canvas:focus-visible`) | The canvas focus ring used the gold token `--field-border-focus` (~#d4af37) over the default white surface (`--signature-bg` #ffffff) ≈ **2.2:1**, below the 3:1 non-text / focus-appearance threshold — a weak indicator on an empty/required pad. | **FIXED** |
+| 8 | minor | 4.1.3 (A) — test coverage | `SignatureField.stories.tsx` | The `role="status"` region only populates on a real `endStroke`/Clear interaction; none of the visual stories drove an interaction, so the populated `"Signature captured."`/`"Signature cleared."` state had **zero story coverage** (stories are the only regression test in this repo) — the announcement wiring could be deleted with every baseline still green. | **FIXED** |
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
@@ -96,6 +98,32 @@ All in-directory, additive, no public-API prop removed/renamed/retyped; no exist
    `.clearButton:focus-visible` (outward ring), `.srOnly` visually-hidden utility, and a
    `@media (prefers-reduced-motion: reduce)` block dropping the Clear-button transition.
 
+### Adversarial-review fixes (2026-07-11, pass 2)
+
+7. **`aria-required` stripped from the canvas spread** (`index.tsx`, #6): the render prop now
+   builds `const canvasAriaProps = { ...inputAriaProps }; delete canvasAriaProps['aria-required']`
+   and spreads `canvasAriaProps` onto the `role="img"` canvas. Removes the invalid-ARIA
+   `aria-allowed-attr` failure while preserving `aria-invalid`/`aria-describedby`/`aria-disabled`
+   (all valid on any role). No longer deferred — required-ness remains exposed via the accessible
+   name. **This does not touch FieldShell** (`inputAriaProps` is still emitted unchanged by Shell;
+   the strip is purely consumer-side).
+8. **Higher-contrast canvas focus ring** (`SignatureField.module.css`, #7): replaced the single
+   ~2.2:1 gold ring with a dual-tone inset ring (`box-shadow: inset 0 0 0 2px #1a1a1a,
+   inset 0 0 0 4px #f5f5f5`) so at least one band clears 3:1 against ANY canvas colour
+   (~17:1 dark-on-white by default; the light band carries a custom dark `backgroundColor`),
+   plus a `2px solid transparent` outline as the forced-colors / High-Contrast-mode fallback.
+9. **Status-region interaction coverage** (`SignatureField.stories.tsx`, #8): two new `play`-driven
+   stories, `CaptureAnnouncement` (pointer down+up → asserts `"Signature captured."` + Clear
+   enabled) and `ClearAnnouncement` (click Clear on a prefilled pad → asserts `"Signature
+   cleared."` + Clear disabled).
+10. **`setPointerCapture` guarded** (`index.tsx`): wrapped in `try/catch` (empty catch documented,
+    not suppressed). Pointer capture is a progressive enhancement that throws when there is no
+    active native pointer (synthetic events in the new `play` functions); the stroke still works
+    without it. This both hardens real usage and makes the capture path drivable in a story.
+11. **`clip` → `clip-path`** (`SignatureField.module.css`): the `.srOnly` visually-hidden idiom used
+    the deprecated `clip: rect(0,0,0,0)` (stylelint `property-no-deprecated` error) — replaced with
+    the modern `clip-path: inset(50%)`. Same visual/AT behavior; clears the `lint:css` gate.
+
 ## Stories updated
 
 New stories in `SignatureField.stories.tsx`, each exercising a new a11y state (stories are the
@@ -108,17 +136,20 @@ only regression tests in this repo):
 - **`WithError`** — `error` string → `aria-invalid` on the canvas + associated `role="alert"`
   message.
 - **`Disabled`** — canvas out of tab order (`tabIndex=-1`), inert drawing, disabled Clear.
+- **`CaptureAnnouncement`** (pass 2) — `play` fires a pointer down+up on the empty pad and asserts
+  the `role="status"` region reads `"Signature captured."` and Clear becomes enabled.
+- **`ClearAnnouncement`** (pass 2) — `play` clicks Clear on a prefilled pad and asserts the region
+  reads `"Signature cleared."` and Clear becomes disabled.
 
 ## Deferred (root cause outside my directory)
 
-- **`aria-required` on a `role="img"` element (WCAG 4.1.2)** — `src/components/Field/Shell/index.tsx:346`
-  (`if (required) inputAriaProps['aria-required'] = true`). FieldShell builds a generic
-  `inputAriaProps` bag assuming the consumer's element is a form-widget role; when spread onto
-  the Signature canvas (`role="img"`), `aria-required` is not a supported (non-global) attribute
-  and is ignored by AT. I intentionally keep spreading `inputAriaProps` (per the "never remove an
-  existing aria attribute" contract) and mitigate by conveying required through the canvas
-  accessible name instead. **Suggested Shell change:** either (a) expose the individual pieces
-  (e.g. a `required` flag on the slot) so a non-widget consumer can convey required via its name
-  rather than an unsupported attribute, or (b) omit `aria-required` when the consumer signals a
-  non-form-widget role. Low severity — harmless-but-invalid; the real AT experience is already
-  correct via the accessible name.
+- **(RESOLVED in pass 2 — no longer deferred)** `aria-required` on the `role="img"` canvas is now
+  stripped consumer-side in `index.tsx` (build a copy of `inputAriaProps`, `delete` the
+  `aria-required` key, spread the rest). FieldShell is untouched.
+- **OPTIONAL upstream hardening (Shell — not required, no defect remains):** `FieldShell`
+  (`src/components/Field/Shell/index.tsx:346`, `if (required) inputAriaProps['aria-required'] = true`)
+  unconditionally puts `aria-required` in the generic `inputAriaProps` bag, assuming a form-widget
+  role. Any future non-widget-role consumer (like this canvas) must strip it. A cleaner Shell API
+  would either expose the pieces individually (e.g. a `required` boolean on the slot) or accept a
+  hint for non-widget roles and omit `aria-required` itself. Suggested, not blocking — the in-component
+  strip fully resolves the Signature case.

@@ -107,7 +107,10 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  /* clip-path (not the deprecated `clip: rect(...)`) collapses the region to
+     zero area while keeping it in the AT tree — the modern visually-hidden
+     idiom. */
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
