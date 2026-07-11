@@ -205,6 +205,14 @@ export interface AlertProps {
   onClose?: () => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: AlertStyles
+  /**
+   * Forwarded ref to the Close `<button>` — the only interactive element the
+   * Alert renders (present only when `onClose` is provided). React 19
+   * ref-as-prop, so a consumer can move focus to the dismiss control or measure
+   * it. When `onClose` is omitted there is no interactive element and the ref
+   * stays unattached.
+   */
+  ref?: React.Ref<HTMLButtonElement>
 }
 
 // --------------------------------------------------------------------------
@@ -235,6 +243,7 @@ const Alert: React.FC<AlertProps> = ({
   message,
   onClose,
   styles,
+  ref,
 }) => {
   const [isClosing, setIsClosing] = useState(false)
 
@@ -485,6 +494,7 @@ const Alert: React.FC<AlertProps> = ({
 
       {onClose && (
         <button
+          ref={ref}
           type="button"
           onClick={handleClose}
           className={cssStyles.closeButton}

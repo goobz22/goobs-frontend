@@ -249,6 +249,15 @@ export interface FilterSectionProps {
    * Matches the additive `data-testid` prop convention (see Markdown).
    */
   'data-testid'?: string
+  /**
+   * Forwarded ref to the section root `<div>` (React 19 ref-as-prop), threaded
+   * to whichever root renders (the `role="search"` landmark in the default
+   * non-collapsible mode, or the accordion wrapper in collapsible mode). The
+   * section is a composite search/filter facility — search box, dropdowns,
+   * chips, and an optional disclosure toggle — so the root is the meaningful
+   * consumer handle (scroll it into view, measure it, or query its controls).
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 function kebab(input: string): string {
@@ -288,6 +297,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   styles: propStyles,
   dataField,
   'data-testid': dataTestId = 'filter-section',
+  ref,
 }) => {
   const [isExpanded, setIsExpanded] = useState(initiallyOpen)
   const reactId = useId()
@@ -585,6 +595,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   if (!collapsible) {
     return (
       <div
+        ref={ref}
         className={cx(styles.root, className)}
         data-theme={theme}
         data-component="FilterSection"
@@ -645,6 +656,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
   return (
     <div
+      ref={ref}
       className={cx(styles.root, className)}
       data-theme={theme}
       data-component="FilterSection"

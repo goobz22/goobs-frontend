@@ -68,6 +68,13 @@ export interface MetricsAccordionProps {
    */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /**
+   * Forwarded ref to the disclosure toggle `<button>` — the primary interactive
+   * element the accordion renders (React 19 ref-as-prop), so a consumer can
+   * focus or measure the toggle. Unattached in the non-accordion `metrics`-array
+   * path (`collapsible={false}` on desktop), where no toggle button is rendered.
+   */
+  ref?: React.Ref<HTMLButtonElement>
+  /**
    * Base `data-testid` for this accordion's toggle/panel pair (default
    * `'metrics-accordion'`): the toggle gets `${base}-toggle`, the panel
    * `${base}-panel`. Override it to disambiguate multiple metric accordions on
@@ -144,6 +151,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   headingLevel,
   'data-testid': dataTestId = 'metrics-accordion',
   styles: propStyles,
+  ref,
 }) => {
   const [isExpanded, setIsExpanded] = useState(initiallyOpen)
   const reactId = useId()
@@ -287,6 +295,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
 
   const toggleButton = (
     <button
+      ref={ref}
       type="button"
       onClick={handleToggle}
       aria-expanded={isExpanded}
