@@ -26,6 +26,7 @@ readers.
 | 6 | Moderate | 2.4.7 Focus Visible (AA) | `Stepper.module.css:173-195` (`.stepButton`, no `:focus-visible`) | The module had `:hover` and `:disabled` rules but **no `:focus-visible` treatment** — keyboard focus fell back to the UA default outline, easily lost against the sacred gold-on-dark and themed surfaces. | FIXED (`.stepButton:focus-visible` 2px ring using the per-theme `--goobs-*-focus-ring` tokens) |
 | 7 | Minor | 2.3.3 Animation from Interactions (AAA) | `Stepper.module.css:139, 182` | `.iconContainer` and `.stepButton` use `transition: all 0.3s ease` with **no `prefers-reduced-motion` guard**. | FIXED (`@media (prefers-reduced-motion: reduce)` drops both transitions) |
 | 8 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx:227-229` | The wizard's **"All steps completed!"** pane appears (conditionally mounted) with **no live region**, so a screen-reader user gets no announcement that the wizard finished. | FIXED (announcement now via a **persistent, initially-empty** `role="status"` region at the component root; the visible title carries no role — hardened in the 2026-07-11 review follow-up, see below) |
+| 9 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx` wizard-mode step transition (Continue/Back) | **Wizard step transitions were not announced.** Advancing (Continue) or retreating (Back) swaps the rendered `content` and moves the active step **without moving focus** (focus stays on the Continue/Back button), so a screen-reader user got no signal they had navigated to a new step — only the terminal completion was announced (Issue 8), never the intermediate step moves. | FIXED (RF-3 — a **persistent, initially-silent** `aria-live="polite"` region announces the compact position "Step X of N: <label>" on each change; see the 2026-07-11 follow-up below) |
 
 No hearing/media issues: a grep of the component for `new Audio`/`AudioContext`/`<audio>`/
 `<video>`/`navigator.vibrate`/`.play(` returned nothing — Stepper conveys no information by sound.
@@ -62,6 +63,14 @@ applicable.
   initially-empty** polite `role="status"` region at the component root; when the wizard finishes
   it is populated with "All steps completed!" and announced without stealing focus. The visible
   heading carries no role, so the message is announced exactly once (RF-2 hardening).
+- **Step transitions (Issue 9 / RF-3):** a **separate** persistent `aria-live="polite"
+  aria-atomic="true"` region announces the compact step position "Step X of N: <label>" on every
+  Continue/Back move. Its initial content is silent (a polite region present at mount is not
+  announced), each later change is announced, and it clears to `''` at completion so it never
+  competes with the `role="status"` completion announcer. It reports only the POSITION, not the
+  consumer's `content` — so a screen-reader user is told they navigated without the whole step body
+  being read aloud, and without any focus move (see the RF-3 note below for why this replaces the
+  earlier "left as-is" observation).
 - **Keyboard model:** a stepper needs no arrow-key roving (like breadcrumb, it is an ordinary set
   of links/buttons) — Tab/Shift+Tab move between the real `<a>`/`<button>` step controls and the
   wizard Back/Continue/Finish/Start-Over `<button>`s; Enter (and Space on buttons) activate them
@@ -133,9 +142,14 @@ no existing `data-*`/`role`/`aria` selector removed):
   before completion, is populated with "All steps completed!" after, and exactly two nodes carry
   the text (sr-only region + visible heading) — plus the "Start Over" reset. Fails if the
   completion live region regresses to a conditionally-mounted / already-populated form.
-- Existing `WizardMode`, `ThemeShowcase`, `SacredTheme`, `InteractiveDemo`, and the checkout /
-  setup demo stories continue to exercise the status icons, themes, orientations, and wizard flow
-  under the new markup.
+- **`WizardMode`** (extended in the 2026-07-11 RF-3 follow-up) — its `play` function now also pins
+  the step-transition announcement (Issue 9 / RF-3): the polite `aria-live` region reads
+  "Step 1 of 3: Plan" on mount, "Step 2 of 3: Build" after Continue (and no longer "Step 1 of 3:
+  Plan"), and "Step 1 of 3: Plan" again after Back — matching the full unique "Step X of N: <label>"
+  string, which targets the live region unambiguously (the step control itself carries only the bare
+  label). Fails if the step-transition live region is dropped or stops tracking the active step.
+- Existing `ThemeShowcase`, `SacredTheme`, `InteractiveDemo`, and the checkout / setup demo stories
+  continue to exercise the status icons, themes, orientations, and wizard flow under the new markup.
 
 ## Adversarial review follow-up (2026-07-11)
 

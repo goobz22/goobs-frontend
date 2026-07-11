@@ -1,6 +1,6 @@
 # TreeView — a11y audit (2026-07-11)
 
-**Status:** FIXED (incl. adversarial-review follow-ups, 2026-07-11)
+**Status:** FIXED (incl. adversarial-review follow-ups + second ownership pass, 2026-07-11)
 
 **APG pattern:** [WAI-ARIA APG — Tree View](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/)
 (single-select / multi-select tree, with optional checkbox selection). The
@@ -37,6 +37,28 @@ Primary source: `src/components/TreeView/index.tsx`,
 | R3 | Minor | consistency | keyboard | `index.tsx` row `onFocus` / `handleClick` | FIXED |
 | R4 | Minor | UX / behavior | keyboard-adjacent | `index.tsx` `handleIconClick` | FIXED |
 | R5 | Minor | APG completeness | keyboard | `index.tsx` `handleKeyDown` type-ahead + `*` | FIXED |
+
+### Second ownership pass (2026-07-11, commit `4c26dac5`)
+
+| # | Severity | WCAG / kind | Area | Location | Status |
+|---|----------|-------------|------|----------|--------|
+| P1 | Minor | 1.1.1 Non-text Content | reading | `index.tsx:1050-1056` `SacredBackground` `<canvas>` | FIXED |
+| P2 | Minor | 4.1.2 Name, Role, Value | aria | `index.tsx:1405` treeitem `aria-selected` | FIXED |
+
+**P1 — Decorative particle `<canvas>` not hidden from AT (MINOR, WCAG 1.1.1) — FIXED.**
+The sacred-theme `SacredBackground` `<canvas>` is a purely ornamental, `pointer-events:none`
+drifting-hieroglyph overlay that conveys no information, but it carried no `aria-hidden`, so a
+screen reader could surface a bare, meaningless canvas. **Fix:** added `aria-hidden="true"` to
+the canvas element (`index.tsx:1052`). Pattern class `icon-missing-aria-hidden`
+(decorative-graphic-missing-aria-hidden). Pinned by a new `play` test on `SacredTheme`.
+
+**P2 — `aria-selected` announced on an unselectable tree (MINOR, WCAG 4.1.2) — FIXED.**
+Every `treeitem` emitted `aria-selected="false"` even when `disableSelection` turns selection
+off entirely — so a tree that supports no selection still announced a permanent, unchangeable
+"not selected" on every row. The APG Tree View pattern requires `aria-selected` to be absent on
+a tree whose nodes are not selectable. **Fix:** `aria-selected` is now omitted (`undefined`)
+when `context.disableSelection` is set, and reflects `isSelected` otherwise (`index.tsx:1405`).
+Pattern class `aria-state-when-unsupported`. Pinned by a new `play` test on `DisabledSelection`.
 
 ### 1 — No arrow-key navigation (SERIOUS, WCAG 2.1.1) — FIXED
 The old `handleKeyDown` only handled `Enter`, `Space`, `ArrowRight` (expand),
@@ -192,18 +214,21 @@ coverage (not a WCAG failure).
 ## Hearing
 
 No audio, `<audio>`/`<video>`, `AudioContext`, `navigator.vibrate`, or any
-sound-conveyed information exists in this component (verified by grep of
-`index.tsx`). The only media surface is the decorative `<canvas>` particle
-overlay, which conveys no information. **No hearing-related issues.** (The canvas
-motion is addressed under WCAG 2.3.3, issue 5.)
+sound-conveyed information exists in this component (verified by grep of the whole
+directory for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
+`navigator.vibrate` / `.play(`). The only media surface is the decorative
+`<canvas>` particle overlay, which conveys no information — now `aria-hidden`
+(P1). **No hearing-related issues.** (The canvas motion is addressed under
+WCAG 2.3.3, issue 5.)
 
 ## Reading & screen reader
 
 - Roles: `tree` → `treeitem` → `group` (group added, issue 4).
-- States/props per node: `aria-selected`, `aria-expanded` (only on parents),
-  `aria-disabled`, `aria-level`, and now `aria-setsize`/`aria-posinset`
-  (issue 6). Selection/expansion/disabled state each has a programmatic
-  attribute in addition to color, so no state is color-only (WCAG 1.4.1 pass).
+- States/props per node: `aria-selected` (on selectable trees only — omitted when
+  `disableSelection`, P2), `aria-expanded` (only on parents), `aria-disabled`,
+  `aria-level`, and now `aria-setsize`/`aria-posinset` (issue 6).
+  Selection/expansion/disabled state each has a programmatic attribute in addition
+  to color, so no state is color-only (WCAG 1.4.1 pass).
 - The checkbox (checkbox-selection mode) is intentionally `aria-hidden="true"` +
   `tabIndex={-1}`; the treeitem's `aria-selected` is the authoritative selection
   semantic, so the visible checkbox is decorative. This is the correct pattern
@@ -301,16 +326,33 @@ play + Chromatic baseline is this repo's only test layer):
 - **`Accessibility/Type-ahead & Expand Siblings`** (`TypeaheadAndExpandSiblings`,
   new, R5) — typing `p` moves focus to 'Personal'; pressing `*` on a root node
   expands its sibling roots that have children.
+- **`Selection/Disabled Selection`** (`DisabledSelection`, extended, P2) — asserts
+  **no** `treeitem` carries an `aria-selected` attribute while `disableSelection`
+  is set, and that the tree is still keyboard-enterable (roving `tabindex=0`).
+- **`Themes/Sacred`** (`SacredTheme`, extended, P1) — `play` test (via `waitFor`,
+  since the canvas mounts in an effect) asserts the decorative `<canvas>` renders
+  with `aria-hidden="true"`. Added `waitFor` to the `storybook/test` import.
 
 ## Deferred
 
-**Nothing deferred.** The initial pass's two deferrals are now both resolved:
-- Chevron `role="button"` not keyboard-operable (old issue 9) → **FIXED (R2)** —
-  chevron made decorative.
-- Chevron click no-op in `expansionTrigger='content'` mode (old "secondary UX
-  observation") → **FIXED (R4)** — `handleIconClick` toggles in both modes.
+**No WCAG-AA failures deferred.** The initial pass's two deferrals are resolved
+(chevron made decorative — FIXED R2; chevron click no-op — FIXED R4), and the
+second-pass P1/P2 findings are both fixed.
+
+**One known follow-up (not a WCAG-AA failure, in-directory, owner-safe):**
+- **`focus-lost-on-unmount`** — when a parent is collapsed via a chevron
+  pointer-click, the `*` command, or `apiRef.setItemExpansion`, a descendant that
+  currently holds DOM focus is unmounted (the collapsed child group is removed from
+  the DOM), dropping focus to `<body>`. The *keyboard* collapse path (ArrowLeft)
+  already keeps focus on the still-visible parent, and the roving-tabindex fallback
+  (`tabbableItem` → first root, `index.tsx:1568-1580`) guarantees Tab can always
+  re-enter, so keyboard-only users are unaffected. A fully robust fix would move
+  focus to the collapsed ancestor whenever the focused node is about to unmount;
+  it touches the expansion-state flow (`toggleItemExpansion` / the collapse
+  handlers) and is left as a follow-up. Entirely within `src/components/TreeView/`
+  (`index.tsx`) — no cross-file change owed.
 
 **No fixes are owed in files outside `src/components/TreeView/`** — every issue
-found (original and review follow-up) had its root cause inside the owned
-directory. No shared util, `Field`/`Shell`, `global.css`, or barrel change is
+found (original, review follow-up, and second pass) had its root cause inside the
+owned directory. No shared util, `Field`/`Shell`, `global.css`, or barrel change is
 required.
