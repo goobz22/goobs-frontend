@@ -68,14 +68,15 @@ const DECORATIVE_TOKENS = [
 function classNameHasToken(classText: string): boolean {
   const lower = classText.toLowerCase()
   for (const token of DECORATIVE_TOKENS) {
+    const needle = token.toLowerCase()
     let from = 0
     for (;;) {
-      const idx = lower.indexOf(token, from)
+      const idx = lower.indexOf(needle, from)
       if (idx < 0) break
       from = idx + 1
       const before = classText[idx - 1]
       const matchedFirst = classText[idx]
-      const after = classText[idx + token.length]
+      const after = classText[idx + needle.length]
       // Segment START: string start, a non-alphanumeric delimiter before, or an
       // uppercase first char (a camelCase boundary, e.g. `breadcrumbSeparator`).
       const startsSegment =
