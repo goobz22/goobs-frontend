@@ -97,7 +97,7 @@ test contract is untouched.
 
 ## Stories updated
 
-Four new play-function regression stories in `ComplexTextEditor.stories.tsx`:
+Six play-function regression stories in `ComplexTextEditor.stories.tsx`:
 
 - `ToolbarAccessibility` — every button's accessible name, `role="toolbar"`,
   `aria-pressed` on toggles (absent on command buttons), labelled multiline textbox.
@@ -106,16 +106,21 @@ Four new play-function regression stories in `ComplexTextEditor.stories.tsx`:
 - `LabelAssociation` — the simple textarea resolves by its visible label name.
 - `MarkdownPreviewAccessibility` — preview button is `type="button"` and its
   `aria-pressed` flips on toggle; markdown textarea is labelled.
+- `ToolbarRovingTabIndex` (2026-07-11 review) — the toolbar is a single Tab stop
+  (`tabindex` 0 on one control, `-1` on the rest) and Left/Right Arrow + Home/End
+  move focus and the tab stop between controls.
+- `MarkdownPreviewAriaControls` (2026-07-11 review) — `aria-controls` is present
+  only while the preview region is rendered (no dangling IDREF when collapsed).
 
 ## Deferred (not owned)
 
-- **`src/components/Button/index.tsx` (~line 590) / ButtonGroup (~line 46):** the
-  `selected` prop styles the pressed state visually but does not emit
-  `aria-pressed`. Suggested: when `selected` is set (or when ButtonGroup marks a
-  child selected), emit `aria-pressed` — then every single-select `ButtonGroup`
-  across the library gets programmatic selection state without each callsite
-  adding it manually. (Worked around here by passing `aria-pressed` on the mode
-  Button children directly.)
+- ~~**`src/components/Button/index.tsx` / ButtonGroup:** the `selected` prop styled
+  the pressed state visually but did not emit `aria-pressed`.~~ **RESOLVED** (Button
+  now emits `{...(selected !== undefined && { 'aria-pressed': selected })}` at
+  `Button/index.tsx:641`, and ButtonGroup sets `selected` on every child), so the
+  mode switch gets programmatic pressed state from ButtonGroup automatically. The
+  explicit `aria-pressed` on the mode Button children (Toolbars/Complex) is kept as
+  a belt-and-suspenders, callsite-explicit signal. Nothing outstanding here.
 
 ## Notes / non-issues
 
@@ -123,7 +128,26 @@ Four new play-function regression stories in `ComplexTextEditor.stories.tsx`:
   implements the full combobox+listbox APG pattern with `aria-label` and renders
   each option's text (`String(option.value)`); the `icon` field on those options
   is ignored by that dropdown, so there is no icon-only-option problem. No change.
-- Full APG **roving-tabindex / arrow-key** toolbar navigation is intentionally not
-  added: every toolbar button is individually Tab-focusable and Enter/Space
-  operable, so keyboard access (WCAG 2.1.1) is fully satisfied; single-tab-stop
-  arrow navigation is a future enhancement, not a barrier.
+- Full APG **roving-tabindex / arrow-key** toolbar navigation is now implemented
+  (see the 2026-07-11 review-fix pass below). `role="toolbar"` is a single Tab
+  stop; Left/Right Arrow + Home/End move focus between all enabled controls
+  (icon buttons AND the rich-text dropdown comboboxes).
+
+## Review fixes (2026-07-11 adversarial review)
+
+An adversarial review of the first a11y pass found four remaining items. All
+fixed at root cause; all additive (no existing prop/export/`data-*`/`role`/`aria`
+renamed or removed).
+
+| # | Severity | File | Issue | Fix |
+|---|----------|------|-------|-----|
+| R1 | critical | SimpleEditor + RichEditor + MarkdownEditor + Toolbars/Complex | The new `ariaLabel?: string` / `ariaLabelledBy?: string` props were declared as non-`\|undefined` optionals while the callers pass `string \| undefined`; under `tsconfig.exactOptionalPropertyTypes: true` that is `TS2375` (7 errors at index.tsx:225/236/249/262 + Toolbars/Complex:95/106/117). `tsc --noEmit` failing meant `vite build` never ran → the fix could never reach `dist/`/npm. | Widened all four prop pairs to `?: string \| undefined`, so the explicit-`undefined` callers are assignable. Runtime behaviour unchanged. |
+| R2 | moderate | Toolbars/Editor | `role="toolbar"` set an AT arrow-key expectation the buttons didn't fulfil — no roving tabindex (every icon button an independent Tab stop), no Left/Right/Home/End. Incomplete APG Toolbar pattern. | Implemented the pattern: the toolbar is a single Tab stop (roving tabindex over the live set of enabled `<button>`s incl. the dropdown comboboxes, `role="option"` excluded); a container `onKeyDown` handles Left/Right (wrapping) + Home/End and moves both focus and the tab stop; `onFocus` keeps the stop on the last-used control; a combobox that is open (`aria-expanded="true"`) keeps its own Arrow/Home/End nav. Kept `role="toolbar"` (the correct role) rather than dropping it. |
+| R3 | minor | MarkdownEditor | `aria-controls={previewId}` was set unconditionally, but the `id={previewId}` preview element renders only while `showPreview` — dangling IDREF when collapsed (ARIA 1.2). | `aria-controls` is now spread only when `showPreview` is true. |
+| R4 | minor | Toolbars/Complex | The mode switch wrapped goobs `ButtonGroup` (which emits its own `<div role="group">`) inside another `<div role="group" aria-label="Editor mode">` — a labelled group directly containing an unlabelled group (double announcement). | Removed the outer `role`/`aria-label`; passed `aria-label="Editor mode"` to `ButtonGroup` (which accepts it and applies it to its own `role="group"`). One labelled group. The `getByRole('group', { name: /editor mode/i })` story still resolves. |
+
+Regression coverage: added `ToolbarRovingTabIndex` (R2) and
+`MarkdownPreviewAriaControls` (R3) play stories; the existing
+`ModeToggleAccessibility` story still asserts the labelled group name (R4) and
+`LabelAssociation` / the toolbar stories still compile against the R1-typed props.
+`bun lint:file` clean on all six edited files.

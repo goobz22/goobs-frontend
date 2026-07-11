@@ -20,9 +20,9 @@ type MarkdownEditorProps = {
   minRows?: number
   styles?: ComplexTextEditorStyles
   /** Accessible name for the textarea (used when no visible label is linked). */
-  ariaLabel?: string
+  ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the textarea. */
-  ariaLabelledBy?: string
+  ariaLabelledBy?: string | undefined
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -104,12 +104,15 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       />
       {/* type=button so it never submits an enclosing goobs <Form>;
           aria-pressed exposes the on/off preview state; aria-controls links it
-          to the rendered preview region (WCAG 4.1.2). */}
+          to the rendered preview region (WCAG 4.1.2). aria-controls is only set
+          while the preview is shown — the element carrying `id={previewId}` is
+          only rendered then, so referencing it when collapsed would be a
+          dangling IDREF (invalid ARIA relation, ARIA 1.2). */}
       <button
         type="button"
         onClick={() => setShowPreview(!showPreview)}
         aria-pressed={showPreview}
-        aria-controls={previewId}
+        {...(showPreview && { 'aria-controls': previewId })}
       >
         Toggle Preview
       </button>

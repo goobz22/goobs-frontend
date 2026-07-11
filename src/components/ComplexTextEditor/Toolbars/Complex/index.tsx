@@ -20,9 +20,9 @@ interface ComplexToolbarProps {
   minRows?: number
   styles?: ComplexTextEditorStyles
   /** Accessible name for the editing surface (used when no visible label is linked). */
-  ariaLabel?: string
+  ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the editing surface. */
-  ariaLabelledBy?: string
+  ariaLabelledBy?: string | undefined
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -51,15 +51,16 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   return (
     <div className={cssStyles.container} data-theme={styles?.theme || 'light'}>
       {styles?.showModeToggle !== false && (
-        <div
-          className={cssStyles.toggleRow}
-          role="group"
-          aria-label="Editor mode"
-        >
+        // The accessible group name goes on ButtonGroup itself — it already
+        // renders its own <div role="group">, so an outer role="group" here
+        // produced a labelled group directly wrapping an unlabelled group
+        // (double group announcement in some AT). One labelled group only.
+        <div className={cssStyles.toggleRow}>
           <ButtonGroup
             value={mode}
             exclusive
             onChange={handleModeChangeWrapper}
+            aria-label="Editor mode"
             styles={{
               theme: styles?.theme || 'light',
               backgroundColor: 'transparent',

@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/Toolbars/Editor/index.tsx
 
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Dropdown from '../../../Field/Dropdown/Regular'
 import CustomButton from '../../../Button'
 import {
@@ -443,12 +443,112 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     }
   }
 
+  // ---- WAI-ARIA APG Toolbar keyboard pattern (roving tabindex) ------------
+  // `role="toolbar"` sets an AT expectation that the whole control row is a
+  // SINGLE Tab stop navigated with the Arrow keys. We implement that: exactly
+  // one control is tabbable (tabIndex 0); the rest are tabIndex -1 and reached
+  // with Left/Right Arrow + Home/End. The set is discovered live from the DOM
+  // (every enabled <button> — the icon buttons AND the rich-text-only dropdown
+  // comboboxes) so it stays correct as rows and disabled states mount/unmount.
+  // All of this runs only on the client (refs + event handlers), so it is
+  // SSR-safe. Basic Enter/Space activation is unchanged (native button).
+  const toolbarRef = useRef<HTMLDivElement>(null)
+
+  const getToolbarControls = useCallback((): HTMLElement[] => {
+    const root = toolbarRef.current
+    if (!root) return []
+    return Array.from(root.querySelectorAll<HTMLElement>('button')).filter(
+      el =>
+        !(el as HTMLButtonElement).disabled &&
+        // exclude an open combobox's own portalled/inline option buttons
+        el.getAttribute('role') !== 'option'
+    )
+  }, [])
+
+  // Make exactly one control tabbable. `preferred` keeps the roved position
+  // when it's still in the set; otherwise the first control becomes the stop.
+  const applyRovingTabIndex = useCallback(
+    (preferred: HTMLElement | null) => {
+      const controls = getToolbarControls()
+      if (controls.length === 0) return
+      const active =
+        preferred && controls.includes(preferred) ? preferred : controls[0]
+      controls.forEach(el => {
+        el.tabIndex = el === active ? 0 : -1
+      })
+    },
+    [getToolbarControls]
+  )
+
+  // (Re)initialize the single tab stop whenever the control set changes: the
+  // mode switch toggles disabled buttons and the dropdown row is rich-only.
+  useEffect(() => {
+    applyRovingTabIndex(null)
+  }, [applyRovingTabIndex, markdownMode, showExtendedOptions])
+
+  const handleToolbarKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const { key } = event
+      if (
+        key !== 'ArrowLeft' &&
+        key !== 'ArrowRight' &&
+        key !== 'Home' &&
+        key !== 'End'
+      ) {
+        return
+      }
+      // A contained combobox owns its own Arrow/Home/End navigation while it
+      // is open — don't hijack those keys then.
+      const focused = document.activeElement as HTMLElement | null
+      if (focused?.getAttribute('aria-expanded') === 'true') return
+      const controls = getToolbarControls()
+      if (controls.length === 0) return
+      const currentIndex = focused ? controls.indexOf(focused) : -1
+      let nextIndex: number
+      switch (key) {
+        case 'ArrowRight':
+          nextIndex =
+            currentIndex < 0 ? 0 : (currentIndex + 1) % controls.length
+          break
+        case 'ArrowLeft':
+          nextIndex = currentIndex <= 0 ? controls.length - 1 : currentIndex - 1
+          break
+        case 'Home':
+          nextIndex = 0
+          break
+        default: // 'End'
+          nextIndex = controls.length - 1
+          break
+      }
+      const next = controls[nextIndex]
+      if (!next) return
+      event.preventDefault()
+      controls.forEach(el => {
+        el.tabIndex = el === next ? 0 : -1
+      })
+      next.focus()
+    },
+    [getToolbarControls]
+  )
+
+  // Keep the tab stop on whichever control the user focuses (e.g. by mouse) so
+  // Shift+Tab back into the toolbar returns to the last-used control.
+  const handleToolbarFocus = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      applyRovingTabIndex(event.target as HTMLElement)
+    },
+    [applyRovingTabIndex]
+  )
+
   return (
     <div
+      ref={toolbarRef}
       className={cssStyles.toolbarContainer}
       data-theme={toolbarTheme}
       role="toolbar"
       aria-label={markdownMode ? 'Markdown formatting' : 'Text formatting'}
+      onKeyDown={handleToolbarKeyDown}
+      onFocus={handleToolbarFocus}
       {...(styles?.showToolbar === false && { 'data-hidden': 'true' })}
       {...(wrapperStyle && { style: wrapperStyle })}
     >

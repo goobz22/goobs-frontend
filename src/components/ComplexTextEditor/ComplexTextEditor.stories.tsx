@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect } from 'storybook/test'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import ComplexTextEditor from './index'
 
 // Wrapper component for state management
@@ -972,6 +972,97 @@ export const MarkdownPreviewAccessibility: Story = {
     // Toggling flips the pressed state.
     await userEvent.click(toggle)
     expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * The `role="toolbar"` formatting row implements the WAI-ARIA APG Toolbar
+ * keyboard contract: it is a SINGLE Tab stop (roving tabindex — exactly one
+ * control is `tabindex="0"`, the rest `tabindex="-1"`), and Left/Right Arrow +
+ * Home/End move focus (and the tab stop) between controls. This closes the
+ * incomplete-pattern gap where `role="toolbar"` set an AT arrow-key
+ * expectation that the buttons did not fulfil.
+ */
+export const ToolbarRovingTabIndex: Story = {
+  name: 'A11y — Toolbar Roving Tabindex',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Rich Text Content"
+      editorType="rich"
+      initialValue="Roving tabindex demo."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The toolbar is present as a labelled toolbar.
+    expect(
+      canvas.getByRole('toolbar', { name: /text formatting/i })
+    ).toBeVisible()
+
+    const undo = canvas.getByRole('button', { name: 'Undo' })
+    const redo = canvas.getByRole('button', { name: 'Redo' })
+
+    // Single Tab stop: exactly one control is tabbable; its neighbour is -1.
+    await waitFor(() => expect(undo).toHaveAttribute('tabindex', '0'))
+    expect(redo).toHaveAttribute('tabindex', '-1')
+
+    // Right Arrow moves focus to the next control AND moves the tab stop with
+    // it (roving tabindex).
+    undo.focus()
+    expect(undo).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(redo).toHaveFocus()
+    expect(redo).toHaveAttribute('tabindex', '0')
+    expect(undo).toHaveAttribute('tabindex', '-1')
+
+    // Home returns focus to the first control.
+    await userEvent.keyboard('{Home}')
+    expect(undo).toHaveFocus()
+    expect(undo).toHaveAttribute('tabindex', '0')
+
+    // End jumps to the last control (the bulleted-list toggle).
+    await userEvent.keyboard('{End}')
+    expect(canvas.getByRole('button', { name: 'Bulleted list' })).toHaveFocus()
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * The markdown "Toggle Preview" button only references the preview region via
+ * `aria-controls` while that region is actually rendered — a collapsed preview
+ * leaves no dangling IDREF (invalid ARIA relation, ARIA 1.2).
+ */
+export const MarkdownPreviewAriaControls: Story = {
+  name: 'A11y — Markdown Preview aria-controls',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Markdown Content"
+      editorType="markdown"
+      initialValue="# Title"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const toggle = canvas.getByRole('button', { name: 'Toggle Preview' })
+
+    // Collapsed: no aria-controls, so no reference to a non-existent element.
+    expect(toggle).not.toHaveAttribute('aria-controls')
+
+    // Expanded: aria-controls now points at the rendered preview region.
+    await userEvent.click(toggle)
+    const controlsId = toggle.getAttribute('aria-controls')
+    expect(controlsId).toBeTruthy()
+    expect(
+      canvasElement.querySelector(`#${CSS.escape(controlsId as string)}`)
+    ).not.toBeNull()
+
+    // Collapsing again drops the reference.
+    await userEvent.click(toggle)
+    expect(toggle).not.toHaveAttribute('aria-controls')
   },
   globals: { backgrounds: { value: 'light' } },
 }

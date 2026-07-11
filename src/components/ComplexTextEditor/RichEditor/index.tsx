@@ -20,9 +20,9 @@ export interface RichTextEditorProps {
   minRows?: number
   styles?: ComplexTextEditorStyles
   /** Accessible name for the editable surface (used when no visible label is linked). */
-  ariaLabel?: string
+  ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the editable surface. */
-  ariaLabelledBy?: string
+  ariaLabelledBy?: string | undefined
 }
 
 export function RichTextEditor({

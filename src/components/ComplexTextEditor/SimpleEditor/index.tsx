@@ -12,9 +12,9 @@ type SimpleEditorProps = {
   placeholder?: string
   styles?: ComplexTextEditorStyles
   /** Accessible name for the textarea (used when no visible label is linked). */
-  ariaLabel?: string
+  ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the textarea. */
-  ariaLabelledBy?: string
+  ariaLabelledBy?: string | undefined
 }
 
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
