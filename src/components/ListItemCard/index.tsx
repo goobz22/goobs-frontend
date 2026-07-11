@@ -75,6 +75,15 @@ export type ListItemCardTheme = 'sacred' | 'light' | 'dark'
 interface ListItemCardContextValue {
   theme: ListItemCardTheme
   selected: boolean
+  /**
+   * Stable id applied to `<ListItemCard.Content>`'s title span so a
+   * SELECTABLE row (`role="button"`) can name itself via `aria-labelledby`
+   * instead of concatenating every descendant's text (which would pull in the
+   * reorder/remove/action button labels into a garbled accessible name).
+   */
+  titleId: string
+  /** Companion id on the optional subtitle span — folded into the row name. */
+  subtitleId: string
 }
 
 const ListItemCardContext =
@@ -171,9 +180,32 @@ function ListItemCardInner({
   const selectable = onSelect !== undefined
   const hasReorder = onMoveUp !== undefined || onMoveDown !== undefined
 
+  // Ids shared with <ListItemCard.Content> so a selectable row names itself
+  // from its title/subtitle (see ListItemCardContextValue.titleId).
+  const baseId = React.useId()
+  const titleId = `${baseId}-title`
+  const subtitleId = `${baseId}-subtitle`
+
   const contextValue = React.useMemo<ListItemCardContextValue>(
-    () => ({ theme, selected }),
-    [theme, selected]
+    () => ({ theme, selected, titleId, subtitleId }),
+    [theme, selected, titleId, subtitleId]
+  )
+
+  // Internal handle to the rendered <li>, merged with the caller-supplied
+  // `ref` so BOTH the consumer and the aria-labelledby reconciliation effect
+  // below reach the same node without the consumer losing their ref. Mirrors
+  // Card's `assignRootRef`.
+  const rootElementRef = React.useRef<HTMLLIElement | null>(null)
+  const assignRootRef = React.useCallback(
+    (node: HTMLLIElement | null): void => {
+      rootElementRef.current = node
+      if (typeof ref === 'function') {
+        ref(node)
+      } else if (ref) {
+        ref.current = node
+      }
+    },
+    [ref]
   )
 
   // Edge-triggered selection diagnostic (no-op without a host bus). Mirrors the
