@@ -164,6 +164,7 @@ export interface FormDataGridProps<TRow extends RowData = RowData> {
  */
 function FormDataGrid<TRow extends RowData = RowData>({
   title,
+  headingLevel = 2,
   description,
   datagrid,
   sacredtheme = true,
@@ -172,6 +173,12 @@ function FormDataGrid<TRow extends RowData = RowData>({
   // Theme variant as a data-attribute, mirroring the goobs Card/DataGrid house
   // pattern. The boolean `sacredtheme` maps to the canonical 'sacred' | 'light'.
   const theme: 'sacred' | 'light' = sacredtheme ? 'sacred' : 'light'
+
+  // The title is the section heading — render it as a genuine `<h1>`–`<h6>`
+  // (never a styled <div>) so it is reachable by heading navigation and is a
+  // real heading in the SSR'd/crawled HTML. `.title` resets the default heading
+  // margin, so the visual output is unchanged.
+  const HeadingTag = `h${headingLevel}` as ElementType
 
   /**
    * Memoized DataGrid styles to prevent unnecessary re-renders.
