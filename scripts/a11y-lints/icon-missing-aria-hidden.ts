@@ -90,7 +90,10 @@ function maskNonCode(text: string): string {
   )
   t = t.replace(/'(?:[^'\\\n]|\\.)*'/g, (m) => "'" + ' '.repeat(Math.max(0, m.length - 2)) + "'")
   t = t.replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => '"' + ' '.repeat(Math.max(0, m.length - 2)) + '"')
-  t = t.replace(/`(?:[^`\\]|\\.)*`/g, (m) => '`' + ' '.repeat(Math.max(0, m.length - 2)) + '`')
+  // Template literals can span multiple lines, so blank only the NON-newline
+  // characters (keep `\n`) — otherwise a multi-line `<style>{`…css…`}</style>`
+  // collapses newlines and shifts every subsequent glyph/svg line number.
+  t = t.replace(/`(?:[^`\\]|\\.)*`/g, (m) => '`' + m.slice(1, -1).replace(/[^\n]/g, ' ') + '`')
   return t
 }
 
