@@ -697,7 +697,9 @@ export const InteractionTest: Story = {
 // wrapper is exposed as a named role="group" (WCAG 1.3.1). A cross-field
 // error (start > end) is a property of the whole range, so it must mark BOTH
 // inputs aria-invalid — not just the start — and be announced once via a
-// role="alert" region (WCAG 4.1.2 / 4.1.3).
+// role="alert" region (WCAG 4.1.2 / 4.1.3). Because the message describes the
+// whole range, BOTH inputs point aria-describedby at that single region, so a
+// screenreader landing on either control can read the reason (WCAG 3.3.1).
 export const GroupSemanticsAndError: Story = {
   name: 'A11y: Group Semantics & Range Error',
   render: () => (
@@ -723,13 +725,16 @@ export const GroupSemanticsAndError: Story = {
     await expect(startInput).toHaveAttribute('aria-invalid', 'true')
     await expect(endInput).toHaveAttribute('aria-invalid', 'true')
 
-    // The message is announced once via a live alert region and the start
-    // input is programmatically described by it.
+    // The message is announced once via a live alert region and BOTH inputs
+    // are programmatically described by that same region — a screenreader on
+    // either the start or the end control can read the reason for the error,
+    // not just hear "invalid" (WCAG 3.3.1).
     const alert = canvas.getByRole('alert')
     await expect(alert).toHaveTextContent(
       'End date cannot be before start date.'
     )
     await expect(startInput).toHaveAttribute('aria-describedby', alert.id)
+    await expect(endInput).toHaveAttribute('aria-describedby', alert.id)
   },
 }
 
