@@ -1153,6 +1153,37 @@ function DataGridContent({
     setDraggedColumn(null)
   }, [])
 
+  /**
+   * Keyboard-operable column reorder (WCAG 2.1.1). The header drag-and-drop is
+   * pointer-only; this moves a column one position left/right among the VISIBLE
+   * columns and is wired to "Move left"/"Move right" items in the column-actions
+   * menu, so reordering no longer requires a mouse. Swaps the field with its
+   * visible neighbour inside the persisted `columnOrder`.
+   */
+  const handleColumnMove = useCallback(
+    (field: string, direction: 'left' | 'right') => {
+      const visibleFields = visibleColumns.map(col => col.field)
+      const visibleIndex = visibleFields.indexOf(field)
+      const neighborIndex =
+        direction === 'left' ? visibleIndex - 1 : visibleIndex + 1
+      if (neighborIndex < 0 || neighborIndex >= visibleFields.length) return
+      const neighborField = visibleFields[neighborIndex]
+
+      setColumnOrder(prevOrder => {
+        const base =
+          prevOrder.length > 0
+            ? [...prevOrder]
+            : filteredColumns.map(col => col.field)
+        const i = base.indexOf(field)
+        const j = base.indexOf(neighborField as string)
+        if (i === -1 || j === -1) return prevOrder
+        ;[base[i], base[j]] = [base[j] as string, base[i] as string]
+        return base
+      })
+    },
+    [visibleColumns, filteredColumns]
+  )
+
   // ═══════════════════════════════════════════════════════════════════════════
   // PAGINATION CALCULATIONS
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1214,11 +1245,15 @@ function DataGridContent({
       data-theme={theme}
       data-datagrid={dataGrid}
       data-grid-status={gridStatus}
-      role="grid"
-      aria-rowcount={filteredRows.length}
-      // +1 for the leading selection column, so the reported column count
-      // matches the rendered header cells (complements aria-rowcount).
-      aria-colcount={visibleColumns.length + 1}
+      // NOTE: `role="grid"` + `aria-rowcount`/`aria-colcount` used to live here,
+      // on the wrapper that contains BOTH the mobile card view AND the desktop
+      // <table> plus the toolbar/filters/footer chrome — which made the grid
+      // structurally invalid (its role="row"/gridcell descendants inside the
+      // real <table> were owned by the table, not the grid; and a grid may not
+      // wrap non-row chrome). The grid semantics were relocated onto the actual
+      // <table> (see Table/index.tsx, role="grid" + rowgroups) and onto the
+      // mobile card container (see MobileCardView) so each view is a valid grid
+      // that truly owns its rows. (a11y fix D3, WCAG 1.3.1.)
       ref={containerRef}
     >
       {/* ─────────────────────────────────────────────────────────────────────
@@ -1408,11 +1443,17 @@ function DataGridContent({
           {...(sortState ? { sortField: sortState.field } : {})}
           {...(sortState ? { sortDirection: sortState.direction } : {})}
           onManageColumns={handleToggleManageColumns}
+          onColumnMove={handleColumnMove}
           draggedColumn={draggedColumn}
           onColumnDragStart={handleColumnDragStart}
           onColumnDragOver={handleColumnDragOver}
           onColumnDrop={handleColumnDrop}
           onColumnDragEnd={handleColumnDragEnd}
+          // Grid semantics moved off the outer wrapper onto the real <table>
+          // (a11y fix D3). Total row/column counts are surfaced there as
+          // aria-rowcount/aria-colcount (+1 col for the leading selection cell).
+          gridRowCount={filteredRows.length}
+          gridColCount={visibleColumns.length + 1}
         />
 
         {/* ─────────────────────────────────────────────────────────────────
