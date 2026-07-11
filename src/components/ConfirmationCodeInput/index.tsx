@@ -142,12 +142,22 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   const errorRegionId = `${useId()}-cci-error`
 
   // Text written into the PERSISTENT (always-mounted) success live region.
-  // Populated only on the genuine input→success transition (see effect below)
-  // and cleared shortly after, so the confirmation is reliably announced as a
-  // content mutation of a pre-existing region without lingering in the
-  // screen-reader reading order (WCAG 4.1.3).
-  const [successAnnouncement, setSuccessAnnouncement] = useState('')
-  const wasSuccessRef = useRef(showSuccessState)
+  // Announcing the confirmation from a region created together with its content
+  // is unreliable (NVDA/JAWS frequently miss it); writing it into a pre-existing
+  // region as a CONTENT MUTATION guarantees the announcement (WCAG 4.1.3).
+  // Derived from the previous-render `showSuccessState` via React's
+  // adjust-state-during-render pattern — previous value held in state, no effect,
+  // so neither the react-hooks refs nor set-state-in-effect rules apply (the
+  // exact pattern SaveButton uses for its busy-state live region). The
+  // initializer seeds a mount that is already in the success state.
+  const [successAnnouncement, setSuccessAnnouncement] = useState(
+    showSuccessState ? successMessage : ''
+  )
+  const [prevShowSuccess, setPrevShowSuccess] = useState(showSuccessState)
+  if (prevShowSuccess !== showSuccessState) {
+    setPrevShowSuccess(showSuccessState)
+    setSuccessAnnouncement(showSuccessState ? successMessage : '')
+  }
 
   // Use the engine value when bound, the controlled value when the caller wired
   // onChange, otherwise the internal uncontrolled state.
@@ -215,22 +225,6 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       return () => clearTimeout(timer)
     }
   }, []) // Empty deps - only run on mount
-
-  // Announce the success confirmation into the already-mounted live region on
-  // the input→success transition ONLY. A page that mounts already in the
-  // success state needs no status announcement (the visible heading is read
-  // normally), so the initial value is skipped; the message is cleared after it
-  // fires so it does not duplicate the heading in the reading order.
-  useEffect(() => {
-    const wasSuccess = wasSuccessRef.current
-    wasSuccessRef.current = showSuccessState
-    if (showSuccessState && !wasSuccess) {
-      setSuccessAnnouncement(successMessage)
-      const timer = setTimeout(() => setSuccessAnnouncement(''), 1000)
-      return () => clearTimeout(timer)
-    }
-    return undefined
-  }, [showSuccessState, successMessage])
 
   // Helper to update value. When bound to the form engine the change is written
   // through `boundOnChange` (which also chains the caller's original onChange);
@@ -538,9 +532,9 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
           the success view mounts; announcing the confirmation from a region
           created together with its content is unreliable (NVDA/JAWS frequently
           miss it). Writing the message into this pre-existing region as a
-          CONTENT MUTATION (see the transition effect above) guarantees the
-          "Verification Successful" announcement (WCAG 4.1.3). It stays empty
-          (silent) in the input state and outside the transition. */}
+          CONTENT MUTATION (see successAnnouncement above) guarantees the
+          "Verification Successful" announcement (WCAG 4.1.3). It is empty
+          (silent) in the input state. */}
       <div className={cssStyles.srOnly} role="status" aria-live="polite">
         {successAnnouncement}
       </div>
