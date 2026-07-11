@@ -202,3 +202,101 @@ export const BothPrices: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * Accessibility structure demo. The comparison renders as a real `<table>`:
+ * package names are `<th scope="col">`, every feature/price row label is a
+ * `<th scope="row">`, and each value is a `<td>` — so a screen reader announces
+ * the relationships ("Pro, Advanced analytics, Included") instead of a flat run
+ * of divs (WCAG 1.3.1 / 4.1.2). Each check icon is decorative (`aria-hidden`)
+ * with a visually-hidden "Included"; an EXCLUDED cell carries a visually-hidden
+ * "Not included" rather than an ambiguous blank, so inclusion is not conveyed by
+ * the icon's presence alone (WCAG 1.1.1 / 1.4.1). This story deliberately mixes
+ * included and excluded packages so BOTH cell states are exercised. The title is
+ * an `<h2>` (`headingLevel={2}`) that names the table via `aria-labelledby`, and
+ * each feature's info text is exposed inline to assistive tech (the hover
+ * tooltip alone is mouse-only).
+ */
+export const AccessibleComparison: Story = {
+  name: 'Accessible Comparison (mixed inclusion)',
+  render: args => (
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    tabletitle: { text: 'Compare plans' },
+    theme: 'light',
+    headingLevel: 2,
+    highlightedPackageIndex: 1,
+    packagecolumns: { packagenames: ['Starter', 'Pro', 'Enterprise'] },
+    monthlyprice: { prices: ['$10', '$20', '$40'] },
+    annualprice: { annualprices: ['$100', '$200', '$400'] },
+    features: [
+      {
+        title: 'Core dashboard',
+        infopopuptext: 'Included on every plan.',
+        tiedtopackage: { tiedtopackages: ['true', 'true', 'true'] },
+      },
+      {
+        title: 'Advanced analytics',
+        infopopuptext: 'Available on Pro and Enterprise.',
+        tiedtopackage: { tiedtopackages: ['false', 'true', 'true'] },
+        subfeatures: [
+          {
+            title: 'Custom reports',
+            tiedtopackage: { tiedtopackages: ['false', 'false', 'true'] },
+          },
+        ],
+      },
+      {
+        title: 'Dedicated support',
+        tiedtopackage: { tiedtopackages: ['false', 'false', 'true'] },
+      },
+    ],
+    buttoncolumns: {
+      buttontexts: ['Choose Starter', 'Choose Pro', 'Choose Enterprise'],
+      buttonlinks: ['#starter', '#pro', '#enterprise'],
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * `headingLevel` controls the title's heading tag so it slots into the
+ * surrounding document outline, replacing the previously hardcoded `<h5>` that
+ * skipped levels (WCAG 1.3.1 / 2.4.6, and crawlable SSR heading semantics).
+ * Here the title renders as an `<h3>`; the visual size is unchanged because it
+ * comes from the theme's header style, not the tag. (On the sacred theme, the
+ * decorative corner and footer glyphs are `aria-hidden` and their animation is
+ * switched off under `prefers-reduced-motion` — WCAG 2.3.3.)
+ */
+export const CustomHeadingLevel: Story = {
+  name: 'Configurable Heading Level (h3)',
+  render: args => (
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    ...defaultConfig,
+    theme: 'light',
+    headingLevel: 3,
+    highlightedPackageIndex: 0,
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
