@@ -189,10 +189,15 @@ const Select: React.FC<SelectProps> = ({
         disabled={disabled}
         name={name}
         value={resolvedValue}
-        // Convey the error state programmatically (not by border colour alone)
-        // so assistive tech announces the field as invalid (WCAG 4.1.2 / 3.3.1).
-        // Set before `{...props}` so a caller-supplied aria-invalid still wins.
-        aria-invalid={hasError ? true : undefined}
+        // Convey the invalid state programmatically (not by border colour alone)
+        // so assistive tech announces the field as invalid (WCAG 4.1.2 / 3.3.1 /
+        // 1.4.1). BOTH independent error-styling paths must be announced: the
+        // boolean/engine `hasError` AND the `helperTextType: 'error'` path
+        // (`hasHelperError`), which paints the same red "invalid" border via CSS
+        // — announcing only the former would leave the helper-error field
+        // conveyed by colour alone. Set before `{...props}` so a caller-supplied
+        // aria-invalid still wins.
+        aria-invalid={hasError || hasHelperError ? true : undefined}
         onChange={handleNativeChange}
         onBlur={handleNativeBlur}
         {...props}

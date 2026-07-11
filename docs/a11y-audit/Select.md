@@ -42,6 +42,26 @@ existing Storybook `InteractionTest` already keys on via `getByRole('combobox')`
   invalid state. `aria-invalid` is the correct in-primitive conveyance; associating the error
   text via `aria-describedby` is FieldShell's responsibility and lives outside this directory.
 
+### 2b. Second error-styling path (`helperTextType:'error'`) not announced — MODERATE (WCAG 1.4.1 Use of Color, 4.1.2 Name/Role/Value) — FIXED (2026-07-11, adversarial-review follow-up)
+- **File:** `src/components/Select/index.tsx:166, 195` — the Issue-2 fix closed the boolean/engine
+  `hasError` path but **not** the *second, independent* error-styling path. `hasHelperError =
+  styles?.helperTextType === 'error'` (index.tsx:166) paints a red "this field is invalid" border
+  via CSS (`Select.module.css` `.root[data-helper-error='true'] .outlined/.standard { border-*-color:
+  var(--goobs-danger) }`), yet `aria-invalid` keyed only on `hasError` (which excludes
+  `hasHelperError`). So a Select with `styles={{ helperTextType:'error' }}` and no `error` prop
+  showed the invalid border **by colour alone** with zero programmatic conveyance. The state is
+  reachable and exercised standalone by the `ErrorState` story (`Select.stories.tsx:212`).
+- **Fix:** OR'd `hasHelperError` into the condition —
+  `aria-invalid={hasError || hasHelperError ? true : undefined}` (index.tsx:195). Both red-border
+  invalid paths now announce; a caller-supplied `aria-invalid` still wins (set before `{...props}`);
+  a select with neither signal still omits the attribute entirely (never `aria-invalid="false"`).
+- **Also (visual coherence):** extended the invalid-state focus ring so the `data-helper-error`
+  path switches the `:focus-visible` outline to `var(--select-error)` too — matching the
+  established Issue-1 principle that the keyboard focus ring "stays meaningful in the invalid
+  state" (`Select.module.css` — added `.root[data-helper-error='true'] .select:focus-visible`
+  to the existing `data-error` focus-ring rule). Additive, no attribute/markup removed.
+- **Pattern:** `status-not-announced`
+
 ### 3. Animated transition ignores reduced-motion preference — MINOR (WCAG 2.3.3 Animation from Interactions) — FIXED
 - **File:** `src/components/Select/Select.module.css:88` — `.select` carries
   `transition: all 0.2s ease;` (animates the hover/focus border-colour shift) with no
@@ -74,7 +94,8 @@ N/A for this component.
 - **Decorative arrow:** the custom `▼` arrow `<div>` is correctly `aria-hidden="true"`
   (`index.tsx:195`) and `pointer-events: none`, so it is not announced and does not intercept
   clicks. **No action.**
-- **Error state:** now announced via `aria-invalid` (Issue 2).
+- **Error state:** now announced via `aria-invalid` for **both** invalid paths — the boolean/engine
+  `hasError` (Issue 2) and the `helperTextType:'error'` styling path (Issue 2b).
 - **Focus visibility:** now provided via `:focus-visible` (Issue 1).
 
 ## SEO semantics
@@ -94,6 +115,12 @@ N/A for this component.
    the error state is announced to assistive tech and not conveyed by colour alone.
 3. `Select.module.css` — added `@media (prefers-reduced-motion: reduce)` disabling the
    `transition` for users who opt out of motion.
+4. `index.tsx` — OR'd `hasHelperError` into the `aria-invalid` condition
+   (`aria-invalid={hasError || hasHelperError ? true : undefined}`) so the *second* error-styling
+   path (`helperTextType:'error'`) is announced, not just the boolean/engine `hasError` path
+   (Issue 2b — adversarial-review follow-up).
+5. `Select.module.css` — extended the invalid-state `:focus-visible` error-colour override to the
+   `data-helper-error` path so the keyboard focus ring stays meaningful in that invalid state too.
 
 All changes are additive and preserve the public API and the machine-test selector contract
 (`data-component="Select"`, `data-field-name`, `data-error`/`data-filled`/`data-disabled`,
@@ -106,9 +133,13 @@ Added to `Select.stories.tsx` (Storybook stories are this repo's only regression
 - **`KeyboardFocus` ("Keyboard Focus (a11y)")** — `play` fn tabs to the control and asserts
   `toHaveFocus()`, exercising keyboard reachability (WCAG 2.1.1) and the new `:focus-visible`
   ring (visible in the Chromatic baseline when focused).
-- **`ErrorAnnounced` ("Error Announced (aria-invalid)")** — `play` fn asserts the error select
-  exposes `aria-invalid="true"` while the sibling valid select has **no** `aria-invalid`
-  attribute, pinning the programmatic error conveyance (WCAG 1.4.1 / 4.1.2).
+- **`ErrorAnnounced` ("Error Announced (aria-invalid)")** — `play` fn asserts **both** error
+  paths expose `aria-invalid="true"` (the boolean `error` prop AND the
+  `styles.helperTextType:'error'` styling path) while the sibling valid select has **no**
+  `aria-invalid` attribute, pinning the programmatic error conveyance for both red-border paths
+  (WCAG 1.4.1 / 4.1.2). Extended 2026-07-11 to add the `helperTextType:'error'` case — this
+  assertion **fails against the pre-fix code** (the helper-error select carried no `aria-invalid`)
+  and passes after Issue 2b's fix, so it is the regression gate for the class.
 
 Existing `InteractionTest` (native combobox role + controlled value) remains green and
 continues to validate the native semantics.

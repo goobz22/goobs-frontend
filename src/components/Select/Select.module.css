@@ -150,7 +150,8 @@
   outline-offset: 2px;
 }
 
-.root[data-error='true'] .select:focus-visible {
+.root[data-error='true'] .select:focus-visible,
+.root[data-helper-error='true'] .select:focus-visible {
   outline-color: var(--select-error);
 }
 

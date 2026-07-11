@@ -401,9 +401,11 @@ export const KeyboardFocus: Story = {
 }
 
 // --------------------------------------------------------------------------
-// ERROR ANNOUNCED (a11y) — the error state is conveyed programmatically via
+// ERROR ANNOUNCED (a11y) — the invalid state is conveyed programmatically via
 // aria-invalid, not by border colour alone (WCAG 1.4.1 / 4.1.2), so assistive
-// tech announces the field as invalid. Non-error selects must NOT carry it.
+// tech announces the field as invalid. BOTH independent error-styling paths —
+// the boolean `error` prop AND `styles.helperTextType: 'error'` (each paints
+// the red "invalid" border) — must set aria-invalid; a plain select must NOT.
 // --------------------------------------------------------------------------
 
 export const ErrorAnnounced: Story = {
@@ -411,7 +413,11 @@ export const ErrorAnnounced: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <SelectWithState error styles={{ theme: 'light' }}>
-        <MenuItem value="a">Invalid selection</MenuItem>
+        <MenuItem value="a">Invalid selection (error prop)</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState styles={{ theme: 'light', helperTextType: 'error' }}>
+        <MenuItem value="a">Invalid selection (helper-error)</MenuItem>
         <MenuItem value="b">Option B</MenuItem>
       </SelectWithState>
       <SelectWithState styles={{ theme: 'light' }}>
@@ -422,10 +428,15 @@ export const ErrorAnnounced: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const [invalidSelect, validSelect] = canvas.getAllByRole('combobox')
+    const [errorPropSelect, helperErrorSelect, validSelect] =
+      canvas.getAllByRole('combobox')
 
-    // Error field exposes aria-invalid="true"; the valid field omits it.
-    await expect(invalidSelect).toHaveAttribute('aria-invalid', 'true')
+    // BOTH error-styling paths announce the invalid state: the boolean `error`
+    // prop AND the `helperTextType: 'error'` styling path (each paints the red
+    // "invalid" border, so each must expose aria-invalid — WCAG 1.4.1 / 4.1.2).
+    await expect(errorPropSelect).toHaveAttribute('aria-invalid', 'true')
+    await expect(helperErrorSelect).toHaveAttribute('aria-invalid', 'true')
+    // The valid field carries neither error signal and omits the attribute.
     await expect(validSelect).not.toHaveAttribute('aria-invalid')
   },
 }
