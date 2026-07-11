@@ -45,6 +45,9 @@ export const LightTheme: Story = {
   args: {
     children: <EditIcon styles={{ theme: 'light' }} />,
     styles: { theme: 'light' },
+    // Icon-only button → an accessible name is required (WCAG 4.1.2); the icon
+    // carries no text alternative, so the button would otherwise be nameless.
+    'aria-label': 'Edit',
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -56,6 +59,7 @@ export const DarkTheme: Story = {
   args: {
     children: <EditIcon styles={{ theme: 'dark' }} />,
     styles: { theme: 'dark' },
+    'aria-label': 'Edit',
   },
   globals: { backgrounds: { value: 'dark' } },
 }
@@ -67,6 +71,7 @@ export const SacredTheme: Story = {
   args: {
     children: <EditIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'sacred' },
+    'aria-label': 'Edit',
   },
   globals: { backgrounds: { value: 'sacred' } },
 }
@@ -82,16 +87,16 @@ export const Sizes: Story = {
   name: 'Variants/Sizes',
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <IconButton size="xsmall" styles={{ theme: 'light' }}>
+      <IconButton size="xsmall" styles={{ theme: 'light' }} aria-label="Delete">
         <DeleteIcon styles={{ theme: 'light' }} />
       </IconButton>
-      <IconButton size="small" styles={{ theme: 'light' }}>
+      <IconButton size="small" styles={{ theme: 'light' }} aria-label="Delete">
         <DeleteIcon styles={{ theme: 'light' }} />
       </IconButton>
-      <IconButton size="medium" styles={{ theme: 'light' }}>
+      <IconButton size="medium" styles={{ theme: 'light' }} aria-label="Delete">
         <DeleteIcon styles={{ theme: 'light' }} />
       </IconButton>
-      <IconButton size="large" styles={{ theme: 'light' }}>
+      <IconButton size="large" styles={{ theme: 'light' }} aria-label="Delete">
         <DeleteIcon styles={{ theme: 'light' }} />
       </IconButton>
     </div>
@@ -115,25 +120,53 @@ export const Colors: Story = {
   // per-block wrappers needed.
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <IconButton color="primary" styles={{ theme: 'light' }}>
+      <IconButton
+        color="primary"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (primary)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="secondary" styles={{ theme: 'light' }}>
+      <IconButton
+        color="secondary"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (secondary)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="success" styles={{ theme: 'light' }}>
+      <IconButton
+        color="success"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (success)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="error" styles={{ theme: 'light' }}>
+      <IconButton
+        color="error"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (error)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="info" styles={{ theme: 'light' }}>
+      <IconButton
+        color="info"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (info)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="warning" styles={{ theme: 'light' }}>
+      <IconButton
+        color="warning"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (warning)"
+      >
         <FavoriteIcon styles={{ theme: 'dark' }} />
       </IconButton>
-      <IconButton color="default" styles={{ theme: 'light' }}>
+      <IconButton
+        color="default"
+        styles={{ theme: 'light' }}
+        aria-label="Favorite (default)"
+      >
         <FavoriteIcon styles={{ theme: 'light' }} />
       </IconButton>
     </div>
