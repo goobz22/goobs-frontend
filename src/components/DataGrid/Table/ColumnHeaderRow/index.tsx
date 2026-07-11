@@ -22,6 +22,15 @@ interface ColumnHeaderRowProps {
   // New props for column actions
   onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
   onManageColumns?: () => void
+  /**
+   * Field name of the column the grid is currently sorted by, or null when
+   * unsorted. Drives `aria-sort` on the matching `<th>` so screen-reader users
+   * perceive sort state (WCAG 1.3.1 / 4.1.2) — the DataGrid owns the sort state
+   * and threads it down here.
+   */
+  sortField?: string | null
+  /** Current sort direction for `sortField` ('asc' | 'desc'). */
+  sortDirection?: 'asc' | 'desc'
   // Column drag and drop props
   draggedColumn?: string | null
   onColumnDragStart?: (field: string) => void
@@ -40,6 +49,8 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   styles,
   onColumnSort,
   onManageColumns,
+  sortField,
+  sortDirection,
   draggedColumn,
   onColumnDragStart,
   onColumnDragOver,
@@ -66,11 +77,18 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   return (
     <tr className={cssStyles.headerRow} data-theme={theme}>
       {/* Header checkbox for select all */}
-      <th className={`${cssStyles.headerCell} ${cssStyles.headerCellCheckbox}`}>
+      <th
+        scope="col"
+        className={`${cssStyles.headerCell} ${cssStyles.headerCellCheckbox}`}
+      >
         <Checkbox
           checked={allRowsSelected}
           indeterminate={someRowsSelected}
           onChange={handleCheckboxChange}
+          // Icon-only control needs a programmatic name — there is no visible
+          // label text next to the select-all checkbox (WCAG 4.1.2). Checkbox
+          // spreads unknown props onto its underlying <input>.
+          aria-label="Select all rows"
           styles={{
             theme: isSacredTheme ? 'sacred' : 'light',
           }}
@@ -90,6 +108,16 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             } as React.CSSProperties)
           : undefined
 
+        // aria-sort reflects the grid's current sort state on the sorted
+        // column and is omitted on the rest (WCAG 1.3.1 / 4.1.2). The parent
+        // owns sort state and threads it in via sortField/sortDirection.
+        const ariaSort: 'ascending' | 'descending' | undefined =
+          sortField === col.field
+            ? sortDirection === 'desc'
+              ? 'descending'
+              : 'ascending'
+            : undefined
+
         return (
           <th
             key={col.field}
@@ -105,13 +133,15 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
             //     drag source — useful for asserting drag-drop state.
             //   - role="columnheader": ARIA semantics for screenreaders
             //     and accessibility tools.
-            // (aria-sort is omitted because the header doesn't track
-            // current sort direction internally — sorting is owned by
-            // the parent. Consumers that want aria-sort should expose
-            // sort direction via a future prop.)
+            //   - scope="col": associates every data cell in the column with
+            //     this header for assistive-tech table navigation.
+            //   - aria-sort: current sort direction when this is the sorted
+            //     column (set by the parent's sort state).
             data-column-header={col.field}
             data-dragging={isDragging ? 'true' : undefined}
             role="columnheader"
+            scope="col"
+            aria-sort={ariaSort}
             style={headerCellStyle}
             draggable
             onDragStart={() => onColumnDragStart?.(col.field)}

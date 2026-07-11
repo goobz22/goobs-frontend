@@ -321,6 +321,16 @@ function DataGridContent({
   const [showManageColumns, setShowManageColumns] = useState(false)
 
   /**
+   * Active column sort ({ field, direction }) or null when unsorted. Surfaced
+   * to the header via `aria-sort` so sort state is perceivable by assistive
+   * technology, not conveyed by the chevron menu interaction alone.
+   */
+  const [sortState, setSortState] = useState<{
+    field: string
+    direction: 'asc' | 'desc'
+  } | null>(null)
+
+  /**
    * STEP 1: Filter out id/_id columns unless explicitly shown.
    * Most UIs don't need to show database IDs to users.
    */
@@ -1016,6 +1026,10 @@ function DataGridContent({
    */
   const handleColumnSort = useCallback(
     (field: string, direction: 'asc' | 'desc') => {
+      // Remember the active sort so the header can expose `aria-sort` to
+      // assistive tech (WCAG 1.3.1 / 4.1.2).
+      setSortState({ field, direction })
+
       const sortFn = (a: RowData, b: RowData) => {
         const aValue = a[field]
         const bValue = b[field]
@@ -1202,6 +1216,9 @@ function DataGridContent({
       data-grid-status={gridStatus}
       role="grid"
       aria-rowcount={filteredRows.length}
+      // +1 for the leading selection column, so the reported column count
+      // matches the rendered header cells (complements aria-rowcount).
+      aria-colcount={visibleColumns.length + 1}
       ref={containerRef}
     >
       {/* ─────────────────────────────────────────────────────────────────────
@@ -1388,6 +1405,8 @@ function DataGridContent({
           onCreateRowSave={handleCreateRowSave}
           onCreateRowCancel={handleCreateRowCancel}
           onColumnSort={handleColumnSort}
+          {...(sortState ? { sortField: sortState.field } : {})}
+          {...(sortState ? { sortDirection: sortState.direction } : {})}
           onManageColumns={handleToggleManageColumns}
           draggedColumn={draggedColumn}
           onColumnDragStart={handleColumnDragStart}

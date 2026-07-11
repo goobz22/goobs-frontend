@@ -686,6 +686,10 @@ export interface TableProps {
   // ─────────────────────────────────────────────────────────────────────────────
   /** Called when user sorts a column */
   onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
+  /** Field the grid is currently sorted by (drives `aria-sort` on the header) */
+  sortField?: string | null
+  /** Current sort direction for `sortField` */
+  sortDirection?: 'asc' | 'desc'
   /** Called when user opens column management modal */
   onManageColumns?: () => void
 

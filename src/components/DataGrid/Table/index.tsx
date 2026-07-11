@@ -105,6 +105,8 @@ function Table({
   onCreateRowCancel,
   creationRowPosition = 'top',
   onColumnSort,
+  sortField,
+  sortDirection,
   onManageColumns,
   draggedColumn,
   onColumnDragStart,
@@ -241,6 +243,8 @@ function Table({
               resizingColumn={resizingColumn}
               {...(styles ? { styles } : {})}
               {...(onColumnSort ? { onColumnSort } : {})}
+              {...(sortField != null ? { sortField } : {})}
+              {...(sortDirection ? { sortDirection } : {})}
               {...(onManageColumns ? { onManageColumns } : {})}
               {...(draggedColumn != null ? { draggedColumn } : {})}
               {...(onColumnDragStart ? { onColumnDragStart } : {})}
