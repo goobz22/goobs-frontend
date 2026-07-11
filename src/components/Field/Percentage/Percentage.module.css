@@ -47,6 +47,27 @@
   cursor: not-allowed;
 }
 
+/* Focus-coloured border when anything inside is focused — mirrors FieldShell's
+   .inputSlot:focus-within treatment (the --field-border-focus custom property
+   is theme-switched on the parent .shell and cascades in). */
+.inputWrapper:focus-within {
+  border-color: var(--field-border-focus, var(--goobs-gold-a70));
+}
+
+/* Visible keyboard focus ring (WCAG 2.4.7 Focus Visible / 2.4.11 Focus
+   Appearance): the <input> above resets outline:none, so restore a clear ring
+   on real focus. The +/- spin buttons get their own ring so keyboard users can
+   tell WHICH control is focused. The ring uses the theme-aware focus colour. */
+.input:focus-visible {
+  outline: 2px solid var(--field-border-focus, var(--goobs-gold-a70));
+  outline-offset: -2px;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--field-border-focus, var(--goobs-gold-a70));
+  outline-offset: 1px;
+}
+
 .adornmentContainer {
   position: absolute;
   right: 8px;
@@ -81,4 +102,13 @@
 
 .buttonDecrement {
   margin-top: 2px;
+}
+
+/* Respect reduced-motion (WCAG 2.3.3): drop the border/background transitions
+   for users who opt out of non-essential motion. */
+@media (prefers-reduced-motion: reduce) {
+  .inputWrapper,
+  .button {
+    transition: none;
+  }
 }
