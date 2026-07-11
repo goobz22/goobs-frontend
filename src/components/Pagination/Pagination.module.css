@@ -29,12 +29,24 @@
 }
 
 /* --------------------------------------------------------------------------
-   BUTTON CONTAINER (was buttonContainerStyle)
+   BUTTON CONTAINER (was buttonContainerStyle) — now the semantic <ul> list of
+   pagination items. Reset the UA list chrome (marker/margin/padding) so the
+   flex row renders exactly as the old <div> did.
    -------------------------------------------------------------------------- */
 .buttonContainer {
   display: flex;
   align-items: center;
   gap: var(--pagination-gap, 8px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each pagination item is an <li> wrapping a single control; flex so the li
+   sizes to and vertically centres its button/ellipsis child. */
+.listItem {
+  display: flex;
+  align-items: center;
 }
 
 /* ==========================================================================
@@ -52,6 +64,41 @@
   transition: all 0.3s ease;
   font-size: 14px;
   box-sizing: border-box;
+  /* Drop the UA outline for pointer users; the keyboard-only ring is restored
+     on :focus-visible below (WCAG 2.4.7). */
+  outline: none;
+}
+
+/* ==========================================================================
+   KEYBOARD FOCUS INDICATOR (WCAG 2.4.7 / 2.4.11)
+   -------------------------------------------------------------------------
+   Every page/nav button is keyboard reachable; :focus-visible restores a
+   clearly-visible ring ONLY for keyboard/AT focus. Uses `outline` (never fights
+   the hover/selected glow) with an offset so it clears each button's own
+   border, and a SOLID colour — the translucent --goobs-*-focus-ring tokens
+   composite below the 3:1 non-text floor over these surfaces (same reasoning as
+   Button.md). The bare default is the MUI light palette, so the base ring is
+   the light primary; the sacred/dark overrides follow.
+   ========================================================================== */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: 2px;
+}
+
+.root[data-theme='sacred'] .button:focus-visible {
+  outline-color: var(--goobs-sacred-focus-ring);
+}
+
+.root[data-theme='dark'] .button:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
+/* Honour prefers-reduced-motion (WCAG 2.3.3) — drop the 0.3s state transition
+   so hover/focus/selected changes apply instantly for motion-sensitive users. */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
