@@ -139,7 +139,9 @@ function PanelInner({
   // so the header-less case degrades to an un-named region (or a consumer's
   // own `aria-label`/`aria-labelledby` via restProps) rather than a broken ref.
   const hasHeader = React.Children.toArray(children).some(
-    child => React.isValidElement(child) && child.type === PanelHeader
+    child =>
+      React.isValidElement(child) &&
+      child.type === (PanelHeader as React.ElementType)
   )
 
   return (
