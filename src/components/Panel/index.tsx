@@ -195,8 +195,7 @@ function PanelInner({
   // or the fullscreen dialog opens (APG dialog description; WCAG 4.1.2). Gate
   // the attribute on the subtitle actually rendering (Panel.Header renders the
   // subtitle only when `subtitle !== undefined`) so the IDREF is never dangling.
-  const hasSubtitle =
-    hasHeader && headerChild.props.subtitle !== undefined
+  const hasSubtitle = headerChild?.props.subtitle !== undefined
 
   // Does the region have an accessible NAME? Either the header title, or a
   // consumer-supplied `aria-label`/`aria-labelledby` passed through restProps.

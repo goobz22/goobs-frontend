@@ -236,6 +236,68 @@ export const HeadingLevel: Story = {
 }
 
 /**
+ * The header `subtitle` is the panel's DESCRIPTION: it is wired to the root via
+ * `aria-describedby` so assistive tech announces it alongside the title when the
+ * named region is entered / the fullscreen dialog opens (APG dialog description;
+ * WCAG 4.1.2). The play function pins that the root's `aria-describedby` resolves
+ * to the real subtitle element carrying the expected text.
+ */
+export const SubtitleDescription: Story = {
+  name: 'A11y/Subtitle is the description (aria-describedby)',
+  args: { variant: 'standard' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header
+        onBack={fn()}
+        title="Edit Product"
+        subtitle="SKU-00421 — wholesale catalog entry"
+        actions={<CustomButton text="Save" styles={{ theme: 'light' }} />}
+      />
+      <Panel.Body>{sampleBody}</Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector('[data-component="Panel"]')
+    await expect(region).not.toBeNull()
+    // The subtitle is exposed as the panel's programmatic description.
+    const describedBy = region?.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    const descTarget = canvasElement.querySelector(`#${describedBy}`)
+    await expect(descTarget).not.toBeNull()
+    // It resolves to the real subtitle element, not a dangling IDREF.
+    await expect(descTarget).toHaveAttribute('data-panel-subtitle', 'true')
+    await expect(descTarget).toHaveTextContent(
+      'SKU-00421 — wholesale catalog entry'
+    )
+  },
+}
+
+/**
+ * A subtitle-less header must NOT emit a dangling `aria-describedby` — the root
+ * carries the attribute only when a subtitle actually renders (no broken IDREF).
+ */
+export const NoSubtitleNoDescription: Story = {
+  name: 'A11y/No subtitle → no aria-describedby',
+  args: { variant: 'standard' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header
+        onBack={fn()}
+        title="Details"
+        actions={<CustomButton text="Save" styles={{ theme: 'light' }} />}
+      />
+      <Panel.Body>{sampleBody}</Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector('[data-component="Panel"]')
+    await expect(region).not.toBeNull()
+    // No subtitle → no aria-describedby (rather than a dangling IDREF).
+    await expect(region).not.toHaveAttribute('aria-describedby')
+  },
+}
+
+/**
  * Header-less composition (Body only). The root must NOT emit a dangling
  * `aria-labelledby` when no `Panel.Header` supplies the title id, AND — having
  * no accessible name — must NOT declare an explicit `role="region"` landmark
@@ -373,6 +435,14 @@ export const FullscreenModal: Story = {
     await expect(region).not.toBeNull()
     await expect(region).toHaveAttribute('role', 'dialog')
     await expect(region).toHaveAttribute('aria-modal', 'true')
+    // The dialog exposes both a name (title) and a description (subtitle) so a
+    // screen reader announces the takeover's purpose on open (APG dialog).
+    await expect(region).toHaveAttribute('aria-labelledby')
+    const dialogDescribedBy = region?.getAttribute('aria-describedby')
+    await expect(dialogDescribedBy).toBeTruthy()
+    await expect(
+      canvasElement.querySelector(`#${dialogDescribedBy}`)
+    ).toHaveAttribute('data-panel-subtitle', 'true')
     // Focus is moved INTO the takeover on mount.
     await waitFor(() =>
       expect(region!.contains(document.activeElement)).toBe(true)
