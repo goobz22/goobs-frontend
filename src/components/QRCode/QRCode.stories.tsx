@@ -8,6 +8,9 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
 import QRCode from './index'
 
+// argTypes below reference the additive `headingLevel` prop; keep it exercised
+// by the SemanticHeadingLevel + SuccessAnnouncement stories.
+
 const meta: Meta<typeof QRCode> = {
   title: 'Components/QRCode',
   component: QRCode,
@@ -19,6 +22,10 @@ const meta: Meta<typeof QRCode> = {
     size: { control: 'number' },
     level: { control: { type: 'select' }, options: ['L', 'M', 'Q', 'H'] },
     title: { control: 'text' },
+    headingLevel: {
+      control: { type: 'select' },
+      options: [1, 2, 3, 4, 5, 6],
+    },
     bgColor: { control: 'color' },
     fgColor: { control: 'color' },
     styles: { control: 'object' },
@@ -209,4 +216,101 @@ export const WithConfirmationInput: Story = {
     )
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY — semantic heading level + announced success transition
+// --------------------------------------------------------------------------
+
+/**
+ * Exercises the additive `headingLevel` prop (WCAG 1.3.1 / 2.4.6): the `title`
+ * renders as a real `<h2>` instead of the fixed default `<h5>`, so the panel
+ * slots into a surrounding document outline without skipping levels. Inspect
+ * the DOM — the heading text is an `<h2>`, and the canvas exposes
+ * `role="img"` + an `aria-label` naming the code.
+ */
+export const SemanticHeadingLevel: Story = {
+  name: 'Semantic Heading Level (h2)',
+  args: {
+    value: sampleValue,
+    size: 220,
+    title: 'Scan to set up MFA',
+    headingLevel: 2,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Exercises the success-state announcement (WCAG 4.1.3): toggling
+ * `showSuccessState` swaps the QR panel for the success pane with NO focus
+ * move, so a persistent, always-mounted `role="status"` live region announces
+ * the success message. The check icon and (sacred) glyph are decorative and
+ * `aria-hidden`, so assistive tech reads only the heading + the announcement.
+ * Toggle the button with a screen reader running to hear "Verification
+ * Successful" announced without the focus leaving the toggle button.
+ */
+export const SuccessAnnouncement: Story = {
+  name: 'Announced Success Transition',
+  render: function SuccessAnnouncementStory() {
+    const [verified, setVerified] = useState(false)
+
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setVerified(v => !v)}
+          style={{ marginBottom: '1rem' }}
+        >
+          {verified ? 'Reset' : 'Mark verified'}
+        </button>
+        <QRCode
+          value={sampleValue}
+          size={220}
+          title="Scan to set up MFA"
+          headingLevel={2}
+          showSuccessState={verified}
+          successMessage="Verification Successful"
+          onDisableVerification={() => setVerified(false)}
+          styles={{ theme: 'light' }}
+        />
+      </div>
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Sacred success pane: verifies the decorative Egyptian glyph (𓊹) carries
+ * `aria-hidden` so a screen reader does not read it as a stray character
+ * (WCAG 1.1.1), while the persistent live region still announces the message.
+ */
+export const SacredSuccessAnnouncement: Story = {
+  name: 'Announced Success Transition (Sacred)',
+  render: function SacredSuccessAnnouncementStory() {
+    const [verified, setVerified] = useState(false)
+
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setVerified(v => !v)}
+          style={{ marginBottom: '1rem' }}
+        >
+          {verified ? 'Reset' : 'Complete the rite'}
+        </button>
+        <QRCode
+          value={sampleValue}
+          size={220}
+          title="Scan the sacred sigil"
+          headingLevel={2}
+          showSuccessState={verified}
+          successMessage="The rite is complete"
+          onDisableVerification={() => setVerified(false)}
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
+    )
+  },
+  globals: { backgrounds: { value: 'dark' } },
 }
