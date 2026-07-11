@@ -36,6 +36,13 @@ export interface SelectProps extends Omit<
   name?: string
   /** Stable test selector — emitted as `data-field-name`; defaults to `name`. */
   dataFieldName?: string
+  /**
+   * Forwarded ref to the underlying native `<select>` element (React 19
+   * ref-as-prop) so consumers can focus it, read its value, or scroll it into
+   * view. The root wrapper and custom arrow are decorative chrome — the ref
+   * lands on the real control, not the wrapper.
+   */
+  ref?: React.Ref<HTMLSelectElement>
 }
 
 function mergeClassNames(...names: Array<string | undefined>): string {
@@ -57,6 +64,7 @@ const Select: React.FC<SelectProps> = ({
   value: valueProp,
   onChange: onChangeProp,
   onBlur: onBlurProp,
+  ref,
   ...props
 }) => {
   // Tier-1 form binding. Inside a <Form> with a `name` and no explicit value,
@@ -175,6 +183,7 @@ const Select: React.FC<SelectProps> = ({
       data-disabled={disabled ? 'true' : undefined}
     >
       <select
+        ref={ref}
         className={selectClassName}
         style={selectStyle}
         disabled={disabled}
