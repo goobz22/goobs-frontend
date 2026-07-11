@@ -45,6 +45,65 @@
 }
 
 /* --------------------------------------------------------------------------
+   CONTAINER KEYBOARD FOCUS RING (WCAG 2.1.1 / 2.4.7)
+   The container is the horizontal scroll viewport (overflow-x: auto) and is
+   keyboard-focusable (tabIndex=0 in index.tsx) so keyboard-only users can
+   scroll an overflowing table with the arrow keys. Show the ring ONLY for
+   keyboard/AT focus; drop the UA outline when focused by pointer. Inset offset
+   so the ring is never clipped by the container's own border. Sacred is the
+   always-stamped default palette, with the light base ring and the sacred/dark
+   overrides matching the Pagination focus-ring convention.
+   -------------------------------------------------------------------------- */
+.container:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.container:focus-visible {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: -2px;
+}
+
+.container[data-theme='sacred']:focus-visible {
+  outline-color: var(--goobs-sacred-focus-ring);
+}
+
+.container[data-theme='dark']:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
+/* --------------------------------------------------------------------------
+   CAPTION (Table `caption` prop → <caption>) — the table's accessible name.
+   Themed like a header label: sacred gold default, dark-text light / dark
+   overrides via the container or table cascade (the caption carries no
+   data-theme of its own).
+   -------------------------------------------------------------------------- */
+.caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--goobs-space-sm) var(--goobs-space-md);
+  color: var(--table-header-color, var(--goobs-gold));
+  font-family: var(--table-font-family, var(--goobs-font-sacred));
+  font-weight: 700;
+  letter-spacing: var(--goobs-tracking-sacred-wide);
+}
+
+.container[data-theme='light'] .caption,
+.table[data-theme='light'] .caption {
+  color: var(--table-header-color, var(--goobs-light-text));
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.container[data-theme='dark'] .caption,
+.table[data-theme='dark'] .caption {
+  color: var(--table-header-color, var(--goobs-dark-text));
+  font-family: var(--table-font-family, inherit);
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+/* --------------------------------------------------------------------------
    TABLE (Table → table) — identical across all three themes (table.ts *.table)
    Also reused by TableBody → tbody (the old code applied .table styles there).
    `styles.theme` on Table stamps `data-theme` on the <table>, and the
@@ -135,6 +194,14 @@
 .table[data-theme='dark']
   .row[data-hover='true']:not([data-theme='light'], [data-theme='sacred']):hover {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Honour prefers-reduced-motion (WCAG 2.3.3) — apply the hover background
+   change instantly for motion-sensitive users instead of fading it in. */
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
 }
 
 /* --------------------------------------------------------------------------

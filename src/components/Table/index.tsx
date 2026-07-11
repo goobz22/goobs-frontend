@@ -49,6 +49,19 @@ export interface TableStyles {
 
 type CSSVarStyle = CSSProperties & Record<`--${string}`, string>
 
+/**
+ * Which table section a cell is being rendered in. `TableHead` provides
+ * `'head'` and `TableBody` provides `'body'` so a `TableCell` can resolve the
+ * semantically-correct element WITHOUT any prop from the caller: a cell inside
+ * `TableHead` renders as `<th scope="col">` (column header) instead of a plain
+ * `<td>`, giving screen readers the column↔cell association a data table needs
+ * (WCAG 1.3.1 / 4.1.2). The context carries no DOM node, so `<thead>`/`<tbody>`
+ * remain the direct `<table>` children.
+ */
+const TableSectionContext = React.createContext<'head' | 'body' | undefined>(
+  undefined
+)
+
 /** Resolve the active theme name, defaulting to sacred (the hardcoded base). */
 const resolveTheme = (styles?: TableStyles): 'sacred' | 'light' | 'dark' =>
   styles?.theme ?? 'sacred'
@@ -137,6 +150,13 @@ const cellVars = (styles?: TableStyles): CSSVarStyle | undefined => {
 export interface SimpleTableProps {
   children: React.ReactNode
   /**
+   * Optional table caption rendered as a real `<caption>` (the `<table>`'s
+   * accessible name and the first thing a screen reader announces for it).
+   * Supply it whenever a page has more than one table so assistive tech and
+   * crawlers can tell them apart (WCAG 1.3.1 / 2.4.6). Omitted → no caption.
+   */
+  caption?: React.ReactNode
+  /**
    * Shared styling surface. On this part, `theme` stamps `data-theme` on the
    * `<table>` (cascading to unthemed descendants) and `backgroundColor`
    * paints the table surface; the header/cell/font keys inherit down to
@@ -148,6 +168,15 @@ export interface SimpleTableProps {
 /** Props for the `TableContainer` wrapper around a `Table`. */
 export interface TableContainerProps {
   children: React.ReactNode
+  /**
+   * Accessible name for the horizontally-scrollable region. The container is
+   * always keyboard-focusable (`tabIndex=0`) so keyboard-only users can scroll
+   * an overflowing table with the arrow keys (WCAG 2.1.1); supplying this name
+   * additionally promotes it to a labelled `role="region"` landmark so screen
+   * readers announce the scrollable area meaningfully. Omitted → focusable but
+   * unlabelled (no `region` role, to avoid an unnamed landmark).
+   */
+  ariaLabel?: string
   /**
    * Shared styling surface. The container reads `theme` (always stamped,
    * sacred default), `backgroundColor`, `borderColor`, `borderRadius`,
@@ -186,16 +215,31 @@ export interface TableRowProps {
   styles?: TableStyles
 }
 
-/** Props for the `TableCell` part (the `<td>` element). */
+/** Props for the `TableCell` part (renders `<td>`, or `<th>` for a header cell). */
 export interface TableCellProps {
   /**
-   * Cell content. When the direct child is a `<th>` element, the cell is
-   * flagged `data-header-cell="true"` so the CSS module styles it as a
-   * header cell.
+   * Cell content. A cell resolves to a header `<th>` automatically when it
+   * sits inside a `TableHead`; passing a raw `<th>` child (the legacy pattern)
+   * is unwrapped to the same real `<th>` rather than emitting invalid
+   * `<td><th>` markup. Header cells are flagged `data-header-cell="true"` so
+   * the CSS module styles them as header cells.
    */
   children: React.ReactNode
   /** Horizontal text alignment, applied as an inline `text-align`. Default 'left'. */
   align?: 'left' | 'center' | 'right'
+  /**
+   * Force the rendered element. Omit to auto-resolve: cells in a `TableHead`
+   * render as `<th>`, cells elsewhere as `<td>`. Pass `'th'` to mark a
+   * body-row header cell (pair with `scope="row"`); pass `'td'` to keep a
+   * head cell a plain data cell.
+   */
+  component?: 'td' | 'th'
+  /**
+   * `scope` for a header cell — only emitted when the cell renders as `<th>`.
+   * Defaults to `'col'` for header cells (column headers in a `TableHead`);
+   * set `'row'` on a leading body cell to make it that row's header.
+   */
+  scope?: 'col' | 'row' | 'colgroup' | 'rowgroup'
   /**
    * Shared styling surface. The cell reads `color`, `fontFamily`,
    * `cellBorderColor`, plus the header background/color keys (for
@@ -213,6 +257,7 @@ export interface TableCellProps {
  */
 export const TableContainer: React.FC<TableContainerProps> = ({
   children,
+  ariaLabel,
   styles,
 }) => {
   const overrides = containerVars(styles)
@@ -220,6 +265,12 @@ export const TableContainer: React.FC<TableContainerProps> = ({
     <div
       className={cssStyles.container}
       data-theme={resolveTheme(styles)}
+      // The container is the scroll viewport (overflow-x: auto). Making it
+      // focusable lets keyboard-only users scroll an overflowing table via the
+      // arrow keys (WCAG 2.1.1); the :focus-visible ring in the CSS module marks
+      // it. A supplied name promotes it to a labelled region landmark.
+      tabIndex={0}
+      {...(ariaLabel && { role: 'region', 'aria-label': ariaLabel })}
       {...(overrides && { style: overrides })}
     >
       {children}
@@ -239,7 +290,11 @@ export const TableContainer: React.FC<TableContainerProps> = ({
  * between the two cascades, dark outranks light (rule order) — theme them
  * consistently.
  */
-export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
+export const Table: React.FC<SimpleTableProps> = ({
+  children,
+  caption,
+  styles,
+}) => {
   const overrides = tableVars(styles)
   return (
     <table
@@ -248,6 +303,9 @@ export const Table: React.FC<SimpleTableProps> = ({ children, styles }) => {
       {...subThemeAttr(styles)}
       {...(overrides && { style: overrides })}
     >
+      {caption != null && (
+        <caption className={cssStyles.caption}>{caption}</caption>
+      )}
       {children}
     </table>
   )
@@ -266,7 +324,9 @@ export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
       {...subThemeAttr(styles)}
       {...(overrides && { style: overrides })}
     >
-      {children}
+      <TableSectionContext.Provider value="head">
+        {children}
+      </TableSectionContext.Provider>
     </thead>
   )
 }
@@ -276,7 +336,13 @@ export const TableHead: React.FC<TableHeadProps> = ({ children, styles }) => {
  * surface; theme and overrides reach its rows via the container/table cascade.
  */
 export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
-  return <tbody className={cssStyles.table}>{children}</tbody>
+  return (
+    <tbody className={cssStyles.table}>
+      <TableSectionContext.Provider value="body">
+        {children}
+      </TableSectionContext.Provider>
+    </tbody>
+  )
 }
 
 /**
@@ -301,31 +367,62 @@ export const TableRow: React.FC<TableRowProps> = ({
 }
 
 /**
- * `<td>` part. `align` maps to an inline `text-align` (left default). When its
- * direct child is a `<th>` element the cell is flagged
- * `data-header-cell="true"` and styled as a header cell, honoring the header
- * background/color overrides; otherwise the body-cell color/border/font
- * overrides apply. `data-theme` is stamped only when explicitly themed.
+ * Cell part. `align` maps to an inline `text-align` (left default). The element
+ * resolves to a semantic header `<th scope="col">` when the cell sits inside a
+ * `TableHead`, when `component="th"`, or when a raw `<th>` child is passed (that
+ * child is unwrapped so we never emit invalid `<td><th>` nesting); otherwise a
+ * body `<td>` is rendered. Header cells are flagged `data-header-cell="true"`
+ * and styled as header cells, honoring the header background/color overrides;
+ * body cells honor the color/border/font overrides. `scope` (default `'col'`
+ * for header cells) associates the header with its column — or set `'row'` on a
+ * leading body cell (`component="th"`) for a row header. `data-theme` is stamped
+ * only when explicitly themed.
  */
 export const TableCell: React.FC<TableCellProps> = ({
   children,
   align = 'left',
+  component,
+  scope,
   styles,
 }) => {
-  const isHeader =
+  const section = React.useContext(TableSectionContext)
+  const childIsRawTh =
     React.isValidElement(children) &&
     (children as React.ReactElement).type === 'th'
 
-  const overrides = cellVars(styles)
+  // Render a real header cell when the caller forces it, the cell is inside a
+  // TableHead, or a raw <th> child was supplied (legacy pattern).
+  const renderAsHeader =
+    component === 'th' || section === 'head' || childIsRawTh
 
-  return (
+  // Unwrap a legacy raw <th> child to its content — a <th>/<td> can't contain
+  // another <th>, so we hoist the text onto the header cell we render.
+  const content = childIsRawTh
+    ? (children as React.ReactElement<{ children?: React.ReactNode }>).props
+        .children
+    : children
+
+  const overrides = cellVars(styles)
+  const resolvedScope = scope ?? (renderAsHeader ? 'col' : undefined)
+  const style = { textAlign: align, ...(overrides ?? {}) }
+
+  return renderAsHeader ? (
+    <th
+      className={cssStyles.cell}
+      {...subThemeAttr(styles)}
+      data-header-cell="true"
+      {...(resolvedScope && { scope: resolvedScope })}
+      style={style}
+    >
+      {content}
+    </th>
+  ) : (
     <td
       className={cssStyles.cell}
       {...subThemeAttr(styles)}
-      {...(isHeader && { 'data-header-cell': 'true' })}
-      style={{ textAlign: align, ...(overrides ?? {}) }}
+      style={style}
     >
-      {children}
+      {content}
     </td>
   )
 }

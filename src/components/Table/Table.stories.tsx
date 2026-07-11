@@ -145,13 +145,11 @@ export const Dark: Story = {
  * midnight navy), the teal header bg (`--table-header-bg`), and white header
  * text (`--table-header-color`); the container sets lavender cell text
  * (`--table-cell-color`), monospace font, and coral cell borders — all
- * inheriting down. A header-row cell here is a plain `<td>` (not a
- * `data-header-cell` th), so it would otherwise inherit the container's
- * lavender `--table-cell-color` and render lavender-on-teal (2.96:1, fails
- * contrast); each header cell therefore re-sets `--table-cell-color` to white
- * on itself (a closer override beats the inherited value, matching the Table's
- * white `headerColor`) → white-on-teal 5.47:1. The body cells keep the
- * container's lavender on the navy surface (9.52:1).
+ * inheriting down. The header-row cells sit inside `TableHead`, so each
+ * resolves to a real `<th scope="col">` and takes its colour from
+ * `--table-header-color` (white) on the teal `--table-header-bg` → white-on-teal
+ * 5.47:1 (no per-cell override needed). The body cells keep the container's
+ * lavender on the navy surface (9.52:1).
  */
 export const StyleOverrides: Story = {
   globals: { backgrounds: { value: 'dark' } },
@@ -174,10 +172,10 @@ export const StyleOverrides: Story = {
       >
         <TableHead>
           <TableRow>
-            <TableCell styles={{ color: '#ffffff' }}>ID</TableCell>
-            <TableCell styles={{ color: '#ffffff' }}>Name</TableCell>
-            <TableCell styles={{ color: '#ffffff' }}>Category</TableCell>
-            <TableCell styles={{ color: '#ffffff' }}>Status</TableCell>
+            <TableCell>ID</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Category</TableCell>
+            <TableCell>Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -225,5 +223,72 @@ export const BareTableThemed: Story = {
         ))}
       </TableBody>
     </Table>
+  ),
+}
+
+/**
+ * Full accessible data-table semantics (WCAG 1.3.1 / 4.1.2 / 2.4.6). Pins:
+ *  - `caption` renders a real `<caption>` — the table's accessible name.
+ *  - `ariaLabel` on the container promotes the scrollable region to a labelled
+ *    `role="region"` landmark; the region is keyboard-focusable so keyboard
+ *    users can scroll it (visible via the `:focus-visible` ring).
+ *  - cells inside `TableHead` auto-render `<th scope="col">` — no prop needed.
+ *  - the leading body cell of each row is a `<th scope="row">` via
+ *    `component="th" scope="row"`, so screen readers announce the row's name
+ *    with every value cell.
+ */
+export const SemanticDataTable: Story = {
+  globals: { backgrounds: { value: 'sacred' } },
+  render: () => (
+    <TableContainer
+      ariaLabel="Sacred reports"
+      styles={{ theme: 'sacred' }}
+    >
+      <Table caption="Sacred reports by category" styles={{ theme: 'sacred' }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Report</TableCell>
+            <TableCell>Category</TableCell>
+            <TableCell>Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sampleData.map(row => (
+            <TableRow key={row.id} hover>
+              <TableCell component="th" scope="row">
+                {row.name}
+              </TableCell>
+              <TableCell>{row.category}</TableCell>
+              <TableCell>{row.status}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  ),
+}
+
+/**
+ * Legacy raw-`<th>`-child pattern — pins that `<TableCell><th>…</th></TableCell>`
+ * now renders a single valid `<th scope="col">` (the child `<th>` is unwrapped
+ * to the header cell's content) instead of the previously-invalid `<td><th>`
+ * nesting. Rendered outside a `TableHead` to prove the unwrap path is what
+ * produces the header cell here.
+ */
+export const LegacyHeaderChild: Story = {
+  globals: { backgrounds: { value: 'sacred' } },
+  render: () => (
+    <TableContainer styles={{ theme: 'sacred' }}>
+      <Table styles={{ theme: 'sacred' }}>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <th>Raw th header</th>
+            </TableCell>
+            <TableCell>Body value</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
   ),
 }
