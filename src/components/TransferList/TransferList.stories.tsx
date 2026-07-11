@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import { z } from 'zod'
 import TransferList, { TransferListDropdownDataMap } from './index'
 import Form from '../Form'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, fireEvent, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof TransferList> = {
   title: 'Components/TransferList',
@@ -414,6 +414,13 @@ export const InteractiveDemo: Story = {
  * markup that lets screen-reader and search-engine users perceive the outline
  * and list structure — none of which existed when the titles were styled
  * `<div>`s and the items were `<button>`s in a `<div>`.
+ *
+ * Also pins the review-fix invariants: each list carries an EXPLICIT
+ * `role="list"` and each row an EXPLICIT `role="listitem"` (Safari strips the
+ * implicit roles when `list-style: none`, so the attributes must be present —
+ * `getByRole('list')` alone would false-pass in jsdom), and the composite
+ * `role="group"` is NAMED (`aria-label` from the column titles) rather than an
+ * anonymous, context-free "group".
  */
 const AccessibleStructureRenderer = () => {
   const [left, setLeft] = React.useState(singleLeftItems)
@@ -460,6 +467,92 @@ export const AccessibleStructure: Story = {
     await expect(
       canvas.getByRole('list', { name: 'On team' })
     ).toBeInTheDocument()
+
+    // The `role="list"` must be an EXPLICIT attribute, not just the <ul>'s
+    // implicit role: Safari drops the implicit list/listitem roles when
+    // `list-style` computes to `none` (which `.listInner` sets), so VoiceOver
+    // only announces "list, N items" if the attribute is literally present.
+    // jsdom keeps the implicit role, so `getByRole('list')` above would
+    // false-pass — assert the raw attribute so a regression that removes it
+    // fails here.
+    const uls = canvasElement.querySelectorAll('ul')
+    await expect(uls.length).toBeGreaterThanOrEqual(2)
+    uls.forEach(ul => expect(ul.getAttribute('role')).toBe('list'))
+
+    // Every row carries an explicit `role="listitem"` for the same reason.
+    const items = canvasElement.querySelectorAll('li')
+    await expect(items.length).toBeGreaterThanOrEqual(1)
+    items.forEach(li => expect(li.getAttribute('role')).toBe('listitem'))
+
+    // The composite group is NAMED (aria-label built from the column titles),
+    // so assistive tech announces its purpose instead of a bare "group". An
+    // unnamed group would not be findable by this accessible name.
+    await expect(
+      canvas.getByRole('group', {
+        name: 'Transfer items between Available and On team',
+      })
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * 7) Whole-row click toggles selection.
+ *
+ * The row `<li>` carries `data-action="toggle"` and `data-checked` (the machine
+ * test selectors) and the CSS paints it with `cursor: pointer` + a hover
+ * affordance. That affordance is truthful: a pointer click anywhere on the row
+ * (its padding / inter-control gaps — where `event.target` is the `<li>`
+ * itself) toggles the row's checkbox, so a consumer test driving a row via
+ * `[data-action="toggle"]` toggles rather than silently no-opping. `fireEvent`
+ * dispatches directly on the `<li>` (target === the row), exercising the guard
+ * path specifically; clicks that land on the checkbox/label are still handled
+ * natively (and would double-fire without the guard). Toggling twice returns to
+ * the unchecked state, proving the row click is a genuine toggle.
+ */
+const RowClickToggleRenderer = () => {
+  const [left, setLeft] = React.useState(singleLeftItems)
+  const [right, setRight] = React.useState(singleRightItems)
+  return (
+    <div style={{ width: '700px', padding: '24px' }}>
+      <TransferList
+        leftItems={left}
+        rightItems={right}
+        onChange={(newLeft, newRight) => {
+          setLeft(newLeft)
+          setRight(newRight)
+        }}
+      />
+    </div>
+  )
+}
+
+export const RowClickToggle: Story = {
+  render: () => <RowClickToggleRenderer />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Item A's row + its native checkbox. The checkbox starts unchecked.
+    const itemACheckbox = canvas.getByRole('checkbox', { name: 'Item A' })
+    await expect(itemACheckbox).not.toBeChecked()
+
+    // The row that owns Item A, addressed by the machine selector.
+    const itemALabel = canvas.getByText('Item A')
+    const row = itemALabel.closest('[data-action="toggle"]') as HTMLElement
+    await expect(row).not.toBeNull()
+
+    // A click that targets the row itself (its padding) toggles the checkbox —
+    // the guarded row onClick fires because event.target === the <li>. Before
+    // the fix this <li> was inert and the click was a silent no-op.
+    await fireEvent.click(row)
+    await expect(itemACheckbox).toBeChecked()
+    await expect(row).toHaveAttribute('data-checked', 'true')
+
+    // Clicking the row again untoggles it — a genuine two-way toggle, not a
+    // one-shot, and never a double-toggle that would land back where it started
+    // on the first click.
+    await fireEvent.click(row)
+    await expect(itemACheckbox).not.toBeChecked()
+    await expect(row).not.toHaveAttribute('data-checked')
   },
 }
 
