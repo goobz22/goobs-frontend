@@ -122,6 +122,40 @@ visual (spinner + label) **and** now programmatic (Issue 5). **No hearing-specif
   transition and the hover transform (`Button.module.css:310`); state colour changes still apply
   instantly. WCAG 2.3.3 satisfied.
 
+## Adversarial review — remaining issues fixed (2026-07-11)
+
+A follow-up adversarial review of the pass above found three residual issues. All fixed at root
+cause within Button ownership (one shared-token improvement deferred to `global.css`).
+
+- **R1 (moderate, 1.4.11 / 2.4.11) — focus ring below 3:1 in light + dark.** The `:focus-visible`
+  ring added in Issue 1 was the *sole* focus indicator, but its light/dark colour came from the
+  translucent `--goobs-light-focus-ring` (rgba(59,130,246,**0.4**)) / `--goobs-dark-focus-ring`
+  (rgba(96,165,250,**0.45**)) tokens. Composited over the button surface those land ~1.6:1 (light)
+  and ~2.0–2.3:1 (dark) — **below** the 3:1 non-text-contrast floor, so Issue 1's "1.4.11 FIXED"
+  claim did not hold on 2 of 3 themes. **Fixed** (`Button.module.css:183, 225`) by pointing the
+  light/dark `outline-color` at the **solid, opaque** `--goobs-light-primary` (#2563eb → **5.17:1**
+  vs white) and `--goobs-dark-primary` (#60a5fa → **~4.8–5.8:1** vs the dark surface / raised
+  surface / page). An opaque ring's contrast is backdrop-independent, so it holds regardless of
+  page colour. Sacred (gold-a60, ~5.3:1) already passed and is unchanged. *No `global.css` edit —
+  references existing `:root` tokens; the underlying token defect is Deferred.*
+- **R2 (minor, T4) — decorative-icon `aria-hidden` not pinned.** No story failed if the
+  `aria-hidden` on `.iconWrapper` (`index.tsx:625`) were reverted, because the goobs `<svg>` has no
+  role/name so `getByRole('button',{name})` resolves identically either way. **Fixed** with a new
+  regression story `A11y/Decorative icon hidden` (`Button.stories.tsx`) that reads the attribute
+  directly and pins **both** branches of the `hasLabel` conditional: a labelled button's icon
+  wrapper *has* `aria-hidden="true"`; an icon-only button's wrapper does *not*. Reverting either
+  branch now fails the story.
+- **R3 (minor, 4.1.3) — busy lifecycle announced start but not completion.** The `role="status"`
+  region announced `'Saving…'` on `pending:false→true` but cleared to `''` silently on
+  `true→false`, so AT heard the save begin but never that it concluded. **Fixed**
+  (`SaveButton.tsx:118-125`) by tracking the `pending` transition (React adjust-state-during-render
+  pattern — previous value in state, no ref/effect, so the strict `react-hooks/refs` +
+  set-state-in-effect rules don't fire) and announcing a new additive `completedLabel`
+  (default `'Save complete'`) on the completion edge. Success-vs-failure is genuinely caller-owned
+  (SaveButton only observes `pending`), documented in the prop JSDoc: a caller whose save can fail
+  announces the error itself and may override/suppress `completedLabel`. Pinned by the new
+  `Busy lifecycle announced (start + completion)` story.
+
 ## SEO semantics
 
 `Button` is an interactive control, not a heading/landmark/link/list/table, so the SEO-semantic
@@ -139,10 +173,12 @@ SaveButton. Every existing `data-component`/`data-action`/`data-subject`/`data-v
 `data-save-*` selector is preserved.
 
 1. **Keyboard focus ring (Issue 1)** — added `.button:focus-visible` (`Button.module.css:82`)
-   using `outline` (not box-shadow, so it never fights the hover glow) + `outline-offset: 2px`,
-   coloured per theme via `--goobs-sacred/light/dark-focus-ring` tokens (`:82, 175, 213`). Inside
-   a group the offset is inverted to `-2px` (`:278`) so the `overflow: hidden` container can't
-   crop it.
+   using `outline` (not box-shadow, so it never fights the hover glow) + `outline-offset: 2px`.
+   Sacred is coloured via `--goobs-sacred-focus-ring` (gold-a60, ~5.3:1). Light/dark now use the
+   **solid** `--goobs-light-primary` (#2563eb) / `--goobs-dark-primary` (#60a5fa) — see the
+   review-fix note below; the earlier translucent `--goobs-light/dark-focus-ring` tokens
+   composited below the 3:1 non-text-contrast floor. Inside a group the offset is inverted to
+   `-2px` (`:278`) so the `overflow: hidden` container can't crop it.
 2. **Toggle state (Issue 2)** — emit `aria-pressed={selected}` when `selected` is defined
    (`index.tsx:641`). `ButtonGroup` already sets `selected` on every child, so the whole segmented
    control becomes a group of toggle buttons.
@@ -177,10 +213,16 @@ Per-file gate: `bun lint:file` on `index.tsx`, `SaveButton.tsx`, `Button.stories
   `aria-pressed` (no leaked toggle semantics).
 - **`A11y/Group role + pressed`** (new) — asserts `role="group"` + name, per-child
   `aria-pressed`, and that clicking another member moves the pressed state.
+- **`A11y/Decorative icon hidden`** (new, review-fix R2) — reads `aria-hidden` on the icon wrapper
+  directly and pins both branches of `hasLabel`: labelled → hidden, icon-only → exposed. Fails if
+  the `index.tsx:625` fix is reverted.
 
 `SaveButton.stories.tsx`:
 - **`Pending (spinner)`** — added a `play` asserting `aria-busy="true"`, `toBeDisabled()`, and a
   `role="status"` region containing "Saving…".
+- **`Busy lifecycle announced (start + completion)`** (new, review-fix R3) — toggles `pending`
+  in both directions and asserts the `role="status"` region announces "Saving…" on start **and**
+  "Save complete" on completion. Fails if the completion edge regresses to a silent clear.
 
 ## Deferred
 
@@ -200,6 +242,17 @@ Per-file gate: `bun lint:file` on `index.tsx`, `SaveButton.tsx`, `Button.stories
   consumer. **Suggested owner change:** `src/components/Icons/*.tsx` — add `aria-hidden="true"` by
   default on the `<svg>` (overridable when an icon is used as standalone content). Not edited
   (outside Button ownership).
+- **Shared focus-ring tokens are below 3:1 (review-fix R1 root cause).** The translucent
+  `--goobs-light-focus-ring: rgba(59,130,246,0.4)` (`src/styles/global.css:305`) and
+  `--goobs-dark-focus-ring: rgba(96,165,250,0.45)` (`src/styles/global.css:336`) composite below
+  the 3:1 non-text-contrast floor over their host surfaces. Button was fixed locally by switching
+  its `:focus-visible` to the solid `--goobs-*-primary` tokens, but the shared focus-ring tokens
+  are **still consumed by 4 other components** (`Accordion`, `Breadcrumb`, `Chip`, `BigCalendar`
+  `.module.css`), which remain below threshold. **Suggested owner change (unowned file):** in
+  `src/styles/global.css`, redefine `--goobs-light-focus-ring: #2563eb` and
+  `--goobs-dark-focus-ring: #60a5fa` (solid), or raise the alpha until the composite clears 3:1 on
+  each host surface — then those four components (and, optionally, Button reverted back to the
+  token) all pass. Not edited (outside Button ownership; `src/styles/**` is off-limits).
 - **`styles.outline` can override the focus ring.** If a consumer sets `styles.outline` (inline
   CSS `outline`), that inline style beats the stylesheet `:focus-visible` outline. This only
   affects consumers who explicitly opt into a custom persistent outline; the default path (no
