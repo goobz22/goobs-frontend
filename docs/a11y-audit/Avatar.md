@@ -92,13 +92,37 @@ apply. **CLEAN.**
 
 ## Stories updated
 
-`src/components/Avatar/Avatar.stories.tsx` — added two stories (the story = this repo's
-regression test):
+`src/components/Avatar/Avatar.stories.tsx` — the story (+ Chromatic baseline) IS this repo's
+regression test, so every new a11y state must be *driven* by a `play` fn for the state to
+actually appear in the baseline (a passive render of an interactive state is not gated —
+`:focus-visible` only paints on genuine keyboard focus):
 
-- **Accessibility/Labeled** — renders `label="Matthew Goluba"`, exercising the new
-  `role="img"` + `aria-label` path (verifiable in the a11y/DOM panel).
-- **Accessibility/Focusable** — renders `tabIndex={0} role="button"` avatars in light and
-  sacred themes, exercising the new `:focus-visible` ring on keyboard focus.
+- **Accessibility/Labeled** — renders `label="Matthew Goluba"`; a `play` fn now asserts the
+  disc is `role="img"` with `aria-label="Matthew Goluba"` while the visible content stays the
+  initials, so the accessible-name wiring is regression-gated (previously covered only
+  incidentally by the axe addon).
+- **Accessibility/Focusable** — renders `tabIndex={0} role="button"` light + sacred avatars;
+  a `play` fn now `userEvent.tab()`s real keyboard focus onto the light avatar and asserts
+  `toHaveFocus()`, so the base `.root:focus-visible` ring paints and Chromatic captures it.
+  It also asserts the sacred disc is keyboard-reachable (`tabindex="0"`).
+- **Accessibility/Focusable (sacred)** — a single sacred avatar tabbed to focus, so the gold
+  `[data-theme='sacred']:focus-visible` outline-color override is captured in the baseline.
+- **Accessibility/Focusable (dark)** — a single dark avatar tabbed to focus, so the
+  `[data-theme='dark']:focus-visible` outline-color override is captured in the baseline.
+
+Together the three focus stories gate the *entire* `:focus-visible` CSS block (base outline
++ dark + sacred colour overrides) — deleting any of those rules now changes a snapshot.
+
+## Adversarial-review follow-up (2026-07-11)
+
+A review of the a11y pass found the added `Focusable` story had **no `play` function and
+never moved keyboard focus**, so the `:focus-visible` ring it claimed to regression-test was
+never rendered in the Chromatic baseline — deleting `.root:focus-visible` would have changed
+no snapshot and passed silently. **Confirmed valid** and fixed at root cause by driving real
+keyboard focus in `play` fns (matching the repo convention, e.g. `Button.stories.tsx` "drives
+:focus-visible, which the Chromatic snapshot captures as the visible ring"), and by adding
+per-theme focus stories so the sacred/dark outline-colour overrides are gated too. The
+`Labeled` story likewise gained a `play` asserting `role="img"`/`aria-label`.
 
 ## Deferred
 

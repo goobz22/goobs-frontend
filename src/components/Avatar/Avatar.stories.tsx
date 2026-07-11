@@ -6,6 +6,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import Avatar from './index'
 
 // --------------------------------------------------------------------------
@@ -196,6 +197,17 @@ export const Labeled: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+  // Regression-gate the accessible-name path: supplying `label` must expose the
+  // disc as role="img" with that aria-label (so AT announces the name, not the
+  // raw initials). Without this assertion the role/aria-label wiring was only
+  // covered incidentally by the axe addon and a regression could pass silently.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const disc = canvas.getByRole('img', { name: 'Matthew Goluba' })
+    await expect(disc).toHaveAttribute('aria-label', 'Matthew Goluba')
+    // The visible content is still the initials, but the accessible name wins.
+    await expect(disc).toHaveTextContent(initials)
+  },
 }
 
 /**
@@ -210,7 +222,7 @@ export const Focusable: Story = {
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
       <Avatar
-        label="Matthew Goluba"
+        label="Light avatar"
         styles={{ theme: 'light' }}
         tabIndex={0}
         role="button"
@@ -219,7 +231,7 @@ export const Focusable: Story = {
       </Avatar>
       <div style={{ padding: '1rem', borderRadius: 12, background: '#0e0e0e' }}>
         <Avatar
-          label="Matthew Goluba"
+          label="Sacred avatar"
           styles={{ theme: 'sacred' }}
           tabIndex={0}
           role="button"
@@ -230,4 +242,79 @@ export const Focusable: Story = {
     </div>
   ),
   globals: { backgrounds: { value: 'light' } },
+  // Regression-gate the keyboard focus indicator (WCAG 2.4.7). The play fn moves
+  // real keyboard focus (Tab) onto the light avatar so :focus-visible actually
+  // paints — Chromatic captures that visible ring in the baseline. Without this,
+  // :focus-visible never renders in the snapshot and deleting the
+  // `.root:focus-visible` rule would change no baseline and pass silently.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const light = canvas.getByRole('button', { name: 'Light avatar' })
+    const sacred = canvas.getByRole('button', { name: 'Sacred avatar' })
+    // Tab from the body: focus lands on the first focusable disc (the light
+    // avatar), driving its :focus-visible ring for the snapshot.
+    await userEvent.tab()
+    await expect(light).toHaveFocus()
+    // The second disc is keyboard-reachable too (its ring is snapshot-gated by
+    // the FocusableSacred story, since only one element can hold focus per snap).
+    await expect(sacred).toHaveAttribute('tabindex', '0')
+  },
+}
+
+/**
+ * The sacred-theme focus ring in isolation. A single focusable sacred avatar is
+ * tabbed to so its gold `:focus-visible` outline paints and is captured by
+ * Chromatic — this specifically gates the `[data-theme='sacred']:focus-visible`
+ * outline-color override (deleting either it or the base rule changes this snap).
+ */
+export const FocusableSacred: Story = {
+  name: 'Accessibility/Focusable (sacred)',
+  render: () => (
+    <div style={{ padding: '1rem', borderRadius: 12, background: '#0e0e0e' }}>
+      <Avatar
+        label="Sacred avatar"
+        styles={{ theme: 'sacred' }}
+        tabIndex={0}
+        role="button"
+      >
+        {initials}
+      </Avatar>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const sacred = canvas.getByRole('button', { name: 'Sacred avatar' })
+    await userEvent.tab()
+    await expect(sacred).toHaveFocus()
+  },
+}
+
+/**
+ * The dark-theme focus ring in isolation. A single focusable dark avatar is
+ * tabbed to so its `:focus-visible` outline paints and is captured by Chromatic,
+ * gating the `[data-theme='dark']:focus-visible` outline-color override (which no
+ * other story exercises).
+ */
+export const FocusableDark: Story = {
+  name: 'Accessibility/Focusable (dark)',
+  render: () => (
+    <div style={{ padding: '1rem', borderRadius: 12, background: '#111827' }}>
+      <Avatar
+        label="Dark avatar"
+        styles={{ theme: 'dark' }}
+        tabIndex={0}
+        role="button"
+      >
+        {initials}
+      </Avatar>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const dark = canvas.getByRole('button', { name: 'Dark avatar' })
+    await userEvent.tab()
+    await expect(dark).toHaveFocus()
+  },
 }
