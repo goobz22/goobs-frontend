@@ -258,6 +258,55 @@ export const AccessibilityContract: Story = {
   },
 }
 
+/**
+ * Exercises the defensive keyboard-focus indicator (WCAG 2.4.7). The frame is a
+ * decorative wrapper by default, but its public API spreads HTMLAttributes, so a
+ * consumer can make it focusable by passing `tabIndex` / `role` / `aria-label`.
+ * When they do, the `.root:focus-visible` rule must paint a visible gold outline.
+ * The play function makes the frame the focused element and asserts it actually
+ * holds DOM focus (the state that triggers the `:focus-visible` ring), while the
+ * decorative glyph row stays `aria-hidden`.
+ */
+export const FocusableFrameFocusRing: Story = {
+  name: 'Accessibility/Focusable Frame Focus Ring',
+  args: {
+    glow: true,
+    glyphs: true,
+    // A consumer promoting the frame to a focusable, labelled group.
+    tabIndex: 0,
+    role: 'group',
+    'aria-label': 'Sacred estimate frame',
+    children: (
+      <Card styles={{ theme: 'sacred' }} style={{ paddingTop: '40px' }}>
+        <Card.Header>
+          <Card.Title>Keyboard-focusable frame</Card.Title>
+          <Card.Subtitle>Tab to it — the gold outline is the ring</Card.Subtitle>
+        </Card.Header>
+      </Card>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const frame = canvasElement.querySelector(
+      '[data-component="SacredGlyphFrame"]'
+    ) as HTMLElement | null
+    await expect(frame).toBeInTheDocument()
+
+    // The consumer-supplied focusability + labelling must be present on the root.
+    await expect(frame).toHaveAttribute('tabindex', '0')
+    await expect(frame).toHaveAttribute('role', 'group')
+    await expect(frame).toHaveAttribute('aria-label', 'Sacred estimate frame')
+
+    // Focusing the frame is what activates the :focus-visible outline; assert it
+    // can actually take DOM focus (the precondition for the ring to ever show).
+    frame?.focus()
+    await expect(frame).toHaveFocus()
+
+    // Decoration stays hidden from AT even when the frame itself is focusable.
+    const glyphRow = canvasElement.querySelector('[data-sgf-glyph-row="true"]')
+    await expect(glyphRow).toHaveAttribute('aria-hidden', 'true')
+  },
+}
+
 // --------------------------------------------------------------------------
 // PLAIN CONTENT (no Card) — the frame works around any sacred surface
 // --------------------------------------------------------------------------

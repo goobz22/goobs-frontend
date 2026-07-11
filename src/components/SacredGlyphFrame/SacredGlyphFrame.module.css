@@ -25,6 +25,19 @@
   box-sizing: border-box;
 }
 
+/* FOCUS — the frame is a non-interactive wrapper by default, but its public API
+   spreads HTMLAttributes onto this root, so a consumer may make it focusable
+   (tabIndex / role / onClick). :focus-visible only ever matches once the element
+   is actually focusable and keyboard-focused, so this is an inert no-op in the
+   default decorative case and guarantees a visible keyboard-focus indicator when
+   the frame IS made focusable (WCAG 2.4.7 Focus Visible). Uses an outline (not a
+   box-shadow) so the ring survives Windows forced-colors / high-contrast mode,
+   matching the outline focus treatment used across the library. */
+.root:focus-visible {
+  outline: 2px solid var(--sgf-gold);
+  outline-offset: 2px;
+}
+
 /* GLOW — the animated gold-glow border. The animation NAME (`sacredGlowPulse`)
    is injected once at module load by commonKeyframes.sacredGlowPulse(); this
    class only references it. Honour prefers-reduced-motion by freezing the

@@ -1,117 +1,108 @@
 # SacredGlyphFrame — a11y audit (2026-07-11)
 
-**Status: CLEAN** (no WCAG violations found; a regression story was added to lock in the
-accessibility contract).
+**Status:** FIXED
 
-## Component role & APG pattern
-
-`SacredGlyphFrame` is a **decorative wrapper / frame** — it renders an animated gold-glow
-border, a top-centred row of floating decorative Egyptian glyphs, and optional decorative
-corner ornaments around arbitrary `children` (typically a sacred-themed `<Card>`). It renders
-**no interactive elements of its own** and conveys **no semantic information** beyond the
-content passed as `children`.
-
-**WAI-ARIA APG pattern: none applicable.** This is not an interactive widget (not a
-dialog/menu/tabs/combobox/accordion/switch/etc.), so there is no required role, no state
-machine, and no keyboard-interaction table to satisfy. The correct semantics for a purely
-decorative frame are exactly what it renders: a generic `<div>` container whose decorative
-subtrees are removed from the accessibility tree and whose `children` pass through untouched.
-Its nearest cross-component class is a "decorative chrome wrapper" (like a card frame or a
-glow border), not an ARIA pattern.
-
-## Audit results by checklist
-
-### A. Hearing-impaired (WCAG 1.2.x, 1.4.2) — PASS
-- Grepped the component for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
-  `navigator.vibrate`: **none present**. No information is conveyed by sound; there is no
-  media playback. Nothing to caption/transcript. Not applicable.
-
-### B. Reading-impaired / screen-reader / cognitive (1.1.1, 1.3.1, 1.4.1, 2.1.x, 2.3.x, 4.1.2) — PASS
-- **Accessible name / interactive elements:** the component renders **no** interactive
-  elements (`button`/`a`/`input`), so there is no accessible-name, focus-order, or
-  keyboard-interaction obligation. `restProps` is spread onto the root
-  (`index.tsx:144`), which is the correct additive escape hatch: a consumer that uses the
-  frame as a *meaningful* region can pass `role` + `aria-label` without an API change.
-- **Decorative content hidden (1.1.1):** both decorative subtrees are `aria-hidden="true"`
-  at the container level, which removes their entire subtrees from the accessibility tree:
-  - the floating glyph row — `index.tsx:190` (`data-sgf-glyph-row`), which keeps the
-    decorative Egyptian hieroglyphs (`𓊵 𓋹 𓊹 …`) out of the screen-reader stream;
-  - the corner-ornaments container — `index.tsx:149` (`data-sgf-corners`).
-  The content region (`index.tsx:214`, `data-sgf-content`) is **not** hidden, so `children`
-  remain fully exposed to assistive tech. Correct.
-- **Semantic HTML (1.3.1):** renders a generic `<div>` wrapper plus decorative `<span>`s —
-  no role-annotated div masquerading as a semantic element, and no semantic element misused
-  for decoration. Correct for a decorative frame.
-- **Motion / reduced motion (2.3.3, 2.2.2):** both auto-playing infinite animations honor
-  `prefers-reduced-motion: reduce` — the glow freezes to a static box-shadow
-  (`SacredGlyphFrame.module.css:36-43`) and the floating glyphs freeze
-  (`SacredGlyphFrame.module.css:69-74`). The static corner ornaments have no animation.
-  This is the accepted mechanism for pausing/stopping decorative auto-motion, and it covers
-  **every** animated element in the component. See "Considered & compliant" below.
-- **Flash / seizure (2.3.1):** the glow pulse cycle is 6s (`.module.css:33`) — far below the
-  3-flashes-per-second threshold; the float is smooth translation, not a flash. Safe.
-- **Color-alone for state (1.4.1):** no user-facing state is conveyed by color. The
-  decoration mode is exposed **programmatically** via `data-sgf-glow` / `data-sgf-glyphs`
-  (`index.tsx:142-143`) for machine tests; there is no error/selected/disabled state to
-  convey. Not applicable.
-- **Dynamic-update announcement (4.1.3):** the only "dynamic" behavior is `emitDiag` on a
-  decoration-mode change (`index.tsx:122`), which writes to a dev-only diagnostics bus
-  (`window.__diag`) — it renders no user-facing content and needs no `aria-live`. The
-  decoration mode is a controlled prop, not async content. Not applicable.
-- **Overlays / focus trap / forms:** the component is not a dialog/drawer/popover and renders
-  no form controls — none of the overlay-trap or form-association requirements apply.
-
-### C. SEO-semantic (1.3.1, 2.4.x) — PASS
-- **Headings:** the component renders **no** heading text of its own; headings come from
-  `children` (e.g. `Card.Title`). There is no styled `<div>` standing in for a heading, so no
-  `headingLevel` prop is warranted. Correct.
-- **Landmarks:** a decorative frame is **not** a landmark (it is not a nav/header/aside by
-  role), so no landmark element is appropriate; wrapping `children` in one would be incorrect.
-- **Links:** none rendered — no `onClick`-div-as-link. Not applicable.
-- **SSR content:** `children` (and the decorative spans) render server-side; there is no
-  client-only injection of primary content, and no canvas/QR requiring a text alternative.
+**APG pattern:** None. `SacredGlyphFrame` is a purely decorative *presentational
+wrapper* — an animated gold-glow border plus an `aria-hidden` row of floating
+Egyptian glyphs and optional `aria-hidden` corner ornaments, drawn around
+arbitrary `children` (typically a sacred-themed `<Card>`). It renders no
+interactive control, no heading, no landmark, and no live region of its own, so
+it maps to no WAI-ARIA APG widget pattern. The correct semantic posture for a
+frame like this is a *transparent* wrapper: the root `<div>` carries no ARIA role
+so `children` supply all semantics, and every decorative subtree is removed from
+the accessibility tree. That posture was already largely in place; this pass
+verified it and closed the one remaining gap.
 
 ## Issues found
 
-**None.** No WCAG 2.2 violation was identified. The component was already built
-accessible-by-default: decorative subtrees are correctly `aria-hidden`, both animations honor
-`prefers-reduced-motion`, it introduces no interactive elements needing names/roles/keyboard
-handling, and it passes content through with correct semantics.
+| # | Severity | WCAG | Location | Status | Summary |
+|---|----------|------|----------|--------|---------|
+| 1 | Minor | 2.4.7 Focus Visible (AA) | `src/components/SacredGlyphFrame/SacredGlyphFrame.module.css` `.root` (16) / `index.tsx:144` | FIXED | The public API `extends React.HTMLAttributes<HTMLDivElement>` and spreads `...restProps` onto the root (`index.tsx:144`), so a consumer can make the frame focusable (`tabIndex` / `role` / `onClick`), but the module.css defined **no `:focus-visible` treatment** — a keyboard user focusing the frame would get no visible focus indicator. 45 sibling components already ship a focus-visible rule; this one did not. |
 
-## Considered & compliant (documented, not defects)
+### Pattern class
+Issue 1 → `missing-focus-visible-style` (cross-component class: any component that
+spreads `HTMLAttributes` onto a root element a consumer can make focusable, yet
+ships no `:focus-visible` style).
 
-- **WCAG 2.2.2 (Pause, Stop, Hide, Level A)** — the glow (6s infinite) and the floating
-  glyphs (3–5.5s infinite, staggered via `--sgf-float-duration`) auto-start, last >5s, and run
-  in parallel with content, which puts them in scope for 2.2.2. The mechanism to stop them is
-  the `prefers-reduced-motion` media query, which fully freezes **both** animations
-  (`.module.css:36`, `:69`). Honoring the OS-level reduced-motion setting is the accepted
-  stop/hide mechanism for subtle decorative background motion, so this is treated as compliant
-  rather than a finding. All motion is decorative and `aria-hidden`, so no information is lost
-  when it stops.
-- **Interactive `corners` misuse** — the `corners` prop is documented decorative-only and is
-  rendered inside `aria-hidden` + `pointer-events:none`. If a consumer passed an *interactive*
-  node it would be inaccessible, but that is documented consumer misuse (the JSDoc says
-  "Decorative only" / "pass a glyph / SVG / emoji"), not a component defect.
+## Non-issues verified (no action needed)
+
+- **Hearing (WCAG 1.2.x, 1.4.2):** grep for `new Audio` / `AudioContext` /
+  `<audio>` / `<video>` / `navigator.vibrate` / `.play()` returned nothing. No
+  sound or media surface exists. CLEAN.
+- **Decorative subtrees hidden from AT (WCAG 1.1.1, 4.1.2):** the floating glyph
+  row (`index.tsx:187–212`) and the corner-ornament container (`index.tsx:146–185`)
+  are both `aria-hidden="true"`. The Egyptian hieroglyph characters (`𓊵 𓋹 𓊹`
+  …) and ornaments never leak into the screen-reader stream. The `content` wrapper
+  carrying `children` (`index.tsx:214`) is *not* hidden, so real content stays
+  exposed. This contract is regression-locked by the pre-existing
+  `Accessibility/Decoration Hidden, Content Exposed` story. CLEAN.
+- **Reduced motion (WCAG 2.3.3 / 2.2.2):** both animations honour
+  `@media (prefers-reduced-motion: reduce)` — `.glow` freezes to a static glow
+  (`SacredGlyphFrame.module.css:36–43`) and `.glyph` drops to `animation: none`
+  (`:69–74`). The 6s glow pulse is far too slow to be a flash risk (WCAG 2.3.1),
+  and reduced-motion is the accepted stop/hide mechanism for decorative infinite
+  motion (WCAG 2.2.2); all motion is `aria-hidden` so no information is lost when
+  it stops. CLEAN.
+- **Semantic HTML / SEO (WCAG 1.3.1; SEO):** the component renders no heading,
+  link, list, table, or landmark — it is a wrapper whose semantics belong to
+  `children`. A plain `<div>` root with no role is the correct transparent
+  wrapper here; forcing a `role` (e.g. `figure`/`group`) would inject unwarranted
+  structure into the a11y tree. `children` render server-side with no client-only
+  injection of primary content (only the decorative keyframes are client-injected).
+  No `headingLevel` prop is warranted. CLEAN.
+- **Colour-alone state (WCAG 1.4.1):** the glow/glyph decoration conveys no
+  state a user must perceive; `data-sgf-glow` / `data-sgf-glyphs` (`index.tsx:142–143`)
+  are machine-test selectors, not user-facing state. CLEAN.
+- **Dynamic announcements (WCAG 4.1.3):** the only dynamic hook is `emitDiag`
+  (`index.tsx:115–128`) onto the dev diagnostics bus — not user-facing content,
+  so no live region is warranted. CLEAN.
+- **Interactive `corners` misuse:** `corners` is documented decorative-only and
+  rendered inside `aria-hidden` + `pointer-events:none`; passing an interactive
+  node would be documented consumer misuse ("Decorative only … pass a glyph / SVG
+  / emoji"), not a component defect. No change.
 
 ## Fixes applied
 
-None required — the component already satisfies the checklist.
+Added a defensive keyboard-focus indicator to the root
+(`SacredGlyphFrame.module.css`):
+
+```css
+.root:focus-visible {
+  outline: 2px solid var(--sgf-gold);
+  outline-offset: 2px;
+}
+```
+
+Rationale and safety:
+- `:focus-visible` only matches once the element is *actually focusable and
+  keyboard-focused*, so on a default decorative frame (non-focusable) the rule is
+  a complete no-op — zero risk of a spurious ring on a non-interactive `<div>`.
+- Uses `outline` (not `box-shadow`) so the ring survives Windows forced-colors /
+  high-contrast mode, matching the outline-based focus treatment used across the
+  library (e.g. `Card.module.css`).
+- Uses the component's own `--sgf-gold` custom property (defined on `.root`), so
+  no new token or dependency is introduced.
+- Additive only — no existing prop, export, DOM element, `data-*`, `role`, or
+  `aria-*` attribute was renamed, removed, or retyped; the machine-test selector
+  contract (`data-component`, `data-sgf-*`) is untouched.
 
 ## Stories updated
 
-- Added **`AccessibilityContract`** (`Accessibility/Decoration Hidden, Content Exposed`) to
-  `SacredGlyphFrame.stories.tsx`. Because Storybook stories are this repo's only regression
-  tests, this story's `play` assertion locks in the accessibility contract so a future
-  refactor cannot silently regress it. It renders the frame with glow + glyphs + corners all
-  enabled and asserts:
-  - the glyph row (`[data-sgf-glyph-row]`) has `aria-hidden="true"`;
-  - the corners container (`[data-sgf-corners]`) has `aria-hidden="true"`;
-  - the content region (`[data-sgf-content]`) does **not** have `aria-hidden`, and its text is
-    reachable/visible through the accessibility tree.
-  No public API, DOM element, `data-*`, `role`, or `aria-*` attribute was changed.
+- **Added `Accessibility/Focusable Frame Focus Ring`**
+  (`SacredGlyphFrame.stories.tsx`) — renders the frame promoted to a focusable,
+  labelled group (`tabIndex={0}`, `role="group"`, `aria-label`), then a `play`
+  function asserts the root actually takes DOM focus (the precondition that
+  activates the `:focus-visible` outline) and that the decorative glyph row stays
+  `aria-hidden` even when the frame itself is focusable.
+- **Pre-existing `Accessibility/Decoration Hidden, Content Exposed`** continues to
+  lock the aria-hidden decoration contract (glyph row + corners hidden; content
+  exposed). Storybook stories are this repo's only regression tests, so both
+  stories together guard the a11y contract against future refactors.
 
-## Deferred (files outside my ownership)
+## Deferred
 
-None. No fix requires touching a shared util, Field/Shell, `global.css`, or the barrel. The
-`sacredGlowPulse` / `sacredFloat` keyframes in `src/utils/keyframes.ts` (not owned here) are
-pure decorative CSS with no accessibility concern.
+None. Every finding was fixable at root cause inside the owned component
+directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel change
+was required. The `sacredGlowPulse` / `sacredFloat` keyframes in
+`src/utils/keyframes.ts` (not owned here) are pure decorative CSS with no
+accessibility concern.
