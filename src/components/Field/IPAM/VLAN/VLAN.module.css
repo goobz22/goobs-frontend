@@ -15,7 +15,15 @@
   height: 40px;
   background: transparent;
   outline: none;
-  border: 1px solid var(--goobs-black-a20);
+
+  /* Rest border uses FieldShell's per-theme token (cascaded from the .shell
+     ancestor), NOT a fixed black alpha. --goobs-black-a20 (rgba(0,0,0,.2)) is
+     surface-independent, so on the dark (#1e293b) and sacred (near-black)
+     surfaces it composited to ~1.1:1 against the background — an effectively
+     invisible input boundary (WCAG 1.4.11 Non-text Contrast). --field-border-
+     default resolves to the theme border (light #e2e8f0 / dark #334155 /
+     sacred gold-a30), matching FieldShell's own .inputSlot border. */
+  border: 1px solid var(--field-border-default);
   border-radius: var(--goobs-radius-lg);
   padding: 8px 60px 8px 16px;
   font-size: 16px;
