@@ -47,6 +47,13 @@ export interface ConfirmationCodeInputsProps {
   showSendResendButton?: boolean
   successMessage?: string
   showSuccessState?: boolean
+  /**
+   * Heading level (`h1`–`h6`) rendered for the success message so the consumer
+   * can slot it correctly into the surrounding document outline (avoids a
+   * skipped-heading-level WCAG 1.3.1 / 2.4.6 violation). Defaults to `3`,
+   * preserving the historical `<h3>`.
+   */
+  successMessageHeadingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ConfirmationCodeInputStyles
 }
@@ -96,6 +103,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSendResendButton = true,
   successMessage = 'Verification Successful',
   showSuccessState = false,
+  successMessageHeadingLevel = 3,
   styles,
 }) => {
   // Tier-1 form binding. Inside a <Form> with a `name` and no explicit `value`,
@@ -320,6 +328,11 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   const hasValue = currentValue.length > 0
   const engineError =
     formContext && name ? formContext.engine.getError(name) : undefined
+  // Screen-reader invalid state: honour the caller's explicit `aria-invalid`,
+  // otherwise fall back to the form-engine error so a bound field's validation
+  // failure is programmatically exposed on every digit cell (WCAG 4.1.2). A
+  // caller passing `false` is preserved (?? keeps false).
+  const resolvedAriaInvalid = ariaInvalid ?? (engineError ? true : undefined)
   const rootDataProps = {
     'data-component': 'ConfirmationCodeInput',
     ...(resolvedFieldName && { 'data-field-name': resolvedFieldName }),
@@ -328,24 +341,43 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   }
 
   if (showSuccessState) {
+    // Render the success message at the consumer-controlled heading level
+    // (default h3). Capitalised tag name so JSX treats it as an element type.
+    const SuccessHeading = `h${successMessageHeadingLevel}` as
+      | 'h1'
+      | 'h2'
+      | 'h3'
+      | 'h4'
+      | 'h5'
+      | 'h6'
     return (
+      // role="status" (an aria-live region) so the transition into the success
+      // state is announced to screen-reader users, whose focus was on the now-
+      // unmounted Verify button — otherwise the confirmation is silent (4.1.3).
       <div
         className={cssStyles.successContainer}
         data-theme={theme}
+        role="status"
         {...rootDataProps}
       >
         {/* CheckCircleOutline applies its own inline style to the <svg>, which
             beats a className. Source the three theme-driven properties from
             CSS custom properties (defined on .successContainer[data-theme])
-            so the values still live in CSS as a single source of truth. */}
+            so the values still live in CSS as a single source of truth. The
+            icon is decorative — the heading already conveys success — so it is
+            hidden from assistive tech (WCAG 1.1.1). */}
         <CheckCircleOutline
+          aria-hidden="true"
+          focusable="false"
           style={{
             fontSize: 'var(--cci-success-icon-size)',
             color: 'var(--cci-success-icon-color)',
             filter: 'var(--cci-success-icon-filter)',
           }}
         />
-        <h3 className={cssStyles.successMessage}>{successMessage}</h3>
+        <SuccessHeading className={cssStyles.successMessage}>
+          {successMessage}
+        </SuccessHeading>
         <div className={cssStyles.buttonContainer}>
           <CustomButton
             text="Disable Verification"
@@ -388,25 +420,41 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={1}
+                // `one-time-code` lets the platform offer SMS/authenticator
+                // autofill on the first cell (the multi-char value is then
+                // distributed across the cells by handleInputChange); the
+                // remaining cells opt out so browsers don't surface unrelated
+                // autofill suggestions on each box.
+                autoComplete={index === 0 ? 'one-time-code' : 'off'}
                 value={digits[index] || ''}
                 onChange={e => handleInputChange(e, index)}
                 onKeyDown={e => handleKeyDown(e, index)}
                 onPaste={e => handlePaste(e, index)}
                 onBlur={() => boundOnBlur?.()}
-                aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1}`}
+                aria-label={`${ariaLabel || 'Confirmation Code'} digit ${index + 1} of ${codeLength}`}
                 aria-required={ariaRequired}
-                aria-invalid={ariaInvalid}
+                aria-invalid={resolvedAriaInvalid}
                 disabled={isDisabled}
                 className={cssStyles.input}
               />
             ))}
           </div>
+          {/* The coloured dot is a live region. An empty element whose only
+              state cue is a swapped aria-label does NOT re-announce on change,
+              so the actual state text is rendered as visually-hidden CONTENT —
+              a content mutation the role="status" region announces (4.1.3).
+              The dot itself also shows a checkmark glyph when valid so the
+              valid/invalid distinction is not carried by colour alone (1.4.1). */}
           <div
             className={cssStyles.statusIndicator}
             data-valid={isValid ? 'true' : 'false'}
             role="status"
             aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
-          />
+          >
+            <span className={cssStyles.statusText}>
+              {isValid ? 'Code is valid' : 'Code is invalid'}
+            </span>
+          </div>
         </div>
         {showActionButtons && (
           <div className={cssStyles.buttonContainer}>
