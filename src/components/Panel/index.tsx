@@ -159,6 +159,7 @@ interface PanelComponent {
 function PanelInner({
   variant = 'sacred',
   className,
+  onClose,
   children,
   ref,
   ...restProps
@@ -182,17 +183,141 @@ function PanelInner({
       child.type === (PanelHeader as React.ElementType)
   )
 
+  // Does the region have an accessible NAME? Either the header title, or a
+  // consumer-supplied `aria-label`/`aria-labelledby` passed through restProps.
+  // A `role="region"` (an explicit landmark) with no name is a nameless
+  // landmark (axe best-practice `region`); when there is genuinely no name we
+  // drop the explicit role and fall back to a plain `<section>`, which is NOT
+  // a landmark unless it is named — so header-less panels never register an
+  // unnamed landmark.
+  const hasAccessibleName =
+    hasHeader ||
+    restProps['aria-label'] != null ||
+    restProps['aria-labelledby'] != null
+
+  // Merge the forwarded ref with a local ref so the focus-trap effect can
+  // reach the root node without stealing the consumer's ref.
+  const rootRef = useRef<HTMLElement | null>(null)
+  const assignRootRef = useCallback(
+    (node: HTMLElement | null) => {
+      rootRef.current = node
+      if (typeof ref === 'function') ref(node)
+      else if (ref) (ref as React.RefObject<HTMLElement | null>).current = node
+    },
+    [ref]
+  )
+
+  // Keep the latest onClose without making it an effect dependency, so the
+  // focus-trap effect runs once per fullscreen-transition (not on every parent
+  // re-render, which would otherwise yank focus back to the first element).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  // FULLSCREEN = MODAL. The `.fullscreen` variant is `position:fixed; inset:0`
+  // over an opaque backdrop, obscuring the whole page — a modal takeover. A
+  // bare `role="region"` with no focus management lets keyboard/AT users Tab
+  // straight into the now-invisible content behind it (WCAG 2.4.3 Focus Order /
+  // 1.3.1). Give the fullscreen variant the APG dialog contract (mirrors
+  // Dialog/index.tsx): move focus in on mount, trap Tab at the boundaries,
+  // `Escape` → `onClose` (when provided), restore focus to the opener on
+  // unmount. The `role="dialog"` + `aria-modal="true"` set in render make the
+  // obscured background inert for assistive tech. Non-fullscreen variants are
+  // inline surfaces and are inert here (no trap, no focus theft).
+  useEffect(() => {
+    if (variant !== 'fullscreen') return undefined
+    const node = rootRef.current
+    if (!node) return undefined
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    // Move focus into the takeover (first focusable, else the container).
+    const firstFocusable = getFocusableWithin(node)[0]
+    if (firstFocusable) firstFocusable.focus()
+    else node.focus()
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onCloseRef.current?.()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const items = getFocusableWithin(node)
+      if (items.length === 0) {
+        event.preventDefault()
+        node.focus()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return
+      const active = document.activeElement
+      // Boundary-only cycling. Deliberately NO "active outside → recapture"
+      // branch: goobs overlays (SearchableSimple, Popover, MultiSelect,
+      // Tooltip) portal their content to document.body, so a dropdown opened
+      // inside the panel legitimately holds focus outside the panel subtree —
+      // recapturing there would orphan the open dropdown. Matches Dialog's trap.
+      if (event.shiftKey && (active === first || active === node)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeydown)
+    return () => {
+      document.removeEventListener('keydown', handleKeydown)
+      previouslyFocused?.focus?.()
+    }
+  }, [variant])
+
+  // Dev-only: a fullscreen takeover renders as a modal `role="dialog"`, which
+  // MUST expose an accessible name (WCAG 4.1.2). Warn at author time when one
+  // opens with neither a `Panel.Header` title nor a consumer `aria-label`/
+  // `aria-labelledby`, so a nameless takeover surfaces in development instead
+  // of silently shipping. Compiles out in production bundles.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    if (variant !== 'fullscreen') return
+    if (!hasAccessibleName) {
+      console.warn(
+        'goobs Panel: the `fullscreen` variant renders as a modal ' +
+          '(role="dialog", aria-modal="true") but has no accessible name. ' +
+          'Compose a <Panel.Header title=…/> or pass `aria-label` / ' +
+          '`aria-labelledby` so screen readers announce the takeover on open ' +
+          '(WCAG 4.1.2).'
+      )
+    }
+  }, [variant, hasAccessibleName])
+
+  // Role resolution:
+  //  • fullscreen  → "dialog" (modal takeover; paired with aria-modal below)
+  //  • named       → "region" (a real named landmark — preserved from before)
+  //  • unnamed     → no explicit role (plain <section>, not an unnamed landmark)
+  const resolvedRole =
+    variant === 'fullscreen'
+      ? 'dialog'
+      : hasAccessibleName
+        ? 'region'
+        : undefined
+
   return (
     <PanelContext.Provider value={contextValue}>
       <section
-        ref={ref}
+        ref={assignRootRef}
         className={mergeClassNames(
           cssStyles.root,
           cssStyles[variant],
           className
         )}
-        role="region"
+        role={resolvedRole}
+        aria-modal={variant === 'fullscreen' ? true : undefined}
         aria-labelledby={hasHeader ? titleId : undefined}
+        // Fullscreen (modal) root is a programmatic focus target for the trap's
+        // initial/no-focusable-children fallback.
+        tabIndex={variant === 'fullscreen' ? -1 : undefined}
         data-component="Panel"
         data-panel="true"
         data-panel-variant={variant}
@@ -336,17 +461,61 @@ const PanelBody = forwardRef<HTMLDivElement, PanelBodyProps>(function PanelBody(
   { className, children, ...restProps },
   ref
 ) {
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+  const assignBodyRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      bodyRef.current = node
+      if (typeof ref === 'function') ref(node)
+      else if (ref)
+        (ref as React.RefObject<HTMLDivElement | null>).current = node
+    },
+    [ref]
+  )
+
+  // CONDITIONAL scrollable-region-focusable remediation. The body is a flex:1
+  // `overflow:auto` scroll region. A keyboard-only user can only scroll it with
+  // arrow/Page keys when it is focusable — but making it a tab stop is correct
+  // ONLY when it genuinely traps scroll: it must actually OVERFLOW *and* hold no
+  // focusable descendants of its own. A form-filled body already has tabbable
+  // fields, so a focusable container would be a redundant extra tab stop before
+  // them; a non-overflowing body scrolls nothing, so a tab stop there is pure
+  // focus-order noise (WCAG 2.4.3). So measure at runtime and only opt in when
+  // the body is truly an unfocusable scroll trap (axe-core `scrollable-region-
+  // focusable`). Re-measures on resize and content mutation so a body that
+  // gains/loses overflow or interactive children stays correct.
+  const [needsFocus, setNeedsFocus] = useState(false)
+  useEffect(() => {
+    const node = bodyRef.current
+    if (!node) return undefined
+    const measure = () => {
+      const overflows = node.scrollHeight > node.clientHeight
+      const hasFocusableChild = getFocusableWithin(node).length > 0
+      setNeedsFocus(overflows && !hasFocusableChild)
+    }
+    measure()
+    const resizeObserver = new ResizeObserver(measure)
+    resizeObserver.observe(node)
+    const mutationObserver = new MutationObserver(measure)
+    mutationObserver.observe(node, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'tabindex', 'hidden'],
+    })
+    return () => {
+      resizeObserver.disconnect()
+      mutationObserver.disconnect()
+    }
+  }, [])
+
   return (
     <div
-      ref={ref}
+      ref={assignBodyRef}
       className={mergeClassNames(cssStyles.body, className)}
-      // The body is a flex:1 `overflow:auto` scroll region. When its content
-      // overflows but holds no focusable children (e.g. a read-only "show"
-      // surface), keyboard-only users cannot scroll it — WCAG 2.1.1. Making
-      // it focusable lets arrow/Page keys scroll it. Placed before restProps
-      // so a consumer can override `tabIndex` (e.g. -1) when the body already
-      // contains its own focusable content.
-      tabIndex={0}
+      // Only a tab stop when it is genuinely an unfocusable scroll trap
+      // (measured above). `undefined` omits the attribute entirely; placed
+      // before restProps so a consumer can still force a value (e.g. -1 / 0).
+      tabIndex={needsFocus ? 0 : undefined}
       data-panel-body="true"
       {...restProps}
     >

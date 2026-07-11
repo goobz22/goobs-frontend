@@ -6,7 +6,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect, fn } from 'storybook/test'
+import { within, expect, fn, userEvent, waitFor } from 'storybook/test'
 import Panel from './index'
 import CustomButton from '../Button'
 
@@ -147,6 +147,12 @@ export const Fullscreen: Story = {
     // decorator's 480x720 box.
     const computed = window.getComputedStyle(region as HTMLElement)
     await expect(computed.position).toBe('fixed')
+    // The fullscreen takeover is a MODAL (WCAG 2.4.3): it renders as a
+    // role="dialog" + aria-modal="true" so AT treats the obscured page as
+    // inert, and the root is a programmatic focus target (tabIndex=-1).
+    await expect(region).toHaveAttribute('role', 'dialog')
+    await expect(region).toHaveAttribute('aria-modal', 'true')
+    await expect(region).toHaveAttribute('tabindex', '-1')
   },
 }
 
@@ -182,9 +188,12 @@ export const InteractionTest: Story = {
     await expect((labelTarget as HTMLElement).tagName).toMatch(/^H[1-6]$/)
     // Default heading level is 2.
     await expect((labelTarget as HTMLElement).tagName).toBe('H2')
-    // The scroll body is keyboard-reachable (WCAG 2.1.1): tabIndex=0.
+    // The scroll body is keyboard-reachable (WCAG 2.1.1): because this body
+    // overflows (12 rows in a 480px panel) AND holds no focusable children,
+    // the runtime measurement opts it into the tab order (tabIndex=0). The
+    // wait accounts for the post-mount ResizeObserver measurement.
     const body = canvasElement.querySelector('[data-panel-body="true"]')
-    await expect(body).toHaveAttribute('tabindex', '0')
+    await waitFor(() => expect(body).toHaveAttribute('tabindex', '0'))
     // The built-in back button is present and reachable by its label.
     const backButton = canvas.getByLabelText('Back')
     await expect(backButton).toBeVisible()
@@ -228,12 +237,13 @@ export const HeadingLevel: Story = {
 
 /**
  * Header-less composition (Body only). The root must NOT emit a dangling
- * `aria-labelledby` when no `Panel.Header` supplies the title id — the play
- * function pins that the attribute is absent so the region is never left
- * pointing at a non-existent element (WCAG 1.3.1 / 4.1.2).
+ * `aria-labelledby` when no `Panel.Header` supplies the title id, AND — having
+ * no accessible name — must NOT declare an explicit `role="region"` landmark
+ * (an unnamed landmark is an axe best-practice failure). It degrades to a plain
+ * `<section>`. The play function pins both (WCAG 1.3.1 / 4.1.2).
  */
 export const HeaderlessRegion: Story = {
-  name: 'A11y/Header-less (no dangling label)',
+  name: 'A11y/Header-less (no dangling label, no unnamed landmark)',
   args: { variant: 'sacred' },
   render: args => (
     <Panel {...args}>
@@ -245,8 +255,134 @@ export const HeaderlessRegion: Story = {
     await expect(region).not.toBeNull()
     // No header → no aria-labelledby (rather than a broken IDREF).
     await expect(region).not.toHaveAttribute('aria-labelledby')
-    // The body is still keyboard-scrollable on its own.
+    // No accessible name → no explicit region role (not an unnamed landmark).
+    await expect(region).not.toHaveAttribute('role')
+    // The body is still keyboard-scrollable on its own (overflows, no
+    // focusable children → measured into the tab order).
     const body = canvasElement.querySelector('[data-panel-body="true"]')
-    await expect(body).toHaveAttribute('tabindex', '0')
+    await waitFor(() => expect(body).toHaveAttribute('tabindex', '0'))
+  },
+}
+
+/**
+ * A consumer that supplies its own `aria-label` (no `Panel.Header`) DOES get a
+ * named `role="region"` landmark — the role is gated on having an accessible
+ * name, not on the header specifically. Pins that a labelled header-less panel
+ * is still a proper named landmark.
+ */
+export const HeaderlessLabelledRegion: Story = {
+  name: 'A11y/Header-less but aria-label (named landmark)',
+  args: { variant: 'sacred' },
+  render: args => (
+    <Panel {...args} aria-label="Activity log">
+      <Panel.Body>{sampleBody}</Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const region = canvasElement.querySelector('[data-component="Panel"]')
+    await expect(region).not.toBeNull()
+    // Consumer name present → explicit region landmark is retained.
+    await expect(region).toHaveAttribute('role', 'region')
+    await expect(region).toHaveAttribute('aria-label', 'Activity log')
+  },
+}
+
+/**
+ * Panel.Body is a tab stop ONLY when it is a genuine scroll trap. When the body
+ * holds its own focusable children (a form-filled body — the primitive's
+ * canonical InlineManageContact use case), the container must NOT become a
+ * redundant extra tab stop before those fields (WCAG 2.4.3 focus order). Pins
+ * that the body has no `tabindex` when interactive content is present.
+ */
+export const BodyWithInteractiveContent: Story = {
+  name: 'A11y/Body — interactive content is not a tab stop',
+  args: { variant: 'standard' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header title="Edit Contact" onBack={fn()} />
+      <Panel.Body>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <CustomButton text="Field One" styles={{ theme: 'light' }} />
+          <CustomButton text="Field Two" styles={{ theme: 'light' }} />
+        </div>
+      </Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.querySelector('[data-panel-body="true"]')
+    await expect(body).not.toBeNull()
+    // Focusable descendants present → the container is not opted into the tab
+    // order (no redundant stop). The wait lets the mount measurement settle.
+    await waitFor(() => expect(body).not.toHaveAttribute('tabindex'))
+  },
+}
+
+/**
+ * Panel.Body that does NOT overflow scrolls nothing, so it must NOT be a tab
+ * stop either — a focusable element that scrolls nothing is focus-order noise
+ * (WCAG 2.4.3). Pins that a short, non-overflowing body carries no `tabindex`.
+ */
+export const BodyShortNoOverflow: Story = {
+  name: 'A11y/Body — non-overflowing is not a tab stop',
+  args: { variant: 'standard' },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header title="Summary" onBack={fn()} />
+      <Panel.Body>
+        <p style={{ margin: 0 }}>A single short line that does not overflow.</p>
+      </Panel.Body>
+    </Panel>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.querySelector('[data-panel-body="true"]')
+    await expect(body).not.toBeNull()
+    // Non-overflowing, no focusable children → not a tab stop.
+    await waitFor(() => expect(body).not.toHaveAttribute('tabindex'))
+  },
+}
+
+/**
+ * Fullscreen takeover = MODAL focus management (WCAG 2.4.3 Focus Order). The
+ * variant renders as `role="dialog"` + `aria-modal`, moves focus INTO the
+ * takeover on mount, TRAPS Tab at the boundaries so a keyboard user can never
+ * Tab out into the obscured page behind it, and closes on `Escape` via
+ * `onClose`. The play function drives all three so a regression that un-manages
+ * the takeover fails here.
+ */
+export const FullscreenModal: Story = {
+  name: 'A11y/Fullscreen Modal (focus trap + Escape)',
+  args: { variant: 'fullscreen', onClose: fn() },
+  render: args => (
+    <Panel {...args}>
+      <Panel.Header
+        onBack={fn()}
+        title="Fullscreen Takeover"
+        subtitle="Modal focus management + Escape to close"
+        actions={<CustomButton text="Save" styles={{ theme: 'sacred' }} />}
+      />
+      <Panel.Body>{sampleBody}</Panel.Body>
+      <Panel.Footer>
+        <CustomButton text="Close" styles={{ theme: 'sacred' }} />
+      </Panel.Footer>
+    </Panel>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const region = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Panel"]'
+    )
+    await expect(region).not.toBeNull()
+    await expect(region).toHaveAttribute('role', 'dialog')
+    await expect(region).toHaveAttribute('aria-modal', 'true')
+    // Focus is moved INTO the takeover on mount.
+    await waitFor(() =>
+      expect(region!.contains(document.activeElement)).toBe(true)
+    )
+    // Tab is trapped: Shift+Tab at the top boundary wraps back INSIDE the
+    // takeover rather than escaping into the obscured page behind it.
+    await userEvent.tab({ shift: true })
+    await expect(region!.contains(document.activeElement)).toBe(true)
+    // Escape invokes the consumer onClose (APG dialog dismiss contract).
+    await userEvent.keyboard('{Escape}')
+    await expect(args.onClose).toHaveBeenCalled()
   },
 }
