@@ -330,6 +330,15 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             className={cssStyles.toggleButton}
             type="button"
             data-action={isOpen ? 'close' : 'open'}
+            // This arrow is a secondary disclosure trigger for the same listbox
+            // the combobox input owns. Its open/closed state was conveyed only by
+            // the icon rotation (visual-only, WCAG 1.4.1 / 4.1.2) — aria-expanded
+            // exposes it programmatically, aria-controls links it to the listbox
+            // (both unconditional, matching the sibling combobox input above), and
+            // aria-label gives the icon-only button an accessible name.
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-label="Toggle options"
             disabled={styles?.disabled}
           >
             <ArrowDropDownIcon

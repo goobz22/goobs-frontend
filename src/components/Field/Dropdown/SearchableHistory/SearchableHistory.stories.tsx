@@ -8,6 +8,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
+import { userEvent, within, expect } from 'storybook/test'
 import SearchableHistory, { type NavigationItem } from './index'
 
 // Sample navigation items. The Overview tab groups by the categories
@@ -225,4 +226,48 @@ export const InteractiveDemo: Story = {
     )
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — the arrow toggle exposes aria-pressed/expanded state
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `toggle-missing-aria-pressed` class: the arrow button
+ * beside the combobox input is a secondary disclosure trigger for the same
+ * listbox. Its open/closed state used to be conveyed only by the icon rotation
+ * (visual-only — invisible to screen-reader and color-blind users, WCAG 1.4.1 /
+ * 4.1.2). It now carries `aria-expanded` that flips with the state, plus
+ * `aria-controls` to the listbox and an accessible name ("Toggle options"). This
+ * play function drives that: resting = collapsed on both the combobox input and
+ * the arrow; clicking the arrow opens the listbox and flips `aria-expanded` to
+ * `true` on both controls.
+ */
+export const ToggleButtonExposesExpandedState: Story = {
+  name: 'A11y: arrow toggle exposes expanded state',
+  args: {
+    label: 'Navigate',
+    placeholder: 'Search navigation...',
+    items: navigationItems,
+    name: 'navigation',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The combobox role lives on the search input; the arrow is a separate
+    // <button> located by its accessible name.
+    const combobox = canvas.getByRole('combobox')
+    const toggle = canvas.getByRole('button', { name: 'Toggle options' })
+
+    // Resting state — both controls report collapsed.
+    expect(combobox).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+
+    // Clicking the arrow opens the listbox and flips aria-expanded on BOTH the
+    // arrow (the newly-added programmatic state) and the combobox input.
+    await userEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+  },
 }
