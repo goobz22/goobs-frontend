@@ -25,6 +25,25 @@
 }
 
 /* --------------------------------------------------------------------------
+   SR DESCRIPTION — persistent, visually hidden element carrying the tooltip
+   text for assistive tech. Referenced by the trigger via aria-describedby so
+   the description is announced on focus/hover even while the animated visual
+   bubble is unmounted. Standard visually-hidden (clip) technique — stays in the
+   accessibility tree and the SSR'd HTML while taking no visual space.
+   -------------------------------------------------------------------------- */
+.srDescription {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
    TOOLTIP — fixed-position floating layer.
    left/top driven by JS-measured --tooltip-x / --tooltip-y.
    Opacity/transform animate the enter; the .visible class is the end state.
