@@ -104,6 +104,31 @@ const Stepper: React.FC<StepperProps> = ({
   const theme = styles?.theme || 'sacred'
   const isWizardMode = mode === 'wizard'
 
+  // Stable id base for wiring each step's secondary `description` to its
+  // control via aria-describedby (SSR-safe; unique per Stepper instance).
+  const baseId = React.useId()
+
+  // Screen-reader-only status word for each step. A step's status is otherwise
+  // conveyed only by the (decorative, aria-hidden) status icon plus colour, so
+  // without this a non-sighted user cannot tell a completed step from a locked
+  // or errored one (WCAG 1.1.1 / 1.3.1 / 1.4.1 — never colour/icon alone). The
+  // 'active' status is intentionally omitted because aria-current="step" on the
+  // control already announces "current step".
+  const getStatusLabel = (
+    status: 'completed' | 'active' | 'error' | 'inactive'
+  ): string | undefined => {
+    switch (status) {
+      case 'completed':
+        return 'Completed'
+      case 'error':
+        return 'Error'
+      case 'inactive':
+        return 'Locked'
+      default:
+        return undefined
+    }
+  }
+
   // Caller-supplied spacing overrides → CSS custom properties (set only when
   // provided; the Stepper.module.css defaults apply otherwise).
   const dynamicStyle: DynamicStyle = {}
@@ -183,20 +208,17 @@ const Stepper: React.FC<StepperProps> = ({
     // Additive diagnostics: a clickable step click is a nav.change to that
     // step index. Non-clickable (locked / future) steps emit nothing.
     // emitDiag is a no-op without a host bus.
+    //
+    // Navigation-mode reachable steps now render as real <a href> anchors and
+    // navigate natively (crawlable, keyboard-operable, open-in-new-tab), so no
+    // JS window.location assignment happens here anymore. Wizard-mode step
+    // buttons are inert beyond this diagnostic beacon.
     if (isStepClickable(step, index)) {
       emitDiag({
         type: 'nav.change',
         component: 'Stepper',
         to: String(index),
       })
-    }
-    if (isWizardMode) {
-      if (isStepClickable(step, index) && onNext && onBack) {
-        return
-      }
-    } else if (isStepClickable(step, index)) {
-      // Use location.assign() instead of direct href assignment to avoid lint error
-      window.location.assign(getStepLink(step))
     }
   }
 
@@ -224,7 +246,10 @@ const Stepper: React.FC<StepperProps> = ({
     if (isCompleted && finalActions) {
       return (
         <div className={cssStyles.wizardCompleted}>
-          <div className={cssStyles.wizardCompletedTitle}>
+          {/* Polite live region: the completion pane is conditionally mounted
+              when the wizard finishes, so role="status" announces it to screen
+              readers without stealing focus (WCAG 4.1.3 Status Messages). */}
+          <div className={cssStyles.wizardCompletedTitle} role="status">
             All steps completed!
           </div>
           <div className={cssStyles.wizardCompletedActions}>
@@ -274,6 +299,109 @@ const Stepper: React.FC<StepperProps> = ({
     )
   }
 
+  // The steps render as a real ordered list (WCAG 1.3.1) so assistive tech
+  // announces "list, N items" / "step X of N". In navigation mode a
+  // <nav aria-label="Progress"> landmark wraps it (the steps are genuine
+  // links); in wizard mode there is no navigation landmark, so the <ol> names
+  // itself.
+  const stepList = (
+    <ol
+      className={cssStyles.stepperContainer}
+      data-orientation={orientation}
+      aria-label={isWizardMode ? 'Progress' : undefined}
+    >
+      {steps.map((step, index) => {
+        const status = getStepStatus(step, index)
+        const isClickable = isStepClickable(step, index)
+        const isCurrent = status === 'active'
+        const statusLabel = getStatusLabel(status)
+        const descriptionId = step.description
+          ? `${baseId}-step-${index}-description`
+          : undefined
+
+        // Visually-hidden status word appended to the control's accessible
+        // name (leading comma → "Personal Info, Completed").
+        const statusNode = statusLabel ? (
+          <span className={cssStyles.srOnly}>{`, ${statusLabel}`}</span>
+        ) : null
+
+        const labelContent = (
+          <>
+            {step.label}
+            {statusNode}
+          </>
+        )
+
+        // Navigation-mode reachable steps are real anchors (crawlable, native
+        // keyboard/focus, open-in-new-tab). Everything else — locked navigation
+        // steps and every wizard step — stays a native <button> (disabled when
+        // not reachable) that fires the click handler / diagnostic beacon.
+        // Both carry data-action="goto-step" and aria-current for the machine
+        // selector + assistive-tech contract.
+        const stepControl =
+          !isWizardMode && isClickable ? (
+            <a
+              href={getStepLink(step)}
+              className={cssStyles.stepButton}
+              data-action="goto-step"
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-describedby={descriptionId}
+              onClick={() => handleStepClick(step, index)}
+            >
+              {labelContent}
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleStepClick(step, index)}
+              disabled={!isClickable}
+              data-action="goto-step"
+              className={cssStyles.stepButton}
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-describedby={descriptionId}
+            >
+              {labelContent}
+            </button>
+          )
+
+        return (
+          <li
+            key={step.label}
+            className={cssStyles.stepContainer}
+            data-orientation={orientation}
+          >
+            <div className={cssStyles.stepContent}>
+              <div className={cssStyles.iconContainer} data-status={status}>
+                {getStepIcon(status, step)}
+              </div>
+
+              <div className={cssStyles.stepText}>
+                {stepControl}
+                {step.description && (
+                  <div
+                    id={descriptionId}
+                    className={cssStyles.stepDescription}
+                  >
+                    {step.description}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Purely decorative connector line — hidden from assistive tech. */}
+            {index < steps.length - 1 && orientation === 'horizontal' && (
+              <div className={cssStyles.connector} aria-hidden="true" />
+            )}
+
+            {index < steps.length - 1 && orientation === 'vertical' && (
+              <div className={cssStyles.verticalConnector} aria-hidden="true" />
+            )}
+          </li>
+        )
+      })}
+    </ol>
+  )
+
   return (
     <div
       className={cssStyles.root}
@@ -281,53 +409,7 @@ const Stepper: React.FC<StepperProps> = ({
       data-theme={theme}
       style={dynamicStyle}
     >
-      <div
-        className={cssStyles.stepperContainer}
-        data-orientation={orientation}
-      >
-        {steps.map((step, index) => {
-          const status = getStepStatus(step, index)
-          const isClickable = isStepClickable(step, index)
-
-          return (
-            <div
-              key={step.label}
-              className={cssStyles.stepContainer}
-              data-orientation={orientation}
-            >
-              <div className={cssStyles.stepContent}>
-                <div className={cssStyles.iconContainer} data-status={status}>
-                  {getStepIcon(status, step)}
-                </div>
-
-                <div className={cssStyles.stepText}>
-                  <button
-                    onClick={() => handleStepClick(step, index)}
-                    disabled={!isClickable}
-                    data-action="goto-step"
-                    className={cssStyles.stepButton}
-                  >
-                    {step.label}
-                  </button>
-                  {step.description && (
-                    <div className={cssStyles.stepDescription}>
-                      {step.description}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {index < steps.length - 1 && orientation === 'horizontal' && (
-                <div className={cssStyles.connector} />
-              )}
-
-              {index < steps.length - 1 && orientation === 'vertical' && (
-                <div className={cssStyles.verticalConnector} />
-              )}
-            </div>
-          )
-        })}
-      </div>
+      {isWizardMode ? stepList : <nav aria-label="Progress">{stepList}</nav>}
 
       {renderWizardContent()}
       {renderWizardNavigation()}

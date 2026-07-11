@@ -92,6 +92,11 @@
   flex-direction: row;
   gap: var(--stepper-gap, 0);
   align-items: center;
+  /* Rendered as a semantic <ol> (WCAG 1.3.1) — strip the list chrome so the
+     row/column layout is unchanged. */
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .stepperContainer[data-orientation='vertical'] {
@@ -182,6 +187,9 @@
   transition: all 0.3s ease;
   background-color: transparent;
   text-decoration: none;
+  /* Navigation-mode reachable steps render as an <a>; keep the box identical
+     to the <button> variant. */
+  display: inline-block;
 }
 
 .stepButton:hover:not(:disabled) {
@@ -192,6 +200,41 @@
 .stepButton:disabled {
   color: var(--stepper-label-disabled);
   cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   FOCUS-VISIBLE — a clearly visible keyboard focus ring on step controls
+   (WCAG 2.4.7). Ring colour comes from the per-theme focus-ring tokens so it
+   stays legible on the sacred / light / dark surfaces.
+   -------------------------------------------------------------------------- */
+.stepButton:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--goobs-radius-sm);
+}
+
+.root[data-theme='light'] .stepButton:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.root[data-theme='dark'] .stepButton:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   SCREEN-READER-ONLY status text — visually hidden, still in the accessible
+   name / reading order (matches the repo-wide `.srOnly` pattern).
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Label + optional secondary description stacked beside the status icon. */
@@ -266,4 +309,15 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION — honour a user's OS-level "reduce motion" preference by
+   dropping the icon/label transitions (WCAG 2.3.3 Animation from Interactions).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .iconContainer,
+  .stepButton {
+    transition: none;
+  }
 }
