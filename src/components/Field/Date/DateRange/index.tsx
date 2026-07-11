@@ -66,6 +66,7 @@ const DateRange: React.FC<DateRangeProps> = ({
   error,
   dataField,
   dataFieldName,
+  ariaLabel,
   name,
   style,
   styles,
