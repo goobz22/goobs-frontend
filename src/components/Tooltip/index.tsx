@@ -2,7 +2,7 @@
  * @fileoverview Defines the StyledTooltip component, a customizable tooltip for displaying extra information.
  */
 'use client'
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tooltip.module.css'

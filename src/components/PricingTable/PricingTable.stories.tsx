@@ -300,3 +300,106 @@ export const CustomHeadingLevel: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * Keyboard-scrollable overflow. Six package columns inside a deliberately narrow
+ * (420px) container force the table wider than its viewport. The scroll wrapper
+ * is `tabIndex={0}` with `role="group"` and the table's name, so a keyboard-only
+ * user can Tab to the region and scroll the off-screen columns into view with
+ * the arrow keys — the columns are NOT reachable otherwise when the table has no
+ * focusable control inside it (WCAG 2.1.1 Keyboard; axe
+ * `scrollable-region-focusable`). This config omits `buttoncolumns` on purpose so
+ * the ONLY way to reach the far columns by keyboard is the focusable scroll
+ * region itself.
+ */
+export const KeyboardScrollableOverflow: Story = {
+  name: 'Keyboard-scrollable Overflow (no buttons)',
+  render: args => (
+    <div
+      style={{
+        width: '420px',
+        maxWidth: '100%',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    tabletitle: { text: 'Compare every tier' },
+    theme: 'light',
+    headingLevel: 2,
+    highlightedPackageIndex: 2,
+    packagecolumns: {
+      packagenames: [
+        'Free',
+        'Starter',
+        'Growth',
+        'Pro',
+        'Business',
+        'Enterprise',
+      ],
+    },
+    monthlyprice: { prices: ['$0', '$10', '$20', '$40', '$80', '$160'] },
+    features: [
+      {
+        title: 'Seats included',
+        tiedtopackage: {
+          tiedtopackages: ['true', 'true', 'true', 'true', 'true', 'true'],
+        },
+      },
+      {
+        title: 'Priority support',
+        tiedtopackage: {
+          tiedtopackages: ['false', 'false', 'true', 'true', 'true', 'true'],
+        },
+      },
+      {
+        title: 'SSO / SAML',
+        tiedtopackage: {
+          tiedtopackages: ['false', 'false', 'false', 'false', 'true', 'true'],
+        },
+      },
+    ],
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Disambiguated call-to-action labels. All three plans share the SAME visible
+ * button text ("Learn More") — the common pricing-page pattern. Each footer
+ * button folds its package name into its accessible name via `aria-label`
+ * (`"Learn More, ThothOS Pro"`), so a screen-reader user tab-navigating the
+ * buttons hears which plan each CTA selects instead of three identical "Learn
+ * More"s (WCAG 2.4.6 / 4.1.2). The visible label is unchanged and is contained
+ * in the accessible name (WCAG 2.5.3 Label in Name). Inspect the rendered
+ * `<button>`s: each carries a distinct `aria-label` while displaying the same
+ * text.
+ */
+export const DisambiguatedButtonLabels: Story = {
+  name: 'Disambiguated CTA labels (identical text)',
+  render: args => (
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    ...defaultConfig,
+    theme: 'light',
+    highlightedPackageIndex: 1,
+    buttoncolumns: {
+      buttontexts: ['Learn More', 'Learn More', 'Learn More'],
+      buttonlinks: ['#free', '#pro', '#enterprise'],
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}

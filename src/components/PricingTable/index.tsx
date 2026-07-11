@@ -442,7 +442,20 @@ const PricingTable: FC<PricingProps> = props => {
 
       {titleHeading}
 
-      <div style={{ overflowX: 'auto' }}>
+      {/* Horizontal-scroll container. Made keyboard-focusable (tabIndex={0})
+          and given a group role+name so a keyboard-only user can scroll a table
+          that overflows its width EVEN when it has no focusable control inside
+          (e.g. no buttoncolumns) — otherwise the off-screen package columns are
+          unreachable by keyboard (WCAG 2.1.1 Keyboard; axe
+          `scrollable-region-focusable`). The name reuses the table's own so the
+          focus stop announces what it is. */}
+      <div
+        style={{ overflowX: 'auto' }}
+        tabIndex={0}
+        role="group"
+        aria-labelledby={tabletitle ? headingId : undefined}
+        aria-label={tabletitle ? undefined : 'Pricing plans'}
+      >
         {/* Real data table: package columns are <th scope="col">, each row's
             label is <th scope="row">, values are <td> — so assistive tech and
             crawlers get the row/column relationships (WCAG 1.3.1 / 4.1.2, and
@@ -582,10 +595,21 @@ const PricingTable: FC<PricingProps> = props => {
                   .slice(0, numPackages)
                   .map((text, i) => (
                     <td key={i} style={styles.buttonSection}>
+                      {/* Pricing CTAs are commonly identical across columns
+                          ("Learn More", "Choose plan", "Buy"). When a screen
+                          reader user tab-navigates to a footer button the
+                          column-header association is not reliably announced, so
+                          identical labels are indistinguishable. Fold the
+                          package name into the button's accessible name so each
+                          CTA says which plan it selects (WCAG 2.4.6 Headings &
+                          Labels / 4.1.2). The visible label is unchanged and is
+                          contained in the accessible name, satisfying WCAG 2.5.3
+                          Label in Name. */}
                       <CustomButton
                         text={text}
                         onClick={() => handleButtonClick(i)}
                         action="select"
+                        aria-label={`${text}, ${packagenames[i]}`}
                         styles={{ theme, ...styles.button }}
                         disabled={disabled}
                       />
