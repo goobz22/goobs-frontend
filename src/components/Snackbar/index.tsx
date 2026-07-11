@@ -55,6 +55,30 @@ const Snackbar: React.FC<SnackbarProps> = ({
     setIsOpen(open)
   }, [open])
 
+  // Reset the WCAG 2.2.1 pause flags whenever the snackbar is CLOSED. A parent
+  // almost always keeps this instance MOUNTED and merely toggles `open` (we
+  // return null when !isOpen, so React state PERSISTS across an
+  // open → closed → open cycle for the SAME instance). If a toast is dismissed
+  // while it is paused, the DOM release handlers may never fire:
+  //   • Enter/Space on the focused Close button runs Alert's 200ms exit, then
+  //     onClose → parent sets open=false → this node unmounts while the button
+  //     still holds focus; a native blur on an element removed during React's
+  //     own commit is not reliably delivered to the delegated focus listener,
+  //     so `handleBlur` never runs and isFocusWithin stays true.
+  //   • Clicking the inner Close X while still hovering unmounts the node under
+  //     the pointer, so no `mouseleave` fires and isHovered stays true.
+  // Either way the flags would be STUCK true, and the NEXT open would see
+  // isPaused still true so the auto-hide effect below never schedules a timer —
+  // the reused toast would never auto-dismiss, silently breaking the auto-hide
+  // contract on the a11y-critical keyboard/pointer path. Clearing on close
+  // guarantees every reopen starts unpaused with a fresh full-duration timer.
+  useEffect(() => {
+    if (!isOpen) {
+      setIsHovered(false)
+      setIsFocusWithin(false)
+    }
+  }, [isOpen])
+
   // Diagnostic bus — emit the snackbar open/closed lifecycle as a
   // `component.state` transition so outcome tests can assert the snackbar
   // appeared/dismissed without scraping the DOM. Edge-triggered off `isOpen`

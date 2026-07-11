@@ -445,6 +445,103 @@ export const PauseOnFocus: Story = {
   },
 }
 
+/**
+ * Controlled wrapper for the pause-flag reset regression. The parent keeps the
+ * Snackbar MOUNTED and only toggles `open` (an external button re-opens it,
+ * `onClose` closes it), so React state on the ONE Snackbar instance persists
+ * across an open → closed → open cycle — exactly the reuse pattern that the
+ * pause-flag reset must survive.
+ */
+const PauseResetOnReopenComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div style={{ padding: '2rem' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#1d4ed8',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+        }}
+      >
+        Show snackbar
+      </button>
+
+      <Snackbar
+        open={open}
+        onClose={() => setOpen(false)}
+        message="Reused toast — must auto-hide again after reopen."
+        severity="info"
+        autoHideDuration={1000}
+      />
+    </div>
+  )
+}
+
+/**
+ * WCAG 2.2.1 lifecycle regression — the auto-hide pause flags MUST reset when
+ * the snackbar closes, so a REUSED instance still auto-dismisses on its next
+ * open. The parent keeps the Snackbar mounted and toggles `open`, so a toast
+ * dismissed WHILE paused (here: hovered, then closed via its own Close button so
+ * the node unmounts under the pointer and no `mouseleave` fires) must not leave
+ * the pause state stuck. The play function reopens the same instance and asserts
+ * it is NOT paused and auto-dismisses again. Against the pre-fix code the stuck
+ * pause flag means the reopened toast never schedules a timer and stays forever,
+ * so both assertions fail.
+ */
+export const PauseFlagResetsOnReopen: Story = {
+  name: 'Behavior/Pause Flag Resets On Reopen (WCAG 2.2.1)',
+  render: () => <PauseResetOnReopenComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const showButton = canvas.getByRole('button', { name: 'Show snackbar' })
+    const message = 'Reused toast — must auto-hide again after reopen.'
+
+    // 1) Open the toast, then hover it so the auto-hide countdown is PAUSED.
+    await userEvent.click(showButton)
+    const root = await waitFor(() => {
+      const el = canvasElement.querySelector('[data-component="Snackbar"]')
+      if (!el) throw new Error('snackbar did not open')
+      return el as HTMLElement
+    })
+    await userEvent.hover(root)
+    await waitFor(() => expect(root).toHaveAttribute('data-paused', 'true'))
+
+    // 2) Dismiss via the inner Close button while STILL hovered. The node
+    //    unmounts under the pointer, so no `mouseleave` is delivered — pre-fix
+    //    this left the hover pause flag stuck true across the close.
+    const closeButton = within(root).getByRole('button', { name: 'Close' })
+    await userEvent.click(closeButton)
+    await waitFor(() =>
+      expect(canvas.queryByText(message)).not.toBeInTheDocument()
+    )
+
+    // 3) Reopen the SAME instance. Because the flags reset on close, the reused
+    //    toast is NOT paused (pre-fix it would still carry data-paused="true").
+    await userEvent.click(showButton)
+    const reopened = await waitFor(() => {
+      const el = canvasElement.querySelector('[data-component="Snackbar"]')
+      if (!el) throw new Error('snackbar did not reopen')
+      return el as HTMLElement
+    })
+    await expect(reopened).not.toHaveAttribute('data-paused')
+
+    // 4) A fresh countdown was scheduled, so it auto-dismisses again. Against
+    //    the pre-fix stuck-flag code no timer is ever scheduled and this waitFor
+    //    times out (the toast stays visible forever).
+    await waitFor(
+      () => expect(canvas.queryByText(message)).not.toBeInTheDocument(),
+      { timeout: 3000 }
+    )
+  },
+}
+
 // Component for Interactive
 const InteractiveComponent: React.FC = () => {
   const [open, setOpen] = useState(false)
