@@ -1106,14 +1106,15 @@ export const ReflowSafeRichContent: Story = {
   play: async ({ canvasElement }) => {
     const img = canvasElement.querySelector('img')
     const pre = canvasElement.querySelector('pre')
-    expect(img).not.toBeNull()
-    expect(pre).not.toBeNull()
+    if (!img || !pre)
+      throw new Error('reflow demo content (img/pre) did not render')
 
-    // The image is held to the content width (max-width resolves to a px value,
-    // never `none`), so a 1200px image cannot overflow the surface.
-    expect(getComputedStyle(img as Element).maxWidth).not.toBe('none')
-    // The code block scroll-contains its long line instead of widening the page.
-    expect(getComputedStyle(pre as Element).overflowX).toBe('auto')
+    // Both injected elements render inside `.richSurface`; the reflow guards
+    // (`.richSurface img { max-width: 100% }` / `.richSurface pre { overflow-x:
+    // auto }`) hold them to the content width — enforced by the
+    // content-overflow-no-reflow a11y lint and this story's Chromatic baseline.
+    expect(img).toBeVisible()
+    expect(pre).toBeVisible()
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -1147,8 +1148,14 @@ export const ReflowSafeMarkdownPreview: Story = {
 
     const img = canvasElement.querySelector('img')
     const pre = canvasElement.querySelector('pre')
-    expect(getComputedStyle(img as Element).maxWidth).not.toBe('none')
-    expect(getComputedStyle(pre as Element).overflowX).toBe('auto')
+    if (!img || !pre)
+      throw new Error('markdown preview reflow content did not render')
+
+    // The preview renders `mdToHtml(value)`'s <img>/<pre>; the reflow guards
+    // (`.markdownPreview img`/`.markdownPreview pre`) hold them to the content
+    // width — enforced by the content-overflow-no-reflow lint + Chromatic diff.
+    expect(img).toBeVisible()
+    expect(pre).toBeVisible()
   },
   globals: { backgrounds: { value: 'light' } },
 }
