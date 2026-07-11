@@ -686,3 +686,81 @@ export const InteractionTest: Story = {
     await expect(input).toHaveValue('(555) 123-4567')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: KEYBOARD FOCUS INDICATOR (WCAG 2.1.1 + 2.4.7)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the visible focus indicator. The input sets
+ * `outline: none` and renders inside PhoneNumber's own `.inputWrapper` (not
+ * FieldShell's `.inputSlot`), so a keyboard user would get no visible focus
+ * indication unless the `.inputWrapper:focus-within` ring is present. The play
+ * fn Tab-reaches the input (keyboard operability, WCAG 2.1.1) and asserts the
+ * wrapper renders a focus ring (box-shadow) only while focused (WCAG 2.4.7).
+ */
+export const FocusIndicatorTest: Story = {
+  render: () => (
+    <PhoneNumberFieldWithState
+      label="Keyboard Focus"
+      placeholder="555-555-5555"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByPlaceholderText('555-555-5555')
+    // The input's direct parent is the .inputWrapper (prefix + input siblings).
+    const wrapper = input.parentElement as HTMLElement
+
+    // Before focus: no ring on the wrapper.
+    expect(getComputedStyle(wrapper).boxShadow).toBe('none')
+
+    // Keyboard-reachable: a single Tab from the canvas lands on the input.
+    await userEvent.tab()
+    await expect(input).toHaveFocus()
+
+    // While focused: the :focus-within ring is applied (visible indicator).
+    expect(getComputedStyle(wrapper).boxShadow).not.toBe('none')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: AUTOCOMPLETE / INPUT PURPOSE (WCAG 1.3.5)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for input-purpose identification. The field defaults its
+ * native `autocomplete` to `'tel'` so browsers / assistive tech can identify
+ * the input purpose and offer the stored phone number for autofill (WCAG
+ * 1.3.5). A caller-supplied token still overrides the default.
+ */
+export const AutocompleteDefault: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <PhoneNumberFieldWithState
+        label="Default (tel)"
+        placeholder="555-555-5555"
+        styles={{ theme: 'light' }}
+      />
+      <PhoneNumberFieldWithState
+        label="Override (off)"
+        placeholder="No autofill"
+        autoComplete="off"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const defaultInput = canvas.getByPlaceholderText('555-555-5555')
+    const overrideInput = canvas.getByPlaceholderText('No autofill')
+
+    // Accessible-by-default: purpose identified as a telephone number.
+    expect(defaultInput).toHaveAttribute('autocomplete', 'tel')
+    // Caller override still wins.
+    expect(overrideInput).toHaveAttribute('autocomplete', 'off')
+  },
+}

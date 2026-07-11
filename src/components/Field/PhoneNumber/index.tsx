@@ -45,6 +45,12 @@ export interface PhoneNumberFieldProps {
   /** Placeholder text (default '555-555-5555'). */
   placeholder?: string
   id?: string
+  /**
+   * Native input autocomplete token. Defaults to `'tel'` so the browser and
+   * assistive tech can identify the input's purpose (WCAG 1.3.5 Identify
+   * Input Purpose) and offer the user's stored phone number for autofill.
+   * Pass `'off'` (or any other token) to override.
+   */
   autoComplete?: string
   /** Stable test selector — emitted as `data-field` on the wrapper. */
   dataField?: string
@@ -248,7 +254,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            autoComplete={autoComplete}
+            autoComplete={autoComplete ?? 'tel'}
             className={cssStyles.input}
             {...inputAriaProps}
           />

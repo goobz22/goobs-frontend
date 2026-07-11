@@ -29,6 +29,21 @@
   background-color: var(--field-bg, var(--goobs-sacred-control-bg));
 }
 
+/* Visible keyboard focus indicator (WCAG 2.4.7 Focus Visible / 1.4.11
+   Non-text Contrast). The input drops the UA outline (`outline: none` below)
+   and PhoneNumber renders its own .inputWrapper rather than FieldShell's
+   .inputSlot (whose :focus-within ring would otherwise apply), so without
+   this a keyboard user would get NO visible focus indication at all. Restore
+   a themed ring on the wrapper whenever the input inside it is focused: the
+   border shifts to the shell's per-theme focus token (--field-border-focus
+   cascades in from the .shell ancestor — light-primary / dark-primary / gold)
+   plus a soft ring. Matches Number/InternalIncrement's wrapper-focus
+   convention. */
+.inputWrapper:focus-within {
+  border-color: var(--field-border-focus, var(--goobs-gold-a70));
+  box-shadow: 0 0 0 2px var(--field-border-focus, var(--goobs-gold-a70));
+}
+
 .prefix {
   display: flex;
   align-items: center;
@@ -124,4 +139,17 @@
 
 :global([data-component='FieldShell'][data-theme='dark']) .input:disabled {
   color: var(--goobs-dark-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions). The wrapper
+   transitions border/background color on focus/hover/theme change (and the
+   `all` transition also animates the focus ring's box-shadow). Honor the OS
+   "reduce motion" preference by dropping the transition for users who opt
+   out — the focus ring still appears instantly, just without the fade.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .inputWrapper {
+    transition: none;
+  }
 }
