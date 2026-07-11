@@ -14,6 +14,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { userEvent, within, expect } from 'storybook/test'
 import FilterSection, {
   type FilterDropdownDef,
   type FilterChipClusterDef,
@@ -35,6 +36,11 @@ const meta: Meta<typeof FilterSection> = {
       control: { type: 'number', min: 1, max: 6, step: 1 },
       description:
         'When collapsible, wrap the toggle in a real <h1>–<h6> for the document outline (opt-in).',
+    },
+    landmarkLabel: {
+      control: 'text',
+      description:
+        'Accessible name for the non-collapsible `role="search"` landmark (present when a search box is rendered). Defaults to `title` ("Filters"); set a unique value to disambiguate multiple filter sections on one page.',
     },
     styles: {
       control: 'object',
@@ -139,6 +145,7 @@ interface DemoConfig {
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   surface?: boolean
   withBelowSearch?: boolean
+  landmarkLabel?: string
 }
 
 const FilterSectionDemo = ({
@@ -156,6 +163,7 @@ const FilterSectionDemo = ({
   headingLevel,
   surface = false,
   withBelowSearch = false,
+  landmarkLabel,
 }: DemoConfig): React.JSX.Element => {
   const [search, setSearch] = React.useState('')
   const [category, setCategory] = React.useState('all')
@@ -278,6 +286,7 @@ const FilterSectionDemo = ({
       {...(title !== undefined && { title })}
       {...(headingLevel !== undefined && { headingLevel })}
       {...(surface && { surface: true })}
+      {...(landmarkLabel !== undefined && { landmarkLabel })}
       {...(withBelowSearch && {
         belowSearch: (
           <div
