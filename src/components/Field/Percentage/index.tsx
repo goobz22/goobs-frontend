@@ -144,6 +144,16 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       ? parseFloat(currentValue.toString())
       : NaN
   const hasNumericAria = !Number.isNaN(numericForAria)
+  // aria-valuenow MUST stay within [aria-valuemin, aria-valuemax] per the
+  // WAI-ARIA spinbutton contract. The DISPLAY value is intentionally left
+  // unclamped — an out-of-range seed/prop ('150' against max=100, or '-25'
+  // against min=0) is shown verbatim so an error state reads truthfully, and
+  // aria-valuetext still carries that true "150%" form — but the number we
+  // expose as aria-valuenow is clamped into range so AT never announces a
+  // value that violates the declared min/max.
+  const clampedNumericForAria = hasNumericAria
+    ? Math.min(max, Math.max(min, numericForAria))
+    : NaN
 
   // Calculate width based on character count using CSS ch units —
   // avoids DOM measurement / useLayoutEffect for the auto-sized
@@ -399,7 +409,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
             type="text"
             inputMode="numeric"
             role="spinbutton"
-            aria-valuenow={hasNumericAria ? numericForAria : undefined}
+            aria-valuenow={hasNumericAria ? clampedNumericForAria : undefined}
             aria-valuemin={min}
             aria-valuemax={max}
             aria-valuetext={
