@@ -358,6 +358,22 @@
   box-sizing: border-box;
 }
 
+/* MEDIA / CODE-BLOCK REFLOW (WCAG 1.4.10). The contentEditable surface renders
+   its raw HTML `value` via dangerouslySetInnerHTML — pasted images and the
+   `<pre>` produced by the code-format button. A wide image or long code line
+   inside would overflow the surface (its own max-width does not constrain
+   descendants) and force a two-dimensional page scroll. Hold images to the
+   content width; scroll code blocks inside their own box. */
+.richSurface img {
+  max-width: 100%;
+  height: auto;
+}
+
+.richSurface pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .richSurfaceWrap {
   position: relative;
 }
@@ -453,6 +469,21 @@
 .markdownPreview {
   width: 50%;
   border-left: 1px solid;
+}
+
+/* MEDIA / CODE-BLOCK REFLOW (WCAG 1.4.10). The preview renders `mdToHtml(value)`
+   via dangerouslySetInnerHTML, which emits bare <img> and <pre><code>. Without
+   constraints a wide image or a long unwrapped code line overflows the preview
+   and forces a two-dimensional page scroll. Images are held to the content
+   width; code blocks scroll INSIDE their own box instead of widening the page. */
+.markdownPreview img {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdownPreview pre {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* --------------------------------------------------------------------------

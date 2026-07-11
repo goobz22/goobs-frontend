@@ -349,6 +349,22 @@
   white-space: pre-wrap;
 }
 
+/* MEDIA / CODE-BLOCK REFLOW (WCAG 1.4.10). The article field values are
+   injected as HTML via dangerouslySetInnerHTML, so a value can carry a wide
+   <img> or a long <pre> code line. `white-space: pre-wrap` wraps long text but
+   does NOT constrain images or <pre> blocks — those would overflow and force a
+   two-dimensional page scroll. Hold images to the content width; scroll code
+   blocks inside their own box. */
+.articleFieldTextPreWrap img {
+  max-width: 100%;
+  height: auto;
+}
+
+.articleFieldTextPreWrap pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* --------------------------------------------------------------------------
    KNOWLEDGEBASE — list view
    -------------------------------------------------------------------------- */
