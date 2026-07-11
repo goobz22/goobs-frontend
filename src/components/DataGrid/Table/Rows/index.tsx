@@ -169,14 +169,14 @@ function formatCurrency(
           background:
             'linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(55, 65, 81, 0.8) 100%)',
           border: 'rgba(156, 163, 175, 0.5)',
-          shadow: '0 2px 6px rgba(255, 215, 0, 0.1)',
+          shadow: '0 2px 6px var(--goobs-gold-a10)',
           pulse: false,
         }
       }
 
       if (isNegative) {
         return {
-          text: '#EF4444',
+          text: 'var(--goobs-danger)',
           background:
             'linear-gradient(135deg, rgba(127, 29, 29, 0.8) 0%, rgba(185, 28, 28, 0.8) 100%)',
           border: 'rgba(239, 68, 68, 0.6)',
@@ -188,16 +188,16 @@ function formatCurrency(
       // Positive values for sacred theme
       if (isLarge) {
         return {
-          text: '#FFD700',
+          text: 'var(--goobs-gold)',
           background:
-            'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.25) 100%)',
-          border: '#FFD700',
-          shadow: '0 4px 12px rgba(255, 215, 0, 0.4)',
+            'linear-gradient(135deg, var(--goobs-gold-a15) 0%, var(--goobs-gold-a25) 100%)',
+          border: 'var(--goobs-gold)',
+          shadow: '0 4px 12px var(--goobs-gold-a40)',
           pulse: true,
         }
       } else if (isMedium) {
         return {
-          text: '#F59E0B',
+          text: 'var(--goobs-warn)',
           background:
             'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%)',
           border: 'rgba(245, 158, 11, 0.6)',
@@ -232,7 +232,7 @@ function formatCurrency(
         text: '#DC2626',
         background:
           'linear-gradient(135deg, #FEF2F2 0%, #FECACA 30%, #FCA5A5 100%)',
-        border: '#F87171',
+        border: 'var(--goobs-dark-danger-text)',
         shadow: '0 4px 12px rgba(220, 38, 38, 0.15)',
         pulse: isLarge,
       }
@@ -309,7 +309,7 @@ function formatCurrency(
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)'
         e.currentTarget.style.boxShadow = isZero
-          ? '0 2px 8px rgba(0, 0, 0, 0.1)'
+          ? '0 2px 8px var(--goobs-black-a10)'
           : colorScheme.shadow
               .replace('0.15)', '0.25)')
               .replace('0.2)', '0.35)')
@@ -339,7 +339,7 @@ function formatCurrency(
             marginRight: '4px',
             fontSize: '0.75em',
             opacity: 0.7,
-            color: sacredtheme ? '#FFD700' : '#10B981',
+            color: sacredtheme ? 'var(--goobs-gold)' : '#10B981',
           }}
         >
           ▲
@@ -379,7 +379,7 @@ function formatCurrency(
             width: '100%',
             height: '100%',
             background:
-              'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+              'linear-gradient(90deg, transparent, var(--goobs-white-a30), transparent)',
             animation: `shimmer-${formatId} 3s ease-in-out infinite`,
           }}
         >
@@ -451,13 +451,13 @@ function formatCreditCard(
           fontSize: '0.875rem',
           lineHeight: 1.3,
           letterSpacing: '0.1em',
-          color: sacredtheme ? 'rgba(255, 215, 0, 0.5)' : '#9CA3AF',
+          color: sacredtheme ? 'var(--goobs-gold-a50)' : '#9CA3AF',
           backgroundColor: sacredtheme
-            ? 'rgba(255, 215, 0, 0.05)'
+            ? 'var(--goobs-gold-a05)'
             : 'rgba(156, 163, 175, 0.1)',
           border: sacredtheme
-            ? '1px solid rgba(255, 215, 0, 0.3)'
-            : '1px solid rgba(156, 163, 175, 0.3)',
+            ? '1px solid var(--goobs-gold-a30)'
+            : '1px solid var(--goobs-gray-light-a30)',
           borderRadius: '6px',
           padding: '5px 10px',
           minWidth: '140px',
@@ -481,16 +481,16 @@ function formatCreditCard(
   // Clean, security-focused styling without card type detection
   const cardInfo = sacredtheme
     ? {
-        color: '#FFD700',
+        color: 'var(--goobs-gold)',
         bgGradient:
-          'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 30%, rgba(255, 215, 0, 0.15) 100%)',
-        borderColor: 'rgba(255, 215, 0, 0.6)',
+          'linear-gradient(135deg, var(--goobs-gold-a10) 0%, var(--goobs-gold-a05) 30%, var(--goobs-gold-a15) 100%)',
+        borderColor: 'var(--goobs-gold-a60)',
       }
     : {
-        color: '#1F2937',
+        color: 'var(--goobs-light-text)',
         bgGradient:
-          'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 30%, #CBD5E1 100%)',
-        borderColor: '#475569',
+          'linear-gradient(135deg, var(--goobs-light-surface-raised) 0%, var(--goobs-light-border) 30%, var(--goobs-light-border-strong) 100%)',
+        borderColor: 'var(--goobs-dark-border-strong)',
       }
 
   const formatId = `card-${Math.random().toString(36).substr(2, 9)}`
@@ -517,8 +517,8 @@ function formatCreditCard(
         minWidth: '140px',
         textAlign: 'center' as const,
         boxShadow: sacredtheme
-          ? `0 2px 8px rgba(255, 215, 0, 0.2)`
-          : `0 2px 8px rgba(0, 0, 0, 0.1)`,
+          ? `0 2px 8px var(--goobs-gold-a20)`
+          : `0 2px 8px var(--goobs-black-a10)`,
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -529,14 +529,14 @@ function formatCreditCard(
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-1px)'
         e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 4px 12px rgba(255, 215, 0, 0.3)'
-          : '0 4px 12px rgba(0, 0, 0, 0.15)'
+          ? '0 4px 12px var(--goobs-gold-a30)'
+          : '0 4px 12px var(--goobs-black-a15)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
         e.currentTarget.style.boxShadow = sacredtheme
-          ? '0 2px 8px rgba(255, 215, 0, 0.2)'
-          : '0 2px 8px rgba(0, 0, 0, 0.1)'
+          ? '0 2px 8px var(--goobs-gold-a20)'
+          : '0 2px 8px var(--goobs-black-a10)'
       }}
     >
       {/* Card number with special styling for masked vs visible digits */}
@@ -569,7 +569,7 @@ function formatCreditCard(
           fontSize: '0.75rem',
           opacity: 0.5,
           marginLeft: '8px',
-          color: sacredtheme ? '#FFD700' : '#6B7280',
+          color: sacredtheme ? 'var(--goobs-gold)' : '#6B7280',
         }}
       >
         🔒
@@ -584,7 +584,7 @@ function formatCreditCard(
           width: '20px',
           height: '100%',
           background:
-            'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)',
+            'linear-gradient(45deg, transparent 30%, var(--goobs-white-a10) 50%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -691,39 +691,39 @@ function formatExpirationDate(
           borderColor: 'rgba(163, 230, 53, 0.4)',
         },
         expiring_soon: {
-          color: '#FBBF24',
+          color: 'var(--goobs-dark-warn-text)',
           bg: 'rgba(251, 191, 36, 0.1)',
           borderColor: 'rgba(251, 191, 36, 0.5)',
         },
         expired: {
-          color: '#F87171',
+          color: 'var(--goobs-dark-danger-text)',
           bg: 'rgba(248, 113, 113, 0.1)',
           borderColor: 'rgba(248, 113, 113, 0.5)',
         },
         invalid: {
           color: '#9CA3AF',
           bg: 'rgba(156, 163, 175, 0.1)',
-          borderColor: 'rgba(156, 163, 175, 0.3)',
+          borderColor: 'var(--goobs-gray-light-a30)',
         },
       },
       standard: {
         valid: {
           color: '#166534',
           bg: '#DCFCE7',
-          borderColor: '#4ADE80',
+          borderColor: 'var(--goobs-dark-success-text)',
         },
         expiring_soon: {
           color: '#92400E',
           bg: '#FEF3C7',
-          borderColor: '#FBBF24',
+          borderColor: 'var(--goobs-dark-warn-text)',
         },
         expired: {
           color: '#991B1B',
           bg: '#FEE2E2',
-          borderColor: '#F87171',
+          borderColor: 'var(--goobs-dark-danger-text)',
         },
         invalid: {
-          color: '#4B5563',
+          color: 'var(--goobs-light-text-muted)',
           bg: '#F3F4F6',
           borderColor: '#D1D5DB',
         },
@@ -794,7 +794,7 @@ function formatAccountNumber(
       <span
         style={{
           fontFamily: '"JetBrains Mono", monospace',
-          color: sacredtheme ? 'rgba(255, 215, 0, 0.6)' : '#6B7280',
+          color: sacredtheme ? 'var(--goobs-gold-a60)' : '#6B7280',
           letterSpacing: '0.1em',
         }}
       >
@@ -810,12 +810,12 @@ function formatAccountNumber(
 
   const themeStyle = sacredtheme
     ? {
-        color: '#FFD700',
+        color: 'var(--goobs-gold)',
         fontFamily: '"Caudex", serif',
-        textShadow: '0 0 8px rgba(255, 215, 0, 0.5)',
+        textShadow: '0 0 8px var(--goobs-gold-a50)',
       }
     : {
-        color: '#1F2937',
+        color: 'var(--goobs-light-text)',
         fontFamily: '"Inter", sans-serif',
       }
 
@@ -825,7 +825,7 @@ function formatAccountNumber(
         style={{
           fontSize: '0.75rem',
           opacity: 0.6,
-          color: sacredtheme ? '#FFD700' : '#4B5563',
+          color: sacredtheme ? 'var(--goobs-gold)' : 'var(--goobs-light-text-muted)',
         }}
       >
         #
@@ -884,7 +884,7 @@ function formatRoutingNumber(
       <span
         style={{
           fontFamily: '"Inter", sans-serif',
-          color: '#EF4444',
+          color: 'var(--goobs-danger)',
           fontSize: '0.8rem',
           fontStyle: 'italic',
         }}
@@ -914,7 +914,7 @@ function formatRoutingNumber(
         style={{
           fontSize: '0.8rem',
           opacity: 0.7,
-          color: sacredtheme ? '#38BDF8' : '#3B82F6',
+          color: sacredtheme ? '#38BDF8' : 'var(--goobs-info)',
         }}
       >
         ⑆
@@ -1310,11 +1310,11 @@ const Rows: React.FC<RowsProps> = ({
                               theme: isSacredTheme ? 'sacred' : 'light',
                               fontSize: '12px',
                               backgroundColor: isSacredTheme
-                                ? 'rgba(255, 215, 0, 0.1)'
+                                ? 'var(--goobs-gold-a10)'
                                 : '#f0f0f0',
-                              color: isSacredTheme ? '#FFD700' : '#333',
+                              color: isSacredTheme ? 'var(--goobs-gold)' : '#333',
                               borderColor: isSacredTheme
-                                ? '#FFD700'
+                                ? 'var(--goobs-gold)'
                                 : '#d0d0d0',
                             }}
                           />
@@ -1357,7 +1357,7 @@ const Rows: React.FC<RowsProps> = ({
                       style={{
                         fontFamily: 'monospace',
                         fontSize: '14px',
-                        color: isSacredTheme ? '#FFD700' : '#1F2937',
+                        color: isSacredTheme ? 'var(--goobs-gold)' : 'var(--goobs-light-text)',
                       }}
                     >
                       {safeString(value)}
@@ -1369,7 +1369,7 @@ const Rows: React.FC<RowsProps> = ({
                       style={{
                         fontFamily: 'monospace',
                         fontSize: '14px',
-                        color: isSacredTheme ? '#FFD700' : '#1F2937',
+                        color: isSacredTheme ? 'var(--goobs-gold)' : 'var(--goobs-light-text)',
                         textTransform: 'uppercase',
                       }}
                     >
@@ -1395,7 +1395,7 @@ const Rows: React.FC<RowsProps> = ({
                       style={{
                         fontFamily: 'monospace',
                         fontSize: '14px',
-                        color: isSacredTheme ? '#3B82F6' : '#2563EB',
+                        color: isSacredTheme ? 'var(--goobs-info)' : 'var(--goobs-light-primary)',
                         fontWeight: 'bold',
                       }}
                     >
@@ -1419,7 +1419,7 @@ const Rows: React.FC<RowsProps> = ({
                           style={{
                             fontFamily: 'monospace',
                             fontSize: '14px',
-                            color: isSacredTheme ? '#FFD700' : '#1F2937',
+                            color: isSacredTheme ? 'var(--goobs-gold)' : 'var(--goobs-light-text)',
                           }}
                         >
                           {`${subnetValue.address}/${subnetValue.mask}`}

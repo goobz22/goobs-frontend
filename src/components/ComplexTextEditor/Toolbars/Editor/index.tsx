@@ -424,15 +424,15 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
       theme: styles?.theme || 'light',
       backgroundColor: isActive
         ? isSacredTheme
-          ? 'rgba(255, 215, 0, 0.2)'
-          : 'rgba(0, 0, 0, 0.10)'
+          ? 'var(--goobs-gold-a20)'
+          : 'var(--goobs-black-a10)'
         : 'transparent',
       color: isActive
         ? isSacredTheme
-          ? '#FFD700'
+          ? 'var(--goobs-gold)'
           : GREY_DARK
         : isSacredTheme
-          ? 'rgba(255, 215, 0, 0.8)'
+          ? 'var(--goobs-gold-a80)'
           : BLACK_MAIN,
       borderRadius: '2px',
       minWidth: '36px',

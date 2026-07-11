@@ -837,10 +837,10 @@ const buildExpandIconStyle = (
   const base: CSSProperties =
     theme === 'sacred'
       ? {
-          color: 'rgba(255, 215, 0, 0.7)',
+          color: 'var(--goobs-gold-a70)',
           fontSize: '16px',
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))',
+          filter: 'drop-shadow(0 1px 2px var(--goobs-black-a80))',
           opacity: 1,
         }
       : theme === 'dark'
@@ -863,7 +863,7 @@ const buildExpandIconStyle = (
     // theme.itemDisabled.color + opacity 0.5
     resolved.color =
       theme === 'sacred'
-        ? 'rgba(255, 215, 0, 0.3)'
+        ? 'var(--goobs-gold-a30)'
         : theme === 'dark'
           ? 'rgb(107, 114, 128)'
           : 'rgb(156, 163, 175)'
@@ -873,9 +873,9 @@ const buildExpandIconStyle = (
       resolved = {
         ...resolved,
         transform: 'rotate(90deg) scale(1.1) translateX(2px)',
-        color: 'rgba(255, 215, 0, 1)',
+        color: 'var(--goobs-amber-a100)',
         filter:
-          'drop-shadow(0 2px 6px rgba(255, 215, 0, 0.7)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))',
+          'drop-shadow(0 2px 6px var(--goobs-gold-a70)) drop-shadow(0 1px 2px var(--goobs-black-a80))',
       }
     } else if (theme === 'dark') {
       resolved.transform = 'rotate(90deg)'
@@ -890,9 +890,9 @@ const buildExpandIconStyle = (
     // rule can never win). The hover transform is left to CSS. Values are the
     // exact treeViewThemes[*].expandIconHover color/filter.
     if (theme === 'sacred') {
-      resolved.color = 'rgba(255, 215, 0, 1)'
+      resolved.color = 'var(--goobs-amber-a100)'
       resolved.filter =
-        'drop-shadow(0 2px 4px rgba(255, 215, 0, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))'
+        'drop-shadow(0 2px 4px var(--goobs-gold-a50)) drop-shadow(0 1px 2px var(--goobs-black-a80))'
     } else if (theme === 'dark') {
       resolved.color = 'rgb(96, 165, 250)'
     } else {

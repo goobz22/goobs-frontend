@@ -91,8 +91,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
     padding: '10px 12px', // Match creation row padding
     borderRadius: '4px',
     width: '100%',
-    backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.8)' : 'white',
-    borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#ccc',
+    backgroundColor: isSacredTheme ? 'var(--goobs-black-a80)' : 'white',
+    borderColor: isSacredTheme ? 'var(--goobs-gold-a50)' : '#ccc',
   }
 
   // Get the field configuration from creationField or column type

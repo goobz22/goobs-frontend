@@ -412,7 +412,7 @@ export default function BigCalendar({
   const calendarRadiusByTheme = isSacredTheme ? '12px' : '8px'
   // Sacred calendar surface background image (theme/bigcalendar.ts sacred.backgroundImage)
   const sacredCalendarBackgroundImage = `
-        linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%, rgba(255, 215, 0, 0.05) 100%),
+        linear-gradient(135deg, var(--goobs-gold-a05) 0%, transparent 50%, var(--goobs-gold-a05) 100%),
         radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
       `
 
@@ -424,7 +424,7 @@ export default function BigCalendar({
   // Event text is hardcoded white (renderEvent Typography color:'white') painted on
   // --bc-event-bg = this color. #2196f3 gave only 3.12 white-on-bg contrast; #1d4ed8
   // (goobs light-primary-strong) gives 6.70, clearing the 4.5 text threshold.
-  const defaultEventColor = isSacredTheme ? 'rgba(255, 215, 0, 0.8)' : '#1d4ed8'
+  const defaultEventColor = isSacredTheme ? 'var(--goobs-gold-a80)' : 'var(--goobs-light-primary-strong)'
 
   // Caller-supplied layout/style overrides stay in JS (recipe step 3). These
   // mirror the old containerStyle override fields; theme defaults live in CSS.
@@ -927,7 +927,7 @@ export default function BigCalendar({
                           fontSize: '0.8rem',
                           fontWeight: isToday ? 700 : 400,
                           ...(isToday && isSacredTheme
-                            ? { color: 'rgba(255, 215, 0, 1)' }
+                            ? { color: 'var(--goobs-amber-a100)' }
                             : {}),
                         }}
                       >

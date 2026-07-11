@@ -84,7 +84,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 style={{
                   fontSize: '10px',
                   marginBottom: '2px',
-                  color: isSacredTheme ? 'rgba(255, 215, 0, 0.7)' : '#666',
+                  color: isSacredTheme ? 'var(--goobs-gold-a70)' : '#666',
                 }}
               >
                 {fieldConfig.label}
@@ -122,12 +122,13 @@ const CreationRow: React.FC<CreationRowProps> = ({
       >
         <button
           onClick={() => setOpenModalField(column.field)}
+          data-action="open"
           style={{
             background: isSacredTheme
-              ? 'rgba(255, 215, 0, 0.15)'
-              : 'rgba(59, 130, 246, 0.15)',
-            border: `1px solid ${isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : 'rgba(59, 130, 246, 0.5)'}`,
-            color: isSacredTheme ? '#FFD700' : '#3B82F6',
+              ? 'var(--goobs-gold-a15)'
+              : 'var(--goobs-blue-a15)',
+            border: `1px solid ${isSacredTheme ? 'var(--goobs-gold-a50)' : 'rgba(59, 130, 246, 0.5)'}`,
+            color: isSacredTheme ? 'var(--goobs-gold)' : 'var(--goobs-info)',
             cursor: 'pointer',
             fontSize: '12px',
             fontFamily: isSacredTheme ? 'Cinzel, serif' : 'inherit',
@@ -736,10 +737,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 height: '28px',
                 padding: '2px 8px',
                 backgroundColor: isSacredTheme
-                  ? 'rgba(255, 215, 0, 0.1)'
+                  ? 'var(--goobs-gold-a10)'
                   : 'rgba(34, 197, 94, 0.1)',
                 borderColor: isSacredTheme
-                  ? 'rgba(255, 215, 0, 0.5)'
+                  ? 'var(--goobs-gold-a50)'
                   : 'rgba(34, 197, 94, 0.5)',
               }}
             />
@@ -753,10 +754,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
                 height: '28px',
                 padding: '2px 8px',
                 backgroundColor: isSacredTheme
-                  ? 'rgba(255, 215, 0, 0.1)'
+                  ? 'var(--goobs-gold-a10)'
                   : 'rgba(239, 68, 68, 0.1)',
                 borderColor: isSacredTheme
-                  ? 'rgba(255, 215, 0, 0.5)'
+                  ? 'var(--goobs-gold-a50)'
                   : 'rgba(239, 68, 68, 0.5)',
               }}
             />

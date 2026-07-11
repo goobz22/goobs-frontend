@@ -261,9 +261,9 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     const successIconStyle: CSSProperties = {
       width: '60px',
       height: '60px',
-      color: styles?.successIconColor || (isSacred ? '#FFD700' : '#22C55E'),
+      color: styles?.successIconColor || (isSacred ? 'var(--goobs-gold)' : 'var(--goobs-success)'),
       ...(isSacred && {
-        filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
+        filter: 'drop-shadow(0 0 10px var(--goobs-gold-a60))',
       }),
     }
 

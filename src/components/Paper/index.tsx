@@ -128,8 +128,8 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
     // inline logic exactly:
     //   sacred → gold glow, default → soft drop shadow
     const elevationShadow = isSacredTheme
-      ? `0 0 ${20 + elevation * 10}px rgba(255, 215, 0, 0.3), 0 0 ${40 + elevation * 20}px rgba(255, 215, 0, 0.1)`
-      : `0 ${elevation}px ${elevation * 4}px rgba(0, 0, 0, 0.1)`
+      ? `0 0 ${20 + elevation * 10}px var(--goobs-gold-a30), 0 0 ${40 + elevation * 20}px var(--goobs-gold-a10)`
+      : `0 ${elevation}px ${elevation * 4}px var(--goobs-black-a10)`
     const resolvedShadow = styles?.boxShadow ?? elevationShadow
 
     // Border resolution mirrors the old branch precedence: an explicit
@@ -143,10 +143,10 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>(
         : styles?.borderWidth
           ? `${styles.borderWidth} solid ${
               isSacredTheme
-                ? 'rgba(255, 215, 0, 0.3)'
+                ? 'var(--goobs-gold-a30)'
                 : isDarkTheme
                   ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(0, 0, 0, 0.12)'
+                  : 'var(--goobs-black-a12)'
             }`
           : undefined
 

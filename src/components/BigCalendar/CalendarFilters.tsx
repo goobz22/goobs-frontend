@@ -121,8 +121,8 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
             ...(theme === 'sacred'
               ? {
                   variant: 'cinzelh5',
-                  color: '#FFD700',
-                  textShadow: '0 0 6px rgba(255, 215, 0, 0.5)',
+                  color: 'var(--goobs-gold)',
+                  textShadow: '0 0 6px var(--goobs-gold-a50)',
                 }
               : {}),
           }}
@@ -134,7 +134,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
             label={`${activeFilterCount} active`}
             styles={{
               theme: styles?.theme || 'sacred',
-              color: styles?.theme === 'sacred' ? '#FFD700' : '#3b82f6',
+              color: styles?.theme === 'sacred' ? 'var(--goobs-gold)' : 'var(--goobs-info)',
             }}
           />
         )}
@@ -161,8 +161,8 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
             onMouseEnter={e => {
               e.currentTarget.style.backgroundColor =
                 styles?.theme === 'sacred'
-                  ? 'rgba(255, 215, 0, 0.1)'
-                  : 'rgba(0, 0, 0, 0.04)'
+                  ? 'var(--goobs-gold-a10)'
+                  : 'var(--goobs-black-a04)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.backgroundColor = 'transparent'
@@ -206,8 +206,8 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
         marginBottom: '16px',
         ...(theme === 'sacred'
           ? {
-              summaryColor: '#FFD700',
-              summaryTextShadow: '0 0 8px rgba(255, 215, 0, 0.6)',
+              summaryColor: 'var(--goobs-gold)',
+              summaryTextShadow: '0 0 8px var(--goobs-gold-a60)',
             }
           : {}),
       }}

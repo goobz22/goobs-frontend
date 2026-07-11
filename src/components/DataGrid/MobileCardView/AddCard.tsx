@@ -68,30 +68,30 @@ function AddCard({
     switch (themeName) {
       case 'dark':
         return {
-          background: '#1E293B',
-          text: '#E2E8F0',
-          secondaryText: '#94A3B8',
-          primary: '#3B82F6',
+          background: 'var(--goobs-dark-surface)',
+          text: 'var(--goobs-light-border)',
+          secondaryText: 'var(--goobs-dark-text-muted)',
+          primary: 'var(--goobs-info)',
           // dark-danger-text: #f87171 is 5.29:1 on #1E293B; the bare #ef4444
           // (used on the near-black sacred card) is only 3.89:1 here.
-          danger: '#F87171',
+          danger: 'var(--goobs-dark-danger-text)',
         }
       case 'sacred':
         return {
-          background: 'rgba(0, 0, 0, 0.9)',
-          text: '#FBBF24',
+          background: 'var(--goobs-black-a90)',
+          text: 'var(--goobs-dark-warn-text)',
           secondaryText: '#D97706',
-          primary: '#FFD700',
-          danger: '#EF4444',
+          primary: 'var(--goobs-gold)',
+          danger: 'var(--goobs-danger)',
         }
       default: // light
         return {
-          background: '#FFFFFF',
-          text: '#374151',
+          background: 'var(--goobs-light-surface)',
+          text: 'var(--goobs-light-text-secondary)',
           secondaryText: '#6B7280',
-          primary: '#3B82F6',
+          primary: 'var(--goobs-info)',
           // light-danger-text: #b91c1c is 6.47:1 on #FFFFFF; #ef4444 is 3.76:1.
-          danger: '#B91C1C',
+          danger: 'var(--goobs-light-danger-text)',
         }
     }
   }
@@ -468,8 +468,8 @@ function AddCard({
             width: '48%',
             height: '44px',
             ...(theme === 'sacred' && {
-              backgroundColor: 'rgba(255, 215, 0, 0.2)',
-              borderColor: '#FFD700',
+              backgroundColor: 'var(--goobs-gold-a20)',
+              borderColor: 'var(--goobs-gold)',
             }),
           }}
         />

@@ -180,14 +180,14 @@ const createDropdownStyles = (
     case 'dark':
       return {
         theme: 'dark',
-        '--field-bg': '#1E293B',
-        '--field-border-default': '#334155',
-        '--field-border-focus': '#475569',
-        '--field-text': '#E2E8F0',
-        '--field-label-default': '#E2E8F0',
+        '--field-bg': 'var(--goobs-dark-surface)',
+        '--field-border-default': 'var(--goobs-dark-border)',
+        '--field-border-focus': 'var(--goobs-dark-border-strong)',
+        '--field-text': 'var(--goobs-light-border)',
+        '--field-label-default': 'var(--goobs-light-border)',
         '--field-label-focus': '#F1F5F9',
         '--field-adornment-default': '#9CA3AF',
-        '--field-adornment-focus': '#E2E8F0',
+        '--field-adornment-focus': 'var(--goobs-light-border)',
         borderRadius: '6px',
         height: '32px',
         // Shrink the dropdown trigger from its 40px default to match
@@ -199,14 +199,14 @@ const createDropdownStyles = (
     case 'sacred':
       return {
         theme: 'sacred',
-        '--field-bg': 'rgba(0, 0, 0, 0.9)',
-        '--field-border-default': 'rgba(255, 215, 0, 0.5)',
-        '--field-border-focus': 'rgba(255, 215, 0, 0.8)',
-        '--field-text': '#FBBF24',
-        '--field-label-default': '#FBBF24',
-        '--field-label-focus': '#FFD700',
-        '--field-adornment-default': 'rgba(255, 215, 0, 0.6)',
-        '--field-adornment-focus': '#FFD700',
+        '--field-bg': 'var(--goobs-black-a90)',
+        '--field-border-default': 'var(--goobs-gold-a50)',
+        '--field-border-focus': 'var(--goobs-gold-a80)',
+        '--field-text': 'var(--goobs-dark-warn-text)',
+        '--field-label-default': 'var(--goobs-dark-warn-text)',
+        '--field-label-focus': 'var(--goobs-gold)',
+        '--field-adornment-default': 'var(--goobs-gold-a60)',
+        '--field-adornment-focus': 'var(--goobs-gold)',
         borderRadius: '6px',
         height: '32px',
         // Shrink the dropdown trigger from its 40px default to match
@@ -218,14 +218,14 @@ const createDropdownStyles = (
     default: // light theme
       return {
         theme: 'light',
-        '--field-bg': '#FFFFFF',
-        '--field-border-default': '#E2E8F0',
-        '--field-border-focus': '#94A3B8',
-        '--field-text': '#374151',
-        '--field-label-default': '#374151',
-        '--field-label-focus': '#1F2937',
+        '--field-bg': 'var(--goobs-light-surface)',
+        '--field-border-default': 'var(--goobs-light-border)',
+        '--field-border-focus': 'var(--goobs-dark-text-muted)',
+        '--field-text': 'var(--goobs-light-text-secondary)',
+        '--field-label-default': 'var(--goobs-light-text-secondary)',
+        '--field-label-focus': 'var(--goobs-light-text)',
         '--field-adornment-default': '#6B7280',
-        '--field-adornment-focus': '#374151',
+        '--field-adornment-focus': 'var(--goobs-light-text-secondary)',
         borderRadius: '6px',
         height: '32px',
         // Shrink the dropdown trigger from its 40px default to match
@@ -329,6 +329,7 @@ const TablePagination: React.FC<{
       disabled={disabled}
       aria-label={ariaLabel}
       data-pagination={dataPagination}
+      data-action={dataPagination}
       className={cssStyles.paginationBtn}
     >
       {icon}
@@ -698,6 +699,7 @@ const ExportMenu: React.FC<{
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={cssStyles.exportCogBtn}
+        data-action={isOpen ? 'close' : 'open'}
         data-open={isOpen ? 'true' : 'false'}
         aria-label="Export options"
         aria-haspopup="menu"

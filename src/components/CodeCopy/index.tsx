@@ -223,19 +223,19 @@ const CodeCopy: FC<CodeCopyProps> = props => {
               borderRadius: '4px',
               borderWidth: '1px',
               borderColor: isSacredTheme
-                ? 'rgba(255, 215, 0, 0.4)'
+                ? 'var(--goobs-gold-a40)'
                 : 'rgba(156, 163, 175, 0.4)',
               minWidth: '32px',
               maxWidth: '100%',
               ...(isSacredTheme && {
-                color: '#FFD700',
-                textShadow: '0 0 6px rgba(255, 215, 0, 0.4)',
+                color: 'var(--goobs-gold)',
+                textShadow: '0 0 6px var(--goobs-gold-a40)',
                 fontFamily: '"Cinzel", serif',
                 fontWeight: 600,
                 // The gold hover glow lives in CodeCopy.module.css
                 // (.copyButtonSlot button:hover under [data-theme='sacred']) —
                 // ButtonStyles has no hover text/glow keys.
-                hoverBorderColor: 'rgba(255, 215, 0, 0.8)',
+                hoverBorderColor: 'var(--goobs-gold-a80)',
               }),
             }}
             disabled={styles?.disabled}

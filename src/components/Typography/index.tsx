@@ -8,8 +8,20 @@ import cssStyles from './Typography.module.css'
  * `styles` object carries the full override surface, and a `styles` key
  * always WINS over its top-level twin (e.g. `styles.fontSize` over
  * `fontSize`).
+ *
+ * Extends `React.HTMLAttributes<HTMLElement>` so standard DOM attributes —
+ * `id`, `role`, `tabIndex`, `title`, `aria-*`, event handlers, `className`,
+ * `style`, … — pass through to the rendered element. This is what makes the
+ * polymorphic `component` genuinely usable in accessibility patterns:
+ * `component="h2" id="…"` can serve as an `aria-labelledby`/`aria-describedby`
+ * target (a heading that supplies the accessible name of a dialog/landmark/
+ * region), and `component="label" htmlFor="…"` can be programmatically
+ * associated with a form control. Pass-through attributes NEVER override the
+ * component's own contract attributes (`data-component`, `data-theme`) or its
+ * resolved `className`/`style` — those always win; a caller `className`/`style`
+ * is MERGED (resolved classes/vars keep precedence).
  */
-export interface TypographyProps {
+export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
   /** Text content. Wins over `children` when both are set (a falsy `''` falls back to `children`). */
   text?: string
   /** Content rendered when `text` is absent. */
@@ -46,8 +58,24 @@ export interface TypographyProps {
    * headings) and existing markup are preserved. Additive — never changes the
    * default rendered element. (WCAG 1.3.1 Info and Relationships, 2.4.6
    * Headings and Labels.)
+   *
+   * Because Typography spreads standard DOM attributes onto this element, the
+   * upgraded element is fully usable in its a11y pattern: `component="h2"
+   * id="dialogTitle"` can be referenced by `aria-labelledby="dialogTitle"` to
+   * NAME a dialog/region, and `component="label" htmlFor="emailInput"` is
+   * programmatically bound to the control with that id.
    */
   component?: React.ElementType
+  /**
+   * Associates a `component="label"` Typography with a form control by the
+   * control's `id` (renders as the `for` attribute). Not part of
+   * `React.HTMLAttributes`, so it is declared explicitly to make the advertised
+   * `component="label"` affordance functional (WCAG 1.3.1, 3.3.2 Labels or
+   * Instructions). Ignored by non-`label` elements. Prefer a real `<label>`
+   * wrapping the control when the label text and control are adjacent; use
+   * `htmlFor` when they are not co-located in the markup.
+   */
+  htmlFor?: string
   /** Text color. Unset → the per-theme CSS fallback (near-white base, gold on sacred, dark-on-light on light). The merri helper/footer variants pin their own color, which wins over this. */
   color?: string
   /** Font size; wins over the variant's default size. */
@@ -229,8 +257,8 @@ function resolveVariant(variant: string): VariantResolution {
         className: cssStyles.merriHelper ?? '',
         fontWeight: 400,
         fontFamily: '"Merriweather", serif',
-        merriColorNonSacred: 'rgba(255, 255, 255, 0.6)',
-        merriColorSacred: 'rgba(255, 215, 0, 0.7)',
+        merriColorNonSacred: 'var(--goobs-sacred-text-secondary)',
+        merriColorSacred: 'var(--goobs-gold-a70)',
         // WCAG fix: the non-sacred white-60% pin is a DARK-surface color —
         // on a light surface it composites to ~white (1.0:1, invisible).
         // The light theme gets the light role's AA-tuned muted token
@@ -360,6 +388,13 @@ const Typography: React.FC<TypographyProps> = ({
   outline,
   gutterBottom,
   styles,
+  // Pulled out so they can be MERGED with the component's resolved values
+  // (a caller className/style must not clobber the resolved classes/CSS-vars);
+  // everything else in `rest` (id, htmlFor, role, tabIndex, aria-*, event
+  // handlers, …) passes straight through to the rendered element.
+  className: classNameProp,
+  style: styleProp,
+  ...rest
 }) => {
   const isSacred = styles?.theme === 'sacred'
 

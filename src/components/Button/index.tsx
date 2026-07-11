@@ -387,16 +387,16 @@ function variantDefaults(variant: ButtonVariant | undefined): ButtonStyles {
   if (variant === 'secondary') {
     return {
       backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: 'var(--goobs-white-a20)',
       color: 'rgba(255, 255, 255, 0.85)',
-      hoverBackgroundColor: 'rgba(255, 255, 255, 0.1)',
+      hoverBackgroundColor: 'var(--goobs-white-a10)',
     }
   }
   return {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    borderColor: 'rgba(255, 215, 0, 0.5)',
-    color: '#FFD700',
-    hoverBackgroundColor: 'rgba(255, 215, 0, 0.25)',
+    backgroundColor: 'var(--goobs-gold-a15)',
+    borderColor: 'var(--goobs-gold-a50)',
+    color: 'var(--goobs-gold)',
+    hoverBackgroundColor: 'var(--goobs-gold-a25)',
   }
 }
 

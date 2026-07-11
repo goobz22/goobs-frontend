@@ -173,8 +173,8 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
       padding: '10px 12px',
       borderRadius: '4px',
       width: '100%',
-      backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.8)' : 'white',
-      borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#ccc',
+      backgroundColor: isSacredTheme ? 'var(--goobs-black-a80)' : 'white',
+      borderColor: isSacredTheme ? 'var(--goobs-gold-a50)' : '#ccc',
     }),
     [isSacredTheme]
   )
@@ -204,7 +204,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 theme: isSacredTheme ? 'sacred' : 'light',
                 fontSize: '14px',
                 fontWeight: 600,
-                color: isSacredTheme ? 'rgba(255, 215, 0, 0.9)' : '#333',
+                color: isSacredTheme ? 'var(--goobs-gold-a90)' : '#333',
               }}
             />
           </div>
@@ -249,8 +249,8 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               minRows={fieldConfig.minRows || 4}
               styles={{
                 theme: isSacredTheme ? 'sacred' : 'light',
-                backgroundColor: isSacredTheme ? 'rgba(0, 0, 0, 0.8)' : 'white',
-                borderColor: isSacredTheme ? 'rgba(255, 215, 0, 0.5)' : '#ccc',
+                backgroundColor: isSacredTheme ? 'var(--goobs-black-a80)' : 'white',
+                borderColor: isSacredTheme ? 'var(--goobs-gold-a50)' : '#ccc',
               }}
             />
           )
@@ -639,7 +639,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
         <div
           style={{
             padding: '24px 24px 0 24px',
-            borderBottom: '1px solid rgba(255, 215, 0, 0.2)',
+            borderBottom: '1px solid var(--goobs-gold-a20)',
             marginBottom: '24px',
           }}
         >
@@ -650,7 +650,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               theme: isSacredTheme ? 'sacred' : 'light',
               fontSize: '24px',
               fontWeight: 700,
-              color: isSacredTheme ? '#FFD700' : '#333',
+              color: isSacredTheme ? 'var(--goobs-gold)' : '#333',
             }}
           />
         </div>
@@ -670,7 +670,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
         <div
           style={{
             padding: '24px',
-            borderTop: '1px solid rgba(255, 215, 0, 0.2)',
+            borderTop: '1px solid var(--goobs-gold-a20)',
             display: 'flex',
             gap: '12px',
             justifyContent: 'flex-end',

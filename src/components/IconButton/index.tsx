@@ -59,10 +59,25 @@ export interface IconButtonProps extends Omit<ButtonProps, 'text'> {
  * button does (WCAG 4.1.2 / 1.1.1) — development builds warn when it is
  * omitted. Keyboard focus, reduced-motion, and disabled semantics are inherited
  * from the underlying <Button> (native `<button>`, `:focus-visible` ring).
+ *
+ * Defaults to `type="button"` (via the native `type` prop inherited from
+ * `<Button>`). An IconButton is an icon-only auxiliary control (delete-row,
+ * clear, expand, …); a native `<button>` with no `type` defaults to
+ * `type="submit"`, so an unqualified IconButton inside a `<form>` would submit
+ * the form on click/Enter. Defaulting to `'button'` makes the control
+ * form-safe by default while remaining additive — pass `type="submit"`
+ * explicitly for a genuine submit control.
  */
 const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   (
-    { size = 'medium', color = 'default', children, styles, ...restProps },
+    {
+      size = 'medium',
+      color = 'default',
+      children,
+      styles,
+      type,
+      ...restProps
+    },
     ref
   ) => {
     // Accessible name (WCAG 4.1.2 Name, Role, Value / 1.1.1 Non-text Content).
@@ -77,7 +92,14 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     const ariaLabelledby = restProps['aria-labelledby']
     useEffect(() => {
       if (process.env.NODE_ENV === 'production') return
-      if (ariaLabel == null && ariaLabelledby == null) {
+      // Treat an empty/whitespace-only value as UNNAMED. `aria-label=""` (or a
+      // blank/whitespace `aria-labelledby`) is not `== null`, yet it produces an
+      // EMPTY accessible name — the exact failure this guard exists to catch, so
+      // a bare `== null` check let it slip through. `.trim()` closes the hole (a
+      // real id reference is always non-blank text).
+      const hasAccessibleName =
+        Boolean(ariaLabel?.trim()) || Boolean(ariaLabelledby?.trim())
+      if (!hasAccessibleName) {
         console.warn(
           'goobs IconButton: rendered without an accessible name. Pass ' +
             '`aria-label` (e.g. "Delete row") or `aria-labelledby` so screen ' +
@@ -113,13 +135,13 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     const colorMap =
       styles?.theme === 'sacred'
         ? {
-            primary: { backgroundColor: 'transparent', color: '#FFD700' },
-            secondary: { backgroundColor: 'transparent', color: '#FFD700' },
+            primary: { backgroundColor: 'transparent', color: 'var(--goobs-gold)' },
+            secondary: { backgroundColor: 'transparent', color: 'var(--goobs-gold)' },
             success: { backgroundColor: 'transparent', color: '#10B981' },
-            error: { backgroundColor: 'transparent', color: '#EF4444' },
-            info: { backgroundColor: 'transparent', color: '#3B82F6' },
-            warning: { backgroundColor: 'transparent', color: '#F59E0B' },
-            default: { backgroundColor: 'transparent', color: '#FFD700' },
+            error: { backgroundColor: 'transparent', color: 'var(--goobs-danger)' },
+            info: { backgroundColor: 'transparent', color: 'var(--goobs-info)' },
+            warning: { backgroundColor: 'transparent', color: 'var(--goobs-warn)' },
+            default: { backgroundColor: 'transparent', color: 'var(--goobs-gold)' },
           }
         : {
             primary: { backgroundColor: '#1976d2', color: 'white' },
@@ -146,7 +168,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     // border. Map to the theme border token instead.
     const defaultBorderColor = isDarkTheme
       ? 'var(--goobs-dark-border)'
-      : 'rgba(0, 0, 0, 0.12)'
+      : 'var(--goobs-black-a12)'
 
     const buttonStyles = {
       ...sizeMap[size],
@@ -178,7 +200,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         borderColor: 'transparent',
         boxShadow: 'none',
         backgroundColor: 'transparent',
-        hoverBackgroundColor: 'rgba(255, 215, 0, 0.1)',
+        hoverBackgroundColor: 'var(--goobs-gold-a10)',
       }),
     }
 
@@ -187,6 +209,11 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         ref={ref}
         icon={children}
         styles={buttonStyles}
+        // Icon-only auxiliary control → default to a non-submitting button so an
+        // IconButton placed inside a <form> can't accidentally submit it. `type`
+        // is destructured out of `restProps`, so a caller-supplied value still
+        // wins (additive). See component JSDoc (WCAG 4.1.2 — behavioral defect).
+        type={type ?? 'button'}
         {...restProps}
         data-component="IconButton"
       />
