@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface KeyboardArrowDownIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const KeyboardArrowDownIcon: React.FC<KeyboardArrowDownIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const KeyboardArrowDownIcon: React.FC<KeyboardArrowDownIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
       </svg>
     </div>

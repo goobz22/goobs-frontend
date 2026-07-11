@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface HomeWorkIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const HomeWorkIcon: React.FC<HomeWorkIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const HomeWorkIcon: React.FC<HomeWorkIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M1 11v10h6v-5h2v5h6V11L8 6l-7 5zm12 8h-2v-5H5v5H3v-6.97l5-3.57 5 3.57V19zm4-12h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z" />
         <path d="M10 3v1.97l2 1.43V5h9v14h-4v2h6V3z" />

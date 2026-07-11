@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface PriorityHighIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const PriorityHighIcon: React.FC<PriorityHighIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const PriorityHighIcon: React.FC<PriorityHighIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M14 20H10V11H14V20ZM14 9H10V4H14V9Z" />
         <path d="M12 2L14.5 4.5L12 7L9.5 4.5L12 2Z" />
       </svg>

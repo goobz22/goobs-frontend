@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface TransferIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const TransferIcon: React.FC<TransferIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const TransferIcon: React.FC<TransferIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z" />
       </svg>

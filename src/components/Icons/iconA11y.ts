@@ -47,11 +47,13 @@ export interface ResolvedIconA11y {
  * WCAG 1.1.1 (Non-text Content, Level A) — a purely decorative graphic must
  * expose a null text alternative rather than an unlabelled "graphic"/"image".
  *
- * A consumer opts **into** a meaningful icon by passing any of `aria-label`,
- * `aria-labelledby`, or `title`. That flips the icon to `role="img"` (unless an
- * explicit `role` was given), keeps it exposed to AT, and — for `title` —
- * renders a child `<title>` element (the correct accessible-name mechanism for
- * inline SVG; a `title` *attribute* on `<svg>` is inert).
+ * A consumer opts **into** a meaningful icon by passing `aria-label` or
+ * `aria-labelledby` (both part of {@link React.SVGProps}), which flips the icon
+ * to `role="img"` (unless an explicit `role` was given) and keeps it exposed to
+ * AT. A `title` is also honoured when present at runtime — it renders a child
+ * `<title>` element (the correct accessible-name mechanism for inline SVG; a
+ * `title` *attribute* on `<svg>` is inert) — and likewise flips the icon to a
+ * named `role="img"`.
  *
  * An explicit `aria-hidden` prop always wins, so an icon can be force-hidden
  * even when named, or force-exposed even when unnamed.
@@ -64,7 +66,9 @@ export interface ResolvedIconA11y {
  * @returns The `rest` passthrough, the computed `svgA11y` attributes, and the `title` text.
  */
 export function resolveIconA11y(
-  props: React.SVGProps<SVGSVGElement>
+  // `title` is not part of React's SVGProps, but consumers can still supply it
+  // via a spread; honour it when present so the <title> opt-in path works.
+  props: React.SVGProps<SVGSVGElement> & { title?: string }
 ): ResolvedIconA11y {
   const {
     'aria-label': ariaLabel,

@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface QrCodeIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const QrCodeIcon: React.FC<QrCodeIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const QrCodeIcon: React.FC<QrCodeIconProps> = ({
         width="24"
         fill="none"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <rect x="3" y="3" width="8" height="8" rx="1" fill="currentColor" />
         <rect x="13" y="3" width="8" height="8" rx="1" fill="currentColor" />
         <rect x="3" y="13" width="8" height="8" rx="1" fill="currentColor" />

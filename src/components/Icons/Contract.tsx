@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface ContractIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const ContractIcon: React.FC<ContractIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const ContractIcon: React.FC<ContractIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M5 3C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H12.09C12.03 20.67 12 20.34 12 20C12 16.69 14.69 14 18 14C19.09 14 20.12 14.28 21 14.81V8L14 3H5M7 7H12V9H7V7M7 11H17V13H7V11M7 15H17V17H7V15M23 18.5C23 19.88 21.88 21 20.5 21S18 19.88 18 18.5 19.12 16 20.5 16 23 17.12 23 18.5M19.5 19.5H21V18H19.5V19.5M21 17H19.5V16.25C19.5 16.11 19.61 16 19.75 16S20 16.11 20 16.25V16.5C20 16.78 20.22 17 20.5 17Z" />
       </svg>
     </div>

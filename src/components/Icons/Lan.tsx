@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface LanIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -10,6 +11,7 @@ interface LanIconProps extends React.SVGProps<SVGSVGElement> {
 
 const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -46,8 +48,10 @@ const LanIcon: React.FC<LanIconProps> = ({ styles, style = {}, ...props }) => {
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M13 22h-2v-4H6v-6h5V8H9V2h6v6h-2v4h5v6h-5z" />
         <path d="M4 14h4v4H4zM16 14h4v4h-4z" />

@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface AddIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -10,6 +11,7 @@ interface AddIconProps extends React.SVGProps<SVGSVGElement> {
 
 const AddIcon: React.FC<AddIconProps> = ({ styles, style = {}, ...props }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -46,8 +48,10 @@ const AddIcon: React.FC<AddIconProps> = ({ styles, style = {}, ...props }) => {
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
       </svg>

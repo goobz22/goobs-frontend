@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface LooksThreeIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const LooksThreeIcon: React.FC<LooksThreeIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const LooksThreeIcon: React.FC<LooksThreeIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1h-2.5V17H15c.55 0 1-.45 1-1v-2c0-.55-.45-1-1-1 .55 0 1-.45 1-1v-1c0-.55-.45-1-1-1h-3.5v1.5H15v1h-1.5V13h2v2h-2V17z" />
       </svg>
     </div>

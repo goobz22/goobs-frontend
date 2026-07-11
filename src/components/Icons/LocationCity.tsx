@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface LocationCityIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const LocationCityIcon: React.FC<LocationCityIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const LocationCityIcon: React.FC<LocationCityIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M15 11V5l-3-3-3 3v2H3v14h18V11h-6zM7 19H5v-2h2v2zM7 15H5v-2h2v2zM7 11H5V9h2v2zM13 19h-2v-2h2v2zM13 15h-2v-2h2v2zM13 11h-2V9h2v2zM13 7h-2V5h2v2zM19 19h-2v-2h2v2zM19 15h-2v-2h2v2z" />
       </svg>
     </div>

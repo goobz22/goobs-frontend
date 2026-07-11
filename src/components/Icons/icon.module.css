@@ -84,3 +84,23 @@
    theme had its own gold coloring. The glyph characters live on as the
    exported SACRED_GLYPHS constant (src/components/Icons/sacredGlyphs.ts),
    no longer force-rendered onto icons. */
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION — WCAG 2.3.3 (Animation from Interactions).
+   The dark/sacred hovers animate scale/rotate transforms via the medium/
+   premium transitions. Users who ask their OS for less motion get the same
+   color/glow feedback with the movement (transform + timed transition)
+   removed, so the hover still reads without vestibular-triggering animation.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .svg,
+  .wrapper[data-theme='dark'] .svg,
+  .wrapper[data-theme='sacred'] .svg {
+    transition: none;
+  }
+
+  .wrapper[data-theme='dark'] .svg:hover,
+  .wrapper[data-theme='sacred'] .svg:hover {
+    transform: none;
+  }
+}

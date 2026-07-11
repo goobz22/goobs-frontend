@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface ApartmentIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const ApartmentIcon: React.FC<ApartmentIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const ApartmentIcon: React.FC<ApartmentIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M17,11V3H7V4H15V11H17M21,9V7H17V9H21M7,11V9L5,9V11H7M21,11V9H19V11H21M5,11V13H7V11H5M17,13V11H15V13H17M7,13V15H5V13H7M21,13V15H17V13H21M15,15V13H7V15H15M17,15V17H21V15H19V17H17M15,19V17H17V15H15V17H7V19H15M5,19V17H7V19H5M5,15V17H17V15H5Z" />
       </svg>
     </div>

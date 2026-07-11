@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface CardMembershipIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const CardMembershipIcon: React.FC<CardMembershipIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const CardMembershipIcon: React.FC<CardMembershipIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M20 4H4c-1.11 0-2 .89-2 2v7c0 1.11.89 2 2 2v2c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2v-2c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 9H4V6h16v7zm-10 2l2 3 2-3H10z" />
       </svg>
     </div>

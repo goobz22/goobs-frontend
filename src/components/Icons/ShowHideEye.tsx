@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface ShowHideEyeIconProps extends React.SVGProps<SVGSVGElement> {
   visible?: boolean
@@ -17,6 +18,7 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
 }) => {
   const theme = styles?.theme || 'light'
   const isSacredTheme = theme === 'sacred'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -53,6 +55,10 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
         isSacredTheme ? (
           <div
             className={cssStyles.svg}
+            aria-hidden={svgA11y['aria-hidden']}
+            role={svgA11y.role}
+            aria-label={svgA11y['aria-label'] ?? title}
+            aria-labelledby={svgA11y['aria-labelledby']}
             style={{
               ...svgStyle,
               fontSize: '20px',
@@ -76,8 +82,10 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            {...props}
+            {...rest}
+            {...svgA11y}
           >
+            {title ? <title>{title}</title> : null}
             <path d="M1 12C2.73 16.11 7 20 12 20s9.27-3.89 11-8c-1.73-4.11-6-8-11-8S2.73 7.89 1 12z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
@@ -85,6 +93,10 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
       ) : isSacredTheme ? (
         <div
           className={cssStyles.svg}
+          aria-hidden={svgA11y['aria-hidden']}
+          role={svgA11y.role}
+          aria-label={svgA11y['aria-label'] ?? title}
+          aria-labelledby={svgA11y['aria-labelledby']}
           style={{
             ...svgStyle,
             fontSize: '20px',
@@ -120,8 +132,10 @@ const ShowHideEyeIcon: React.FC<ShowHideEyeIconProps> = ({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          {...props}
+          {...rest}
+          {...svgA11y}
         >
+          {title ? <title>{title}</title> : null}
           <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20C7 20 2.73 16.11 1 12c.74-1.81 2.01-3.41 3.56-4.69M9.53 9.53A3.001 3.001 0 0 1 12 15a3 3 0 0 1-2.47-5.47" />
           <path d="M1 1l22 22" />
         </svg>

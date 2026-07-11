@@ -3,6 +3,7 @@
 import React from 'react'
 import { IconStyles } from './types'
 import cssStyles from './icon.module.css'
+import { resolveIconA11y } from './iconA11y'
 
 interface WorkspacePremiumIconProps extends React.SVGProps<SVGSVGElement> {
   styles?: IconStyles
@@ -14,6 +15,7 @@ const WorkspacePremiumIcon: React.FC<WorkspacePremiumIconProps> = ({
   ...props
 }) => {
   const theme = styles?.theme || 'light'
+  const { rest, svgA11y, title } = resolveIconA11y(props)
 
   // Caller-supplied overrides (size / color / filter / transform / etc.) and
   // the native `style` prop stay in JS; theme + hover + transition live in CSS.
@@ -50,8 +52,10 @@ const WorkspacePremiumIcon: React.FC<WorkspacePremiumIconProps> = ({
         width="24"
         fill="currentColor"
         style={svgStyle}
-        {...props}
+        {...rest}
+        {...svgA11y}
       >
+        {title ? <title>{title}</title> : null}
         <path d="M10,2L8.5,5H5A1,1 0 0,0 4,6V19A1,1 0 0,0 5,20H19A1,1 0 0,0 20,19V6A1,1 0 0,0 19,5H15.5L14,2H10M12,6L13.5,9H17L14.5,11.5L15.5,15L12,13L8.5,15L9.5,11.5L7,9H10.5L12,6Z" />
       </svg>
     </div>
