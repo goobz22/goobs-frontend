@@ -125,6 +125,26 @@ export interface AppBarProps {
    */
   ariaLabel?: string
   /**
+   * Landmark semantics for the root `<header>`.
+   *
+   * - `'banner'` (default) — the bar is the page's top-level `banner` landmark
+   *   (the site header / primary app bar). `role="banner"` is emitted
+   *   explicitly, which also guarantees the banner role if the `<header>` is
+   *   nested inside sectioning content (where its implicit role would otherwise
+   *   degrade to generic).
+   * - `'none'` — suppress the explicit `role="banner"` so a SECONDARY or NESTED
+   *   app bar (e.g. a sub-toolbar inside `<main>`/`<section>`, or a second bar on
+   *   the page) does not introduce a duplicate or non-top-level banner landmark
+   *   (axe `landmark-no-duplicate-banner` / `landmark-banner-is-top-level`). The
+   *   root still renders a native `<header>`, so its role degrades to the
+   *   element's implicit role for its position in the document (generic when
+   *   nested in sectioning content).
+   *
+   * Defaults to `'banner'`, so existing single-app-bar pages — and the machine
+   * test contract that keys on `role="banner"` — are unchanged.
+   */
+  landmark?: 'banner' | 'none'
+  /**
    * Callback fired when the app bar is clicked.
    *
    * ⚠️ Accessibility (WCAG 2.1.1 Keyboard): this fires on the `banner` landmark
@@ -164,6 +184,7 @@ const AppBar: FC<AppBarProps> = props => {
     className,
     ariaLabel,
     onClick,
+    landmark = 'banner',
     'data-testid': dataTestId = 'app-bar',
     ...rest
   } = props
