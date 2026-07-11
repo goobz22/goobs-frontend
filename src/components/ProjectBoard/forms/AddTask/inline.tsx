@@ -586,6 +586,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     <button
                       type="button"
                       onClick={() => setViewingArticle(null)}
+                      data-action="back"
                       className={cssStyles.backButton}
                     >
                       <span aria-hidden="true">←</span> Back to Articles
@@ -606,6 +607,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             prev.filter(id => id !== viewingArticle._id)
                           )
                         }
+                        data-action="unlink"
                         className={cssStyles.unlinkButton}
                       >
                         <span aria-hidden="true">✓ </span>Linked - Click to
@@ -620,6 +622,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             viewingArticle._id,
                           ])
                         }
+                        data-action="link"
                         className={cssStyles.linkButton}
                       >
                         Link to This Case
@@ -755,6 +758,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                               <button
                                 type="button"
                                 className={cssStyles.selectedChipLabel}
+                                data-action="view"
                                 onClick={() => setViewingArticle(article)}
                               >
                                 {article.articleTitle}
@@ -762,6 +766,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                               <button
                                 type="button"
                                 aria-label={`Remove ${article.articleTitle}`}
+                                data-action="remove"
                                 onClick={e => {
                                   e.stopPropagation()
                                   setSelectedArticleIds(prev =>
@@ -864,6 +869,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             <button
               type="button"
               onClick={handleSubmit}
+              data-action="create"
               className={cx(cssStyles.button, cssStyles.submitButton)}
             >
               Create Task
@@ -872,6 +878,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               <button
                 type="button"
                 onClick={onCancel}
+                data-action="cancel"
                 className={cx(cssStyles.button, cssStyles.cancelButton)}
               >
                 Cancel
