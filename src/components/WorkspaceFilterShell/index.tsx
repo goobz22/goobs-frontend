@@ -131,41 +131,63 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
       data-shell-zone="pagination"
       aria-label="Pagination"
     >
-      {btn('prev', 'Prev', {
-        disabled: page <= 1,
-        onClick: () => onPageChange(page - 1),
-        action: 'prev',
-        ariaLabel: 'Previous page',
-      })}
-      {pageSequence(page, totalPages).map((p, i) =>
-        p === 'ellipsis' ? (
-          // Decorative gap marker — the numbered buttons already convey the
-          // skipped range, so hide the glyph from assistive tech (WCAG 1.3.1).
-          <span
-            key={`e-${i}`}
-            className={cssStyles.pageEllipsis}
-            aria-hidden="true"
-          >
-            …
-          </span>
-        ) : (
-          btn(p, p, {
-            active: p === page,
-            onClick: () => onPageChange(p),
-            ariaLabel: `Page ${p}`,
-          })
-        )
-      )}
-      {btn('next', 'Next', {
-        disabled: page >= totalPages,
-        onClick: () => onPageChange(page + 1),
-        action: 'next',
-        ariaLabel: 'Next page',
-      })}
+      {/* The page controls are a REAL list, mirroring the library's Breadcrumb
+          <ol>/<li>: Prev + the numbered controls + Next are one related set, so
+          marking them up as a list lets assistive tech convey the set
+          relationship AND item count ("list, N items") instead of a flat run of
+          buttons (WCAG 1.3.1 Info and Relationships). role="list" is set
+          explicitly because the `list-style: none` a control strip needs strips
+          the implicit list semantics in Safari/VoiceOver — the role restores
+          them. The buttons stay native <button>s (client-side page changes, no
+          URL), so this is additive markup that preserves every existing
+          data-action / aria-label / aria-current selector. */}
+      <ul role="list" className={cssStyles.pageList}>
+        <li className={cssStyles.pageItem}>
+          {btn('prev', 'Prev', {
+            disabled: page <= 1,
+            onClick: () => onPageChange(page - 1),
+            action: 'prev',
+            ariaLabel: 'Previous page',
+          })}
+        </li>
+        {pageSequence(page, totalPages).map((p, i) =>
+          p === 'ellipsis' ? (
+            // Decorative gap marker — the numbered buttons already convey the
+            // skipped range, so drop the whole list item from assistive tech.
+            // aria-hidden is on the <li> (not just the glyph) so it is neither
+            // announced as an empty list item nor counted in the set size
+            // (WCAG 1.3.1).
+            <li
+              key={`e-${i}`}
+              className={cssStyles.pageItem}
+              aria-hidden="true"
+            >
+              <span className={cssStyles.pageEllipsis}>…</span>
+            </li>
+          ) : (
+            <li key={p} className={cssStyles.pageItem}>
+              {btn(p, p, {
+                active: p === page,
+                onClick: () => onPageChange(p),
+                ariaLabel: `Page ${p}`,
+              })}
+            </li>
+          )
+        )}
+        <li className={cssStyles.pageItem}>
+          {btn('next', 'Next', {
+            disabled: page >= totalPages,
+            onClick: () => onPageChange(page + 1),
+            action: 'next',
+            ariaLabel: 'Next page',
+          })}
+        </li>
+      </ul>
       {/* The visible range doubles as a polite live region so screen-reader
           users hear the new range when a page control is activated (focus
           stays on Prev/Next, so nothing else announces the change) — WCAG
-          4.1.3 Status Messages. */}
+          4.1.3 Status Messages. It sits OUTSIDE the control list (it is a
+          status, not a page control) so it doesn't count as a list item. */}
       <span
         className={cssStyles.pageInfo}
         aria-live="polite"

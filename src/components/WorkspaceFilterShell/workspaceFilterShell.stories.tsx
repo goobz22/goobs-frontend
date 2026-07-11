@@ -285,6 +285,9 @@ export const Light: Story = {
  * pagination a11y contract:
  *   • it is a real `<nav aria-label="Pagination">` landmark, not a
  *     `div[role="navigation"]` (WCAG 1.3.1 / 4.1.2);
+ *   • the page controls are a real `<ul role="list">` of `<li>` items (mirrors
+ *     the library's Breadcrumb `<ol>/<li>`) so assistive tech conveys the set
+ *     relationship + item count, not a flat run of buttons (WCAG 1.3.1);
  *   • each numbered control carries a descriptive `"Page N"` accessible name —
  *     the bare digit alone is not descriptive (WCAG 2.4.6), and `"Page N"`
  *     keeps the visible `"N"` as a substring so it still satisfies 2.5.3;
@@ -324,6 +327,29 @@ export const PaginationA11y: Story = {
     // The pagination is a REAL <nav> landmark (native element, not role=).
     const paginationNav = canvas.getByRole('navigation', { name: 'Pagination' })
     await expect(paginationNav.tagName).toBe('NAV')
+
+    // The page controls form a real list (role="list" <ul> of <li> items),
+    // mirroring the library's Breadcrumb <ol>/<li> so AT conveys the set + item
+    // count (WCAG 1.3.1). FAILS against the former flat markup where the buttons
+    // were direct <nav> children with no list wrapper.
+    const pageList = paginationNav.querySelector('ul')
+    await expect(pageList).not.toBeNull()
+    await expect(pageList).toHaveAttribute('role', 'list')
+    // Prev, a numbered control, and Next are each wrapped in a list item of it.
+    const page4Item = canvas.getByRole('button', { name: 'Page 4' })
+    await expect(page4Item.closest('li')).not.toBeNull()
+    await expect(page4Item.closest('ul')).toBe(pageList)
+    await expect(
+      canvas.getByRole('button', { name: 'Previous page' }).closest('li')
+    ).not.toBeNull()
+    await expect(
+      canvas.getByRole('button', { name: 'Next page' }).closest('li')
+    ).not.toBeNull()
+    // The decorative gap ellipsis is a list item removed from AT (aria-hidden on
+    // the <li>) so it is neither announced as an empty item nor counted in the
+    // set size.
+    const hiddenItem = pageList?.querySelector('li[aria-hidden="true"]')
+    await expect(hiddenItem?.textContent).toContain('…')
 
     // Numbered controls expose a descriptive "Page N" accessible name.
     await expect(
