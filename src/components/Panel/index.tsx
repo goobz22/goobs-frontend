@@ -126,9 +126,19 @@ export interface PanelProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * Visual archetype. `'sacred'` (default) is the dark/gold inline-shell
    * backdrop. `'standard'` is a neutral surface. `'fullscreen'` pins the
-   * panel to the full viewport (fixed inset:0) for takeover surfaces.
+   * panel to the full viewport (fixed inset:0) for takeover surfaces and,
+   * because it obscures the page beneath an opaque backdrop, is treated as a
+   * modal (`role="dialog"` + `aria-modal` + focus trap).
    */
   variant?: PanelVariant
+  /**
+   * Dismiss handler for the `fullscreen` (modal) variant. When provided, the
+   * takeover closes on `Escape` per the APG dialog pattern. Ignored by the
+   * non-modal `sacred`/`standard` variants (they are inline surfaces the host
+   * unmounts directly). Optional — a fullscreen panel without `onClose` still
+   * traps focus and restores it on unmount, it simply has no keyboard-dismiss.
+   */
+  onClose?: () => void
   children: ReactNode
 }
 
