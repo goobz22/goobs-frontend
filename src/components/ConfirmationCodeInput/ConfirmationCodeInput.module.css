@@ -287,8 +287,15 @@
 
 /* --------------------------------------------------------------------------
    STATUS INDICATOR — red/green dot. Valid state driven by [data-valid].
+   The valid state also renders a checkmark glyph (::before) so it is NOT
+   distinguished from the invalid state by colour alone (WCAG 1.4.1). A
+   near-black glyph reads on every valid background (light/dark bright greens
+   + sacred gold), each well above the 3:1 non-text-contrast floor (1.4.11).
    -------------------------------------------------------------------------- */
 .statusIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
@@ -298,6 +305,29 @@
 
 .statusIndicator[data-valid='true'] {
   background-color: var(--cci-status-valid-bg);
+}
+
+.statusIndicator[data-valid='true']::before {
+  content: '✓';
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Visually-hidden text held INSIDE the role="status" live region so its
+   content mutation (invalid <-> valid) is announced by assistive tech; the
+   dot's visual appearance is unaffected. Standard clip-rect sr-only recipe. */
+.statusText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* --------------------------------------------------------------------------
