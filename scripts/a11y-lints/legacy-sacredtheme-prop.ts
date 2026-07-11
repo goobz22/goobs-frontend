@@ -86,21 +86,28 @@ const lint: A11yLint = {
         }
       })
 
-      // (2) JSX CALLSITES that hardcode the legacy boolean. A pass-through of
-      // the deprecated prop (`={sacredtheme}`) is allowed; only literal
-      // `={true}`/`={false}`/`="…"` or a bare boolean attribute is flagged.
+      // (2) JSX CALLSITES that hardcode the legacy boolean. Only a LITERAL
+      // value — `={true}`, `={false}`, or a string — is a new hardcoded theme
+      // choice. A `={sacredtheme}` pass-through of a deprecated prop, a `{...}`
+      // spread, or a `{ sacredtheme }` shorthand are all expressions, never
+      // literal, so they are inherently exempt (no ignore-list needed).
       const code = blankComments(text)
-      const JSX_HARDCODE =
-        /<[A-Z][\w.]*(?:\s+[^<>]*?)?\bsacredtheme\b\s*(?:=\s*\{\s*(?:true|false)\s*\}|=\s*"[^"]*"|(?=\s|\/|>))/g
-      let m: RegExpExecArray | null
-      while ((m = JSX_HARDCODE.exec(code)) !== null) {
-        const lineNo = code.slice(0, m.index).split('\n').length
-        violations.push({
-          file: path,
-          line: lineNo,
-          message:
-            'JSX callsite hardcodes the legacy `sacredtheme` boolean — pass the `styles.theme` union instead (a `sacredtheme={sacredtheme}` pass-through of a deprecated prop is exempt)',
-        })
+      const JSX_LITERALS: RegExp[] = [
+        /\bsacredtheme\s*=\s*\{\s*(?:true|false)\s*\}/g,
+        /\bsacredtheme\s*=\s*"[^"]*"/g,
+      ]
+      for (const matcher of JSX_LITERALS) {
+        matcher.lastIndex = 0
+        let m: RegExpExecArray | null
+        while ((m = matcher.exec(code)) !== null) {
+          const lineNo = code.slice(0, m.index).split('\n').length
+          violations.push({
+            file: path,
+            line: lineNo,
+            message:
+              'JSX callsite hardcodes the legacy `sacredtheme` boolean — pass the `styles.theme` union instead (a `sacredtheme={sacredtheme}` pass-through of a deprecated prop is exempt)',
+          })
+        }
       }
     }
     return violations
@@ -115,8 +122,8 @@ const lint: A11yLint = {
       'export const X = () => <Card sacredtheme={true} />',
       // JSX callsite hardcoding false
       'export const Y = () => <Card sacredtheme={false} />',
-      // bare boolean attribute
-      'export const Z = () => <Card sacredtheme />',
+      // JSX callsite hardcoding a string theme
+      'export const Z = () => <Card sacredtheme="sacred" />',
     ],
     good: [
       // sanctioned deprecation shape — JSDoc @deprecated above the member
@@ -129,6 +136,8 @@ const lint: A11yLint = {
       'function renderCard(row: Row, sacredtheme: boolean = false) { return sacredtheme }',
       // JSX pass-through of the deprecated prop
       'export const P = () => <ContentSection grids={grids} sacredtheme={sacredtheme} />',
+      // conditional spread / shorthand of the deprecated prop (expression, not literal)
+      'export const Q = () => <RenderContent {...(sacredtheme === undefined ? {} : { sacredtheme })} />',
       // the modern API itself
       "export interface NewProps {\n  styles?: { theme?: 'sacred' | 'light' | 'dark' }\n}",
     ],
