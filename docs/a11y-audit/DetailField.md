@@ -170,6 +170,55 @@ Review-fix pass (issue 2):
   semi-transparent `rgba(255, 215, 0, 0.6)`. Fails against the pre-fix baseline
   (the translucent token), pinning issue 2's fix.
 
+Second adversarial-review pass (coverage + DX):
+
+### 3. Story-coverage gap — the grid-theme → CHILDREN cascade was unpinned — MINOR
+- **WCAG:** 1.4.3 Contrast (Minimum) (AA) — regression coverage, not a live defect.
+- **Where:** `DetailField.stories.tsx`; the CSS under test is the DetailGrid-root
+  descendant selectors `DetailField.module.css:71-100`
+  (`.grid[data-theme='light'] .label` / `.value`, and the dark analogues).
+- **Detail:** The report's headline claim is that a DetailGrid-level `theme`
+  cascades to nested `DetailField` **children** (the escape-hatch path) without
+  prop-drilling, via the `.grid[data-theme=X] .label/.value` descendant selectors.
+  Code traced functionally correct — a JSX child defaults to `data-theme='sacred'`
+  (no sacred override block exists), and the `.grid[data-theme=X] .value`/`.label`
+  rule (specificity 0,3,0) out-specifies the sacred base (0,1,0), so it wins with no
+  conflicting rule. **But no story exercised that path.** Every themed story
+  (`Themes`, `ThemeInteractionTest`, `DarkLabelContrast`) drives the `fields` array,
+  where the theme is threaded into each child so the child independently carries
+  `data-theme` and is styled by `.field[data-theme]` — the grid-descendant selectors
+  are never the sole style source. `GridFromChildren` renders children but sets no
+  theme. Net: the grid-descendant selectors could be deleted and zero stories would
+  fail. In goobs (story + Chromatic baseline is the ONLY regression gate) the feature
+  was unpinned.
+- **Pattern:** `story-coverage-gap-unpinned-cascade`
+- **Status:** FIXED — added **`GridThemeCascadeToChildren` (Theme/Grid Cascade To
+  Children)**: two `DetailGrid`s (`theme="light"` and `theme="dark"`) populated with
+  `DetailField` CHILDREN carrying no per-child theme, each on its matching surface
+  (`#ffffff` / `#273746`). The play function asserts each child couplet is still
+  `data-theme="sacred"` (proving the child does NOT carry the grid theme, so the
+  grid-descendant selector is the sole style source) YET its computed label/value
+  colors resolve to the themed tokens — light label `rgb(180, 83, 9)`
+  (`--goobs-light-warn-text` #b45309) / value `rgb(31, 41, 55)`
+  (`--goobs-light-text` #1f2937); dark label `rgb(251, 191, 36)`
+  (`--goobs-dark-warn-text` #fbbf24) / value `rgb(226, 232, 240)`
+  (`--goobs-dark-text` #e2e8f0). Deleting the `.grid[data-theme=X]` selectors now
+  fails the test (the couplet would fall back to the sacred base color), so the
+  cascade is pinned in the only regression gate goobs has.
+
+### 4. Storybook Controls omitted the new `theme` prop (DX, not a11y) — MINOR
+- **Where:** `DetailField.stories.tsx` — `meta.argTypes` listed
+  `label/value/mono/valueColor/hideWhenEmpty` but not the additive `theme` prop, so
+  the Controls panel on the default/`SingleField` story exposed no theme selector.
+- **Detail:** Not an accessibility defect — a Storybook DX completeness gap. The
+  `theme` prop was demonstrated by the `Themes` story but not interactively
+  adjustable.
+- **Pattern:** `argtypes-missing-new-prop`
+- **Status:** FIXED — added
+  `theme: { control: 'select', options: ['sacred', 'light', 'dark'] }` to
+  `meta.argTypes`, so the Controls panel now exposes the theme selector on the
+  single-field story. Purely a story/DX change; no rendered-DOM or API impact.
+
 ## Deferred
 
 Both a11y contrast issues (issue 1 + the review's issue 2) were fully fixable

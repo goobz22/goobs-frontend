@@ -17,6 +17,7 @@ const meta: Meta<typeof DetailField> = {
     mono: { control: 'boolean' },
     valueColor: { control: 'text' },
     hideWhenEmpty: { control: 'boolean' },
+    theme: { control: 'select', options: ['sacred', 'light', 'dark'] },
   },
   parameters: {
     layout: 'padded',
@@ -229,6 +230,82 @@ export const ThemeInteractionTest: Story = {
     // Values are still present + visible on the light surface.
     const canvas = within(canvasElement)
     await expect(canvas.getByText('$1,240.00')).toBeVisible()
+  },
+}
+
+/**
+ * Regression pin for the DetailGrid-theme → nested-CHILDREN cascade — the
+ * escape-hatch path (WCAG 1.4.3). When a `DetailGrid` is populated with
+ * `DetailField` CHILDREN (not the `fields` array) the theme is deliberately NOT
+ * threaded into each child, so every child couplet keeps its own default
+ * `data-theme="sacred"`. Legibility on the light / neutral-dark surface therefore
+ * rides ENTIRELY on the DetailGrid-root descendant selectors
+ * (`.grid[data-theme='light'] .label` / `.value`, DetailField.module.css:71-100),
+ * which out-specify the sacred base (specificity 0,3,0 vs 0,1,0) with no per-child
+ * prop-drilling. Every OTHER themed story drives the `fields` array — each child
+ * independently carries the theme and is styled by `.field[data-theme]` — so the
+ * grid-descendant selectors are never their sole style source; this story is the
+ * only one that pins them. The play function asserts each child couplet is still
+ * `data-theme="sacred"` (proving the child does NOT carry the grid theme) yet its
+ * computed label/value colors resolve to the themed tokens, so deleting the
+ * grid-descendant selectors would fail this test.
+ */
+export const GridThemeCascadeToChildren: Story = {
+  name: 'Theme/Grid Cascade To Children',
+  parameters: { backgrounds: { disable: true } },
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Light grid wrapping sacred-default children (no per-child theme). */}
+      <div style={{ background: '#ffffff', padding: '16px', borderRadius: 8 }}>
+        <DetailGrid ariaLabel="Light grid, sacred children" theme="light">
+          <DetailField label="Customer" value="Jane Buyer" />
+          <DetailField label="Balance Due" value="$1,240.00" />
+        </DetailGrid>
+      </div>
+      {/* Dark grid wrapping sacred-default children (no per-child theme). */}
+      <div style={{ background: '#273746', padding: '16px', borderRadius: 8 }}>
+        <DetailGrid ariaLabel="Dark grid, sacred children" theme="dark">
+          <DetailField label="Customer" value="Jane Buyer" />
+          <DetailField label="Balance Due" value="$1,240.00" />
+        </DetailGrid>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // LIGHT grid — children carry NO theme, so each couplet stays sacred; the
+    // ONLY thing theming them is the .grid[data-theme='light'] descendant rule.
+    const lightGrid = canvasElement.querySelector(
+      '[data-detail-grid="true"][data-theme="light"]'
+    )
+    await expect(lightGrid).not.toBeNull()
+    const lightCouplet = lightGrid?.querySelector('[data-detail-field="true"]')
+    await expect(lightCouplet?.getAttribute('data-theme')).toBe('sacred')
+    const lightLabel = lightGrid?.querySelector('[data-detail-label="true"]')
+    const lightValue = lightGrid?.querySelector('[data-detail-value="true"]')
+    // --goobs-light-warn-text #b45309 / --goobs-light-text #1f2937.
+    await expect(getComputedStyle(lightLabel as Element).color).toBe(
+      'rgb(180, 83, 9)'
+    )
+    await expect(getComputedStyle(lightValue as Element).color).toBe(
+      'rgb(31, 41, 55)'
+    )
+
+    // DARK grid — same cascade, dark tokens; couplet still sacred.
+    const darkGrid = canvasElement.querySelector(
+      '[data-detail-grid="true"][data-theme="dark"]'
+    )
+    await expect(darkGrid).not.toBeNull()
+    const darkCouplet = darkGrid?.querySelector('[data-detail-field="true"]')
+    await expect(darkCouplet?.getAttribute('data-theme')).toBe('sacred')
+    const darkLabel = darkGrid?.querySelector('[data-detail-label="true"]')
+    const darkValue = darkGrid?.querySelector('[data-detail-value="true"]')
+    // --goobs-dark-warn-text #fbbf24 / --goobs-dark-text #e2e8f0.
+    await expect(getComputedStyle(darkLabel as Element).color).toBe(
+      'rgb(251, 191, 36)'
+    )
+    await expect(getComputedStyle(darkValue as Element).color).toBe(
+      'rgb(226, 232, 240)'
+    )
   },
 }
 
