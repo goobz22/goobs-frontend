@@ -258,6 +258,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   collapsible = false,
   initiallyOpen = true,
   title = 'Filters',
+  headingLevel,
   surface = false,
   className,
   style,
@@ -499,31 +500,55 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
       {hasChipClusters && (
         <div className={styles.chipClusters}>
-          {chipClusters!.map((cluster, ci) => (
-            <div
-              key={`cluster-${ci}-${cluster.label ?? 'unlabelled'}`}
-              className={styles.chipCluster}
-              data-chip-cluster={
-                cluster.dataField ??
-                (cluster.label ? kebab(cluster.label) : undefined)
-              }
-            >
-              {cluster.label && (
-                <span className={styles.chipClusterLabel}>
-                  {cluster.label}:
-                </span>
-              )}
-              <div className={styles.chipRow}>
-                {cluster.options.map(opt =>
-                  renderChip(
-                    cluster,
-                    opt,
-                    cluster.selectedValues.includes(opt.value)
-                  )
+          {chipClusters!.map((cluster, ci) => {
+            // Programmatic group labelling (WCAG 1.3.1 / 4.1.2). A labelled
+            // cluster is a NAMED group of related filter chips — each Chip
+            // renders as a toggle button (role="button" + aria-pressed), so
+            // the row is exposed as role="group" tied to its visible dimension
+            // label via aria-labelledby. Screen-reader users then hear e.g.
+            // "Status, group" and traverse the chips as one set instead of a
+            // string of context-free buttons. (role="radiogroup" is NOT used:
+            // that requires role="radio" children, which the shared Chip does
+            // not emit — see Deferred.) An UNLABELLED cluster stays a plain
+            // container: an unnamed group only adds AT verbosity.
+            const clusterLabelId = cluster.label
+              ? `filter-cluster-label-${reactId}-${ci}`
+              : undefined
+            return (
+              <div
+                key={`cluster-${ci}-${cluster.label ?? 'unlabelled'}`}
+                className={styles.chipCluster}
+                data-chip-cluster={
+                  cluster.dataField ??
+                  (cluster.label ? kebab(cluster.label) : undefined)
+                }
+              >
+                {cluster.label && (
+                  <span
+                    id={clusterLabelId}
+                    className={styles.chipClusterLabel}
+                  >
+                    {cluster.label}:
+                  </span>
                 )}
+                <div
+                  className={styles.chipRow}
+                  {...(clusterLabelId !== undefined && {
+                    role: 'group',
+                    'aria-labelledby': clusterLabelId,
+                  })}
+                >
+                  {cluster.options.map(opt =>
+                    renderChip(
+                      cluster,
+                      opt,
+                      cluster.selectedValues.includes(opt.value)
+                    )
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
@@ -548,6 +573,32 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
     )
   }
 
+  // Disclosure trigger. When `headingLevel` is set it is wrapped in a real
+  // heading (WCAG 1.3.1 / SEO), matching the APG Accordion pattern where the
+  // trigger lives inside a heading; otherwise it renders bare (DOM unchanged).
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={handleToggle}
+      aria-expanded={isExpanded}
+      aria-controls={panelId}
+      data-testid="filter-section-toggle"
+      data-state={state}
+      className={styles.toggle}
+    >
+      <span>{title}</span>
+      <span
+        aria-hidden="true"
+        className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+      >
+        ▼
+      </span>
+    </button>
+  )
+  const HeadingTag = headingLevel
+    ? (`h${headingLevel}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')
+    : undefined
+
   return (
     <div
       className={cx(styles.root, className)}
@@ -561,23 +612,11 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       })}
       {...(style !== undefined && { style })}
     >
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-expanded={isExpanded}
-        aria-controls={panelId}
-        data-testid="filter-section-toggle"
-        data-state={state}
-        className={styles.toggle}
-      >
-        <span>{title}</span>
-        <span
-          aria-hidden="true"
-          className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
-        >
-          ▼
-        </span>
-      </button>
+      {HeadingTag ? (
+        <HeadingTag className={styles.heading}>{toggleButton}</HeadingTag>
+      ) : (
+        toggleButton
+      )}
       {isExpanded && (
         <div
           id={panelId}

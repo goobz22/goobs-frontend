@@ -31,6 +31,11 @@ const meta: Meta<typeof FilterSection> = {
     title: { control: 'text' },
     collapsible: { control: 'boolean' },
     initiallyOpen: { control: 'boolean' },
+    headingLevel: {
+      control: { type: 'number', min: 1, max: 6, step: 1 },
+      description:
+        'When collapsible, wrap the toggle in a real <h1>–<h6> for the document outline (opt-in).',
+    },
     styles: {
       control: 'object',
       description: "Styling options — only `theme: 'light' | 'sacred'`",
@@ -131,6 +136,7 @@ interface DemoConfig {
   collapsible?: boolean
   initiallyOpen?: boolean
   title?: string
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   surface?: boolean
   withBelowSearch?: boolean
 }
@@ -147,6 +153,7 @@ const FilterSectionDemo = ({
   collapsible = false,
   initiallyOpen = true,
   title,
+  headingLevel,
   surface = false,
   withBelowSearch = false,
 }: DemoConfig): React.JSX.Element => {
@@ -269,6 +276,7 @@ const FilterSectionDemo = ({
       collapsible={collapsible}
       initiallyOpen={initiallyOpen}
       {...(title !== undefined && { title })}
+      {...(headingLevel !== undefined && { headingLevel })}
       {...(surface && { surface: true })}
       {...(withBelowSearch && {
         belowSearch: (
@@ -402,6 +410,45 @@ export const CollapsibleClosed: Story = {
       withDateRange
       title="Course Filters"
     />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * A11y — semantic heading. `headingLevel={2}` wraps the collapsible toggle in a
+ * real `<h2>`, so the "Course Filters" disclosure appears in the document
+ * outline and screen-reader heading navigation (WAI-ARIA APG Accordion pattern;
+ * WCAG 1.3.1). Opt-in: omit `headingLevel` and the toggle renders bare, DOM
+ * unchanged. Inspect the rendered markup to see `<h2 class="…heading"><button
+ * aria-expanded aria-controls>…</button></h2>`.
+ */
+export const AccessibleHeading: Story = {
+  name: 'A11y/Heading Level',
+  render: () => (
+    <FilterSectionDemo
+      collapsible
+      initiallyOpen
+      headingLevel={2}
+      withDateRange
+      title="Course Filters"
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * A11y — chip-cluster grouping. Each labelled chip cluster is exposed as a
+ * `role="group"` whose accessible name comes from the visible dimension label
+ * via `aria-labelledby` (WCAG 1.3.1 / 4.1.2). A screen-reader user hears
+ * "Status, group" / "Level, group" / "Tags, group" and traverses each set of
+ * `aria-pressed` toggle chips as one named dimension. Inspect the three chip
+ * rows: each `.chipRow` carries `role="group"` + `aria-labelledby` pointing at
+ * its `Status:` / `Level:` / `Tags:` label.
+ */
+export const AccessibleChipGroups: Story = {
+  name: 'A11y/Chip Groups',
+  render: () => (
+    <FilterSectionDemo withButtons={false} withDropdowns={false} />
   ),
   globals: { backgrounds: { value: 'light' } },
 }
