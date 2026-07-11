@@ -1648,3 +1648,218 @@ export const AccessibilityChecks: Story = {
     expect(kb).toBeChecked()
   },
 }
+
+/**
+ * 9) Accessibility — OFF-state non-text contrast (WCAG 1.4.11, AA)
+ *
+ * Regression gate for the 1.4.11 fix. In the light theme the OFF (unchecked)
+ * switch must stay perceivable to low-vision users: the control's boundary (the
+ * track border) is measured against the page and must clear the 3:1 non-text-
+ * contrast floor. The old border `rgba(156,163,175,0.2)` read at only ~1.2:1
+ * over a near-white page (the OFF pill was effectively invisible, and the white
+ * thumb was ~1.3:1 against the faint track). The switch is rendered on a pure
+ * WHITE page — the worst realistic adjacent colour — and the play function
+ * computes the live WCAG contrast from the *rendered* border colour, so any
+ * future weakening of `--switch-track-border-color` re-fails here.
+ */
+export const AccessibilityOffStateContrast: Story = {
+  name: 'Accessibility - Off-State Contrast (WCAG 1.4.11)',
+  render: args => {
+    const Component = () => {
+      const [wifi, setWifi] = useState(false)
+      const [labelled, setLabelled] = useState(false)
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            padding: '24px',
+            // Worst realistic case: a pure-white page behind the OFF control.
+            background: '#ffffff',
+            borderRadius: '12px',
+          }}
+        >
+          <Switch
+            {...args}
+            aria-label="Wi-Fi"
+            checked={wifi}
+            onChange={e => setWifi(e.target.checked)}
+            styles={{ theme: 'light', outline: true }}
+          />
+
+          <Switch
+            {...args}
+            leftLabel="Off"
+            rightLabel="On"
+            checked={labelled}
+            onChange={e => setLabelled(e.target.checked)}
+            styles={{ theme: 'light', outline: true }}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Minimal sRGB relative-luminance + WCAG contrast-ratio implementation.
+    const parseRgb = (color: string): [number, number, number] => {
+      const parts = color.match(/-?\d+(?:\.\d+)?/g) ?? []
+      return [Number(parts[0]) || 0, Number(parts[1]) || 0, Number(parts[2]) || 0]
+    }
+    const linearize = (channel: number) => {
+      const srgb = channel / 255
+      return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4)
+    }
+    const luminance = ([r, g, b]: [number, number, number]) =>
+      0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b)
+    const contrastRatio = (
+      colorA: [number, number, number],
+      colorB: [number, number, number]
+    ) => {
+      const a = luminance(colorA) + 0.05
+      const b = luminance(colorB) + 0.05
+      return a > b ? a / b : b / a
+    }
+    const white: [number, number, number] = [255, 255, 255]
+
+    // Both controls here are OFF (unchecked) and light-themed.
+    const switches = canvas.getAllByRole('switch')
+    expect(switches.length).toBe(2)
+
+    for (const control of switches) {
+      expect(control).not.toBeChecked()
+
+      // The track is the <input>'s parent <div> (see index.tsx markup).
+      const track = control.parentElement as HTMLElement
+      expect(track).not.toBeNull()
+
+      const trackStyle = getComputedStyle(track)
+      // A real, non-zero boundary must actually be drawn (outline defaults on).
+      expect(trackStyle.borderTopStyle).not.toBe('none')
+      expect(parseFloat(trackStyle.borderTopWidth)).toBeGreaterThan(0)
+
+      // …and that boundary must clear the 3:1 non-text-contrast floor against
+      // the white page it sits on.
+      const ratio = contrastRatio(parseRgb(trackStyle.borderTopColor), white)
+      expect(ratio).toBeGreaterThanOrEqual(3)
+    }
+  },
+}
+
+/**
+ * 10) Accessibility — reduced motion (WCAG 2.3.3 Animation from Interactions)
+ *
+ * Regression gate for the reduced-motion fix. The sacred switch runs an
+ * INFINITE shimmer sweep (`sacredSwitchShimmer`) on hover-while-checked, plus
+ * transitions on the track/thumb/labels. Under `prefers-reduced-motion: reduce`
+ * those must be neutralised. A play function cannot flip the OS media
+ * preference, so this asserts — via the CSSOM, scoped to THIS component's
+ * hashed CSS-module classes — that Switch's own
+ * `@media (prefers-reduced-motion: reduce)` block still exists and still
+ * suppresses BOTH the infinite animation and the transitions. If a future edit
+ * drops or weakens the block (re-introducing the shimmer for reduced-motion
+ * users), this re-fails. The rendered sacred+checked switch also gives
+ * Chromatic a visual baseline for the shimmer state.
+ */
+export const AccessibilityReducedMotion: Story = {
+  name: 'Accessibility - Reduced Motion (WCAG 2.3.3)',
+  render: args => {
+    const Component = () => {
+      const [on, setOn] = useState(true)
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            padding: '24px',
+            // Sacred surfaces read correctly only on a dark backdrop.
+            background: '#0e0e0e',
+            borderRadius: '12px',
+          }}
+        >
+          <Switch
+            {...args}
+            aria-label="Sacred shimmer toggle"
+            checked={on}
+            onChange={e => setOn(e.target.checked)}
+            styles={{ theme: 'sacred', outline: true }}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Rendering the switch loads the Switch stylesheet under test.
+    const control = canvas.getByRole('switch', { name: 'Sacred shimmer toggle' })
+    expect(control).toBeChecked()
+
+    // The track is the <input>'s parent <div>; its (hashed) CSS-module class is
+    // the token we scope the CSSOM search by, so another component's
+    // reduced-motion block can never false-green this gate.
+    const track = control.parentElement as HTMLElement
+    const trackClass = track.className.trim().split(/\s+/).find(Boolean) ?? ''
+    expect(trackClass).not.toBe('')
+
+    // Collect every style rule inside a `prefers-reduced-motion: reduce` media
+    // block from the same-origin injected stylesheets. Cross-origin sheets
+    // throw on `.cssRules` and are skipped.
+    const reducedMotionRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (
+            /prefers-reduced-motion/i.test(mediaText) &&
+            /reduce/i.test(mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) reducedMotionRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    // Scope to Switch's own reduced-motion rules via its hashed track class.
+    const switchRules = reducedMotionRules.filter(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        rule.selectorText.includes(trackClass)
+    )
+    expect(switchRules.length).toBeGreaterThan(0)
+
+    // The infinite shimmer animation must be killed…
+    const suppressesAnimation = switchRules.some(
+      rule =>
+        rule.style.getPropertyValue('animation').trim() === 'none' ||
+        rule.style.getPropertyValue('animation-name').trim() === 'none'
+    )
+    expect(suppressesAnimation).toBe(true)
+
+    // …and the track/thumb/label transitions must be neutralised.
+    const suppressesTransition = switchRules.some(
+      rule =>
+        rule.style.getPropertyValue('transition').trim() === 'none' ||
+        rule.style.getPropertyValue('transition-property').trim() === 'none'
+    )
+    expect(suppressesTransition).toBe(true)
+  },
+}

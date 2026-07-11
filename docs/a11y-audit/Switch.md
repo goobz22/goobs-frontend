@@ -2,6 +2,14 @@
 
 **Status:** FIXED
 
+**2nd adversarial review (2026-07-11):** three remaining items closed at root cause —
+(a) **Issue 6 / WCAG 1.4.11** the light-theme OFF control had no ~3:1 boundary (never
+assessed by the 1st pass) → solid `#6b7280` track border, contrast-gated by a new story;
+(b) reduced-motion (Issue 3) had **no regression gate** → new `AccessibilityReducedMotion`
+CSSOM story; (c) the 1st report **overstated** that the `AccessibilityChecks` play was
+"verified" when only `lint`/`stylelint` had run locally → corrected to describe it as the
+`test-storybook`/CI regression gate (see "Gates & evidence").
+
 **APG pattern:** [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/). The
 component is built on a native `<input type="checkbox">` wrapped in a `<label>`
 (`index.tsx:158-213`) — the "semantic HTML first" implementation. The APG's
@@ -21,6 +29,7 @@ to move focus, `Space` to toggle).
 | 3 | Moderate | 2.3.3 Animation from Interactions (AAA) | `Switch.module.css` — infinite `sacredSwitchShimmer` + `transition` everywhere, no reduced-motion block | **FIXED** |
 | 4 | Minor (by design — consumer responsibility) | 4.1.2 Name, Role, Value (A) | `index.tsx` — no accessible name when neither label nor `aria-label` is supplied | **DEFERRED (documented, not a defect)** |
 | 5 | Minor (opt-in — documented) | 2.4.7 Focus Visible (AA) | `Switch.module.css:250` focus ring is suppressible via `styles.focusEffects === false` | **DEFERRED (public API, default is accessible)** |
+| 6 | Moderate | 1.4.11 Non-text Contrast (AA) | `Switch.module.css` light-theme OFF state — track border `rgba(156,163,175,0.2)` (~1.2:1 vs a light page), track fill ~1.3:1, white thumb ~1.3:1: the OFF control was effectively invisible to low-vision users | **FIXED (2nd review)** |
 
 ### Issue 1 — Switch announced as a plain checkbox (Serious)
 
@@ -56,6 +65,32 @@ sweep and the sliding transitions. This fails WCAG 2.3.3 (motion triggered by
 interaction must be disable-able). Every sibling component in the library already
 carries a reduced-motion block, so Switch was the outlier.
 
+### Issue 6 — light-theme OFF state fails non-text contrast (Moderate) — 2nd review
+
+Found by the second adversarial review: the a11y pass never assessed **WCAG 1.4.11
+Non-text Contrast (AA)**, the criterion most directly applicable to a toggle. In the
+light theme the OFF (unchecked) state used an almost-invisible boundary:
+
+| Boundary (light OFF) | Colour | Contrast vs `#f9fafb` | vs `#ffffff` |
+|---|---|---|---|
+| Track **border** (old) | `rgba(156,163,175,0.2)` | **1.18:1** | 1.18:1 |
+| Track **fill** | `--goobs-gray-light-a30` composited | **1.27:1** | — |
+| White **thumb** vs track fill | `#ffffff` | **1.32:1** | — |
+
+No boundary of the control reached the **3:1** floor, so a sighted low-vision user
+could not reliably perceive the switch or distinguish on from off. (Dark theme is
+fine: its near-white thumb `#f3f4f6` sits on a dark track at well over 3:1. Disabled
+is 1.4.11-exempt. The checked/ON state is fine: the dark-blue `#2563eb` fill carries
+the boundary.)
+
+**Root cause:** the OFF border alpha was tuned for a purely *aesthetic* hairline, never
+against the 3:1 non-text-contrast requirement.
+
+**Fix:** the light-theme `--switch-track-border-color` is now a solid `#6b7280`
+(gray-500) — **4.83:1 vs `#ffffff`**, **4.63:1 vs `#f9fafb`**. The checked state still
+overrides the border to `transparent` (blue fill carries the boundary there), so the
+change is OFF-state-only in effect. Width unchanged (1px → no layout shift).
+
 ## Hearing
 
 No audio, video, `Audio`, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate`
@@ -72,9 +107,18 @@ WCAG 1.2.x / 1.4.2 do not apply. **No issues.**
   content via `leftLabel`/`rightLabel` spans, and (b) `aria-label` /
   `aria-labelledby` forwarded through `...props` onto the `<input>`. **Fixed** the
   decorative-glyph leakage (Issue 2, `aria-hidden` on `.thumb`/`.shimmer`) so the name
-  is now exactly the label text — verified by the new `AccessibilityChecks` story
-  resolving `getByRole('switch', { name: 'Off On' })` and
-  `getByRole('switch', { name: 'Enable notifications' })`.
+  is now exactly the label text. The `AccessibilityChecks` story is the regression
+  gate for this — its `play` **asserts** `getByRole('switch', { name: 'Off On' })`
+  (proving the now-`aria-hidden` glyph does not fold into the name) and
+  `getByRole('switch', { name: 'Enable notifications' })`. That `play` function runs
+  under `test-storybook` (the `@storybook/test-runner` gate in CI / the batch gate),
+  not under the per-file `bun lint:file` / `stylelint` gates that were run here — see
+  "Gates & evidence" below for exactly what was executed locally.
+- **Non-text contrast (1.4.11):** **Fixed** (Issue 6) — the light-theme OFF control
+  now draws a solid `#6b7280` (gray-500) track border, **4.83:1 vs `#ffffff`** /
+  **4.63:1 vs `#f9fafb`** (was ~1.2:1). The `AccessibilityOffStateContrast` story
+  renders the OFF switch on a pure-white page and its `play` computes the live WCAG
+  contrast from the *rendered* border colour, asserting `>= 3:1`.
 - **State never color-alone (1.4.1):** on/off is conveyed by thumb **position**
   (`translateX`) **plus** the glyph **plus** colour **plus** the programmatic
   switch/`aria-checked` state — not colour-only. Good (kept as-is).
@@ -89,6 +133,12 @@ WCAG 1.2.x / 1.4.2 do not apply. **No issues.**
 - **Disabled:** conveyed by the native `disabled` attribute (programmatic) plus
   `data-disabled` styling — not visual-only. Good.
 - **Motion:** **Fixed** (Issue 3) — added `@media (prefers-reduced-motion: reduce)`.
+  Regression-gated by the new `AccessibilityReducedMotion` story: a play function
+  cannot flip the OS media preference, so it inspects the **CSSOM** — scoped to
+  Switch's own hashed CSS-module classes (so no sibling's reduced-motion block can
+  false-green it) — and asserts Switch's `prefers-reduced-motion: reduce` block still
+  exists and still sets both `animation: none` (kills the infinite shimmer) and
+  `transition: none`.
 
 ## SEO semantics
 
@@ -110,7 +160,17 @@ primary content. **No issues.**
 3. **Reduced motion (Issue 3)** — added a `@media (prefers-reduced-motion: reduce)`
    block to `Switch.module.css` (`:405`) that zeroes the container/track/thumb/label
    `transition` and sets the sacred shimmer `animation: none; opacity: 0`. Matches the
-   library's existing reduced-motion convention (e.g. `Alert.module.css`).
+   library's existing reduced-motion convention (e.g. `Alert.module.css`). Now
+   regression-gated by `AccessibilityReducedMotion` (2nd review — see below).
+4. **Non-text contrast (Issue 6, 2nd review)** — changed the light-theme
+   `--switch-track-border-color` from `rgba(156,163,175,0.2)` (~1.2:1) to a solid
+   `#6b7280` gray-500 (4.83:1 vs white). A block comment on the token records the WCAG
+   1.4.11 rationale + the measured ratios so a future editor cannot silently weaken it.
+   Regression-gated by `AccessibilityOffStateContrast`, which asserts `>= 3:1` computed
+   from the live border colour. `#6b7280` is a raw literal (allowed — it is not one of
+   the brand literals stylelint forbids, and the file already carries per-theme
+   literals) because no `--goobs-*` token sits in the required 4–5:1 band; see Deferred
+   for the token that should own this.
 
 **Markup change note (required disclosure):** the only DOM change is the **addition**
 of `role="switch"` (and two `aria-hidden` attributes). No element was swapped, and no
@@ -136,9 +196,39 @@ changes are additive attributes + additive CSS.
   (`'Enable notifications'`) and via the wrapping `<label>` (`'Off On'`, proving the
   now-`aria-hidden` glyph does not leak); `aria-checked` tracking after a click
   (`toBeChecked()`); and keyboard toggle via `Space` on a focused switch.
+- **(2nd review)** Added **`AccessibilityOffStateContrast`**
+  (`Accessibility - Off-State Contrast (WCAG 1.4.11)`): renders two OFF light switches
+  on a pure-white page; its `play` reads each track's computed `border-top-color`,
+  computes the WCAG contrast ratio against white, and asserts `>= 3:1` (plus that a
+  non-`none`, non-zero-width border is actually drawn). This re-fails if
+  `--switch-track-border-color` is weakened.
+- **(2nd review)** Added **`AccessibilityReducedMotion`**
+  (`Accessibility - Reduced Motion (WCAG 2.3.3)`): renders the sacred checked switch
+  (also a Chromatic baseline for the shimmer state); its `play` walks the CSSOM, scoped
+  to Switch's own hashed track class, and asserts Switch's
+  `@media (prefers-reduced-motion: reduce)` block exists and sets both `animation: none`
+  and `transition: none`. This re-fails if the reduced-motion block is dropped.
 
-Gates run per-file and passing: `bun lint:file` on `index.tsx` and `Switch.stories.tsx`
-(exit 0), `stylelint` on `Switch.module.css` (exit 0).
+## Gates & evidence
+
+**Run locally, per-file (this is the complete list of what was executed here):**
+- `bun lint:file src/components/Switch/Switch.stories.tsx` → exit 0.
+- `bunx stylelint src/components/Switch/Switch.module.css` → exit 0 (token-leak clean;
+  `#6b7280` is not a forbidden brand literal).
+- `index.tsx` was **not** modified in the 2nd review, so it was not re-linted here.
+- WCAG contrast figures above were computed with a standalone sRGB-luminance script and
+  are additionally encoded as live assertions in the two new stories.
+
+**NOT run locally (deliberately):** the `test-storybook` (`@storybook/test-runner`) run
+that actually executes the `play` functions, and the full `bun run build` / Chromatic
+snapshot. `test-storybook` requires a running Storybook that builds **every** component's
+stories, and `build`/Chromatic are repo-wide — both are expensive and would race the
+sibling components under concurrent edit (a peer's in-progress story could fail the run
+and be misattributed here). Those play functions + the Chromatic baselines are the
+regression gate; they execute in CI / the batch-gate agent's run. The 1st-review report's
+phrasing "verified by the new story resolving `getByRole(...)`" **overstated** the local
+evidence (the play was authored, not executed here) and has been corrected above to
+"the story is the regression gate, asserting …".
 
 ## Deferred
 
@@ -158,6 +248,26 @@ Gates run per-file and passing: `bun lint:file` on `index.tsx` and `Switch.stori
   The default (`focusEffects` unset/true) is fully accessible, and removing the prop
   would be a breaking API change, so this is left as documented consumer risk rather
   than a defect. No code change.
+- **`styles.outline === false` also removes the OFF-state boundary (2nd review).** Like
+  `focusEffects`, `outline: false` (`data-outline='false'`) strips the track border
+  entirely; in light OFF that leaves only the ~1.3:1 track fill, so a consumer who opts
+  out re-loses 1.4.11. The default (`outline` unset/true) now passes. Documented as an
+  opt-in consumer risk, same class as Issue 5 — not changed (removing the opt-out would
+  be a breaking API change).
 
-**No cross-file (unowned) fixes were required** — all three root-cause fixes lived
-inside the `src/components/Switch/` directory.
+## Cross-file / unowned (deferred to file owners)
+
+- **`src/styles/global.css` — add a `--goobs-light-control-border-strong` token.** The
+  light-theme OFF border needs a solid gray in the **4–5:1-vs-white** band, but no
+  existing `--goobs-*` token lives there (nearest are `--goobs-light-control-border`
+  `#cbd5e1` @1.5:1 — too light — and `--goobs-light-text-muted` `#4b5563` @7.6:1 — text-
+  heavy). I used the raw literal `#6b7280` in `Switch.module.css` (allowed by stylelint;
+  the file is not in the config's in-flight ignore list). **Suggested change:** add
+  `--goobs-light-control-border-strong: #6b7280;` to the light `:root`/theme block in
+  `src/styles/global.css` (near line 304, beside `--goobs-light-control-border`), then
+  Switch (and any sibling needing a 3:1 light control boundary) can route through it.
+  I could not make this edit — `src/styles/**` is outside my ownership.
+
+**No cross-file fix was *required* to close the findings** — the three review items were
+all fixed at root cause inside `src/components/Switch/`. The token above is a
+maintainability improvement, not a blocker (the literal already satisfies 1.4.11).

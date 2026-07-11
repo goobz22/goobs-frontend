@@ -120,7 +120,17 @@
   --switch-track-height: 24px;
   --switch-track-radius: 12px;
   --switch-track-bg: var(--goobs-gray-light-a30);
-  --switch-track-border-color: rgba(156, 163, 175, 0.2);
+  /* WCAG 1.4.11 Non-text Contrast (AA): the OFF-state control must have a
+     visible boundary — its border must reach >=3:1 against an adjacent light
+     page. The old rgba(156,163,175,0.2) border was ~1.2:1 over a near-white
+     page (the OFF pill was effectively invisible to low-vision users, and the
+     white thumb was only ~1.3:1 against the faint track). A solid gray-500
+     (#6b7280) gives 4.83:1 vs #ffffff / 4.63:1 vs #f9fafb — a comfortable
+     margin over the 3:1 floor. Checked state overrides this to transparent
+     (the blue fill then carries the boundary); disabled is 1.4.11-exempt.
+     No --goobs-* token sits in the 4-5:1 band (nearest are #cbd5e1 @1.5:1 and
+     #4b5563 @7.6:1), so a literal is used here — see the deferred token note. */
+  --switch-track-border-color: #6b7280;
   --switch-track-border-width: 1px;
   --switch-track-backdrop: blur(4px);
   --switch-track-image: none;
