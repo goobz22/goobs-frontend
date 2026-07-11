@@ -10,6 +10,16 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import Content from './'
+import { AnimatedElement, type Animation } from './Structure/animations'
+
+// Self-contained inline SVG so the image stories need no network asset. A solid
+// purple swatch (120×80) used to exercise the `image` sub-component's alt-text.
+const SAMPLE_IMAGE =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">' +
+      '<rect width="120" height="80" fill="#7e22ce"/></svg>'
+  )
 
 // --------------------------------------------------------------------------
 // MOCK DATA — shared grid builders so each theme story stays declarative
@@ -197,6 +207,121 @@ export const CustomComponent: Story = {
         ),
       },
     ],
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Image alt text (WCAG 1.1.1). The `image` sub-component now respects the
+ * author's explicit `alt` verbatim: a meaningful description is announced, while
+ * an explicit empty string (`alt=""`) marks the image decorative so assistive
+ * tech skips it. An omitted `alt` defaults to decorative (empty) rather than the
+ * old meaningless "image" label.
+ */
+export const ImageAltText: Story = {
+  name: 'A11y/Image Alt Text',
+  args: {
+    grids: [
+      {
+        boxProps: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column' as const,
+            gap: '0.75rem',
+          },
+        },
+        typography: [
+          { text: 'Images', variant: 'h5', styles: { theme: 'light' } },
+        ],
+        image: [
+          // Meaningful image: real alt is exposed to assistive tech.
+          {
+            url: SAMPLE_IMAGE,
+            alt: 'Purple placeholder swatch',
+            width: 120,
+            height: 80,
+          },
+          // Decorative image: explicit empty alt so screen readers skip it.
+          { url: SAMPLE_IMAGE, alt: '', width: 120, height: 80 },
+        ],
+      },
+    ],
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Link accessible name (WCAG 2.4.4 / 4.1.2). A link with visible text takes its
+ * name from that text; a link with NO text falls back to an `aria-label` of its
+ * destination URL so it is never announced as an empty link.
+ */
+export const LinkAccessibleName: Story = {
+  name: 'A11y/Link Accessible Name',
+  args: {
+    grids: [
+      {
+        boxProps: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column' as const,
+            gap: '0.5rem',
+          },
+        },
+        link: [
+          // Named by its visible text.
+          {
+            link: 'https://example.com/pricing',
+            text: 'View pricing',
+            styles: { theme: 'light' },
+          },
+          // No text: the anchor is labelled with its href via aria-label.
+          { link: 'https://example.com/terms', styles: { theme: 'light' } },
+        ],
+      },
+    ],
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Reduced-motion entrance animations (WCAG 2.3.3). AnimatedElement drives the
+ * slide/fade entrance variants. Under `prefers-reduced-motion: reduce` the
+ * module CSS disables the transform-based movement and jumps each variant to its
+ * stable end state (slides/fadeIn stay fully visible, fadeOut stays hidden).
+ */
+export const ReducedMotionAnimations: Story = {
+  name: 'A11y/Reduced Motion',
+  render: () => {
+    const variants: Animation[] = [
+      'slideInLeft',
+      'slideInRight',
+      'slideInUp',
+      'slideInDown',
+      'fadeIn',
+    ]
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {variants.map(variant => (
+          <AnimatedElement
+            key={variant}
+            animationtype={variant}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: 8,
+              background: 'rgba(126, 34, 206, 0.12)',
+              color: 'rgba(126, 34, 206, 1)',
+              fontFamily: 'sans-serif',
+            }}
+          >
+            {variant}
+          </AnimatedElement>
+        ))}
+      </div>
+    )
   },
   globals: { backgrounds: { value: 'light' } },
 }

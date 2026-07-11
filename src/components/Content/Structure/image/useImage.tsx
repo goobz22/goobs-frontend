@@ -28,7 +28,7 @@ const useImage = (props: {
     imageItem: ImageProps,
     index: number
   ): React.ReactElement => {
-    const { url, alt = '', ...restProps } = imageItem
+    const { url, alt, ...restProps } = imageItem
 
     if (!url) {
       throw new Error('URL is required for image')
@@ -38,7 +38,12 @@ const useImage = (props: {
       <ImageEl
         key={`image-${index}`}
         src={url}
-        alt={alt || 'image'}
+        // Respect the author's explicit `alt` verbatim — including `''`, which
+        // marks the image as decorative so assistive tech skips it (WCAG 1.1.1).
+        // When `alt` is omitted, default to an empty (decorative) alt rather than
+        // a generic "image" label, which conveys no information and only adds
+        // screen-reader noise. Meaningful images should always pass a real `alt`.
+        alt={alt ?? ''}
         className={cssStyles.image}
         {...restProps}
       />

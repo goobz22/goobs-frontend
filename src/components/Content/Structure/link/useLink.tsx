@@ -31,8 +31,18 @@ const useLink = (props: {
       throw new Error('Link property is required')
     }
 
+    // A link needs a discernible accessible name (WCAG 2.4.4 / 4.1.2). The name
+    // normally comes from the rendered Typography `text`; when `text` is omitted
+    // the anchor would announce as an empty link, so fall back to labelling it
+    // with its destination URL.
+    const hasVisibleText = typeof text === 'string' && text.length > 0
+
     return (
-      <LinkEl key={`link-${index}`} href={link}>
+      <LinkEl
+        key={`link-${index}`}
+        href={link}
+        {...(hasVisibleText ? {} : { 'aria-label': link })}
+      >
         <Typography
           {...(text !== undefined ? { text } : {})}
           styles={{
