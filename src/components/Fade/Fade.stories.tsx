@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import Fade from './index'
 import CustomButton from '../Button'
 import Typography from '../Typography'
@@ -321,7 +322,9 @@ export const FocusAndScreenReaderSafety: Story = {
         >
           <button type="button">Before</button>
           <Fade styles={{ in: isVisible, theme: 'light', timeout: 300 }}>
-            <button type="button">Inside Fade</button>
+            <button type="button" data-testid="fade-inner-button">
+              Inside Fade
+            </button>
           </Fade>
           <button type="button">After</button>
         </div>
@@ -334,6 +337,52 @@ export const FocusAndScreenReaderSafety: Story = {
         </div>
       </div>
     )
+  },
+  // Behavioral regression gate (runs in @storybook/test-runner, a real browser):
+  // proves the hidden state removes the inner control from BOTH the a11y tree and
+  // the tab order — the property a Chromatic pixel-diff cannot see, because
+  // `visibility: hidden` and the old `opacity: 0` are pixel-identical. This
+  // FAILS against an opacity:0-only Fade (the button would stay accessible +
+  // focusable), so it truly protects the issue-1 fix.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const fade = canvasElement.querySelector(
+      '[data-component="Fade"]'
+    ) as HTMLElement
+    const insideButton = canvasElement.querySelector(
+      '[data-testid="fade-inner-button"]'
+    ) as HTMLButtonElement
+    const beforeButton = canvas.getByRole('button', { name: 'Before' })
+
+    // Starts faded OUT (in:false). No mount transition, so visibility is already
+    // hidden: the inner button is out of the accessibility tree (queryByRole
+    // walks that tree) and cannot receive focus (visibility:hidden is unfocusable).
+    await waitFor(() => expect(getComputedStyle(fade).visibility).toBe('hidden'))
+    expect(canvas.queryByRole('button', { name: 'Inside Fade' })).toBeNull()
+    beforeButton.focus()
+    insideButton.focus()
+    expect(insideButton).not.toHaveFocus()
+    expect(beforeButton).toHaveFocus()
+
+    // Fade IN: the inner button re-enters the a11y tree and becomes focusable.
+    await userEvent.click(canvas.getByRole('button', { name: /Fade (in|out)/ }))
+    await waitFor(() =>
+      expect(getComputedStyle(fade).visibility).toBe('visible')
+    )
+    expect(
+      canvas.getByRole('button', { name: 'Inside Fade' })
+    ).toBeInTheDocument()
+    insideButton.focus()
+    expect(insideButton).toHaveFocus()
+
+    // Fade OUT again: the deferred DISCRETE visibility swap holds the node
+    // present for the whole fade-out, then drops it once fully transparent.
+    await userEvent.click(canvas.getByRole('button', { name: /Fade (in|out)/ }))
+    await waitFor(() => expect(getComputedStyle(fade).visibility).toBe('hidden'))
+    expect(canvas.queryByRole('button', { name: 'Inside Fade' })).toBeNull()
+    beforeButton.focus()
+    insideButton.focus()
+    expect(insideButton).not.toHaveFocus()
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -370,6 +419,58 @@ export const ReducedMotion: Story = {
         </div>
       </div>
     )
+  },
+  // Regression gate for the issue-2 reduced-motion fix. Chromatic cannot emulate
+  // `prefers-reduced-motion` and a visible reduced-motion Fade is pixel-identical
+  // to a normal one, so a visual diff can't protect this. Instead assert the
+  // guard RULE structurally in the CSSOM (it fails if the
+  // `@media (prefers-reduced-motion: reduce)` block that zeroes the transition is
+  // ever removed), plus a real behavioral check when the runner DOES request
+  // reduced motion.
+  play: async ({ canvasElement }) => {
+    const fade = canvasElement.querySelector(
+      '[data-component="Fade"]'
+    ) as HTMLElement
+    expect(fade).toBeInTheDocument()
+
+    // Structural presence gate: some stylesheet must carry a
+    // `@media (prefers-reduced-motion: reduce)` rule that sets `transition: none`
+    // on this component's container class. getComputedStyle can't read a
+    // non-matching media query's value, so walk the CSSOM directly.
+    const containerClass = fade.classList[0]
+    let hasReducedMotionGuard = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        continue // cross-origin sheet — not readable, skip
+      }
+      for (const rule of Array.from(rules)) {
+        if (
+          rule instanceof CSSMediaRule &&
+          rule.media.mediaText.includes('prefers-reduced-motion') &&
+          rule.media.mediaText.includes('reduce')
+        ) {
+          for (const inner of Array.from(rule.cssRules)) {
+            if (
+              inner instanceof CSSStyleRule &&
+              inner.selectorText.includes(containerClass) &&
+              /transition:\s*none/i.test(inner.cssText)
+            ) {
+              hasReducedMotionGuard = true
+            }
+          }
+        }
+      }
+    }
+    expect(hasReducedMotionGuard).toBe(true)
+
+    // Behavioral gate when the environment actually requests reduced motion
+    // (e.g. a runner configured to emulate it): the transition must be off.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      expect(getComputedStyle(fade).transitionProperty).toBe('none')
+    }
   },
   globals: { backgrounds: { value: 'light' } },
 }
