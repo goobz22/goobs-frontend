@@ -78,6 +78,20 @@ one multi-branch `ShowHideEye.tsx`). Representative icons read in full:
   the consumer's remaining props still spread onto the `<svg>` (as `{...rest}`)
   before the computed a11y attributes.
 
+### 2. Hover motion has no `prefers-reduced-motion` guard — MINOR — WCAG 2.3.3 (Animation from Interactions, AAA) — FIXED
+- **Where:** `src/components/Icons/icon.module.css` — dark-theme hover
+  `transform: scale(1.05)` (was `:54-58`) and sacred-theme hover `transform:
+  scale(1.1) rotate(2deg)` (was `:69-73`), driven by the 200ms/400ms
+  medium/premium transitions (`.svg` `:40-44`, `[data-theme='sacred'] .svg`
+  `:62-67`). No `@media (prefers-reduced-motion: reduce)` block existed.
+- **Problem:** users who ask their OS for reduced motion still got the scale/rotate
+  animation on icon hover (a vestibular-trigger risk).
+- **Pattern class:** `missing-reduced-motion`.
+- **Fix:** added an `@media (prefers-reduced-motion: reduce)` block to
+  `icon.module.css` that sets `transition: none` on `.svg` (all themes) and
+  `transform: none` on the dark/sacred `:hover`. The colour/glow feedback is
+  retained (non-motion); only the movement and its timed animation are removed.
+
 ### 3. Three shipped `resolveIconA11y` naming branches had no regression coverage — MINOR — WCAG 4.1.2 (Name, Role, Value, A) — FIXED (pass 2)
 - **Where:** `src/components/Icons/iconA11y.ts:82-104` (the resolver) vs
   `IconA11y.stories.tsx` before this pass — the `Contract` play function pinned
@@ -100,20 +114,6 @@ one multi-branch `ShowHideEye.tsx`). Representative icons read in full:
   `role="button"` preserved alongside `aria-label`; `aria-hidden={false}` unnamed
   → no `aria-hidden`, no `role`, no name, still `focusable="false"`). No
   implementation change — the branches already behave correctly; this locks them.
-
-### 2. Hover motion has no `prefers-reduced-motion` guard — MINOR — WCAG 2.3.3 (Animation from Interactions, AAA) — FIXED
-- **Where:** `src/components/Icons/icon.module.css` — dark-theme hover
-  `transform: scale(1.05)` (was `:54-58`) and sacred-theme hover `transform:
-  scale(1.1) rotate(2deg)` (was `:69-73`), driven by the 200ms/400ms
-  medium/premium transitions (`.svg` `:40-44`, `[data-theme='sacred'] .svg`
-  `:62-67`). No `@media (prefers-reduced-motion: reduce)` block existed.
-- **Problem:** users who ask their OS for reduced motion still got the scale/rotate
-  animation on icon hover (a vestibular-trigger risk).
-- **Pattern class:** `missing-reduced-motion`.
-- **Fix:** added an `@media (prefers-reduced-motion: reduce)` block to
-  `icon.module.css` that sets `transition: none` on `.svg` (all themes) and
-  `transform: none` on the dark/sacred `:hover`. The colour/glow feedback is
-  retained (non-motion); only the movement and its timed animation are removed.
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 No audio, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate` anywhere in
