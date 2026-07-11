@@ -435,6 +435,45 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     setEditedTeamMember(teamMemberAssigned)
   }, [teamMemberAssigned])
 
+  // --- Hydration-safe date/time formatting ---------------------------------
+  // The server cannot know the viewer's locale or time zone, so formatting a
+  // date with the ambient locale/zone during render produces different text on
+  // the server vs the client (breaking hydration) and shows the wrong
+  // wall-clock time. We render a deterministic fixed-locale + UTC value on the
+  // server and the first client render, then switch to the viewer's own locale
+  // + zone right after mount. Gate: scripts/a11y-lints/locale-format-in-render.ts.
+  const [dateLocale, setDateLocale] = useState<string>('en-US')
+  const [dateZone, setDateZone] = useState<string | undefined>('UTC')
+  useEffect(() => {
+    setDateLocale(
+      typeof navigator !== 'undefined' && navigator.language
+        ? navigator.language
+        : 'en-US'
+    )
+    setDateZone(undefined)
+  }, [])
+  const formatLocalDateTime = (
+    value: string | number | Date,
+    options?: Intl.DateTimeFormatOptions
+  ): string =>
+    new Date(value).toLocaleString(dateLocale, { ...options, timeZone: dateZone })
+  const formatLocalDate = (
+    value: string | number | Date,
+    options?: Intl.DateTimeFormatOptions
+  ): string =>
+    new Date(value).toLocaleDateString(dateLocale, {
+      ...options,
+      timeZone: dateZone,
+    })
+  const formatLocalTime = (
+    value: string | number | Date,
+    options?: Intl.DateTimeFormatOptions
+  ): string =>
+    new Date(value).toLocaleTimeString(dateLocale, {
+      ...options,
+      timeZone: dateZone,
+    })
+
   const isSacred = styles?.theme === 'sacred'
   const isDark = styles?.theme === 'dark'
   // Theme value for the [data-theme] attribute on the styled root (sacred is
