@@ -136,6 +136,25 @@
 }
 
 /* --------------------------------------------------------------------------
+   State: keyboard focus. The base `.select` sets `outline: none` to hide the
+   native ring so the custom border reads cleanly; that alone leaves keyboard
+   users with NO visible focus indicator. Restore a visible ring on
+   :focus-visible only (keyboard / programmatic focus, not pointer clicks) so
+   the control has a perceivable focus treatment (WCAG 2.4.7 / 2.4.13). Uses
+   the per-theme focused-border token; error fields switch it to the error
+   colour so the ring stays meaningful in the invalid state.
+   -------------------------------------------------------------------------- */
+
+.select:focus-visible {
+  outline: 2px solid var(--select-border-focused);
+  outline-offset: 2px;
+}
+
+.root[data-error='true'] .select:focus-visible {
+  outline-color: var(--select-error);
+}
+
+/* --------------------------------------------------------------------------
    State: helperTextType='error'. The old getFormFieldTheme path colored the
    border with the rgba(239, 68, 68, 1) error token when the caller set
    `helperTextType: 'error'`, even without the boolean `error` prop. Declared
@@ -225,4 +244,17 @@
 
 .root[data-disabled='true'] .arrow {
   color: var(--select-arrow-disabled-color);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion. The `.select` carries a `transition: all 0.2s ease` for the
+   hover/focus border colour shift; honour a user's reduced-motion preference
+   by removing the animated transition (WCAG 2.3.3). State changes still apply
+   instantly — only the animation is dropped.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .select {
+    transition: none;
+  }
 }

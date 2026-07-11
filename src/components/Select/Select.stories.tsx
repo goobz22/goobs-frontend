@@ -374,3 +374,58 @@ export const InteractionTest: Story = {
     await expect(select).toHaveValue('typescript')
   },
 }
+
+// --------------------------------------------------------------------------
+// KEYBOARD FOCUS (a11y) — the native <select> is reachable by Tab and, once
+// focused, shows the :focus-visible ring added in Select.module.css (WCAG
+// 2.4.7). The native element is exposed with the implicit `combobox` role.
+// --------------------------------------------------------------------------
+
+export const KeyboardFocus: Story = {
+  name: 'Keyboard Focus (a11y)',
+  render: () => (
+    <SelectWithState styles={{ theme: 'light' }}>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const select = canvas.getByRole('combobox')
+
+    // Reachable and operable by keyboard alone (WCAG 2.1.1).
+    await userEvent.tab()
+    await expect(select).toHaveFocus()
+  },
+}
+
+// --------------------------------------------------------------------------
+// ERROR ANNOUNCED (a11y) — the error state is conveyed programmatically via
+// aria-invalid, not by border colour alone (WCAG 1.4.1 / 4.1.2), so assistive
+// tech announces the field as invalid. Non-error selects must NOT carry it.
+// --------------------------------------------------------------------------
+
+export const ErrorAnnounced: Story = {
+  name: 'Error Announced (aria-invalid)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SelectWithState error styles={{ theme: 'light' }}>
+        <MenuItem value="a">Invalid selection</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+      <SelectWithState styles={{ theme: 'light' }}>
+        <MenuItem value="a">Valid selection</MenuItem>
+        <MenuItem value="b">Option B</MenuItem>
+      </SelectWithState>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const [invalidSelect, validSelect] = canvas.getAllByRole('combobox')
+
+    // Error field exposes aria-invalid="true"; the valid field omits it.
+    await expect(invalidSelect).toHaveAttribute('aria-invalid', 'true')
+    await expect(validSelect).not.toHaveAttribute('aria-invalid')
+  },
+}
