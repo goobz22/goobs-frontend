@@ -1,6 +1,6 @@
 # DetailField — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** FIXED (initial pass + adversarial-review fix pass)
 
 **Component:** `src/components/DetailField/index.tsx` (+ `DetailField.module.css`,
 `DetailField.stories.tsx`). Exports `DetailField` (default) and `DetailGrid`.
@@ -56,6 +56,30 @@ declarations, so there is nothing to gate behind a reduced-motion query).
   DetailGrid-root selectors let a grid-level theme cascade to nested
   `DetailField` children (the escape-hatch path) without prop-drilling.
   Computed contrast for every theme/role now clears the 4.5:1 small-text bar.
+
+### 2. Dark-theme label used a SEMI-TRANSPARENT token (backdrop-dependent contrast) — MODERATE
+- **WCAG:** 1.4.3 Contrast (Minimum) (AA)
+- **Where:** `DetailField.module.css` — the initial fix retargeted only the dark
+  `.value` (lines 82-89) and deliberately LEFT the dark `.label` on the base
+  `.label { color: var(--goobs-amber-a60) }` (line 39), i.e. `rgba(255,215,0,0.6)`.
+- **Detail (adversarial-review catch that refutes issue 1's "every combination
+  clears 4.5:1" claim):** `--goobs-amber-a60` is **semi-transparent**, so the
+  label composites against whatever surface sits behind it and its effective
+  contrast is backdrop-dependent. Composited over `--goobs-dark-surface` (#1e293b,
+  the Themes-story surface) it is ~4.66:1 — a razor-thin pass — but composited over
+  the **sibling** raised-card token `--goobs-dark-surface-raised` (#273746, the same
+  palette's surface for raised cards) it falls to **~4.14:1**, FAILING the 4.5:1
+  small-text bar. The light theme avoided this by using the OPAQUE
+  `--goobs-light-warn-text` (#b45309); an opaque dark analogue
+  `--goobs-dark-warn-text` (#fbbf24) already existed unused in `global.css:343`.
+- **Pattern:** `semi-transparent-color-backdrop-dependent-contrast`
+- **Status:** FIXED — added a `.field[data-theme='dark'] .label, .grid[data-theme='dark'] .label`
+  override retargeting the dark label to `var(--goobs-dark-warn-text)`, mirroring
+  the light theme's opaque treatment. The opaque token clears 4.5:1 on **every**
+  dark surface in the palette with no backdrop dependency (~8.5:1 over #1e293b,
+  ~7.1:1 over #273746). Removed the now-false trailing comment that claimed "dark
+  theme keeps the gold-60% eyebrow — it clears 4.5:1". Sacred (the shipping default)
+  is untouched.
 
 ## Hearing
 
@@ -134,13 +158,40 @@ Chromatic baseline is the only regression gate):
   couplet inherits that theme (not left sacred), and that the value text is still
   visible on the light surface. Pins issue 1's contract.
 
+Review-fix pass (issue 2):
+
+- **`Themes` (extended)** — added a fourth block rendering the dark theme on the
+  raised-surface token `#273746` (`--goobs-dark-surface-raised`), the exact backdrop
+  where the old semi-transparent label failed contrast, so the Chromatic baseline
+  captures the opaque label staying legible there.
+- **`DarkLabelContrast` (Theme/Dark Label Contrast (Raised Surface))** — new
+  play-function story on the `#273746` raised surface asserting the dark `<dt>`
+  label's computed color is the OPAQUE `rgb(251, 191, 36)` (#fbbf24), NOT the
+  semi-transparent `rgba(255, 215, 0, 0.6)`. Fails against the pre-fix baseline
+  (the translucent token), pinning issue 2's fix.
+
 ## Deferred
 
-None. The single issue was fully fixable inside the owned DetailField directory —
-the `--goobs-{light,warn,dark}-text` tokens already exist in `src/styles/global.css`
-(not edited). No shared util / FieldGrid / Shell / barrel change was required
-(`data-theme` rides through `FieldGrid`'s existing `restProps` spread, the same
-path the pre-existing `data-detail-grid` attribute already used).
+Both a11y contrast issues (issue 1 + the review's issue 2) were fully fixable
+inside the owned DetailField directory — the `--goobs-{light,warn,dark}-*` tokens
+already exist in `src/styles/global.css` (not edited). No shared util / FieldGrid /
+Shell / barrel change was required (`data-theme` rides through `FieldGrid`'s
+existing `restProps` spread, the same path the pre-existing `data-detail-grid`
+attribute already used).
+
+**Stale committed `index.d.ts` / `index.d.ts.map` (review finding, NOT an a11y
+issue, NOT owner-editable):** `src/components/DetailField/index.d.ts` (+ `.map`),
+dated May 30, predates the `theme` prop / `DetailFieldTheme` export and is now
+stale. It is a build-generated declaration artifact — explicitly outside this
+agent's ownership (the ownership rule forbids touching any `*.d.ts` / `*.d.ts.map`)
+— and the review itself flags it as "out of a11y scope, flagged for completeness."
+The current build (`tsc --noEmit && vite build`, per goobs.md §1) no longer emits
+`.d.ts` files into `src/`, so these are orphaned leftovers from the pre-`ce86c83`
+bare-`tsc` build. Low impact (consumers import the freshly-built `dist/`), but a
+TS resolver that picked up this source-tree `.d.ts` over `index.tsx` would mis-type
+the new prop. **Suggested change (for the owning/build agent):** delete the stale
+`src/components/DetailField/index.d.ts` and `index.d.ts.map` (the vite build no
+longer regenerates them in-tree). Recorded in `deferred`; left untouched here.
 
 **Observation (not owned, not an a11y defect):** DetailField/DetailGrid emit their
 bespoke `data-detail-*` selectors but not the universal `data-component="DetailField"`

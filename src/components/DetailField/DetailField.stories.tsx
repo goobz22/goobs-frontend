@@ -144,8 +144,57 @@ export const Themes: Story = {
             fields={commonFields}
           />
         </div>
+        {/* Dark theme on the RAISED surface token (--goobs-dark-surface-raised,
+            #273746). The old semi-transparent gold-60% label washed out to
+            ~4.14:1 here (WCAG 1.4.3 fail); the opaque --goobs-dark-warn-text
+            label must stay legible on this lighter dark backdrop too. */}
+        <div style={{ background: '#273746', padding: '16px', borderRadius: 8 }}>
+          <DetailGrid
+            ariaLabel="Dark theme on raised surface"
+            theme="dark"
+            fields={commonFields}
+          />
+        </div>
       </div>
     )
+  },
+}
+
+/**
+ * Regression pin for the dark-theme label contrast fix (WCAG 1.4.3). The dark
+ * `<dt>` label must resolve to the OPAQUE amber token (`--goobs-dark-warn-text`,
+ * #fbbf24 → `rgb(251, 191, 36)`), NOT the semi-transparent `--goobs-amber-a60`
+ * (`rgba(255, 215, 0, 0.6)`) whose composited contrast fell to ~4.14:1 on the
+ * raised-surface token #273746. Rendered on that exact raised surface so the
+ * Chromatic baseline captures the label staying legible; the play function
+ * asserts the computed color is fully opaque so a regression to the translucent
+ * token fails the test.
+ */
+export const DarkLabelContrast: Story = {
+  name: 'Theme/Dark Label Contrast (Raised Surface)',
+  parameters: { backgrounds: { disable: true } },
+  render: () => (
+    <div style={{ background: '#273746', padding: '16px', borderRadius: 8 }}>
+      <DetailGrid
+        ariaLabel="Dark Billing on Raised Surface"
+        theme="dark"
+        fields={[
+          { label: 'Customer', value: 'Jane Buyer' },
+          { label: 'Balance Due', value: '$1,240.00' },
+        ]}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const label = canvasElement.querySelector('[data-detail-label="true"]')
+    await expect(label).not.toBeNull()
+    // Opaque amber (#fbbf24) — NOT the semi-transparent rgba(255,215,0,0.6)
+    // whose composited contrast fails 4.5:1 on the raised dark surface.
+    const color = getComputedStyle(label as Element).color
+    await expect(color).toBe('rgb(251, 191, 36)')
+    // The value stays legible on the raised dark surface.
+    const canvas = within(canvasElement)
+    await expect(canvas.getByText('$1,240.00')).toBeVisible()
   },
 }
 

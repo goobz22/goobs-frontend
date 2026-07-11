@@ -79,11 +79,22 @@
   color: var(--goobs-light-text);
 }
 
+.field[data-theme='dark'] .label,
+.grid[data-theme='dark'] .label {
+  /* OPAQUE amber, not the semi-transparent gold-60% token (`--goobs-amber-a60`,
+     rgba(255,215,0,0.6)). A translucent label composites against whatever sits
+     behind it, so its effective contrast is backdrop-dependent: over
+     --goobs-dark-surface (#1e293b) it is ~4.66:1 (a razor-thin pass) but over
+     the sibling raised-card token --goobs-dark-surface-raised (#273746) it
+     drops to ~4.14:1 and FAILS the 4.5:1 small-text bar (WCAG 1.4.3). The
+     opaque analogue clears 4.5:1 on every dark surface in the palette
+     (~8.5:1 base, ~7.1:1 raised) with no backdrop dependency — mirroring the
+     light theme's opaque --goobs-light-warn-text eyebrow treatment. */
+  color: var(--goobs-dark-warn-text);
+}
+
 .field[data-theme='dark'] .value,
 .grid[data-theme='dark'] .value {
   /* softer off-white for a neutral-dark (non-sacred) surface */
   color: var(--goobs-dark-text);
 }
-
-/* dark theme keeps the gold-60% eyebrow — it clears 4.5:1 on a dark-slate
-   surface, so only the value needs retargeting. */
