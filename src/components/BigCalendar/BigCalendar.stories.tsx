@@ -385,3 +385,333 @@ export const A11yHourCellKeyboard: Story = {
     )
   },
 }
+
+/**
+ * Week-view hour cells share ONE roving tab stop advertised by a `role="toolbar"`
+ * container (a bare group does not advertise arrow-key navigation). Left/Right
+ * move the focused cell by day, Up/Down by hour, and Home/End jump to the first
+ * / last hour of the day (WCAG 2.1.1; `handleTimeCellKeyDown` day-nav branch).
+ */
+export const A11yWeekDayNavigation: Story = {
+  name: 'A11y/Week Day Navigation',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'week',
+    startHour: 7,
+    endHour: 19,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The hour cells live inside a labelled toolbar (composite keyboard model).
+    expect(canvas.getByRole('toolbar')).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('week of June 14, 2026')
+    )
+
+    const start = canvas.getByRole('button', {
+      name: /Monday, June 15, 2026, 9 AM/,
+    })
+    start.focus()
+    expect(start).toHaveFocus()
+
+    // Right → next day, same hour.
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: /Tuesday, June 16, 2026, 9 AM/ })
+      ).toHaveFocus()
+    )
+
+    // Left → back to the original day.
+    await userEvent.keyboard('{ArrowLeft}')
+    await waitFor(() => expect(start).toHaveFocus())
+
+    // Down → next hour, same day.
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: /Monday, June 15, 2026, 10 AM/ })
+      ).toHaveFocus()
+    )
+
+    // Home → first hour of the day (7 AM).
+    await userEvent.keyboard('{Home}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: /Monday, June 15, 2026, 7 AM/ })
+      ).toHaveFocus()
+    )
+
+    // End → last hour of the day (6 PM, since endHour 19 is exclusive).
+    await userEvent.keyboard('{End}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: /Monday, June 15, 2026, 6 PM/ })
+      ).toHaveFocus()
+    )
+  },
+}
+
+/**
+ * Month PageUp/PageDown change the displayed month and carry focus to the
+ * equivalent day of the new month (WCAG 2.1.1; `handleMonthCellKeyDown`
+ * Page branch + the roving-focus follow across a period change).
+ */
+export const A11yMonthPageNavigation: Story = {
+  name: 'A11y/Month Page Navigation',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const start = canvas.getByRole('gridcell', { name: /June 15, 2026/ })
+    start.focus()
+    expect(start).toHaveFocus()
+
+    // PageDown → next month; focus follows to July 15.
+    await userEvent.keyboard('{PageDown}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /July 15, 2026/ })
+      ).toHaveFocus()
+    )
+    // The grid label + live region now announce the new period.
+    expect(canvas.getByRole('grid')).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('July 2026')
+    )
+
+    // PageUp → previous month; focus follows back to June 15.
+    await userEvent.keyboard('{PageUp}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 15, 2026/ })
+      ).toHaveFocus()
+    )
+  },
+}
+
+/**
+ * Month Home/End jump the roving focus to the first (Sunday) / last (Saturday)
+ * cell of the current week (WCAG 2.1.1; `handleMonthCellKeyDown` Home/End).
+ */
+export const A11yMonthHomeEnd: Story = {
+  name: 'A11y/Month Home End',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const start = canvas.getByRole('gridcell', { name: /June 16, 2026/ })
+    start.focus()
+    expect(start).toHaveFocus()
+
+    // Home → Sunday of that week (June 14).
+    await userEvent.keyboard('{Home}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 14, 2026/ })
+      ).toHaveFocus()
+    )
+
+    // End → Saturday of that week (June 20).
+    await userEvent.keyboard('{End}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 20, 2026/ })
+      ).toHaveFocus()
+    )
+  },
+}
+
+/**
+ * "Today" and the current hour are conveyed programmatically (not by color
+ * alone — WCAG 1.4.1): today's month gridcell carries `aria-current="date"` and
+ * the current hour cell carries `aria-current="time"`. Uses the real current
+ * date so exactly one of each is present.
+ */
+export const A11yCurrentState: Story = {
+  name: 'A11y/Current Date + Hour',
+  args: {
+    events: [],
+    currentDate: new Date(),
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  // Uses the real current date (so "today" is present) — disable the visual
+  // snapshot so it doesn't diff every day; the play assertion is the test.
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    // Today's cell in the month grid.
+    const today = canvasElement.querySelector(
+      '[role="gridcell"][aria-current="date"]'
+    )
+    expect(today).not.toBeNull()
+  },
+}
+
+/**
+ * Day view surfaces the current hour with `aria-current="time"` (WCAG 1.4.1).
+ * Full 0–24 range guarantees the current hour cell is rendered.
+ */
+export const A11yCurrentHour: Story = {
+  name: 'A11y/Current Hour',
+  args: {
+    events: [],
+    currentDate: new Date(),
+    view: 'day',
+    startHour: 0,
+    endHour: 24,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  // Real current date → disable the daily-changing visual snapshot.
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    const currentHour = canvasElement.querySelector(
+      '[role="button"][aria-current="time"]'
+    )
+    expect(currentHour).not.toBeNull()
+  },
+}
+
+/**
+ * The prev/next nav buttons carry unit-aware accessible names that track the
+ * active view — "Previous month" / "Next month" become "Previous week" /
+ * "Next week" after the view toggle (WCAG 2.4.6).
+ */
+export const A11yNavButtonLabels: Story = {
+  name: 'A11y/Nav Button Labels',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    expect(
+      canvas.getByRole('button', { name: 'Previous month' })
+    ).toBeInTheDocument()
+    expect(
+      canvas.getByRole('button', { name: 'Next month' })
+    ).toBeInTheDocument()
+    expect(
+      canvas.getByRole('button', { name: 'Go to today' })
+    ).toBeInTheDocument()
+
+    // Switch to week view via the toggle; the nav labels re-unit.
+    await userEvent.click(canvas.getByRole('button', { name: 'Week' }))
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: 'Previous week' })
+      ).toBeInTheDocument()
+    )
+    expect(
+      canvas.getByRole('button', { name: 'Next week' })
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * The month/week/day view toggle is wrapped in a `role="group"` with the
+ * accessible name "Calendar view" so the related toggles are announced as a
+ * named set (WCAG 1.3.1).
+ */
+export const A11yViewSwitcherGroup: Story = {
+  name: 'A11y/View Switcher Group',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const group = canvas.getByRole('group', { name: 'Calendar view' })
+    expect(within(group).getByRole('button', { name: 'Month' })).toBeInTheDocument()
+    expect(within(group).getByRole('button', { name: 'Week' })).toBeInTheDocument()
+    expect(within(group).getByRole('button', { name: 'Day' })).toBeInTheDocument()
+  },
+}
+
+/**
+ * The whole component is a `region` landmark whose accessible name is the
+ * current period, and the period is rendered as a real heading element (SEO
+ * structure + screen-reader heading navigation) — WCAG 1.3.1 / 2.4.6.
+ */
+export const A11yRegionAndHeading: Story = {
+  name: 'A11y/Region + Heading',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Region landmark, named by the period heading.
+    expect(
+      canvas.getByRole('region', { name: /June 2026/ })
+    ).toBeInTheDocument()
+
+    // A real level-2 heading carries the period (default headingLevel).
+    expect(
+      canvas.getByRole('heading', { level: 2, name: /June 2026/ })
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * The filter panel's "Clear all filters" control is a real, labelled `<button>`
+ * (keyboard-operable, named) and resets the filters to empty (WCAG 2.1.1,
+ * 4.1.2, 1.1.1). Seeded with one active filter so the control renders.
+ */
+export const A11yClearFilters: Story = {
+  name: 'A11y/Clear Filters Button',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    showFilters: true,
+    filters: { resources: ['eng'] },
+    availableResources: [{ id: 'eng', title: 'Engineering' }],
+    onFiltersChange: fn(),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    const clearButton = canvas.getByRole('button', {
+      name: 'Clear all filters',
+    })
+    expect(clearButton).toBeInTheDocument()
+
+    await userEvent.click(clearButton)
+    await waitFor(() =>
+      expect(args.onFiltersChange).toHaveBeenCalledWith({})
+    )
+  },
+}
