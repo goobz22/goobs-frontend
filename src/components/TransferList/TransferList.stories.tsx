@@ -2,7 +2,9 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { z } from 'zod'
 import TransferList, { TransferListDropdownDataMap } from './index'
+import Form from '../Form'
 import { expect, userEvent, within } from 'storybook/test'
 
 const meta: Meta<typeof TransferList> = {
@@ -360,11 +362,8 @@ export const InteractiveDemo: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // The component renders each side as an h3 title + div-based list inside
-    // one column element (there is NO <ul> in the markup — a former version
-    // of this play anchored on closest('ul'), which was null on both sides
-    // and made the move assertion vacuously fail). Anchor on the column that
-    // owns each heading instead.
+    // Each side is now a real, named <ul> list whose heading owns the column.
+    // Anchor on the column that owns each heading.
     const leftColumn = canvas.getByRole('heading', {
       name: 'Unassigned',
     }).parentElement
@@ -372,12 +371,22 @@ export const InteractiveDemo: Story = {
       name: 'Assigned',
     }).parentElement
 
+    // Each row is a REAL native checkbox (input type=checkbox), not a <button>
+    // wrapping a nested checkbox (the old nested-interactive markup — WCAG
+    // 4.1.2). Prove the item exposes the checkbox role + accessible name…
+    const itemACheckbox = canvas.getByRole('checkbox', { name: 'Item A' })
+    await expect(itemACheckbox).not.toBeChecked()
+    // …and is no longer announced as a button.
+    await expect(canvas.queryByRole('button', { name: 'Item A' })).toBeNull()
+
     // Item A starts in the Unassigned (left) column.
     const itemToMove = await canvas.findByText('Item A')
     await expect(leftColumn).toContainElement(itemToMove)
 
-    // Select it and move it right.
+    // Clicking the label toggles the native checkbox (real htmlFor binding).
     await userEvent.click(itemToMove)
+    await expect(itemACheckbox).toBeChecked()
+
     const moveRightButton = await canvas.findByRole('button', {
       name: 'move selected right',
     })
@@ -388,5 +397,128 @@ export const InteractiveDemo: Story = {
     const movedItem = await canvas.findByText('Item A')
     await expect(rightColumn).toContainElement(movedItem)
     await expect(leftColumn).not.toContainElement(movedItem)
+
+    // The transfer was announced to screen-reader users via the polite status
+    // live region (WCAG 4.1.3 Status Messages).
+    const status = canvas.getByRole('status')
+    await expect(status).toHaveTextContent(/Moved 1 item to Assigned/)
+  },
+}
+
+/**
+ * 5) Accessible structure — real headings + real lists.
+ *
+ * The transfer list is embedded under a real `<h2>` section; its column titles
+ * render as consumer-controlled `<h3>` elements (via `headingLevel`, WCAG 1.3.1
+ * / SEO), and each side is a real `<ul>` named by its heading. Exercises the
+ * markup that lets screen-reader and search-engine users perceive the outline
+ * and list structure — none of which existed when the titles were styled
+ * `<div>`s and the items were `<button>`s in a `<div>`.
+ */
+const AccessibleStructureRenderer = () => {
+  const [left, setLeft] = React.useState(singleLeftItems)
+  const [right, setRight] = React.useState(singleRightItems)
+  return (
+    <div style={{ width: '700px', padding: '24px' }}>
+      <h2 style={{ marginBottom: '12px' }}>Team roster</h2>
+      <TransferList
+        leftItems={left}
+        rightItems={right}
+        headingLevel={3}
+        leftTitle="Available"
+        rightTitle="On team"
+        onChange={(newLeft, newRight) => {
+          setLeft(newLeft)
+          setRight(newRight)
+        }}
+      />
+    </div>
+  )
+}
+
+export const AccessibleStructure: Story = {
+  render: () => <AccessibleStructureRenderer />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Column titles are REAL, level-3 headings (not styled divs), keeping the
+    // outline correct beneath the section's <h2>.
+    await expect(
+      canvas.getByRole('heading', { level: 3, name: 'Available' })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('heading', { level: 3, name: 'On team' })
+    ).toBeInTheDocument()
+
+    // Both sides are real lists, and each is programmatically named by its
+    // column heading (aria-labelledby).
+    const lists = canvas.getAllByRole('list')
+    await expect(lists.length).toBeGreaterThanOrEqual(2)
+    await expect(
+      canvas.getByRole('list', { name: 'Available' })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('list', { name: 'On team' })
+    ).toBeInTheDocument()
+  },
+}
+
+const errorSchema = z.object({
+  assignedSkills: z.array(z.string()).min(1, 'Assign at least one skill.'),
+})
+
+/**
+ * 6) Validation error — visible AND announced.
+ *
+ * Bound into a `<Form>` whose schema requires at least one assigned item. A
+ * blocked submit now renders the engine's error as visible text inside a
+ * `role="alert"` region (before this pass the component read the error but
+ * NEVER rendered it — a silent WCAG 3.3.1 failure), and marks the group
+ * `aria-invalid` + `aria-describedby` so assistive tech ties the message to the
+ * field.
+ */
+export const ValidationError: Story = {
+  render: () => (
+    <div style={{ width: '700px', padding: '24px' }}>
+      <Form
+        schema={errorSchema}
+        initialValues={{ assignedSkills: [] }}
+        onSubmit={() => {}}
+        subject="skills"
+      >
+        <TransferList
+          name="assignedSkills"
+          leftItems={['Design', 'Engineering', 'Sales']}
+          leftTitle="Available"
+          rightTitle="Assigned"
+          onChange={() => {}}
+        />
+        <button type="submit" style={{ marginTop: '16px' }}>
+          Save
+        </button>
+      </Form>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // No visible field error before submit. (The error is queried by its text,
+    // not by role="alert", because the parent <Form> also renders an
+    // always-present role="alert" summary region.)
+    await expect(
+      canvas.queryByText('Assign at least one skill.')
+    ).toBeNull()
+
+    // Submitting with nothing assigned fails the min(1) rule.
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+
+    // The error is now rendered, visible, and in an alert region…
+    const errorText = await canvas.findByText('Assign at least one skill.')
+    await expect(errorText).toHaveAttribute('role', 'alert')
+
+    // …and the composite group is marked invalid + linked to that message.
+    const group = canvas.getByRole('group')
+    await expect(group).toHaveAttribute('aria-invalid', 'true')
+    await expect(group).toHaveAttribute('aria-describedby', errorText.id)
   },
 }
