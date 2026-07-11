@@ -330,9 +330,12 @@ function formatCurrency(
         </style>
       )}
 
-      {/* Value indicator icon for large amounts */}
+      {/* Value indicator icon for large amounts. Decorative: the amount itself
+          (rendered below) conveys the value, so the ▲ glyph is hidden from
+          assistive tech to avoid announcing "up-pointing triangle" (WCAG 1.1.1). */}
       {isLarge && !isNegative && (
         <span
+          aria-hidden="true"
           style={{
             marginRight: '4px',
             fontSize: '0.75em',
