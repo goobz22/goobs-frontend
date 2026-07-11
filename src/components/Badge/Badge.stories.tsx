@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import Badge from './index'
 
 const meta: Meta<typeof Badge> = {
@@ -1000,4 +1000,151 @@ export const MultipleBadges: Story = {
       </Badge>
     </div>
   ),
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * A bare count like "5" is meaningless to a screen reader out of context.
+ * `ariaLabel` gives it meaning, and the badge renders as a `role="status"`
+ * live region with `aria-atomic`, so assistive tech announces the full
+ * "5 unread notifications" rather than a context-free "5". (WCAG 1.3.1, 4.1.2)
+ */
+export const LabeledStatus: Story = {
+  name: 'Accessibility/Labeled Status',
+  args: {
+    content: '5',
+    ariaLabel: '5 unread notifications',
+    children: (
+      <div
+        style={{
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#1976d2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '20px',
+        }}
+      >
+        Bell
+      </div>
+    ),
+    styles: { backgroundColor: '#d32f2f', color: 'white' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The badge chip is exposed as a status region carrying the accessible name.
+    const badge = canvas.getByRole('status')
+    await expect(badge).toHaveAttribute('aria-label', '5 unread notifications')
+    await expect(badge).toHaveAttribute('aria-atomic', 'true')
+    await expect(badge).toHaveTextContent('5')
+  },
+}
+
+/**
+ * A notification count that updates after render. Because the badge is a
+ * `role="status"` / `aria-live="polite"` region, incrementing the count
+ * announces the new value to a screen reader WITHOUT moving focus — the
+ * classic notification-badge behavior. Click the bell to increment.
+ * (WCAG 4.1.3 Status Messages)
+ */
+export const LiveCountUpdate: Story = {
+  name: 'Accessibility/Live Count Update',
+  render: () => {
+    const [count, setCount] = React.useState(1)
+    return (
+      <Badge
+        content={String(count)}
+        ariaLabel={`${count} unread notifications`}
+        ariaLive="polite"
+        styles={{ backgroundColor: '#d32f2f', color: 'white' }}
+      >
+        <button
+          type="button"
+          onClick={() => setCount(current => current + 1)}
+          style={{
+            width: '48px',
+            height: '48px',
+            backgroundColor: '#1976d2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            color: 'white',
+            fontSize: '14px',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          Bell
+        </button>
+      </Badge>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const badge = canvas.getByRole('status')
+    await expect(badge).toHaveAttribute('aria-live', 'polite')
+    await expect(badge).toHaveTextContent('1')
+    // Incrementing updates both the visible count and the live-region label,
+    // so the change is announced with its new meaning.
+    await userEvent.click(canvas.getByRole('button', { name: 'Bell' }))
+    await expect(badge).toHaveTextContent('2')
+    await expect(badge).toHaveAttribute('aria-label', '2 unread notifications')
+  },
+}
+
+/**
+ * A purely decorative dot badge opts out of announcement via `role="none"`:
+ * no status role, no live region, no `aria-label` — assistive tech skips it,
+ * matching the visual-only intent (e.g. an online-status dot whose meaning is
+ * already conveyed elsewhere). (WCAG 1.3.1)
+ */
+export const DecorativeBadge: Story = {
+  name: 'Accessibility/Decorative (role=none)',
+  args: {
+    content: '',
+    role: 'none',
+    styles: {
+      backgroundColor: '#2e7d32',
+      width: '12px',
+      height: '12px',
+      position: 'bottom-right',
+      offset: 2,
+    },
+    children: (
+      <div
+        style={{
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#9c27b0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '18px',
+          fontWeight: 'bold',
+        }}
+      >
+        JD
+      </div>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The decorative badge exposes no status role and is not a live region.
+    await expect(canvas.queryByRole('status')).toBeNull()
+    const badge = canvasElement.querySelector(
+      '[data-component="Badge"] > span[role="none"]'
+    )
+    await expect(badge).not.toBeNull()
+    await expect(badge).not.toHaveAttribute('aria-label')
+    await expect(badge).not.toHaveAttribute('aria-live')
+  },
 }
