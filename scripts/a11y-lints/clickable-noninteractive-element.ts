@@ -43,9 +43,17 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  *     `rowgroup`, `table`, `grid`, `toolbar`, `status`, …). The element is a
  *     container/passthrough, not an activated control: its interactive DESCENDANTS
  *     (or the composite widget's own roving-tabindex keyboard model, e.g. a data
- *     grid's row/cell navigation) carry keyboard operability. An INTERACTIVE
- *     widget role (`button`, `link`, `menuitem`, `option`, `tab`, `treeitem`,
- *     `checkbox`, `gridcell`, …) does NOT exempt — those MUST be keyboard-operable.
+ *     grid's row/cell navigation) carry keyboard operability. A STANDALONE
+ *     interactive widget role (`button`, `link`, `checkbox`, `switch`,
+ *     `gridcell`, `slider`, …) does NOT exempt — those MUST be keyboard-operable.
+ *  4b. Composite-widget-child role — `option`, `menuitem`, `menuitemradio`,
+ *     `menuitemcheckbox`, `tab`, `treeitem`. These are the MANAGED LEAVES of a
+ *     `listbox`/`menu`/`tablist`/`tree`, keyboard-operated through their owning
+ *     widget (roving `tabindex` OR the input's `aria-activedescendant`), so a
+ *     correctly-roled child legitimately has no per-item `tabIndex`/`onKeyDown`
+ *     (e.g. SearchableHistory's `role="option"` rows, driven by the combobox
+ *     input's Arrow/Enter + `aria-activedescendant`). Matches the same escape
+ *     hatch in `missing-data-action-on-actions.ts` — one convention across lints.
  *  5. Self-declared backdrop / overlay / scrim (its own `className` or a `data-*`
  *     attribute names it). A modal dismiss surface whose keyboard path is Escape
  *     (WAI-ARIA modal pattern); click-outside is an optional pointer convenience,
@@ -89,6 +97,15 @@ const NON_WIDGET_ROLES = new Set([
   'list', 'listitem', 'table', 'row', 'rowgroup', 'rowheader', 'columnheader',
   'caption', 'cell', 'grid', 'treegrid', 'tablist', 'tabpanel', 'menu',
   'menubar', 'listbox', 'tree', 'radiogroup',
+])
+
+// Composite-widget-child interactive roles (escape hatch #4b) — managed leaves
+// of a listbox/menu/tablist/tree, keyboard-operated by their owning widget
+// (roving tabindex OR the owner's aria-activedescendant), so an individual child
+// legitimately lacks its own tabIndex/onKeyDown. Standalone widget roles (button,
+// link, checkbox, switch, gridcell, slider, …) are intentionally NOT here.
+const COMPOSITE_CHILD_ROLES = new Set([
+  'option', 'menuitem', 'menuitemradio', 'menuitemcheckbox', 'tab', 'treeitem',
 ])
 
 // Calls that do NOT constitute a real activation (escape hatch #1).
@@ -293,9 +310,11 @@ const lint: A11yLint = {
         if (onClickIsNonActivating(expr, text)) continue
         // Hatch 2 — decorative / hidden.
         if (isAriaHidden(body)) continue
-        // Hatch 3 & 4 — presentation/none or a non-widget (container) role.
+        // Hatch 3, 4 & 4b — presentation/none, a non-widget (container) role, or
+        // a composite-widget-child role managed by its owning widget's keyboard.
         const role = staticRole(body)
-        if (role && NON_WIDGET_ROLES.has(role)) continue
+        if (role && (NON_WIDGET_ROLES.has(role) || COMPOSITE_CHILD_ROLES.has(role)))
+          continue
         // Hatch 5 — self-declared backdrop / overlay / scrim (Escape dismiss).
         if (isBackdrop(body)) continue
 
@@ -319,8 +338,8 @@ const lint: A11yLint = {
       'export const B = () => <span role="button" onClick={activate}>x</span>',
       // multi-line <li> option, activating handler, no keyboard model
       'export const C = () => (\n  <li\n    className={s.item}\n    onClick={() => handleSelect(item)}\n  >\n    text\n  </li>\n)',
-      // tabIndex alone is not enough — still missing key activation
-      'export const D = () => <div role="option" tabIndex={0} onClick={() => pick()}>opt</div>',
+      // tabIndex alone is not enough — focusable but no key activation
+      'export const D = () => <div tabIndex={0} onClick={() => pick()}>opt</div>',
       // onKeyPress does NOT count (deprecated; never prevents Space-scroll)
       'export const E = () => <div role="button" tabIndex={0} onKeyPress={k} onClick={go}>x</div>',
     ],
@@ -344,6 +363,11 @@ const lint: A11yLint = {
       'export const N = () => <div role="presentation" onClick={h}>x</div>',
       // <label> is not in the tag set (native control association)
       'export const O = () => <label onClick={e => e.stopPropagation()}>x</label>',
+      // composite-widget-child role="option" — keyboard-managed by the owning
+      // combobox/listbox (aria-activedescendant), no per-option tabIndex needed
+      'export const P = () => <div role="option" aria-selected={sel} onClick={() => pick(item)}>opt</div>',
+      // role="menuitem" — managed leaf of a menu
+      'export const Q = () => <li role="menuitem" onClick={run}>Run</li>',
     ],
   },
 }
