@@ -428,3 +428,31 @@
     opacity: 0;
   }
 }
+
+/* --------------------------------------------------------------------------
+   FORCED COLORS / WINDOWS HIGH CONTRAST (WCAG 2.4.7, 2.4.11, 1.4.1, 1.4.11)
+   In forced-colors mode the UA drops every box-shadow and repaints all
+   backgrounds with a small system palette. The switch's ONLY focus cue is the
+   `--switch-track-focus-shadow` box-shadow, so keyboard focus vanishes here;
+   and the track/thumb backgrounds both collapse to the same system surface,
+   erasing the on/off distinction. Repair both with the system-colour-safe
+   primitives that survive forced-colors — an outline (transparent outlines are
+   promoted to the system focus colour by the UA) and a system-colour border.
+   This is the outline-based focus treatment the rest of the library already
+   uses for exactly this reason (SacredGlyphFrame / SignatureField). Left
+   UNGATED by [data-focus-effects] on purpose: a visible focus indicator is
+   non-negotiable in high-contrast mode even when the decorative glow is
+   suppressed via focusEffects=false.
+   -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .track:has(.input:focus-visible) {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  /* Keep the moving thumb — the primary NON-colour on/off cue (position) —
+     perceivable once its fill is forced to the system surface colour. */
+  .thumb {
+    border: 1px solid canvastext;
+  }
+}

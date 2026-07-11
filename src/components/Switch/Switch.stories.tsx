@@ -1863,3 +1863,129 @@ export const AccessibilityReducedMotion: Story = {
     expect(suppressesTransition).toBe(true)
   },
 }
+
+/**
+ * 11) Accessibility — forced colors / Windows High Contrast (WCAG 2.4.7, 1.4.1)
+ *
+ * Regression gate for the forced-colors fix. In forced-colors / Windows High
+ * Contrast Mode the UA drops every `box-shadow` and repaints backgrounds with a
+ * small system palette. Switch's ONLY focus cue was the
+ * `--switch-track-focus-shadow` box-shadow (so keyboard focus disappeared), and
+ * the track/thumb backgrounds both collapse to the same system surface (so the
+ * on/off distinction vanished). The fix adds a `@media (forced-colors: active)`
+ * block that restores a system-colour-safe focus outline and a system-colour
+ * thumb border. A play function cannot flip the OS forced-colors preference, so
+ * this asserts — via the CSSOM, scoped to THIS component's hashed CSS-module
+ * classes — that Switch's own forced-colors block still exists and still
+ * repairs BOTH the focus indicator and the thumb boundary. If a future edit
+ * drops or weakens the block, this re-fails.
+ */
+export const AccessibilityForcedColors: Story = {
+  name: 'Accessibility - Forced Colors (WCAG 2.4.7)',
+  render: args => {
+    const Component = () => {
+      const [on, setOn] = useState(true)
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            padding: '24px',
+            // Sacred surfaces read correctly only on a dark backdrop.
+            background: '#0e0e0e',
+            borderRadius: '12px',
+          }}
+        >
+          <Switch
+            {...args}
+            aria-label="Sacred forced-colors toggle"
+            checked={on}
+            onChange={e => setOn(e.target.checked)}
+            styles={{ theme: 'sacred', outline: true }}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Rendering the switch loads the Switch stylesheet under test.
+    const control = canvas.getByRole('switch', {
+      name: 'Sacred forced-colors toggle',
+    })
+    expect(control).toBeChecked()
+
+    // Collect every hashed CSS-module class token used in this switch's track
+    // subtree (track / input / shimmer / thumb). These are the tokens we scope
+    // the CSSOM search by, so another component's forced-colors block can never
+    // false-green this gate.
+    const track = control.parentElement as HTMLElement
+    const scopeTokens = new Set<string>()
+    for (const element of [track, ...Array.from(track.querySelectorAll('*'))]) {
+      for (const token of element.className.trim().split(/\s+/).filter(Boolean)) {
+        scopeTokens.add(token)
+      }
+    }
+    expect(scopeTokens.size).toBeGreaterThan(0)
+
+    // Collect every style rule inside a `forced-colors: active` media block from
+    // the same-origin injected stylesheets. Cross-origin sheets throw on
+    // `.cssRules` and are skipped.
+    const forcedColorsRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (/forced-colors/i.test(mediaText) && /active/i.test(mediaText)) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) forcedColorsRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    // Scope to Switch's own forced-colors rules via its hashed class tokens.
+    const switchRules = forcedColorsRules.filter(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        Array.from(scopeTokens).some(token =>
+          rule.selectorText.includes(token)
+        )
+    )
+    expect(switchRules.length).toBeGreaterThan(0)
+
+    // Keyboard focus must stay visible (an outline survives forced-colors where
+    // box-shadow is dropped)…
+    const restoresFocusOutline = switchRules.some(
+      rule =>
+        /focus-visible/i.test(rule.selectorText) &&
+        (rule.style.getPropertyValue('outline').trim() !== '' ||
+          rule.style.getPropertyValue('outline-style').trim() !== '')
+    )
+    expect(restoresFocusOutline).toBe(true)
+
+    // …and the on/off cue (the thumb) must keep a real boundary once its fill is
+    // forced to the system surface colour.
+    const restoresThumbBoundary = switchRules.some(
+      rule =>
+        rule.style.getPropertyValue('border').trim() !== '' ||
+        rule.style.getPropertyValue('border-color').trim() !== '' ||
+        rule.style.getPropertyValue('border-width').trim() !== ''
+    )
+    expect(restoresThumbBoundary).toBe(true)
+  },
+}
