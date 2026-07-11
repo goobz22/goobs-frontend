@@ -207,6 +207,12 @@ const lint: A11yLint = {
       // MULTILINE content region whose decorative child (not the region) is
       // aria-hidden — the SaveButton/FileDropzone layout must not be flagged.
       `<div\n  className={s.srOnly}\n  role="status"\n  aria-live="polite"\n>\n  <Spinner aria-hidden="true" />\n  {label}\n</div>`,
+      // A CONTENT-BEARING live region that ALSO carries aria-labelledby (the real
+      // Card alertdialog / TransferList error layout). Shape 1 requires an EMPTY
+      // body AND a label together — a labelled region whose text rides in a child
+      // element announces fine and MUST NOT be flagged. Pins that the empty-body
+      // conjunction is load-bearing (guards against dropping it from the check).
+      `<div\n  role="alert"\n  aria-labelledby={messageId}\n  aria-live="assertive"\n>\n  <p id={messageId}>{message}</p>\n</div>`,
     ],
   },
 }
