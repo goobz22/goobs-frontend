@@ -84,6 +84,7 @@
 import React, {
   forwardRef,
   isValidElement,
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -843,16 +844,32 @@ const CardStatCell = forwardRef<HTMLDivElement, CardStatCellProps>(
 export interface CardProgressProps {
   /** Progress fraction, 0-1. */
   value: number
-  /** Optional label rendered above the bar. */
+  /**
+   * Optional label rendered above the bar. When set it ALSO becomes the
+   * progressbar's accessible name (via `aria-labelledby`) so assistive tech
+   * announces WHAT is progressing, not just a bare percentage.
+   */
   label?: ReactNode
+  /**
+   * Accessible name for the progressbar when there is no visible `label`.
+   * Ignored when `label` is set (the visible label supplies the name). Without
+   * either, the progressbar is announced anonymously ("62%, progress bar").
+   */
+  ariaLabel?: string
   /** Optional override for the fill color. Defaults to theme accent. */
   color?: string
-  /** Override displayed percentage (default `${Math.round(value * 100)}%`). */
+  /**
+   * Override displayed percentage (default `${Math.round(value * 100)}%`).
+   * When set it is ALSO exposed as `aria-valuetext`, so assistive tech
+   * announces the custom text (e.g. "3 of 10 steps") instead of the raw
+   * percentage derived from `value`.
+   */
   displayValue?: string
 }
 
 const CardProgress = forwardRef<HTMLDivElement, CardProgressProps>(
-  function CardProgress({ value, label, color, displayValue }, ref) {
+  function CardProgress({ value, label, ariaLabel, color, displayValue }, ref) {
+    const labelId = useId()
     const pct = Math.max(0, Math.min(1, value))
     const display = displayValue ?? `${Math.round(pct * 100)}%`
     const fillStyle: CSSProperties = {
@@ -861,11 +878,19 @@ const CardProgress = forwardRef<HTMLDivElement, CardProgressProps>(
         ['--card-progress-color' as string]: color,
       }),
     }
+    // Accessible name: prefer the visible label (referenced by id), else fall
+    // back to the ariaLabel prop. Neither → an anonymous progressbar.
+    const nameProps: AnyProps =
+      label !== undefined
+        ? { 'aria-labelledby': labelId }
+        : ariaLabel !== undefined
+          ? { 'aria-label': ariaLabel }
+          : {}
     return (
       <div ref={ref} className={cssStyles.progress} data-card-progress="true">
         {(label !== undefined || displayValue !== undefined) && (
           <div className={cssStyles.progressMeta}>
-            {label !== undefined && <span>{label}</span>}
+            {label !== undefined && <span id={labelId}>{label}</span>}
             <span>{display}</span>
           </div>
         )}
@@ -875,6 +900,8 @@ const CardProgress = forwardRef<HTMLDivElement, CardProgressProps>(
           aria-valuenow={Math.round(pct * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
+          {...(displayValue !== undefined && { 'aria-valuetext': display })}
+          {...nameProps}
         >
           <div className={cssStyles.progressFill} style={fillStyle} />
         </div>
@@ -1173,15 +1200,64 @@ const CardConfirmDelete = forwardRef<HTMLDivElement, CardConfirmDeleteProps>(
     },
     ref
   ) {
+    const messageId = useId()
+    const paneRef = useRef<HTMLDivElement | null>(null)
+
+    // Merge the forwarded ref with the internal paneRef so we can move focus
+    // into the alertdialog while still honoring a caller-supplied ref.
+    const setPaneRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        paneRef.current = node
+        if (typeof ref === 'function') ref(node)
+        else if (ref) ref.current = node
+      },
+      [ref]
+    )
+
+    // WAI-ARIA alertdialog focus management: on mount move focus into the pane
+    // so assistive tech announces the confirmation and keyboard users land on
+    // it; on close restore focus to whatever was focused before (the Delete
+    // trigger) — unless that element was removed (a confirmed delete took its
+    // card with it), in which case we leave focus to the browser.
+    useEffect(() => {
+      const previouslyFocused = document.activeElement as HTMLElement | null
+      paneRef.current?.focus()
+      return () => {
+        if (
+          previouslyFocused &&
+          previouslyFocused.isConnected &&
+          typeof previouslyFocused.focus === 'function'
+        ) {
+          previouslyFocused.focus()
+        }
+      }
+    }, [])
+
+    const handleKeyDown = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ): void => {
+      // Escape dismisses the confirmation (APG alertdialog keyboard contract).
+      if (event.key === 'Escape') {
+        event.stopPropagation()
+        onCancel()
+      }
+    }
+
     return (
       <div
-        ref={ref}
+        ref={setPaneRef}
         className={cssStyles.confirmDelete}
         data-card-confirm="delete"
         role="alertdialog"
+        aria-modal="false"
+        aria-labelledby={messageId}
         aria-live="assertive"
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
       >
-        <p className={cssStyles.confirmDeleteMessage}>{message}</p>
+        <p id={messageId} className={cssStyles.confirmDeleteMessage}>
+          {message}
+        </p>
         <div className={cssStyles.confirmDeleteActions}>
           {renderActions ? (
             renderActions({ onConfirm, onCancel, confirmLabel, cancelLabel })
