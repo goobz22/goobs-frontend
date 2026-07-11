@@ -38,7 +38,7 @@ the accessibility tree and the crawled document outline?*
 - **Fix (additive, backward-compatible):** added a polymorphic
   `component?: React.ElementType` prop (`index.tsx`, MUI-Typography convention and
   the checklist's first-named option). The rendered element is now
-  `const Element = component ?? 'span'` (`index.tsx:518`). A caller passes
+  `const Element = component ?? 'span'`. A caller passes
   `component="h2"` for a real heading, `component="p"` for a paragraph,
   `component="label"` for a form label, etc. The **default stays `'span'`**, so the
   phrasing-content/hydration contract and every existing caller's markup are
@@ -46,6 +46,43 @@ the accessibility tree and the crawled document outline?*
   invalid-nesting hydration bug fixed in CF-185). All test-selector attributes
   (`data-component`, `data-theme`), `className`, and `style` ride the resolved
   element verbatim.
+
+### 2. Polymorphic element dropped `id`/`htmlFor`/attribute pass-through — MODERATE
+
+- **WCAG:** 1.3.1 Info and Relationships (A), 3.3.2 Labels or Instructions (A),
+  4.1.2 Name, Role, Value (A).
+- **Pattern class:** `polymorphic-no-attr-passthrough`
+- **Location:** `src/components/Typography/index.tsx` — the render (previously only
+  `className`/`data-component`/`data-theme`/`style` were forwarded to `<Element>`;
+  no `...rest`).
+- **Status:** FIXED (adversarial-review follow-up to Issue 1).
+- **Detail:** Issue 1 delivered a real heading element for outline/rotor navigation,
+  but the render forwarded ONLY a fixed set of attributes — there was no
+  `...rest`/`id` pass-through. Two consequences the semantic fix left unusable:
+  (1) `component="h2"` could not be given an `id`, so a Typography heading could NOT
+  serve as an `aria-labelledby`/`aria-describedby` target — the standard pattern
+  where a heading supplies the accessible NAME of a dialog/landmark/region;
+  (2) the prop JSDoc advertised `component="label"`, but the resulting `<label>`
+  could not be programmatically associated with a control (`htmlFor` was neither a
+  typed prop nor forwarded), making that advertised affordance non-functional.
+- **Fix (additive, backward-compatible):** `TypographyProps` now
+  `extends React.HTMLAttributes<HTMLElement>` (standard `id`/`role`/`tabIndex`/
+  `title`/`aria-*`/event-handler/`className`/`style` surface) plus an explicit
+  `htmlFor?: string` (not part of `HTMLAttributes`, needed for the `component="label"`
+  case → renders as the `for` attribute). The render destructures
+  `className`/`style` and spreads the remaining `...rest` onto the element. Ordering
+  is deliberate: `{...rest}` is spread FIRST, then `data-component`/`data-theme`/the
+  resolved `className`/`style` are written AFTER, so pass-through props can NEVER
+  clobber the machine-test selector contract. A caller `className` is MERGED into
+  the resolved class list (via the existing `[…].filter(Boolean).join(' ')` helper);
+  a caller `style` is merged UNDER the resolved `dynamicStyle` (resolved CSS-vars /
+  margins keep precedence). Fully additive — no existing prop renamed/removed/retyped;
+  existing callers (which passed none of these) are unaffected.
+- **Markup change:** none to the rendered element choice — same `const Element =
+  component ?? 'span'`. The only DOM difference is that consumer-supplied standard
+  attributes (`id`, `htmlFor`→`for`, `aria-*`, `role`, `tabIndex`, event handlers,
+  merged `class`/`style`) now appear on the element when passed; nothing is emitted
+  when they are absent.
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
@@ -97,17 +134,23 @@ and no audio-only status.
 - Added `component?: React.ElementType` prop (default `'span'`), fully JSDoc'd with
   the a11y/SEO rationale — `src/components/Typography/index.tsx`.
 - Render now uses the polymorphic `const Element = component ?? 'span'`, preserving
-  `data-component`/`data-theme`/`className`/`style` on the resolved element —
-  `src/components/Typography/index.tsx:518`.
+  `data-component`/`data-theme`/`className`/`style` on the resolved element.
 - Updated the component-level and prop-level JSDoc to document the semantic-element
   polymorphism.
+- **(Review follow-up, Issue 2)** `TypographyProps extends React.HTMLAttributes<HTMLElement>`
+  + explicit `htmlFor?: string`; render destructures `className`/`style` and spreads
+  `...rest` onto the element so `id`/`htmlFor`/`aria-*`/etc. reach the DOM. `{...rest}`
+  is spread BEFORE the contract attributes; caller `className`/`style` are MERGED
+  (resolved classes/vars keep precedence). Additive — no existing prop changed.
 - Verified: `bun lint:file` clean on both edited files. Polymorphic-`ElementType`
-  render pattern matches established, building code in `FieldGrid/index.tsx:65`.
+  render pattern matches established, building code in `FieldGrid/index.tsx:65`; the
+  `extends React.HTMLAttributes<HTMLElement>` + `...rest` spread pattern matches
+  `Panel/index.tsx:97,126,161`.
 
 ## Stories updated
 
-Three new stories in `src/components/Typography/Typography.stories.tsx` (the repo's
-only regression tests), each with a `play` assertion:
+Six stories in `src/components/Typography/Typography.stories.tsx` (the repo's only
+regression tests) cover the a11y behaviors, each with a `play` assertion:
 
 - **`Semantics/Real Heading Element`** (`SemanticHeadingElement`) — `component="h2"`
   asserts `getByRole('heading', { level: 2 })`, `tagName === 'H2'`, and that the
@@ -119,8 +162,23 @@ only regression tests), each with a `play` assertion:
   exposes NO heading role (`queryByRole('heading')` is null), guarding against a
   regression that would auto-promote the element and reintroduce the invalid-nesting
   hydration bug.
+- **(New, Issue 2) `Semantics/Heading Names a Region (aria-labelledby)`**
+  (`HeadingAsLabelledbyTarget`) — `component="h2" id="region-title"` inside
+  `<section aria-labelledby="region-title">`; asserts `getByRole('region', { name:
+  'Account Settings' })` resolves (the id pass-through makes the heading the region's
+  accessible name) and the `<h2>` carries the `id` + `data-component`.
+- **(New, Issue 2) `Semantics/Label Associates With Control (htmlFor)`**
+  (`LabelAssociation`) — `component="label" htmlFor="email-input"` + an
+  `<input id="email-input">`; asserts `getByLabelText('Email address')` returns the
+  input (association works), the label is a real `<label>` with `for="email-input"`,
+  and `data-component` preserved.
+- **(New, Issue 2) `Semantics/Attribute Pass-Through (contract preserved)`**
+  (`AttributePassThroughPreservesContract`) — `component="h3"` with `id`,
+  `className="caller-added-class"`, and `aria-describedby`; asserts the attributes
+  ride through, the caller class is MERGED (`>1` class on the element), and
+  `data-component`/`data-theme` are NOT clobbered by the pass-through spread.
 
 ## Deferred
 
-None. The one defect was fixable in-directory (additive prop). No shared-file or
-peer-owned change was required.
+None. Both defects were fixable in-directory (additive props + render change). No
+shared-file or peer-owned change was required.
