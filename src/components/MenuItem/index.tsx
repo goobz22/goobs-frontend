@@ -95,15 +95,22 @@ const MenuItem: React.FC<MenuItemProps> = ({
       data-divider={divider ? 'true' : undefined}
       data-selected={selected ? 'true' : undefined}
       data-disabled={disabled ? 'true' : undefined}
-      // Programmatic exposure of the `selected` visual highlight for assistive
-      // tech (WCAG 1.4.1 / 4.1.2): `data-selected` is a test-only attribute a
-      // screen reader never reads, and the tinted background/accent text is
-      // color-alone. `aria-selected` is valid on `<option>` (implicit
-      // role="option") and is additive — we do NOT set the native `selected`
-      // content attribute (React controls selection via the `<select value>`),
-      // so there is no controlled-select conflict. Placed before `{...props}`
-      // so a caller-supplied `aria-selected` still wins.
-      aria-selected={selected ? 'true' : undefined}
+      // NO author `aria-selected` here — deliberate (WCAG 4.1.2 / 1.4.1, "first
+      // rule of ARIA"). This `<option>` is always rendered inside the parent
+      // Select's native `<select value>` (Select/index.tsx). The browser maps
+      // that native `value` selection to the accessibility tree and announces
+      // the truly-selected option to assistive tech WITHOUT any author ARIA —
+      // native selection is the single source of the programmatic selected
+      // state, so re-declaring it would be redundant. Crucially, the `selected`
+      // PROP is only a VISUAL highlight (drives `data-selected` + the tinted
+      // CSS) and is NOT guaranteed to equal the select's real `value`: MenuItem
+      // cannot see the parent value, so it cannot know whether `selected` is
+      // actually the selected option. Emitting `aria-selected="true"` off the
+      // decoupled prop would therefore FALSELY announce a second "selected"
+      // option whenever `selected` diverges from `value` (double/conflicting
+      // announcement) — a defect worse than the color-only gap it aimed to fix.
+      // A caller who owns the value↔selected alignment can still pass their own
+      // `aria-selected` via {...props}.
       style={dynamicStyle}
       disabled={disabled}
       onClick={handleClick}

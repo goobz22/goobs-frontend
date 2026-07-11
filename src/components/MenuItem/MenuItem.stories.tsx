@@ -142,14 +142,20 @@ export const Selected: Story = {
 }
 
 // --------------------------------------------------------------------------
-// SELECTED STATE — PROGRAMMATICALLY ANNOUNCED (a11y regression)
+// SELECTED STATE — PROGRAMMATICALLY EXPOSED VIA NATIVE SELECTION (a11y regression)
 // --------------------------------------------------------------------------
 
 /**
- * The `selected` prop must not be conveyed by color alone (WCAG 1.4.1). It is
- * mirrored to `aria-selected="true"` on the native `<option>` so assistive tech
- * announces the highlighted item, alongside the `data-selected` test hook. This
- * story pins that contract with a play assertion.
+ * The selected state must not be conveyed by color alone (WCAG 1.4.1), and it
+ * isn't: the parent Select renders a native `<select value>`, so the browser
+ * maps the value-selected option into the accessibility tree and announces it
+ * to assistive tech natively — no author `aria-selected` needed (or wanted) on
+ * the `<option>`. When the visual `selected` prop is aligned with the select's
+ * `value` (the intended use), this story pins that (a) the native selection is
+ * the value-selected option, (b) the `data-selected` test hook is preserved,
+ * and (c) MenuItem does NOT emit a decoupled author `aria-selected` (which the
+ * browser would ignore when aligned and which becomes a false announcement when
+ * NOT aligned — see SelectedDecoupledFromValue below).
  */
 export const SelectedStateAnnounced: Story = {
   render: () => (
@@ -167,12 +173,62 @@ export const SelectedStateAnnounced: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    // Programmatic exposure is the NATIVE selection: the <select> reports the
+    // value-selected option, which the browser announces to screen readers.
+    await expect(canvas.getByRole('combobox')).toHaveValue('typescript')
     const selectedOption = canvas.getByText('TypeScript (selected)')
-    // Programmatic (screen-reader) exposure, not color alone.
-    await expect(selectedOption).toHaveAttribute('aria-selected', 'true')
     // Machine-test selector contract preserved.
     await expect(selectedOption).toHaveAttribute('data-selected', 'true')
-    // Non-selected items must not falsely announce as selected.
+    // No decoupled author ARIA on the native option — native selection is the
+    // single source of truth (regression guard for the review fix).
+    await expect(selectedOption).not.toHaveAttribute('aria-selected')
+    await expect(canvas.getByText('JavaScript')).not.toHaveAttribute(
+      'aria-selected'
+    )
+  },
+}
+
+// --------------------------------------------------------------------------
+// SELECTED PROP DECOUPLED FROM VALUE — the hazard the fix must not reintroduce
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the specific hazard flagged in review: the `selected`
+ * VISUAL prop is decoupled from the select's actual `value`. Here the native
+ * selection is "javascript" (via `initialValue`) while the `selected` prop is
+ * placed on the "typescript" item. MenuItem must NOT mirror the decoupled prop
+ * into `aria-selected="true"` — doing so would announce a second, FALSE
+ * "selected" option (typescript) conflicting with the real native selection
+ * (javascript). The play pins that: the native selection is javascript, the
+ * decoupled item still exposes only the `data-selected` visual hook, and no
+ * `aria-selected` is emitted on any option.
+ */
+export const SelectedDecoupledFromValue: Story = {
+  render: () => (
+    <SelectWithState theme="light" initialValue="javascript">
+      <MenuItem value="javascript" styles={{ theme: 'light' }}>
+        JavaScript
+      </MenuItem>
+      <MenuItem value="typescript" selected styles={{ theme: 'light' }}>
+        TypeScript (visually highlighted, NOT the value)
+      </MenuItem>
+      <MenuItem value="react" styles={{ theme: 'light' }}>
+        React
+      </MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The real, natively-announced selection is the value-selected option.
+    await expect(canvas.getByRole('combobox')).toHaveValue('javascript')
+    const highlighted = canvas.getByText(
+      'TypeScript (visually highlighted, NOT the value)'
+    )
+    // Visual hook is present...
+    await expect(highlighted).toHaveAttribute('data-selected', 'true')
+    // ...but it must NOT falsely announce as selected to assistive tech.
+    await expect(highlighted).not.toHaveAttribute('aria-selected')
+    // And the true native selection carries no conflicting author ARIA either.
     await expect(canvas.getByText('JavaScript')).not.toHaveAttribute(
       'aria-selected'
     )
