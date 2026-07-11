@@ -3,15 +3,23 @@
  * It supports light, dark, and sacred themes with comprehensive customization options.
  */
 'use client'
-import React, { FC } from 'react'
+import React, { FC, useId } from 'react'
 import InfoIcon from '../Icons/Info'
 import CheckCircleIcon from '../Icons/CheckCircle'
 import StyledTooltip from '../Tooltip'
 import CustomButton from '../Button'
 import { emitDiag } from '../../utils/diag'
+import cssStyles from './PricingTable.module.css'
 // Remove Switch import
 // import Switch from '../Switch';
 // Remove clsx import
+
+/**
+ * Compose class names without a clsx/classnames dependency (library
+ * convention). Falsy entries are dropped so conditional classes read cleanly.
+ */
+const cx = (...classes: Array<string | false | null | undefined>): string =>
+  classes.filter(Boolean).join(' ')
 
 // --------------------------------------------------------------------------
 // PROPS INTERFACE (keep existing, perhaps adjust if needed)
@@ -33,6 +41,17 @@ export interface PricingProps {
   /** Disabled state */
   disabled?: boolean
   highlightedPackageIndex?: number
+  /**
+   * Heading level (1–6) for the table title, so the title slots into the
+   * surrounding document outline instead of a fixed level (WCAG 1.3.1 / 2.4.6,
+   * and crawlable heading semantics under SSR). The visual size is unchanged —
+   * it comes from the theme's header style, not the tag. Defaults to `2`
+   * (a page-level pricing section is typically an `<h2>`); a component nested
+   * deeper should pass the level that matches its context. Also becomes the
+   * table's programmatic accessible name via `aria-labelledby`.
+   * (Was previously a hardcoded `<h5>`.)
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 }
 
 export interface SubFeature {
@@ -155,7 +174,8 @@ const getThemeStyles = (theme: string = 'light', disabled: boolean = false) => {
         glyph: {
           ...common.glyph,
           color: 'rgba(255,215,0,0.2)',
-          animation: 'spin 20s linear infinite',
+          // Rotation now lives in PricingTable.module.css (.sacredGlyph) so it
+          // can be disabled under prefers-reduced-motion (WCAG 2.3.3).
           position: 'absolute' as const,
         },
         header: {
@@ -199,7 +219,8 @@ const getThemeStyles = (theme: string = 'light', disabled: boolean = false) => {
         sacredFooterGlyph: {
           color: 'rgba(255,215,0,0.3)',
           fontSize: '0.75rem',
-          animation: 'float 3s ease-in-out infinite',
+          // Drift now lives in PricingTable.module.css (.sacredFooterGlyph) so
+          // it can be disabled under prefers-reduced-motion (WCAG 2.3.3).
         },
         toggleBackground: 'rgba(0,0,0,0.8)',
       }
