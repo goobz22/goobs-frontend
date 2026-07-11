@@ -329,6 +329,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             }}
             className={cssStyles.toggleButton}
             type="button"
+            data-action={isOpen ? 'close' : 'open'}
             disabled={styles?.disabled}
           >
             <ArrowDropDownIcon
@@ -375,6 +376,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     setActiveTab('overview')
                   }}
                   type="button"
+                  data-action="select-tab"
                 >
                   Overview
                 </button>
@@ -390,6 +392,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     setActiveTab('history')
                   }}
                   type="button"
+                  data-action="select-tab"
                 >
                   <HistoryIcon styles={{ theme, size: 14 }} />
                   History
@@ -434,6 +437,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                             onClick={clearHistory}
                             className={cssStyles.clearButton}
                             type="button"
+                            data-action="clear"
                           >
                             Clear History
                           </button>

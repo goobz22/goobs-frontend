@@ -241,6 +241,7 @@ function Card({
           type="button"
           aria-expanded={isExpanded}
           className={cssStyles.expandBtn}
+          data-action="toggle"
           onClick={e => {
             e.stopPropagation()
             setIsExpanded(!isExpanded)

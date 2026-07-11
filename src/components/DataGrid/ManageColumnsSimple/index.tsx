@@ -158,6 +158,7 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
           ref={doneBtnRef}
           type="button"
           onClick={onClose}
+          data-action="close"
           className={cssStyles.manageColumnsDoneBtn}
         >
           Done

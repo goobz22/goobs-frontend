@@ -240,6 +240,7 @@ function CardField({
           <button
             type="button"
             aria-label={`Save ${column.headerName}`}
+            data-action="save"
             className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnSave}`}
             onClick={e => {
               e.stopPropagation()
@@ -251,6 +252,7 @@ function CardField({
           <button
             type="button"
             aria-label={`Cancel editing ${column.headerName}`}
+            data-action="cancel"
             className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnCancel}`}
             onClick={e => {
               e.stopPropagation()

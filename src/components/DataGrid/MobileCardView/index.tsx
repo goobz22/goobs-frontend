@@ -319,7 +319,9 @@ function MobileCardView({
       {selectionMode && (
         <div className={cssStyles.selectionHeader}>
           <span>{selectedRows.length} selected</span>
-          <button onClick={handleExitSelectionMode}>Cancel</button>
+          <button onClick={handleExitSelectionMode} data-action="cancel">
+            Cancel
+          </button>
         </div>
       )}
 
@@ -435,6 +437,7 @@ function MobileCardView({
         <div className={cssStyles.pagination}>
           <button
             className={cssStyles.paginationBtn}
+            data-action="prev"
             onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
           >
@@ -453,6 +456,7 @@ function MobileCardView({
 
           <button
             className={cssStyles.paginationBtn}
+            data-action="next"
             onClick={() =>
               setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))
             }
@@ -467,23 +471,36 @@ function MobileCardView({
       {showActions && selectedRows.length > 0 && (
         <div className={cssStyles.actionBar}>
           {onShow && (
-            <button className={cssStyles.actionBtn} onClick={handleShow}>
+            <button
+              className={cssStyles.actionBtn}
+              data-action="show"
+              onClick={handleShow}
+            >
               Show
             </button>
           )}
           {onManage && (!permissions || permissions.access === 'write') && (
-            <button className={cssStyles.actionBtn} onClick={handleManage}>
+            <button
+              className={cssStyles.actionBtn}
+              data-action="manage"
+              onClick={handleManage}
+            >
               Manage
             </button>
           )}
           {onDuplicate && (!permissions || permissions.access === 'write') && (
-            <button className={cssStyles.actionBtn} onClick={handleDuplicate}>
+            <button
+              className={cssStyles.actionBtn}
+              data-action="duplicate"
+              onClick={handleDuplicate}
+            >
               Duplicate
             </button>
           )}
           {onDelete && (!permissions || permissions.access === 'write') && (
             <button
               className={`${cssStyles.actionBtn} ${cssStyles.actionBtnDelete}`}
+              data-action="delete"
               onClick={handleDelete}
             >
               Delete
