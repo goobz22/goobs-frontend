@@ -1,6 +1,44 @@
 # Panel — a11y audit (2026-07-11)
 
-**Status:** FIXED (initial pass + adversarial-review follow-up, 2026-07-11)
+**Status:** FIXED (initial pass + adversarial-review follow-up + description-association pass, 2026-07-11)
+
+## 2026-07-11 follow-up pass — subtitle is the panel's description (finding #8)
+
+A re-audit against the APG dialog "description" contract surfaced one remaining gap on top of
+the seven already fixed below.
+
+| # | Severity | WCAG | Location (pre-fix) | Pattern class | Status |
+|---|----------|------|--------------------|---------------|--------|
+| 8 | Minor | 4.1.2 Name, Role, Value (A) / APG Dialog description | `index.tsx` root (`aria-describedby` absent) + subtitle span (no `id`) | `missing-accessible-description` | FIXED |
+
+### 8 — Header `subtitle` was not associated as the panel's description (Minor, 4.1.2)
+`Panel.Header`'s `subtitle` rendered as a visible `<span data-panel-subtitle>` with no `id`,
+and the root `<section>`/`<dialog>` exposed only `aria-labelledby` (the title). For the
+`fullscreen` **dialog** variant especially, a screen reader announced the title on open but
+never the subtitle — the line that explains the takeover's purpose (e.g. "Edit the wholesale
+buyer's details"). The library's own `Dialog` wires exactly this via `ariaDescribedBy`
+(`Dialog/index.tsx:415`); Panel's dialog/region had no equivalent. Pattern class:
+`missing-accessible-description`. **Fixed** (root cause, additive) by:
+- adding `subtitleId` (a second `useId()`) to `PanelContext`;
+- `PanelInner` now captures the header child element and derives
+  `hasSubtitle = headerChild?.props.subtitle !== undefined`, so `aria-describedby` is gated on
+  the subtitle genuinely rendering (never a dangling IDREF — mirrors the fix-#2 labelledby guard);
+- emitting `aria-describedby={hasSubtitle ? subtitleId : undefined}` on the root, placed
+  **before** `{...restProps}` so a consumer can override it;
+- `Panel.Header` tagging its subtitle span with `id={subtitleId}`.
+No prop/export renamed, removed, or retyped; the `data-panel-subtitle` selector is preserved
+(the span merely gained an `id`). Commit `b0ac3787`.
+
+**Stories added for finding #8** (`Panel.stories.tsx`, commit `b0ac3787`):
+- `A11y/Subtitle is the description (aria-describedby)` — asserts the root's `aria-describedby`
+  resolves to the real `data-panel-subtitle` element with the expected text.
+- `A11y/No subtitle → no aria-describedby` — asserts a subtitle-less header emits no dangling
+  `aria-describedby`.
+- Extended `A11y/Fullscreen Modal (focus trap + Escape)` — now also asserts the dialog exposes
+  both `aria-labelledby` (name) and an `aria-describedby` resolving to the subtitle.
+
+---
+
 
 **APG pattern:** Two patterns apply depending on variant. For `sacred`/`standard`, `Panel`
 is a **landmark [region](https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/)** —
