@@ -119,23 +119,57 @@ CSS module + `data-*` attribute selectors.
 
 ## Stories updated
 
-Added to `Toolbar.stories.tsx` (Storybook stories are this repo's regression tests):
+Added to `Toolbar.stories.tsx` (Storybook stories are this repo's regression tests).
+Both new stories carry a `storybook/test` **`play` function** so the a11y behavior is
+under automated regression protection — Chromatic visual diffs cannot see
+`role`/`aria-*`/`tabindex`/keyboard focus movement, so a screenshot alone would let
+these fixes silently regress. The play functions mirror the in-repo precedent
+`ComplexTextEditor.stories.tsx` `ToolbarRovingTabIndex` (line ~987).
 
 - **`AccessibleName`** — renders two light-theme toolbars, one with
-  `ariaLabel="Records toolbar"` and one with the default name, pinning the
-  `role="toolbar"` + `aria-orientation` + `aria-label` output and the
-  multiple-toolbar disambiguation use-case.
+  `ariaLabel="Records toolbar"` and one with the default name. **`play`** asserts
+  each root exposes `role="toolbar"` + `aria-orientation="horizontal"`, the named
+  one has `aria-label="Records toolbar"` and the default one `aria-label="Toolbar"`,
+  and the two are distinct elements (the multiple-toolbar disambiguation use-case).
 - **`KeyboardRovingTabIndex`** — sacred-theme toolbar with buttons + filter
-  Dropdown + Searchbar; JSDoc pins the roving-tabindex Arrow/Home/End interaction,
-  the "don't hijack keys from the searchbar / open combobox" guards, and the
-  `aria-hidden` decorative glyph.
+  Dropdown + Searchbar. **`play`** asserts: the labelled toolbar role; a single Tab
+  stop (exactly one control `tabindex="0"`, the rest `-1`); `Tab` lands on that stop;
+  `ArrowRight`/`ArrowLeft`/`Home`/`End` move focus AND the tab stop between the two
+  action buttons and the `Status` filter combobox (Arrow keys do not open the
+  combobox); the searchbar `<input>` KEEPS Arrow/Home/End (focus stays in the field —
+  the toolbar does not hijack caret keys); and the decorative sacred `𓊗` glyph span
+  is `aria-hidden="true"`.
 
 The existing `FilterDropdown` story already exercises the combobox-inside-toolbar
 branch that the roving set now includes.
 
+### Adversarial-review follow-up (2026-07-11)
+
+- **Moderate — new a11y stories had no `play` function → zero automated regression
+  protection.** The initial pass added `AccessibleName` + `KeyboardRovingTabIndex` as
+  `render`-only stories, so the Issue 1 (role/name) and Issue 2 (roving-tabindex +
+  glyph/text-field guards) fixes were invisible to the repo's Chromatic screenshot
+  baseline. **FIXED** — both stories now have `storybook/test` `play` functions
+  asserting the full role/name/orientation, roving-tabindex movement (one tabindex=0,
+  Arrow/Home/End), the searchbar-keeps-arrows guard, and the `aria-hidden` glyph
+  (commit `1198e683`).
+
 ## Deferred
 
-None. Every issue was fixed at root cause inside the component directory. The child
-components (`Button`, `Field/Dropdown/Regular`, `Field/Search`) own their own
+Every Toolbar-container issue was fixed at root cause inside the component directory.
+The child components (`Button`, `Field/Dropdown/Regular`, `Field/Search`) own their own
 accessible-name/focus/error semantics and are audited under their own owners; this
 audit made no changes outside `src/components/Toolbar/`.
+
+One out-of-band issue was noticed in a component I do not own, recorded here for its
+owner (per R14):
+
+- **`src/components/Field/Dropdown/Regular/index.tsx:220`** — the `role="combobox"`
+  button always sets `aria-controls={listboxId}`, but the `id={listboxId}` listbox
+  only renders when `isOpen && !disabled` (`index.tsx:252-256`). When the dropdown is
+  closed, `aria-controls` points at a non-existent element — a dangling IDREF /
+  invalid ARIA relation (ARIA 1.2). Suggested fix: gate the attribute on open state,
+  i.e. `{...(isOpen && !disabled ? { 'aria-controls': listboxId } : {})}` on the
+  button, mirroring the `ComplexTextEditor` `MarkdownPreviewAriaControls` fix (only
+  reference the region while it is actually rendered). Not fixed here because the file
+  is outside my ownership boundary.
