@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the AccountNumber component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import AccountNumber from './index'
 
 const meta: Meta<typeof AccountNumber> = {
@@ -302,5 +303,40 @@ export const SacredBanking: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * A11y regression (WCAG 1.3.1 / 3.3.1 / 4.1.2 / 4.1.3). Pins the accessible
+ * error contract FieldShell wires for this field: the input is reachable by
+ * its `<label>` (label association), carries `aria-invalid="true"`, and points
+ * via `aria-describedby` at the `role="alert"` region that announces the
+ * message — so a screen reader hears the validation error without moving
+ * focus. No prior AccountNumber story exercised the error state.
+ */
+export const AccessibleErrorState: Story = {
+  args: {
+    ...commonArgs,
+    label: 'Checking Account Number',
+    error: 'Account number is invalid',
+    styles: { theme: 'light' },
+  },
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <AccountNumber {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Label association: getByLabelText throws if the input has no
+    // accessible name from its <label>.
+    const input = canvas.getByLabelText('Checking Account Number')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+    const describedBy = input.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    // The described-by target is the live error region announcing the message.
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveAttribute('id', describedBy ?? '')
+    await expect(alert).toHaveTextContent('Account number is invalid')
   },
 }

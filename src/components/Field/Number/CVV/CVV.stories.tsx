@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the CVV component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import CVV from './index'
 
 const meta: Meta<typeof CVV> = {
@@ -309,5 +310,36 @@ export const SacredPayment: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * A11y regression (WCAG 1.3.1 / 3.3.1 / 4.1.2 / 4.1.3). Pins the accessible
+ * error contract FieldShell wires for this field: the (password-typed) input
+ * is reachable by its `<label>`, carries `aria-invalid="true"`, and points via
+ * `aria-describedby` at the `role="alert"` region that announces the message.
+ * No prior CVV story exercised the error state.
+ */
+export const AccessibleErrorState: Story = {
+  args: {
+    ...commonArgs,
+    label: 'Card Security Code',
+    error: 'Security code is invalid',
+    styles: { theme: 'light' },
+  },
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <CVV {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Card Security Code')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+    const describedBy = input.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveAttribute('id', describedBy ?? '')
+    await expect(alert).toHaveTextContent('Security code is invalid')
   },
 }

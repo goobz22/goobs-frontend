@@ -266,3 +266,33 @@ export const KeyboardAccessible: Story = {
     await expect(spinbutton).toHaveValue('1')
   },
 }
+
+/**
+ * A11y regression (WCAG 1.3.1 / 3.3.1 / 4.1.2 / 4.1.3). Pins the accessible
+ * error contract FieldShell wires for the spinbutton: the input is reachable
+ * by its `<label>`, carries `aria-invalid="true"`, and points via
+ * `aria-describedby` at the `role="alert"` region that announces the message.
+ */
+export const AccessibleErrorState: Story = {
+  args: {
+    ...commonArgs,
+    label: 'Order Quantity',
+    error: 'Quantity is invalid',
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Order Quantity')
+    await expect(input).toHaveAttribute('role', 'spinbutton')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+    const describedBy = input.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveAttribute('id', describedBy ?? '')
+    await expect(alert).toHaveTextContent('Quantity is invalid')
+  },
+}
