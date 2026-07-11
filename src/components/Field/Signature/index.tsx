@@ -195,7 +195,15 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
       const ctx = canvas?.getContext('2d')
       const point = pointFromEvent(e)
       if (!canvas || !ctx || !point) return
-      canvas.setPointerCapture(e.pointerId)
+      try {
+        canvas.setPointerCapture(e.pointerId)
+      } catch {
+        // Pointer capture is a progressive enhancement — it keeps the stroke
+        // tracking the pointer if it leaves the canvas. It throws when there is
+        // no active native pointer for this id (e.g. synthetic pointer events
+        // dispatched by a Storybook play function / test); the stroke still
+        // works without capture, so this is safe to ignore.
+      }
       drawingRef.current = true
       ctx.beginPath()
       ctx.moveTo(point.x, point.y)
@@ -272,7 +280,18 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
       filled={hasInk}
       styles={styles}
     >
-      {({ inputId, inputAriaProps }) => (
+      {({ inputId, inputAriaProps }) => {
+        // FieldShell's inputAriaProps bag includes `aria-required` when the
+        // field is required. aria-required is a WIDGET property, NOT a global
+        // attribute, so it is INVALID on this canvas's role="img" (axe-core
+        // aria-allowed-attr flags it — a WCAG 4.1.2 automated failure) and is
+        // ignored by AT. Strip only aria-required here; required-ness is instead
+        // conveyed through the accessible name (canvasAriaLabel). aria-invalid,
+        // aria-describedby, and aria-disabled are all valid on any role, so they
+        // are preserved.
+        const canvasAriaProps = { ...inputAriaProps }
+        delete canvasAriaProps['aria-required']
+        return (
         <div>
           <div
             className={cssStyles.surface}
