@@ -332,6 +332,14 @@ export interface TreeItemProps {
   /** Total number of items in this item's sibling set (aria-setsize) */
   setSize?: number
 
+  /**
+   * DOM id of the `role="group"` element that holds this node's children, used
+   * to establish APG Tree View parent→children ownership via `aria-owns`. Set
+   * only while the node is an expanded parent (the group is in the DOM);
+   * `undefined` for leaves and collapsed parents.
+   */
+  ownsGroupId?: string
+
   /** Component styling */
   styles?: TreeViewStyles
 
@@ -404,6 +412,18 @@ interface TreeViewContextValue {
     itemId: TreeViewItemId
   ) => void
   setFocusedItem: (itemId: TreeViewItemId | null) => void
+  /**
+   * Expand every sibling of `itemId` (nodes sharing its parent, or the root
+   * nodes when it has no parent) that has children. Backs the APG Tree View
+   * optional `*` (asterisk) keyboard command.
+   */
+  expandSiblings: (event: React.SyntheticEvent, itemId: TreeViewItemId) => void
+  /**
+   * Append a character to the shared type-ahead buffer (auto-clears after a
+   * short idle timeout) and return the current accumulated, lower-cased query.
+   * Backs the APG Tree View recommended type-ahead: focus follows typed text.
+   */
+  appendTypeahead: (char: string) => string
   apiRef?: React.MutableRefObject<TreeViewApiRef | undefined>
 }
 
@@ -1038,6 +1058,7 @@ const TreeItem: FC<TreeItemProps> = ({
   hasChildren = false,
   posInSet,
   setSize,
+  ownsGroupId,
   styles = {},
   onClick,
   onToggleExpansion,
@@ -1115,10 +1136,13 @@ const TreeItem: FC<TreeItemProps> = ({
       event.preventDefault()
       event.stopPropagation()
 
-      // Focus the item
+      // Focus the item. The consumer focus notification (onItemFocus / the
+      // onFocus prop) is fired centrally by the row's native onFocus handler,
+      // which runs for pointer, Tab, AND arrow-key focus alike — a click
+      // focuses the row (focus precedes click), so we do NOT re-fire it here.
+      // Doing so previously double-fired onItemFocus on every click while
+      // keyboard roving fired it not at all.
       context.setFocusedItem(itemId)
-      onFocus?.(event as any, itemId)
-      context.onItemFocus?.(event, itemId)
 
       // Handle selection
       if (!context.disableSelection && !isDisabled) {
@@ -1141,7 +1165,6 @@ const TreeItem: FC<TreeItemProps> = ({
       disabledItemsFocusable,
       context,
       itemId,
-      onFocus,
       onToggleSelection,
       onToggleExpansion,
       onClick,
@@ -1157,19 +1180,18 @@ const TreeItem: FC<TreeItemProps> = ({
       event.preventDefault()
       event.stopPropagation()
 
-      if (hasChildren && expansionTrigger === 'iconContainer') {
+      // The chevron is the expand/collapse affordance in EVERY expansion mode.
+      // A pointer click on it toggles expansion (and, via stopPropagation, does
+      // not also select the row). Previously this only fired for
+      // expansionTrigger==='iconContainer', so in the default 'content' mode a
+      // chevron click was a dead no-op (it stopped propagation to the row yet
+      // did nothing itself).
+      if (hasChildren) {
         onToggleExpansion?.(event, itemId)
         context.onToggleExpansion(event, itemId)
       }
     },
-    [
-      isDisabled,
-      hasChildren,
-      onToggleExpansion,
-      context,
-      itemId,
-      expansionTrigger,
-    ]
+    [isDisabled, hasChildren, onToggleExpansion, context, itemId]
   )
 
   const handleCheckboxChange = useCallback(
@@ -1269,6 +1291,50 @@ const TreeItem: FC<TreeItemProps> = ({
             }
           }
           break
+        default: {
+          // Ignore anything that isn't a bare printable character (modifiers,
+          // function keys, etc. are handled by the cases above or the browser).
+          if (
+            event.key.length !== 1 ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey
+          ) {
+            break
+          }
+          if (event.key === '*') {
+            // APG optional: '*' expands every sibling of the focused node.
+            event.preventDefault()
+            context.expandSiblings(event, itemId)
+            break
+          }
+          // APG recommended type-ahead: a printable character moves focus to the
+          // next visible node whose label begins with the accumulated typed
+          // string. A single fresh character searches from the NEXT node (so
+          // repeated presses cycle through same-initial matches); a multi-char
+          // query searches from the current node (so it can refine in place).
+          const query = context.appendTypeahead(event.key)
+          const count = visibleItems.length
+          if (!query || count === 0) break
+          const from = currentIndex < 0 ? 0 : currentIndex
+          const startOffset = query.length > 1 ? 0 : 1
+          for (
+            let offset = startOffset;
+            offset < count + startOffset;
+            offset++
+          ) {
+            const candidate = visibleItems[(from + offset) % count]
+            const candidateLabel = (candidate.textContent || '')
+              .trim()
+              .toLowerCase()
+            if (candidateLabel.startsWith(query)) {
+              event.preventDefault()
+              candidate.focus()
+              break
+            }
+          }
+          break
+        }
       }
     },
     [
@@ -1296,16 +1362,19 @@ const TreeItem: FC<TreeItemProps> = ({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onFocus={event => {
-        // Keep roving-tabindex + the visual focus state in sync whenever the
-        // row receives DOM focus (Tab entry, arrow-key navigation, or click).
+        // Single source of focus tracking + notification for the row. Runs for
+        // EVERY way the row gains DOM focus — Tab entry, arrow-key roving, AND
+        // pointer click (focus precedes click). It (a) keeps the roving-tabindex
+        // / visual focus state in sync and (b) fires the documented onItemFocus
+        // consumer callback, which previously fired only on pointer click.
         // Guarded to the row itself so focus bubbling from inner controls is
-        // ignored.
-        if (
-          event.target === event.currentTarget &&
-          context.focusedItem !== itemId
-        ) {
-          context.setFocusedItem(itemId)
-        }
+        // ignored, to a genuine focus change, and away from disabled
+        // non-focusable rows.
+        if (event.target !== event.currentTarget) return
+        if (isDisabled && !disabledItemsFocusable) return
+        if (context.focusedItem === itemId) return
+        context.setFocusedItem(itemId)
+        onFocus?.(event, itemId)
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -1325,6 +1394,14 @@ const TreeItem: FC<TreeItemProps> = ({
       aria-level={level + 1}
       aria-setsize={setSize}
       aria-posinset={posInSet}
+      // APG Tree View parent→children ownership: when this node is an expanded
+      // parent, its children live in a sibling role="group" element (kept a
+      // sibling, not a descendant, so the row's styling/hover box does not
+      // enclose the whole subtree). aria-owns re-parents that group under this
+      // treeitem in the accessibility tree so the pattern's ownership is truly
+      // established, not merely implied by aria-level. Only set while the group
+      // exists in the DOM (expanded), so the reference is never dangling.
+      aria-owns={ownsGroupId}
       data-testid={`tree-item-${itemId}`}
     >
       {/* Checkbox */}
@@ -1342,15 +1419,21 @@ const TreeItem: FC<TreeItemProps> = ({
         />
       )}
 
-      {/* Expand/Collapse Icon */}
+      {/* Expand/Collapse Icon — purely DECORATIVE. Expand/collapse is owned by
+          the treeitem row itself (arrow keys + Enter/Space, state conveyed by
+          the row's aria-expanded), so the chevron carries no role/name and is
+          hidden from assistive tech. It was previously role="button" +
+          aria-label with a click handler but no tabIndex/onKeyDown, so it was
+          announced as an operable button yet was not keyboard-focusable
+          (WCAG 4.1.2). Making it decorative removes that broken control while
+          leaving the onClick as a redundant pointer convenience. */}
       {hasChildren && (
         <div
           className={cssStyles.iconContainer}
           data-theme={theme}
           style={iconContainerOverrideStyle}
           onClick={handleIconClick}
-          role="button"
-          aria-label={isExpanded ? 'Collapse' : 'Expand'}
+          aria-hidden="true"
         >
           <ExpandMoreIcon
             styles={{ theme: styles.theme || 'sacred' }}
@@ -1417,6 +1500,14 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
     const [focusedItem, setFocusedItem] = useState<TreeViewItemId | null>(null)
     const [disabledItems] = useState<Set<TreeViewItemId>>(new Set())
     const [isMounted, setIsMounted] = useState(false)
+
+    // Shared type-ahead buffer (APG Tree View recommended type-ahead). Kept in a
+    // ref (not state) so it is shared across every row's key handler without
+    // re-rendering; the accumulated query auto-clears after a short idle gap.
+    const typeaheadRef = useRef<{
+      query: string
+      timer: ReturnType<typeof setTimeout> | null
+    }>({ query: '', timer: null })
 
     // Set mounted state to ensure consistent rendering
     useEffect(() => {
@@ -1630,6 +1721,10 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
           const isItemSelected = selectedItems.has(itemId)
           const isItemExpanded = expandedItems.has(itemId)
           const isItemFocused = focusedItem === itemId
+          // Stable DOM id for this node's child group, used both as the group's
+          // `id` and as the parent treeitem's `aria-owns` target so the APG
+          // parent→children ownership is explicit.
+          const groupId = `tree-group-${itemId}`
 
           return (
             <React.Fragment key={itemId}>
@@ -1642,6 +1737,9 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                 hasChildren={hasChildren}
                 posInSet={index + 1}
                 setSize={items.length}
+                ownsGroupId={
+                  hasChildren && isItemExpanded ? groupId : undefined
+                }
                 styles={styles}
                 checkboxSelection={checkboxSelection}
                 multiSelect={multiSelect}
@@ -1649,14 +1747,17 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                 disabledItemsFocusable={disabledItemsFocusable}
                 onToggleSelection={toggleItemSelection}
                 onToggleExpansion={toggleItemExpansion}
-                onFocus={(event, itemId) => {
-                  setFocusedItem(itemId)
-                  onItemFocus?.(event, itemId)
+                onFocus={(event, focusedId) => {
+                  // Pure consumer-notification wrapper. Focus STATE is set by
+                  // the row's DOM onFocus handler (via context.setFocusedItem);
+                  // this only forwards the documented onItemFocus callback.
+                  onItemFocus?.(event, focusedId)
                 }}
                 onClick={onItemClick}
               />
               {hasChildren && isItemExpanded && (
                 <div
+                  id={groupId}
                   className={cssStyles.childrenGroup}
                   data-theme={styles.theme || 'light'}
                   role="group"
@@ -1717,6 +1818,33 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
         onToggleExpansion: toggleItemExpansion,
         onToggleSelection: toggleItemSelection,
         setFocusedItem,
+        expandSiblings: (event, targetId) => {
+          const parentId = parentMap.get(targetId)
+          const siblingIds =
+            parentId !== undefined
+              ? childrenMap.get(parentId) || []
+              : items.map(getItemId)
+          const newExpansion = new Set(expandedItems)
+          let changed = false
+          siblingIds.forEach(siblingId => {
+            const kids = childrenMap.get(siblingId)
+            if (kids && kids.length > 0 && !newExpansion.has(siblingId)) {
+              newExpansion.add(siblingId)
+              changed = true
+            }
+          })
+          if (changed) setExpandedItems(newExpansion, event)
+        },
+        appendTypeahead: (char: string) => {
+          const state = typeaheadRef.current
+          if (state.timer) clearTimeout(state.timer)
+          state.query += char.toLowerCase()
+          state.timer = setTimeout(() => {
+            state.query = ''
+            state.timer = null
+          }, 500)
+          return state.query
+        },
         apiRef,
       }),
       [
@@ -1744,6 +1872,8 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
         toggleItemExpansion,
         toggleItemSelection,
         setFocusedItem,
+        setExpandedItems,
+        items,
         apiRef,
       ]
     )

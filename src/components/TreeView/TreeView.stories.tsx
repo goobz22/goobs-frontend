@@ -1012,9 +1012,11 @@ export const ChevronDecorativeAndClickable: Story = {
     ) as HTMLElement
     await expect(row).toHaveAttribute('aria-expanded', 'false')
 
-    // The chevron container wraps the decorative <svg>; it carries no role and
-    // is hidden from assistive tech.
-    const chevron = row.querySelector('svg')?.parentElement as HTMLElement
+    // The chevron container is the row's first child (no checkbox in this
+    // story); it wraps the decorative icon, carries no role, and is hidden from
+    // assistive tech.
+    const chevron = row.firstElementChild as HTMLElement
+    await expect(chevron.querySelector('svg')).not.toBeNull()
     await expect(chevron).not.toHaveAttribute('role')
     await expect(chevron).toHaveAttribute('aria-hidden', 'true')
 
