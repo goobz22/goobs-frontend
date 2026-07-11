@@ -91,6 +91,11 @@
   .glyph {
     animation: none;
   }
+
+  /* Suppress the theme cross-fade too, so no motion is driven under reduce. */
+  .root {
+    transition: none;
+  }
 }
 
 @keyframes glyphRotate {

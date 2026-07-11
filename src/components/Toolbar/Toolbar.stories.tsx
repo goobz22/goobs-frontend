@@ -238,3 +238,81 @@ export const SacredStyleOverrides: Story = {
     },
   },
 }
+
+/**
+ * 7) Accessible Name (WAI-ARIA APG Toolbar) — exercises the `ariaLabel` prop and
+ * the toolbar semantics added for screen-reader users. Pinned observable state:
+ * the root renders `role="toolbar"` with `aria-orientation="horizontal"` and an
+ * `aria-label="Records toolbar"` (the caller-supplied name), so AT announces the
+ * control group by that name (WCAG 1.3.1 / 4.1.2). Two toolbars are shown to
+ * demonstrate that distinct `ariaLabel`s disambiguate multiple toolbars on a
+ * page; the second uses the default `'Toolbar'` name.
+ */
+export const AccessibleName: Story = {
+  render: () => (
+    <div
+      style={{
+        padding: '16px',
+        background: '#f3f4f6',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+      }}
+    >
+      <CustomToolbar
+        ariaLabel="Records toolbar"
+        buttons={sampleButtons}
+        searchbarProps={sampleSearchProps}
+        styles={{ theme: 'light' }}
+      />
+      <CustomToolbar
+        buttons={sampleButtons}
+        searchbarProps={sampleSearchProps}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+}
+
+const KeyboardRovingRenderer = () => {
+  const [filterValue, setFilterValue] = React.useState('all')
+  const [search, setSearch] = React.useState('')
+
+  return (
+    <div style={{ padding: '16px', background: '#000000' }}>
+      <CustomToolbar
+        ariaLabel="Inventory toolbar"
+        buttons={sampleButtons}
+        filterDropdown={{
+          label: 'Status',
+          options: filterOptions,
+          value: filterValue,
+          onChange: setFilterValue,
+        }}
+        searchbarProps={{
+          label: 'Search Something',
+          placeholder: 'Type here...',
+          value: search,
+          onChange: setSearch,
+        }}
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  )
+}
+
+/**
+ * 8) Keyboard Roving Tabindex + Hidden Glyph — exercises the APG Toolbar
+ * keyboard interaction and the decorative-glyph fix. Pinned observable state:
+ *  - The button/combobox group shares ONE Tab stop; Left/Right Arrow move focus
+ *    between the action buttons and the "Status" filter combobox, Home/End jump
+ *    to first/last (roving tabindex — exactly one control has `tabindex="0"`).
+ *  - Focusing the searchbar and pressing Arrow/Home/End moves the text caret
+ *    (the toolbar does NOT hijack those keys from a text field); opening the
+ *    filter combobox likewise gives it the Arrow keys for its options.
+ *  - The sacred 𓊗 glyph (top-right) is `aria-hidden="true"`, so screen readers
+ *    skip the decorative hieroglyph (WCAG 1.1.1).
+ */
+export const KeyboardRovingTabIndex: Story = {
+  render: () => <KeyboardRovingRenderer />,
+}
