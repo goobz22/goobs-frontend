@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect } from 'storybook/test'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import TreeView, { TreeViewItem, useTreeViewApiRef } from './index'
 
 const meta: Meta<typeof TreeView> = {
@@ -880,6 +880,20 @@ export const KeyboardNavigation: Story = {
     const groups = canvasElement.querySelectorAll('[role="group"]')
     await expect(groups.length).toBeGreaterThan(0)
 
+    // APG parent→children OWNERSHIP: the expanded parent ('Documents') owns its
+    // child group via aria-owns, and the referenced element is that group —
+    // ownership is explicit, not merely implied by aria-level.
+    const ownsId = items[0].getAttribute('aria-owns')
+    await expect(ownsId).toBeTruthy()
+    const ownedGroup = canvasElement.querySelector(`#${ownsId}`)
+    await expect(ownedGroup).not.toBeNull()
+    await expect(ownedGroup).toHaveAttribute('role', 'group')
+    // A collapsed / leaf node carries no aria-owns (no dangling reference).
+    const leaf = canvasElement.querySelector(
+      '[data-testid="tree-item-desktop"]'
+    )
+    await expect(leaf).not.toHaveAttribute('aria-owns')
+
     // Structural ARIA: level + set position/size are exposed to assistive tech.
     await expect(items[0]).toHaveAttribute('aria-level', '1')
     await expect(items[0]).toHaveAttribute('aria-setsize', '3')
@@ -936,6 +950,125 @@ export const WithAccessibleLabel: Story = {
     // getByRole with an accessible name proves the aria-label is wired through.
     const tree = canvas.getByRole('tree', { name: 'File browser' })
     await expect(tree).toBeInTheDocument()
+  },
+}
+
+/**
+ * The documented `onItemFocus` consumer callback fires for EVERY focus entry —
+ * pointer click AND keyboard roving (arrow keys) — not only pointer. Pinned
+ * observable state: after ArrowDown moves roving focus to the second node, the
+ * spy has been called with that node's id.
+ */
+export const FocusCallbackOnKeyboard: Story = {
+  name: 'Accessibility/Focus Callback (Keyboard)',
+  args: {
+    items: sampleTreeData,
+    defaultExpandedItems: ['documents'],
+    styles: { theme: 'light' },
+    onItemFocus: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const items = canvas.getAllByRole('treeitem')
+
+    // Enter the tree, then rove down with the keyboard (no pointer involved).
+    items[0].focus()
+    await expect(items[0]).toHaveFocus()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(items[1]).toHaveFocus()
+
+    // onItemFocus fired for the ARROW-KEY focus change (regression: it used to
+    // fire only on pointer click). items[1] is 'Work Files' (id 'work').
+    await expect(args.onItemFocus).toHaveBeenCalledWith(
+      expect.anything(),
+      'work'
+    )
+  },
+}
+
+/**
+ * The expand/collapse chevron is DECORATIVE (no role/name, hidden from AT) —
+ * expand/collapse is owned by the treeitem row (arrow keys + aria-expanded), so
+ * the chevron is no longer a broken `role="button"` that AT announces yet cannot
+ * operate by keyboard. It remains a pointer convenience: in the DEFAULT
+ * 'content' expansion mode a click on the chevron toggles the node (previously a
+ * dead no-op). Pinned observable state: the chevron container has no role and is
+ * aria-hidden, the tree exposes NO button, and a chevron click expands then
+ * collapses the node.
+ */
+export const ChevronDecorativeAndClickable: Story = {
+  name: 'Accessibility/Chevron (Decorative + Clickable)',
+  args: {
+    items: sampleTreeData,
+    // No defaultExpandedItems → nodes start collapsed.
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const row = canvasElement.querySelector(
+      '[data-testid="tree-item-documents"]'
+    ) as HTMLElement
+    await expect(row).toHaveAttribute('aria-expanded', 'false')
+
+    // The chevron container wraps the decorative <svg>; it carries no role and
+    // is hidden from assistive tech.
+    const chevron = row.querySelector('svg')?.parentElement as HTMLElement
+    await expect(chevron).not.toHaveAttribute('role')
+    await expect(chevron).toHaveAttribute('aria-hidden', 'true')
+
+    // No node exposes a nested button (the old broken chevron role="button").
+    await expect(canvas.queryByRole('button')).toBeNull()
+
+    // Default 'content' mode: a pointer click on the chevron toggles expansion.
+    await userEvent.click(chevron)
+    await expect(row).toHaveAttribute('aria-expanded', 'true')
+    await userEvent.click(chevron)
+    await expect(row).toHaveAttribute('aria-expanded', 'false')
+  },
+}
+
+/**
+ * The optional/recommended tail of the APG Tree View keyboard table: type-ahead
+ * (focus follows typed characters) and '*' (expand all sibling nodes). Pinned
+ * observable state: typing 'p' moves focus to 'Personal'; pressing '*' on a root
+ * node expands all sibling roots that have children.
+ */
+export const TypeaheadAndExpandSiblings: Story = {
+  name: 'Accessibility/Type-ahead & Expand Siblings',
+  args: {
+    items: sampleTreeData,
+    defaultExpandedItems: ['documents'],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const items = canvas.getAllByRole('treeitem')
+
+    // Type-ahead: focus the first node and type 'p' → focus jumps to the next
+    // visible node whose label starts with 'p' ('Personal').
+    items[0].focus()
+    await expect(items[0]).toHaveFocus()
+    await userEvent.keyboard('p')
+    const personal = canvasElement.querySelector(
+      '[data-testid="tree-item-personal"]'
+    )
+    await expect(personal).toHaveFocus()
+
+    // '*' expands every sibling of the focused node. Focus a root node and press
+    // '*' → the sibling roots that have children ('Downloads', 'Desktop') expand.
+    items[0].focus()
+    await userEvent.keyboard('*')
+    const downloads = canvasElement.querySelector(
+      '[data-testid="tree-item-downloads"]'
+    )
+    const desktop = canvasElement.querySelector(
+      '[data-testid="tree-item-desktop"]'
+    )
+    await expect(downloads).toHaveAttribute('aria-expanded', 'true')
+    await expect(desktop).toHaveAttribute('aria-expanded', 'true')
   },
 }
 
