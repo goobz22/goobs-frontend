@@ -1066,3 +1066,89 @@ export const MarkdownPreviewAriaControls: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — CONTENT REFLOW (WCAG 1.4.10)
+// Both injected-HTML surfaces (RichEditor's contentEditable `.richSurface`
+// rendering raw HTML, and MarkdownEditor's `.markdownPreview` rendering
+// `mdToHtml(value)`) can carry a wide <img> or a long-line <pre> that, without
+// a CSS guard, overflows the surface and forces a two-dimensional page scroll.
+// These stories render exactly that content and assert the guard applies, so a
+// regression that removes `.richSurface|.markdownPreview img { max-width }` or
+// `… pre { overflow-x: auto }` fails the interaction test AND the visual diff.
+// --------------------------------------------------------------------------
+
+// A deliberately 1200px-wide banner as a self-contained data-URI SVG (no
+// network), plus one very long unbroken code line — the two 1.4.10 vectors.
+const WIDE_IMAGE_SRC =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='120'><rect width='1200' height='120' fill='steelblue'/><text x='40' y='72' font-family='sans-serif' font-size='30' fill='white'>1200px image, clamped to container</text></svg>"
+const LONG_CODE_LINE =
+  'const wide = "a-single-unbroken-line-of-code-far-wider-than-any-narrow-viewport-that-must-not-force-the-page-to-scroll-sideways-1234567890"'
+
+/**
+ * Reflow-safe RICH content (WCAG 1.4.10 Reflow). The contentEditable
+ * `.richSurface` renders its raw HTML `value` — here a 1200px-wide image and a
+ * long-line `<pre>`. `.richSurface img { max-width: 100% }` clamps the image to
+ * the content width and `.richSurface pre { overflow-x: auto }` scrolls the code
+ * inside its own box, so neither widens the page. Removing either CSS guard
+ * makes the assertions (and the Chromatic baseline) fail.
+ */
+export const ReflowSafeRichContent: Story = {
+  name: 'A11y/Reflow-safe rich content',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Rich Content"
+      editorType="rich"
+      initialValue={`<p>A wide image must clamp to the surface, not overflow:</p><img src="${WIDE_IMAGE_SRC}" alt="1200px demo banner" /><p>A long code line must scroll inside its own box:</p><pre><code>${LONG_CODE_LINE}</code></pre>`}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const img = canvasElement.querySelector('img')
+    const pre = canvasElement.querySelector('pre')
+    expect(img).not.toBeNull()
+    expect(pre).not.toBeNull()
+
+    // The image is held to the content width (max-width resolves to a px value,
+    // never `none`), so a 1200px image cannot overflow the surface.
+    expect(getComputedStyle(img as Element).maxWidth).not.toBe('none')
+    // The code block scroll-contains its long line instead of widening the page.
+    expect(getComputedStyle(pre as Element).overflowX).toBe('auto')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Reflow-safe MARKDOWN PREVIEW (WCAG 1.4.10 Reflow). The preview pane renders
+ * `mdToHtml(value)`, which emits bare `<img>` and `<pre><code>`. After the
+ * preview is toggled on, `.markdownPreview img { max-width: 100% }` and
+ * `.markdownPreview pre { overflow-x: auto }` keep a wide image and a long code
+ * line from forcing a two-dimensional page scroll.
+ */
+export const ReflowSafeMarkdownPreview: Story = {
+  name: 'A11y/Reflow-safe markdown preview',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Markdown Content"
+      editorType="markdown"
+      initialValue={`# Reflow-safe preview\n\n![1200px demo banner](${WIDE_IMAGE_SRC})\n\nA long code line must scroll inside its own box:\n\n\`\`\`\n${LONG_CODE_LINE}\n\`\`\`\n`}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The preview (which holds the injected <img>/<pre>) is opt-in.
+    await userEvent.click(canvas.getByRole('button', { name: 'Toggle Preview' }))
+
+    await waitFor(() => {
+      expect(canvasElement.querySelector('img')).not.toBeNull()
+      expect(canvasElement.querySelector('pre')).not.toBeNull()
+    })
+
+    const img = canvasElement.querySelector('img')
+    const pre = canvasElement.querySelector('pre')
+    expect(getComputedStyle(img as Element).maxWidth).not.toBe('none')
+    expect(getComputedStyle(pre as Element).overflowX).toBe('auto')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
