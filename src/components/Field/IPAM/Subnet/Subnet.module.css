@@ -30,6 +30,26 @@
   color: var(--field-text);
 }
 
+/* Keyboard focus indicator (WCAG 2.4.7 Focus Visible). The input sets
+   `outline: none` and is NOT wrapped in FieldShell's .inputSlot (whose
+   :focus-within ring would otherwise apply), so without this a keyboard user
+   gets no visible focus indication at all. Restore a themed ring: the border
+   shifts to the shell's per-theme focus token (cascaded in from .shell via
+   --field-border-focus) plus a soft glow. Sacred is the hardcoded default;
+   light/dark are overridden via the ancestor [data-theme] (house pattern). */
+.input:focus-visible {
+  border-color: var(--field-border-focus);
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+[data-theme='light'] .input:focus-visible {
+  box-shadow: var(--goobs-focus-light);
+}
+
+[data-theme='dark'] .input:focus-visible {
+  box-shadow: var(--goobs-focus-dark);
+}
+
 .buttonContainer {
   position: absolute;
   right: 8px;
@@ -62,6 +82,30 @@
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Keyboard focus ring for the +/- stepper buttons (WCAG 2.4.7). Matches the
+   library Button pattern: a themed outline, sacred default with light/dark
+   overrides resolved via the ancestor [data-theme] on the shell wrapper. */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
+[data-theme='light'] .button:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+[data-theme='dark'] .button:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
+/* Honour a reduced-motion preference (WCAG 2.3.3): drop the button's
+   color/opacity transition for users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
 }
 
 /* The increment field stretches to the full subnet container width. */

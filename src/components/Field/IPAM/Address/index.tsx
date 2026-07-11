@@ -605,6 +605,17 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
 
     const rangeError = !isValidRange ? 'Invalid IP range' : undefined
 
+    // In range mode the FieldShell label is only rendered once the paired
+    // input holds a value (`startIPValue ? label : ''`), so an empty range
+    // input would otherwise have NO programmatic name at all (WCAG 1.3.1 /
+    // 4.1.2 / 3.3.2). Give each input a stable aria-label — derived from the
+    // field label so the visible label text is contained in the accessible
+    // name (WCAG 2.5.3 Label in Name) — that also distinguishes start from end
+    // for screen-reader users, who would otherwise hear two identical fields.
+    const baseRangeLabel = label || 'IP address'
+    const startAriaLabel = `${baseRangeLabel} range start`
+    const endAriaLabel = `${baseRangeLabel} range end`
+
     return (
       <div className={cssStyles.rangeRoot} data-field={dataField}>
         {availableRangeMessage && (
@@ -629,6 +640,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
                   value={startIPValue || ''}
                   disabled={disabled}
                   required={required}
+                  aria-label={startAriaLabel}
                   onChange={e => handleStartIPChange(e.target.value)}
                   onBlur={() => {
                     onEndIPBlur?.()
@@ -657,6 +669,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
                   value={endIPValue || ''}
                   disabled={disabled}
                   required={required}
+                  aria-label={endAriaLabel}
                   onChange={e => handleEndIPChange(e.target.value)}
                   onBlur={onEndIPBlur}
                   placeholder={placeholder || '192.168.0.255'}

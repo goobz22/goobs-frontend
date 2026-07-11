@@ -189,6 +189,26 @@ const VLANField: React.FC<VLANFieldProps> = ({
     document.addEventListener('mouseleave', clearTimers)
   }, [handleDecrement, initialDelay, repeatInterval, clearTimers])
 
+  // Keyboard activation for the stepper buttons (WCAG 2.1.1). The +/- steppers
+  // previously only had `onMouseDown` (to drive the press-and-hold repeat), so
+  // a keyboard Enter/Space — which dispatches a `click`, never a mousedown —
+  // left the focusable buttons completely inert. A keyboard-synthesised click
+  // has `detail === 0`; a real pointer click has `detail >= 1` and its step has
+  // already fired on mousedown, so this guard adds one keyboard step without
+  // double-firing for the mouse.
+  const handleIncrementClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (event.detail === 0) handleIncrement()
+    },
+    [handleIncrement]
+  )
+  const handleDecrementClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (event.detail === 0) handleDecrement()
+    },
+    [handleDecrement]
+  )
+
   useEffect(() => {
     return () => {
       clearTimers()
@@ -270,19 +290,21 @@ const VLANField: React.FC<VLANFieldProps> = ({
               type="button"
               aria-label="Increase VLAN ID"
               onMouseDown={handleIncrementMouseDown}
+              onClick={handleIncrementClick}
               disabled={disabled}
               className={cssStyles.button}
             >
-              <ArrowDropUpIcon style={{ fontSize: '1.25rem' }} />
+              <ArrowDropUpIcon aria-hidden style={{ fontSize: '1.25rem' }} />
             </button>
             <button
               type="button"
               aria-label="Decrease VLAN ID"
               onMouseDown={handleDecrementMouseDown}
+              onClick={handleDecrementClick}
               disabled={disabled}
               className={cssStyles.button}
             >
-              <ArrowDropDownIcon style={{ fontSize: '1.25rem' }} />
+              <ArrowDropDownIcon aria-hidden style={{ fontSize: '1.25rem' }} />
             </button>
           </div>
         </div>

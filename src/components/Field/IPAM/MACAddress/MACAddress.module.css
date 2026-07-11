@@ -25,3 +25,23 @@
      as the sibling IPAM CIDR/Subnet inputs. */
   color: var(--field-text);
 }
+
+/* Keyboard focus indicator (WCAG 2.4.7 Focus Visible). The input sets
+   `outline: none` and is NOT wrapped in FieldShell's .inputSlot (whose
+   :focus-within ring would otherwise apply), so without this a keyboard user
+   gets no visible focus indication at all. Restore a themed ring: the border
+   shifts to the shell's per-theme focus token (cascaded in from .shell via
+   --field-border-focus) plus a soft glow. Sacred is the hardcoded default;
+   light/dark are overridden via the ancestor [data-theme] (house pattern). */
+.input:focus-visible {
+  border-color: var(--field-border-focus);
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+[data-theme='light'] .input:focus-visible {
+  box-shadow: var(--goobs-focus-light);
+}
+
+[data-theme='dark'] .input:focus-visible {
+  box-shadow: var(--goobs-focus-dark);
+}
