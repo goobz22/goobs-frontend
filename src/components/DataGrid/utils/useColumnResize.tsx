@@ -145,10 +145,37 @@ export function useColumnResize({
     [handleMouseDown, isResizing]
   )
 
+  /**
+   * Keyboard-operable resize (WCAG 2.1.1). The drag handle is pointer-only;
+   * this adjusts a column's width by `delta` px (clamped to the same 50px
+   * minimum the mouse path enforces) and notifies the parent via
+   * `onColumnResize`, so the resize `role="separator"` handle can be driven
+   * with Arrow keys. The new width flows to the header through `computedWidth`
+   * (rendered as the `--dg-col-width` CSS variable), matching the mouse path.
+   */
+  const resizeColumnBy = useCallback(
+    (columnField: string, delta: number) => {
+      const column = updatedColumns.find(col => col.field === columnField)
+      if (!column) return
+      const current = column.computedWidth || column.width || 200
+      const newWidth = Math.max(50, current + delta)
+      setUpdatedColumns(prev =>
+        prev.map(col =>
+          col.field === columnField
+            ? { ...col, computedWidth: newWidth, width: newWidth }
+            : col
+        )
+      )
+      onColumnResize?.(columnField, newWidth)
+    },
+    [updatedColumns, onColumnResize]
+  )
+
   return {
     updatedColumns,
     isResizing,
     resizingColumn,
     getResizeHandleProps,
+    resizeColumnBy,
   }
 }

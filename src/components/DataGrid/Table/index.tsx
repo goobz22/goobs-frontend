@@ -108,12 +108,15 @@ function Table({
   sortField,
   sortDirection,
   onManageColumns,
+  onColumnMove,
   draggedColumn,
   onColumnDragStart,
   onColumnDragOver,
   onColumnDrop,
   onColumnDragEnd,
   permissions,
+  gridRowCount,
+  gridColCount,
 }: TableProps) {
   /** Current theme for styling */
   const theme = styles?.theme || 'light'
@@ -124,11 +127,16 @@ function Table({
   // Provides column resize functionality via drag handles.
   // Returns updated columns with computed widths and resize event handlers.
 
-  const { updatedColumns, isResizing, resizingColumn, getResizeHandleProps } =
-    useColumnResize({
-      columns,
-      ...(onColumnResize ? { onColumnResize } : {}),
-    })
+  const {
+    updatedColumns,
+    isResizing,
+    resizingColumn,
+    getResizeHandleProps,
+    resizeColumnBy,
+  } = useColumnResize({
+    columns,
+    ...(onColumnResize ? { onColumnResize } : {}),
+  })
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COMPOSITE EDITING STATE
@@ -227,18 +235,31 @@ function Table({
   return (
     <div className={cssStyles.tableContainer} data-theme={theme}>
       <div className={cssStyles.tableWrapper}>
-        <table className={cssStyles.table}>
+        {/* The real <table> carries the interactive-grid semantics (a11y fix
+            D3): role="grid" + aria-rowcount/aria-colcount live here — on the
+            element that actually OWNS the role="row"/gridcell descendants —
+            rather than on an outer wrapper that also held the mobile view and
+            chrome. <thead>/<tbody> are explicit rowgroups so the grid → rowgroup
+            → row → cell ownership chain is valid (WCAG 1.3.1). */}
+        <table
+          className={cssStyles.table}
+          role="grid"
+          aria-label="Data grid"
+          {...(gridRowCount != null ? { 'aria-rowcount': gridRowCount } : {})}
+          {...(gridColCount != null ? { 'aria-colcount': gridColCount } : {})}
+        >
           {/* ─────────────────────────────────────────────────────────────────
               TABLE HEADER
               Renders column headers with sort, resize, and drag-drop support.
               ───────────────────────────────────────────────────────────────── */}
-          <thead className={cssStyles.thead}>
+          <thead className={cssStyles.thead} role="rowgroup">
             <ColumnHeaderRow
               allRowsSelected={allRowsSelected}
               someRowsSelected={someRowsSelected}
               handleHeaderCheckboxChange={onHeaderCheckboxChange}
               columns={updatedColumns}
               getResizeHandleProps={getResizeHandleProps}
+              resizeColumnBy={resizeColumnBy}
               isResizing={isResizing}
               resizingColumn={resizingColumn}
               {...(styles ? { styles } : {})}
@@ -246,6 +267,7 @@ function Table({
               {...(sortField != null ? { sortField } : {})}
               {...(sortDirection ? { sortDirection } : {})}
               {...(onManageColumns ? { onManageColumns } : {})}
+              {...(onColumnMove ? { onColumnMove } : {})}
               {...(draggedColumn != null ? { draggedColumn } : {})}
               {...(onColumnDragStart ? { onColumnDragStart } : {})}
               {...(onColumnDragOver ? { onColumnDragOver } : {})}
@@ -253,7 +275,7 @@ function Table({
               {...(onColumnDragEnd ? { onColumnDragEnd } : {})}
             />
           </thead>
-          <tbody>
+          <tbody role="rowgroup">
             {/* ─────────────────────────────────────────────────────────────────
                 CREATION ROW (TOP POSITION)
                 Inline form for creating new rows. Only shown when:

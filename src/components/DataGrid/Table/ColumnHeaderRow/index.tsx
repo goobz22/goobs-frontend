@@ -16,12 +16,24 @@ interface ColumnHeaderRowProps {
     onMouseDown: (e: React.MouseEvent) => void
     style: React.CSSProperties
   }
+  /**
+   * Keyboard-operable resize (WCAG 2.1.1) — adjusts a column's width by a pixel
+   * delta. Drives the `role="separator"` resize handle's Arrow-key handler so
+   * columns can be resized without a pointer.
+   */
+  resizeColumnBy?: (columnField: string, delta: number) => void
   isResizing: boolean
   resizingColumn: string | null
   styles?: DataGridStyles
   // New props for column actions
   onColumnSort?: (field: string, direction: 'asc' | 'desc') => void
   onManageColumns?: () => void
+  /**
+   * Keyboard-operable column reorder (WCAG 2.1.1) — moves a column left/right
+   * among the visible columns. Rendered as "Move left"/"Move right" items in
+   * the column-actions menu so reordering works without drag-and-drop.
+   */
+  onColumnMove?: (field: string, direction: 'left' | 'right') => void
   /**
    * Field name of the column the grid is currently sorted by, or null when
    * unsorted. Drives `aria-sort` on the matching `<th>` so screen-reader users
@@ -45,10 +57,12 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   handleHeaderCheckboxChange,
   columns,
   getResizeHandleProps,
+  resizeColumnBy,
   resizingColumn,
   styles,
   onColumnSort,
   onManageColumns,
+  onColumnMove,
   sortField,
   sortDirection,
   draggedColumn,
@@ -74,6 +88,44 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
     handleHeaderCheckboxChange(fakeEvent)
   }
 
+  /**
+   * Menu keyboard model (WCAG 2.1.1). The Popover (role="dialog") already moves
+   * focus into the menu on open, traps Tab, and restores focus to the trigger
+   * on close; this adds the APG-Menu arrow-key roving among the menuitems that
+   * was missing (D5). Up/Down wrap; Home/End jump to the ends.
+   */
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')
+    ).filter(el => !el.disabled)
+    if (items.length === 0) return
+    const currentIndex = items.indexOf(
+      document.activeElement as HTMLButtonElement
+    )
+    let nextIndex: number
+    switch (e.key) {
+      case 'ArrowDown':
+        nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length
+        break
+      case 'ArrowUp':
+        nextIndex =
+          currentIndex < 0
+            ? items.length - 1
+            : (currentIndex - 1 + items.length) % items.length
+        break
+      case 'Home':
+        nextIndex = 0
+        break
+      case 'End':
+        nextIndex = items.length - 1
+        break
+      default:
+        return
+    }
+    e.preventDefault()
+    items[nextIndex]?.focus()
+  }
+
   return (
     <tr className={cssStyles.headerRow} data-theme={theme}>
       {/* Header checkbox for select all */}
@@ -96,8 +148,10 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
       </th>
 
       {/* All columns with horizontal scrolling */}
-      {columns.map(col => {
+      {columns.map((col, colIndex) => {
         const isDragging = draggedColumn === col.field
+        const canMoveLeft = colIndex > 0
+        const canMoveRight = colIndex < columns.length - 1
         // Runtime-measured column width (from resize ops) is passed as a CSS
         // custom property; the .headerCell[style*='--dg-col-width'] selector in
         // the module pins width/min/max to it. Drag-source opacity moves to a
@@ -185,6 +239,9 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 setAnchorEl(null)
               }}
               anchorEl={anchorEl}
+              // Name the portalled surface (WCAG 4.1.2) — the Popover renders
+              // as role="dialog" and requires an accessible name.
+              ariaLabel={`Column actions for ${col.headerName || col.field}`}
               styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
             >
               <div
@@ -197,6 +254,8 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 data-column-menu-for={col.field}
                 role="menu"
                 aria-label={`Column actions for ${col.headerName || col.field}`}
+                // APG-Menu arrow-key roving among the menuitems (WCAG 2.1.1).
+                onKeyDown={handleMenuKeyDown}
               >
                 {/* Sorting options */}
                 <button
@@ -222,6 +281,39 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                   Sort Z → A
                 </button>
 
+                {/* Keyboard-operable column reorder (WCAG 2.1.1) — a
+                    pointer-free alternative to header drag-and-drop. Rendered
+                    only when a move is possible in that direction. */}
+                {onColumnMove && (canMoveLeft || canMoveRight) && (
+                  <hr className={cssStyles.dropdownDivider} />
+                )}
+                {onColumnMove && canMoveLeft && (
+                  <button
+                    className={cssStyles.dropdownBtn}
+                    data-action="move-left"
+                    role="menuitem"
+                    onClick={() => {
+                      onColumnMove(col.field, 'left')
+                      setOpenDropdown(null)
+                    }}
+                  >
+                    Move column left
+                  </button>
+                )}
+                {onColumnMove && canMoveRight && (
+                  <button
+                    className={cssStyles.dropdownBtn}
+                    data-action="move-right"
+                    role="menuitem"
+                    onClick={() => {
+                      onColumnMove(col.field, 'right')
+                      setOpenDropdown(null)
+                    }}
+                  >
+                    Move column right
+                  </button>
+                )}
+
                 <hr className={cssStyles.dropdownDivider} />
 
                 <button
@@ -238,12 +330,29 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
               </div>
             </Popover>
 
-            {/* Resize handle - for all columns that are resizable */}
+            {/* Resize handle - for all columns that are resizable.
+                role="separator" + tabIndex + Arrow-key handler make the
+                previously pointer-only resize keyboard operable (WCAG 2.1.1):
+                ←/→ nudge the width by 10px (50px with Shift). */}
             {col.resizable !== false && (
               <div
                 {...getResizeHandleProps(col.field)}
                 className={`${cssStyles.resizeHandle} ${resizingColumn === col.field ? cssStyles.resizeHandleActive : ''}`}
                 title="Drag to resize column"
+                role="separator"
+                aria-orientation="vertical"
+                aria-label={`Resize ${col.headerName || col.field} column`}
+                tabIndex={0}
+                data-action="resize-handle"
+                onKeyDown={e => {
+                  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+                  e.preventDefault()
+                  const step = e.shiftKey ? 50 : 10
+                  resizeColumnBy?.(
+                    col.field,
+                    e.key === 'ArrowLeft' ? -step : step
+                  )
+                }}
               />
             )}
           </th>

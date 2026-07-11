@@ -2305,6 +2305,21 @@
   outline-offset: -2px;
 }
 
+/* Data cells participate in the APG Grid roving-tabindex keyboard model
+   (WCAG 2.1.1) — the active cell is focusable and must show a keyboard focus
+   ring. Inset so the ring stays inside the cell border. */
+.cell:focus-visible {
+  outline: 2px solid var(--dg-focus-ring, currentColor);
+  outline-offset: -2px;
+}
+
+/* The mobile row card is keyboard-operable (Enter/Space select it, WCAG
+   2.1.1) so it needs a visible keyboard focus ring like every other control. */
+.card:focus-visible {
+  outline: 2px solid var(--dg-focus-ring, currentColor);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    Accessibility: reduced motion (WCAG 2.3.3)
    Honor the user's prefers-reduced-motion setting by neutralizing the

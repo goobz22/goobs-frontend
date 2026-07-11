@@ -31,7 +31,7 @@
  * stays in `Rows`, which owns the selection + edit callbacks.
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 
 /** Zero-based coordinates of the active data cell within the visible page. */
 export interface GridCellPosition {
@@ -62,15 +62,16 @@ export function useGridKeyboardNav(rowCount: number, colCount: number) {
     []
   )
 
-  // Keep the active cell inside the current bounds when the data shrinks
-  // (filtering, deletion, page change). Never grows focus unexpectedly.
-  useEffect(() => {
-    setActive(prev => {
-      const row = Math.min(prev.row, Math.max(0, rowCount - 1))
-      const col = Math.min(prev.col, Math.max(0, colCount - 1))
-      return row === prev.row && col === prev.col ? prev : { row, col }
-    })
-  }, [rowCount, colCount])
+  // Clamp for rendering + focus (derived, not stored — avoids a setState-in-
+  // effect cascade). When the data shrinks (filtering, deletion, page change)
+  // this keeps the single tab stop on a cell that actually exists; the raw
+  // state self-heals to a valid coordinate on the next move. Memoised so the
+  // focus effect's dependency is stable across unrelated re-renders.
+  const clamped = useMemo<GridCellPosition>(() => {
+    const row = Math.min(active.row, Math.max(0, rowCount - 1))
+    const col = Math.min(active.col, Math.max(0, colCount - 1))
+    return row === active.row && col === active.col ? active : { row, col }
+  }, [active, rowCount, colCount])
 
   // Move DOM focus to the active cell, but only when a keyboard action asked
   // for it (pendingFocus) — never on mount or on a passive sync, so the grid
@@ -78,8 +79,8 @@ export function useGridKeyboardNav(rowCount: number, colCount: number) {
   useEffect(() => {
     if (!pendingFocus.current) return
     pendingFocus.current = false
-    cellRefs.current.get(cellKey(active.row, active.col))?.focus()
-  }, [active])
+    cellRefs.current.get(cellKey(clamped.row, clamped.col))?.focus()
+  }, [clamped])
 
   const moveTo = useCallback(
     (row: number, col: number) => {
@@ -103,5 +104,5 @@ export function useGridKeyboardNav(rowCount: number, colCount: number) {
     setActive(prev => ({ ...prev }))
   }, [])
 
-  return { active, registerCell, moveTo, syncActive, focusActive }
+  return { active: clamped, registerCell, moveTo, syncActive, focusActive }
 }

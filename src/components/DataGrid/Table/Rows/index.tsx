@@ -52,6 +52,7 @@ import { ColumnDef, type RowData, type DataGridStyles } from '../../types'
 import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
 import { getRowId } from '../index'
+import { useGridKeyboardNav } from '../../utils/useGridKeyboardNav'
 import cssStyles from '../../DataGrid.module.css'
 
 // =============================================================================
@@ -1020,18 +1021,112 @@ const Rows: React.FC<RowsProps> = ({
   const isSacredTheme = styles?.theme === 'sacred'
   const theme = styles?.theme || 'light'
 
+  // Write access gates whether Enter/F2 opens an editor (mirrors the mouse
+  // path's `canEdit`). Missing permissions mean write, same as the grid.
+  const hasWriteAccess = !permissions || permissions.access === 'write'
+
+  // APG Grid keyboard model (WCAG 2.1.1): roving tabindex + 2-D arrow nav over
+  // the data cells. `columns.length` data columns — the leading checkbox cell
+  // is not part of the roving set. Called before the empty-state return so the
+  // hook order is stable across renders.
+  const { active, registerCell, moveTo, syncActive, focusActive } =
+    useGridKeyboardNav(rows?.length ?? 0, columns.length)
+
+  // When an inline editor closes (Escape / save) the input unmounts; return
+  // focus to the owning cell so keyboard users aren't dropped onto <body>.
+  const prevEditingRef = React.useRef(editingCell)
+  React.useEffect(() => {
+    if (prevEditingRef.current && !editingCell) focusActive()
+    prevEditingRef.current = editingCell
+  }, [editingCell, focusActive])
+
+  /**
+   * Central keydown handler for a focused data cell. No-ops when the event
+   * bubbled up from an interactive child (an inline editor input handles its
+   * own keys); only acts when the cell itself is the focus target.
+   */
+  const handleCellKeyDown = (
+    e: React.KeyboardEvent<HTMLTableCellElement>,
+    rowIndex: number,
+    colIndex: number,
+    row: RowData,
+    col: ColumnDef
+  ) => {
+    if (e.target !== e.currentTarget) return
+
+    const rowId = getRowId(row)
+    const isEditableCol = col.editable !== false && hasWriteAccess
+
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault()
+        moveTo(rowIndex, colIndex + 1)
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        moveTo(rowIndex, colIndex - 1)
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        moveTo(rowIndex + 1, colIndex)
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        moveTo(rowIndex - 1, colIndex)
+        break
+      case 'Home':
+        e.preventDefault()
+        moveTo(e.ctrlKey ? 0 : rowIndex, 0)
+        break
+      case 'End':
+        e.preventDefault()
+        if (e.ctrlKey) moveTo(rows.length - 1, columns.length - 1)
+        else moveTo(rowIndex, columns.length - 1)
+        break
+      case 'PageDown':
+        e.preventDefault()
+        moveTo(rowIndex + 10, colIndex)
+        break
+      case 'PageUp':
+        e.preventDefault()
+        moveTo(rowIndex - 10, colIndex)
+        break
+      case ' ':
+      case 'Spacebar':
+        // Space toggles row selection (mirrors clicking the row).
+        e.preventDefault()
+        onRowClick?.(row)
+        break
+      case 'Enter':
+      case 'F2':
+        // Mirror the mouse flow: an unselected row selects first; a selected
+        // row's editable cell enters edit mode (composite columns open their
+        // modal via the same onCellClick route).
+        e.preventDefault()
+        if (!selectedRowIds.includes(rowId)) onRowClick?.(row)
+        else if (isEditableCol) onCellClick?.(rowId, col.field, row[col.field])
+        break
+      default:
+        break
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // EMPTY STATE
   // ─────────────────────────────────────────────────────────────────────────────
   if (!rows || rows.length === 0) {
     return (
-      <tr className={cssStyles.row} data-theme={theme}>
+      <tr className={cssStyles.row} data-theme={theme} role="row">
         <td className={`${cssStyles.cell} ${cssStyles.cellCheckbox}`}></td>
         <td
           colSpan={100}
           className={`${cssStyles.cell} ${cssStyles.cellEmpty}`}
+          role="gridcell"
         >
-          No data to display.
+          {/* Status-message region (WCAG 4.1.3): when a search/filter empties
+              the grid, assistive tech is notified of the change rather than it
+              passing silently. */}
+          <span role="status">No data to display.</span>
         </td>
       </tr>
     )
@@ -1130,10 +1225,12 @@ const Rows: React.FC<RowsProps> = ({
                 5. Special type (currency, credit_card, etc.) -> Formatter
                 6. Default -> safeString()
                 ───────────────────────────────────────────────────────────── */}
-            {columns.map(col => {
+            {columns.map((col, colIndex) => {
               const value = row[col.field]
               const isEditing =
                 editingCell?.rowId === rowId && editingCell?.field === col.field
+              const isActiveCell =
+                active.row === rowIndex && active.col === colIndex
               let cellContent: React.ReactNode
 
               if (col.field === '__overflow__') {
@@ -1377,6 +1474,16 @@ const Rows: React.FC<RowsProps> = ({
                     isEditing ? 'editing' : canEdit ? 'editable' : 'idle'
                   }
                   role="gridcell"
+                  // APG Grid roving tabindex (WCAG 2.1.1): exactly one data
+                  // cell is in the tab order; arrow keys move focus between the
+                  // rest. onFocus keeps the roving index in step with pointer /
+                  // Tab focus; onKeyDown drives navigation + Enter/F2/Space.
+                  tabIndex={isActiveCell ? 0 : -1}
+                  ref={registerCell(rowIndex, colIndex)}
+                  onFocus={() => syncActive(rowIndex, colIndex)}
+                  onKeyDown={e =>
+                    handleCellKeyDown(e, rowIndex, colIndex, row, col)
+                  }
                   style={
                     isEditingMultiselect
                       ? {

@@ -692,6 +692,26 @@ export interface TableProps {
   sortDirection?: 'asc' | 'desc'
   /** Called when user opens column management modal */
   onManageColumns?: () => void
+  /**
+   * Keyboard-operable column reorder (WCAG 2.1.1). Moves a column one position
+   * left/right among the visible columns; wired to the column-actions menu so
+   * reordering works without drag-and-drop.
+   */
+  onColumnMove?: (field: string, direction: 'left' | 'right') => void
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // GRID SEMANTICS (a11y — relocated from the DataGrid root wrapper)
+  // ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * Total row count across all pages — emitted as `aria-rowcount` on the real
+   * `<table role="grid">` (only the current page's rows are in the DOM).
+   */
+  gridRowCount?: number
+  /**
+   * Total column count including the leading selection column — emitted as
+   * `aria-colcount` on the `<table role="grid">`.
+   */
+  gridColCount?: number
 
   // ─────────────────────────────────────────────────────────────────────────────
   // COLUMN DRAG AND DROP PROPS
