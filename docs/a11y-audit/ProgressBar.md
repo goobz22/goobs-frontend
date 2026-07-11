@@ -153,7 +153,10 @@ label and the ARIA values are present on first render). No SEO-semantic issue.
 2. `index.tsx` — added `aria-hidden="true"` to the visible label so its text is
    not announced a second time on top of `aria-valuetext` (with a JSDoc comment
    explaining the rationale and that `data-testid` is preserved). (Issue 2.)
-3. `ProgressBar.stories.tsx` — new `AccessibilityShowcase` story (below).
+3. `ProgressBar.stories.tsx` — new `AccessibilityShowcase` story (default-motion
+   ARIA/contract baseline) and new `AccessibilityReducedMotion` story that forces
+   `chromatic.prefersReducedMotion: 'reduce'` so the reduced-motion CSS is
+   captured as a real Chromatic baseline (below).
 
 No existing `data-*` / `role` / `aria` attribute was removed or renamed; the
 public prop API is unchanged (no new props were needed — both fixes are internal
@@ -161,10 +164,12 @@ markup/CSS). The machine-test selector contract (`data-component`,
 `data-testid`, `data-theme`, `data-variant`, `data-striped`, `data-animated`,
 `data-pulse`, `data-disabled`, `role="progressbar"`, the `aria-value*`
 attributes) is fully preserved. Per-file gate green: `bun lint:file` on
-`index.tsx` + `ProgressBar.stories.tsx` (0 warnings). **CSS changed this pass** —
-under an OS "reduce motion" setting the `Indeterminate` / `StripedAnimated` /
-`PulseEffect` / `SacredIndeterminate` Chromatic baselines render motion-free;
-that is the intended fix (default-motion baselines are unaffected).
+`index.tsx` + `ProgressBar.stories.tsx` (0 warnings). **CSS changed this pass** — the
+reduced-motion rendering is captured by the dedicated `AccessibilityReducedMotion`
+story (which forces `chromatic.prefersReducedMotion: 'reduce'`); the
+default-motion Chromatic baselines (`Indeterminate` / `StripedAnimated` /
+`PulseEffect` / `SacredIndeterminate` and the rest) are unaffected, because
+Chromatic does not emulate `prefers-reduced-motion` unless a story opts in.
 
 ## Stories updated
 
@@ -176,21 +181,71 @@ this repo — goobs has no unit tests):
   `aria-valuetext`, with an explicit `aria-label="Upload progress"`), an
   **indeterminate** bar (`aria-valuenow` omitted, `aria-valuetext="Loading"`),
   and a **pulse + striped + animated** bar. Its JSDoc documents the ARIA
-  contract and that all looping effects are neutralized under
-  `prefers-reduced-motion`. This anchors the reduced-motion-affected states
-  (indeterminate sweep, stripe scroll, pulse) and the aria-hidden label as a
+  contract. This anchors the DOM/ARIA contract (roles/values, the aria-hidden
+  label) and the **default-motion** rendering of the animated states as a
   Chromatic regression baseline.
+- **`AccessibilityReducedMotion`** — new. Renders the reduced-motion-affected
+  states (plain + striped indeterminate, striped+animated determinate, pulse
+  determinate, pulse+striped+animated determinate) with
+  `parameters.chromatic.prefersReducedMotion: 'reduce'` set, so Chromatic
+  emulates the OS "Reduce motion" media feature **when snapshotting this story**
+  and the `@media (prefers-reduced-motion: reduce)` CSS block at
+  `ProgressBar.module.css:474-508` is actually rendered into the baseline. This
+  is the automated guard for the reduced-motion path: a break in the
+  neutralization (the horizontal sweep or stripe scroll returning, the pulse
+  rings re-enabling) shifts the captured pixels and fails the baseline.
 
-The existing `Indeterminate`, `StripedAnimated`, `PulseEffect`, and
-`SacredIndeterminate` stories already exercise each animated state, so the
-reduced-motion CSS is covered by them under an OS reduce-motion setting.
+**Coverage note (corrected).** Chromatic's default snapshot only *pauses*
+animations — it does **not** activate `prefers-reduced-motion: reduce`
+(confirmed: `chromatic.config.json` and `.storybook/` set no reduced-motion
+mode; media-feature emulation is opt-in per story via
+`@chromatic-com/storybook`'s `prefersReducedMotion` parameter, typed at
+`node_modules/@chromatic-com/storybook/dist/index.d.ts:86-91`). So the
+`Indeterminate` / `StripedAnimated` / `PulseEffect` / `SacredIndeterminate`
+default-motion stories do **not** exercise the reduced-motion CSS — only the
+dedicated `AccessibilityReducedMotion` story above does. The earlier claim that
+those stories "cover the reduced-motion CSS under an OS reduce-motion setting"
+was true for a manual OS toggle but overstated the *automated* Chromatic
+coverage; it is corrected here.
+
+## Adversarial review follow-ups (2026-07-11)
+
+### 3. Overstated Chromatic regression coverage for the reduced-motion CSS — MINOR — FIXED
+- **Finding:** the `AccessibilityShowcase` story JSDoc and this report claimed the
+  reduced-motion-affected states were anchored "as a Chromatic regression
+  baseline," but Chromatic's default snapshot only pauses animations and does
+  **not** activate `prefers-reduced-motion: reduce`. Since goobs' only regression
+  net is the Chromatic story, the `@media (prefers-reduced-motion: reduce)` block
+  (`ProgressBar.module.css:474-508`) shipped with **zero** automated guard — a
+  future edit breaking the neutralization would not be caught.
+- **Root-cause fix (within owned files, no config change needed):** added a
+  dedicated `AccessibilityReducedMotion` story that sets
+  `parameters.chromatic.prefersReducedMotion: 'reduce'`. Chromatic reads that
+  per-story parameter and emulates the reduced-motion media feature for that
+  snapshot (verified the parameter exists in the installed addon:
+  `node_modules/@chromatic-com/storybook/dist/index.d.ts:86-91`,
+  `prefersReducedMotion?: 'reduce' | 'no-preference'`), so the reduced-motion CSS
+  is now rendered into and locked by a real Chromatic baseline. No
+  `.storybook/*` or `chromatic.config.json` change was required — the parameter
+  is consumed by Chromatic's capture service from the built Storybook, so it
+  works without registering the `@chromatic-com/storybook` panel addon.
+- **Also corrected the wording** in the `AccessibilityShowcase` JSDoc and in the
+  "Stories updated" / "Fixes applied" sections above to accurately distinguish
+  the default-motion baseline (`AccessibilityShowcase`) from the reduced-motion
+  baseline (`AccessibilityReducedMotion`), and to stop implying the default
+  animated stories cover the reduced-motion path automatically.
+- **Pattern:** `overstated-regression-coverage`
 
 ## Deferred
 
-None. Both issues were fixable entirely inside the owned ProgressBar directory
-(`index.tsx`, `ProgressBar.module.css`, `ProgressBar.stories.tsx`). No shared
+None. All three issues (the two original + the review follow-up) were fixable
+entirely inside the owned ProgressBar directory (`index.tsx`,
+`ProgressBar.module.css`, `ProgressBar.stories.tsx`). No shared
 util / Field / Shell / `global.css` / barrel change was required — the
 reduced-motion CSS uses plain `none`/`transform` values and a local keyframe
-(matching the file's three existing local keyframes), and the label fix is a
-single attribute. No `--goobs-*` token addition in `global.css` (out of scope)
-was needed.
+(matching the file's three existing local keyframes), the label fix is a
+single attribute, and the reduced-motion Chromatic baseline is a per-story
+`parameters.chromatic.prefersReducedMotion` opt-in that needs **no** edit to
+the shared `.storybook/*` config or `chromatic.config.json` (both of which are
+outside this component's ownership). No `--goobs-*` token addition in
+`global.css` (out of scope) was needed.
