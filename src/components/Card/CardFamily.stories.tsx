@@ -811,3 +811,149 @@ export const AsChildListItem: Story = {
     await expect(titleElement).toHaveTextContent('Hieroglyphs In Practice')
   },
 }
+
+// --------------------------------------------------------------------------
+// CARD.PROGRESS — progressbar accessible name + aria-valuetext
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the progressbar's accessible-name contract (a11y audit 2026-07-11): the
+ * first bar is NAMED by its visible "Complete" label (via `aria-labelledby`),
+ * so assistive tech announces WHAT is progressing rather than a bare "62%".
+ * The second bar has no visible label — it is named by the `ariaLabel` prop and
+ * exposes the custom `displayValue` as `aria-valuetext` so AT announces
+ * "3 of 10 steps" instead of the raw 30% derived from `value`.
+ */
+export const ProgressAccessibleName: Story = {
+  name: 'Progress/Accessible Name',
+  render: () => (
+    <div style={{ width: '380px' }}>
+      <Card cardType="course" cardId="prog-a11y" styles={{ theme: 'sacred' }}>
+        <CardHeader>
+          <CardHeaderIcon>📚</CardHeaderIcon>
+          <CardTitle>Foundations of Egyptology</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <CardProgress value={0.62} label="Complete" />
+          <CardProgress
+            value={0.3}
+            ariaLabel="Onboarding progress"
+            displayValue="3 of 10 steps"
+          />
+        </CardBody>
+      </Card>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Named by the visible "Complete" label (aria-labelledby).
+    const labelled = canvas.getByRole('progressbar', { name: 'Complete' })
+    await expect(labelled).toHaveAttribute('aria-valuenow', '62')
+    await expect(labelled).toHaveAttribute('aria-valuemin', '0')
+    await expect(labelled).toHaveAttribute('aria-valuemax', '100')
+    // Named by ariaLabel, with the custom "3 of 10 steps" text as aria-valuetext.
+    const named = canvas.getByRole('progressbar', {
+      name: 'Onboarding progress',
+    })
+    await expect(named).toHaveAttribute('aria-valuenow', '30')
+    await expect(named).toHaveAttribute('aria-valuetext', '3 of 10 steps')
+  },
+}
+
+// --------------------------------------------------------------------------
+// CARD.CONFIRMDELETE — alertdialog accessible name, focus move, Escape
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the alertdialog a11y contract (a11y audit 2026-07-11): the pane is NAMED
+ * by its message (`aria-labelledby`), receives focus on mount (so AT announces
+ * the confirmation and keyboard users land on it), and Escape dismisses it via
+ * onCancel — the APG alertdialog keyboard contract. Complements
+ * `ConfirmDeleteFlow`, which pins the button click flow.
+ */
+export const ConfirmDeleteAccessibility: StoryObj<typeof CardConfirmDelete> = {
+  name: 'ConfirmDelete/Accessible Name, Focus, Escape',
+  args: {
+    message: 'Delete "Acme Inc"? This cannot be undone.',
+    onConfirm: fn(),
+    onCancel: fn(),
+  },
+  render: args => (
+    <div style={{ width: '380px' }}>
+      <Card cardType="company" cardId="acme-a11y" styles={{ theme: 'sacred' }}>
+        <CardHeader>
+          <CardHeaderIcon>🏢</CardHeaderIcon>
+          <CardTitle>Acme Inc</CardTitle>
+          <CardHeaderActions>
+            <button type="button" aria-label="Delete Acme Inc">
+              🗑️
+            </button>
+          </CardHeaderActions>
+        </CardHeader>
+        <CardConfirmDelete {...args} />
+      </Card>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    // The alertdialog is named by its message and holds focus on mount.
+    const pane = canvas.getByRole('alertdialog', {
+      name: 'Delete "Acme Inc"? This cannot be undone.',
+    })
+    await expect(pane).toHaveFocus()
+    // Escape cancels (and does NOT confirm).
+    await userEvent.keyboard('{Escape}')
+    await expect(args.onCancel).toHaveBeenCalledTimes(1)
+    await expect(args.onConfirm).not.toHaveBeenCalled()
+  },
+}
+
+// --------------------------------------------------------------------------
+// CARD.TITLE block-link — keyboard reachability of the whole-card click target
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the block-link keyboard contract (a11y audit 2026-07-11): a
+ * `Card.Title onClick` renders a real `<button>` that is the single meaningful,
+ * Tab-reachable click target for the card (the `::after` overlay only extends
+ * its hit area). One Tab lands focus on the labelled button — which then draws
+ * the shared :focus-visible ring and the card's focus-within highlight.
+ */
+export const BlockLinkKeyboardFocus: Story = {
+  name: 'BlockLink/Keyboard Focus',
+  render: () => (
+    <div style={{ width: '360px' }}>
+      <Card
+        cardType="course"
+        cardId="blocklink-focus"
+        styles={{ theme: 'sacred' }}
+        interactive
+      >
+        <CardHeader>
+          <CardHeaderIcon>📚</CardHeaderIcon>
+          <CardTitle onClick={fn()} ariaLabel="Open Foundations of Egyptology">
+            Foundations of Egyptology
+          </CardTitle>
+          <CardSubtitle>History &amp; Culture</CardSubtitle>
+        </CardHeader>
+        <CardBody>
+          <CardDescription>
+            A guided journey through the dynasties of ancient Egypt.
+          </CardDescription>
+        </CardBody>
+      </Card>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const link = canvas.getByRole('button', {
+      name: 'Open Foundations of Egyptology',
+    })
+    // The block-link button is the first (and only meaningful) Tab stop.
+    await userEvent.tab()
+    await expect(link).toHaveFocus()
+  },
+}
