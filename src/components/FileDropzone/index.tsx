@@ -114,9 +114,15 @@ function placeholderGlyph(variant: FileDropzoneVariant): ReactNode {
  * so the dropzone announces to assistive tech like every other goobs field.
  * The drop surface is a real `<button>` that opens a hidden
  * `<input type="file">` and doubles as a native drag-drop target; the input
- * resets after each pick so the same file can be re-selected. Emits
- * `data-component="FileDropzone"` plus a `file.select` diagnostics beacon on
- * every pick.
+ * resets after each pick so the same file can be re-selected. Because that
+ * hidden input is `display:none` (absent from the accessibility tree), the
+ * shell's state ARIA (`aria-required` / `aria-invalid` / the `aria-describedby`
+ * → error-region link) is spread onto the operable `<button>` instead — the
+ * same convention the Dropdown combobox uses — and a visually-hidden polite
+ * `role="status"` region announces the pick / uploading / selected transition
+ * (WCAG 4.1.3) since a disabled button's label change isn't reliably announced.
+ * Emits `data-component="FileDropzone"` plus a `file.select` diagnostics beacon
+ * on every pick.
  */
 const FileDropzone: React.FC<FileDropzoneProps> = ({
   value,
@@ -138,6 +144,19 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   const theme = styles?.theme ?? 'sacred'
   const resolvedAccept = accept ?? defaultAccept(variant)
   const hasValue = value !== undefined && value !== ''
+  const hintId = `${instanceId}-hint`
+  const noun = variant === 'image' ? 'image' : 'file'
+
+  // Visually-hidden polite status text (WCAG 4.1.3). While `uploading` the
+  // drop-target button is natively `disabled`, and a disabled control's label
+  // change ("Upload image" → "Uploading…") is not reliably announced; drag-drop
+  // picks never focus the button at all. This live region carries the
+  // pick / upload / done transition to assistive tech regardless of focus.
+  const statusText = uploading
+    ? `Uploading ${noun}…`
+    : hasValue
+      ? `${noun.charAt(0).toUpperCase()}${noun.slice(1)} selected`
+      : ''
 
   const dispatchFile = (file: File | undefined | null): void => {
     if (!file) return
@@ -193,7 +212,20 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
       dataField="fileDropzone"
       styles={{ theme }}
     >
-      {({ inputId, inputAriaProps }) => (
+      {({ inputId, inputAriaProps }) => {
+        // The operable control is the <button>, not the display:none file
+        // input (which is removed from the accessibility tree). So the state
+        // ARIA FieldShell builds — aria-required / aria-invalid / the
+        // aria-describedby → error-region link — must ride the BUTTON, mirroring
+        // the Dropdown combobox pattern (Field/Dropdown/Regular). Merge the
+        // shell's error/helper describedby with the local drag-drop hint so a
+        // screen reader hears both the instruction and any error on the control
+        // it actually operates.
+        const describedBy =
+          [hintId, inputAriaProps['aria-describedby']]
+            .filter(Boolean)
+            .join(' ') || undefined
+        return (
         <div
           className={cssStyles.dropzone}
           data-component="FileDropzone"
@@ -236,14 +268,13 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 disabled={uploading}
-                aria-describedby={`${instanceId}-hint`}
+                {...inputAriaProps}
+                aria-describedby={describedBy}
+                {...(uploading && { 'aria-busy': true })}
                 data-file-dropzone-browse="true"
               >
                 <span className={cssStyles.dropTargetLabel}>{browseLabel}</span>
-                <span
-                  id={`${instanceId}-hint`}
-                  className={cssStyles.dropTargetHint}
-                >
+                <span id={hintId} className={cssStyles.dropTargetHint}>
                   Drag &amp; drop or click to browse
                 </span>
               </button>
@@ -254,6 +285,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                   className={cssStyles.removeButton}
                   onClick={onRemove}
                   disabled={uploading}
+                  aria-label={`Remove ${noun}`}
                   data-file-dropzone-remove="true"
                 >
                   Remove
@@ -261,8 +293,18 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
               )}
             </div>
           </div>
+
+          <span
+            className={cssStyles.srOnly}
+            role="status"
+            aria-live="polite"
+            data-file-dropzone-status="true"
+          >
+            {statusText}
+          </span>
         </div>
-      )}
+        )
+      }}
     </FieldShell>
   )
 }

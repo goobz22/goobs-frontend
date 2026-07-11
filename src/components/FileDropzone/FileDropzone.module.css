@@ -178,3 +178,33 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* --------------------------------------------------------------------------
+   VISUALLY-HIDDEN LIVE REGION
+   Carries the pick / uploading / selected transition to assistive tech
+   (WCAG 4.1.3) without affecting layout — the drop-target button is natively
+   `disabled` while uploading (its label change isn't reliably announced) and
+   drag-drop picks never focus it, so this polite region does the announcing.
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — honour the OS "reduce motion" preference by
+   dropping the hover/drag/focus colour transitions.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .dropTarget,
+  .removeButton {
+    transition: none;
+  }
+}

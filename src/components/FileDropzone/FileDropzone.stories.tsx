@@ -113,6 +113,14 @@ export const DocumentVariant: Story = {
   },
 }
 
+/**
+ * Error + required state. The operable drop-target `<button>` (not the hidden
+ * `display:none` file input) carries `aria-required`, `aria-invalid`, and an
+ * `aria-describedby` linked to the FieldShell error region, so a screen reader
+ * navigating to the control it actually operates hears "required, invalid" and
+ * the failure text — the fix for the state ARIA previously landing only on the
+ * out-of-tree input.
+ */
 export const WithError: Story = {
   render: () => (
     <FileDropzone
@@ -124,6 +132,71 @@ export const WithError: Story = {
       onFileSelect={() => {}}
     />
   ),
+}
+
+/**
+ * Uploading state. The drop-target button is natively `disabled` and marked
+ * `aria-busy`; the visually-hidden `role="status"` live region announces
+ * "Uploading image…" (WCAG 4.1.3) so the transition reaches assistive tech even
+ * though a disabled button's label change ("Upload image" → "Uploading…") and a
+ * drag-drop pick (which never focuses the button) would otherwise be silent.
+ */
+export const Uploading: Story = {
+  args: {
+    label: 'Product Image',
+    required: true,
+    variant: 'image',
+    value: 'uploaded://logo.png',
+    uploading: true,
+    onFileSelect: fn(),
+    preview: (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          fontSize: '0.65rem',
+          color: '#ffd700',
+        }}
+      >
+        logo.png
+      </div>
+    ),
+  },
+}
+
+/**
+ * A value is present and `onRemove` is wired, so the "Remove" control renders.
+ * It carries `aria-label="Remove image"` (variant-aware; the visible "Remove"
+ * text stays inside the name so WCAG 2.5.3 Label-in-Name holds) so the control
+ * reads with its field context rather than a bare "Remove". The status region
+ * reflects the selected state.
+ */
+export const WithValueRemovable: Story = {
+  render: () => {
+    function RemovableDemo() {
+      const [img, setImg] = useState('uploaded://banner.jpg')
+      return (
+        <FileDropzone
+          label="Product Image"
+          variant="image"
+          value={img}
+          onFileSelect={file => setImg(`uploaded://${file.name}`)}
+          onRemove={() => setImg('')}
+          preview={
+            img ? (
+              <div style={{ fontSize: '0.6rem', padding: 4, color: '#ffd700' }}>
+                {img.replace('uploaded://', '')}
+              </div>
+            ) : undefined
+          }
+        />
+      )
+    }
+    return <RemovableDemo />
+  },
 }
 
 /**
