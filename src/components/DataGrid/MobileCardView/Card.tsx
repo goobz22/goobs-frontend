@@ -121,6 +121,21 @@ function Card({
     ]
   )
 
+  // Keyboard operability (WCAG 2.1.1): the card is a pointer/touch-driven
+  // role="row" <div>; Enter or Space selects/deselects it (the keyboard
+  // equivalent of a tap). Only acts when the card itself holds focus so inputs
+  // and the expand button inside handle their own keys.
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.target !== e.currentTarget) return
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault()
+        onTap()
+      }
+    },
+    [onTap]
+  )
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -147,6 +162,9 @@ function Card({
       data-card="true"
       aria-selected={isSelected || undefined}
       role="row"
+      // Keyboard-operable (WCAG 2.1.1): focusable + Enter/Space selects it.
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

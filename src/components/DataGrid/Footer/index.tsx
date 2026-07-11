@@ -362,6 +362,11 @@ const TablePagination: React.FC<{
       <div
         className={cssStyles.paginationText}
         data-pagination-status={`${from}-${to}-of-${rowCount}`}
+        // Status-message region (WCAG 4.1.3): when search/filter/paging changes
+        // the visible range or total, assistive tech is notified of the new
+        // count instead of it changing silently.
+        role="status"
+        aria-live="polite"
       >
         {from}-{to} of {rowCount}
       </div>
@@ -516,6 +521,18 @@ const ExportMenu: React.FC<{
     if (isOpen) computeMenuPosition()
   }, [isOpen, computeMenuPosition])
 
+  // Menu-button keyboard model (WCAG 2.1.1): on open, move focus INTO the menu
+  // (its first item). Without this the menu is portalled to the end of
+  // <body>, so a keyboard user tabbing forward from the trigger would never
+  // reach the items — they'd fall at the end of the page tab order.
+  useEffect(() => {
+    if (!isOpen) return
+    const first = menuRef.current?.querySelector<HTMLButtonElement>(
+      '[role="menuitem"]'
+    )
+    first?.focus()
+  }, [isOpen])
+
   // Close on click-outside; reposition (don't dismiss) on scroll/resize.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -562,6 +579,68 @@ const ExportMenu: React.FC<{
     }
   }, [isOpen, computeMenuPosition])
 
+  // APG Menu keyboard interaction among the portalled menuitems (WCAG 2.1.1):
+  // Up/Down roving (wrapping), Home/End, first-letter typeahead, and Tab to
+  // close the menu + return focus to the trigger (a menu is not part of the
+  // page tab sequence). Escape is handled by the document listener above.
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const menu = menuRef.current
+    if (!menu) return
+    const items = Array.from(
+      menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')
+    )
+    if (items.length === 0) return
+    const currentIndex = items.indexOf(
+      document.activeElement as HTMLButtonElement
+    )
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        items[currentIndex < 0 ? 0 : (currentIndex + 1) % items.length]?.focus()
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        items[
+          currentIndex < 0
+            ? items.length - 1
+            : (currentIndex - 1 + items.length) % items.length
+        ]?.focus()
+        break
+      case 'Home':
+        e.preventDefault()
+        items[0]?.focus()
+        break
+      case 'End':
+        e.preventDefault()
+        items[items.length - 1]?.focus()
+        break
+      case 'Tab':
+        e.preventDefault()
+        setIsOpen(false)
+        buttonRef.current?.focus()
+        break
+      default:
+        // First-letter typeahead: jump to the next item whose label starts
+        // with the typed character (wrapping to the top).
+        if (e.key.length === 1 && /\S/.test(e.key)) {
+          const char = e.key.toLowerCase()
+          const ordered = [
+            ...items.slice(currentIndex + 1),
+            ...items.slice(0, currentIndex + 1),
+          ]
+          const match = ordered.find(item =>
+            (item.textContent || '').trim().toLowerCase().startsWith(char)
+          )
+          if (match) {
+            e.preventDefault()
+            match.focus()
+          }
+        }
+        break
+    }
+  }
+
   const handleExportCSV = () => {
     exportToCSV(columns, rows, 'datagrid-export')
     setIsOpen(false)
@@ -586,6 +665,7 @@ const ExportMenu: React.FC<{
         data-theme={theme}
         role="menu"
         aria-label="Export options"
+        onKeyDown={handleMenuKeyDown}
         style={{ top: menuPosition.top, left: menuPosition.left }}
       >
         <button

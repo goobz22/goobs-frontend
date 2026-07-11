@@ -371,8 +371,19 @@ function MobileCardView({
         </div>
       )}
 
-      {/* Cards Container */}
-      <div className={cssStyles.cardsContainer}>
+      {/* Cards Container. Carries the grid semantics for the mobile view
+          (a11y fix D3): each Card is a role="row", so its owner must be a
+          grid/rowgroup — this used to be the shared outer wrapper, which also
+          wrapped the desktop <table> and chrome and was therefore an invalid
+          grid. aria-rowcount is the full filtered count (only a page is in the
+          DOM). */}
+      <div
+        className={cssStyles.cardsContainer}
+        role="grid"
+        aria-label="Data grid (card view)"
+        aria-rowcount={filteredRows.length}
+        aria-colcount={columns.length}
+      >
         {/* Add Card */}
         {isAddingCard && (
           <AddCard
@@ -410,9 +421,10 @@ function MobileCardView({
           )
         })}
 
-        {/* Empty State */}
+        {/* Empty State. role="status" (WCAG 4.1.3) so a search/filter that
+            empties the list is announced to assistive tech, not silent. */}
         {paginatedRows.length === 0 && !isAddingCard && (
-          <div className={cssStyles.mobileEmpty}>
+          <div className={cssStyles.mobileEmpty} role="status">
             {searchQuery ? 'No results found' : 'No data available'}
           </div>
         )}
@@ -429,7 +441,13 @@ function MobileCardView({
             Previous
           </button>
 
-          <span className={cssStyles.paginationInfo}>
+          <span
+            className={cssStyles.paginationInfo}
+            // Status-message region (WCAG 4.1.3): announces the page/count
+            // change (e.g. after filtering) instead of it passing silently.
+            role="status"
+            aria-live="polite"
+          >
             {currentPage + 1} of {totalPages}
           </span>
 
