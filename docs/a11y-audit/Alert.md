@@ -57,9 +57,10 @@ close-button `type` matters).
 - **Fix:** added a visually-hidden severity prefix — `<span class="severityLabel">Error: </span>`
   (mapped `error→Error`, `warning→Warning`, `info→Information`, `success→Success`) rendered before
   the message so the assertive announcement becomes e.g. "Error: An error occurred…". The
-  `.severityLabel` class is the standard clip-rect visually-hidden technique — present in the a11y
+  `.severityLabel` class is the standard clip-path visually-hidden technique — present in the a11y
   tree, invisible to sighted users who read severity from the icon + colour.
-  (`index.tsx:436-451` map + `472-473` markup; `Alert.module.css` `.severityLabel`)
+  (`index.tsx:436-451` map + `472-473` markup; `Alert.module.css` `.severityLabel`). The
+  `.severityLabel` uses the modern `clip-path: inset(50%)` visually-hidden technique (see R4).
 
 ### 5. No visible keyboard focus indicator on the close button — SERIOUS — FIXED
 - **WCAG:** 2.4.7 Focus Visible (AA)
@@ -132,7 +133,7 @@ WCAG 1.2.x / 1.4.2 do not apply. No change needed.
    `aria-hidden="true"` span. (`index.tsx`)
 2. `aria-hidden="true"` on the severity `<Icon>` (spreads to the inner `<svg>`). (`index.tsx`)
 3. Visually-hidden severity prefix (`Error:`/`Warning:`/`Information:`/`Success:`) +
-   `.severityLabel` clip-rect utility. (`index.tsx`, `Alert.module.css`)
+   `.severityLabel` clip-path utility. (`index.tsx`, `Alert.module.css`)
 4. `.closeButton:focus-visible` outline ring. (`Alert.module.css`)
 5. `@media (prefers-reduced-motion: reduce)` block neutralising all hover/closing motion.
    (`Alert.module.css`)
@@ -140,7 +141,8 @@ WCAG 1.2.x / 1.4.2 do not apply. No change needed.
 
 All API changes are additive — no prop renamed/removed/retyped, no existing
 `data-*`/`role`/`aria` attribute removed. The public `AlertProps`/`AlertStyles` contract is
-unchanged. Per-file gate `bun lint:file` passes for `index.tsx` and `Alert.stories.tsx`.
+unchanged. Per-file gate `bun lint:file` passes for `index.tsx` and `Alert.stories.tsx`, and
+`stylelint src/components/Alert/Alert.module.css` exits 0 (the CSS lint gate — see R4).
 
 ## Stories updated
 
@@ -155,7 +157,8 @@ unchanged. Per-file gate `bun lint:file` passes for `index.tsx` and `Alert.stori
 
 ## Adversarial-review follow-up (2026-07-11)
 
-A post-audit adversarial review flagged three items; all addressed at root cause.
+A post-audit adversarial review flagged three items; all addressed at root cause. A later review
+found a fourth (R4 — a CSS lint-gate regression introduced by the audit); also fixed at root cause.
 
 ### R1. `AccessibilitySemantics` regression assertion was broken — SERIOUS — FIXED
 - **Where:** `Alert.stories.tsx` — the story used `await expect(severityLabel).not.toBeVisible()`
@@ -163,8 +166,8 @@ A post-audit adversarial review flagged three items; all addressed at root cause
 - **Why it was wrong:** jest-dom's `toBeVisible()` derives visibility ONLY from computed
   `display`/`visibility`/`opacity` and the `hidden`/`<details>` attributes — it never inspects
   `clip`, `width`/`height`, or `overflow`. `.severityLabel` hides via
-  `position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)`
-  (`Alert.module.css`), leaving `display!=none`, `visibility=visible`, `opacity=1`. jest-dom
+  `position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%)`
+  (`Alert.module.css`; see R4), leaving `display!=none`, `visibility=visible`, `opacity=1`. jest-dom
   therefore reports the node VISIBLE, so `.not.toBeVisible()` THROWS when the play function runs
   (`@storybook/test-runner` / Chromatic interactions) — the headline severity-announcement fix had
   no working regression lock.
@@ -192,6 +195,29 @@ A post-audit adversarial review flagged three items; all addressed at root cause
 - **Fix:** documented as a consumer responsibility in the `onClose` prop JSDoc (`index.tsx`) — the
   consumer should move focus to a sensible element (e.g. the control that surfaced the alert) in
   `onClose` to keep a logical focus order (WCAG 2.4.3).
+
+### R4. Audit CSS broke the `lint:css` stylelint gate — MODERATE — FIXED
+- **Where:** `Alert.module.css` — two lines added by this audit failed stylelint. The pre-audit
+  file was stylelint-clean (exit 0); the audit's additions made `bun run lint:css` / `lint:all`
+  exit 2. The audit report only claimed `bun lint:file` passed for the two `.tsx` files and never
+  ran the CSS lint gate, so the regression went unnoticed.
+- **Errors:**
+  1. `.severityLabel` (issue #4) used the deprecated `clip: rect(0, 0, 0, 0)` property
+     (stylelint `property-no-deprecated`).
+  2. `.closeButton:focus-visible` (issue #5) used uppercase `currentColor` in `outline`
+     (stylelint `value-keyword-case`, which wants lowercase `currentcolor`).
+- **Fix:** `clip: rect(0, 0, 0, 0)` → `clip-path: inset(50%)` (the modern visually-hidden clip;
+  behaviourally + visually identical — both leave the layout box at the explicit `1px × 1px`, so
+  the `AccessibilitySemantics` `getBoundingClientRect()` ≤1px assertion still holds), and
+  `currentColor` → `currentcolor` in the focus ring (an identical keyword). `stylelint
+  src/components/Alert/Alert.module.css` now exits 0.
+- **Note on the pre-existing `currentColor` at `.closeButton` (`color: var(--alert-close-color,
+  currentColor)`):** untouched — it is inside a `var()` fallback, was pre-existing in the
+  stylelint-clean file, and stylelint does not flag it in that position (verified: the file lints
+  clean without changing it). No behavioural change; left as-is to keep the diff minimal.
+- **Story:** no new story is warranted — the change is a lint-clean CSS equivalence with no new
+  a11y state or rendered-DOM change; the existing `AccessibilitySemantics` story remains the
+  regression lock (its stale `clip`-property comment was updated to `clip-path:inset(50%)`).
 
 ## Deferred
 

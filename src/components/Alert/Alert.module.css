@@ -343,7 +343,7 @@
    a background it already contrasts against. Stays inside the container's 20px
    padding so the root's overflow:hidden never clips it. */
 .closeButton:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid currentcolor;
   outline-offset: 2px;
 }
 

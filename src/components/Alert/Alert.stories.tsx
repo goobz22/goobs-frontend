@@ -255,8 +255,9 @@ export const AccessibilitySemantics: Story = {
 
     // 2. The severity is announced textually, not by icon/colour alone. The
     //    label is in the accessibility tree but visually hidden via the
-    //    clip-rect technique (position:absolute; 1px box; overflow:hidden;
-    //    clip). NOTE: jest-dom's toBeVisible() inspects ONLY display/
+    //    standard visually-hidden technique (position:absolute; 1px box;
+    //    overflow:hidden; clip-path:inset(50%)). NOTE: jest-dom's toBeVisible()
+    //    inspects ONLY display/
     //    visibility/opacity/hidden — never clip/size/overflow — so it would
     //    (wrongly) report this clipped node as VISIBLE and `.not.toBeVisible()`
     //    would throw. Assert the actual visually-hidden geometry instead: the
