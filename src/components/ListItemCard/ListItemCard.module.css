@@ -97,6 +97,36 @@
 }
 
 /* --------------------------------------------------------------------------
+   SELECT — the native <button> select target wrapping the naming content
+   (order / icon / content) on selectable rows. A transparent flex row that
+   mirrors .root's layout (gap, centering, min-width ellipsis basis) and
+   inherits the card's typography, so the wrapped children lay out exactly as
+   they do on a non-selectable row. Carries the focus ring the <li> no longer
+   owns now that the button is the focusable select target.
+   -------------------------------------------------------------------------- */
+.select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--list-item-accent, var(--list-accent));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
    REORDER — wraps the composed <Card.DragHandle>
    -------------------------------------------------------------------------- */
 .reorder {

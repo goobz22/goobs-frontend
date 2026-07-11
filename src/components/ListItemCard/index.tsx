@@ -61,7 +61,6 @@
 import React, {
   forwardRef,
   type CSSProperties,
-  type KeyboardEvent,
   type ReactNode,
 } from 'react'
 import { emitDiag } from '../../utils/diag'
