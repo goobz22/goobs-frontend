@@ -596,11 +596,15 @@ export const FileUploadSimulation: Story = {
  * aria-valuetext="Loading". The visible label is aria-hidden because it only
  * duplicates aria-valuetext (prevents a double screen-reader announcement).
  *
- * Every looping/moving effect here (the indeterminate sweep, stripe scroll,
- * and pulse rings) is neutralized under `@media (prefers-reduced-motion:
- * reduce)` — enable "Reduce motion" in your OS to see the motion-free
- * rendering; the indeterminate bar keeps a gentle opacity pulse so a loading
- * state is still conveyed without vestibular motion.
+ * This story captures the DEFAULT-motion baseline. Every looping/moving effect
+ * here (the indeterminate sweep, stripe scroll, and pulse rings) is neutralized
+ * under `@media (prefers-reduced-motion: reduce)`; that reduced-motion rendering
+ * is anchored as its OWN Chromatic baseline by the sibling
+ * `AccessibilityReducedMotion` story (which forces the media feature via
+ * `chromatic.prefersReducedMotion` — Chromatic only pauses animations and does
+ * NOT emulate reduced motion by default, so it needs a dedicated snapshot). The
+ * indeterminate bar keeps a gentle opacity pulse there so a loading state is
+ * still conveyed without vestibular motion.
  */
 export const AccessibilityShowcase: Story = {
   render: () => (
@@ -650,6 +654,100 @@ export const AccessibilityShowcase: Story = {
       description: {
         story:
           'Screen-reader ARIA contract and reduced-motion behavior of the ProgressBar: correct progressbar roles/values for determinate vs indeterminate, an aria-hidden visible label, and prefers-reduced-motion neutralizing the looping animations.',
+      },
+    },
+  },
+}
+
+/**
+ * Reduced-motion Chromatic baseline — captures the actual
+ * `@media (prefers-reduced-motion: reduce)` rendering.
+ *
+ * `parameters.chromatic.prefersReducedMotion: 'reduce'` makes Chromatic emulate
+ * the OS "Reduce motion" setting for this snapshot (media-feature emulation, see
+ * the `@chromatic-com/storybook` `prefersReducedMotion` parameter). Without it,
+ * Chromatic only pauses animations and NEVER activates `prefers-reduced-motion`,
+ * so the reduced-motion CSS block would ship with zero automated guard — this
+ * story is what turns it into a real regression baseline (goobs' only regression
+ * net is the Chromatic story).
+ *
+ * Each bar exercises a distinct selector in the reduced-motion block: the
+ * determinate fill transition is dropped (the fill jumps to value), the
+ * striped+animated and pulse determinate loops are turned off, and the
+ * indeterminate horizontal sweep + stripe scroll are replaced by the motion-free
+ * `progressReducedMotionPulse` opacity fade so a loading state stays perceivable
+ * without vestibular motion. A break in the neutralization (e.g. the sweep
+ * returning) shifts these pixels and fails the baseline.
+ */
+export const AccessibilityReducedMotion: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        width: '400px',
+      }}
+    >
+      <div>
+        <h4>Indeterminate — sweep replaced by a motion-free opacity pulse</h4>
+        <ProgressBar
+          variant="indeterminate"
+          showLabel
+          aria-label="Loading data"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div>
+        <h4>Striped indeterminate — stripe scroll + sweep neutralized</h4>
+        <ProgressBar
+          variant="indeterminate"
+          showLabel
+          aria-label="Loading data"
+          styles={{ theme: 'light', striped: true }}
+        />
+      </div>
+      <div>
+        <h4>Striped + animated determinate — stripe scroll off, fill jumps</h4>
+        <ProgressBar
+          value={60}
+          variant="determinate"
+          showLabel
+          styles={{ theme: 'light', striped: true, animated: true }}
+        />
+      </div>
+      <div>
+        <h4>Pulse determinate — pulse rings off</h4>
+        <ProgressBar
+          value={60}
+          variant="determinate"
+          showLabel
+          styles={{ theme: 'light', pulse: true }}
+        />
+      </div>
+      <div>
+        <h4>Pulse + striped + animated — all determinate loops off</h4>
+        <ProgressBar
+          value={60}
+          variant="determinate"
+          showLabel
+          styles={{ theme: 'light', striped: true, animated: true, pulse: true }}
+        />
+      </div>
+    </div>
+  ),
+  // theme:'light' content with no wrapper surface — pin the light canvas so the
+  // h4s aren't judged against the sacred #0e0e0e default (h4 #000 on #fff = 21.0).
+  globals: { backgrounds: { value: 'light' } },
+  parameters: {
+    // Force the prefers-reduced-motion media feature ONLY for this snapshot so
+    // Chromatic captures the reduced-motion CSS path (default snapshots stay
+    // full-motion). This is the automated guard for the @media block.
+    chromatic: { prefersReducedMotion: 'reduce' },
+    docs: {
+      description: {
+        story:
+          'Reduced-motion rendering of the ProgressBar, captured as a Chromatic baseline via `chromatic.prefersReducedMotion: "reduce"`: the determinate fill transition and the striped/pulse loops are neutralized, and the indeterminate sweep is replaced by a motion-free opacity pulse. Anchors the `@media (prefers-reduced-motion: reduce)` CSS so a regression in the neutralization is caught by the visual baseline.',
       },
     },
   },
