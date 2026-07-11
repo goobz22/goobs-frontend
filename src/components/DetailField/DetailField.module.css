@@ -58,3 +58,32 @@
   letter-spacing: 0;
   text-transform: none;
 }
+
+/* --------------------------------------------------------------------------
+   THEME OVERRIDES (WCAG 1.4.3) — sacred (gold-on-near-black) is the hardcoded
+   default above. On a LIGHT or neutral-DARK surface the hardcoded #ffffff value
+   / gold-60% label drop below 4.5:1 (white value goes invisible on light), so
+   `data-theme` — set on the DetailField couplet root (standalone / `fields`
+   array) OR on the DetailGrid `<dl>` root (cascades to nested children) —
+   retargets the label + value colors to keep legible contrast. `valueColor`
+   inline overrides still win over these (a caller-chosen accent is their call).
+   -------------------------------------------------------------------------- */
+.field[data-theme='light'] .label,
+.grid[data-theme='light'] .label {
+  /* dark amber keeps the eyebrow identity while clearing 4.5:1 on light */
+  color: var(--goobs-light-warn-text);
+}
+
+.field[data-theme='light'] .value,
+.grid[data-theme='light'] .value {
+  color: var(--goobs-light-text);
+}
+
+.field[data-theme='dark'] .value,
+.grid[data-theme='dark'] .value {
+  /* softer off-white for a neutral-dark (non-sacred) surface */
+  color: var(--goobs-dark-text);
+}
+
+/* dark theme keeps the gold-60% eyebrow — it clears 4.5:1 on a dark-slate
+   surface, so only the value needs retargeting. */

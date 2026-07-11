@@ -103,6 +103,86 @@ export const HideWhenEmpty: Story = {
   ),
 }
 
+/**
+ * Theme adaptation (WCAG 1.4.3). Sacred (gold-on-near-black) is the default;
+ * `theme="light"` / `theme="dark"` retarget the label + value colors so the
+ * couplet stays legible on a light or neutral-dark surface instead of rendering
+ * the hardcoded white value text invisibly on a pale background. Each block is
+ * shown on its own matching surface.
+ */
+export const Themes: Story = {
+  name: 'Theme/Sacred · Light · Dark',
+  parameters: { backgrounds: { disable: true } },
+  render: () => {
+    const commonFields = [
+      { label: 'Customer', value: 'Jane Buyer' },
+      { label: 'Invoice #', value: 'INV-0042', mono: true },
+      { label: 'Balance Due', value: '$1,240.00' },
+    ]
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+        }}
+      >
+        <div style={{ background: '#0e0e0e', padding: '16px', borderRadius: 8 }}>
+          <DetailGrid ariaLabel="Sacred theme" fields={commonFields} />
+        </div>
+        <div style={{ background: '#ffffff', padding: '16px', borderRadius: 8 }}>
+          <DetailGrid
+            ariaLabel="Light theme"
+            theme="light"
+            fields={commonFields}
+          />
+        </div>
+        <div style={{ background: '#1e293b', padding: '16px', borderRadius: 8 }}>
+          <DetailGrid
+            ariaLabel="Dark theme"
+            theme="dark"
+            fields={commonFields}
+          />
+        </div>
+      </div>
+    )
+  },
+}
+
+// --------------------------------------------------------------------------
+// INTERACTION TEST — theme is emitted on the <dl> and threaded to each field
+// --------------------------------------------------------------------------
+export const ThemeInteractionTest: Story = {
+  name: 'Theme/Interaction Test',
+  parameters: { backgrounds: { disable: true } },
+  render: () => (
+    <div style={{ background: '#ffffff', padding: '16px' }}>
+      <DetailGrid
+        ariaLabel="Light Billing"
+        theme="light"
+        fields={[
+          { label: 'Customer', value: 'Jane Buyer' },
+          { label: 'Balance Due', value: '$1,240.00' },
+        ]}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // The <dl> carries the theme so nested children can cascade off it.
+    const grid = canvasElement.querySelector('[data-detail-grid="true"]')
+    await expect(grid?.getAttribute('data-theme')).toBe('light')
+    // Every fields-array couplet inherits the grid theme (not left sacred).
+    const couplets = canvasElement.querySelectorAll('[data-detail-field="true"]')
+    await expect(couplets.length).toBe(2)
+    couplets.forEach(couplet =>
+      expect(couplet.getAttribute('data-theme')).toBe('light')
+    )
+    // Values are still present + visible on the light surface.
+    const canvas = within(canvasElement)
+    await expect(canvas.getByText('$1,240.00')).toBeVisible()
+  },
+}
+
 // --------------------------------------------------------------------------
 // INTERACTION TEST — labels are <dt>, values are <dd>, empty rows dropped
 // --------------------------------------------------------------------------

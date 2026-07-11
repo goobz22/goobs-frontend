@@ -41,6 +41,16 @@ function mergeClassNames(...names: Array<string | undefined>): string {
   return names.filter(Boolean).join(' ')
 }
 
+/**
+ * Visual theme. `'sacred'` (the hardcoded default) is the gold-on-dark palette
+ * that matches the ThothOS read-only surfaces this primitive replaced; `'light'`
+ * and `'dark'` retarget the label + value colors so the couplet keeps a legible
+ * ≥4.5:1 contrast (WCAG 1.4.3) when the block sits on a light or neutral-dark
+ * surface instead of the near-black sacred backdrop. Emitted as `data-theme` on
+ * the couplet root / definition-list root.
+ */
+export type DetailFieldTheme = 'sacred' | 'light' | 'dark'
+
 // -----------------------------------------------------------------------------
 // DETAILFIELD — single term/description couplet
 // -----------------------------------------------------------------------------
@@ -60,6 +70,13 @@ export interface DetailFieldProps {
    * conditional that wraps optional rows in the reference shell.
    */
   hideWhenEmpty?: boolean
+  /**
+   * Visual theme (`'sacred'` default). Retargets label/value colors so the
+   * couplet stays legible on light / neutral-dark surfaces, not just the
+   * near-black sacred backdrop. Inherited from the enclosing `DetailGrid` when
+   * driven by its `fields` array; set per-field when nesting as children.
+   */
+  theme?: DetailFieldTheme
 }
 
 function isEmptyValue(value: ReactNode): boolean {
@@ -74,12 +91,20 @@ function isEmptyValue(value: ReactNode): boolean {
  * mono stack, and `valueColor` overrides the value color inline.
  */
 const DetailField = forwardRef<HTMLDivElement, DetailFieldProps>(
-  function DetailField({ label, value, mono, valueColor, hideWhenEmpty }, ref) {
+  function DetailField(
+    { label, value, mono, valueColor, hideWhenEmpty, theme = 'sacred' },
+    ref
+  ) {
     if (hideWhenEmpty && isEmptyValue(value)) return null
     const valueStyle: CSSProperties | undefined =
       valueColor !== undefined ? { color: valueColor } : undefined
     return (
-      <div ref={ref} className={cssStyles.field} data-detail-field="true">
+      <div
+        ref={ref}
+        className={cssStyles.field}
+        data-detail-field="true"
+        data-theme={theme}
+      >
         <dt className={cssStyles.label} data-detail-label="true">
           {label}
         </dt>
@@ -127,6 +152,13 @@ export interface DetailGridProps {
   /** Optional accessible label for the definition list group. */
   ariaLabel?: string
   className?: string
+  /**
+   * Visual theme (`'sacred'` default). Emitted as `data-theme` on the `<dl>`
+   * and threaded into every `fields`-array `DetailField`, and it also cascades
+   * to nested `DetailField` children so the whole group stays legible on light
+   * / neutral-dark surfaces (WCAG 1.4.3).
+   */
+  theme?: DetailFieldTheme
   /** `DetailField` children, used when `fields` is not supplied. */
   children?: ReactNode
 }
@@ -140,7 +172,15 @@ export interface DetailGridProps {
  */
 const DetailGrid = forwardRef<HTMLDListElement, DetailGridProps>(
   function DetailGrid(
-    { fields, minColWidth = '200px', gap, ariaLabel, className, children },
+    {
+      fields,
+      minColWidth = '200px',
+      gap,
+      ariaLabel,
+      className,
+      theme = 'sacred',
+      children,
+    },
     ref
   ) {
     const body: ReactNode = fields
@@ -149,6 +189,7 @@ const DetailGrid = forwardRef<HTMLDListElement, DetailGridProps>(
             key={index}
             label={descriptor.label}
             value={descriptor.value}
+            theme={theme}
             {...(descriptor.mono !== undefined && { mono: descriptor.mono })}
             {...(descriptor.valueColor !== undefined && {
               valueColor: descriptor.valueColor,
@@ -169,6 +210,7 @@ const DetailGrid = forwardRef<HTMLDListElement, DetailGridProps>(
         {...(ariaLabel !== undefined && { 'aria-label': ariaLabel })}
         className={mergeClassNames(cssStyles.grid, className)}
         data-detail-grid="true"
+        data-theme={theme}
       >
         {body}
       </FieldGrid>
