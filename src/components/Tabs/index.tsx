@@ -411,11 +411,12 @@ export const Tab: React.FC<TabProps> = ({
       ) : null}
       {label}
       {count != null ? (
-        <span
-          aria-hidden="true"
-          data-tab-count={count}
-          className={cssStyles.count}
-        >
+        // Count badge. Deliberately NOT aria-hidden: the number is meaningful
+        // information shown only visually, so it must reach assistive tech too
+        // (WCAG 1.3.1) — leaving it in the accessible name makes the tab
+        // announce e.g. "Inbox 5", matching what sighted users see. The
+        // `data-tab-count` attribute is preserved for the test contract.
+        <span data-tab-count={count} className={cssStyles.count}>
           {count}
         </span>
       ) : null}

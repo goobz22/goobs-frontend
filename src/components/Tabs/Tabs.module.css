@@ -324,3 +324,19 @@
   color: var(--goobs-dark-primary);
   box-shadow: 0 2px 4px var(--goobs-blue-light-a30);
 }
+
+/* ==========================================================================
+   REDUCED MOTION ([prefers-reduced-motion: reduce]) — WCAG 2.3.3
+   The tab's colour / background / shadow transitions are decorative. Honour a
+   user's reduced-motion preference by dropping the animated transition while
+   keeping every hover / active / focus state as an instant, still-visible
+   change. The theme variants set their own `transition`, so they are listed
+   explicitly to match specificity and win the cascade.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .tab[data-theme='light'],
+  .tab[data-theme='dark'] {
+    transition: none;
+  }
+}

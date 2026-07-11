@@ -2,7 +2,7 @@
 
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, userEvent, within, fn } from 'storybook/test'
+import { expect, userEvent, within, waitFor, fn } from 'storybook/test'
 import Tabs, { TabsItem, TabPanel, tabPanelId } from './index'
 
 const basicTabs: TabsItem[] = [
@@ -355,8 +355,89 @@ const ChipAppearanceRenderer = () => {
   )
 }
 
+const keyboardNavTabs: TabsItem[] = [
+  { title: 'Inbox', id: 'inbox', count: 5, trigger: 'onClick', onClick: fn() },
+  { title: 'Sent', id: 'sent', trigger: 'onClick', onClick: fn() },
+  { title: 'Archive', id: 'archive', trigger: 'onClick', onClick: fn() },
+]
+
+const KeyboardNavRenderer = () => {
+  const [activeTab, setActiveTab] = React.useState(0)
+  return (
+    <div style={{ background: '#ffffff', padding: '16px' }}>
+      <Tabs
+        items={keyboardNavTabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        alignment="left"
+        ariaLabel="Keyboard navigation demo"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
 /**
- * 5) Chip Appearance (regression)
+ * 5) Keyboard navigation + count semantics (a11y regression)
+ *
+ * Pins the WAI-ARIA tablist keyboard contract and two a11y fixes from the
+ * 2026-07-11 audit:
+ *   - Roving tabindex: only the active tab is in the Tab sequence
+ *     (`tabindex="0"`); the rest are `tabindex="-1"`. Arrow keys move focus
+ *     AND activate (automatic activation), Home/End jump to the bounds
+ *     (WCAG 2.1.1). Focusing a tab drives the new `:focus-visible` ring
+ *     (WCAG 2.4.7) — the base `.tab` sets `outline: none`, so without that rule
+ *     keyboard focus would be invisible; this story renders the focused state
+ *     for the Chromatic snapshot.
+ *   - Count exposed to assistive tech: the count badge is no longer
+ *     `aria-hidden`, so the "Inbox" tab's accessible name includes its count
+ *     ("Inbox 5") — meaningful visual info now has a programmatic equivalent
+ *     (WCAG 1.3.1).
+ * Focus assertions use `waitFor` because `<Tabs>` moves focus in a
+ * `requestAnimationFrame` after the activating re-render.
+ */
+export const KeyboardNavigation: Story = {
+  render: () => <KeyboardNavRenderer />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const inbox = canvas.getByRole('tab', { name: /Inbox/ })
+    const sent = canvas.getByRole('tab', { name: 'Sent' })
+    const archive = canvas.getByRole('tab', { name: 'Archive' })
+
+    // Count is part of the accessible name (WCAG 1.3.1) — the badge is no
+    // longer aria-hidden, so the same tab is findable by "Inbox 5".
+    await expect(canvas.getByRole('tab', { name: /Inbox\s*5/ })).toBe(inbox)
+
+    // Roving tabindex: active tab is focusable, the others are removed from
+    // the Tab sequence.
+    await expect(inbox).toHaveAttribute('tabindex', '0')
+    await expect(sent).toHaveAttribute('tabindex', '-1')
+    await expect(archive).toHaveAttribute('tabindex', '-1')
+
+    // Focus the active tab, then ArrowRight roves focus AND activates the next.
+    inbox.focus()
+    await expect(inbox).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => expect(sent).toHaveFocus())
+    await expect(sent).toHaveAttribute('aria-selected', 'true')
+    await expect(sent).toHaveAttribute('tabindex', '0')
+    await expect(inbox).toHaveAttribute('tabindex', '-1')
+
+    // End jumps to the last tab; Home wraps back to the first.
+    await userEvent.keyboard('{End}')
+    await waitFor(() => expect(archive).toHaveFocus())
+    await expect(archive).toHaveAttribute('aria-selected', 'true')
+
+    await userEvent.keyboard('{Home}')
+    await waitFor(() => expect(inbox).toHaveFocus())
+    await expect(inbox).toHaveAttribute('aria-selected', 'true')
+  },
+}
+
+/**
+ * 6) Chip Appearance (regression)
  *
  * `appearance="chips"` renders each tab as a rounded pill and drops the
  * tablist's bottom border. It is PURELY cosmetic: this play test pins the
