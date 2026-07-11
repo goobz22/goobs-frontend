@@ -1,6 +1,8 @@
 # FileDropzone — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** PARTIAL — every in-directory fix is applied; one root fix (issue 3,
+exposing a `labelId` from FieldShell) is DEFERRED to a shared file this agent
+does not own.
 
 **APG pattern:** No single APG widget pattern — this is a **custom file-upload
 control**: a native `<button>` drop target that opens a hidden
