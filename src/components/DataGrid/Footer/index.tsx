@@ -20,6 +20,8 @@ const SettingsIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -39,6 +41,8 @@ const DownloadIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <polyline points="7 10 12 15 17 10" />
@@ -57,6 +61,8 @@ const PdfIcon: React.FC<{ color?: string }> = ({ color = 'currentColor' }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
@@ -79,6 +85,8 @@ const ChevronFirstIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <polyline points="11 17 6 12 11 7" />
     <polyline points="18 17 13 12 18 7" />
@@ -97,6 +105,8 @@ const ChevronLastIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <polyline points="6 17 11 12 6 7" />
     <polyline points="13 17 18 12 13 7" />
@@ -115,6 +125,8 @@ const ChevronLeftIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <polyline points="15 18 9 12 15 6" />
   </svg>
@@ -132,6 +144,8 @@ const ChevronRightIcon: React.FC<{ color?: string }> = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
   >
     <polyline points="9 18 15 12 9 6" />
   </svg>
@@ -525,15 +539,24 @@ const ExportMenu: React.FC<{
       }
       computeMenuPosition()
     }
+    // Escape closes the menu and returns focus to the trigger (WCAG 2.1.2).
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
       window.addEventListener('scroll', handleReposition, true)
       window.addEventListener('resize', handleReposition)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('scroll', handleReposition, true)
       window.removeEventListener('resize', handleReposition)
     }
@@ -561,13 +584,25 @@ const ExportMenu: React.FC<{
         ref={menuRef}
         className={cssStyles.exportMenu}
         data-theme={theme}
+        role="menu"
+        aria-label="Export options"
         style={{ top: menuPosition.top, left: menuPosition.left }}
       >
-        <button onClick={handleExportCSV} className={cssStyles.exportMenuItem}>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={handleExportCSV}
+          className={cssStyles.exportMenuItem}
+        >
           <DownloadIcon color="currentColor" />
           Export CSV
         </button>
-        <button onClick={handleExportPdf} className={cssStyles.exportMenuItem}>
+        <button
+          type="button"
+          role="menuitem"
+          onClick={handleExportPdf}
+          className={cssStyles.exportMenuItem}
+        >
           <PdfIcon color="currentColor" />
           Export PDF
         </button>
@@ -579,11 +614,14 @@ const ExportMenu: React.FC<{
   return (
     <div className={cssStyles.exportMenuWrapper}>
       <button
+        type="button"
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={cssStyles.exportCogBtn}
         data-open={isOpen ? 'true' : 'false'}
         aria-label="Export options"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
         title="Export options"
       >
         <SettingsIcon color="currentColor" />

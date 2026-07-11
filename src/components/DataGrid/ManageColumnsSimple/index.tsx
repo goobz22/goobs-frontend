@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useId, useRef } from 'react'
 import type { ColumnDef, DataGridStyles } from '../types'
 import Checkbox from '../../Checkbox'
 import cssStyles from '../DataGrid.module.css'
@@ -29,6 +29,53 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
   // original only branched on sacred vs. not, so any non-sacred theme maps to
   // the light look. isSacredTheme is still used for the Checkbox theme prop.
   const theme = styles?.theme || 'light'
+
+  const titleId = useId()
+  const modalRef = useRef<HTMLDivElement>(null)
+  const doneBtnRef = useRef<HTMLButtonElement>(null)
+
+  // Dialog behavior (WCAG 2.1.2 / 2.4.3 / 4.1.2): trap Tab focus inside the
+  // modal, close on Escape, move focus in on open, and restore focus to the
+  // trigger on close.
+  useEffect(() => {
+    if (!open) return
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    // Move focus into the dialog once it mounts.
+    doneBtnRef.current?.focus()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation()
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab') return
+
+      const focusables = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (!focusables || focusables.length === 0) return
+      const first = focusables[0]!
+      const last = focusables[focusables.length - 1]!
+      const active = document.activeElement
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true)
+      // Restore focus to whatever opened the dialog.
+      previouslyFocused?.focus?.()
+    }
+  }, [open, onClose])
 
   if (!open) return null
 
@@ -59,11 +106,17 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
   return (
     <div className={cssStyles.manageColumnsOverlay} onClick={onClose}>
       <div
+        ref={modalRef}
         className={cssStyles.manageColumnsModal}
         data-theme={theme}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         onClick={e => e.stopPropagation()}
       >
-        <h3 className={cssStyles.manageColumnsTitle}>{'Manage Columns'}</h3>
+        <h3 id={titleId} className={cssStyles.manageColumnsTitle}>
+          {'Manage Columns'}
+        </h3>
 
         <div>
           {columns.map(column => {
@@ -89,6 +142,9 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
                   onChange={checked =>
                     handleToggleColumn(column.field, checked)
                   }
+                  // The adjacent column name is a plain <span>, not a <label>,
+                  // so name the toggle programmatically (WCAG 1.3.1 / 4.1.2).
+                  aria-label={`Show ${column.headerName || column.field} column`}
                   styles={{
                     theme: isSacredTheme ? 'sacred' : 'light',
                   }}
@@ -98,7 +154,12 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
           })}
         </div>
 
-        <button onClick={onClose} className={cssStyles.manageColumnsDoneBtn}>
+        <button
+          ref={doneBtnRef}
+          type="button"
+          onClick={onClose}
+          className={cssStyles.manageColumnsDoneBtn}
+        >
           Done
         </button>
       </div>
