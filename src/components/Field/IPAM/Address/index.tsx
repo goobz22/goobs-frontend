@@ -233,8 +233,7 @@ const calculateNetworkRange = (
 
 const calculateUsableIPRange = (
   subnetAddress: string,
-  subnetCIDR: number,
-  gatewayIP?: string
+  subnetCIDR: number
 ): { start: string; end: string } | null => {
   if (!isValidIPAddress(subnetAddress) || !subnetCIDR) return null
   const subnetMask = cidrToMask(subnetCIDR)
@@ -243,14 +242,6 @@ const calculateUsableIPRange = (
   const broadcastNum = ipToNumber(range.end)
   const usableStart = networkNum + 1
   const usableEnd = broadcastNum - 1
-  if (gatewayIP && isValidIPAddress(gatewayIP)) {
-    const gatewayNum = ipToNumber(gatewayIP)
-    if (gatewayNum >= usableStart && gatewayNum <= usableEnd) {
-      console.log(
-        `Gateway IP ${gatewayIP} is in the usable range and will be excluded`
-      )
-    }
-  }
   return { start: numToIP(usableStart), end: numToIP(usableEnd) }
 }
 

@@ -199,7 +199,6 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
       summary={accordionSummary}
       expanded={isExpanded}
       onChange={(_, expanded) => {
-        console.log('Accordion onChange called, expanded:', expanded)
         setIsExpanded(expanded)
       }}
       styles={{
