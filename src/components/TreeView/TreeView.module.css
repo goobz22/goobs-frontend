@@ -225,6 +225,23 @@
   box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
+/* Keyboard focus is ALWAYS visible (WCAG 2.4.7), independent of the JS
+   data-focused state — this covers the instant Tab first lands roving focus
+   on a node before/without any pointer or JS focus-state update. */
+.item:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
+
+.item[data-theme='dark']:focus-visible {
+  outline-color: rgba(96, 165, 250, 0.6);
+}
+
+.item[data-theme='sacred']:focus-visible {
+  outline-color: var(--goobs-gold-a80);
+  outline-offset: 3px;
+}
+
 /* ---- DARK item ---- */
 .item[data-theme='dark'] {
   color: var(--goobs-dark-text-secondary);
@@ -439,4 +456,43 @@
 
 .label[data-theme='sacred'] {
   transition: var(--goobs-transition-premium);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — honor prefers-reduced-motion by dropping the
+   hover slide/scale micro-motion and all transitions. The decorative
+   SacredBackground particle canvas is separately halted in JS (it paints one
+   static frame instead of animating).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .item,
+  .iconContainer,
+  .checkbox,
+  .label {
+    transition: none;
+  }
+
+  /* Match the exact specificity of the guarded hover rules above (the :not()
+     guards raise their specificity), so these transform resets win by source
+     order. */
+  .item:hover:not(
+      [data-disabled='true'],
+      [data-selected='true'],
+      [data-expanded='true']
+    ),
+  .item[data-theme='dark']:hover:not(
+      [data-disabled='true'],
+      [data-selected='true'],
+      [data-expanded='true']
+    ),
+  .item[data-theme='sacred']:hover:not(
+      [data-disabled='true'],
+      [data-selected='true'],
+      [data-expanded='true']
+    ),
+  .iconContainer:hover svg,
+  .iconContainer[data-theme='sacred']:hover svg {
+    transform: none;
+  }
 }

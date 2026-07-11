@@ -851,6 +851,95 @@ export const InteractionTest: Story = {
 }
 
 // --------------------------------------------------------------------------
+// ACCESSIBILITY TESTS
+// --------------------------------------------------------------------------
+
+/**
+ * Exercises the full WAI-ARIA APG Tree View keyboard interaction and the
+ * structural ARIA the pattern requires. Pinned observable state:
+ *  - child nodes live inside a `role="group"` container;
+ *  - each node carries `aria-level` / `aria-setsize` / `aria-posinset`;
+ *  - exactly ONE node is in the Tab sequence at a time (roving `tabindex`),
+ *    and it follows focus;
+ *  - Down / Up move roving focus between visible nodes, End / Home jump to the
+ *    last / first, and Left / Right collapse / expand the focused parent.
+ */
+export const KeyboardNavigation: Story = {
+  name: 'Accessibility/Keyboard Navigation',
+  args: {
+    items: sampleTreeData,
+    defaultExpandedItems: ['documents'],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const items = canvas.getAllByRole('treeitem')
+
+    // Child treeitems are wrapped in a role="group" container (APG Tree View).
+    const groups = canvasElement.querySelectorAll('[role="group"]')
+    await expect(groups.length).toBeGreaterThan(0)
+
+    // Structural ARIA: level + set position/size are exposed to assistive tech.
+    await expect(items[0]).toHaveAttribute('aria-level', '1')
+    await expect(items[0]).toHaveAttribute('aria-setsize', '3')
+    await expect(items[0]).toHaveAttribute('aria-posinset', '1')
+
+    // Roving tabindex: only the first node is initially in the Tab sequence.
+    await expect(items[0]).toHaveAttribute('tabindex', '0')
+    await expect(items[1]).toHaveAttribute('tabindex', '-1')
+
+    // Tab enters the tree onto the first node.
+    items[0].focus()
+    await expect(items[0]).toHaveFocus()
+
+    // Down / Up move roving focus, and the tabindex follows focus.
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(items[1]).toHaveFocus()
+    await expect(items[1]).toHaveAttribute('tabindex', '0')
+    await expect(items[0]).toHaveAttribute('tabindex', '-1')
+
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(items[0]).toHaveFocus()
+
+    // End / Home jump to the last / first visible node.
+    await userEvent.keyboard('{End}')
+    await expect(items[items.length - 1]).toHaveFocus()
+    await userEvent.keyboard('{Home}')
+    await expect(items[0]).toHaveFocus()
+
+    // 'Documents' (items[0]) is expanded by default → Left collapses it,
+    // Right re-expands it.
+    await userEvent.keyboard('{ArrowLeft}')
+    await expect(items[0]).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(items[0]).toHaveAttribute('aria-expanded', 'true')
+  },
+}
+
+/**
+ * The tree accepts an `aria-label` (forwarded to the `role="tree"` element)
+ * so the whole widget has an accessible name (WCAG 4.1.2). Pinned observable
+ * state: the tree exposes the accessible name 'File browser'.
+ */
+export const WithAccessibleLabel: Story = {
+  name: 'Accessibility/With Accessible Label',
+  args: {
+    items: sampleTreeData,
+    defaultExpandedItems: ['documents'],
+    styles: { theme: 'light' },
+    'aria-label': 'File browser',
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByRole with an accessible name proves the aria-label is wired through.
+    const tree = canvas.getByRole('tree', { name: 'File browser' })
+    await expect(tree).toBeInTheDocument()
+  },
+}
+
+// --------------------------------------------------------------------------
 // PERFORMANCE TEST
 // --------------------------------------------------------------------------
 
