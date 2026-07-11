@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useId, useRef, useEffect } from 'react'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import type { ColumnDef } from '../types'
 import cssStyles from '../DataGrid.module.css'
@@ -42,6 +42,9 @@ function CardField({
   const inputRef = useRef<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
   >(null)
+  // Stable id linking the visible <label> to the native edit control so the
+  // input has a programmatic accessible name (WCAG 1.3.1 / 4.1.2).
+  const inputId = useId()
 
   const theme = styles?.theme || 'sacred'
 
@@ -179,6 +182,7 @@ function CardField({
     if (column.type === 'dropdown' && column.dropdownOptions) {
       return (
         <select
+          id={inputId}
           ref={inputRef as React.RefObject<HTMLSelectElement>}
           value={editingValue}
           onChange={e => onEditingValueChange(e.target.value)}
@@ -199,6 +203,7 @@ function CardField({
     if (column.type === 'date') {
       return (
         <input
+          id={inputId}
           ref={inputRef as React.RefObject<HTMLInputElement>}
           type="date"
           value={editingValue ? editingValue.split('T')[0] : ''}
@@ -213,6 +218,7 @@ function CardField({
 
     return (
       <input
+        id={inputId}
         ref={inputRef as React.RefObject<HTMLInputElement>}
         type={inputType}
         value={editingValue}
@@ -225,27 +231,33 @@ function CardField({
 
   return (
     <div className={cssStyles.field} data-field={column.field}>
-      <label className={cssStyles.fieldLabel}>{column.headerName}</label>
+      <label className={cssStyles.fieldLabel} htmlFor={inputId}>
+        {column.headerName}
+      </label>
       {isEditing ? (
         <div className={cssStyles.fieldEditContainer}>
           {renderInput()}
           <button
+            type="button"
+            aria-label={`Save ${column.headerName}`}
             className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnSave}`}
             onClick={e => {
               e.stopPropagation()
               handleSave()
             }}
           >
-            ✓
+            <span aria-hidden="true">✓</span>
           </button>
           <button
+            type="button"
+            aria-label={`Cancel editing ${column.headerName}`}
             className={`${cssStyles.fieldBtn} ${cssStyles.fieldBtnCancel}`}
             onClick={e => {
               e.stopPropagation()
               onCellCancel()
             }}
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
       ) : (

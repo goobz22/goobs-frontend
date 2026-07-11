@@ -158,8 +158,9 @@ function Card({
       {/* Left accent bar */}
       <div className={cssStyles.accentBar} />
 
-      {/* Selection Indicator - Always visible */}
-      <div className={cssStyles.selectionIndicator}>
+      {/* Selection Indicator - Always visible. Decorative: the selected state
+          is conveyed programmatically via aria-selected on the row above. */}
+      <div className={cssStyles.selectionIndicator} aria-hidden="true">
         {isSelected ? (
           <span className={cssStyles.checkmark}>✓</span>
         ) : (
@@ -219,13 +220,19 @@ function Card({
       {/* Expand/Collapse Button - only show if more than 3 secondary fields */}
       {hasSecondaryFields && secondaryFields.length > 3 && (
         <button
+          type="button"
+          aria-expanded={isExpanded}
           className={cssStyles.expandBtn}
           onClick={e => {
             e.stopPropagation()
             setIsExpanded(!isExpanded)
           }}
         >
-          <span className={cssStyles.expandIcon} data-expanded={isExpanded}>
+          <span
+            className={cssStyles.expandIcon}
+            data-expanded={isExpanded}
+            aria-hidden="true"
+          >
             ▼
           </span>
           {isExpanded
