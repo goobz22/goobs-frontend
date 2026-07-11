@@ -77,8 +77,8 @@ owned by that component).
 | 9 | Moderate | 1.1.1 Non-text Content (A), 4.1.2 (A) | decorative icons: nav-button chevrons/calendar `index.tsx`, view-toggle icons, `CalendarFilters.tsx:112` filter icon | **FIXED** |
 | 10 | Serious | 2.1.1 Keyboard (A), 4.1.2 (A), 1.1.1 (A) | `CalendarFilters.tsx` clear-all control was a `<div onClick>` with an unlabelled `CloseIcon` (no name, no keyboard) | **FIXED** |
 | 11 | Minor | 2.4.6 Headings & Labels (AA) | nav-button labels were bare "Previous"/"Next"/"Today" (no unit context) | **FIXED** |
-| 12 | Minor | 1.3.1 (A) | ToggleButtonGroup view switcher has no group name / `role="group" aria-label` | **DEFERRED** (unowned — `ToggleButtonGroup`) |
-| 13 | Moderate | 1.3.1 (A) / SEO | no real `<h1>-<h6>` for the current period; Typography only renders `<span>` | **DEFERRED** (unowned — `Typography` can't render heading elements) |
+| 12 | Minor | 1.3.1 (A) | ToggleButtonGroup view switcher has no group name / `role="group" aria-label` | **FIXED** (in-component wrapper — Rev #3) |
+| 13 | Moderate | 1.3.1 (A) / SEO | no real `<h1>-<h6>` for the current period; Typography only renders `<span>` | **FIXED** (in-component raw heading + region — Rev #2) |
 | 14 | Minor | 1.4.13 Content on Hover or Focus (AA) | event Tooltip shows on hover only, not keyboard focus | **DEFERRED** (unowned — `Tooltip`; mitigated here via `aria-label`) |
 
 ### Issue 1 — Day/hour cells not keyboard-operable, no role (Critical)
@@ -140,8 +140,9 @@ No information is conveyed by sound, so WCAG 1.2.x / 1.4.2 do not apply. **No is
   in-cell event `<button>` from hijacking grid navigation.
 - **Roles/states (4.1.2):** month `grid`/`row`/`columnheader`/`rowgroup`/`gridcell` with
   `aria-multiselectable`, `aria-selected`, `aria-current="date"`, and a full-date +
-  event-count `aria-label` per cell; week/day `role="group"` + `role="button"` hour cells
-  with `aria-pressed`, `aria-current="time"`, and a full date-+-hour `aria-label`.
+  event-count `aria-label` per cell; week/day hour cells are `role="button"` toggles inside
+  a labelled `role="toolbar"` composite (day view: `aria-orientation="vertical"`), each with
+  `aria-pressed`, `aria-current="time"`, and a full date-+-hour `aria-label`.
   Column-header `aria-label`s use full weekday names ("Sunday" not "Sun").
 - **Accessible names:** every interactive element now has one — nav buttons (labelled),
   event buttons/chips (`aria-label` / `.srOnly`), cells (`aria-label`), clear-filters
@@ -169,10 +170,11 @@ No information is conveyed by sound, so WCAG 1.2.x / 1.4.2 do not apply. **No is
   state via buttons), so the `<a href>` / `linkComponent` checklist item does not apply.
 - **All meaningful content in SSR HTML:** yes — events, dates, headers all render
   server-side; nothing primary is client-only injected. No canvas/QR content.
-- **Headings:** the component exposes no real `<h1>-<h6>` for the current period — see
-  Deferred #13 (the shared `Typography` primitive renders only `<span>`, and it is not in
-  this component's ownership). The grid's `aria-label` + the live region carry the period
-  name for AT in the meantime.
+- **Headings:** the component now renders a real `<h{headingLevel}>` (default `<h2>`) for
+  the current period (Rev #2), visually hidden but in the SSR'd HTML, so the crawled markup
+  carries a heading and screen-reader users can jump to it. The whole component is also a
+  `role="region"` landmark named by that heading. The grid's `aria-label` + the live region
+  continue to carry the period name for AT.
 
 ## Fixes applied
 
@@ -197,12 +199,17 @@ pattern untouched).
    with full-name `columnheader`s; `rowgroup` + `display:contents` week `row`s; `gridcell`s
    with `tabIndex`/`data-focus-key`/`aria-selected`/`aria-current`/`aria-label`/`onKeyDown`
    (`index.tsx:848-935`).
-7. Week & day: `role="group"` + period `aria-label`; `aria-hidden` on the redundant time
-   column; hour cells as `role="button"` toggles with roving tabindex + aria + keydown
-   (`index.tsx:959-`, `1093-`).
-8. Live region (`index.tsx:1285`); nav buttons `type="button"` + unit-aware `aria-label`s
+7. Week & day: outer `role="group"` + period `aria-label`; the hour-cell container is a
+   labelled `role="toolbar"` composite (day: `aria-orientation="vertical"` — Rev #1);
+   `aria-hidden` on the redundant time column; hour cells as `role="button"` toggles with
+   roving tabindex + aria + keydown.
+8. Live region; nav buttons `type="button"` + unit-aware `aria-label`s
    (`Previous {view}` / `Go to today` / `Next {view}`) + `aria-hidden` icons; view-toggle
    icons `aria-hidden`.
+9. Root `role="region"` + `aria-labelledby` a visually-hidden real heading
+   `<h{headingLevel}>` for the period (new additive `headingLevel` prop, default 2 — Rev #2);
+   view toggles wrapped in `role="group" aria-label="Calendar view"` via a `display:contents`
+   `.viewSwitcherGroup` wrapper (Rev #3).
 
 **`BigCalendar.module.css`**
 9. `--bc-focus-ring` token per theme (`:81`, `:137`, `:182`); `.gridRow { display: contents }`
@@ -236,20 +243,29 @@ date-fns):
 - **`A11y/Hour Cell Keyboard`** — day-view hour `button` with full date+hour name; `Enter`
   flips `aria-pressed` false→true.
 
-## Deferred
+Adversarial-review follow-up stories (2026-07-11), each failing if the matching wiring
+regresses:
 
-- **#12 — view-switcher group name (unowned).** `ToggleButtonGroup` renders a `<div>` with
-  no `role="group"`/`aria-label` and exposes no prop to add one. **Suggested change (in
-  `src/components/ToggleButton/index.tsx`, the group `<div>` ~line 233):** accept an
-  optional `aria-label` prop and, when a group of related toggles is present, emit
-  `role="group"` + that label. BigCalendar would then pass `aria-label="Calendar view"`.
-- **#13 — real heading for the current period (unowned).** The `Typography` primitive
-  (`src/components/Typography/index.tsx:483`) always renders a `<span>` and accepts no
-  `component`/`as` prop, so a real `<h2>` for "June 2026" cannot be produced without
-  either editing `Typography` or having BigCalendar render a raw heading element.
-  **Suggested change:** add an `as`/`component?: 'span' | 'h1'…'h6' | 'p'` prop to
-  `Typography` (default `'span'`, additive); BigCalendar would then add a `headingLevel`
-  prop and render the period as a heading. Left as an additive enhancement.
+- **`A11y/Week Day Navigation`** — week view: asserts the hour cells live in a labelled
+  `role="toolbar"`, then `ArrowRight`→next day, `ArrowLeft`→back, `ArrowDown`→next hour,
+  `Home`→7 AM, `End`→6 PM, tracking focus each step (Rev #1 + the day-nav branch).
+- **`A11y/Month Page Navigation`** — `PageDown` June 15→July 15 (month change + focus
+  follow + grid label updates to "July 2026"), `PageUp` back to June 15.
+- **`A11y/Month Home End`** — `Home` June 16→June 14 (Sunday), `End`→June 20 (Saturday).
+- **`A11y/Current Date + Hour`** & **`A11y/Current Hour`** — real current date; assert a
+  month gridcell carries `aria-current="date"` and a day hour cell carries
+  `aria-current="time"` (snapshot disabled so the daily date doesn't churn Chromatic).
+- **`A11y/Nav Button Labels`** — asserts "Previous/Next month" + "Go to today", then clicks
+  the Week toggle and asserts the labels re-unit to "Previous/Next week".
+- **`A11y/View Switcher Group`** — the toggles are inside a `role="group"` named
+  "Calendar view" (Rev #3).
+- **`A11y/Region + Heading`** — the root is a `region` named by the period, and a real
+  `<h2>` carries the period (Rev #2).
+- **`A11y/Clear Filters Button`** — seeds one active filter, resolves the labelled
+  "Clear all filters" `<button>`, clicks it, and asserts `onFiltersChange({})`.
+
+## Deferred / unowned
+
 - **#14 — Tooltip on focus (unowned).** `StyledTooltip`
   (`src/components/Tooltip/index.tsx:308-315`) opens on `onMouseEnter`/`onMouseLeave` only,
   never on `focus`/`blur`, so keyboard users don't get the visual bubble
@@ -259,9 +275,21 @@ date-fns):
   inaccessible — the Tooltip is now purely a sighted-pointer enhancement.
 
 **Note on scope of the grid model:** week/day hour cells are individually keyboard-operable
-buttons with roving tabindex inside a labelled group (fully WCAG-conformant), rather than a
-full `role="grid"` — a deliberate call because the DOM is column-major (transposed from the
-visual hour-rows) and forcing a grid role would mis-describe the structure to AT. Upgrading
-week/day to a true transposed grid (row=hour, column=day) with `columnheader`/`rowheader`
-would be a larger DOM refactor; recorded here as a possible future enhancement, not a
-defect.
+buttons with roving tabindex inside a labelled **`role="toolbar"`** composite container
+(fully WCAG-conformant, and the toolbar role advertises the arrow-key model — Rev #1), rather
+than a full `role="grid"` — a deliberate call because the DOM is column-major (transposed from
+the visual hour-rows) and forcing a grid role (which requires `row`/`gridcell`, incompatible
+with keeping the hour cells as `role="button"` toggles) would mis-describe the structure to
+AT. Upgrading week/day to a true transposed grid (row=hour, column=day) with
+`columnheader`/`rowheader` would be a larger DOM refactor; recorded here as a possible future
+enhancement, not a defect.
+
+**Newly-found (queued, pre-existing, low severity):** in week/day view a *clickable* event
+(when `onEventClick` is set) renders as a native `<button>` nested inside a `role="button"`
+hour cell (`index.tsx` `renderEvent` inside the hour-cell `<div role="button">`) — a
+nested-interactive pattern. It is pre-existing (not introduced by this pass) and only occurs
+when a consumer both sets `onEventClick` AND uses week/day view with events landing in an
+hour cell. A clean fix would move the hour-cell selection off `role="button"` (e.g. a
+`gridcell`/`option` model) so it no longer nests interactives — but that would change the
+established `role="button"`+`aria-pressed` machine-test/AT contract and is out of scope for
+this review; recorded for a future dedicated pass.
