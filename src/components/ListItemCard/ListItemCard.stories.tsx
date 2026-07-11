@@ -106,3 +106,41 @@ export const SelectedDark: Story = {
   ),
   globals: { backgrounds: { value: 'dark' } },
 }
+
+/**
+ * Accessible name of a SELECTABLE row.
+ *
+ * Each `onSelect` row is a `role="button"` widget (Enter/Space activate,
+ * `aria-pressed` reflects `selected`). Its accessible NAME comes from
+ * `aria-labelledby` pointed at the Content title + subtitle spans — so a
+ * screen reader announces "Draft proposal, Pricing + scope, toggle button,
+ * pressed" rather than a concatenation of the order badge, leading icon, and
+ * every nested control's label. Selecting a row here reads as its title, and
+ * the selected state is conveyed non-visually via `aria-pressed` (never by the
+ * accent ring alone). The order badge and leading icon stay `aria-hidden` so
+ * they don't pollute that name.
+ */
+function SelectableList() {
+  const [selectedId, setSelectedId] = useState<string>('b')
+  return (
+    <ul role="list" style={{ display: 'grid', gap: 8, padding: 0, margin: 0 }}>
+      {initialSteps.map((step, index) => (
+        <ListItemCard
+          key={step.id}
+          selected={selectedId === step.id}
+          onSelect={() => setSelectedId(step.id)}
+          styles={{ theme: 'light' }}
+        >
+          <ListItemCard.Order>{index + 1}</ListItemCard.Order>
+          <ListItemCard.Icon>📍</ListItemCard.Icon>
+          <ListItemCard.Content title={step.name} subtitle={step.description} />
+        </ListItemCard>
+      ))}
+    </ul>
+  )
+}
+
+export const SelectableAccessibleName: Story = {
+  render: () => <SelectableList />,
+  globals: { backgrounds: { value: 'light' } },
+}

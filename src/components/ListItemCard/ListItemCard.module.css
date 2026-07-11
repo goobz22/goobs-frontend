@@ -65,14 +65,23 @@
   border-left-color: var(--list-item-accent, var(--list-accent));
 }
 
-/* Selectable rows show a pointer + hover background. */
+/* Selectable rows show a pointer + hover background. The hover feedback is an
+   affordance (not motion), so it applies regardless of motion preference; only
+   the color TRANSITION is suppressed for reduced-motion users (below). */
 .root[data-selectable='true'] {
   cursor: pointer;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .root[data-selectable='true']:hover {
-    background-color: var(--list-bg-hover);
+.root[data-selectable='true']:hover {
+  background-color: var(--list-bg-hover);
+}
+
+/* Respect prefers-reduced-motion (WCAG 2.3.3): keep every state change instant
+   — no animated background/border/shadow tween — while preserving the states
+   themselves (hover wash, selected ring, focus outline). */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
   }
 }
 

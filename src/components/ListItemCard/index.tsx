@@ -226,6 +226,29 @@ function ListItemCardInner({
     }
   }, [selected])
 
+  // aria-labelledby reconciliation. Only a SELECTABLE row (`role="button"`)
+  // needs a computed name, and `<ListItemCard.Content>` — which owns the
+  // title/subtitle id elements — is OPTIONAL and arbitrarily nested, so the
+  // root cannot know at render time whether it mounted. The SSR markup emits
+  // `aria-labelledby={titleId}` (identical hydration output); after mount we
+  // reconcile as a plain DOM mutation: point it at whichever of the
+  // title/subtitle ids actually resolved, or drop it entirely when neither
+  // did (a dangling idref is what a11y scanners flag). Mirrors Card's title
+  // reconciliation.
+  React.useEffect(() => {
+    if (!selectable) return
+    const node = rootElementRef.current
+    if (node === null) return
+    const resolvedIds = [titleId, subtitleId].filter(
+      id => document.getElementById(id) !== null
+    )
+    if (resolvedIds.length > 0) {
+      node.setAttribute('aria-labelledby', resolvedIds.join(' '))
+    } else {
+      node.removeAttribute('aria-labelledby')
+    }
+  }, [selectable, titleId, subtitleId, children])
+
   const handleSelect = (): void => {
     onSelect?.()
   }
@@ -253,6 +276,9 @@ function ListItemCardInner({
         role: 'button',
         tabIndex: 0,
         'aria-pressed': selected,
+        // Named by its own title (SSR baseline; the effect above upgrades this
+        // to include the subtitle and drops it if no title element mounted).
+        'aria-labelledby': titleId,
         onClick: handleSelect,
         onKeyDown: handleKeyDown,
       }
@@ -260,7 +286,7 @@ function ListItemCardInner({
 
   return (
     <li
-      ref={ref}
+      ref={assignRootRef}
       className={mergeClassNames(cssStyles.root, className)}
       data-component="ListItemCard"
       data-list-item-card="true"
@@ -380,14 +406,25 @@ const ListItemCardContent = forwardRef<
   HTMLDivElement,
   ListItemCardContentProps
 >(function ListItemCardContent({ title, subtitle, children }, ref) {
-  useListItemCardContext()
+  // `id`s let a selectable row name itself via aria-labelledby (see the root's
+  // reconciliation effect) — the title/subtitle text is the row's real name,
+  // not the concatenation of its nested control labels.
+  const { titleId, subtitleId } = useListItemCardContext()
   return (
     <div ref={ref} className={cssStyles.content} data-list-item-content="true">
-      <span className={cssStyles.title} data-list-item-title="true">
+      <span
+        id={titleId}
+        className={cssStyles.title}
+        data-list-item-title="true"
+      >
         {title}
       </span>
       {subtitle !== undefined && (
-        <span className={cssStyles.subtitle} data-list-item-subtitle="true">
+        <span
+          id={subtitleId}
+          className={cssStyles.subtitle}
+          data-list-item-subtitle="true"
+        >
           {subtitle}
         </span>
       )}
