@@ -177,3 +177,66 @@ export const FullWidth: Story = {
   // Color is `inherit` (black here) — needs the light canvas, not sacred.
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// Exercise the a11y guarantees added in the 2026-07-11 audit: reflow-safe
+// media (WCAG 1.4.10) and a surface-adaptive keyboard focus ring (WCAG 2.4.7).
+// --------------------------------------------------------------------------
+
+/**
+ * Reflow-safe media (WCAG 1.4.10 Reflow). A deliberately 1200px-wide image is
+ * clamped to the content width by `.root img { max-width: 100% }`, and the long
+ * unbroken code line scrolls INSIDE its own `<pre>` box
+ * (`.root pre { overflow-x: auto }`) instead of forcing a two-dimensional page
+ * scroll. Rendered in a narrow 360px frame so the constraints are visible; the
+ * image is a self-contained inline SVG data-URI so it renders offline.
+ */
+export const ReflowSafeMedia: Story = {
+  name: 'A11y/Reflow-safe media',
+  args: {
+    children: [
+      '# Reflow-safe rendering',
+      '',
+      "![1200px-wide demo banner](data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='200'><rect width='1200' height='200' fill='steelblue'/><text x='40' y='115' font-family='sans-serif' font-size='38' fill='white'>1200px image, clamped to container</text></svg>)",
+      '',
+      'The fenced block below holds one very long line that must scroll inside its own box, not widen the page:',
+      '',
+      '```',
+      "const wide = 'a-single-unbroken-line-of-code-far-wider-than-any-narrow-viewport-that-must-not-force-the-page-to-scroll-sideways-1234567890'",
+      '```',
+    ].join('\n'),
+    maxWidth: 0,
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '360px', padding: '1rem', color: '#1a1a1a' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Keyboard focus indicator (WCAG 2.4.7 Focus Visible). Tab through the rendered
+ * links: `.root a:focus-visible` draws a `currentColor` outline that stays
+ * visible on any surface. Shown on the dark canvas — where a UA-default dark
+ * outline would otherwise vanish — to prove the ring adapts to the inherited
+ * text color.
+ */
+export const FocusableLinks: Story = {
+  name: 'A11y/Focusable links (dark)',
+  args: {
+    children:
+      'Tab through these links to see the focus ring: [first link](https://example.com), [second link](https://example.org), and [third link](https://example.net).',
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '640px', padding: '1.5rem', color: '#e6e6e6' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'dark' } },
+}
