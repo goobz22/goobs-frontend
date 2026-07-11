@@ -8,6 +8,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React from 'react'
+import { userEvent, within, expect, fn, waitFor } from 'storybook/test'
 import BigCalendar, { type CalendarEvent } from './index'
 
 // Fixed anchor so the rendered period is stable in snapshots.
@@ -210,4 +211,177 @@ export const NoEvents: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY (WCAG 2.2) — each play function is a regression test that
+// fails if the a11y wiring regresses.
+// --------------------------------------------------------------------------
+
+/**
+ * The month view is a WAI-ARIA grid: `role="grid"` (multi-selectable, labelled
+ * with the month), seven `columnheader`s named by full weekday, and each day a
+ * `gridcell` whose accessible name is the full date + event count. The selected
+ * day owns the single roving tab stop (`tabindex="0"`). A polite live region
+ * echoes the current period for screen readers (WCAG 1.3.1, 4.1.2, 4.1.3).
+ */
+export const A11yGridSemantics: Story = {
+  name: 'A11y/Grid Semantics',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const grid = canvas.getByRole('grid')
+    expect(grid).toHaveAttribute('aria-multiselectable', 'true')
+    expect(grid).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('June 2026')
+    )
+
+    const headers = canvas.getAllByRole('columnheader')
+    expect(headers).toHaveLength(7)
+    expect(headers[0]).toHaveAttribute('aria-label', 'Sunday')
+    expect(headers[6]).toHaveAttribute('aria-label', 'Saturday')
+
+    // June 15 is the selected day → carries the roving tab stop + event count.
+    const selectedCell = canvas.getByRole('gridcell', {
+      name: /Monday, June 15, 2026, 2 events/,
+    })
+    expect(selectedCell).toHaveAttribute('tabindex', '0')
+
+    // Live region announces the period.
+    expect(canvas.getByText('Month view, June 2026')).toBeInTheDocument()
+  },
+}
+
+/**
+ * Full keyboard grid navigation (WCAG 2.1.1): arrow keys move the roving focus
+ * by day / week; the moved-to cell becomes the tab stop and receives focus.
+ */
+export const A11yKeyboardNavigation: Story = {
+  name: 'A11y/Keyboard Navigation',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const start = canvas.getByRole('gridcell', { name: /June 15, 2026/ })
+    start.focus()
+    expect(start).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 16, 2026/ })
+      ).toHaveFocus()
+    )
+
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 23, 2026/ })
+      ).toHaveFocus()
+    )
+  },
+}
+
+/**
+ * Enter/Space activate a focused day cell exactly like a click, toggling the
+ * selection state which is conveyed programmatically via `aria-selected`
+ * (not color alone — WCAG 1.4.1).
+ */
+export const A11ySelectionAnnounced: Story = {
+  name: 'A11y/Selection Announced',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const cell = canvas.getByRole('gridcell', { name: /June 23, 2026/ })
+    expect(cell).toHaveAttribute('aria-selected', 'false')
+
+    cell.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(cell).toHaveAttribute('aria-selected', 'true'))
+  },
+}
+
+/**
+ * Clickable events render as real `<button>`s (keyboard-operable) whose full
+ * accessible name — title, resource, description, and start–end time — rides on
+ * `aria-label`, because the hover Tooltip is not exposed to assistive tech
+ * (WCAG 2.1.1, 4.1.2).
+ */
+export const A11yEventButtons: Story = {
+  name: 'A11y/Event Accessible Names',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    onEventClick: fn(),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    const eventButton = canvas.getByRole('button', {
+      name: /Team Standup - Engineering, Daily sync/,
+    })
+    expect(eventButton).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('9:00 AM to')
+    )
+
+    await userEvent.click(eventButton)
+    expect(args.onEventClick).toHaveBeenCalledTimes(1)
+  },
+}
+
+/**
+ * Week/day hour cells are keyboard-operable buttons: full date + hour
+ * accessible name, `aria-pressed` for the toggle selection, and Enter to
+ * activate (WCAG 2.1.1, 4.1.2, 1.4.1).
+ */
+export const A11yHourCellKeyboard: Story = {
+  name: 'A11y/Hour Cell Keyboard',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'day',
+    startHour: 7,
+    endHour: 19,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const hourCell = canvas.getByRole('button', {
+      name: /Monday, June 15, 2026, 9 AM/,
+    })
+    expect(hourCell).toHaveAttribute('aria-pressed', 'false')
+
+    hourCell.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() =>
+      expect(hourCell).toHaveAttribute('aria-pressed', 'true')
+    )
+  },
 }
