@@ -30,7 +30,7 @@ version and has been brought up to that same standard.
 | 5 | Serious | 4.1.2; 2.1.1 | `index.tsx:253-261` | **Interactive-in-interactive** for `type="menu"` + `href`: an `<a href>` wrapped a nested `<div role="button" tabIndex=0>` → invalid nesting, **two tab stops for one item**, conflicting roles. | FIXED |
 | 6 | Moderate | 1.4.1; 4.1.2 | `index.tsx:224` (`data-active`) | Active menu item was conveyed by **colour + font-weight only** — no programmatic "current" state, so AT users got no signal for the current page. | FIXED |
 | 7 | Moderate | 2.3.3 Animation from Interactions | `Accordion.module.css:159` (icon) + `:56` (container) | The 0.3s chevron rotation and container/summary transitions had **no `prefers-reduced-motion` guard**. | FIXED |
-| 8 | Moderate (SEO) | 1.3.1 | `index.tsx` (absent) | An accordion header is semantically a **heading**, but the component offered no way to render a real `<h1>`–`<h6>` — so SSR'd/crawled markup and SR heading-navigation saw no heading for each section. | FIXED (additive `headingLevel` prop) |
+| 8 | Moderate (SEO) | 1.3.1 | `index.tsx` (absent) | An accordion header is semantically a **heading**, but the component offered no way to render a real `<h1>`–`<h6>` — so SSR'd/crawled markup and SR heading-navigation saw no heading for each section. | FIXED for the Disclosure default via additive `headingLevel`; see review follow-up R3 for the honest scope |
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
@@ -72,7 +72,12 @@ conveyed by sound — clean.**
 - **Real links:** `type="menu"` + `href` renders a genuine `<a href>` (crawlable), preserving
   the `linkComponent` override for Next.js consumers. Previously the `<a>` wrapped a `role=button`
   div; the anchor is now the crawlable, correctly-roled element itself.
-- All summary/details content remains in the SSR'd markup (no client-only injection).
+- **Collapsed panels stay in the SSR'd markup (review follow-up R1):** an accordion-type section
+  with `details` renders its panel **even while collapsed**, hidden from AT + layout via the native
+  `hidden` attribute rather than being conditionally omitted. So all summary AND details content is
+  in the server-rendered HTML and crawlable for every section — no client-only injection, and no
+  collapsed-section content missing from the SSR'd output. (Earlier this section overclaimed: a
+  collapsed default section omitted its panel entirely; that gap is now closed.)
 
 ## Fixes applied
 
@@ -117,8 +122,51 @@ All exercise new behaviour with `play` assertions (the repo's only regression te
   one has `aria-current="page"` while the inactive one does not.
 - **`A11y/Heading Level`** — asserts `headingLevel={3}` renders a real `<h3>` containing the
   toggle button, which still toggles.
+- **`A11y/Collapsed Panel In DOM (SEO)`** (review R1) — asserts a COLLAPSED accordion still has its
+  panel in the DOM with the details text present + `role="region"` + `aria-labelledby` + `hidden`,
+  and that expanding removes `hidden` and reveals it. Pins the SSR/SEO fix.
+- **`A11y/Disabled Menu Link`** (review R2) — asserts a disabled `type="menu"` + `href` item drops
+  its `href`, gains `aria-disabled="true"`, and is no longer exposed as a link role, while an
+  enabled sibling stays a real `<a href>` with no `aria-disabled`.
+- **`A11y/Default (No Heading Wrapper)`** (review R3) — asserts the default (no `headingLevel`)
+  renders an operable disclosure button and NO `heading` role, pinning the deliberate no-default-
+  heading behaviour.
 
-Existing `InteractionTest` (click to expand/collapse) continues to pass against the native button.
+Existing `InteractionTest` (click to expand/collapse) still passes; its collapsed assertions were
+updated from "content absent from DOM" to "content present but not visible" to match the R1 fix
+(the panel is now disclosed, not removed).
+
+## Review follow-ups (adversarial re-review of the a11y pass — all fixed)
+
+- **R1 — SSR/SEO overclaim + real gap (minor, 1.3.1).** The SEO section claimed all details content
+  was in the SSR'd markup, but `hasPanel` gated the panel on `expanded`, so a default-collapsed
+  section rendered NO panel — its content was absent from the SSR'd HTML and invisible to crawlers.
+  **Root-cause fix:** `hasPanel = !isMenuType && Boolean(details)` (no longer gated on `expanded`);
+  the panel renders whenever the section has content and toggles visibility with the native `hidden`
+  attribute (`hidden={!expanded}`). Collapsed = in the DOM (crawlable) but out of the a11y tree and
+  layout; expanded = visible. `aria-controls` is now emitted whenever the panel exists (present when
+  collapsed too — never a dangling IDREF, since the panel is always in the DOM for a content-bearing
+  section). Pinned by `A11y/Collapsed Panel In DOM (SEO)`; `InteractionTest` + `A11y/Keyboard Toggle`
+  updated accordingly. NOTE (markup change per contract): the collapsed accordion panel now ships in
+  the DOM with `hidden` instead of being omitted; no `data-*`/`role`/`aria` attribute was removed
+  (`aria-controls` went from open-only to always-present-when-content-exists — an additive change).
+- **R2 — story-coverage gap for the disabled menu-link state (minor).** The disabled `type="menu"` +
+  `href` behaviour (drop `href` + `aria-disabled="true"`) had no story with assertions, so it was
+  unpinned. **Fix:** added `A11y/Disabled Menu Link` with `play` assertions on both the disabled and
+  enabled cases. No component change (the behaviour was already correct); this closes the regression-
+  test gap.
+- **R3 — APG accordion-heading default (minor, 1.3.1).** The default renders a bare disclosure
+  `<button>` with no heading wrapper unless the consumer opts into `headingLevel`. **Resolution:** the
+  opt-in is the correct design, not a gap to "fix" by forcing a default — a single `<Accordion>` is a
+  valid WAI-ARIA **Disclosure** (which requires no heading), and a context-agnostic primitive cannot
+  choose a correct heading LEVEL; hardcoding one (e.g. always `<h2>`) would corrupt the document
+  outline (its own WCAG 1.3.1 defect) AND silently change every existing consumer's DOM, violating
+  the additive-only public-API contract. The full multi-section Accordion heading pattern remains
+  available and is now explicitly RECOMMENDED for accordion GROUPS via the strengthened `headingLevel`
+  JSDoc, which tells consumers to pass the outline-appropriate level per section. Both modes are now
+  pinned: `A11y/Heading Level` (with heading) and `A11y/Default (No Heading Wrapper)` (without). Issue
+  #8 in the table above is amended to reflect this honest scope: closed for the Disclosure default,
+  consumer-driven for the full Accordion pattern.
 
 ## Deferred
 

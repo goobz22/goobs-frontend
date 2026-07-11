@@ -407,10 +407,10 @@ export const InteractionTest: Story = {
     const canvas = within(canvasElement)
     const summary = canvas.getByText('Test Accordion')
 
-    // Check it's initially collapsed
+    // Initially collapsed — the panel stays in the DOM (SSR/SEO) but is hidden.
     await expect(
-      canvas.queryByText('This is the detailed content', { exact: false })
-    ).toBeNull()
+      canvas.getByText('This is the detailed content', { exact: false })
+    ).not.toBeVisible()
 
     // Click to expand
     await userEvent.click(summary)
@@ -418,11 +418,11 @@ export const InteractionTest: Story = {
       canvas.getByText('This is the detailed content', { exact: false })
     ).toBeVisible()
 
-    // Click to collapse
+    // Click to collapse — back in the DOM, hidden again.
     await userEvent.click(summary)
     await expect(
-      canvas.queryByText('This is the detailed content', { exact: false })
-    ).toBeNull()
+      canvas.getByText('This is the detailed content', { exact: false })
+    ).not.toBeVisible()
   },
 }
 
@@ -433,8 +433,9 @@ export const InteractionTest: Story = {
 /**
  * Keyboard operability (WCAG 2.1.1) + disclosure ARIA (4.1.2). The header row
  * is a real `<button>`, so it is reachable by Tab and toggled with Enter/Space;
- * `aria-expanded` tracks state and `aria-controls` points at the panel while
- * open. (The former `<div role="button">` had no key handler and could not be
+ * `aria-expanded` tracks state and `aria-controls` references the panel, which
+ * is present whether the section is open or closed (it ships collapsed for
+ * SEO). (The former `<div role="button">` had no key handler and could not be
  * operated from the keyboard at all.)
  */
 export const KeyboardInteraction: Story = {
@@ -448,9 +449,10 @@ export const KeyboardInteraction: Story = {
     const canvas = within(canvasElement)
     const trigger = canvas.getByRole('button', { name: 'Keyboard Accordion' })
 
-    // Starts collapsed, no dangling aria-controls.
+    // Starts collapsed. The panel is always in the DOM (SSR/SEO), so the trigger
+    // references it via aria-controls even while collapsed (no dangling IDREF).
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-    await expect(trigger).not.toHaveAttribute('aria-controls')
+    await expect(trigger).toHaveAttribute('aria-controls')
 
     // Tab reaches it, Enter expands.
     trigger.focus()
@@ -545,6 +547,120 @@ export const HeadingLevel: Story = {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
     await userEvent.click(trigger)
     await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  },
+}
+
+/**
+ * SSR/SEO (1.3.1): a COLLAPSED accordion still ships its panel in the DOM, so
+ * crawlers and the SSR'd HTML see the section content. The panel is hidden from
+ * assistive tech and from layout via the native `hidden` attribute (disclosed,
+ * not deleted); `aria-controls` on the trigger references it whether open or
+ * closed. Expanding removes `hidden` and reveals it.
+ */
+export const CollapsedPanelInDom: Story = {
+  name: 'A11y/Collapsed Panel In DOM (SEO)',
+  args: {
+    summary: 'Collapsed Section',
+    details: sampleDetails,
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Collapsed Section' })
+
+    // Collapsed by default, but the trigger references its panel already.
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    const panelId = trigger.getAttribute('aria-controls')
+    await expect(panelId).toBeTruthy()
+    const panel = canvasElement.querySelector(`#${panelId}`)
+
+    // The panel is in the SSR'd DOM with its content as crawlable text …
+    await expect(panel).toBeInTheDocument()
+    await expect(panel).toHaveTextContent('This is the detailed content')
+    // … wired back to the trigger as a labelled region …
+    await expect(panel).toHaveAttribute('role', 'region')
+    await expect(panel).toHaveAttribute(
+      'aria-labelledby',
+      trigger.getAttribute('id') ?? ''
+    )
+    // … yet hidden from AT + layout while collapsed.
+    await expect(panel).toHaveAttribute('hidden')
+    await expect(panel).not.toBeVisible()
+
+    // Expanding removes `hidden` and reveals the same panel node.
+    await userEvent.click(trigger)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect(panel).not.toHaveAttribute('hidden')
+    await expect(panel).toBeVisible()
+  },
+}
+
+/**
+ * A disabled `type="menu"` link drops its `href` (so it is neither focusable nor
+ * navigable and is no longer exposed as a link role) and is announced disabled
+ * via `aria-disabled="true"` (4.1.2). An enabled sibling stays a real, crawlable
+ * `<a href>` with no `aria-disabled`.
+ */
+export const DisabledMenuLink: Story = {
+  name: 'A11y/Disabled Menu Link',
+  render: () => (
+    <div style={{ width: '300px' }}>
+      <Accordion
+        type="menu"
+        summary="Enabled Link"
+        href="/enabled"
+        styles={{ theme: 'light' }}
+      />
+      <Accordion
+        type="menu"
+        summary="Disabled Link"
+        href="/disabled"
+        styles={{ theme: 'light', disabled: true }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Enabled item: a real link with a crawlable href, no aria-disabled.
+    const enabled = canvas.getByRole('link', { name: 'Enabled Link' })
+    await expect(enabled).toHaveAttribute('href', '/enabled')
+    await expect(enabled).not.toHaveAttribute('aria-disabled')
+
+    // Disabled item: href dropped, announced disabled, no longer a link role.
+    const disabled = canvas.getByText('Disabled Link')
+    await expect(disabled).not.toHaveAttribute('href')
+    await expect(disabled).toHaveAttribute('aria-disabled', 'true')
+    await expect(disabled).toHaveAttribute('data-disabled', 'true')
+    await expect(
+      canvas.queryByRole('link', { name: 'Disabled Link' })
+    ).toBeNull()
+  },
+}
+
+/**
+ * A single accordion is a valid **Disclosure** and renders NO heading wrapper by
+ * default (a context-agnostic primitive cannot know the correct document-outline
+ * level; a hardcoded one would be a WCAG 1.3.1 defect and would silently change
+ * every consumer's DOM). Consumers composing a multi-section accordion opt into
+ * the full pattern per section via `headingLevel` (see `A11y/Heading Level`).
+ * This pins the no-heading default so it cannot regress.
+ */
+export const DefaultNoHeading: Story = {
+  name: 'A11y/Default (No Heading Wrapper)',
+  args: {
+    summary: 'Disclosure Toggle',
+    details: sampleDetails,
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The toggle is a real, operable button (disclosure) …
+    const trigger = canvas.getByRole('button', { name: 'Disclosure Toggle' })
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    // … and is NOT wrapped in a heading by default.
+    await expect(canvas.queryByRole('heading')).toBeNull()
   },
 }
 

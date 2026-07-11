@@ -61,10 +61,19 @@ export interface AccordionProps {
   linkComponent?: React.ElementType
   isActive?: boolean
   /**
-   * When set (accordion type only), wraps the toggle button in a real
-   * `<h1>`–`<h6>` heading so a collapsible section is exposed as a document
-   * heading for screen-reader navigation and SEO. Omit to render the button
-   * without a heading wrapper (unchanged default). Ignored for `type="menu"`.
+   * Heading level (accordion type only) that wraps the toggle button in a real
+   * `<h1>`–`<h6>`, exposing the collapsible section as a document heading for
+   * screen-reader navigation and SEO (the WAI-ARIA **Accordion** pattern).
+   *
+   * A single `<Accordion>` is a complete, valid **Disclosure** (a labelled
+   * toggle button plus the region it controls) and needs no heading, so this is
+   * opt-in. When composing MULTIPLE sections into an **accordion group**, pass
+   * the heading level that matches the surrounding document outline on each
+   * section: a context-agnostic primitive cannot know the correct level, and a
+   * hardcoded default would corrupt the outline (itself a WCAG 1.3.1 defect) and
+   * silently change every consumer's DOM — which is why there is no default
+   * heading. Omit to render the bare disclosure button. Ignored for
+   * `type="menu"`.
    */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 }
@@ -224,9 +233,15 @@ const Accordion: FC<AccordionProps> = props => {
   const panelId = `accordion-panel-${reactId}`
   const triggerId = `accordion-trigger-${reactId}`
 
-  // The expanded body only renders for an accordion-type that is open with
-  // content; the trigger's aria-controls points at it only when it exists.
-  const hasPanel = !isMenuType && expanded && Boolean(details)
+  // The panel renders whenever an accordion-type section HAS content — including
+  // while COLLAPSED — so its markup ships in the SSR'd HTML and stays crawlable
+  // / indexable for SEO. Visibility is toggled with the native `hidden`
+  // attribute (below): collapsed removes it from the a11y tree and from layout
+  // but LEAVES it in the DOM, unlike a conditional render that omits it entirely
+  // and hides the content from crawlers. Because the panel is always present for
+  // a content-bearing section, the trigger's aria-controls is never a dangling
+  // IDREF and points at the panel whether the section is open or closed.
+  const hasPanel = !isMenuType && Boolean(details)
 
   const arrowIconSvg = (
     <svg
@@ -341,6 +356,10 @@ const Accordion: FC<AccordionProps> = props => {
           role="region"
           aria-labelledby={triggerId}
           className={cssStyles.details}
+          // Collapsed: kept in the DOM for SSR/SEO (crawlable content) but
+          // hidden from assistive tech AND from layout via the native `hidden`
+          // attribute — disclosed, not deleted. Removed when expanded.
+          hidden={!expanded}
         >
           {details}
         </div>
