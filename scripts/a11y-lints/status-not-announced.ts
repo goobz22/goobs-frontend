@@ -184,6 +184,11 @@ const lint: A11yLint = {
       `<div aria-live="polite" aria-label={statusMessage}>{/* message rides on the label */}</div>`,
       // Shape 2 — a live region that is itself aria-hidden, so it never announces.
       `<div role="status" aria-live="polite" aria-hidden="true">{message}</div>`,
+      // Shape 1 — MULTILINE (the real code layout: one attribute per line). The
+      // parser must join across lines, not scan line-by-line.
+      `<div\n  className={s.dot}\n  role="status"\n  aria-label={valid ? 'Valid' : 'Invalid'}\n/>`,
+      // Shape 2 — MULTILINE aria-hidden live region with real content children.
+      `<div\n  className={s.srOnly}\n  role="status"\n  aria-live="polite"\n  aria-hidden="true"\n>\n  {message}\n</div>`,
     ],
     good: [
       // Content-bearing polite region, no label — announces its changed text.
@@ -199,6 +204,9 @@ const lint: A11yLint = {
       // A live region NEXT TO a decorative aria-hidden child (the correct pattern
       // CodeCopy/SaveButton use) — attributes are on different elements.
       `<div role="status" aria-live="polite"><Spinner aria-hidden="true" />{label}</div>`,
+      // MULTILINE content region whose decorative child (not the region) is
+      // aria-hidden — the SaveButton/FileDropzone layout must not be flagged.
+      `<div\n  className={s.srOnly}\n  role="status"\n  aria-live="polite"\n>\n  <Spinner aria-hidden="true" />\n  {label}\n</div>`,
     ],
   },
 }
