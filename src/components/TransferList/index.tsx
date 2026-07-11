@@ -93,6 +93,14 @@ export interface TransferListProps {
   name?: string
   /** Stable test selector — emitted as `data-field-name`; defaults to `name`. */
   dataFieldName?: string
+  /**
+   * Forwarded ref to the root `<div role="group">` composite (React 19
+   * ref-as-prop). TransferList renders two lists plus the transfer `<button>`s
+   * and a dropdown, so there is no single "the button" — the grouping root is
+   * the meaningful consumer handle (scroll into view, measure, or query the
+   * transfer controls). Individual controls stay reachable by their aria-labels.
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 // TransferButton component moved outside TransferList to avoid re-creation during render
@@ -155,6 +163,7 @@ const TransferList: React.FC<TransferListProps> = ({
   style,
   name,
   dataFieldName,
+  ref,
 }) => {
   // Tier-1 form binding. The assigned (right) list is the field's primary
   // string[] value. Inside a <Form> with a `name` and no explicit `rightItems`,
@@ -436,6 +445,7 @@ const TransferList: React.FC<TransferListProps> = ({
 
   return (
     <div
+      ref={ref}
       className={mergeClassNames(cssStyles.container, className)}
       data-theme={theme}
       data-component="TransferList"
