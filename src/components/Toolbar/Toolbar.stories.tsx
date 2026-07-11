@@ -273,6 +273,25 @@ export const AccessibleName: Story = {
       />
     </div>
   ),
+  // Regression guard for Issue 1 (role/name). Chromatic screenshots cannot see
+  // role="toolbar" / aria-orientation / aria-label, so assert them directly.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The caller-supplied ariaLabel becomes the toolbar's accessible name, and
+    // the group advertises its role + horizontal orientation (WCAG 1.3.1/4.1.2).
+    const named = canvas.getByRole('toolbar', { name: 'Records toolbar' })
+    await expect(named).toHaveAttribute('aria-orientation', 'horizontal')
+    await expect(named).toHaveAttribute('aria-label', 'Records toolbar')
+
+    // An unconfigured toolbar is never nameless — it falls back to 'Toolbar'.
+    const defaulted = canvas.getByRole('toolbar', { name: 'Toolbar' })
+    await expect(defaulted).toHaveAttribute('aria-orientation', 'horizontal')
+    await expect(defaulted).toHaveAttribute('aria-label', 'Toolbar')
+
+    // Distinct names are what let AT disambiguate two toolbars on one page.
+    await expect(named).not.toBe(defaulted)
+  },
 }
 
 const KeyboardRovingRenderer = () => {
