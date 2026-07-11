@@ -607,3 +607,52 @@ export const KeyboardOperableSteppers: Story = {
     await waitFor(() => expect(input).toHaveValue('11.00'))
   },
 }
+
+/**
+ * Min/max range exposed to assistive tech. This is a free-form currency text
+ * input (deliberately `type="text"` + `inputMode="decimal"`, NOT
+ * `role="spinbutton"`), so it exposes no `aria-valuemin`/`aria-valuemax`. When
+ * `min`/`max` are constrained the field instead references a visually-hidden
+ * description via `aria-describedby`, so a screen-reader user hears the allowed
+ * bounds on focus even when the consumer supplies **no** helperText. The play
+ * function deliberately renders WITHOUT helperText — the pre-fix field left the
+ * range invisible to assistive tech in exactly that case (WCAG 1.3.1 / 4.1.2).
+ */
+export const RangeExposedToAT: Story = {
+  name: 'Min/max range (aria-describedby)',
+  render: args => (
+    <A11yFrame>
+      <USDField {...args} />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Amount',
+    initialValue: '50.00',
+    min: 0,
+    max: 1000,
+    enableIncrement: true,
+    // NO helperText on purpose — proves the range is exposed programmatically
+    // regardless of any visible hint.
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText(/amount/i) as HTMLInputElement
+
+    // The allowed range must be exposed programmatically via aria-describedby,
+    // even though no helperText/error is present (pre-fix: undefined).
+    const describedBy = input.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+
+    // At least one referenced node must spell out the min/max bounds.
+    const referencedText = (describedBy ?? '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(
+        refId =>
+          canvasElement.ownerDocument.getElementById(refId)?.textContent ?? ''
+      )
+      .join(' ')
+    await expect(referencedText).toMatch(/between \$0 and \$1000/i)
+  },
+}

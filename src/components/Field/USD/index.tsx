@@ -332,83 +332,103 @@ const USDField: React.FC<USDFieldProps> = ({
             data-increment={enableIncrement || undefined}
             style={wrapperCssVars as React.CSSProperties}
           >
-          <div className={`${cssStyles.adornment} ${cssStyles.startAdornment}`}>
-            {sacredTheme && (
-              <span aria-hidden="true" className={cssStyles.sacredGlyph}>
-                𓊹
+            <div
+              className={`${cssStyles.adornment} ${cssStyles.startAdornment}`}
+            >
+              {sacredTheme && (
+                <span aria-hidden="true" className={cssStyles.sacredGlyph}>
+                  𓊹
+                </span>
+              )}
+              <span className={cssStyles.dollarSign}>$</span>
+            </div>
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="decimal"
+              id={id ?? inputId}
+              name={name}
+              data-field-name={dataFieldName}
+              value={internalValue}
+              onChange={handleChange}
+              onFocus={onFocus}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              disabled={disabled}
+              required={required}
+              placeholder={resolvedPlaceholder}
+              className={cssStyles.input}
+              {...inputAriaProps}
+              {...rest}
+              {...(hasRange ? { 'aria-describedby': describedBy } : {})}
+            />
+            {enableIncrement && (
+              <div
+                className={`${cssStyles.adornment} ${cssStyles.endAdornment}`}
+              >
+                <div className={cssStyles.buttonContainer}>
+                  <button
+                    type="button"
+                    onMouseDown={() => handleMouseDown(handleIncrement)}
+                    onKeyDown={handleButtonKeyDown(handleIncrement)}
+                    aria-label="increment"
+                    disabled={disabled}
+                    className={cssStyles.button}
+                  >
+                    <ArrowDropUpIcon
+                      style={iconStyle}
+                      styles={{
+                        theme: sacredTheme
+                          ? 'sacred'
+                          : styles?.theme || 'light',
+                      }}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={() => handleMouseDown(handleDecrement)}
+                    onKeyDown={handleButtonKeyDown(handleDecrement)}
+                    aria-label="decrement"
+                    disabled={disabled}
+                    className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
+                  >
+                    <ArrowDropDownIcon
+                      style={iconStyle}
+                      styles={{
+                        theme: sacredTheme
+                          ? 'sacred'
+                          : styles?.theme || 'light',
+                      }}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Polite live region: speaks the new amount after a stepper button
+                or arrow-key change (focus doesn't move to the value, so it's
+                otherwise silent for screen-reader users). Typing is not
+                announced here. WCAG 4.1.3. */}
+            <span
+              role="status"
+              aria-live="polite"
+              className={cssStyles.srOnly}
+              data-usd-status=""
+            >
+              {stepAnnouncement}
+            </span>
+            {/* Visually-hidden range description referenced by the input's
+                aria-describedby (composed above). Surfaces the min/max bounds to
+                assistive tech even when the consumer supplies no helperText, and
+                without misrepresenting this free-form text field as a spinbutton.
+                WCAG 1.3.1 / 4.1.2. */}
+            {hasRange && (
+              <span id={rangeDescId} className={cssStyles.srOnly}>
+                {rangeDescription}
               </span>
             )}
-            <span className={cssStyles.dollarSign}>$</span>
           </div>
-          <input
-            ref={inputRef}
-            type="text"
-            inputMode="decimal"
-            id={id ?? inputId}
-            name={name}
-            data-field-name={dataFieldName}
-            value={internalValue}
-            onChange={handleChange}
-            onFocus={onFocus}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            disabled={disabled}
-            required={required}
-            placeholder={resolvedPlaceholder}
-            className={cssStyles.input}
-            {...inputAriaProps}
-            {...rest}
-          />
-          {enableIncrement && (
-            <div className={`${cssStyles.adornment} ${cssStyles.endAdornment}`}>
-              <div className={cssStyles.buttonContainer}>
-                <button
-                  type="button"
-                  onMouseDown={() => handleMouseDown(handleIncrement)}
-                  onKeyDown={handleButtonKeyDown(handleIncrement)}
-                  aria-label="increment"
-                  disabled={disabled}
-                  className={cssStyles.button}
-                >
-                  <ArrowDropUpIcon
-                    style={iconStyle}
-                    styles={{
-                      theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
-                    }}
-                  />
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={() => handleMouseDown(handleDecrement)}
-                  onKeyDown={handleButtonKeyDown(handleDecrement)}
-                  aria-label="decrement"
-                  disabled={disabled}
-                  className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
-                >
-                  <ArrowDropDownIcon
-                    style={iconStyle}
-                    styles={{
-                      theme: sacredTheme ? 'sacred' : styles?.theme || 'light',
-                    }}
-                  />
-                </button>
-              </div>
-            </div>
-          )}
-          {/* Polite live region: speaks the new amount after a stepper button
-              or arrow-key change (focus doesn't move to the value, so it's
-              otherwise silent for screen-reader users). Typing is not
-              announced here. WCAG 4.1.3. */}
-          <span
-            role="status"
-            aria-live="polite"
-            className={cssStyles.srOnly}
-            data-usd-status=""
-          >
-            {stepAnnouncement}
-          </span>
-        </div>
-      )}
+        )
+      }}
     </FieldShell>
   )
 }
