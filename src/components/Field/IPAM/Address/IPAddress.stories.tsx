@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the IPAddressField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import IPAddressField from './index'
 
 const meta: Meta<typeof IPAddressField> = {
@@ -307,5 +308,60 @@ export const ErrorState: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * Range mode (`renderAsRange`) renders paired start/end inputs. In this layout
+ * the FieldShell visible label is only shown once a paired value exists, so
+ * each input carries a stable `aria-label` — derived from the field label so
+ * the visible text is contained in the accessible name (WCAG 2.5.3) — that
+ * keeps both inputs programmatically NAMED even while empty (WCAG 1.3.1 /
+ * 4.1.2) and DISTINGUISHES start from end for screen-reader users (WCAG
+ * 3.3.2). The play test asserts both names resolve on an empty field.
+ */
+export const RangeModeAccessibleNames: Story = {
+  name: 'Range Mode (accessible names)',
+  render: () => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '500px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Range Mode:</strong> Paired start/end inputs. Each input keeps
+          an accessible name even while empty, and start vs end are
+          distinguishable to assistive technology.
+        </div>
+        <IPAddressField
+          label="IP Address"
+          renderAsRange
+          startIPValue=""
+          endIPValue=""
+          styles={{ theme: 'light' }}
+        />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Both inputs are programmatically named even though the field is empty,
+    // and the start/end names are distinct.
+    const start = canvas.getByRole('textbox', {
+      name: 'IP Address range start',
+    })
+    const end = canvas.getByRole('textbox', { name: 'IP Address range end' })
+    await expect(start).toBeInTheDocument()
+    await expect(end).toBeInTheDocument()
   },
 }

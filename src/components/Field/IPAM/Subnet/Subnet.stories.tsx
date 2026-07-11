@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the SubnetField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect, userEvent } from 'storybook/test'
 import SubnetField from './index'
 
 const meta: Meta<typeof SubnetField> = {
@@ -297,5 +298,68 @@ export const DataCenterSubnet: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * Keyboard operability of the mask +/- steppers (WCAG 2.1.1) plus the announced
+ * subnet summary (WCAG 4.1.3). The steppers respond to Enter/Space, and the
+ * recomputed CIDR / host readout is a polite `role="status"` live region so
+ * screen-reader users hear the new mask as it changes.
+ */
+export const KeyboardSteppersAndLiveReadout: Story = {
+  name: 'Keyboard Steppers + Live Readout (a11y)',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Keyboard Steppers + Live Readout:</strong> Enter/Space step
+          the mask, and the subnet summary is a polite live region.
+        </div>
+        <SubnetField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Subnet Mask',
+    value: { address: '192.168.1.0', mask: 24 },
+    min: 8,
+    max: 30,
+    styles: {
+      theme: 'light',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: 'Subnet Mask' })
+    const increase = canvas.getByRole('button', {
+      name: 'Increase subnet mask',
+    })
+
+    // The recomputing readout is a polite status live region.
+    const status = canvas.getByRole('status')
+    await expect(status).toHaveAttribute('aria-live', 'polite')
+
+    // Keyboard Enter steps the mask up (/24 -> /25) with no pointer event; the
+    // dotted-mask input and the live readout both reflect the new value.
+    increase.focus()
+    await expect(increase).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(input).toHaveValue('255.255.255.128')
+    await expect(status).toHaveTextContent('Subnet CIDR: /25')
   },
 }

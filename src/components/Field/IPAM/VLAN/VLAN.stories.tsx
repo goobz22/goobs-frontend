@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the VLANField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect, userEvent } from 'storybook/test'
 import VLANField from './index'
 
 const meta: Meta<typeof VLANField> = {
@@ -327,5 +328,74 @@ export const DataCenterVLAN: Story = {
     styles: {
       theme: 'dark',
     },
+  },
+}
+
+/**
+ * Keyboard operability of the +/- steppers (WCAG 2.1.1). The buttons drive a
+ * press-and-hold repeat via `onMouseDown`, but keyboard Enter/Space (which
+ * dispatch a `click`, never a mousedown) now step the value too, so the
+ * focusable buttons are no longer inert for keyboard-only users. The play test
+ * focuses each button and activates it with the keyboard alone, and confirms
+ * the decorative caret icons are hidden from assistive tech.
+ */
+export const KeyboardSteppers: Story = {
+  name: 'Keyboard Steppers (a11y)',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Keyboard Steppers:</strong> The increment / decrement buttons
+          are operable with Enter and Space, not just the mouse.
+        </div>
+        <VLANField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    initialValue: '10',
+    styles: {
+      theme: 'light',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: 'VLAN ID' })
+    const increase = canvas.getByRole('button', { name: 'Increase VLAN ID' })
+    const decrease = canvas.getByRole('button', { name: 'Decrease VLAN ID' })
+
+    // Focusing the increment button and pressing Enter steps the value up with
+    // no pointer event at all.
+    increase.focus()
+    await expect(increase).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(input).toHaveValue('11')
+
+    // The decrement button is likewise keyboard-operable.
+    decrease.focus()
+    await expect(decrease).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(input).toHaveValue('10')
+
+    // The caret glyph inside each labelled button is hidden from AT so the
+    // button's aria-label is the sole accessible name.
+    await expect(increase.querySelector('svg')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    )
   },
 }

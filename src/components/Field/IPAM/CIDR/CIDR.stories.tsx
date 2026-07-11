@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the CIDRField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect, userEvent } from 'storybook/test'
 import CIDRField from './index'
 
 const meta: Meta<typeof CIDRField> = {
@@ -306,5 +307,64 @@ export const SubnetCalculator: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * Keyboard operability of the +/- steppers (WCAG 2.1.1) plus the announced
+ * subnet-info readout (WCAG 4.1.3). The steppers now respond to Enter/Space,
+ * and the recomputed mask/host summary lives in a polite `role="status"` live
+ * region so screen-reader users hear the new values as the CIDR changes.
+ */
+export const KeyboardSteppersAndLiveReadout: Story = {
+  name: 'Keyboard Steppers + Live Readout (a11y)',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Keyboard Steppers + Live Readout:</strong> Enter/Space step
+          the CIDR, and the subnet summary is a polite live region.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    initialValue: '24',
+    showSubnetInfo: true,
+    styles: {
+      theme: 'light',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', { name: 'CIDR' })
+    const increase = canvas.getByRole('button', { name: 'Increase CIDR' })
+
+    // The recomputing readout is a polite status live region.
+    const status = canvas.getByRole('status')
+    await expect(status).toHaveAttribute('aria-live', 'polite')
+
+    // Keyboard Enter steps the CIDR up (24 -> 25) with no pointer event, and
+    // the live region reflects the new /25 mask.
+    increase.focus()
+    await expect(increase).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(input).toHaveValue('/25')
+    await expect(status).toHaveTextContent('255.255.255.128')
   },
 }
