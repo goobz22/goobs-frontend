@@ -701,3 +701,164 @@ export const DialogBackgroundIsolation: Story = {
     await waitFor(() => expect(hasHiddenAncestor(backgroundText)).toBe(false))
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — TRIGGER DISCLOSURE SEMANTICS (menu-button pattern)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression story for the trigger disclosure contract on the NON-modal popup
+ * roles (WAI-ARIA APG menu-button / disclosure; WCAG 4.1.2). A control that
+ * toggles a `role="menu"` (or listbox/grid) popover must advertise, ON THE
+ * TRIGGER ITSELF:
+ *   - `aria-haspopup="menu"` — there is a popup of this kind,
+ *   - `aria-expanded` — reflecting whether it is currently open, and
+ *   - `aria-controls` — the id of the surface it controls (present only while
+ *     the surface is in the DOM).
+ * The Popover owns the anchor, so it wires these by default; the play step
+ * proves each is set on open and torn down (expanded→false, controls removed)
+ * on close, without the consumer wiring anything.
+ */
+const MenuDisclosureComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Actions
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        role="menu"
+        ariaLabel="Row actions"
+        styles={{ theme: 'light' }}
+      >
+        <div style={{ padding: '8px', minWidth: '160px' }}>
+          <button type="button" role="menuitem" style={{ display: 'block' }}>
+            Edit
+          </button>
+          <button type="button" role="menuitem" style={{ display: 'block' }}>
+            Delete
+          </button>
+        </div>
+      </Popover>
+    </div>
+  )
+}
+
+export const TriggerDisclosureSemantics: Story = {
+  name: 'A11y/Trigger Disclosure Semantics',
+  render: () => <MenuDisclosureComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Actions' })
+
+    // Closed: the trigger already advertises it owns a menu popup, collapsed,
+    // and controls nothing yet (the surface is not in the DOM).
+    await expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).not.toHaveAttribute('aria-controls')
+
+    // Open: expanded flips true and aria-controls points at the live surface.
+    await userEvent.click(trigger)
+    const menu = await body.findByRole('menu')
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    const controls = trigger.getAttribute('aria-controls')
+    await expect(controls).toBeTruthy()
+    await expect(menu).toHaveAttribute('id', controls as string)
+
+    // Close via Escape: expanded returns to false and the stale controls IDREF
+    // is removed (the surface it referenced is gone).
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(menu).not.toBeInTheDocument())
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).not.toHaveAttribute('aria-controls')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y — TOOLTIP DESCRIPTION ASSOCIATION
+// --------------------------------------------------------------------------
+
+/**
+ * Regression story for the `role="tooltip"` association fix (WCAG 1.3.1 / 4.1.2).
+ * A tooltip is only useful to a screen reader if the element it describes points
+ * at it via `aria-describedby`. The Popover now links the trigger to the surface
+ * while a `role="tooltip"` popover is open (appending, so it never clobbers an
+ * existing describedby) and removes the link on close. The play step proves the
+ * trigger gains a describedby IDREF resolving to the tooltip surface on open, and
+ * that it is fully removed on close.
+ */
+const TooltipDescriptionComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Show hint
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        role="tooltip"
+        styles={{ theme: 'light' }}
+      >
+        <div style={{ padding: '8px 12px' }}>Saves without leaving the page.</div>
+      </Popover>
+    </div>
+  )
+}
+
+export const TooltipDescription: Story = {
+  name: 'A11y/Tooltip Description Association',
+  render: () => <TooltipDescriptionComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Show hint' })
+
+    // Closed: no description link yet.
+    await expect(trigger).not.toHaveAttribute('aria-describedby')
+
+    // Open: the trigger is described by the tooltip surface.
+    await userEvent.click(trigger)
+    const tip = await body.findByText('Saves without leaving the page.')
+    const surface = tip.closest('[data-component="Popover"]') as HTMLElement
+    const describedBy = trigger.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    await expect((describedBy as string).split(/\s+/)).toContain(
+      surface.getAttribute('id')
+    )
+
+    // Close: the association is fully removed.
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(surface).not.toBeInTheDocument())
+    await expect(trigger).not.toHaveAttribute('aria-describedby')
+  },
+}
