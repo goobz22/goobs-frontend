@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import TimeField from './index'
 
 // Build a Date carrying a specific local time-of-day for seeding stories.
@@ -151,6 +152,62 @@ export const WithError: Story = {
       </div>
     </div>
   ),
+}
+
+// --------------------------------------------------------------------------
+// A11y: ERROR ASSOCIATION (WCAG 3.3.1 / 4.1.2 / 4.1.3 / 1.4.1)
+//
+// A real `error` string must (a) set aria-invalid on the input, (b) render the
+// message in a role="alert" live region, and (c) link the two via
+// aria-describedby, so a screenreader announces the error and can re-read it
+// while the field has focus. The module.css also gives the invalid input a
+// themed danger border so the error isn't conveyed by the helper text alone.
+// --------------------------------------------------------------------------
+
+export const ErrorAssociated: Story = {
+  render: () => (
+    <TimeFieldWithState
+      label="Departure"
+      initialValue={timeAt(22, 0)}
+      error="Outside allowed hours."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Departure')
+    await expect(input).toHaveAttribute('aria-invalid', 'true')
+
+    // The message renders in a live alert region…
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveTextContent('Outside allowed hours.')
+
+    // …and the input is programmatically described by exactly that region.
+    await expect(input).toHaveAttribute('aria-describedby', alert.id)
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11y: FOCUS RING (WCAG 2.4.7 — Focus Visible)
+//
+// The input sets `outline: none`; the module.css replaces it with a themed
+// `:focus-visible` ring so keyboard users get a visible focus indicator. The
+// play function focuses the input so the ring is exercised in Storybook /
+// Chromatic (a time input matches :focus-visible whenever focused).
+// --------------------------------------------------------------------------
+
+export const FocusRing: Story = {
+  render: () => (
+    <TimeFieldWithState label="Focused Time" styles={{ theme: 'light' }} />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Focused Time')
+    input.focus()
+    await expect(input).toHaveFocus()
+  },
 }
 
 // --------------------------------------------------------------------------

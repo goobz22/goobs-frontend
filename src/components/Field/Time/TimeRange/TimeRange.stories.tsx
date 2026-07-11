@@ -3,6 +3,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import TimeRangeComponent, { TimeRange } from './index'
 
 const meta: Meta<typeof TimeRangeComponent> = {
@@ -305,4 +306,75 @@ const InteractiveDemoComponent = () => {
 
 export const InteractiveDemo: Story = {
   render: () => <InteractiveDemoComponent />,
+}
+
+// --------------------------------------------------------------------------
+// A11y: GROUP SEMANTICS & RANGE ERROR (WCAG 1.3.1 / 4.1.2 / 4.1.3 / 1.4.1)
+//
+// The start/end inputs are two related controls forming ONE range, so the
+// wrapper is exposed as a named role="group". A cross-field error (end before
+// start) is a property of the whole range, so it must mark BOTH inputs
+// aria-invalid — not just the start — and be announced once via a role="alert"
+// live region that programmatically describes the start input.
+// --------------------------------------------------------------------------
+
+export const GroupSemanticsAndError: Story = {
+  name: 'A11y: Group Semantics & Range Error',
+  render: () => (
+    <div style={{ padding: '2rem', maxWidth: '600px' }}>
+      <TimeRangeComponent
+        startLabel="Meeting Start"
+        endLabel="Meeting End"
+        ariaLabel="Meeting time range"
+        error="End time cannot be before start time."
+        value={{ start: new Date(), end: new Date() }}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The pair is announced as one named group.
+    const group = canvas.getByRole('group', { name: 'Meeting time range' })
+    await expect(group).toBeInTheDocument()
+
+    // A cross-field error marks BOTH time inputs invalid, not just the start.
+    const startInput = canvas.getByLabelText('Meeting Start')
+    const endInput = canvas.getByLabelText('Meeting End')
+    await expect(startInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(endInput).toHaveAttribute('aria-invalid', 'true')
+
+    // The message is announced once via a live alert region and the start
+    // input is programmatically described by it.
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveTextContent(
+      'End time cannot be before start time.'
+    )
+    await expect(startInput).toHaveAttribute('aria-describedby', alert.id)
+  },
+}
+
+// The wrapper is always a named group even without an explicit ariaLabel —
+// the default accessible name is 'Time range'.
+export const DefaultGroupLabel: Story = {
+  name: 'A11y: Default Group Label',
+  render: () => (
+    <div style={{ padding: '2rem', maxWidth: '600px' }}>
+      <TimeRangeComponent
+        startLabel="Start Time"
+        endLabel="End Time"
+        value={{ start: null, end: null }}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByRole('group', { name: 'Time range' })
+    ).toBeInTheDocument()
+  },
 }
