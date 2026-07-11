@@ -11,6 +11,10 @@ type SimpleEditorProps = {
   minRows?: number
   placeholder?: string
   styles?: ComplexTextEditorStyles
+  /** Accessible name for the textarea (used when no visible label is linked). */
+  ariaLabel?: string
+  /** Id of the visible label element to associate with the textarea. */
+  ariaLabelledBy?: string
 }
 
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
@@ -19,6 +23,8 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   minRows = 4,
   placeholder,
   styles,
+  ariaLabel,
+  ariaLabelledBy,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -55,6 +61,11 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
       placeholder={placeholder || 'Enter text...'}
       className={cssStyles.simpleTextarea}
       data-theme={styles?.theme || 'light'}
+      {...(ariaLabelledBy
+        ? { 'aria-labelledby': ariaLabelledBy }
+        : ariaLabel
+          ? { 'aria-label': ariaLabel }
+          : {})}
       style={dynamicStyle}
     />
   )

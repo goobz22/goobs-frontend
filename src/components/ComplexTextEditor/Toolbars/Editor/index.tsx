@@ -405,7 +405,7 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
   const getButtonA11y = (
     format: string,
     accessibleName: string
-  ): Record<string, string | boolean> => ({
+  ): React.AriaAttributes => ({
     'aria-label': accessibleName,
     ...(!markdownMode && TOGGLE_FORMATS.has(format)
       ? { 'aria-pressed': isFormatActive(format) }

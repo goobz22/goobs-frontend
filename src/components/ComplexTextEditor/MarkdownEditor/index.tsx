@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/MarkdownEditor/index.tsx
 
 'use client'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useId } from 'react'
 import { handleBoldClick, handleItalicClick } from '../utils/useMarkdownEditor'
 import Toolbar from '../Toolbars/Editor'
 import {
@@ -19,6 +19,10 @@ type MarkdownEditorProps = {
 
   minRows?: number
   styles?: ComplexTextEditorStyles
+  /** Accessible name for the textarea (used when no visible label is linked). */
+  ariaLabel?: string
+  /** Id of the visible label element to associate with the textarea. */
+  ariaLabelledBy?: string
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -26,11 +30,14 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   onChange,
   minRows,
   styles,
+  ariaLabel,
+  ariaLabelledBy,
 }) => {
   // Use value prop directly - this is a controlled component
   // No internal state needed for the value itself
   const [selectedText, setSelectedText] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const previewId = useId()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Listen for native input events from browser automation tools
@@ -95,7 +102,15 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         toolbarType="markdown"
         styles={styles as ComplexTextEditorStyles}
       />
-      <button onClick={() => setShowPreview(!showPreview)}>
+      {/* type=button so it never submits an enclosing goobs <Form>;
+          aria-pressed exposes the on/off preview state; aria-controls links it
+          to the rendered preview region (WCAG 4.1.2). */}
+      <button
+        type="button"
+        onClick={() => setShowPreview(!showPreview)}
+        aria-pressed={showPreview}
+        aria-controls={previewId}
+      >
         Toggle Preview
       </button>
       <div className={cssStyles.markdownRow}>
@@ -111,6 +126,11 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           }
           className={cssStyles.markdownTextarea}
           data-theme={theme}
+          {...(ariaLabelledBy
+            ? { 'aria-labelledby': ariaLabelledBy }
+            : ariaLabel
+              ? { 'aria-label': ariaLabel }
+              : {})}
           {...(editorAreaOverrideStyle && { style: editorAreaOverrideStyle })}
           {...(showPreview && { 'data-preview': 'true' })}
           {...(styles?.helperTextType === 'error' && {
@@ -120,6 +140,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         />
         {showPreview && (
           <div
+            id={previewId}
             className={cssStyles.markdownPreview}
             dangerouslySetInnerHTML={{ __html: mdToHtml(value) }}
           />

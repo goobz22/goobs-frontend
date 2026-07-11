@@ -19,6 +19,10 @@ interface ComplexToolbarProps {
   onChange: (value: string) => void
   minRows?: number
   styles?: ComplexTextEditorStyles
+  /** Accessible name for the editing surface (used when no visible label is linked). */
+  ariaLabel?: string
+  /** Id of the visible label element to associate with the editing surface. */
+  ariaLabelledBy?: string
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -28,6 +32,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   onChange,
   minRows = 5,
   styles,
+  ariaLabel,
+  ariaLabelledBy,
 }) => {
   const handleModeChange = (newMode: EditorMode) => {
     const converted = convertValue(value, mode, newMode)
@@ -45,7 +51,11 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   return (
     <div className={cssStyles.container} data-theme={styles?.theme || 'light'}>
       {styles?.showModeToggle !== false && (
-        <div className={cssStyles.toggleRow}>
+        <div
+          className={cssStyles.toggleRow}
+          role="group"
+          aria-label="Editor mode"
+        >
           <ButtonGroup
             value={mode}
             exclusive
@@ -59,9 +69,24 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
               margin: '0',
             }}
           >
-            <Button value="simple" text="Simple" />
-            <Button value="rich" text="Rich Text" />
-            <Button value="markdown" text="Markdown" />
+            {/* Single-select mode switch: aria-pressed exposes which mode is
+                active (state was previously conveyed by the .selected class
+                alone — color/visual only, WCAG 1.4.1 / 4.1.2). */}
+            <Button
+              value="simple"
+              text="Simple"
+              aria-pressed={mode === 'simple'}
+            />
+            <Button
+              value="rich"
+              text="Rich Text"
+              aria-pressed={mode === 'rich'}
+            />
+            <Button
+              value="markdown"
+              text="Markdown"
+              aria-pressed={mode === 'markdown'}
+            />
           </ButtonGroup>
         </div>
       )}
@@ -71,6 +96,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
+          ariaLabel={ariaLabel}
+          ariaLabelledBy={ariaLabelledBy}
           {...(styles ? { styles } : {})}
         />
       )}
@@ -80,6 +107,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
+          ariaLabel={ariaLabel}
+          ariaLabelledBy={ariaLabelledBy}
           {...(styles ? { styles } : {})}
         />
       )}
@@ -89,6 +118,8 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           value={value}
           onChange={onChange}
           minRows={minRows}
+          ariaLabel={ariaLabel}
+          ariaLabelledBy={ariaLabelledBy}
           {...(styles ? { styles } : {})}
         />
       )}

@@ -2,7 +2,7 @@
  * @fileoverview Defines the ComplexTextEditor, a versatile text editor with multiple modes.
  */
 'use client'
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useId } from 'react'
 import ComplexToolbar, { type EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
@@ -73,6 +73,22 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const accordionSummary = styles?.accordionSummary || label || 'Text Editor'
   const defaultExpanded = styles?.accordionDefaultExpanded || false
   const isSacredTheme = styles?.theme === 'sacred'
+
+  // A stable id links the visible <label> to the editor surface for assistive
+  // tech. The editor's accessible name prefers the visible label (linked by id)
+  // when one is rendered (non-accordion mode); in accordion mode the label
+  // lives in the summary, so we fall back to an aria-label string. It always
+  // resolves to *some* name so the textarea / contenteditable is never left
+  // unlabeled (WCAG 1.3.1 / 3.3.2 / 4.1.2).
+  const reactId = useId()
+  const labelId = `${reactId}-label`
+  const hasVisibleLabel = Boolean(label) && !accordion
+  const editorAriaLabelledBy = hasVisibleLabel ? labelId : undefined
+  const editorAriaLabel = hasVisibleLabel
+    ? undefined
+    : label ||
+      (typeof accordionSummary === 'string' ? accordionSummary : undefined) ||
+      'Text editor'
 
   const startMode = determineStartMode(
     editorType,
@@ -211,6 +227,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           onChange={handleChange}
           minRows={minRows}
           styles={styles as ComplexTextEditorStyles}
+          ariaLabel={editorAriaLabel}
+          ariaLabelledBy={editorAriaLabelledBy}
         />
       )
     } else if (editorType === 'rich') {
@@ -222,6 +240,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           onChange={handleChange}
           minRows={minRows}
           styles={styles as ComplexTextEditorStyles}
+          ariaLabel={editorAriaLabel}
+          ariaLabelledBy={editorAriaLabelledBy}
         />
       )
     } else if (editorType === 'markdown') {
@@ -233,6 +253,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           onChange={handleChange}
           minRows={minRows}
           styles={styles as ComplexTextEditorStyles}
+          ariaLabel={editorAriaLabel}
+          ariaLabelledBy={editorAriaLabelledBy}
         />
       )
     } else {
@@ -244,6 +266,8 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           onChange={handleChange}
           minRows={minRows}
           styles={styles as ComplexTextEditorStyles}
+          ariaLabel={editorAriaLabel}
+          ariaLabelledBy={editorAriaLabelledBy}
         />
       )
     }
@@ -252,6 +276,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // Render label if provided and not in accordion mode
   const labelElement = label && !accordion && (
     <label
+      id={labelId}
       className={cssStyles.label}
       {...(styles?.theme && { 'data-theme': styles.theme })}
       {...(isSacredTheme && { 'data-sacred': 'true' })}

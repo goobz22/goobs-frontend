@@ -588,3 +588,39 @@
     filter: drop-shadow(0 0 4px var(--goobs-gold-a80));
   }
 }
+
+/* ==========================================================================
+   KEYBOARD FOCUS — an explicit, high-contrast focus-visible outline on the
+   editing surfaces. The contentEditable rich surface and the textareas set
+   `outline: none` and previously relied only on a border-COLOUR change; this
+   guarantees a clearly visible indicator for keyboard users (WCAG 2.4.7 /
+   2.4.11). The focused-border custom property is theme-aware (defined per
+   [data-theme] on .container), so the outline colour matches the active theme.
+   ========================================================================== */
+.richSurface:focus-visible,
+.simpleTextarea:focus-visible,
+.markdownTextarea:focus-visible {
+  outline: 2px solid var(--ct-editor-border-focused, currentcolor);
+  outline-offset: -2px;
+}
+
+/* ==========================================================================
+   REDUCED MOTION — honour the user's OS "reduce motion" setting (WCAG 2.3.3).
+   Disables the infinite sacred markdown code-glow animation and the container
+   / editor / label transitions. Matched selector-specificity so these win
+   over the themed rules above (e.g. .markdownTextarea[data-theme='sacred']).
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .label,
+  .editorArea,
+  .simpleTextarea,
+  .sacredGlyph {
+    transition: none;
+    animation: none;
+  }
+
+  .markdownTextarea[data-theme='sacred'] {
+    animation: none;
+  }
+}

@@ -19,6 +19,10 @@ export interface RichTextEditorProps {
 
   minRows?: number
   styles?: ComplexTextEditorStyles
+  /** Accessible name for the editable surface (used when no visible label is linked). */
+  ariaLabel?: string
+  /** Id of the visible label element to associate with the editable surface. */
+  ariaLabelledBy?: string
 }
 
 export function RichTextEditor({
@@ -26,6 +30,8 @@ export function RichTextEditor({
   onChange,
   minRows = 5,
   styles: editorStyles,
+  ariaLabel,
+  ariaLabelledBy,
 }: RichTextEditorProps) {
   const accordion = editorStyles?.accordionMode || false
   const accordionSummary = editorStyles?.accordionSummary || 'Rich Text Editor'
@@ -113,9 +119,19 @@ export function RichTextEditor({
         styles={editorStyles as ComplexTextEditorStyles}
       />
       <div className={cssStyles.richSurfaceWrap}>
+        {/* role=textbox + aria-multiline expose the contenteditable as a
+            multi-line text field, and the threaded label gives it an
+            accessible name (WCAG 1.3.1 / 4.1.2). */}
         <div
           ref={editorRef}
           contentEditable
+          role="textbox"
+          aria-multiline="true"
+          {...(ariaLabelledBy
+            ? { 'aria-labelledby': ariaLabelledBy }
+            : ariaLabel
+              ? { 'aria-label': ariaLabel }
+              : {})}
           onInput={handleInput}
           className={cssStyles.richSurface}
           style={surfaceStyle}
