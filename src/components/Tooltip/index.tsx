@@ -111,6 +111,12 @@ const StyledTooltip: React.FC<TooltipProps> = ({
   const tooltipRef = useRef<HTMLDivElement>(null)
   const enterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Stable id linking the trigger's child to the tooltip description via
+  // aria-describedby (WCAG 1.3.1 / 4.1.2). Rendered on a persistent, visually
+  // hidden `role="tooltip"` element so the description is available to screen
+  // readers the instant the trigger is focused — independent of the animated,
+  // conditionally-mounted visual bubble and its enter delay.
+  const tooltipId = useId()
 
   const theme = styles?.theme || 'light'
   const isControlled = controlledOpen !== undefined
@@ -149,6 +155,23 @@ const StyledTooltip: React.FC<TooltipProps> = ({
       setIsVisible(false)
       onClose?.()
     }, leaveDelay)
+  }
+
+  // WCAG 1.4.13 (Content on Hover or Focus — Dismissable): Escape hides the
+  // tooltip without moving pointer or keyboard focus, so a keyboard user can
+  // clear a tooltip that obscures other content while keeping their place.
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Escape' || !showTooltip) return
+
+    if (isControlled) {
+      onClose?.()
+      return
+    }
+
+    if (enterTimeoutRef.current) clearTimeout(enterTimeoutRef.current)
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current)
+    setIsVisible(false)
+    onClose?.()
   }
 
   useEffect(() => {
@@ -286,6 +309,10 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     ? `${cssStyles.tooltip} ${cssStyles.visible}`
     : cssStyles.tooltip
 
+  // The animated visual bubble is a decorative duplicate of the persistent
+  // `role="tooltip"` description below (which is what screen readers announce),
+  // so it is hidden from assistive tech to avoid a double announcement. Its
+  // data-* selectors are preserved for the machine-test contract.
   const tooltipElement = title && showTooltip && (
     <div
       ref={tooltipRef}
@@ -294,6 +321,7 @@ const StyledTooltip: React.FC<TooltipProps> = ({
       data-theme={theme}
       data-placement={tooltipplacement}
       data-state="open"
+      aria-hidden="true"
       style={tooltipVars}
     >
       <div className={cssStyles.content}>
@@ -303,15 +331,53 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     </div>
   )
 
+  // Inject aria-describedby onto the trigger's child so the interactive element
+  // (button/link/etc.) is programmatically described by the tooltip text
+  // (WCAG 1.3.1 / 4.1.2). Any caller-supplied aria-describedby is preserved.
+  // When children is not a single element the association is skipped gracefully
+  // — a focusable element child is required for full screen-reader support.
+  const describedChildren =
+    title && React.isValidElement(children)
+      ? React.cloneElement(
+          children as React.ReactElement<{ 'aria-describedby'?: string }>,
+          {
+            'aria-describedby':
+              [
+                (children.props as { 'aria-describedby'?: string })[
+                  'aria-describedby'
+                ],
+                tooltipId,
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined,
+          }
+        )
+      : children
+
   return (
     <>
       <div
         ref={triggerRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        // Keyboard/AT parity with hover (WCAG 2.1.1): focus/blur bubble up from
+        // the interactive child, so tabbing to it opens the tooltip just like a
+        // pointer hover, and blurring closes it.
+        onFocus={handleMouseEnter}
+        onBlur={handleMouseLeave}
+        onKeyDown={handleKeyDown}
         className={cssStyles.container}
       >
-        {children}
+        {describedChildren}
+        {/* Persistent, visually hidden description — the single element screen
+            readers announce via aria-describedby. Present whenever a title is
+            set (even while the visual bubble is closed), so the description is
+            available immediately on focus regardless of the enter delay. */}
+        {title && (
+          <span id={tooltipId} role="tooltip" className={cssStyles.srDescription}>
+            {title}
+          </span>
+        )}
       </div>
 
       {usePortal && typeof window !== 'undefined'
