@@ -155,9 +155,46 @@ superstring of the visible `"Prev"`/`"Next"` text, so 2.5.3 Label in Name still 
   loaded stylesheet, so the guard cannot silently regress.
 - A shared module-level `PaginationOnly` harness backs the new pagination-only stories.
 
+## List-semantics follow-up (2026-07-11, second-owner pass)
+
+A fresh audit of the shipped state above found one real remaining issue, fixed at root cause inside
+the component directory.
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| L1 | minor | 1.3.1 Info & Relationships (A) | `index.tsx` `ShellPagination` `<nav>` (page controls were **direct children** of `<nav>`) | The pagination is a set of related controls (Prev + numbered + Next) that visually forms a list, but the set relationship / item count was NOT programmatically conveyed — the buttons sat as a flat run of direct `<nav>` children with no list wrapper. This is inconsistent with the library's **own Breadcrumb**, which the pagination code explicitly claims to match (`Breadcrumb/index.tsx:246-253` wraps its `<nav>` items in `<ol className={list}><li>`), and with the WAI-ARIA APG Pagination example. A screen-reader user heard a flat series of buttons instead of "list, N items". | FIXED |
+
+**Fix (`index.tsx` + `WorkspaceFilterShell.module.css`):** the Prev / numbered / Next controls are now
+wrapped in a `<ul role="list">` with each control in its own `<li>`, mirroring Breadcrumb's `<ol>/<li>`.
+`role="list"` is set **explicitly** on the `<ul>` because the `list-style: none` a control strip needs
+strips the implicit list semantics in Safari/VoiceOver — the role restores them. The decorative gap
+ellipsis is now an `<li aria-hidden="true">` (the `aria-hidden` moved from the glyph `<span>` to the whole
+`<li>`) so it is neither announced as an empty list item nor counted in the set size. The `X-Y of Z` range
+readout stays **outside** the list (it is a status, not a page control) so it doesn't inflate the item
+count. New `.pageList` (`<ul>`) / `.pageItem` (`<li>`) CSS carries the same flex row + `clamp(4px,1vw,8px)`
+gap the flat layout used and is content-sized (no `flex-grow`), so the control strip + range readout stay
+centred together as one group — **visually identical** to the pre-list markup.
+
+**Markup change (noted per contract):** the pagination controls gained a `<ul role="list">` / `<li>`
+wrapper. This is **additive** — every existing selector is preserved: the `<nav data-shell-zone="pagination"
+aria-label="Pagination">` landmark, each control's `data-action="prev"/"next"`, `aria-current="page"`,
+`aria-disabled`, and the `aria-live` range readout are all unchanged and still resolve. No prop or export
+changed. The buttons stay native `<button>`s (page changes are client-side via `onPageChange`, there is no
+URL to make them `<a href>`), so button remains the semantically correct control.
+
+**Story:** `PaginationA11y`'s `play` was extended to pin the list contract — it asserts the `<nav>` contains
+a `<ul role="list">`, that `Page 4` / `Previous page` / `Next page` each resolve inside an `<li>` of that
+list, and that the ellipsis `<li aria-hidden="true">` carries the `…`. These assertions FAIL against the
+former flat markup, so the list semantics cannot silently regress.
+
+**Also this pass:** an unrelated, coherent in-flight `ref`-forwarding addition to the shell root `<div>`
+(React 19 ref-as-prop, matching the Breadcrumb/TreeView root-forwarding convention) was found uncommitted
+in `index.tsx`; per the shared-tree model it was save-committed first (`c37affa1`) so it could not be lost,
+then the a11y fix landed on top. It is not part of this a11y finding.
+
 ## Deferred
 
-None. Every issue — original and review follow-up — was fixable at root cause inside the component
-directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel change was required; the
-CSS fixes only *reference* the existing `--goobs-*-focus-ring` tokens already defined in
+None. Every issue — original, review follow-up, and this list-semantics pass — was fixable at root cause
+inside the component directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel change was
+required; the CSS fixes only *reference* the existing `--goobs-*-focus-ring` tokens already defined in
 `src/styles/global.css` (not edited).
