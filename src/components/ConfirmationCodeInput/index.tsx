@@ -147,6 +147,17 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   )
   const hasAutoFocused = useRef(false)
 
+  // Ref to the success view's sole interactive control ("Disable
+  // Verification"), used to restore focus when the view swaps input→success
+  // (see the focus-restoration effect below). `Partial<ButtonProps>` does not
+  // expose `ref`, so this can never collide with `disableVerificationButtonProps`.
+  const disableButtonRef = useRef<HTMLButtonElement | null>(null)
+  // The success state as last seen by the focus-restoration effect, so it fires
+  // ONLY on the input→success transition (not a mount that already starts in the
+  // success state, and not a success→input transition). Held in a ref — not a
+  // dependency — so the effect stays keyed on `showSuccessState` alone.
+  const prevSuccessForFocus = useRef(showSuccessState)
+
   // Stable, unique id for the form-error region so each digit cell can point at
   // it via aria-describedby (WCAG 3.3.1). `useId` keeps it unique across
   // multiple instances on one page and stable across SSR/CSR hydration.
@@ -236,6 +247,22 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
       return () => clearTimeout(timer)
     }
   }, []) // Empty deps - only run on mount
+
+  // Restore focus on the input→success transition (WCAG 2.4.3 Focus Order).
+  // When `showSuccessState` flips true the input branch unmounts — taking the
+  // Verify button (or the just-focused digit cell) with it — and the success
+  // branch mounts. Without intervention keyboard focus falls to <body>, dumping
+  // a keyboard / assistive-tech user at the top of the document with only a
+  // single control (the "Disable Verification" button) left to Tab to. Move
+  // focus onto that control as soon as it mounts. Gated to the transition via
+  // `prevSuccessForFocus` so a component that MOUNTS already in the success
+  // state does not steal focus, and a success→input transition does not fire.
+  useEffect(() => {
+    if (showSuccessState && !prevSuccessForFocus.current) {
+      disableButtonRef.current?.focus()
+    }
+    prevSuccessForFocus.current = showSuccessState
+  }, [showSuccessState])
 
   // Helper to update value. When bound to the form engine the change is written
   // through `boundOnChange` (which also chains the caller's original onChange);
@@ -415,6 +442,11 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
             height: '40px',
           }}
           {...disableVerificationButtonProps}
+          // Internal focus target for the input→success focus restoration
+          // above. Placed AFTER the spread so the component's a11y focus
+          // guarantee always owns this ref (Button forwards it to the native
+          // <button>); `disableVerificationButtonProps` cannot type-supply a ref.
+          ref={disableButtonRef}
           onClick={() => {
             void onDisableVerification()
           }}
