@@ -16,6 +16,17 @@ export interface SliderProps {
   min?: number
   max?: number
   step?: number
+  /**
+   * Maps the current numeric value to a human-readable string announced by
+   * screen readers via `aria-valuetext`. Use whenever the raw number is not
+   * the clearest spoken representation — units (`v => `${v} °C``), a bounded
+   * scale (`v => `${v} of 5``), or a percentage (`v => `${v * 100}%``). When
+   * omitted, assistive tech falls back to announcing the numeric
+   * `aria-valuenow` as before (unchanged for existing callsites).
+   * (WCAG 1.3.1 Info and Relationships / 4.1.2 Name, Role, Value; WAI-ARIA
+   * APG slider pattern.)
+   */
+  formatValueText?: (value: number) => string
   label?: string
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
@@ -39,6 +50,7 @@ const Slider: React.FC<SliderProps> = ({
   min = 0,
   max = 100,
   step = 1,
+  formatValueText,
   label,
   helperText,
   error,
@@ -59,6 +71,13 @@ const Slider: React.FC<SliderProps> = ({
   // caller value nor an engine value is present, fall back to `min` (the
   // historical native default for a value-less range input).
   const currentValue = value ?? min
+
+  // Human-readable value for screen readers. Only set aria-valuetext when a
+  // formatter is supplied — otherwise leave it unset so AT announces the
+  // native numeric aria-valuenow (the historical, back-compat behavior).
+  const valueText = formatValueText
+    ? formatValueText(currentValue)
+    : undefined
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -121,6 +140,7 @@ const Slider: React.FC<SliderProps> = ({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={currentValue}
+          aria-valuetext={valueText}
           aria-orientation="horizontal"
           className={cssStyles.input}
           {...inputAriaProps}

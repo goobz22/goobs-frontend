@@ -7,3 +7,17 @@
 .input {
   width: 100%;
 }
+
+/* Keyboard focus indicator. A native range input's UA focus ring is
+   inconsistent across browsers (thumb-only in some, easily defeated by a
+   page reset in others), so we paint an explicit, high-contrast ring for
+   keyboard users. `:focus-visible` (not `:focus`) keeps it keyboard-only so
+   a pointer drag doesn't flash it. Color comes from the theme's
+   `--field-border-focus` token (blue on light/dark, gold on sacred),
+   inherited from the FieldShell wrapper this input renders inside — matching
+   the Checkbox/Switch focus convention. WCAG 2.4.7 Focus Visible /
+   2.4.11 Focus Appearance. */
+.input:focus-visible {
+  outline: 2px solid var(--field-border-focus);
+  outline-offset: 2px;
+}

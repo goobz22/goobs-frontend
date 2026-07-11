@@ -249,6 +249,96 @@ export const Required: Story = {
 }
 
 // --------------------------------------------------------------------------
+// ACCESSIBLE VALUE TEXT (aria-valuetext)
+// --------------------------------------------------------------------------
+
+/**
+ * When the raw number is not the clearest spoken representation, pass
+ * `formatValueText` to control what screen readers announce via
+ * `aria-valuetext` — units, a bounded scale, or a percentage. Inspect the
+ * range input in the a11y panel: the announced value is the formatted string,
+ * not the bare number. (WCAG 1.3.1 / 4.1.2; APG slider pattern.)
+ */
+export const WithValueText: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <SliderWithState
+        label="Temperature"
+        min={-20}
+        max={40}
+        step={1}
+        initialValue={20}
+        helperText="Announced as e.g. “20 degrees Celsius”, not “20”"
+        formatValueText={v => `${v} degrees Celsius`}
+        styles={{ theme: 'light' }}
+      />
+      <SliderWithState
+        label="Rating"
+        min={1}
+        max={5}
+        step={1}
+        initialValue={3}
+        helperText="Announced as “3 of 5”, not “3”"
+        formatValueText={v => `${v} of 5`}
+        styles={{ theme: 'light' }}
+      />
+      <SliderWithState
+        label="Opacity"
+        min={0}
+        max={1}
+        step={0.05}
+        initialValue={0.5}
+        helperText="Announced as “50 percent”, not “0.5”"
+        formatValueText={v => `${Math.round(v * 100)} percent`}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// KEYBOARD FOCUS RING (:focus-visible)
+// --------------------------------------------------------------------------
+
+/**
+ * Tab to the slider: a 2px themed focus ring appears (`:focus-visible`, so it
+ * only shows for keyboard focus, never a pointer drag). The native range input
+ * is fully keyboard-operable out of the box — Arrow Left/Right/Up/Down adjust
+ * by `step`, Home/End jump to min/max, PageUp/PageDown take larger steps.
+ * (WCAG 2.1.1 Keyboard / 2.4.7 Focus Visible / 2.4.11 Focus Appearance.)
+ */
+export const KeyboardFocusRing: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <SliderWithState
+        label="Light (Tab to focus)"
+        min={0}
+        max={100}
+        step={1}
+        initialValue={50}
+        helperText="Arrows adjust · Home/End jump to min/max"
+        styles={{ theme: 'light' }}
+      />
+      <div
+        style={{ background: '#0e0e0e', padding: '1.5rem', borderRadius: '8px' }}
+      >
+        <SliderWithState
+          label="Sacred (Tab to focus)"
+          min={0}
+          max={100}
+          step={1}
+          initialValue={50}
+          helperText="Gold focus ring on the sacred canvas"
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
 // COMPREHENSIVE SHOWCASE
 // --------------------------------------------------------------------------
 
