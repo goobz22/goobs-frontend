@@ -1,10 +1,54 @@
 # BigCalendar — a11y audit (2026-07-11)
 
-**Status:** PARTIAL — every issue inside this component's ownership (11 of 14) is FIXED;
-the 3 deferred items (#12 view-switcher group label, #13 real heading for the period, #14
-Tooltip-on-focus) all require edits to **other** components (`ToggleButtonGroup`,
-`Typography`, `Tooltip`) that this owner may not touch, and each has a concrete suggested
-change recorded below.
+**Status:** FIXED (in-component) — the original 11 ownership issues plus the
+adversarial-review follow-ups are resolved **without touching any unowned component**.
+Two of the three former "deferred" items were reclassified as in-component fixes and DONE:
+**#12 view-switcher group name** and **#13 real heading + region landmark** are now built in
+BigCalendar itself. Only **#14 (Tooltip-on-focus)** remains genuinely unowned (the visual
+hover bubble lives in `Tooltip`); it is fully MITIGATED here (all event detail is on the
+interactive element's `aria-label`, so nothing is keyboard/AT-inaccessible).
+
+## Adversarial-review follow-up (2026-07-11)
+
+An adversarial review of the first pass raised five findings. Resolution:
+
+| Rev # | Severity | Finding | Resolution |
+|---|----------|---------|------------|
+| R1 | Moderate | Week/day hour cells use roving tabindex inside a bare `role="group"` (does not advertise arrow-key nav) | **FIXED** — the hour-cell container is now `role="toolbar"` (week: `weekDaysContainer`; day: `dayContentColumn` + `aria-orientation="vertical"`), a composite widget role that advertises the single-tab-stop + arrow-key model. `index.tsx:1028-1032`, `1164-1172`. |
+| R2 | Moderate | No real heading and no landmark (SEO + heading nav) | **FIXED in-component** — root is now a `role="region"` landmark named (via `aria-labelledby`) by a real, visually-hidden `<h{headingLevel}>` carrying the current period. New additive `headingLevel` prop (default 2). `index.tsx:1305-1329`. Resolves former Deferred #13 without editing `Typography`. |
+| R3 | Minor | View-switcher (ToggleButtonGroup) has no accessible group name | **FIXED in-component** — the group is wrapped in `<div role="group" aria-label="Calendar view">` with `display:contents` (`.viewSwitcherGroup`) so the toolbar layout is byte-unchanged. `index.tsx:1385-1391`. Resolves former Deferred #12 without editing `ToggleButton`. |
+| R4 | Minor | Clickable event chips (native `<button>`, default tabIndex 0) are not in the grid's single-tab-stop roving model | **REFUTED** (see below) — the prescribed `tabIndex=-1` would remove keyboard operability (WCAG 2.1.1 A) without a compensating in-cell arrow-nav system; the current behavior is WCAG-conformant and matches accessible-calendar convention. |
+| R5 | Minor | Test-coverage gaps (week day-nav, month Page/Home/End, aria-current, nav-label units, clear-filters) | **FIXED** — 10 new play stories added (see "Stories updated"). |
+
+### Rev #4 — refutation detail
+
+`renderEvent` (`index.tsx:806-815`) makes a clickable event a native
+`<button type="button">` with the full detail on `aria-label`. The review asks for
+`tabIndex={-1}` per the strict APG data-grid pattern ("in-cell widgets reached via arrows").
+That prescription is **not safely applicable here**:
+
+1. Setting `tabIndex={-1}` on the event buttons **without** also building an in-cell arrow
+   navigation system would make the events **keyboard-unreachable**, a direct WCAG **2.1.1
+   Keyboard (Level A)** failure — strictly worse than the current state.
+2. The APG "one tab stop per grid" guidance is an **authoring recommendation, not a WCAG
+   success criterion**. Keeping rich, action-bearing widgets (event buttons) as sequential
+   tab stops is WCAG-conformant and is exactly what mainstream accessible calendars do
+   (react-big-calendar, FullCalendar, Google Calendar month view).
+3. Building a full "enter cell → arrow among widgets → Escape to exit" system has **no
+   conflict-free key** here (the cell already binds Arrows for grid nav and Enter/Space for
+   day selection), and would add real focus-management risk to a **published** library for a
+   finding the reviewer themselves rated *minor* with *"impact is limited."*
+
+The reviewer's own note — "Events stay operable, so impact is limited" — confirms there is no
+operability defect. Left as-is deliberately; keyboard operability (2.1.1) is preserved over an
+optional single-tab-stop nicety. (Latent, separate observation queued below: a clickable
+event nested inside a `role="button"` hour cell in week/day is nested-interactive — pre-existing,
+not introduced here.)
+
+### Former "deferred" status of the original pass
+
+The 3 items that were deferred in the first pass are now resolved as follows: #12 and #13 are
+FIXED in-component (see R3/R2 above); #14 (Tooltip-on-focus) stays unowned but fully mitigated.
 
 **APG pattern:** primarily the [Grid](https://www.w3.org/WAI/ARIA/apg/patterns/grid/)
 pattern, in the [Date Picker Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/datepicker-dialog/)
