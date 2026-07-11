@@ -172,8 +172,15 @@
   background-color: #f1f5f9;
 }
 
+/* Light focus ring uses the SOLID primary (#2563eb), not the translucent
+   --goobs-light-focus-ring (rgba(59,130,246,0.4)): a 40%-alpha ring composited
+   over the white surface computes ~1.6:1, failing WCAG 1.4.11 / 2.4.11 non-text
+   contrast. The opaque primary holds ~5.2:1 against white/near-white regardless
+   of backdrop, so the keyboard-focus indicator is reliably perceivable. (The
+   shared --goobs-*-focus-ring tokens are still below threshold for their other
+   consumers — see Button.md Deferred to raise them in global.css.) */
 .button[data-theme='light']:focus-visible {
-  outline-color: var(--goobs-light-focus-ring);
+  outline-color: var(--goobs-light-primary);
 }
 
 .button[data-theme='light'].selected {
@@ -210,8 +217,12 @@
   background-color: #2d3f52;
 }
 
+/* Dark focus ring uses the SOLID primary (#60a5fa), not the translucent
+   --goobs-dark-focus-ring (rgba(96,165,250,0.45)) which composited to ~2.0–2.3:1
+   over the dark surface — below the 3:1 non-text-contrast floor. The opaque
+   primary holds ~4.8–5.8:1 against the dark surface / raised surface / page. */
 .button[data-theme='dark']:focus-visible {
-  outline-color: var(--goobs-dark-focus-ring);
+  outline-color: var(--goobs-dark-primary);
 }
 
 .button[data-theme='dark'].selected {
