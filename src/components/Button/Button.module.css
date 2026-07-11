@@ -74,6 +74,16 @@
   background-color: var(--goobs-gold-a20);
 }
 
+/* Keyboard focus indicator (WCAG 2.4.7 / 2.4.11). The base `.button` sets
+   `outline: none` to drop the UA ring for pointer users; :focus-visible
+   restores a clearly-visible ring ONLY for keyboard/AT focus. Uses `outline`
+   (not box-shadow) so it never fights the hover glow, with an offset for
+   contrast against the button's own border. Per-theme colours below. */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Selected state - Sacred theme */
 .button.selected {
   background-color: var(--goobs-gold-a20);
@@ -162,6 +172,10 @@
   background-color: #f1f5f9;
 }
 
+.button[data-theme='light']:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
 .button[data-theme='light'].selected {
   background-color: var(--goobs-blue-a08);
   border-color: var(--goobs-light-primary);
@@ -194,6 +208,10 @@
 
 .button[data-theme='dark']:active:not(:disabled) {
   background-color: #2d3f52;
+}
+
+.button[data-theme='dark']:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
 }
 
 .button[data-theme='dark'].selected {
@@ -254,6 +272,14 @@
   border-radius: 0;
 }
 
+/* The group container clips with `overflow: hidden`, which would crop an
+   outward focus ring on a member button. Draw the focus outline INSET so the
+   keyboard-focus indicator stays fully visible inside the segmented control. */
+.buttonGroup .button:focus-visible {
+  outline-offset: -2px;
+  z-index: 1;
+}
+
 .buttonGroup .button:first-child {
   border-radius: var(--goobs-radius-md) 0 0 var(--goobs-radius-md);
 }
@@ -272,4 +298,21 @@
 
 .buttonGroup[data-theme='dark'] .button:not(:last-child) {
   border-right-color: var(--goobs-dark-border);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced Motion (WCAG 2.3.3)
+   Users who ask for reduced motion get no colour/position transition and no
+   hover lift — the state changes still apply instantly (colour/border/shadow
+   remain as accessibility affordances), just without the animated movement.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button:hover:not(:disabled) {
+    transform: none;
+  }
 }

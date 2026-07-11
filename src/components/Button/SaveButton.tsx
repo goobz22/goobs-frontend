@@ -97,19 +97,29 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   }
 
   return (
-    <CustomButton
-      action="save"
-      variant="primary"
-      text={pending ? pendingLabel : label}
-      {...(pending && { icon: <PendingSpinner /> })}
-      disabled={isDisabled}
-      onClick={onSave}
-      styles={mergedStyles}
-      data-save-button="true"
-      {...(pending && { 'data-save-pending': 'true' })}
-      {...(subject !== undefined && { subject })}
-      {...restProps}
-    />
+    <>
+      <CustomButton
+        action="save"
+        variant="primary"
+        text={pending ? pendingLabel : label}
+        {...(pending && { icon: <PendingSpinner /> })}
+        disabled={isDisabled}
+        {...(pending && { 'aria-busy': true })}
+        onClick={onSave}
+        styles={mergedStyles}
+        data-save-button="true"
+        {...(pending && { 'data-save-pending': 'true' })}
+        {...(subject !== undefined && { subject })}
+        {...restProps}
+      />
+      {/* Polite live region carrying the busy-state announcement (WCAG
+          4.1.3). Empty when idle; populated with the pending label while a
+          save is in flight so assistive tech hears "Saving…" even though the
+          button itself is disabled. */}
+      <span className={cssStyles.srOnly} role="status" aria-live="polite">
+        {pending ? pendingLabel : ''}
+      </span>
+    </>
   )
 }
 

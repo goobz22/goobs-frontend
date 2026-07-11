@@ -19,6 +19,18 @@ export interface ButtonGroupProps {
   children: React.ReactNode
   /** Styling forwarded onto every child Button — group keys override each child's own `styles` keys — and applied as the container's `data-theme` (default `'sacred'`). */
   styles?: ButtonStyles
+  /**
+   * Accessible name for the segmented group, applied to the container's
+   * `role="group"`. Strongly recommended for a segmented single-select so
+   * assistive tech announces the set (e.g. "View mode, group") before its
+   * toggle buttons (WCAG 1.3.1 / 4.1.2).
+   */
+  'aria-label'?: string
+  /**
+   * ID reference supplying the group's accessible name — the labelledby
+   * alternative to `aria-label` (point it at a visible heading/legend).
+   */
+  'aria-labelledby'?: string
 }
 
 /**
@@ -35,6 +47,8 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   onChange,
   children,
   styles,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
 }) => {
   const theme = styles?.theme || 'sacred'
 
@@ -65,7 +79,13 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   })
 
   return (
-    <div className={cssStyles.buttonGroup} data-theme={theme}>
+    <div
+      className={cssStyles.buttonGroup}
+      data-theme={theme}
+      role="group"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
+    >
       {enhancedChildren}
     </div>
   )
@@ -309,7 +329,15 @@ export interface ButtonProps extends Omit<
   icon?: ReactNode
   /** Styling overrides — theme, inline-CSS keys, and hover intent. See ButtonStyles. */
   styles?: ButtonStyles
-  /** Renders the pressed/selected treatment (gold-tinted on sacred). Set automatically by ButtonGroup on the child whose `value` matches the group's. */
+  /**
+   * Renders the pressed/selected treatment (gold-tinted on sacred) AND, when
+   * defined, exposes the state programmatically as `aria-pressed={selected}`
+   * so the button reads as a toggle button — the selection is conveyed to
+   * assistive tech, not by colour alone (WCAG 1.4.1 / 4.1.2). Set
+   * automatically by ButtonGroup on every child (the one whose `value` matches
+   * the group's is `true`), turning the segmented control into a labelled
+   * group of toggle buttons.
+   */
   selected?: boolean
   /** Identity of this button inside a ButtonGroup — compared against the group `value` for selection and reported to the group's `onChange`. Unused outside a group. */
   value?: string
@@ -568,10 +596,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     if (iconLocation === 'above') classNames.push(cssStyles.iconAbove)
     if (selected) classNames.push(cssStyles.selected)
 
-    const iconComponent = useMemo(() => {
-      return icon ? <span className={cssStyles.iconWrapper}>{icon}</span> : null
-    }, [icon])
-
     // Label content. JSX `children` (when provided) take precedence over the
     // `text` prop so `<Button>Save</Button>` and `<Button text="Save" />`
     // render identically; both flow through the same `<span>` label slot.
@@ -586,6 +610,24 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ? children
         : text
     const labelComponent = labelSource ? <span>{labelSource}</span> : null
+    const hasLabel = labelComponent !== null
+
+    // Icon slot. When the button ALSO renders a text label the icon is
+    // decorative, so hide it from assistive tech (`aria-hidden`) — otherwise
+    // an unlabelled goobs <svg> pollutes the accessible name (WCAG 1.1.1).
+    // For an icon-ONLY button we must NOT hide it (it would leave the button
+    // nameless); such buttons rely on a caller-supplied `aria-label` (passed
+    // through via `filteredProps`) for their accessible name (WCAG 4.1.2).
+    const iconComponent = useMemo(() => {
+      return icon ? (
+        <span
+          className={cssStyles.iconWrapper}
+          {...(hasLabel ? { 'aria-hidden': true } : {})}
+        >
+          {icon}
+        </span>
+      ) : null
+    }, [icon, hasLabel])
 
     return (
       <button
@@ -596,6 +638,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         data-action={action}
         data-subject={subject}
         data-variant={variant}
+        {...(selected !== undefined && { 'aria-pressed': selected })}
         style={dynamicStyle}
         disabled={isDisabled}
         onClick={handleClick}
