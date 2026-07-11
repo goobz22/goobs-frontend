@@ -1088,6 +1088,12 @@ export const InteractiveDemo: Story = {
  * reveals "← Back", and that Back returns to step 1 content. The snapshot
  * therefore captures the wizard back on step 1 after a full
  * forward-then-back round trip.
+ *
+ * It ALSO pins the wizard step-transition announcement (WCAG 4.1.3): advancing
+ * / retreating moves the active step and swaps `content` WITHOUT moving focus,
+ * so a persistent polite `aria-live` region reflects "Step X of N: <label>" and
+ * is what tells a screen-reader user they navigated. The play function asserts
+ * the region tracks Plan → Build → Plan across the round trip.
  */
 export const WizardMode: Story = {
   play: async ({ canvasElement }) => {
@@ -1097,6 +1103,14 @@ export const WizardMode: Story = {
       await canvas.findByText(/Step 1 content — define what ships/)
     ).toBeVisible()
     await expect(canvas.queryByText('← Back')).toBeNull()
+
+    // The polite live region announces the wizard position for AT users (WCAG
+    // 4.1.3). Its full "Step X of N: <label>" string is unique to the region
+    // (the step control itself only carries the bare label), so matching the
+    // whole string targets the live region unambiguously.
+    await expect(
+      await canvas.findByText('Step 1 of 3: Plan')
+    ).toBeInTheDocument()
 
     // Continue → onNext advances: step 2 content replaces step 1 content
     // and the Back control appears.
@@ -1108,12 +1122,24 @@ export const WizardMode: Story = {
     const backButton = canvas.getByRole('button', { name: '← Back' })
     await expect(backButton).toBeVisible()
 
+    // Advancing updated the live region → the move is announced politely.
+    await expect(
+      await canvas.findByText('Step 2 of 3: Build')
+    ).toBeInTheDocument()
+    await expect(canvas.queryByText('Step 1 of 3: Plan')).toBeNull()
+
     // Back → onBack retreats: step 1 content is rendered again.
     await userEvent.click(backButton)
     await expect(
       await canvas.findByText(/Step 1 content — define what ships/)
     ).toBeVisible()
     await expect(canvas.queryByText(/Step 2 content/)).toBeNull()
+
+    // …and the live region is back to announcing step 1.
+    await expect(
+      await canvas.findByText('Step 1 of 3: Plan')
+    ).toBeInTheDocument()
+    await expect(canvas.queryByText('Step 2 of 3: Build')).toBeNull()
   },
   render: () => {
     const Component = () => {
