@@ -398,6 +398,23 @@
   border-color: var(--goobs-dark-control-border);
 }
 
+/* focus-visible — keyboard-only focus ring for the transfer buttons (WCAG
+   2.4.7 Focus Visible). Uses `outline` (not box-shadow) so it never collides
+   with the hover box-shadow above. The list-row checkboxes carry their own
+   focus ring from the Checkbox module, so only these buttons need one here. */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-gold);
+  outline-offset: 2px;
+}
+
+.container[data-theme='light'] .button:focus-visible {
+  outline-color: var(--goobs-light-primary);
+}
+
+.container[data-theme='dark'] .button:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
 /* --------------------------------------------------------------------------
    SACRED GLYPH — decorative rotating sigil, sacred theme only
    -------------------------------------------------------------------------- */
@@ -408,4 +425,64 @@
   font-size: var(--goobs-text-2xl);
   color: var(--goobs-gold-a20);
   animation: transferListGlyphRotate 20s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   VALIDATION ERROR — visible + role="alert" region below the row. Uses the
+   per-theme WCAG-AA danger text tokens (light #b91c1c = 6.47:1) rather than the
+   raw --goobs-danger (3.76:1) so the message meets contrast on every surface.
+   Sacred = base (module convention); light / dark override.
+   -------------------------------------------------------------------------- */
+.error {
+  margin-top: var(--goobs-space-xs);
+  font-size: var(--goobs-text-sm);
+  font-weight: var(--goobs-weight-medium);
+  color: var(--goobs-sacred-danger-text);
+}
+
+.container[data-theme='light'] .error {
+  color: var(--goobs-light-danger-text);
+}
+
+.container[data-theme='dark'] .error {
+  color: var(--goobs-dark-danger-text);
+}
+
+/* --------------------------------------------------------------------------
+   VISUALLY-HIDDEN — the polite live region that narrates each transfer. Kept in
+   the a11y tree (so it is announced) but removed from the visual layout.
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — the sacred theme runs three continuous infinite
+   animations (list glow-pulse, button float, glyph rotate) plus hover
+   transforms/transitions. Users who ask for reduced motion get a static UI.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .list,
+  .button,
+  .glyph {
+    animation: none;
+  }
+
+  .listItem,
+  .button {
+    transition: none;
+  }
+
+  .listItem:hover,
+  .button:hover:not(:disabled) {
+    transform: none;
+  }
 }

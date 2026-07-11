@@ -18,6 +18,11 @@ function mergeClassNames(...names: Array<string | undefined>): string {
   return names.filter(Boolean).join(' ')
 }
 
+/** Singular/plural helper for the screen-reader status announcements. */
+function pluralize(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`
+}
+
 export type TransferListVariant = 'singleSelection' | 'multipleSelection'
 
 /**
@@ -25,6 +30,13 @@ export type TransferListVariant = 'singleSelection' | 'multipleSelection'
  * every sibling field exposes via `styles={{ theme }}`.
  */
 export type TransferListTheme = 'light' | 'dark' | 'sacred'
+
+/**
+ * Heading level for the two column titles. Rendered as a real `<h1>`–`<h6>`
+ * element so the control slots correctly into the consuming page's document
+ * outline (WCAG 1.3.1 Info & Relationships; SSR-crawlable).
+ */
+export type TransferListHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 export interface TransferListDropdownDataMap {
   [dropdownValue: string]: {
@@ -48,6 +60,13 @@ export interface TransferListProps {
   ) => void
   leftTitle?: string
   rightTitle?: string
+  /**
+   * Heading level (1–6) for the two column titles ("Unassigned" / "Assigned").
+   * Rendered as a real `<h1>`–`<h6>` so a consumer embedding the transfer list
+   * under, say, an `<h2>` section can keep the document outline correct rather
+   * than being locked to `<h3>`. Defaults to 3, preserving the prior markup.
+   */
+  headingLevel?: TransferListHeadingLevel
   /**
    * @deprecated Use `styles.theme` (the `'sacred' | 'light' | 'dark'` union)
    * below — it supersedes this boolean and can also express the `dark` palette
@@ -99,6 +118,10 @@ const TransferButton: React.FC<TransferButtonProps> = ({
     'move-' + name.replace(/^all-/, 'all-').replace(/^checked-/, 'selected-')
   return (
     <button
+      // Explicit type so a transfer arrow never acts as an implicit submit
+      // button when the TransferList is rendered inside a `<Form>`/`<form>`
+      // (the default `<button>` type is "submit" — WCAG 3.2.2 On Input).
+      type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
@@ -106,7 +129,10 @@ const TransferButton: React.FC<TransferButtonProps> = ({
       data-action={action}
       data-animation-delay={name === 'all-left' ? 'all-left' : undefined}
     >
-      {children}
+      {/* The arrow glyph is decorative — the accessible name comes from
+          aria-label above — so hide the symbol from assistive tech (WCAG
+          1.1.1) to avoid it leaking into or duplicating the name. */}
+      <span aria-hidden="true">{children}</span>
     </button>
   )
 }
@@ -122,6 +148,7 @@ const TransferList: React.FC<TransferListProps> = ({
   onChange,
   leftTitle = 'Unassigned',
   rightTitle = 'Assigned',
+  headingLevel = 3,
   sacredtheme = false,
   styles,
   className,
@@ -161,10 +188,28 @@ const TransferList: React.FC<TransferListProps> = ({
     [isBound, boundOnChange, onChange]
   )
 
-  // Per-instance id base so label ids are unique across multiple TransferLists
-  // on the same page and never leak raw item values (with spaces / special
-  // chars) into an id attribute referenced by aria-labelledby.
+  // Per-instance id base so heading/label/error ids are unique across multiple
+  // TransferLists on the same page and never leak raw item values (with spaces /
+  // special chars) into an id attribute referenced by aria-labelledby.
   const reactId = React.useId()
+  const leftTitleId = `${reactId}-left-title`
+  const rightTitleId = `${reactId}-right-title`
+  const errorId = `${reactId}-error`
+
+  // Screen-reader status: a transfer moves items between lists without moving
+  // focus, so each move is announced through a polite live region (WCAG 4.1.3
+  // Status Messages).
+  const [announcement, setAnnouncement] = useState<string>('')
+  const announceMove = React.useCallback(
+    (count: number, toTitle: string, leftLen: number, rightLen: number) => {
+      setAnnouncement(
+        `Moved ${pluralize(count, 'item')} to ${toTitle}. ` +
+          `${leftTitle} now has ${pluralize(leftLen, 'item')}, ` +
+          `${rightTitle} now has ${pluralize(rightLen, 'item')}.`
+      )
+    },
+    [leftTitle, rightTitle]
+  )
 
   const [selectedDropdownValue, setSelectedDropdownValueInternal] =
     useState<string>('')
@@ -211,6 +256,7 @@ const TransferList: React.FC<TransferListProps> = ({
 
   const handleAllRight = () => {
     const newRight = [...currentRight, ...currentLeft]
+    announceMove(currentLeft.length, rightTitle, 0, newRight.length)
     emitChange(
       [],
       newRight,
@@ -222,6 +268,7 @@ const TransferList: React.FC<TransferListProps> = ({
   const handleCheckedRight = () => {
     const newRight = [...currentRight, ...leftChecked]
     const newLeft = not(currentLeft, leftChecked)
+    announceMove(leftChecked.length, rightTitle, newLeft.length, newRight.length)
     setChecked(not(checked, leftChecked))
     emitChange(
       newLeft,
@@ -233,6 +280,7 @@ const TransferList: React.FC<TransferListProps> = ({
   const handleCheckedLeft = () => {
     const newLeft = [...currentLeft, ...rightChecked]
     const newRight = not(currentRight, rightChecked)
+    announceMove(rightChecked.length, leftTitle, newLeft.length, newRight.length)
     setChecked(not(checked, rightChecked))
     emitChange(
       newLeft,
@@ -243,6 +291,7 @@ const TransferList: React.FC<TransferListProps> = ({
 
   const handleAllLeft = () => {
     const newLeft = [...currentLeft, ...currentRight]
+    announceMove(currentRight.length, leftTitle, newLeft.length, 0)
     emitChange(
       newLeft,
       [],
@@ -251,50 +300,87 @@ const TransferList: React.FC<TransferListProps> = ({
     setChecked([])
   }
 
-  const renderList = (items: readonly string[], listKey: string) => (
+  /**
+   * Renders one selectable list as a real `<ul>` of `<li>`s (WCAG 1.3.1). Each
+   * row is a native checkbox — the SOLE interactive control, no nested button
+   * (WCAG 4.1.2) — whose checked state IS the "selected for transfer" state, so
+   * selection is conveyed programmatically, never by colour alone (WCAG 1.4.1).
+   * The list is named by its column heading (`labelledBy`) or, in the dropdown
+   * variant that has no heading, by `ariaLabel`.
+   */
+  const renderList = (
+    items: readonly string[],
+    listKey: string,
+    labelledBy: string | undefined,
+    ariaLabel: string | undefined
+  ) => (
     <div className={cssStyles.list}>
-      <div className={cssStyles.listInner}>
+      <ul
+        className={cssStyles.listInner}
+        {...(labelledBy ? { 'aria-labelledby': labelledBy } : {})}
+        {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
+      >
         {items.map((value, index) => {
-          // Index- and instance-scoped id: valid (no spaces/special chars from
+          // Index- and instance-scoped ids: valid (no spaces/special chars from
           // the raw value), unique across the left/right lists (listKey) and
-          // across component instances (reactId). aria-labelledby below points
-          // at the matching <span id={labelId}>, preserving the association.
+          // across component instances (reactId).
           const labelId = `${reactId}-${listKey}-item-${index}-label`
+          const checkboxId = `${reactId}-${listKey}-item-${index}-cb`
           const isChecked = checked.indexOf(value) !== -1
           const displayedLabel = itemLabelMap?.[value] || value
 
           return (
-            <button
+            <li
               key={value}
-              onClick={handleToggle(value)}
               className={cssStyles.listItem}
               data-action="toggle"
               data-checked={isChecked ? 'true' : undefined}
             >
-              <div className={cssStyles.checkboxContainer}>
+              <span className={cssStyles.checkboxContainer}>
+                {/* The native checkbox is the real, focusable control: keyboard
+                    users Tab to it and toggle with Space; its checked state is
+                    announced natively. `aria-labelledby` names it from the
+                    adjacent label so the announced name is deterministic. */}
                 <CustomCheckbox
+                  id={checkboxId}
                   checked={isChecked}
-                  onChange={() => {}}
+                  onChange={handleToggle(value)}
                   aria-labelledby={labelId}
                   styles={{ theme }}
                 />
-              </div>
-              <span id={labelId} className={cssStyles.label}>
-                {displayedLabel}
               </span>
-            </button>
+              {/* A real `<label htmlFor>` so clicking the visible text toggles
+                  the checkbox, and it carries the themed item label styling. */}
+              <label
+                htmlFor={checkboxId}
+                id={labelId}
+                className={cssStyles.label}
+              >
+                {displayedLabel}
+              </label>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
+
+  const HeadingTag = `h${headingLevel}` as
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
 
   const renderLeftColumn = () => {
     if (variant === 'singleSelection') {
       return (
         <div className={cssStyles.column}>
-          <h3 className={cssStyles.title}>{leftTitle}</h3>
-          {renderList(currentLeft, 'left')}
+          <HeadingTag id={leftTitleId} className={cssStyles.title}>
+            {leftTitle}
+          </HeadingTag>
+          {renderList(currentLeft, 'left', leftTitleId, undefined)}
         </div>
       )
     }
@@ -307,7 +393,13 @@ const TransferList: React.FC<TransferListProps> = ({
           onChange={value => setSelectedDropdownValue(value)}
           styles={{ theme }}
         />
-        {renderList(currentLeft, 'left')}
+        {/* No heading in the dropdown variant, so the list is named directly. */}
+        {renderList(
+          currentLeft,
+          'left',
+          undefined,
+          dropdownLabel || 'Available items'
+        )}
       </div>
     )
   }
@@ -324,48 +416,82 @@ const TransferList: React.FC<TransferListProps> = ({
       data-component="TransferList"
       data-field-name={dataFieldName ?? name}
       data-filled={hasValue ? 'true' : undefined}
-      {...(engineError && { 'data-error': 'true' })}
+      // Group the two lists + transfer controls so a validation error can be
+      // programmatically associated with the whole composite field.
+      role="group"
+      {...(engineError && {
+        'data-error': 'true',
+        'aria-invalid': true,
+        'aria-describedby': errorId,
+      })}
       style={style}
     >
-      {theme === 'sacred' && <div className={cssStyles.glyph}>𓊨</div>}
-      <div className={cssStyles.column}>{renderLeftColumn()}</div>
-      <div className={cssStyles.buttonGroup}>
-        <TransferButton
-          onClick={handleAllRight}
-          disabled={currentLeft.length === 0}
-          aria-label="move all right"
-          name="all-right"
-        >
-          ≫
-        </TransferButton>
-        <TransferButton
-          onClick={handleCheckedRight}
-          disabled={leftChecked.length === 0}
-          aria-label="move selected right"
-          name="checked-right"
-        >
-          &gt;
-        </TransferButton>
-        <TransferButton
-          onClick={handleCheckedLeft}
-          disabled={rightChecked.length === 0}
-          aria-label="move selected left"
-          name="checked-left"
-        >
-          &lt;
-        </TransferButton>
-        <TransferButton
-          onClick={handleAllLeft}
-          disabled={currentRight.length === 0}
-          aria-label="move all left"
-          name="all-left"
-        >
-          ≪
-        </TransferButton>
+      {theme === 'sacred' && (
+        // Decorative sacred sigil — hidden from assistive tech (WCAG 1.1.1).
+        <div className={cssStyles.glyph} aria-hidden="true">
+          𓊨
+        </div>
+      )}
+      <div className={cssStyles.row}>
+        <div className={cssStyles.column}>{renderLeftColumn()}</div>
+        <div className={cssStyles.buttonGroup}>
+          <TransferButton
+            onClick={handleAllRight}
+            disabled={currentLeft.length === 0}
+            aria-label="move all right"
+            name="all-right"
+          >
+            ≫
+          </TransferButton>
+          <TransferButton
+            onClick={handleCheckedRight}
+            disabled={leftChecked.length === 0}
+            aria-label="move selected right"
+            name="checked-right"
+          >
+            &gt;
+          </TransferButton>
+          <TransferButton
+            onClick={handleCheckedLeft}
+            disabled={rightChecked.length === 0}
+            aria-label="move selected left"
+            name="checked-left"
+          >
+            &lt;
+          </TransferButton>
+          <TransferButton
+            onClick={handleAllLeft}
+            disabled={currentRight.length === 0}
+            aria-label="move all left"
+            name="all-left"
+          >
+            ≪
+          </TransferButton>
+        </div>
+        <div className={cssStyles.column}>
+          <HeadingTag id={rightTitleId} className={cssStyles.title}>
+            {rightTitle}
+          </HeadingTag>
+          {renderList(currentRight, 'right', rightTitleId, undefined)}
+        </div>
       </div>
-      <div className={cssStyles.column}>
-        <h3 className={cssStyles.title}>{rightTitle}</h3>
-        {renderList(currentRight, 'right')}
+
+      {/* Validation error — visible AND announced (role="alert"), and linked to
+          the group above via aria-describedby (WCAG 3.3.1 / 4.1.3). */}
+      {engineError && (
+        <div
+          id={errorId}
+          role="alert"
+          aria-live="polite"
+          className={cssStyles.error}
+        >
+          {engineError}
+        </div>
+      )}
+
+      {/* Polite live region announcing each transfer to screen-reader users. */}
+      <div role="status" aria-live="polite" className={cssStyles.srOnly}>
+        {announcement}
       </div>
     </div>
   )
