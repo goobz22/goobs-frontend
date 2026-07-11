@@ -13,6 +13,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect, userEvent, waitFor } from 'storybook/test'
 import { z } from 'zod'
 import Form from './index'
 import Button from '../Button'
@@ -404,6 +405,35 @@ export const DynamicFieldValues: Story = {
   name: 'Dynamic field-set (useFieldValues)',
   render: () => <ArticleForm />,
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// SUBMIT STATUS ANNOUNCEMENT (regression for the role="alert" live region)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression for the form-level submit-status announcement (WCAG 4.1.3 Status
+ * Messages). Submitting the pristine (empty) contact form blocks on validation
+ * — the per-field errors appear WITHOUT moving focus, so a screen-reader user
+ * would otherwise get no feedback that the submit failed. The visually-hidden
+ * `role="alert"` region announces a concise field-count summary ("2 fields need
+ * attention…"), the audible counterpart to the visible per-field errors.
+ */
+export const SubmitStatusAnnouncement: Story = {
+  name: 'Submit status announcement (role=alert)',
+  render: () => <ThemedContactForm theme="light" />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Submit the empty form → validation blocks it (fullName + email required).
+    await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
+    // The live region announces the count of fields needing attention.
+    await waitFor(() =>
+      expect(canvas.getByRole('alert')).toHaveTextContent(
+        /fields need attention/i
+      )
+    )
+  },
 }
 
 /**

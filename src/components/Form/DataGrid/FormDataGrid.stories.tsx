@@ -195,6 +195,11 @@ export const Sacred: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByText('Employee Directory')).toBeVisible()
+    // The title is a real heading (default level 2) — reachable by heading
+    // navigation and a genuine heading in the crawled HTML, not a styled <div>.
+    await expect(
+      canvas.getByRole('heading', { level: 2, name: 'Employee Directory' })
+    ).toBeVisible()
     await expect(
       canvas.getByText('Manage all employee records for your company')
     ).toBeVisible()
@@ -294,6 +299,36 @@ export const DismissibleErrorAlert: Story = {
     await userEvent.click(canvas.getByRole('button', { name: '✕' }))
     // The Alert defers onClose by 200ms (fade-out) before invoking it.
     await waitFor(() => expect(args.alert?.onClose).toHaveBeenCalled())
+  },
+}
+
+/**
+ * Custom heading level: the title's semantic level is caller-controllable via
+ * `headingLevel` so the wrapper slots into the surrounding document outline.
+ * Here it renders as an `<h3>` (e.g. nested under an `<h2>` section) while the
+ * visual styling is unchanged.
+ */
+export const CustomHeadingLevel: Story = {
+  globals: { backgrounds: { value: 'light' } },
+  args: {
+    title: 'Employee Directory',
+    description: 'Manage all employee records for your company',
+    headingLevel: 3,
+    sacredtheme: false,
+    datagrid: {
+      columns: employeeColumns,
+      rows: employeeRows,
+      permissions: { access: 'read' },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      await canvas.findByRole('heading', {
+        level: 3,
+        name: 'Employee Directory',
+      })
+    ).toBeVisible()
   },
 }
 

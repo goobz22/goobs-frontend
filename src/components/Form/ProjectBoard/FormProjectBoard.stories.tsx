@@ -283,6 +283,11 @@ export const Sacred: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByText('Support Cases')).toBeVisible()
+    // The title is a real heading (default level 2) — reachable by heading
+    // navigation and a genuine heading in the crawled HTML, not a styled <div>.
+    await expect(
+      canvas.getByRole('heading', { level: 2, name: 'Support Cases' })
+    ).toBeVisible()
     await expect(
       canvas.getByText('Track and resolve every open customer case')
     ).toBeVisible()
@@ -323,6 +328,9 @@ export const SeverityGrouping: Story = {
   args: {
     title: 'Cases by Severity',
     description: 'Triage cases from most to least critical',
+    // Caller-controlled heading level: this board's title renders as an <h3>
+    // (e.g. nested under an <h2> section) while its styling is unchanged.
+    headingLevel: 3,
     sacredtheme: true,
     projectboard: {
       ...administratorBoard,
@@ -333,5 +341,14 @@ export const SeverityGrouping: Story = {
         { _id: 'sev-3', title: 'Medium', description: 'Medium priority' },
       ],
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      await canvas.findByRole('heading', {
+        level: 3,
+        name: 'Cases by Severity',
+      })
+    ).toBeVisible()
   },
 }
