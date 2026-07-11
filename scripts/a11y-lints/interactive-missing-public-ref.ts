@@ -58,7 +58,9 @@ function maskNonCode(text: string): string {
   )
   t = t.replace(/'(?:[^'\\\n]|\\.)*'/g, (m) => "'" + ' '.repeat(Math.max(0, m.length - 2)) + "'")
   t = t.replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => '"' + ' '.repeat(Math.max(0, m.length - 2)) + '"')
-  t = t.replace(/`(?:[^`\\]|\\.)*`/g, (m) => '`' + ' '.repeat(Math.max(0, m.length - 2)) + '`')
+  // Template literals CAN span newlines — blank only the non-newline inner chars
+  // so line numbers of any JSX after a multi-line template stay accurate.
+  t = t.replace(/`(?:[^`\\]|\\.)*`/g, (m) => '`' + m.slice(1, -1).replace(/[^\n]/g, ' ') + '`')
   return t
 }
 
