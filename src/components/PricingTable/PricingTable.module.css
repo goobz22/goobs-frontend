@@ -1,0 +1,78 @@
+/* --------------------------------------------------------------------------
+   PricingTable — accessibility-only CSS module.
+
+   The component's theming stays as inline style objects (getThemeStyles),
+   consistent with this file's long-standing pattern. This module carries ONLY
+   the pieces that cannot be expressed inline: a visually-hidden text utility
+   (screen-reader alternatives for icon-only cells) and reduced-motion-guarded
+   keyframes for the purely decorative sacred glyphs.
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   VISUALLY-HIDDEN TEXT
+   Kept in the accessibility tree (NOT display:none) so screen readers announce
+   the meaning that sighted users read from the check icon / column layout:
+   "Included" / "Not included" per feature cell, and each feature's info text
+   that is otherwise only reachable through the hover tooltip.
+   (WCAG 1.1.1 Non-text Content, 1.3.1 Info & Relationships, 4.1.2 Name/Role/Value.)
+   Mirrors Alert.module.css .severityLabel.
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   DECORATIVE SACRED GLYPHS
+   The corner mark slowly rotates and the footer marks gently drift. They are
+   pure ornament (aria-hidden in the TSX) and carry no information. The
+   animations live here — not inline — so the reduced-motion query below can
+   switch them off; inline `animation` could not be overridden by a media rule.
+   CSS Modules scopes these @keyframes names, so they cannot collide with the
+   global bundle (the earlier inline `spin`/`float` names referenced keyframes
+   that no longer exist post theme-removal, so those glyphs never actually moved).
+   -------------------------------------------------------------------------- */
+.sacredGlyph {
+  animation: pricingSpin 20s linear infinite;
+}
+
+.sacredFooterGlyph {
+  animation: pricingFloat var(--pt-float-duration, 3s) ease-in-out infinite;
+}
+
+@keyframes pricingSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pricingFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
+   Honour a user's reduced-motion preference by halting the decorative glyphs.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sacredGlyph,
+  .sacredFooterGlyph {
+    animation: none;
+  }
+}

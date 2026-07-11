@@ -14,13 +14,6 @@ import cssStyles from './PricingTable.module.css'
 // import Switch from '../Switch';
 // Remove clsx import
 
-/**
- * Compose class names without a clsx/classnames dependency (library
- * convention). Falsy entries are dropped so conditional classes read cleanly.
- */
-const cx = (...classes: Array<string | false | null | undefined>): string =>
-  classes.filter(Boolean).join(' ')
-
 // --------------------------------------------------------------------------
 // PROPS INTERFACE (keep existing, perhaps adjust if needed)
 // --------------------------------------------------------------------------
@@ -363,6 +356,72 @@ const PricingTable: FC<PricingProps> = props => {
     }
   }
 
+  // A real heading whose level the consumer controls (via React.createElement,
+  // matching Accordion), replacing the hardcoded <h5> that skipped levels in
+  // the document outline. Carries the id that names the table.
+  const titleHeading = tabletitle
+    ? React.createElement(
+        `h${headingLevel}`,
+        { id: headingId, style: styles.header },
+        tabletitle.text
+      )
+    : null
+
+  // One package (data) cell per column. When the feature is included the check
+  // icon is decorative (aria-hidden) and a visually-hidden "Included" carries
+  // the meaning to assistive tech; an excluded cell announces "Not included"
+  // rather than rendering an ambiguous blank (WCAG 1.1.1 / 1.4.1 / 4.1.2).
+  const renderPackageCells = (tied: string[] | undefined, fIndex: number) =>
+    packagenames.map((_, pIndex) => {
+      const included = tied?.[pIndex] === 'true'
+      return (
+        <td
+          key={pIndex}
+          style={{
+            ...styles.checkCell,
+            borderRight: '1px solid rgba(0,0,0,0.1)',
+            ...(fIndex % 2 === 0 ? styles.rowEven : {}),
+            ...(pIndex === highlightedPackageIndex ? styles.highlighted : {}),
+          }}
+        >
+          {included ? (
+            <>
+              <CheckCircleIcon
+                styles={{ theme: isSacredTheme ? 'sacred' : theme }}
+                style={styles.checkIcon}
+                fontSize="small"
+                aria-hidden="true"
+              />
+              <span className={cssStyles.srOnly}>Included</span>
+            </>
+          ) : (
+            <span className={cssStyles.srOnly}>Not included</span>
+          )}
+        </td>
+      )
+    })
+
+  // The hover tooltip is the sighted affordance for a feature's info text; its
+  // trigger is mouse-only (keyboard support is a deferred Tooltip fix), so the
+  // same text is also exposed inline to assistive tech (WCAG 1.1.1 / 3.3.2).
+  const renderInfoAffordance = (infopopuptext: string) => (
+    <>
+      <StyledTooltip
+        tooltipplacement="right"
+        title={infopopuptext}
+        styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+      >
+        <InfoIcon
+          styles={{ theme: isSacredTheme ? 'sacred' : theme }}
+          fontSize="small"
+          style={{ marginLeft: '0.5rem', display: 'inline-block' }}
+          aria-hidden="true"
+        />
+      </StyledTooltip>
+      <span className={cssStyles.srOnly}>{infopopuptext}</span>
+    </>
+  )
+
   return (
     <div
       style={styles.container}
@@ -370,197 +429,193 @@ const PricingTable: FC<PricingProps> = props => {
       data-subject={tabletitle?.text}
       data-state={disabled ? 'disabled' : 'enabled'}
     >
-      {isSacredTheme && <div style={styles.glyph}>✦</div>}
+      {/* Decorative rotating corner glyph — pure ornament, hidden from AT. */}
+      {isSacredTheme && (
+        <div
+          style={styles.glyph}
+          className={cssStyles.sacredGlyph}
+          aria-hidden="true"
+        >
+          ✦
+        </div>
+      )}
 
-      {tabletitle && <h5 style={styles.header}>{tabletitle.text}</h5>}
+      {titleHeading}
 
       <div style={{ overflowX: 'auto' }}>
-        <div
+        {/* Real data table: package columns are <th scope="col">, each row's
+            label is <th scope="row">, values are <td> — so assistive tech and
+            crawlers get the row/column relationships (WCAG 1.3.1 / 4.1.2, and
+            SSR-crawlable semantics). Named by the title heading via
+            aria-labelledby, or a generic label when there is no title. */}
+        <table
           style={{
-            display: 'grid',
-            gap: 0,
-            gridTemplateColumns: `minmax(200px, 300px) repeat(${numPackages}, minmax(150px, 1fr))`,
+            borderCollapse: 'collapse',
+            width: '100%',
             minWidth: 'fit-content',
           }}
+          aria-labelledby={tabletitle ? headingId : undefined}
+          aria-label={tabletitle ? undefined : 'Pricing plans'}
         >
-          {/* Package Names Row */}
-          <div /> {/* Empty top-left */}
-          {packagenames.map((name, i) => (
-            <div
-              key={i}
-              style={{
-                ...styles.packageName,
-                ...(i === highlightedPackageIndex ? styles.highlighted : {}),
-              }}
-            >
-              {name}
-              {i === highlightedPackageIndex && (
-                <span style={styles.badge}>Popular</span>
-              )}
-            </div>
-          ))}
-          {/* Monthly Price Row */}
-          {monthlyprice && (
-            <>
-              <div style={styles.priceLabel}>Monthly Price</div>
-              {monthlyprice.prices.slice(0, numPackages).map((price, i) => (
-                <div
+          <colgroup>
+            <col style={{ minWidth: '200px' }} />
+            {packagenames.map((_, i) => (
+              <col key={i} style={{ minWidth: '150px' }} />
+            ))}
+          </colgroup>
+
+          <thead>
+            <tr>
+              {/* Empty corner: row-label column × package-header row. */}
+              <td />
+              {packagenames.map((name, i) => (
+                <th
                   key={i}
+                  scope="col"
                   style={{
-                    ...styles.price,
+                    ...styles.packageName,
                     ...(i === highlightedPackageIndex
                       ? styles.highlighted
                       : {}),
                   }}
                 >
-                  {price.replace(/Monthly - |Annually - /, '')}
-                </div>
+                  {name}
+                  {i === highlightedPackageIndex && (
+                    <span style={styles.badge}>Popular</span>
+                  )}
+                </th>
               ))}
-            </>
-          )}
-          {/* Annual Price Row */}
-          {annualprice && (
-            <>
-              <div style={styles.priceLabel}>Annual Price</div>
-              {annualprice.annualprices
-                .slice(0, numPackages)
-                .map((price, i) => (
-                  <div
+            </tr>
+          </thead>
+
+          <tbody>
+            {/* Monthly Price Row */}
+            {monthlyprice && (
+              <tr>
+                <th scope="row" style={styles.priceLabel}>
+                  Monthly Price
+                </th>
+                {monthlyprice.prices.slice(0, numPackages).map((price, i) => (
+                  <td
                     key={i}
                     style={{
-                      ...styles.annualPrice,
+                      ...styles.price,
                       ...(i === highlightedPackageIndex
                         ? styles.highlighted
                         : {}),
                     }}
                   >
                     {price.replace(/Monthly - |Annually - /, '')}
-                  </div>
+                  </td>
                 ))}
-            </>
-          )}
-          {/* Features Rows */}
-          {features?.map((feature, fIndex) => (
-            <React.Fragment key={fIndex}>
-              <div
-                style={{
-                  ...styles.featureTitle,
-                  ...(fIndex % 2 === 0 ? styles.rowEven : {}),
-                }}
-              >
-                <span>{feature.title}</span>
-                {feature.infopopuptext && (
-                  <StyledTooltip
-                    tooltipplacement="right"
-                    title={feature.infopopuptext}
-                    styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                  >
-                    <InfoIcon
-                      styles={{ theme: isSacredTheme ? 'sacred' : theme }}
-                      fontSize="small"
-                      style={{ marginLeft: '0.5rem', display: 'inline-block' }}
-                    />
-                  </StyledTooltip>
-                )}
-              </div>
-              {packagenames.map((_, pIndex) => (
-                <div
-                  key={pIndex}
-                  style={{
-                    ...styles.checkCell,
-                    borderRight: '1px solid rgba(0,0,0,0.1)',
-                    ...(fIndex % 2 === 0 ? styles.rowEven : {}),
-                    ...(pIndex === highlightedPackageIndex
-                      ? styles.highlighted
-                      : {}),
-                  }}
-                >
-                  {feature.tiedtopackage?.tiedtopackages?.[pIndex] ===
-                    'true' && (
-                    <CheckCircleIcon
-                      styles={{ theme: isSacredTheme ? 'sacred' : theme }}
-                      style={styles.checkIcon}
-                      fontSize="small"
-                    />
-                  )}
-                </div>
-              ))}
+              </tr>
+            )}
 
-              {feature.subfeatures?.map((sub, sIndex) => (
-                <React.Fragment key={sIndex}>
-                  <div style={styles.subFeatureTitle}>
-                    <span>{sub.title}</span>
-                    {sub.infopopuptext && (
-                      <StyledTooltip
-                        tooltipplacement="right"
-                        title={sub.infopopuptext}
-                        styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
-                      >
-                        <InfoIcon
-                          styles={{ theme: isSacredTheme ? 'sacred' : theme }}
-                          fontSize="small"
-                          style={{
-                            marginLeft: '0.5rem',
-                            display: 'inline-block',
-                          }}
-                        />
-                      </StyledTooltip>
-                    )}
-                  </div>
-                  {packagenames.map((_, pIndex) => (
-                    <div
-                      key={pIndex}
+            {/* Annual Price Row */}
+            {annualprice && (
+              <tr>
+                <th scope="row" style={styles.priceLabel}>
+                  Annual Price
+                </th>
+                {annualprice.annualprices
+                  .slice(0, numPackages)
+                  .map((price, i) => (
+                    <td
+                      key={i}
                       style={{
-                        ...styles.checkCell,
-                        borderRight: '1px solid rgba(0,0,0,0.1)',
-                        ...(fIndex % 2 === 0 ? styles.rowEven : {}),
-                        ...(pIndex === highlightedPackageIndex
+                        ...styles.annualPrice,
+                        ...(i === highlightedPackageIndex
                           ? styles.highlighted
                           : {}),
                       }}
                     >
-                      {sub.tiedtopackage?.tiedtopackages?.[pIndex] ===
-                        'true' && (
-                        <CheckCircleIcon
-                          styles={{ theme: isSacredTheme ? 'sacred' : theme }}
-                          style={styles.checkIcon}
-                          fontSize="small"
-                        />
-                      )}
-                    </div>
+                      {price.replace(/Monthly - |Annually - /, '')}
+                    </td>
                   ))}
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
+              </tr>
+            )}
+
+            {/* Features Rows */}
+            {features?.map((feature, fIndex) => (
+              <React.Fragment key={fIndex}>
+                <tr>
+                  <th
+                    scope="row"
+                    style={{
+                      ...styles.featureTitle,
+                      ...(fIndex % 2 === 0 ? styles.rowEven : {}),
+                    }}
+                  >
+                    <span>{feature.title}</span>
+                    {feature.infopopuptext &&
+                      renderInfoAffordance(feature.infopopuptext)}
+                  </th>
+                  {renderPackageCells(
+                    feature.tiedtopackage?.tiedtopackages,
+                    fIndex
+                  )}
+                </tr>
+
+                {feature.subfeatures?.map((sub, sIndex) => (
+                  <tr key={sIndex}>
+                    <th scope="row" style={styles.subFeatureTitle}>
+                      <span>{sub.title}</span>
+                      {sub.infopopuptext &&
+                        renderInfoAffordance(sub.infopopuptext)}
+                    </th>
+                    {renderPackageCells(
+                      sub.tiedtopackage?.tiedtopackages,
+                      fIndex
+                    )}
+                  </tr>
+                ))}
+              </React.Fragment>
+            ))}
+          </tbody>
+
           {/* Buttons Row */}
-          <div /> {/* Empty */}
-          {buttoncolumns?.buttontexts.slice(0, numPackages).map((text, i) => (
-            <div key={i} style={styles.buttonSection}>
-              <CustomButton
-                text={text}
-                onClick={() => handleButtonClick(i)}
-                styles={{ theme, ...styles.button }}
-                disabled={disabled}
-              />
-            </div>
-          ))}
-        </div>
+          {buttoncolumns && (
+            <tfoot>
+              <tr>
+                <td />
+                {buttoncolumns.buttontexts
+                  .slice(0, numPackages)
+                  .map((text, i) => (
+                    <td key={i} style={styles.buttonSection}>
+                      <CustomButton
+                        text={text}
+                        onClick={() => handleButtonClick(i)}
+                        styles={{ theme, ...styles.button }}
+                        disabled={disabled}
+                      />
+                    </td>
+                  ))}
+              </tr>
+            </tfoot>
+          )}
+        </table>
       </div>
 
       {isSacredTheme && (
-        <div style={styles.sacredFooter}>
-          {['✦', '◆', '✦'].map((glyph, i) => (
-            <span
-              key={i}
-              style={{
-                ...styles.sacredFooterGlyph,
-                animationDuration: `${2 + i * 0.3}s`,
-              }}
-            >
-              {glyph}
-            </span>
-          ))}
+        <div style={styles.sacredFooter} aria-hidden="true">
+          {['✦', '◆', '✦'].map((glyph, i) => {
+            // Drift animation + its staggered duration live in the CSS module
+            // (reduced-motion aware); the per-glyph duration passes through as
+            // a custom property.
+            const glyphStyle: React.CSSProperties & Record<string, string> = {
+              ...(styles.sacredFooterGlyph as Record<string, string>),
+              '--pt-float-duration': `${2 + i * 0.3}s`,
+            }
+            return (
+              <span
+                key={i}
+                className={cssStyles.sacredFooterGlyph}
+                style={glyphStyle}
+              >
+                {glyph}
+              </span>
+            )
+          })}
         </div>
       )}
     </div>
