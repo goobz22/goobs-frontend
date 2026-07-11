@@ -592,7 +592,17 @@ export const ColorVariantsDark: Story = {
   globals: { backgrounds: { value: 'dark' } },
 }
 
-/** Different colored badges for different states in sacred theme. */
+/**
+ * Severity badges in the sacred theme. Sacred badges pair GOLD text
+ * (`#FFD700`) with the fill, so — unlike the white-on-fill light/dark variants —
+ * every fill must be OPAQUE and dark enough to clear WCAG AA 1.4.3 (4.5:1). The
+ * original demo used translucent `rgba(...,0.9)` fills that FAILED: gold on
+ * `rgba(220,38,38,0.9)` is only ~3.44:1 (down to ~3.08:1 composited over a light
+ * backdrop) and gold on amber `rgba(245,158,11,0.9)` is ~1.7:1. These tiles now
+ * use opaque red-800 / green-900 / amber-900 / blue-800 (5.9–6.5:1); the play
+ * function pins the computed fills so a low-contrast regression re-fails.
+ * (WCAG 1.4.3)
+ */
 export const ColorVariantsSacred: Story = {
   name: 'Colors/Color Variants - Sacred Theme',
   render: () => (
@@ -600,7 +610,7 @@ export const ColorVariantsSacred: Story = {
       <Badge
         content="Error"
         styles={{
-          backgroundColor: 'rgba(220, 38, 38, 0.9)',
+          backgroundColor: '#991b1b',
           color: '#FFD700',
           theme: 'sacred',
         }}
@@ -624,7 +634,7 @@ export const ColorVariantsSacred: Story = {
       <Badge
         content="Success"
         styles={{
-          backgroundColor: 'rgba(34, 197, 94, 0.9)',
+          backgroundColor: '#14532d',
           color: '#FFD700',
           theme: 'sacred',
         }}
