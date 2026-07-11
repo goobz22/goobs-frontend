@@ -71,7 +71,12 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   const { code, language, styles, ...rest } = props
 
   const codeRef = useRef<HTMLElement>(null)
-  const [copied, setCopied] = useState(false)
+  // Three-state copy status so the failure path is representable, not just
+  // success. 'error' is reached only when BOTH the async Clipboard API and the
+  // execCommand fallback fail — see handleCopy (WCAG 4.1.3 failure path).
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>(
+    'idle'
+  )
 
   const theme = styles?.theme || 'dark'
   const isSacredTheme = theme === 'sacred'
@@ -123,22 +128,43 @@ const CodeCopy: FC<CodeCopyProps> = props => {
     const codeElement = codeRef.current
     if (!codeElement) return
 
-    const markCopied = () => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1000)
+    const text = codeElement.innerText
+
+    // Flash a transient status, then settle back to idle. The visible glyph and
+    // the role="status" live region both read from copyStatus, so 'error' is
+    // announced to assistive tech instead of a false success (WCAG 4.1.3).
+    const flashStatus = (next: 'copied' | 'error') => {
+      setCopyStatus(next)
+      setTimeout(() => setCopyStatus('idle'), 1000)
     }
+
+    // Fallback for non-secure contexts (no Clipboard API) OR a rejected async
+    // clipboard write (permission denied / document not focused). Reports
+    // 'error' when even execCommand fails, so a silent copy failure is never
+    // mistaken for success by a screen-reader user.
+    const copyViaExecCommand = () => {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      document.body.appendChild(textArea)
+      textArea.select()
+      let succeeded = false
+      try {
+        succeeded = document.execCommand('copy')
+      } catch {
+        succeeded = false
+      }
+      textArea.remove()
+      flashStatus(succeeded ? 'copied' : 'error')
+    }
+
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(codeElement.innerText).then(markCopied)
+      navigator.clipboard
+        .writeText(text)
+        .then(() => flashStatus('copied'))
+        .catch(copyViaExecCommand)
       return
     }
-    // Fallback for non-secure contexts where the Clipboard API is unavailable.
-    const textArea = document.createElement('textarea')
-    textArea.value = codeElement.innerText
-    document.body.appendChild(textArea)
-    textArea.select()
-    document.execCommand('copy')
-    textArea.remove()
-    markCopied()
+    copyViaExecCommand()
   }, [styles?.disabled])
 
   // Apply syntax highlighting. The sacred-theme token recoloring that used
@@ -170,7 +196,13 @@ const CodeCopy: FC<CodeCopyProps> = props => {
         </div>
         <div className={cssStyles.copyButtonSlot}>
           <Button
-            text={copied ? '✓' : '⧉'}
+            text={
+              copyStatus === 'copied'
+                ? '✓'
+                : copyStatus === 'error'
+                  ? '✕'
+                  : '⧉'
+            }
             onClick={handleCopy}
             // The visible label is a bare ⧉ / ✓ glyph with no text meaning, so
             // the button carries a stable accessible name for assistive tech
@@ -212,10 +244,15 @@ const CodeCopy: FC<CodeCopyProps> = props => {
 
       {/* Visually-hidden polite live region: announces the copy result to
           assistive tech (WCAG 4.1.3). Kept in the DOM at all times so the live
-          region is registered before its text changes; the ⧉→✓ glyph swap is a
-          silent, visual-only cue otherwise. */}
+          region is registered before its text changes; the ⧉→✓/✕ glyph swap is
+          a silent, visual-only cue otherwise. Both the success and the failure
+          branch are announced so a rejected copy is never read as a success. */}
       <div role="status" aria-live="polite" className={cssStyles.srStatus}>
-        {copied ? 'Copied to clipboard' : ''}
+        {copyStatus === 'copied'
+          ? 'Copied to clipboard'
+          : copyStatus === 'error'
+            ? 'Copy failed'
+            : ''}
       </div>
 
       <div className={cssStyles.codeBlock} style={codeBlockStyle}>
@@ -231,7 +268,23 @@ const CodeCopy: FC<CodeCopyProps> = props => {
             ))}
           </div>
         )}
-        <pre className={cssStyles.pre} style={preStyle}>
+        {/* The <pre> is a horizontal-scroll container (overflow:auto) whenever a
+            code line is wider than the block. Without a tabindex it is NOT
+            keyboard-focusable in Chromium/WebKit, so a keyboard-only user cannot
+            scroll to read clipped wide code (WCAG 2.1.1; axe
+            scrollable-region-focusable). tabIndex=0 makes it focusable and
+            arrow-scrollable; role="group" + aria-label give it an accessible
+            name announced on focus. role="group" is deliberate over "region":
+            it supports naming (so aria-label is not an aria-prohibited-attr on a
+            bare <pre>) WITHOUT registering a landmark per snippet, and it is not
+            a name-from-content role so the code text inside stays readable. */}
+        <pre
+          className={cssStyles.pre}
+          style={preStyle}
+          tabIndex={0}
+          role="group"
+          aria-label={`${language} code`}
+        >
           <code ref={codeRef} className={`language-${language}`}>
             {code}
           </code>

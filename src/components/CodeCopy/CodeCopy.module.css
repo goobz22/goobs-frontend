@@ -177,7 +177,10 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  /* Modern sr-only clip (the legacy `clip: rect()` is deprecated). inset(50%)
+     collapses the box to a point while keeping it in the accessibility tree so
+     the live-region text is still announced. */
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -275,6 +278,27 @@
 .container[data-theme='sacred'] .pre {
   color: var(--goobs-gold-a90);
   text-shadow: 0 0 2px var(--goobs-gold-a20);
+}
+
+/* PRE KEYBOARD FOCUS (WCAG 2.1.1 + 2.4.7)
+   The <pre> is `tabindex="0"` (index.tsx) so a keyboard user can focus it and
+   arrow-scroll wide code (axe scrollable-region-focusable). Give that focus a
+   visible ring. The ring is INSET (not the outset --goobs-focus-* tokens) so the
+   container's `overflow: hidden` cannot clip it at the right/bottom edges; the
+   colours match the focus tokens exactly (blue-light-a30 = --goobs-focus-dark,
+   blue-a20 = --goobs-focus-light, gold-a30 = --goobs-focus-sacred). The 3–4px
+   ring hugs the padding-box edge, well clear of the 1rem-inset code text. */
+.pre:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 3px var(--goobs-blue-light-a30);
+}
+
+.container[data-theme='light'] .pre:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--goobs-blue-a20);
+}
+
+.container[data-theme='sacred'] .pre:focus-visible {
+  box-shadow: inset 0 0 0 4px var(--goobs-gold-a30);
 }
 
 /* --------------------------------------------------------------------------
