@@ -279,6 +279,24 @@ const USDField: React.FC<USDFieldProps> = ({
   const resolvedLabel = sacredTheme ? 'Sacred Treasury' : label
   const resolvedPlaceholder = sacredTheme ? 'Divine wealth...' : placeholder
 
+  // Programmatic exposure of the min/max range (WCAG 1.3.1 / 4.1.2). This is a
+  // free-form currency TEXT input (deliberately type="text" + inputMode="decimal"
+  // for format-preserving entry, NOT role="spinbutton" — see the a11y audit),
+  // so it carries no aria-valuemin/valuemax. When a min/max is constrained we
+  // instead describe the allowed bounds in a visually-hidden node wired via
+  // aria-describedby, so a screen-reader user hears the range on focus even when
+  // the consumer writes no helperText. These are the range BOUNDS; the polite
+  // live region below announces stepper value CHANGES — complementary, not
+  // redundant. WCAG technique ARIA1.
+  const hasRange = min !== undefined || max !== undefined
+  const rangeDescription = !hasRange
+    ? ''
+    : min !== undefined && max !== undefined
+      ? `Value must be between $${min} and $${max}.`
+      : min !== undefined
+        ? `Value must be at least $${min}.`
+        : `Value must be at most $${max}.`
+
   return (
     <FieldShell
       label={resolvedLabel}
@@ -292,13 +310,28 @@ const USDField: React.FC<USDFieldProps> = ({
       filled={Boolean(internalValue && internalValue.length > 0)}
       styles={styles}
     >
-      {({ inputId, inputAriaProps }) => (
-        <div
-          className={cssStyles.inputWrapper}
-          data-theme={sacredTheme ? 'sacred' : undefined}
-          data-increment={enableIncrement || undefined}
-          style={wrapperCssVars as React.CSSProperties}
-        >
+      {({ inputId, inputAriaProps }) => {
+        // Merge the range-description id into aria-describedby WITHOUT dropping
+        // the Shell-provided helper/error id (inputAriaProps) or any
+        // consumer-supplied describedby (rest). Emitted only when a range is
+        // set, so the no-range path is byte-for-byte unchanged.
+        const rangeDescId = `${inputId}-range`
+        const describedBy = hasRange
+          ? [
+              inputAriaProps['aria-describedby'],
+              rest['aria-describedby'],
+              rangeDescId,
+            ]
+              .filter(Boolean)
+              .join(' ')
+          : undefined
+        return (
+          <div
+            className={cssStyles.inputWrapper}
+            data-theme={sacredTheme ? 'sacred' : undefined}
+            data-increment={enableIncrement || undefined}
+            style={wrapperCssVars as React.CSSProperties}
+          >
           <div className={`${cssStyles.adornment} ${cssStyles.startAdornment}`}>
             {sacredTheme && (
               <span aria-hidden="true" className={cssStyles.sacredGlyph}>
