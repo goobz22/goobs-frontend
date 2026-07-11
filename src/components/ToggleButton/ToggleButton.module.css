@@ -194,6 +194,37 @@
 }
 
 /* --------------------------------------------------------------------------
+   KEYBOARD FOCUS — visible :focus-visible ring (WCAG 2.4.7 / 2.4.11).
+   The base .button sets `outline: none` to drop the UA ring for pointer
+   users; :focus-visible restores a clearly-visible ring ONLY for
+   keyboard/AT focus. `outline` (not box-shadow) is used deliberately so the
+   indicator can never be clobbered by the caller's inline `style` margins/
+   dimensions and never fights the sacred hover glow. Solid per-theme hues
+   (primary blue / gold) at full opacity hold >= 3:1 non-text contrast
+   against the button's own surface. Mirrors the Button component's ring.
+   -------------------------------------------------------------------------- */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: 2px;
+}
+
+.button[data-theme='dark']:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
+.button[data-theme='sacred']:focus-visible {
+  outline-color: var(--goobs-gold);
+}
+
+/* Grouped buttons sit inside `.group` which has `overflow: hidden`, so an
+   OUTSET focus ring would be clipped by the wrapper. Inset the ring and lift
+   the focused button above its neighbours so the full ring paints. */
+.group .button:focus-visible {
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
    GROUP MEMBERSHIP — first / middle / last item border-radius + border
    collapse. Mirrors the old `groupStyles` branch:
      isFirst -> '7px 0 0 7px', isLast -> '0 7px 7px 0', else '0'
@@ -244,4 +275,20 @@
 .group[data-theme='sacred'] {
   border-color: var(--goobs-gold-a40);
   border-radius: var(--goobs-radius-xl);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION — respect the user's OS-level "reduce motion" preference
+   (WCAG 2.3.3). Drop the color/shadow transition and the sacred pressed
+   translate so nothing animates for motion-sensitive users; the visual
+   state changes (theme/selected/hover) still apply, just instantly.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button[data-theme='sacred']:active:not(:disabled) {
+    transform: none;
+  }
 }

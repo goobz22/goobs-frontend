@@ -637,3 +637,121 @@ export const InteractionTest: Story = {
     await expect(button).not.toBeDisabled()
   },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY — keyboard focus ring (WCAG 2.4.7) + labelled group (1.3.1)
+// --------------------------------------------------------------------------
+
+/**
+ * Keyboard focus paints a visible `:focus-visible` ring (WCAG 2.4.7). The base
+ * `.button` drops the UA outline for pointer users, so WITHOUT this rule a
+ * keyboard user would have no focus indicator at all. The `play` moves real
+ * keyboard focus (Tab) onto the button — a mouse click does NOT trigger
+ * `:focus-visible` — so the light-theme blue ring is an actually-rendered
+ * state the Chromatic snapshot captures; deleting the `.button:focus-visible`
+ * rule changes this baseline.
+ */
+export const FocusRingLight: Story = {
+  name: 'A11y/Focus Ring (Light, Keyboard)',
+  args: {
+    value: 'focus-light',
+    children: 'Tab to Focus Me',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Tab to Focus Me' })
+    // Keyboard focus (not a mouse click) is what activates :focus-visible.
+    await userEvent.tab()
+    await expect(button).toHaveFocus()
+    await expect(button).toHaveAttribute('aria-pressed', 'false')
+  },
+}
+
+/**
+ * Gates the `[data-theme='dark']:focus-visible` outline-color override. Tabbed
+ * to with the keyboard so the dark-theme blue ring paints for Chromatic;
+ * deleting the dark override would change this baseline.
+ */
+export const FocusRingDark: Story = {
+  name: 'A11y/Focus Ring (Dark, Keyboard)',
+  args: {
+    value: 'focus-dark',
+    children: 'Tab to Focus Me',
+    styles: { theme: 'dark' },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Tab to Focus Me' })
+    await userEvent.tab()
+    await expect(button).toHaveFocus()
+  },
+}
+
+/**
+ * Gates the `[data-theme='sacred']:focus-visible` gold outline override.
+ * Tabbed to with the keyboard so the sacred gold ring paints for Chromatic.
+ */
+export const FocusRingSacred: Story = {
+  name: 'A11y/Focus Ring (Sacred, Keyboard)',
+  args: {
+    value: 'focus-sacred',
+    children: 'Tab to Focus Me',
+    styles: { theme: 'sacred' },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Tab to Focus Me' })
+    await userEvent.tab()
+    await expect(button).toHaveFocus()
+  },
+}
+
+const LabelledGroupExample = () => {
+  const [value, setValue] = React.useState<string | null>('left')
+  return (
+    <ToggleButtonGroup
+      value={value}
+      exclusive={true}
+      onChange={(_, newValue) => setValue(newValue)}
+      styles={{ theme: 'light' }}
+      aria-label="Text alignment"
+    >
+      <ToggleButton value="left">Left</ToggleButton>
+      <ToggleButton value="center">Center</ToggleButton>
+      <ToggleButton value="right">Right</ToggleButton>
+    </ToggleButtonGroup>
+  )
+}
+
+/**
+ * The group renders `role="group"` with an accessible name (WCAG 1.3.1 /
+ * 4.1.2) so assistive tech announces the cluster ("Text alignment, group")
+ * before its toggle buttons — a bare `<div>` gave the set no programmatic
+ * label. The `play` asserts the labelled group is queryable by role+name,
+ * then tabs keyboard focus onto the first grouped button: its INSET
+ * `:focus-visible` ring (`outline-offset:-2px` so the group's
+ * `overflow:hidden` can't clip it) is captured by Chromatic. Deleting either
+ * the `role="group"`/`aria-label` wiring or the `.group .button:focus-visible`
+ * rule changes this baseline.
+ */
+export const LabelledGroupAndFocus: Story = {
+  name: 'A11y/Labelled Group + Grouped Focus',
+  render: () => <LabelledGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // role="group" + aria-label make the cluster one named, announced set.
+    const group = canvas.getByRole('group', { name: 'Text alignment' })
+    await expect(group).toBeInTheDocument()
+    // Keyboard focus lands on the first grouped button → drives the inset ring.
+    await userEvent.tab()
+    const firstButton = canvas.getByRole('button', { name: 'Left' })
+    await expect(firstButton).toHaveFocus()
+    // The selected member is programmatically pressed, not colour-only (1.4.1).
+    await expect(firstButton).toHaveAttribute('aria-pressed', 'true')
+  },
+}

@@ -94,6 +94,19 @@ export interface ToggleButtonGroupProps {
    * falls back to `name` when not provided.
    */
   dataFieldName?: string
+  /**
+   * Accessible name for the group, applied to the container's `role="group"`.
+   * Strongly recommended so assistive tech announces the set (e.g. "View
+   * mode, group") before its toggle buttons (WCAG 1.3.1 / 4.1.2). Prefer this
+   * or `aria-labelledby` on every group — without one the button cluster has
+   * no programmatic label.
+   */
+  'aria-label'?: string
+  /**
+   * ID reference supplying the group's accessible name — the labelledby
+   * alternative to `aria-label` (point it at a visible heading/legend).
+   */
+  'aria-labelledby'?: string
 }
 
 // --------------------------------------------------------------------------
@@ -176,6 +189,8 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
   styles,
   name,
   dataFieldName,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
 }) => {
   const childrenArray = React.Children.toArray(children)
   const totalChildren = childrenArray.length
@@ -236,6 +251,9 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
       data-field-name={dataFieldName ?? name}
       data-filled={effectiveValue !== null && effectiveValue !== ''}
       data-theme={theme}
+      role="group"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
     >
       {enhancedChildren}
     </div>
