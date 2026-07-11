@@ -4,7 +4,9 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
+  type ElementType,
   type FC,
 } from 'react'
 import QRCode from 'qrcode'
