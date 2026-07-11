@@ -517,20 +517,18 @@ export const PaginationReducedMotion: Story = {
     await expect(pageBtnClass).toBeTruthy()
 
     const guardTargetsPageBtn = Array.from(document.styleSheets).some(sheet => {
-      let rules: CSSRuleList
       try {
-        rules = sheet.cssRules
+        return Array.from(sheet.cssRules).some(
+          rule =>
+            rule instanceof CSSMediaRule &&
+            rule.cssText.includes('prefers-reduced-motion') &&
+            rule.cssText.includes(pageBtnClass as string) &&
+            rule.cssText.includes('transition')
+        )
       } catch {
         // Cross-origin stylesheet — not ours; skip.
         return false
       }
-      return Array.from(rules).some(
-        rule =>
-          rule instanceof CSSMediaRule &&
-          rule.cssText.includes('prefers-reduced-motion') &&
-          rule.cssText.includes(pageBtnClass as string) &&
-          rule.cssText.includes('transition')
-      )
     })
     await expect(guardTargetsPageBtn).toBe(true)
   },
