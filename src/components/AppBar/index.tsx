@@ -113,6 +113,12 @@ export interface AppBarProps {
   /** Additional CSS class name */
   className?: string
   /**
+   * Root `data-testid` (default `'app-bar'`). Override it to disambiguate when
+   * a page renders more than one app bar so their test ids don't collide.
+   * Matches the additive `data-testid` prop convention (see Markdown).
+   */
+  'data-testid'?: string
+  /**
    * Accessible name for the `banner` landmark, exposed as `aria-label` on the
    * root `<header>`. Set this to disambiguate when a page renders more than one
    * banner/app-bar landmark (assistive tech otherwise lists them identically).
@@ -158,6 +164,7 @@ const AppBar: FC<AppBarProps> = props => {
     className,
     ariaLabel,
     onClick,
+    'data-testid': dataTestId = 'app-bar',
     ...rest
   } = props
 
@@ -270,7 +277,7 @@ const AppBar: FC<AppBarProps> = props => {
       onClick={handleClick}
       role="banner"
       aria-label={ariaLabel}
-      data-testid="app-bar"
+      data-testid={dataTestId}
       {...rest}
     >
       {isSacredTheme && (

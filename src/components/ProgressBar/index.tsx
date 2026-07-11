@@ -143,6 +143,13 @@ export interface ProgressBarProps {
   label?: string
   /** ARIA label for accessibility */
   'aria-label'?: string
+  /**
+   * Root `data-testid` (default `'progress-bar'`). The fill and label derive
+   * from it as `${dataTestId}-fill` / `${dataTestId}-label`. Override it to
+   * disambiguate multiple progress bars on one page so their test ids don't
+   * collide. Matches the additive `data-testid` prop convention (see Markdown).
+   */
+  'data-testid'?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ProgressBarStyles
 }
@@ -157,10 +164,10 @@ export interface ProgressBarProps {
 
 const STRIPE_GRADIENT: Record<'light' | 'dark' | 'sacred', string> = {
   light:
-    'linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)',
-  dark: 'linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent)',
+    'linear-gradient(45deg, var(--goobs-white-a15) 25%, transparent 25%, transparent 50%, var(--goobs-white-a15) 50%, var(--goobs-white-a15) 75%, transparent 75%, transparent)',
+  dark: 'linear-gradient(45deg, var(--goobs-white-a10) 25%, transparent 25%, transparent 50%, var(--goobs-white-a10) 50%, var(--goobs-white-a10) 75%, transparent 75%, transparent)',
   sacred:
-    'linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent)',
+    'linear-gradient(45deg, var(--goobs-white-a20) 25%, transparent 25%, transparent 50%, var(--goobs-white-a20) 50%, var(--goobs-white-a20) 75%, transparent 75%, transparent)',
 }
 
 const STRIPE_SIZE: Record<'light' | 'dark' | 'sacred', string> = {
@@ -182,6 +189,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   showLabel = false,
   label,
   'aria-label': ariaLabel,
+  'data-testid': dataTestId = 'progress-bar',
   styles,
 }) => {
   const isIndeterminate = variant === 'indeterminate'
@@ -311,7 +319,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         aria-valuemax={isIndeterminate ? undefined : 100}
         aria-valuenow={getAriaValueNow()}
         aria-valuetext={getAriaValueText()}
-        data-testid="progress-bar"
+        data-testid={dataTestId}
       >
         <div
           className={cssStyles.bar}
@@ -321,7 +329,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           {...(styles?.animated && { 'data-animated': 'true' })}
           {...(styles?.pulse && { 'data-pulse': 'true' })}
           style={barStyle}
-          data-testid="progress-bar-fill"
+          data-testid={`${dataTestId}-fill`}
         />
       </div>
       {showLabel && (
@@ -335,7 +343,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           className={cssStyles.label}
           data-theme={theme}
           style={labelStyle}
-          data-testid="progress-bar-label"
+          data-testid={`${dataTestId}-label`}
           aria-hidden="true"
         >
           {getLabel()}

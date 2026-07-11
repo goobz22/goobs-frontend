@@ -244,7 +244,16 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
                 <div className={styles.groupLabel} id={groupLabelId}>
                   {g.label}
                 </div>
-                <ul className={styles.metricsRow} aria-labelledby={groupLabelId}>
+                {/* Explicit role="list" because the stylesheet sets
+                    list-style:none — WebKit/VoiceOver strip the implicit list
+                    role (and the <li> children's listitem role) from a
+                    bulletless <ul>, so the role restores the "list, N items"
+                    announcement (WCAG 1.3.1). Matches List/index.tsx. */}
+                <ul
+                  role="list"
+                  className={styles.metricsRow}
+                  aria-labelledby={groupLabelId}
+                >
                   {g.cards.map((c, i) => renderCard(c, i))}
                 </ul>
               </div>
@@ -255,7 +264,10 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
     }
 
     return (
-      <ul className={styles.metricsRow}>
+      // Explicit role="list" because .metricsRow sets list-style:none —
+      // WebKit/VoiceOver otherwise strip the implicit list semantics from a
+      // bulletless <ul> (WCAG 1.3.1). Matches List/index.tsx.
+      <ul role="list" className={styles.metricsRow}>
         {(metrics as MetricCardData[]).map((m, i) => renderCard(m, i))}
       </ul>
     )
