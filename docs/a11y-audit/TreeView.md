@@ -1,6 +1,6 @@
 # TreeView — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** FIXED (incl. adversarial-review follow-ups, 2026-07-11)
 
 **APG pattern:** [WAI-ARIA APG — Tree View](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/)
 (single-select / multi-select tree, with optional checkbox selection). The
@@ -21,12 +21,22 @@ Primary source: `src/components/TreeView/index.tsx`,
 | 1 | Serious | 2.1.1 Keyboard | keyboard | `index.tsx` `handleKeyDown` | FIXED |
 | 2 | Serious | 2.4.3 Focus Order | keyboard | `index.tsx` treeitem `tabIndex` + root `tabIndex` | FIXED |
 | 3 | Serious | 2.4.7 Focus Visible | reading | `TreeView.module.css` `.item` (`outline: none`) | FIXED |
-| 4 | Moderate | 1.3.1 Info & Relationships | aria | `index.tsx` `renderTree` children wrapper | FIXED |
+| 4 | Moderate | 1.3.1 Info & Relationships | aria | `index.tsx` `renderTree` children wrapper | FIXED (group + `aria-owns` ownership, R1) |
 | 5 | Moderate | 2.3.3 Animation from Interactions | motion | `index.tsx` `SacredBackground` + `.module.css` transitions | FIXED |
 | 6 | Minor | 1.3.1 Info & Relationships | aria | `index.tsx` treeitem (only `aria-level` present) | FIXED |
 | 7 | Minor | 1.1.1 Non-text Content | reading | `index.tsx` `<ExpandMoreIcon>` svg | FIXED |
 | 8 | Minor | 4.1.2 Name, Role, Value | aria | `index.tsx` root `role="tree"` (no name) | FIXED (passthrough + doc) |
-| 9 | Minor | 4.1.2 Name, Role, Value | keyboard | `index.tsx` chevron `role="button"` | DEFERRED (known limitation) |
+| 9 | Minor | 4.1.2 Name, Role, Value | keyboard | `index.tsx` chevron `role="button"` | FIXED (chevron made decorative, R2) |
+
+### Adversarial-review follow-ups (2026-07-11)
+
+| # | Severity | WCAG / kind | Area | Location | Status |
+|---|----------|-------------|------|----------|--------|
+| R1 | Moderate | 1.3.1 Info & Relationships | aria | `index.tsx` treeitem `aria-owns` + group `id` | FIXED |
+| R2 | Minor | 4.1.2 Name, Role, Value | keyboard/aria | `index.tsx` chevron container | FIXED |
+| R3 | Minor | consistency | keyboard | `index.tsx` row `onFocus` / `handleClick` | FIXED |
+| R4 | Minor | UX / behavior | keyboard-adjacent | `index.tsx` `handleIconClick` | FIXED |
+| R5 | Minor | APG completeness | keyboard | `index.tsx` `handleKeyDown` type-ahead + `*` | FIXED |
 
 ### 1 — No arrow-key navigation (SERIOUS, WCAG 2.1.1) — FIXED
 The old `handleKeyDown` only handled `Enter`, `Space`, `ArrowRight` (expand),
@@ -65,6 +75,9 @@ state.
 The recursive children wrapper (`cssStyles.childrenGroup`) carried no role, so
 assistive tech could not perceive the nested set that each parent owns.
 **Fix:** added `role="group"` to the children wrapper `<div>` in `renderTree`.
+**Follow-up (R1):** the group was a *sibling* of the parent treeitem, not a
+descendant, and the parent had no `aria-owns` — so the APG parent→children
+ownership was only *implied* by `aria-level`, not established. See R1 below.
 
 ### 5 — Motion ignores `prefers-reduced-motion` (MODERATE, WCAG 2.3.3) — FIXED
 The sacred-theme `SacredBackground` canvas ran an **unconditional**
@@ -96,16 +109,83 @@ consumer-supplied name. The existing `{...other}` spread already forwards
 the `WithAccessibleLabel` story (`getByRole('tree', { name: 'File browser' })`).
 No code change required beyond verification; consumers should pass `aria-label`.
 
-### 9 — Chevron `role="button"` is not keyboard-focusable (MINOR, WCAG 4.1.2) — DEFERRED (known limitation)
-The expand/collapse chevron container is a `<div role="button" aria-label>` with
-a click handler but no `tabIndex`/`onKeyDown`, so it is not reachable by a
-keyboard-only user. It is **not removed** because (a) the ownership contract
-forbids removing an existing `role`/`aria` attribute, and (b) making it a real
-tab stop would add an extra Tab stop per node and break the tree's roving
-tabindex. Crucially this is **not a functional barrier**: expand/collapse is
-fully keyboard-operable at the treeitem level (Arrow keys + Enter/Space) and the
-state is conveyed by `aria-expanded`, so the chevron is a supplementary pointer /
-AT-click affordance only. See Deferred below for the recommended long-term shape.
+### 9 — Chevron `role="button"` is not keyboard-focusable (MINOR, WCAG 4.1.2) — FIXED
+The expand/collapse chevron container was a `<div role="button" aria-label>` with
+a click handler but no `tabIndex`/`onKeyDown`, so it was announced to assistive
+tech as an operable button yet was not keyboard-focusable/operable. Making it a
+*real* button would add an extra Tab stop per node and break the tree's roving
+tabindex (the reason the initial pass deferred it). Because expand/collapse is
+already fully owned by the treeitem row (Arrow keys + Enter/Space, state via
+`aria-expanded`), the APG-correct shape is a **decorative** chevron.
+**Fix (R2):** dropped `role="button"` + `aria-label` from the chevron container
+and added `aria-hidden="true"`, so it is no longer a broken control exposed to
+AT. The `onClick` stays as a redundant pointer convenience. See R2 below.
+
+---
+
+## Adversarial-review follow-ups — detail
+
+### R1 — Parent→children ownership not actually established (MODERATE, WCAG 1.3.1) — FIXED
+Adding `role="group"` (issue 4) was necessary but not sufficient: in `renderTree`
+the group is rendered as a **sibling** of the parent `role="treeitem"` inside the
+`React.Fragment`, and the parent carried no `aria-owns`. The APG Tree View pattern
+requires each parent node to **contain or own** its child group; here the parent
+set `aria-expanded="true"` but neither contained nor owned the group. (Kept it a
+sibling on purpose — nesting the group *inside* the treeitem `<div>` would extend
+the row's hover/selection box over the whole subtree.)
+**Fix:** the child group `<div>` gets a stable `id` (`tree-group-<itemId>`) and
+the parent treeitem gets `aria-owns={that id}` — but **only while expanded** (the
+group is in the DOM), so the reference is never dangling. This re-parents the
+group under the treeitem in the accessibility tree, establishing real ownership.
+New internal (additive) `TreeItemProps.ownsGroupId`.
+
+### R2 — Chevron exposed as a non-operable button (MINOR, WCAG 4.1.2) — FIXED
+See issue 9 above. Chevron container: **removed** `role="button"` +
+`aria-label`, **added** `aria-hidden="true"`. This is a deliberate markup change
+that removes existing `role`/`aria` attributes; it is permissible here because
+(a) it makes the element *semantically correct* (decorative, per the accessible-
+by-default protocol), (b) those attributes were never part of the machine-test
+selector contract (not `data-*`, not the `combobox` dropdown pattern), and
+(c) the only conformant alternative — a real keyboard button — is fundamentally
+incompatible with the tree's single-tab-stop roving tabindex. Expand/collapse
+remains fully operable via the row (Arrow keys/Enter/Space + `aria-expanded`).
+
+### R3 — `onItemFocus` did not fire on keyboard focus (MINOR, consistency) — FIXED
+The roving-tabindex work set focus state directly in the row's DOM `onFocus`
+handler (`context.setFocusedItem`), bypassing the documented `onItemFocus`
+callback — so pointer focus (via `handleClick`) fired `onItemFocus` but arrow-key
+/ Tab roving focus did not. `handleClick` additionally fired `onItemFocus`
+**twice** (once via the `onFocus` prop, once via `context.onItemFocus`).
+**Fix:** consolidated focus notification into a single source — the row's DOM
+`onFocus` handler now both syncs focus state **and** fires `onItemFocus` (via the
+`onFocus` prop), guarded to a genuine focus change on the row itself. `handleClick`
+no longer fires focus callbacks (a click focuses the row first, so the DOM focus
+event covers it). Result: exactly one `onItemFocus` per focus change, for pointer
+**and** keyboard alike. The `renderTree` `onFocus` wrapper is now pure
+consumer-notification; focus *state* is owned solely by the DOM handler.
+
+### R4 — Chevron click was a dead no-op in default 'content' mode (MINOR, UX) — FIXED
+`handleIconClick` called `stopPropagation()` (killing the row's `handleClick`)
+but its expand guard only fired for `expansionTrigger==='iconContainer'`, so in
+the default `'content'` mode a click directly on the chevron neither expanded nor
+let the row handle it.
+**Fix:** `handleIconClick` now toggles expansion whenever the node `hasChildren`,
+in **both** expansion modes. Clicking the chevron toggles expand/collapse (without
+selecting the row); clicking the row body still behaves per `expansionTrigger`.
+
+### R5 — 'Full keyboard table' overstated; type-ahead + `*` absent (MINOR, APG) — FIXED
+The required APG table (Enter/Space, Up/Down, Left/Right, Home/End) was complete,
+but the **recommended** type-ahead and the **optional** `*` (expand all siblings)
+interactions were not implemented — so "full APG keyboard table" overstated
+coverage (not a WCAG failure).
+**Fix:** implemented both rather than walk back the claim.
+- **Type-ahead:** a printable character moves focus to the next visible node whose
+  label begins with the accumulated typed string (shared buffer in a provider ref
+  via new `context.appendTypeahead`, auto-clears after a 500 ms idle gap; a fresh
+  single char searches from the next node so repeats cycle, a multi-char query
+  refines from the current node).
+- **`*`:** expands every sibling of the focused node that has children (new
+  `context.expandSiblings`, batched through `setExpandedItems`).
 
 ---
 
@@ -160,6 +240,14 @@ All in `src/components/TreeView/` (owned):
   - Chevron: `aria-hidden="true"` forwarded to the decorative `<ExpandMore>` svg.
   - `SacredBackground`: honors `prefers-reduced-motion` (single static frame,
     no rAF loop).
+  - **(review follow-ups)** treeitem `aria-owns` → its child group's `id` while
+    expanded (R1); chevron container made decorative — dropped `role="button"` +
+    `aria-label`, added `aria-hidden="true"` (R2); focus notification
+    consolidated into the row's `onFocus` so `onItemFocus` fires for keyboard
+    focus too and exactly once per focus change (R3); `handleIconClick` toggles
+    expansion in both expansion modes so a chevron click is never a no-op (R4);
+    `handleKeyDown` type-ahead + `*` (expand siblings), backed by new
+    `context.appendTypeahead` / `context.expandSiblings` (R5).
 - `TreeView.module.css`
   - `.item:focus-visible` outline rules (light/dark/sacred).
   - `@media (prefers-reduced-motion: reduce)` block dropping transitions + hover
@@ -168,52 +256,61 @@ All in `src/components/TreeView/` (owned):
 ### Markup changes (per audit protocol)
 - Root `<div role="tree">`: **removed** `tabIndex={0}` (roving tabindex now on
   the items). No `role`/`aria`/`data-*` removed.
-- Children wrapper `<div>`: **added** `role="group"`.
+- Children wrapper `<div role="group">`: **added** `role="group"`; **added** a
+  stable `id` (`tree-group-<itemId>`) as the `aria-owns` target (R1).
 - Treeitem `<div role="treeitem">`: `tabIndex` static-0 → roving; **added**
-  `onFocus`, `aria-setsize`, `aria-posinset`.
-- Chevron `<ExpandMoreIcon>`: **added** `aria-hidden="true"` on its `<svg>`.
+  `onFocus`, `aria-setsize`, `aria-posinset`; **added** `aria-owns` (set only
+  while the node is an expanded parent) (R1).
+- Chevron `<ExpandMoreIcon>` svg: **added** `aria-hidden="true"`.
+- Chevron **container** `<div>`: **removed** `role="button"` + `aria-label`,
+  **added** `aria-hidden="true"` — the deliberate decorative change (R2). These
+  removed attributes were never part of the machine-test selector contract; see
+  R2 detail for the justification.
 - (Note: a concurrent a11y-lint pass added `data-component="TreeView"` to the
   root element; preserved as-is, not part of this audit's work.)
 
 No public prop was renamed, removed, or retyped; all changes are additive
-(new optional `TreeItemProps.posInSet`/`setSize` are internal). The
-`data-testid`, `role`, `aria-*`, and `data-component` selector contract is
-preserved.
+(new optional `TreeItemProps.posInSet`/`setSize`/`ownsGroupId` are internal;
+new `TreeViewContextValue.appendTypeahead`/`expandSiblings` are internal to the
+private context). The `data-testid`, `role="tree"`/`"treeitem"`/`"group"`,
+`aria-*` (level/setsize/posinset/selected/expanded/disabled), and
+`data-component`/`data-testid` selector contract is preserved. The **only**
+removed `role`/`aria` are the chevron container's `role="button"`/`aria-label`
+(R2) — non-selector, non-contract attributes on a now-decorative element.
 
 ## Stories updated
 
-`TreeView.stories.tsx` — two new stories under an "Accessibility" section:
+`TreeView.stories.tsx` — stories under the "Accessibility" section (Storybook
+play + Chromatic baseline is this repo's only test layer):
 
-- **`Accessibility/Keyboard Navigation`** (`KeyboardNavigation`) — `play` test
-  that asserts: `role="group"` present; `aria-level`/`aria-setsize`/
-  `aria-posinset` on nodes; roving tabindex (one `tabindex=0`, follows focus);
-  Down/Up/Home/End focus movement; Left collapses / Right re-expands the focused
-  parent.
+- **`Accessibility/Keyboard Navigation`** (`KeyboardNavigation`) — asserts:
+  `role="group"` present; `aria-level`/`aria-setsize`/`aria-posinset` on nodes;
+  roving tabindex (one `tabindex=0`, follows focus); Down/Up/Home/End focus
+  movement; Left collapses / Right re-expands the focused parent. **Extended
+  (R1):** the expanded parent's `aria-owns` points at the owned `role="group"`
+  (id match), and a collapsed node carries **no** `aria-owns`.
 - **`Accessibility/With Accessible Label`** (`WithAccessibleLabel`) — passes
-  `aria-label` and asserts `getByRole('tree', { name: 'File browser' })`, pinning
-  the accessible-name passthrough.
-
-Both are the regression tests for the new behavior (Storybook play + Chromatic
-baseline is this repo's only test layer).
+  `aria-label`, asserts `getByRole('tree', { name: 'File browser' })`.
+- **`Accessibility/Focus Callback (Keyboard)`** (`FocusCallbackOnKeyboard`, new,
+  R3) — `onItemFocus: fn()`; arrow-key roving to the second node asserts the spy
+  was called with that node's id (i.e. `onItemFocus` fires on keyboard focus).
+- **`Accessibility/Chevron (Decorative + Clickable)`**
+  (`ChevronDecorativeAndClickable`, new, R2+R4) — asserts the chevron container
+  has **no** `role` and is `aria-hidden`, the tree exposes **no** button, and a
+  pointer click on the chevron in default `'content'` mode toggles expansion.
+- **`Accessibility/Type-ahead & Expand Siblings`** (`TypeaheadAndExpandSiblings`,
+  new, R5) — typing `p` moves focus to 'Personal'; pressing `*` on a root node
+  expands its sibling roots that have children.
 
 ## Deferred
 
-**In-directory known limitation (issue 9) — no cross-file fix owed.**
-Chevron `role="button"` (icon container in `index.tsx`, the
-`<div className={cssStyles.iconContainer} role="button" aria-label=…>`) is not
-keyboard-focusable. Recommended long-term shape (needs a design/API decision
-outside this additive audit): make the chevron fully decorative
-(`aria-hidden` + drop `role="button"`/`aria-label`) since the treeitem already
-owns expand/collapse semantics and keyboard control — this removes an existing
-aria attribute, which the ownership contract disallows here, so it is flagged
-rather than applied.
-
-**Secondary UX observation (not a11y-blocking):** in
-`expansionTrigger='content'` mode, `handleIconClick` calls `stopPropagation()`
-and then no-ops (its guard only fires for `expansionTrigger='iconContainer'`), so
-a direct pointer click on the chevron in content mode neither expands nor lets
-the row handle the click. Not a WCAG failure (keyboard + row-click both work);
-noted for a future logic pass.
+**Nothing deferred.** The initial pass's two deferrals are now both resolved:
+- Chevron `role="button"` not keyboard-operable (old issue 9) → **FIXED (R2)** —
+  chevron made decorative.
+- Chevron click no-op in `expansionTrigger='content'` mode (old "secondary UX
+  observation") → **FIXED (R4)** — `handleIconClick` toggles in both modes.
 
 **No fixes are owed in files outside `src/components/TreeView/`** — every issue
-found had its root cause inside the owned directory.
+found (original and review follow-up) had its root cause inside the owned
+directory. No shared util, `Field`/`Shell`, `global.css`, or barrel change is
+required.
