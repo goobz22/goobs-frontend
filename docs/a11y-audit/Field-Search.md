@@ -1,0 +1,160 @@
+# Field/Search — a11y audit (2026-07-11)
+
+**Status:** FIXED
+
+**Component:** `src/components/Field/Search` (the `Searchbar` search input, built on
+`Field/Shell` `FieldShell`).
+
+## APG pattern
+
+There is no dedicated "search bar" pattern in the WAI-ARIA APG; a search field is a
+**text input with search semantics**. The correct native element is
+`<input type="search">` (implicit role `searchbox`), optionally sitting inside a
+`search` landmark. The relevant obligations are therefore the generic **Name, Role,
+Value** (4.1.2), **Info & Relationships** (1.3.1), **Focus Visible** (2.4.7), and the
+label/error wiring that `FieldShell` already provides (`<label htmlFor>`,
+`aria-describedby` → helper/error region, `aria-invalid`, `aria-required`). This audit
+verifies the sub-field's *use* of Shell and fixes what lives in the Search directory.
+
+## Issues found
+
+| # | Severity | WCAG | Location | Status |
+|---|----------|------|----------|--------|
+| 1 | Serious | 2.4.7 Focus Visible (AA) | `Search.module.css:83` (`.input { outline: none }` with no replacement) | FIXED |
+| 2 | Serious | 4.1.2 Name, Role, Value (A); 3.3.2 Labels/Instructions (A) | `index.tsx` (`label` optional; input named only by placeholder) | FIXED |
+| 3 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 (A) | `index.tsx` input `type="text"` on a search field | FIXED |
+| 4 | Minor | 1.1.1 Non-text Content (A) | `index.tsx` magnifier `<svg>` had no `aria-hidden`/`focusable` | FIXED |
+| 5 | Minor | 1.4.1 Use of Color (A) — robustness | `Search.module.css` — error state gave the field no visual border feedback | FIXED |
+| 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `Search.module.css:24` wrapper `transition` had no reduced-motion guard | FIXED |
+
+### 1. No visible focus indicator (Serious, 2.4.7)
+
+The inner `.input` sets `outline: none` (`Search.module.css:83`) but nothing replaced it.
+Search renders its own `.inputWrapper`/`.input` chrome and does **not** use FieldShell's
+generic `.inputSlot` class, so the `.inputSlot:focus-within` ring in `FieldShell.module.css`
+never applied. Result: tabbing to the search input produced **zero** visible focus change —
+a keyboard user cannot see where focus is. FIXED by adding a `:focus-within` treatment on
+`.inputWrapper` (themed focus border via `--field-border-focus` + a per-theme focus-ring
+box-shadow using the `--goobs-focus-{sacred,light,dark}` tokens).
+
+### 2. No accessible name when `label` is omitted (Serious, 4.1.2 / 3.3.2)
+
+`label` is optional and `FieldShell` only renders a `<label htmlFor>` when `label` is a
+non-empty string. A very common search-bar usage is placeholder-only ("Search..."). A
+placeholder is **not** an accessible name (it is not exposed as the control's name and
+disappears on input), so a label-less Search was an **unnamed** control for screen-reader
+and voice-control users. FIXED by adding an additive `ariaLabel?: string` prop and applying
+`aria-label` **only** when no visible label is present: explicit `ariaLabel` wins, otherwise
+the `placeholder` string becomes the name. When a visible label exists, `aria-label` is left
+undefined so it can never override the `<label htmlFor>` association.
+
+### 3. Non-semantic input type (Moderate, 1.3.1 / 4.1.2)
+
+The input used `type="text"` for what is semantically a search field. FIXED → `type="search"`,
+which gives the native `searchbox` role, correct AT announcement, and a "search" mobile
+enter-key hint. The webkit-only, mouse-only, unstyled clear button that `type="search"`
+introduces is stripped in CSS (`::-webkit-search-cancel-button`/`-decoration`) for consistent
+cross-browser appearance — no a11y regression, since the field ships no bespoke clear control
+and clearing remains possible from the keyboard.
+
+### 4. Decorative icon not hidden from AT (Minor, 1.1.1)
+
+The leading magnifier `<svg>` had no text alternative and no `aria-hidden`. It is purely
+decorative (the input is already named), so it should be hidden from the accessibility tree.
+FIXED by adding `aria-hidden="true"` and `focusable="false"`.
+
+### 5. Error state not visually reflected on the field (Minor, 1.4.1 robustness)
+
+Because Search doesn't use `.inputSlot`, the FieldShell error-border rule never reached the
+field: on error the label + helper text turned red but the input border did **not**. Error is
+still conveyed non-visually (the error message text + `aria-invalid`), so this was a
+robustness gap rather than a hard failure. FIXED by adding a wrapper error-border rule keyed
+on the shell's `[data-state='error']`/`[aria-invalid='true']`; it is more specific than
+`:focus-within`, so a focused invalid field keeps the danger border while still showing the
+focus ring.
+
+### 6. No reduced-motion guard (Minor, 2.3.3)
+
+`.inputWrapper` animates `transition: var(--goobs-transition-slow)` (border/background, and
+now the focus box-shadow). FIXED with an `@media (prefers-reduced-motion: reduce)` block that
+drops the transition; state changes still apply instantly.
+
+## Hearing
+
+No audio, video, `AudioContext`, `navigator.vibrate`, or any media API is used anywhere in
+the component (grep-verified across `index.tsx`, `Search.module.css`, and the stories). No
+information is conveyed by sound. **Nothing to fix** for WCAG 1.2.x / 1.4.2. Status/feedback
+(search results, "no results", "searching…") in the demo story is entirely visual + textual.
+
+## Reading & screen reader
+
+- **Accessible name** now guaranteed in every configuration (visible `<label>` → labels the
+  input; label-less → `aria-label` from `ariaLabel` or the placeholder). (Issue 2)
+- **Role**: native `type="search"` → `searchbox` role (Issue 3). Verified by a story that
+  finds the input via `getByRole('searchbox', { name })`.
+- **Error/validation** wiring is inherited correctly from `FieldShell`: string `error` →
+  helper region with `role="alert"` + `aria-live="polite"`, linked via `aria-describedby`,
+  and `aria-invalid="true"` on the input. The Search field forwards `error` straight through.
+  Error is conveyed by text + programmatic attribute, never colour alone; the new border
+  (Issue 5) is an additional visual channel.
+- **Required** is conveyed programmatically: FieldShell sets `aria-required` and renders the
+  ` *` indicator as `aria-hidden` decoration — not asterisk-only.
+- **Decorative icon** hidden from AT (Issue 4).
+- **Focus** is now visible for keyboard users (Issue 1) and honours reduced-motion (Issue 6).
+- **Keyboard operability**: the input is a native text control — Tab/Shift+Tab to focus,
+  standard text editing, no custom key handling needed or removed. The extra native-`input`
+  listener (`index.tsx`) only mirrors programmatic value sets for browser-automation tools;
+  it does not affect keyboard users.
+
+## SEO semantics
+
+- The input renders server-side as a real `<input type="search">` with its `<label>` (when
+  provided) present in the SSR'd HTML — no client-only injection of primary content.
+- No heading text is rendered by the component, so no `<div>`-as-heading concern applies (the
+  `<h3>` elements in the stories are demo scaffolding, not shipped component markup).
+- Considered wrapping the field in a `search` landmark / `<search>` element. Deliberately
+  **not** forced: this is a generic, reusable search *field* (frequently used as a table/list
+  filter, of which a page may have several), so emitting a `search` landmark on every instance
+  would create redundant, indistinguishable landmarks. See Deferred.
+
+## Fixes applied
+
+All in `src/components/Field/Search`:
+
+- `index.tsx`: added additive `ariaLabel` prop (JSDoc'd); compute `resolvedAriaLabel`
+  (label-less → `ariaLabel ?? placeholder`, else undefined); `aria-label` on the input;
+  `type="text"` → `type="search"`; `aria-hidden="true"` + `focusable="false"` on the
+  magnifier svg.
+- `Search.module.css`: `.inputWrapper:focus-within` themed focus border + per-theme focus-ring
+  box-shadow (`--goobs-focus-{sacred,light,dark}`); wrapper error-border keyed on the shell's
+  error state; `::-webkit-search-cancel-button`/`-decoration` reset; `@media
+  (prefers-reduced-motion: reduce)` guard.
+
+Per-file gate: `bun lint:file` on both `.tsx` files exits 0.
+
+## Stories updated
+
+`SearchBar.stories.tsx`:
+
+- **`InteractionTest`** (extended): asserts the input is reachable via
+  `getByRole('searchbox', { name: 'Test Search Input' })` and that this element is the same
+  input — proving `type="search"` yields the `searchbox` role and the visible label names it
+  (an `aria-label` does not override it). The play function focuses the input, so the Chromatic
+  snapshot also captures the new focus ring.
+- **`AccessibleNameFallback`** (new, "Accessible Name (No Visible Label)"): two label-less
+  fields — one placeholder-only, one with an explicit `ariaLabel` — with a play function that
+  asserts each is found by `getByRole('searchbox', { name })`, exercising the placeholder-
+  fallback and the explicit-`ariaLabel` paths.
+- Existing **`ErrorStates`** story now also serves as the visual regression for the new error
+  border (Chromatic).
+
+## Deferred
+
+- **Nothing is blocked on `Field/Shell`.** Shell's label association, `aria-describedby`
+  error/helper wiring, `aria-invalid`, `aria-required`, and the `aria-hidden` required
+  indicator are all correct for this field; no Shell change is required for Search's a11y.
+- **Optional future enhancement (not a defect, not owned elsewhere):** an opt-in `search`
+  landmark. If a consumer wants the field to be a page-level search landmark, an additive
+  prop (e.g. `landmarkLabel?: string`) could wrap the field in `<search aria-label={…}>`.
+  Left out by default to avoid redundant landmarks on filter-style usages; can be added
+  additively later if a consumer needs it.
