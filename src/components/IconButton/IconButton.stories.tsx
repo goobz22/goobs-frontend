@@ -218,6 +218,71 @@ export const DisabledStates: Story = {
 }
 
 // --------------------------------------------------------------------------
+// FORM BEHAVIOR STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Form-submit safety. An IconButton is an icon-only auxiliary control
+ * (delete-row, clear, expand, …), so it defaults to `type="button"`. A native
+ * `<button>` with no `type` defaults to `type="submit"`, which would submit the
+ * enclosing `<form>` on click/Enter — a real functional/keyboard defect for an
+ * auxiliary control. This story wires a `<form onSubmit>` around a default
+ * IconButton (the round "clear" control) plus a genuine `type="submit"` button:
+ *
+ * - Clicking (or focusing + Enter on) the **IconButton** does NOT submit — the
+ *   status line stays "not submitted", proving the `type="button"` default.
+ * - Clicking **Submit** (or the explicit `type="submit"` IconButton beside it)
+ *   DOES submit — `type` remains additive, a caller can still opt back in.
+ */
+export const FormSubmitSafety: Story = {
+  name: 'Behavior/Form-submit safety',
+  render: function FormSubmitSafetyStory() {
+    const [submitted, setSubmitted] = React.useState(false)
+    return (
+      <form
+        onSubmit={event => {
+          event.preventDefault()
+          setSubmitted(true)
+        }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          alignItems: 'flex-start',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Default type='button' — must NOT submit the form. */}
+          <IconButton
+            styles={{ theme: 'light' }}
+            aria-label="Clear (auxiliary — must not submit)"
+            onClick={() => setSubmitted(false)}
+          >
+            <DeleteIcon styles={{ theme: 'light' }} />
+          </IconButton>
+
+          {/* Explicit type='submit' — additive opt-in; DOES submit. */}
+          <IconButton
+            type="submit"
+            color="primary"
+            styles={{ theme: 'light' }}
+            aria-label="Submit form"
+          >
+            <AddIcon styles={{ theme: 'dark' }} />
+          </IconButton>
+
+          <button type="submit">Submit</button>
+        </div>
+        <span data-testid="submit-status">
+          {submitted ? 'submitted' : 'not submitted'}
+        </span>
+      </form>
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
 // ACCESSIBILITY STORIES
 // --------------------------------------------------------------------------
 
@@ -233,7 +298,9 @@ export const DisabledStates: Story = {
  *
  * Tab to either button in the a11y/Accessibility addon and confirm the name is
  * announced. Rendering an IconButton with neither logs a development-only
- * `console.warn`.
+ * `console.warn` — and so does an empty/whitespace-only `aria-label=""` (or a
+ * blank `aria-labelledby`), since those still compute to an EMPTY accessible
+ * name; the dev guard treats them as unnamed.
  */
 export const AccessibleName: Story = {
   name: 'Accessibility/Accessible name',

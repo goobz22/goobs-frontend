@@ -70,6 +70,42 @@ Because it delegates to `<Button>`, IconButton inherits (verified, not changed):
   story tabbing through sacred/dark/light so the behavior is documented and
   regression-visible.
 
+## Adversarial-review follow-ups (2026-07-11)
+
+### 3. Icon-only button submits its enclosing `<form>` (no default `type`) — MODERATE — WCAG 4.1.2 / functional-keyboard defect — FIXED
+- **Where:** `src/components/IconButton/index.tsx` render — IconButton spread
+  `{...restProps}` onto `<Button>` with no `type`, so the rendered native
+  `<button>` (`src/components/Button/index.tsx:633-646`, `type` only ever present
+  when a consumer passes one via `filteredProps`) inherited the HTML default
+  `type="submit"`.
+- **Problem:** an IconButton is an icon-only *auxiliary* control (delete-row,
+  clear, expand). Placed inside a `<form>`, clicking it — or focusing it and
+  pressing Enter — submitted the form. A real functional/keyboard defect that
+  shipped for IconButton.
+- **Pattern class:** `implicit-submit-button`.
+- **Fix (root-cause, IconButton-scoped):** destructured `type` out of props and
+  render `type={type ?? 'button'}`, so an unqualified IconButton is a
+  non-submitting button by default (matches MUI's `IconButton`, which defaults
+  `type="button"`). **Additive** — a caller may still pass `type="submit"` for a
+  genuine submit control (exercised by the new story). The wider fix (defaulting
+  `type="button"` in `<Button>` itself so plain `<Button>` gets the same safety
+  and the two components can't diverge) lives in a file this owner cannot edit —
+  see **Deferred**. Fixing IconButton here does not *cause* divergence: it makes
+  the icon-only control correct now; when Button adopts the same default they
+  converge.
+
+### 4. Empty/whitespace `aria-label` slipped past the accessible-name guard — MINOR — WCAG 4.1.2 — FIXED
+- **Where:** `src/components/IconButton/index.tsx` dev-only guard — the check was
+  `ariaLabel == null && ariaLabelledby == null`.
+- **Problem:** `aria-label=""` (or a blank/whitespace `aria-labelledby`) is not
+  `== null`, so it suppressed the warning while still computing to an EMPTY
+  accessible name — the exact failure the guard exists to catch.
+- **Pattern class:** `empty-string-accessible-name`.
+- **Fix:** the guard now treats an empty/whitespace-only value as unnamed —
+  `hasAccessibleName = Boolean(ariaLabel?.trim()) || Boolean(ariaLabelledby?.trim())`
+  — so `aria-label=""` and `aria-label="   "` now warn. A real id reference is
+  always non-blank text, so `.trim()` on `aria-labelledby` is safe.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 No audio, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate` in the
 component (grep of `src/components/IconButton` — 0 matches). No sound-only
@@ -104,25 +140,42 @@ consumer — outside this component's scope. Content is fully present in SSR HTM
    keyboard `:focus-visible` ring.
 3. `IconButton.stories.tsx` — added `aria-label` to every existing IconButton
    (LightTheme, DarkTheme, SacredTheme, Sizes ×4, Colors ×7, DisabledStates ×3).
+4. `index.tsx` — default `type={type ?? 'button'}` on the passthrough so an
+   icon-only auxiliary IconButton no longer submits its enclosing `<form>`
+   (review finding 3). Additive: `type="submit"` still honored.
+5. `index.tsx` — accessible-name dev guard now treats empty/whitespace-only
+   `aria-label`/`aria-labelledby` as unnamed via `.trim()` (review finding 4).
 
 ## Stories updated
 - Extended all existing stories with meaningful `aria-label`s (accessible-name
   regression coverage).
 - New `Accessibility/Accessible name` — demonstrates `aria-label` and
-  `aria-labelledby` (visible-caption-linked) name mechanisms.
+  `aria-labelledby` (visible-caption-linked) name mechanisms; JSDoc now also
+  documents that an empty/whitespace name warns.
 - New `Accessibility/Keyboard focus` — sacred/dark/light row proving the
   `:focus-visible` ring renders in every theme (regression guard for Issue 2).
+- New `Behavior/Form-submit safety` — a `<form onSubmit>` wrapping a default
+  IconButton (must NOT submit) plus an explicit `type="submit"` IconButton and a
+  real submit button (regression guard for review finding 3).
 
 ## Deferred
-- **`type="button"` default (SHARED — Button):** a `<button>` without an explicit
-  `type` defaults to `type="submit"` inside a `<form>`, so an icon-only auxiliary
-  action (delete-row, expand, etc.) placed in a form can trigger an accidental
-  submit. The correct fix is to default `type="button"` in
-  `src/components/Button/index.tsx` (the rendered `<button>`, ~line 633) so it
-  applies uniformly to Button AND IconButton; defaulting it only in IconButton
-  would diverge the two components' behavior. Additive (consumers can still pass
-  `type="submit"`). **Owner: Button.** Suggested: add `type={type ?? 'button'}`
-  sourced from a destructured `type` prop with a documented default.
+- **`type="button"` default in `<Button>` (SHARED — Button):** the IconButton
+  instance of this defect is now **fixed in-directory** (finding 3 above —
+  IconButton defaults `type="button"`). The remaining deferred work is defaulting
+  `type="button"` in `<Button>` itself so a plain `<Button>` used as a non-submit
+  action also gets the safe default, and so Button + IconButton can never diverge.
+  - **File:** `src/components/Button/index.tsx`.
+  - **Line:** destructuring block at `410-424` (add `type` to the destructure);
+    the rendered `<button>` at `632-646` (currently receives `type` only via
+    `{...filteredProps}` at line 645, i.e. only when a consumer passes one).
+  - **Suggested change:** destructure `type` in the `Button` prop list and render
+    `<button … type={type ?? 'button'} …>` (place the explicit `type` so it is
+    not re-overridden by `{...filteredProps}`; since `type` is destructured out of
+    `restProps`→`filteredProps`, a caller value still wins via the default). This
+    is additive — `ButtonProps` already types `type` through
+    `React.ButtonHTMLAttributes` — and consumers that need a submit button pass
+    `type="submit"`. **Owner: Button.** Note: whoever fixes Button should verify
+    no existing consumer relied on a bare `<Button>` implicitly submitting a form.
 - **Icon `<svg>` not `aria-hidden` (SHARED — Icons + Button):** goobs icon
   components render an `<svg>` with no `aria-hidden`
   (`src/components/Icons/Edit.tsx:45-57`). Inside an IconButton this is harmless
