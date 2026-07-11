@@ -7,12 +7,13 @@ that renders text at heading / body / sacred-Cinzel / Merriweather variant sizes
 
 ## APG pattern
 
-**None (content primitive, not a widget).** Typography is a non-interactive text
-element — no ARIA design pattern applies (it is not a dialog, menu, combobox,
-etc.). Its accessibility obligations are therefore purely **semantic-markup / SEO**
-(WCAG 1.3.1, 2.4.6, 2.4.10) rather than roles/keyboard-interaction. The relevant
-question for a text primitive is: *does styled heading text become a real heading in
-the accessibility tree and the crawled document outline?*
+**None (content primitive, not a widget).** Typography is a text element with no ARIA
+widget pattern (it is not a dialog, menu, combobox, etc.). Its obligations are mainly
+**semantic-markup / SEO** (WCAG 1.3.1, 2.4.6, 2.4.10) — *does styled heading text become
+a real heading in the accessibility tree and the crawled outline?* — PLUS, because it is
+polymorphic via `component` and forwards `tabIndex`/`href`/handlers, a **focus-visibility**
+obligation (WCAG 2.4.7 / 2.4.11 / 1.4.11) whenever a caller renders it as a focusable
+interactive element.
 
 ## Issues found
 
