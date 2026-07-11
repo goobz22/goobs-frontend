@@ -87,6 +87,33 @@
   border-radius: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px) 0 0;
 }
 
+/* Keyboard/AT focus ring (WCAG 2.4.7 / 2.4.11) — the toggle previously had no
+   :focus-visible rule and relied on the UA default outline. Mirror Button /
+   the sibling Accordion: a per-theme ring. INSET (negative offset) so an open
+   accordion's ring doesn't overlap the panel that butts up beneath it. */
+.toggle:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: -2px;
+}
+
+.root[data-theme='light'] .toggle:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.root[data-theme='dark'] .toggle:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   Heading wrapper (optional headingLevel prop)
+   -------------------------------------------------------------------------- */
+/* Purely structural — the toggle button inside carries all visual styling, so
+   the heading neutralises its own default margins/size to avoid layout shift. */
+.heading {
+  margin: 0;
+  font: inherit;
+}
+
 .chevron {
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   color: color-mix(in srgb, var(--ma-accent) 70%, transparent);
@@ -113,6 +140,11 @@
    Metrics row (metrics-array mode — flex wrap)
    -------------------------------------------------------------------------- */
 .metricsRow {
+  /* Rendered as a <ul> so the KPI strip is a semantic list (WCAG 1.3.1);
+     reset the UA list chrome so the flex layout is unchanged. */
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -150,4 +182,15 @@
 
 .metricsGroup .metricsRow {
   gap: clamp(6px, 1.5vw, 10px);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion (WCAG 2.3.3) — drop the chevron spin + toggle transitions
+   for users who opt out of motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .chevron {
+    transition: none;
+  }
 }

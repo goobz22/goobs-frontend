@@ -283,3 +283,25 @@ export const AccordionChildren: Story = {
   ),
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * `MetricsAccordion` with the optional `headingLevel` — wraps the toggle in a
+ * real `<h3>` so the section joins the document outline (WCAG 1.3.1 / SEO /
+ * WAI-ARIA accordion pattern). The `metrics` cards render as a `<ul>`/`<li>`
+ * list underneath for programmatic "list, N items" semantics.
+ */
+export const AccordionHeadingLevel: Story = {
+  name: 'Accordion/Heading Level',
+  render: () => (
+    <div style={{ width: '640px' }}>
+      <MetricsAccordion
+        title="Metrics Summary"
+        metrics={sampleMetrics}
+        initiallyOpen
+        headingLevel={3}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}

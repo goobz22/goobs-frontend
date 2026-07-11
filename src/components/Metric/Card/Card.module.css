@@ -122,3 +122,13 @@
 .trend.negative {
   color: var(--mc-trend-down);
 }
+
+/* --------------------------------------------------------------------------
+   Reduced motion (WCAG 2.3.3) — drop the border-color transition for users
+   who opt out of motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

@@ -133,6 +133,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   collapsible = true,
   responsiveCollapseOnTablet = false,
   dataField,
+  headingLevel,
   styles: propStyles,
 }) => {
   const [isExpanded, setIsExpanded] = useState(initiallyOpen)
@@ -199,11 +200,13 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
         .toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '')
+      // A KPI strip is a set of related items — render each card as an <li>
+      // inside a <ul> row so screen readers announce "list, N items" (1.3.1).
       return (
-        <div key={`${m.title}-${i}`} className={styles.metricsCell}>
+        <li key={`${m.title}-${i}`} className={styles.metricsCell}>
           {}
           <MetricCard {...(cardProps as any)} />
-        </div>
+        </li>
       )
     }
 
@@ -211,32 +214,39 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       const groups = metrics as MetricsGroup[]
       return (
         <div>
-          {groups.map((g, gi) => (
-            <div
-              key={`${g.label}-${gi}`}
-              className={styles.metricsGroup}
-              data-metrics-group={g.label
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^a-z0-9-]/g, '')}
-            >
-              <div className={styles.groupLabel}>{g.label}</div>
-              <div className={styles.metricsRow}>
-                {g.cards.map((c, i) => renderCard(c, i))}
+          {groups.map((g, gi) => {
+            // Associate each group's list with its visible label so the
+            // relationship is programmatic, not just visual (WCAG 1.3.1).
+            const groupLabelId = `${reactId}-metrics-group-${gi}`
+            return (
+              <div
+                key={`${g.label}-${gi}`}
+                className={styles.metricsGroup}
+                data-metrics-group={g.label
+                  .trim()
+                  .toLowerCase()
+                  .replace(/\s+/g, '-')
+                  .replace(/[^a-z0-9-]/g, '')}
+              >
+                <div className={styles.groupLabel} id={groupLabelId}>
+                  {g.label}
+                </div>
+                <ul className={styles.metricsRow} aria-labelledby={groupLabelId}>
+                  {g.cards.map((c, i) => renderCard(c, i))}
+                </ul>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )
     }
 
     return (
-      <div className={styles.metricsRow}>
+      <ul className={styles.metricsRow}>
         {(metrics as MetricCardData[]).map((m, i) => renderCard(m, i))}
-      </div>
+      </ul>
     )
-  }, [metrics, propStyles])
+  }, [metrics, propStyles, reactId])
 
   // Decide whether to render the accordion shell or the bare cards.
   const useAccordion =
@@ -249,6 +259,39 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   }
 
   const content = children ?? renderedMetrics
+
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={handleToggle}
+      aria-expanded={isExpanded}
+      aria-controls={panelId}
+      data-testid="metrics-accordion-toggle"
+      data-state={state}
+      className={styles.toggle}
+    >
+      <span>{title}</span>
+      <span
+        aria-hidden="true"
+        className={[styles.chevron, isExpanded ? styles.open : '']
+          .filter(Boolean)
+          .join(' ')}
+      >
+        ▼
+      </span>
+    </button>
+  )
+
+  // Optional real heading wrapper — the WAI-ARIA accordion pattern wraps each
+  // header button in a heading. Omitted by default so existing consumers' DOM
+  // is unchanged; the button keeps all its disclosure semantics + selectors.
+  const toggle = headingLevel
+    ? React.createElement(
+        `h${headingLevel}`,
+        { className: styles.heading },
+        toggleButton
+      )
+    : toggleButton
 
   return (
     <div
@@ -263,25 +306,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
         'data-metrics-accordion-field': dataField,
       })}
     >
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-expanded={isExpanded}
-        aria-controls={panelId}
-        data-testid="metrics-accordion-toggle"
-        data-state={state}
-        className={styles.toggle}
-      >
-        <span>{title}</span>
-        <span
-          aria-hidden="true"
-          className={[styles.chevron, isExpanded ? styles.open : '']
-            .filter(Boolean)
-            .join(' ')}
-        >
-          ▼
-        </span>
-      </button>
+      {toggle}
       {isExpanded && (
         <div
           id={panelId}

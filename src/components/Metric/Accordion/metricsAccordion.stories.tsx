@@ -306,3 +306,42 @@ export const CustomAccent: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * A11y — `headingLevel` wraps the toggle in a real `<h3>` so the collapsible
+ * section is exposed as a document heading (WCAG 1.3.1 / SEO / the WAI-ARIA
+ * accordion pattern). The button keeps its disclosure semantics
+ * (`aria-expanded`/`aria-controls`) and test selectors inside the heading.
+ * Omitting the prop (every other story) renders the bare button unchanged, so
+ * a context-agnostic default can't silently rewrite consumers' outlines.
+ */
+export const A11yHeadingLevel: Story = {
+  name: 'A11y/Heading Level',
+  args: {
+    title: 'Metrics Summary',
+    metrics: sampleMetrics,
+    initiallyOpen: true,
+    headingLevel: 3,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * A11y — semantic list markup. In `metrics` mode the KPI strip renders as a
+ * `<ul>` of `<li>` cards so screen readers announce "list, N items" (WCAG
+ * 1.3.1); in grouped mode each `<ul>` is `aria-labelledby` its visible group
+ * label, tying the list to its heading text programmatically. Combined here
+ * with `headingLevel` for the full accordion-pattern semantics.
+ */
+export const A11yGroupedSemantics: Story = {
+  name: 'A11y/Grouped List Semantics',
+  args: {
+    title: 'Automation Metrics',
+    metrics: groupedMetrics,
+    initiallyOpen: true,
+    headingLevel: 3,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
