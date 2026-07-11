@@ -242,6 +242,18 @@ const Alert: React.FC<AlertProps> = ({
     success: CheckCircleIcon,
   }[severity]
 
+  // A11y: the severity is conveyed VISUALLY by the icon shape + color scheme
+  // only. The decorative icon is aria-hidden (below), so without this the
+  // severity would be lost to assistive tech and conveyed by color/icon alone
+  // (WCAG 1.4.1 / 1.3.1). This visually-hidden prefix restores the severity to
+  // the assertive announcement ("Error: <message>") for screen-reader users.
+  const severityLabel = {
+    error: 'Error',
+    warning: 'Warning',
+    info: 'Information',
+    success: 'Success',
+  }[severity]
+
   // The container theme defaults to 'light'. The icon follows the SAME theme as
   // the container for visual consistency (it previously defaulted to 'sacred',
   // which rendered a gold icon inside an un-themed light Alert).
@@ -424,7 +436,11 @@ const Alert: React.FC<AlertProps> = ({
   // to render <Icon/>. Placed after all hooks (rules-of-hooks safe).
   if (!Icon) {
     console.warn(`Alert: unknown severity "${severity}"`)
-    return <div className={cssStyles.root}>Unknown severity level: {severity}</div>
+    return (
+      <div className={cssStyles.root} data-component="Alert" role="alert">
+        Unknown severity level: {severity}
+      </div>
+    )
   }
 
   return (
@@ -441,17 +457,31 @@ const Alert: React.FC<AlertProps> = ({
     >
       {isSacredTheme && <SacredGlyphs severity={severity} />}
 
+      {/* Decorative severity icon: the shape/colour it conveys is redundant with
+          the severity prefix + message text, so it is hidden from assistive tech
+          (WCAG 1.1.1). aria-hidden spreads onto the inner <svg> via the Icon's
+          {...props}. */}
       <Icon
         styles={{ theme: containerTheme }}
         className={cssStyles.icon}
         style={iconStyle}
+        aria-hidden="true"
       />
+
+      {/* Visually-hidden severity word — see severityLabel note above. */}
+      <span className={cssStyles.severityLabel}>{severityLabel}: </span>
 
       <div className={cssStyles.message}>{message}</div>
 
       {onClose && (
-        <button onClick={handleClose} className={cssStyles.closeButton}>
-          ✕
+        <button
+          type="button"
+          onClick={handleClose}
+          className={cssStyles.closeButton}
+          aria-label="Close"
+        >
+          {/* Glyph is decorative; the accessible name comes from aria-label. */}
+          <span aria-hidden="true">✕</span>
         </button>
       )}
     </div>

@@ -282,6 +282,24 @@
 }
 
 /* --------------------------------------------------------------------------
+   SEVERITY LABEL — visually-hidden severity word ("Error: ", "Success: ", …).
+   Kept in the accessibility tree (NOT display:none) so the assertive role=alert
+   announcement carries the severity for screen-reader users (WCAG 1.4.1/1.3.1),
+   while sighted users read the severity from the icon + colour scheme.
+   -------------------------------------------------------------------------- */
+.severityLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
    MESSAGE
    -------------------------------------------------------------------------- */
 .message {
@@ -319,6 +337,16 @@
   transition: var(--alert-transition, var(--goobs-transition-medium));
 }
 
+/* Keyboard focus indicator (WCAG 2.4.7). Hover already scales + shifts the
+   background; keyboard users get an explicit high-contrast ring. currentColor
+   is the severity text colour, so the ring is theme/severity-aware and sits on
+   a background it already contrasts against. Stays inside the container's 20px
+   padding so the root's overflow:hidden never clips it. */
+.closeButton:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .root:hover .closeButton {
   background: var(--alert-close-hover-bg, var(--goobs-black-a20));
   transform: var(--alert-close-hover-transform, scale(1.1));
@@ -354,4 +382,30 @@
     --alert-close-hover-box-shadow,
     0 0 12px var(--goobs-gold-a40)
   );
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — users who prefer reduced motion get the same
+   colour/shadow state changes with NO movement: the container lift, icon
+   scale/rotate, close-button scale, and the closing scale animation are all
+   neutralised and transitions collapse to instant. Placed last so it wins on
+   equal specificity. Opacity (the closing fade) is retained — it is not motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .closeButton {
+    transition: none;
+  }
+  .root:hover,
+  .root[data-theme='dark']:hover,
+  .root[data-theme='sacred']:hover,
+  .root:hover .icon,
+  .root[data-theme='sacred']:hover .icon,
+  .root:hover .closeButton,
+  .root[data-theme='dark']:hover .closeButton,
+  .root[data-theme='sacred']:hover .closeButton,
+  .root[data-closing='true'],
+  .root[data-theme='sacred'][data-closing='true'] {
+    transform: none;
+  }
 }

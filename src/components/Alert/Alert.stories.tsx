@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect, fn } from 'storybook/test'
+import { userEvent, within, expect, fn, waitFor } from 'storybook/test'
 import Alert from './index'
 
 // --------------------------------------------------------------------------
@@ -205,22 +205,68 @@ export const InteractionTest: Story = {
   args: {
     severity: 'info',
     message: 'This is a dismissible alert.',
-    onClose: () => {}, // Provide a mock function for the test
+    onClose: fn(), // spy so we can assert onClose fires after the exit delay
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
-    const closeButton = canvas.getByText('✕')
+
+    // The close button is icon-only; its accessible name must be a real word,
+    // NOT the "✕" glyph, so it is resolvable by role + name (WCAG 4.1.2).
+    const closeButton = canvas.getByRole('button', { name: 'Close' })
 
     // Check that the alert and close button are visible
     await expect(canvas.getByText(args.message)).toBeVisible()
     await expect(closeButton).toBeVisible()
 
-    // Click the close button
+    // Click the close button — onClose fires after the 200ms exit animation.
     await userEvent.click(closeButton)
+    await waitFor(() => expect(args.onClose).toHaveBeenCalled())
+  },
+}
 
-    // In a real app, the component would unmount. Here we can't test for disappearance
-    // because the `onClose` is just an action. We have tested the clickability.
+// --------------------------------------------------------------------------
+// ACCESSIBILITY TEST — exercises the a11y semantics added in the 2026-07-11
+// audit: the assertive live region (role="alert"), the visually-hidden severity
+// prefix that carries the severity to screen readers when the icon is decorative
+// (WCAG 1.4.1/1.3.1), and the named icon-only close button (WCAG 4.1.2).
+// --------------------------------------------------------------------------
+
+export const AccessibilitySemantics: Story = {
+  name: 'A11y/Semantics',
+  args: {
+    severity: 'error',
+    message: 'An error occurred while processing your request.',
+    onClose: fn(),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // 1. The alert exposes the assertive live-region role.
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toBeInTheDocument()
+
+    // 2. The severity is announced textually, not by icon/colour alone. The
+    //    label is in the accessibility tree but visually hidden.
+    const severityLabel = canvas.getByText('Error:')
+    await expect(severityLabel).toBeInTheDocument()
+    await expect(severityLabel).not.toBeVisible()
+
+    // 3. The message text is present and visible.
+    await expect(canvas.getByText(args.message)).toBeVisible()
+
+    // 4. The icon-only close button has an accessible name.
+    const closeButton = canvas.getByRole('button', { name: 'Close' })
+    await expect(closeButton).toBeVisible()
+
+    // 5. The button is type="button" so it never submits an enclosing form.
+    await expect(closeButton).toHaveAttribute('type', 'button')
+
+    // 6. Keyboard focus reaches the close button.
+    closeButton.focus()
+    await expect(closeButton).toHaveFocus()
   },
 }
