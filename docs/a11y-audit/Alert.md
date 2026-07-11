@@ -148,9 +148,50 @@ unchanged. Per-file gate `bun lint:file` passes for `index.tsx` and `Alert.stori
   (was `getByText('✕')`), uses a `fn()` spy for `onClose`, and asserts `onClose` fires after the
   200ms exit delay via `waitFor`.
 - New `AccessibilitySemantics` (`A11y/Semantics`) — asserts: `role="alert"` present; the
-  visually-hidden `Error:` severity label is in the DOM but not visible; the message is visible;
-  the close button has accessible name "Close" and `type="button"`; and keyboard focus reaches the
-  close button. Exercises every semantic added in this audit so a regression fails the story.
+  visually-hidden `Error:` severity label is in the DOM but visually clipped out of view; the
+  decorative severity `<svg>` carries `aria-hidden="true"`; the message is visible; the close
+  button has accessible name "Close" and `type="button"`; and keyboard focus reaches the close
+  button. Exercises every DOM-level semantic added in this audit so a regression fails the story.
+
+## Adversarial-review follow-up (2026-07-11)
+
+A post-audit adversarial review flagged three items; all addressed at root cause.
+
+### R1. `AccessibilitySemantics` regression assertion was broken — SERIOUS — FIXED
+- **Where:** `Alert.stories.tsx` — the story used `await expect(severityLabel).not.toBeVisible()`
+  to prove the visually-hidden severity prefix (issue #4).
+- **Why it was wrong:** jest-dom's `toBeVisible()` derives visibility ONLY from computed
+  `display`/`visibility`/`opacity` and the `hidden`/`<details>` attributes — it never inspects
+  `clip`, `width`/`height`, or `overflow`. `.severityLabel` hides via
+  `position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0)`
+  (`Alert.module.css`), leaving `display!=none`, `visibility=visible`, `opacity=1`. jest-dom
+  therefore reports the node VISIBLE, so `.not.toBeVisible()` THROWS when the play function runs
+  (`@storybook/test-runner` / Chromatic interactions) — the headline severity-announcement fix had
+  no working regression lock.
+- **Fix:** replaced the assertion with a real visually-hidden check that passes — the node is in
+  the DOM (`toBeInTheDocument`), and `window.getComputedStyle` confirms
+  `position:absolute` + `overflow:hidden` while `getBoundingClientRect()` confirms the box is
+  collapsed to ≤1px × ≤1px. This asserts the geometry that actually hides it from sighted users.
+
+### R2. Story coverage gap — icon `aria-hidden` uncovered — MINOR — FIXED
+- **Where:** `Alert.stories.tsx` — no assertion covered issue #3 (severity `<Icon>` carries
+  `aria-hidden`), so a regression removing it would not fail the only regression net goobs has.
+- **Fix:** added a cheap DOM assertion — the alert's single `<svg>` (the severity icon; the close
+  glyph is a text `<span>`) must carry `aria-hidden="true"`.
+- **Deliberately deferred (per the review):** issue #5 (`.closeButton:focus-visible` ring) and
+  issue #6 (`prefers-reduced-motion`) are CSS pseudo-class / media-query states, not DOM
+  attributes; they are verified by the Chromatic visual baseline rather than a play-function
+  assertion. Noted in the `AccessibilitySemantics` header comment.
+
+### R3. Focus is lost on dismiss — MINOR — DOCUMENTED (consumer responsibility)
+- **Where:** `index.tsx` `handleClose` — activating Close runs a 200ms timeout then `onClose?.()`;
+  the parent typically unmounts the Alert, dropping focus to `<body>` with no restoration.
+- **Assessment:** not an APG Alert-pattern requirement (the Alert pattern does not own focus) and
+  genuinely consumer-delegated — the component cannot know where focus should return. No code
+  change to the runtime behaviour.
+- **Fix:** documented as a consumer responsibility in the `onClose` prop JSDoc (`index.tsx`) — the
+  consumer should move focus to a sensible element (e.g. the control that surfaced the alert) in
+  `onClose` to keep a logical focus order (WCAG 2.4.3).
 
 ## Deferred
 

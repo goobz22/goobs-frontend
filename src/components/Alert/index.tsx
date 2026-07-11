@@ -191,7 +191,17 @@ export interface AlertProps {
   severity: 'error' | 'warning' | 'info' | 'success'
   /** The message to be displayed in the alert. */
   message: string
-  /** Callback fired when the alert is closed. If not provided, the close button will not be shown. */
+  /**
+   * Callback fired when the alert is closed. If not provided, the close button
+   * will not be shown.
+   *
+   * A11y — focus restoration is the CONSUMER's responsibility. Activating Close
+   * fires this callback after the 200ms exit animation; the parent typically
+   * unmounts the Alert, which drops keyboard focus to `<body>`. The Alert cannot
+   * know where focus should return (the APG Alert pattern does not own focus), so
+   * to keep a logical focus order (WCAG 2.4.3) the consumer should move focus to
+   * a sensible element in `onClose` — e.g. the control that surfaced the alert.
+   */
   onClose?: () => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: AlertStyles

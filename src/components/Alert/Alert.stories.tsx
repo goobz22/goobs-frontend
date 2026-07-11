@@ -280,7 +280,10 @@ export const AccessibilitySemantics: Story = {
     //    the severity icon; the close glyph is a text <span>.)
     const decorativeIcon = alert.querySelector('svg')
     await expect(decorativeIcon).not.toBeNull()
-    await expect(decorativeIcon).toHaveAttribute('aria-hidden', 'true')
+    await expect(decorativeIcon as SVGSVGElement).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    )
 
     // 4. The message text is present and visible.
     await expect(canvas.getByText(args.message)).toBeVisible()
