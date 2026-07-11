@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/Toolbars/Editor/index.tsx
 
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Dropdown from '../../../Field/Dropdown/Regular'
 import CustomButton from '../../../Button'
 import {
@@ -344,25 +344,73 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
       }
     }
 
-  // Check if format is active for styling
-  const isFormatActive = (format: string): boolean => {
-    if (!editor || markdownMode) return false
-
-    if (
-      [
-        'bulleted-list',
-        'numbered-list',
-        'left',
-        'center',
-        'right',
-        'justify',
-      ].includes(format)
-    ) {
-      return document.queryCommandState(format)
-    } else {
-      return document.queryCommandState(format)
+  // Live formatting state for the rich-text toggle buttons. The old code gated
+  // this on a Slate `editor` object this component is never handed, so the
+  // active state (and any aria-pressed derived from it) was permanently dead.
+  // Rich mode drives formatting through document.execCommand, so
+  // document.queryCommandState IS the source of truth — tracked on the client
+  // via `selectionchange` so both the visual active state and the buttons'
+  // aria-pressed stay truthful as the caret/selection moves. Guarded to the
+  // client (effect) + wrapped in try/catch so SSR and unsupported commands
+  // never throw.
+  const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>(
+    {}
+  )
+  useEffect(() => {
+    if (markdownMode) return
+    // Map the toolbar's format keys to their execCommand query names.
+    const queryCommandMap: Record<string, string> = {
+      bold: 'bold',
+      italic: 'italic',
+      underline: 'underline',
+      strikethrough: 'strikeThrough',
+      'numbered-list': 'insertOrderedList',
+      'bulleted-list': 'insertUnorderedList',
     }
+    const readState = () => {
+      const next: Record<string, boolean> = {}
+      for (const [format, command] of Object.entries(queryCommandMap)) {
+        try {
+          next[format] = document.queryCommandState(command)
+        } catch {
+          next[format] = false
+        }
+      }
+      setActiveFormats(next)
+    }
+    readState()
+    document.addEventListener('selectionchange', readState)
+    return () => document.removeEventListener('selectionchange', readState)
+  }, [markdownMode])
+
+  // Whether a toggle format is currently applied at the selection. Markdown
+  // mode has no persistent format state (its buttons wrap the selection), so it
+  // always reports false and those buttons are exposed as command buttons.
+  const isFormatActive = (format: string): boolean => {
+    if (markdownMode) return false
+    return activeFormats[format] ?? false
   }
+
+  // Toggle-capable formats get aria-pressed (WAI-ARIA toggle button); the rest
+  // (undo / redo / link / code) are plain command buttons. Every icon-only
+  // button also gets an aria-label so it has an accessible name (WCAG 4.1.2).
+  const TOGGLE_FORMATS = new Set([
+    'bold',
+    'italic',
+    'underline',
+    'strikethrough',
+    'numbered-list',
+    'bulleted-list',
+  ])
+  const getButtonA11y = (
+    format: string,
+    accessibleName: string
+  ): Record<string, string | boolean> => ({
+    'aria-label': accessibleName,
+    ...(!markdownMode && TOGGLE_FORMATS.has(format)
+      ? { 'aria-pressed': isFormatActive(format) }
+      : {}),
+  })
 
   // Layout containers are CSS classes; the sacred backdrop is a
   // [data-theme='sacred'] override on .toolbarContainer.
@@ -399,6 +447,8 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
     <div
       className={cssStyles.toolbarContainer}
       data-theme={toolbarTheme}
+      role="toolbar"
+      aria-label={markdownMode ? 'Markdown formatting' : 'Text formatting'}
       {...(styles?.showToolbar === false && { 'data-hidden': 'true' })}
       {...(wrapperStyle && { style: wrapperStyle })}
     >
@@ -409,22 +459,26 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <UndoIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('undo')}
             styles={getButtonStyles('undo')}
             disabled={markdownMode}
+            {...getButtonA11y('undo', 'Undo')}
           />
           <CustomButton
             icon={
               <RedoIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('redo')}
             styles={getButtonStyles('redo')}
             disabled={markdownMode}
+            {...getButtonA11y('redo', 'Redo')}
           />
         </div>
 
@@ -433,30 +487,36 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <FormatBoldIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('bold')}
             styles={getButtonStyles('bold')}
+            {...getButtonA11y('bold', 'Bold')}
           />
           <CustomButton
             icon={
               <FormatItalicIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('italic')}
             styles={getButtonStyles('italic')}
+            {...getButtonA11y('italic', 'Italic')}
           />
           <CustomButton
             icon={
               <FormatUnderlinedIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('underline')}
             styles={getButtonStyles('underline')}
             disabled={markdownMode}
+            {...getButtonA11y('underline', 'Underline')}
           />
         </div>
       </div>
@@ -491,29 +551,35 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <StrikethroughSIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('strikethrough')}
             styles={getButtonStyles('strikethrough')}
+            {...getButtonA11y('strikethrough', 'Strikethrough')}
           />
           <CustomButton
             icon={
               <CodeIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('code')}
             styles={getButtonStyles('code')}
+            {...getButtonA11y('code', 'Code')}
           />
           <CustomButton
             icon={
               <LinkIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
               />
             }
             onClick={handleEditorAction('link')}
             styles={getButtonStyles('link')}
+            {...getButtonA11y('link', 'Insert link')}
           />
         </div>
 
@@ -521,22 +587,26 @@ const ToolbarMarkdown: React.FC<ToolbarMarkdownProps> = ({
           <CustomButton
             icon={
               <FormatListNumberedIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
                 style={{ width: '16px', height: '16px' }}
               />
             }
             onClick={handleEditorAction('numbered-list')}
             styles={getButtonStyles('numbered-list')}
+            {...getButtonA11y('numbered-list', 'Numbered list')}
           />
           <CustomButton
             icon={
               <FormatListBulletedIcon
+                aria-hidden="true"
                 styles={{ theme: styles?.theme || 'sacred', size: 16 }}
                 style={{ width: '16px', height: '16px' }}
               />
             }
             onClick={handleEditorAction('bulleted-list')}
             styles={getButtonStyles('bulleted-list')}
+            {...getButtonA11y('bulleted-list', 'Bulleted list')}
           />
         </div>
       </div>
