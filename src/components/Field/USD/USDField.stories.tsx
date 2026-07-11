@@ -3,6 +3,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import USDField from './index'
 
 const meta: Meta<typeof USDField> = {
@@ -493,4 +494,116 @@ const InteractiveDemoComponent = () => {
 
 export const InteractiveDemo: Story = {
   render: () => <InteractiveDemoComponent />,
+}
+
+/**
+ * Shared centered light surface for the a11y stories below so the field and
+ * its focus ring / helper region read clearly.
+ */
+const A11yFrame = ({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{
+      backgroundColor: '#f8fafc',
+      minHeight: '100vh',
+      padding: '2rem',
+      boxSizing: 'border-box',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <div style={{ maxWidth: '400px', width: '100%' }}>{children}</div>
+  </div>
+)
+
+/**
+ * Required field — the FieldShell renders the `*` required indicator next to
+ * the label (aria-hidden, decorative) AND sets `aria-required` on the input, so
+ * the requirement is conveyed programmatically, not by the asterisk alone
+ * (WCAG 1.3.1 / 3.3.2).
+ */
+export const RequiredField: Story = {
+  name: 'Required (aria-required)',
+  render: args => (
+    <A11yFrame>
+      <USDField {...args} />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Payment amount',
+    initialValue: '',
+    helperText: 'This field is required',
+    styles: { theme: 'light', required: true },
+  },
+}
+
+/**
+ * Error state — a string `error` flows through FieldShell to render the message
+ * with `role="alert"` + `aria-live="polite"`, links it to the input via
+ * `aria-describedby`, and sets `aria-invalid="true"`. The invalidity is exposed
+ * programmatically and in text, never by the border colour alone
+ * (WCAG 1.4.1 / 3.3.1 / 4.1.2 / 4.1.3).
+ */
+export const ErrorState: Story = {
+  name: 'Error (aria-invalid + alert)',
+  render: args => (
+    <A11yFrame>
+      <USDField {...args} />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Amount',
+    initialValue: '0.00',
+    error: 'Amount must be greater than $0.00',
+    styles: { theme: 'light' },
+  },
+}
+
+/**
+ * Keyboard-operable steppers. Proves the increment/decrement buttons respond to
+ * Enter (previously they were wired to `onMouseDown` only, so keyboard users
+ * could focus but never activate them) and that Arrow Up / Arrow Down on the
+ * input adjust the value — the native number-input affordance. The play
+ * function drives real keyboard events and asserts the value changes; it leaves
+ * focus in the field so the Chromatic snapshot also captures the focus ring.
+ * WCAG 2.1.1 / 2.4.7.
+ */
+export const KeyboardOperableSteppers: Story = {
+  name: 'Keyboard steppers (Enter / Arrows)',
+  render: args => (
+    <A11yFrame>
+      <USDField {...args} />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Amount',
+    initialValue: '10.00',
+    enableIncrement: true,
+    incrementStep: 1,
+    helperText: 'Enter/Space on the buttons; Arrow Up/Down in the field',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText(/amount/i) as HTMLInputElement
+    const incrementButton = canvas.getByRole('button', { name: 'increment' })
+    const decrementButton = canvas.getByRole('button', { name: 'decrement' })
+
+    // The stepper buttons must be operable from the keyboard (Enter).
+    incrementButton.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(input).toHaveValue('11.00'))
+
+    decrementButton.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(input).toHaveValue('10.00'))
+
+    // Arrow Up / Down on the input itself adjust the value.
+    input.focus()
+    await userEvent.keyboard('{ArrowUp}{ArrowUp}')
+    await waitFor(() => expect(input).toHaveValue('12.00'))
+
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(input).toHaveValue('11.00'))
+  },
 }
