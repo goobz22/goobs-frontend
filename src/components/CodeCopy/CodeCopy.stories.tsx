@@ -396,17 +396,72 @@ export const WideScrollableCode: Story = {
   play: async ({ canvasElement }) => {
     const pre = canvasElement.querySelector<HTMLPreElement>('pre')
 
-    // The scroll container is keyboard-focusable (the axe
-    // scrollable-region-focusable fix) …
-    await expect(pre).toHaveAttribute('tabindex', '0')
-    // … and carries a naming-capable role + accessible name so screen-reader
-    // users know what the focusable region is.
-    await expect(pre).toHaveAttribute('role', 'group')
-    await expect(pre).toHaveAttribute('aria-label', 'typescript code')
+    // The overflow measurement runs client-side after mount (ResizeObserver),
+    // so the focus affordances appear asynchronously — wait for them. The
+    // scroll container becomes keyboard-focusable (the axe
+    // scrollable-region-focusable fix) and carries a naming-capable role +
+    // accessible name so screen-reader users know what the focusable region is.
+    await waitFor(() => {
+      expect(pre).toHaveAttribute('tabindex', '0')
+      expect(pre).toHaveAttribute('role', 'group')
+      expect(pre).toHaveAttribute('aria-label', 'typescript code')
+    })
 
     // It actually accepts focus (proves tabindex takes effect at runtime).
     pre?.focus()
     await expect(pre).toHaveFocus()
+  },
+}
+
+/**
+ * Narrow (non-scrolling) code is NOT a keyboard tab stop. The keyboard-focus
+ * scroll affordances (tabindex / role="group" / aria-label) are gated to the
+ * case where the `<pre>` actually overflows horizontally. A snippet that fits
+ * its container keeps OUT of the tab order and is not announced as an empty
+ * "group", so narrow code adds no tab-stop or screen-reader noise on the common
+ * case (adversarial-review finding — over-application of the scroll-region fix).
+ */
+export const NarrowCodeNotFocusable: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}>
+        <strong>Narrow code:</strong> the lines fit the block, so the code area
+        never scrolls. The `&lt;pre&gt;` is therefore not a tab stop and exposes
+        no group role — nothing extra for keyboard or screen-reader users.
+      </div>
+      <CodeCopy {...args} />
+    </div>
+  ),
+  args: {
+    code: jsCode,
+    language: 'javascript',
+    styles: {
+      theme: 'dark',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Resolving the copy button proves the client component mounted; the
+    // overflow measurement runs in the same lifecycle, so by the time the
+    // assertions settle the (non-)scrollable decision has been made.
+    await canvas.findByRole('button', { name: 'Copy code' })
+    const pre = canvasElement.querySelector<HTMLPreElement>('pre')
+
+    // jsCode fits its container → the scroll region never activates: no tab
+    // stop, no group role, no accessible-name label.
+    await waitFor(() => {
+      expect(pre).not.toHaveAttribute('tabindex')
+      expect(pre).not.toHaveAttribute('role')
+      expect(pre).not.toHaveAttribute('aria-label')
+    })
   },
 }
 
