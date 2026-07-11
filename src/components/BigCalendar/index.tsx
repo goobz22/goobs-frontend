@@ -303,6 +303,15 @@ export default function BigCalendar({
   const gridRef = useRef<HTMLDivElement>(null)
   const focusPendingRef = useRef(false)
 
+  // Merge the internal `gridRef` (scopes roving focus + the querySelector below)
+  // with the public consumer `ref` so a single DOM `ref` slot feeds both — the
+  // consumer holds the region root, the calendar keeps its focus-scoping node.
+  const setRootRef = (el: HTMLDivElement | null): void => {
+    gridRef.current = el
+    if (typeof ref === 'function') ref(el)
+    else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = el
+  }
+
   // Stable id linking the visually-hidden period heading to the root `region`
   // landmark via aria-labelledby (so the landmark is named by the period).
   const headingId = useId()
