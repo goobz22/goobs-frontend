@@ -66,15 +66,22 @@
    Sacred = default; light overrides below.
    -------------------------------------------------------------------------- */
 .container {
-  display: flex;
-  gap: var(--goobs-space-md);
-  align-items: flex-start;
   /* sacred defaults */
   padding: var(--goobs-space-md);
   background-color: var(--goobs-sacred-surface);
   border-radius: var(--goobs-radius-lg);
   border: 1px solid var(--goobs-gold-a30);
   position: relative;
+}
+
+/* The three-column flex row (left column + transfer buttons + right column).
+   Split out from `.container` so the container can stack the row above the
+   validation-error region without the error becoming a fourth flex column. */
+.row {
+  display: flex;
+  gap: var(--goobs-space-md);
+  align-items: flex-start;
+  width: 100%;
 }
 
 .container[data-theme='light'] {
