@@ -24,10 +24,35 @@
   --zoom-transform-origin: center center;
   --zoom-transition: transform 0.3s ease, opacity 0.3s ease;
   --zoom-transition-delay: 0s;
+  /*
+   * Governs the DEFERRED visibility swap below (the visibility segment on the
+   * transition + the [data-state='hidden'] block). Kept in lockstep with the
+   * transform/opacity duration by the TSX — it emits --zoom-duration from the
+   * same value it bakes into --zoom-transition (parsed out of a full
+   * `transition` override, else the timeout / transitionDuration), so the
+   * a11y-tree drop lands exactly at the end of the zoom-OUT. This per-theme
+   * default only applies when NO styles object is passed.
+   */
+  --zoom-duration: 0.3s;
 
   transform: scale(var(--zoom-scale-enter));
   opacity: 1;
-  transition: var(--zoom-transition);
+  visibility: visible;
+  /*
+   * `visibility` rides alongside transform/opacity in the transition list so a
+   * zoomed-OUT wrapper leaves BOTH the accessibility tree and the tab order —
+   * opacity:0 (+ a scale) alone keeps the content screen-reader-announced AND
+   * keyboard-focusable (WCAG 1.3.1 / 2.4.3 / 4.1.2).
+   *
+   * `visibility` is a DISCRETE property with special transition semantics: a
+   * visible->hidden transition holds `visible` for the WHOLE duration and flips
+   * to `hidden` only at the very end, while hidden->visible becomes `visible`
+   * immediately. Running it over the SAME --zoom-duration as the scale/opacity
+   * therefore keeps the node present for exactly the length of the zoom-OUT
+   * (then drops it the instant it is fully hidden) and re-adds it instantly on
+   * zoom-IN — with no separate, position-fragile transition-delay list.
+   */
+  transition: var(--zoom-transition), visibility var(--zoom-duration) linear;
   transition-delay: var(--zoom-transition-delay);
   transform-origin: var(--zoom-transform-origin);
 }
@@ -41,6 +66,7 @@
 /* Sacred theme — slower premium easing and a deeper hidden scale. */
 .zoomRoot[data-theme='sacred'] {
   --zoom-scale-exit: 0.7;
+  --zoom-duration: 0.5s;
   --zoom-transition:
     transform 0.5s var(--goobs-ease), opacity 0.5s var(--goobs-ease);
 }
