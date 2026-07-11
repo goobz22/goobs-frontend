@@ -230,7 +230,11 @@ export const InteractionTest: Story = {
 // ACCESSIBILITY TEST — exercises the a11y semantics added in the 2026-07-11
 // audit: the assertive live region (role="alert"), the visually-hidden severity
 // prefix that carries the severity to screen readers when the icon is decorative
-// (WCAG 1.4.1/1.3.1), and the named icon-only close button (WCAG 4.1.2).
+// (WCAG 1.4.1/1.3.1), the decorative severity icon being aria-hidden from AT
+// (WCAG 1.1.1), and the named icon-only close button (WCAG 4.1.2). The
+// close-button focus ring (issue #5) and prefers-reduced-motion (issue #6) are
+// CSS-pseudo-class / media-query states verified by the Chromatic visual
+// baseline rather than a DOM assertion here.
 // --------------------------------------------------------------------------
 
 export const AccessibilitySemantics: Story = {
@@ -250,22 +254,45 @@ export const AccessibilitySemantics: Story = {
     await expect(alert).toBeInTheDocument()
 
     // 2. The severity is announced textually, not by icon/colour alone. The
-    //    label is in the accessibility tree but visually hidden.
+    //    label is in the accessibility tree but visually hidden via the
+    //    clip-rect technique (position:absolute; 1px box; overflow:hidden;
+    //    clip). NOTE: jest-dom's toBeVisible() inspects ONLY display/
+    //    visibility/opacity/hidden — never clip/size/overflow — so it would
+    //    (wrongly) report this clipped node as VISIBLE and `.not.toBeVisible()`
+    //    would throw. Assert the actual visually-hidden geometry instead: the
+    //    node is in the DOM (announced to AT) but collapsed to a ~1px,
+    //    overflow-hidden, absolutely-positioned box (invisible to sighted
+    //    users). This locks the WCAG 1.4.1/1.3.1 fix with an assertion that
+    //    actually passes.
     const severityLabel = canvas.getByText('Error:')
     await expect(severityLabel).toBeInTheDocument()
-    await expect(severityLabel).not.toBeVisible()
+    const labelStyle = window.getComputedStyle(severityLabel)
+    await expect(labelStyle.position).toBe('absolute')
+    await expect(labelStyle.overflow).toBe('hidden')
+    const labelRect = severityLabel.getBoundingClientRect()
+    await expect(labelRect.width).toBeLessThanOrEqual(1)
+    await expect(labelRect.height).toBeLessThanOrEqual(1)
 
-    // 3. The message text is present and visible.
+    // 3. The decorative severity icon is removed from the a11y tree (WCAG
+    //    1.1.1): aria-hidden spreads from <Icon> onto its inner <svg>. Its
+    //    shape/colour is redundant with the severity prefix + message text, so
+    //    a screen reader must not announce it. (The only <svg> in the alert is
+    //    the severity icon; the close glyph is a text <span>.)
+    const decorativeIcon = alert.querySelector('svg')
+    await expect(decorativeIcon).not.toBeNull()
+    await expect(decorativeIcon).toHaveAttribute('aria-hidden', 'true')
+
+    // 4. The message text is present and visible.
     await expect(canvas.getByText(args.message)).toBeVisible()
 
-    // 4. The icon-only close button has an accessible name.
+    // 5. The icon-only close button has an accessible name.
     const closeButton = canvas.getByRole('button', { name: 'Close' })
     await expect(closeButton).toBeVisible()
 
-    // 5. The button is type="button" so it never submits an enclosing form.
+    // 6. The button is type="button" so it never submits an enclosing form.
     await expect(closeButton).toHaveAttribute('type', 'button')
 
-    // 6. Keyboard focus reaches the close button.
+    // 7. Keyboard focus reaches the close button.
     closeButton.focus()
     await expect(closeButton).toHaveFocus()
   },
