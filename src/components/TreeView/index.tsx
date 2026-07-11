@@ -326,6 +326,12 @@ export interface TreeItemProps {
   /** Whether item has children */
   hasChildren?: boolean
 
+  /** 1-based position of this item within its sibling set (aria-posinset) */
+  posInSet?: number
+
+  /** Total number of items in this item's sibling set (aria-setsize) */
+  setSize?: number
+
   /** Component styling */
   styles?: TreeViewStyles
 
@@ -362,6 +368,13 @@ interface TreeViewContextValue {
   selectedItems: Set<TreeViewItemId>
   expandedItems: Set<TreeViewItemId>
   focusedItem: TreeViewItemId | null
+  /**
+   * The single tree item currently in the Tab sequence (roving tabindex, per
+   * the WAI-ARIA APG Tree View pattern). It is the focused item when that item
+   * is visible; otherwise it falls back to the first root item so Tab can
+   * always enter the tree.
+   */
+  tabbableItem: TreeViewItemId | null
   disabledItems: Set<TreeViewItemId>
   itemMap: Map<TreeViewItemId, TreeViewItem>
   parentMap: Map<TreeViewItemId, TreeViewItemId>
