@@ -440,3 +440,53 @@ export const ErrorAnnounced: Story = {
     await expect(validSelect).not.toHaveAttribute('aria-invalid')
   },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBLE NAME (a11y) — a native <select> gets NO accessible name from its
+// `name` attribute (that is for form submission, not the a11y tree), so a
+// screen reader would announce a nameless "combobox". This primitive does not
+// (and must not) invent a name; instead it forwards every naming mechanism —
+// `aria-label`, `aria-labelledby`, and `id` (for an external `<label htmlFor>`)
+// — straight through the `{...props}` spread onto the real <select> (WCAG 4.1.2
+// Name, Role, Value / 3.3.2 Labels or Instructions). This story pins BOTH
+// primary mechanisms so the labelability contract is regression-gated, not just
+// asserted in prose — it fails if a future change stops threading these props
+// to the native control.
+// --------------------------------------------------------------------------
+
+export const AccessibleName: Story = {
+  name: 'Accessible Name (a11y)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* Mechanism 1 — aria-label supplied directly on the control. */}
+      <SelectWithState aria-label="Favorite framework" styles={{ theme: 'light' }}>
+        <MenuItem value="react">React</MenuItem>
+        <MenuItem value="vue">Vue</MenuItem>
+        <MenuItem value="svelte">Svelte</MenuItem>
+      </SelectWithState>
+      {/* Mechanism 2 — a real, programmatically associated <label> via
+          htmlFor + id (the id threads through {...props} to the <select>). */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <label htmlFor="fav-language-select">Favorite language</label>
+        <SelectWithState id="fav-language-select" styles={{ theme: 'light' }}>
+          <MenuItem value="ts">TypeScript</MenuItem>
+          <MenuItem value="rust">Rust</MenuItem>
+          <MenuItem value="go">Go</MenuItem>
+        </SelectWithState>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Each control resolves a computable accessible NAME via the mechanism it
+    // was given: the forwarded aria-label for the first, the associated
+    // <label> for the second (WCAG 4.1.2). Querying by role AND name proves the
+    // name is exposed to assistive tech, not merely present in the DOM.
+    await expect(
+      canvas.getByRole('combobox', { name: 'Favorite framework' })
+    ).toBeVisible()
+    await expect(
+      canvas.getByRole('combobox', { name: 'Favorite language' })
+    ).toBeVisible()
+  },
+}

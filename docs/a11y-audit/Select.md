@@ -62,6 +62,21 @@ existing Storybook `InteractionTest` already keys on via `getByRole('combobox')`
   to the existing `data-error` focus-ring rule). Additive, no attribute/markup removed.
 - **Pattern:** `status-not-announced`
 
+### 3b. Accessible-name labelability documented but not regression-tested — MINOR (WCAG 4.1.2 Name/Role/Value, 3.3.2 Labels or Instructions) — FIXED (2026-07-11, ownership follow-up)
+- **File:** `src/components/Select/index.tsx:203` — the `{...props}` spread correctly forwards
+  `aria-label` / `aria-labelledby` / `id` onto the native `<select>`, so a consumer CAN give the
+  control a computable accessible name. But nothing in the story suite exercised it: a regression
+  that stopped threading those props to the native element (e.g. spreading `{...props}` onto the
+  root wrapper instead) would have shipped silently, leaving every consumer's Select nameless. In
+  a repo where **stories are the only regression tests**, a documented-but-untested a11y contract
+  is an untested a11y contract.
+- **Fix:** Added the `AccessibleName` story (`Select.stories.tsx`) exercising BOTH primary naming
+  mechanisms — a forwarded `aria-label` and an external `<label htmlFor>` + forwarded `id` — with
+  a `play` fn that queries `getByRole('combobox', { name })` for each, proving the name is exposed
+  to assistive tech (not just present in the DOM). No source/API change — the primitive already
+  forwarded these props correctly; this converts the prose claim into a regression gate.
+- **Pattern:** `missing-accessible-name`
+
 ### 3. Animated transition ignores reduced-motion preference — MINOR (WCAG 2.3.3 Animation from Interactions) — FIXED
 - **File:** `src/components/Select/Select.module.css:88` — `.select` carries
   `transition: all 0.2s ease;` (animates the hover/focus border-colour shift) with no
@@ -82,18 +97,22 @@ N/A for this component.
   focus management, and typeahead handled by the browser. The implicit `combobox` role is
   correct; no ARIA roles were added or needed.
 - **Accessible name:** this low-level primitive does not hardcode a label (it cannot invent
-  one). `aria-label` / `aria-labelledby` / `aria-describedby` all pass through the
+  one). `aria-label` / `aria-labelledby` / `aria-describedby` / `id` all pass through the
   `{...props}` spread (the interface extends `React.SelectHTMLAttributes<HTMLSelectElement>`),
-  so consumers — and the `Field/Shell` wrapper — supply the name. **No action** (correct for a
-  composable primitive); documented here so consumers know the responsibility.
+  so consumers — and the `Field/Shell` wrapper — supply the name. **No source change needed**
+  (correct for a composable primitive; the native `name` attribute is for form submission, not
+  the a11y tree, so an unlabeled default is expected). This matches the repo's established class
+  treatment of Switch in `_lint-missing-accessible-name.md` ("passthrough — the library must not
+  invent a name"). The labelability was previously documented but **not regression-tested**; the
+  new `AccessibleName` story now pins BOTH naming mechanisms (see *Stories updated*, Issue 4).
 - **Required:** the native `required` attribute passes through `{...props}` and is
   programmatically exposed by the browser. **No action.**
 - **Disabled:** uses the native `disabled` attribute (fully programmatic), not `aria-disabled`.
   Correct — preserves the machine-test contract (FieldShell removes `aria-disabled` on enable;
   this primitive never emits `aria-disabled="false"`).
 - **Decorative arrow:** the custom `▼` arrow `<div>` is correctly `aria-hidden="true"`
-  (`index.tsx:195`) and `pointer-events: none`, so it is not announced and does not intercept
-  clicks. **No action.**
+  (`index.tsx:213`) and `pointer-events: none` (`Select.module.css:241`), so it is not announced
+  and does not intercept clicks. **No action.**
 - **Error state:** now announced via `aria-invalid` for **both** invalid paths — the boolean/engine
   `hasError` (Issue 2) and the `helperTextType:'error'` styling path (Issue 2b).
 - **Focus visibility:** now provided via `:focus-visible` (Issue 1).
@@ -140,6 +159,14 @@ Added to `Select.stories.tsx` (Storybook stories are this repo's only regression
   (WCAG 1.4.1 / 4.1.2). Extended 2026-07-11 to add the `helperTextType:'error'` case — this
   assertion **fails against the pre-fix code** (the helper-error select carried no `aria-invalid`)
   and passes after Issue 2b's fix, so it is the regression gate for the class.
+
+- **`AccessibleName` ("Accessible Name (a11y)")** — `play` fn asserts a computable accessible
+  name resolves via **both** primary mechanisms: a forwarded `aria-label`
+  (`getByRole('combobox', { name: 'Favorite framework' })`) AND an external, associated
+  `<label htmlFor>` + forwarded `id` (`getByRole('combobox', { name: 'Favorite language' })`).
+  This regression-gates the labelability contract the report documents (WCAG 4.1.2 / 3.3.2) — it
+  fails if a future change stops threading `aria-label`/`id` through `{...props}` to the native
+  `<select>` (Issue 3b — ownership follow-up).
 
 Existing `InteractionTest` (native combobox role + controlled value) remains green and
 continues to validate the native semantics.
