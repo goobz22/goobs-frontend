@@ -391,6 +391,15 @@ export const KeyboardSteppers: Story = {
     await userEvent.keyboard('{Enter}')
     await expect(input).toHaveValue('10')
 
+    // The input itself is spinbutton-operable: with it focused, Up/Down arrows
+    // step the VLAN ID without touching the +/- buttons (WCAG 2.1.1).
+    input.focus()
+    await expect(input).toHaveFocus()
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(input).toHaveValue('11')
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(input).toHaveValue('10')
+
     // The caret glyph inside each labelled button is hidden from AT so the
     // button's aria-label is the sole accessible name.
     await expect(increase.querySelector('svg')).toHaveAttribute(

@@ -366,5 +366,14 @@ export const KeyboardSteppersAndLiveReadout: Story = {
     await userEvent.keyboard('{Enter}')
     await expect(input).toHaveValue('/25')
     await expect(status).toHaveTextContent('255.255.255.128')
+
+    // The input itself is spinbutton-operable: with it focused, Up/Down arrows
+    // step the CIDR without touching the +/- buttons (WCAG 2.1.1).
+    input.focus()
+    await expect(input).toHaveFocus()
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(input).toHaveValue('/26')
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(input).toHaveValue('/25')
   },
 }

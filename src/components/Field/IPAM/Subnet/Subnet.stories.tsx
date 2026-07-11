@@ -361,5 +361,17 @@ export const KeyboardSteppersAndLiveReadout: Story = {
     await userEvent.keyboard('{Enter}')
     await expect(input).toHaveValue('255.255.255.128')
     await expect(status).toHaveTextContent('Subnet CIDR: /25')
+
+    // The mask input itself is spinbutton-operable: with it focused, Up/Down
+    // arrows step the CIDR without touching the +/- buttons (WCAG 2.1.1). The
+    // dotted-mask value and the live readout both track the change.
+    input.focus()
+    await expect(input).toHaveFocus()
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(input).toHaveValue('255.255.255.192')
+    await expect(status).toHaveTextContent('Subnet CIDR: /26')
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(input).toHaveValue('255.255.255.128')
+    await expect(status).toHaveTextContent('Subnet CIDR: /25')
   },
 }

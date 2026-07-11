@@ -209,6 +209,27 @@ const VLANField: React.FC<VLANFieldProps> = ({
     [handleDecrement]
   )
 
+  // Spinbutton keyboard completeness (WCAG 2.1.1). This field is functionally a
+  // spinbutton (a numeric VLAN ID plus +/- steppers), so a keyboard user who
+  // focuses the input expects Up/Down arrows to step the value — otherwise the
+  // only keyboard path to a step is Tab-ing away to the separate +/- buttons.
+  // ArrowUp/ArrowDown reuse the existing clamp + skip-reserved increment
+  // handlers. The element stays role="textbox" (free-typed VLAN ID) so the
+  // machine-test `getByRole('textbox', { name: 'VLAN ID' })` selector contract
+  // is preserved.
+  const handleInputKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        handleIncrement()
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        handleDecrement()
+      }
+    },
+    [handleIncrement, handleDecrement]
+  )
+
   useEffect(() => {
     return () => {
       clearTimers()
@@ -278,6 +299,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
             disabled={disabled}
             required={required}
             onChange={e => handleTextFieldChange(e.target.value)}
+            onKeyDown={handleInputKeyDown}
             onBlur={() => boundOnBlur?.()}
             placeholder={placeholder}
             type="text"

@@ -186,6 +186,29 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     [handleDecrement]
   )
 
+  // Spinbutton keyboard completeness (WCAG 2.1.1). This field is functionally a
+  // spinbutton (a numeric value plus +/- steppers), so a keyboard user who
+  // focuses the input expects Up/Down arrows to step the value — otherwise the
+  // only keyboard path to a step is Tab-ing away to the separate +/- buttons.
+  // ArrowUp/ArrowDown reuse the existing clamped increment/decrement handlers.
+  // The caller's onKeyDown still runs first and can preventDefault to opt out.
+  // The element stays role="textbox" (free-typed CIDR) so the machine-test
+  // `getByRole('textbox', { name: 'CIDR' })` selector contract is preserved.
+  const handleInputKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      onKeyDown?.(event)
+      if (event.defaultPrevented) return
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        handleIncrement()
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        handleDecrement()
+      }
+    },
+    [onKeyDown, handleIncrement, handleDecrement]
+  )
+
   React.useEffect(() => {
     return () => {
       clearTimers()
@@ -269,7 +292,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
                 onBlur?.(event)
                 boundOnBlur?.()
               }}
-              onKeyDown={onKeyDown}
+              onKeyDown={handleInputKeyDown}
               onClick={onClick}
               placeholder={placeholder}
               type="text"
