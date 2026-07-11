@@ -47,6 +47,33 @@ export interface BadgeProps {
   content: React.ReactNode
   /** The anchor element(s) the badge overlays; the chip positions at one corner of this wrapper. */
   children: React.ReactNode
+  /**
+   * Accessible name announced by screen readers. A bare count like `5` is
+   * meaningless out of context — pass e.g. `"5 unread notifications"` so the
+   * badge is understandable, and INCLUDE the changing value so a live update
+   * (see `ariaLive`) announces the new count. When omitted, the badge's text
+   * `content` is its accessible name (fine for `content="5"`, insufficient for
+   * a decorative dot / icon `content` that has no text of its own). Applied
+   * only when the badge is not decorative (`role` other than `none`/`presentation`).
+   */
+  ariaLabel?: string
+  /**
+   * ARIA role for the badge chip. Defaults to `'status'`, so the badge is
+   * exposed as a status indicator and — because a live region only ever
+   * announces CHANGES, never its initial value — a count that updates after
+   * render is read out while a static badge stays silent on load. Pass an
+   * explicit role to override, e.g. `'none'` (or `'presentation'`) for a
+   * purely decorative badge that should not be announced at all.
+   */
+  role?: string
+  /**
+   * Live-region politeness for badges whose value updates dynamically (a
+   * notification or cart count going `5` → `6`). Only applied when the badge
+   * resolves to `role="status"`; `'off'` suppresses the implicit polite
+   * announcement of a status region. Defaults to the status region's implicit
+   * `'polite'`.
+   */
+  ariaLive?: 'off' | 'polite' | 'assertive'
   /** Theme, corner position/offset, and `--badge-*` scalar overrides. See BadgeStyles. */
   styles?: BadgeStyles
 }
@@ -54,12 +81,29 @@ export interface BadgeProps {
 /**
  * Small count or status indicator overlaid at a configurable corner of its
  * wrapped children, with light/dark/sacred theming and CSS-variable style
- * overrides.
+ * overrides. Accessible by default: the chip is a `role="status"` live region
+ * (announces count changes, silent on initial render) and takes an `ariaLabel`
+ * to give a bare number meaning — both overridable for decorative badges.
  */
-const Badge: React.FC<BadgeProps> = ({ content, children, styles }) => {
+const Badge: React.FC<BadgeProps> = ({
+  content,
+  children,
+  ariaLabel,
+  role,
+  ariaLive,
+  styles,
+}) => {
   const theme = styles?.theme || 'light'
   const position = styles?.position || 'top-right'
   const offset = styles?.offset ?? 8
+
+  // A badge is a status/count indicator, so it defaults to a `role="status"`
+  // live region (accessible-by-default; matches the read-only Chip pill).
+  // `none`/`presentation` opt out entirely for decorative badges.
+  const resolvedRole = role ?? 'status'
+  const isStatus = resolvedRole === 'status'
+  const isDecorative =
+    resolvedRole === 'none' || resolvedRole === 'presentation'
 
   // Caller-supplied overrides are passed as CSS custom properties; each var is
   // set ONLY when the caller provided it, so the CSS fallback (the theme value)
@@ -91,6 +135,12 @@ const Badge: React.FC<BadgeProps> = ({ content, children, styles }) => {
         className={cssStyles.badge}
         data-theme={theme}
         data-position={position}
+        role={resolvedRole}
+        {...(!isDecorative &&
+          ariaLabel !== undefined && { 'aria-label': ariaLabel })}
+        {...(isStatus &&
+          ariaLive !== undefined && { 'aria-live': ariaLive })}
+        {...(isStatus && { 'aria-atomic': 'true' })}
         style={dynamicStyle}
       >
         {content}
