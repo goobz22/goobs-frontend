@@ -292,3 +292,51 @@ export const LegacyHeaderChild: Story = {
     </TableContainer>
   ),
 }
+
+/**
+ * `component="td"` escape hatch inside a `TableHead` (WCAG 1.3.1) — pins that an
+ * explicit `component` prop is authoritative in BOTH directions. A cross-tab
+ * layout's leading corner cell is NOT a column header, so `component="td"` keeps
+ * it a plain `<td>` (no `data-header-cell`, no spurious `scope="col"`) even
+ * though it sits in the `<thead>`; the remaining head cells still auto-resolve to
+ * `<th scope="col">`, and each row's leading cell is a `<th scope="row">`. Before
+ * the fix `section === 'head'` short-circuited the resolver, so the corner cell
+ * rendered a spurious empty header `<th scope="col">` and the escape hatch
+ * documented on the `component` prop was inert — this story fails that baseline.
+ */
+export const CrossTabCornerCell: Story = {
+  globals: { backgrounds: { value: 'sacred' } },
+  render: () => (
+    <TableContainer
+      ariaLabel="Quarterly totals by region"
+      styles={{ theme: 'sacred' }}
+    >
+      <Table caption="Quarterly totals by region" styles={{ theme: 'sacred' }}>
+        <TableHead>
+          <TableRow>
+            {/* Non-header corner cell — the escape hatch forces a plain <td>. */}
+            <TableCell component="td">{' '}</TableCell>
+            <TableCell>Q1</TableCell>
+            <TableCell>Q2</TableCell>
+            <TableCell>Q3</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {[
+            { region: 'North', q1: 120, q2: 138, q3: 151 },
+            { region: 'South', q1: 98, q2: 104, q3: 119 },
+          ].map(row => (
+            <TableRow key={row.region} hover>
+              <TableCell component="th" scope="row">
+                {row.region}
+              </TableCell>
+              <TableCell>{row.q1}</TableCell>
+              <TableCell>{row.q2}</TableCell>
+              <TableCell>{row.q3}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  ),
+}

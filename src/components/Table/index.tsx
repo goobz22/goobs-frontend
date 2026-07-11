@@ -367,11 +367,14 @@ export const TableRow: React.FC<TableRowProps> = ({
 }
 
 /**
- * Cell part. `align` maps to an inline `text-align` (left default). The element
- * resolves to a semantic header `<th scope="col">` when the cell sits inside a
- * `TableHead`, when `component="th"`, or when a raw `<th>` child is passed (that
- * child is unwrapped so we never emit invalid `<td><th>` nesting); otherwise a
- * body `<td>` is rendered. Header cells are flagged `data-header-cell="true"`
+ * Cell part. `align` maps to an inline `text-align` (left default). An explicit
+ * `component` forces the element in both directions — `'th'` a header cell,
+ * `'td'` a plain data cell (the escape hatch for a non-header corner cell inside
+ * a `<thead>`). With `component` omitted the element auto-resolves to a semantic
+ * header `<th scope="col">` when the cell sits inside a `TableHead` or a raw
+ * `<th>` child is passed (that child is unwrapped so we never emit invalid
+ * `<td><th>` nesting); otherwise a body `<td>` is rendered. Header cells are
+ * flagged `data-header-cell="true"`
  * and styled as header cells, honoring the header background/color overrides;
  * body cells honor the color/border/font overrides. `scope` (default `'col'`
  * for header cells) associates the header with its column — or set `'row'` on a
@@ -390,10 +393,13 @@ export const TableCell: React.FC<TableCellProps> = ({
     React.isValidElement(children) &&
     (children as React.ReactElement).type === 'th'
 
-  // Render a real header cell when the caller forces it, the cell is inside a
-  // TableHead, or a raw <th> child was supplied (legacy pattern).
+  // An explicit `component` prop is authoritative in BOTH directions: `'th'`
+  // forces a header cell, `'td'` forces a plain data cell (the escape hatch for
+  // a non-header corner cell inside a `<thead>` — a standard cross-tab layout).
+  // Only when `component` is omitted does the cell auto-resolve: header when it
+  // sits inside a TableHead or a raw <th> child was supplied (legacy pattern).
   const renderAsHeader =
-    component === 'th' || section === 'head' || childIsRawTh
+    component != null ? component === 'th' : section === 'head' || childIsRawTh
 
   // Unwrap a legacy raw <th> child to its content — a <th>/<td> can't contain
   // another <th>, so we hoist the text onto the header cell we render.
