@@ -86,6 +86,11 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
       active?: boolean
       onClick?: () => void
       action?: string
+      /** Descriptive accessible name (e.g. `"Page 5"`) for a control whose
+       *  visible label is only a bare digit — WCAG 2.4.6 / 4.1.2. Kept a
+       *  superstring of the visible text so it also satisfies 2.5.3 Label in
+       *  Name (`"5"` ⊂ `"Page 5"`). */
+      ariaLabel?: string
     } = {}
   ) => (
     <button
@@ -95,16 +100,18 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
       disabled={opts.disabled}
       onClick={opts.onClick}
       aria-current={opts.active ? 'page' : undefined}
+      {...(opts.ariaLabel && { 'aria-label': opts.ariaLabel })}
       {...(opts.action && { 'data-action': opts.action })}
     >
       {label}
     </button>
   )
   return (
-    <div
+    // Native <nav> landmark (not div[role=navigation]) so the pagination is a
+    // real, SSR-crawlable landmark — matches the library's Breadcrumb pattern.
+    <nav
       className={cssStyles.pagination}
       data-shell-zone="pagination"
-      role="navigation"
       aria-label="Pagination"
     >
       {btn('prev', 'Prev', {
@@ -114,11 +121,21 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
       })}
       {pageSequence(page, totalPages).map((p, i) =>
         p === 'ellipsis' ? (
-          <span key={`e-${i}`} className={cssStyles.pageEllipsis}>
+          // Decorative gap marker — the numbered buttons already convey the
+          // skipped range, so hide the glyph from assistive tech (WCAG 1.3.1).
+          <span
+            key={`e-${i}`}
+            className={cssStyles.pageEllipsis}
+            aria-hidden="true"
+          >
             …
           </span>
         ) : (
-          btn(p, p, { active: p === page, onClick: () => onPageChange(p) })
+          btn(p, p, {
+            active: p === page,
+            onClick: () => onPageChange(p),
+            ariaLabel: `Page ${p}`,
+          })
         )
       )}
       {btn('next', 'Next', {
@@ -126,10 +143,18 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
         onClick: () => onPageChange(page + 1),
         action: 'next',
       })}
-      <span className={cssStyles.pageInfo}>
+      {/* The visible range doubles as a polite live region so screen-reader
+          users hear the new range when a page control is activated (focus
+          stays on Prev/Next, so nothing else announces the change) — WCAG
+          4.1.3 Status Messages. */}
+      <span
+        className={cssStyles.pageInfo}
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {startItem}-{endItem} of {totalItems}
       </span>
-    </div>
+    </nav>
   )
 }
 

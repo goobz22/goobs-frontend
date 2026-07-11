@@ -9,7 +9,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 import WorkspaceFilterShell from './index'
 import MetricsAccordion from '../Metric/Accordion'
 import Tabs, { type TabsItem } from '../Tabs'
@@ -246,4 +246,81 @@ export const Sacred: Story = {
 export const Light: Story = {
   render: () => <ShellDemo theme="light" />,
   globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * 3) Pagination accessibility — a many-page range (200 items / 10 per page) so
+ * the built-in control renders Prev / numbered / ellipsis / Next. Pins the
+ * pagination a11y contract:
+ *   • it is a real `<nav aria-label="Pagination">` landmark, not a
+ *     `div[role="navigation"]` (WCAG 1.3.1 / 4.1.2);
+ *   • each numbered control carries a descriptive `"Page N"` accessible name —
+ *     the bare digit alone is not descriptive (WCAG 2.4.6), and `"Page N"`
+ *     keeps the visible `"N"` as a substring so it still satisfies 2.5.3;
+ *   • the current page is programmatically marked with `aria-current="page"`;
+ *   • the decorative gap ellipsis is hidden from assistive tech (WCAG 1.3.1);
+ *   • the item-range readout is a polite live region so a screen-reader hears
+ *     the new range after paging while focus stays on Prev/Next (WCAG 4.1.3).
+ */
+export const PaginationA11y: Story = {
+  render: () => {
+    const Demo = (): React.JSX.Element => {
+      const [page, setPage] = React.useState(3)
+      return (
+        <div
+          style={{ padding: '24px', background: '#000000', minHeight: '100vh' }}
+        >
+          <WorkspaceFilterShell
+            styles={{ theme: 'sacred' }}
+            pagination={{
+              page,
+              pageSize: 10,
+              totalItems: 200,
+              onPageChange: setPage,
+            }}
+          >
+            <CardsPlaceholder color="#d4af37" />
+          </WorkspaceFilterShell>
+        </div>
+      )
+    }
+    return <Demo />
+  },
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The pagination is a REAL <nav> landmark (native element, not role=).
+    const paginationNav = canvas.getByRole('navigation', { name: 'Pagination' })
+    await expect(paginationNav.tagName).toBe('NAV')
+
+    // Numbered controls expose a descriptive "Page N" accessible name.
+    await expect(
+      canvas.getByRole('button', { name: 'Page 4' })
+    ).not.toBeNull()
+
+    // The active page (3) is programmatically current.
+    await expect(
+      canvas.getByRole('button', { name: 'Page 3' })
+    ).toHaveAttribute('aria-current', 'page')
+
+    // The long-range ellipsis is decorative → hidden from assistive tech.
+    const ellipsis = paginationNav.querySelector('[aria-hidden="true"]')
+    await expect(ellipsis?.textContent).toContain('…')
+
+    // The item-range readout is a polite, atomic live region.
+    const info = paginationNav.querySelector('[aria-live="polite"]')
+    await expect(info).not.toBeNull()
+    await expect(info).toHaveAttribute('aria-atomic', 'true')
+    await expect(info?.textContent).toBe('21-30 of 200')
+
+    // Paging moves aria-current AND updates the live region's announced range.
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 4' }))
+    await expect(
+      canvas.getByRole('button', { name: 'Page 4' })
+    ).toHaveAttribute('aria-current', 'page')
+    await expect(
+      paginationNav.querySelector('[aria-live="polite"]')?.textContent
+    ).toBe('31-40 of 200')
+  },
 }

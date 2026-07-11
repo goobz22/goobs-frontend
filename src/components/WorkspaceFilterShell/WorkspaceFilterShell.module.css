@@ -106,6 +106,14 @@
   color: var(--goobs-gold-a90);
 }
 
+/* FOCUS-VISIBLE — a clearly visible keyboard focus ring on every page control
+   (WCAG 2.4.7). Ring colour comes from the per-theme focus-ring tokens; the
+   sacred default is overridden for the light/dark pagination surfaces below. */
+.pageBtn:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
 .pageBtnActive {
   border-color: var(--goobs-gold);
   background: var(--goobs-gold-a20);
@@ -143,6 +151,10 @@
   color: var(--goobs-light-primary);
 }
 
+.shell[data-theme='light'] .pageBtn:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
 .shell[data-theme='light'] .pageBtnActive {
   border-color: var(--goobs-light-primary);
   background: var(--goobs-blue-a15);
@@ -172,6 +184,10 @@
   color: var(--goobs-dark-primary);
 }
 
+.shell[data-theme='dark'] .pageBtn:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
 .shell[data-theme='dark'] .pageBtnActive {
   border-color: var(--goobs-dark-primary);
   background: var(--goobs-blue-light-a20);
@@ -181,4 +197,12 @@
 .shell[data-theme='dark'] .pageInfo,
 .shell[data-theme='dark'] .pageEllipsis {
   color: var(--goobs-dark-text-muted);
+}
+
+/* REDUCED MOTION — honour a user's prefers-reduced-motion request (WCAG 2.3.3)
+   by dropping the page-button hover/focus colour transition. */
+@media (prefers-reduced-motion: reduce) {
+  .pageBtn {
+    transition: none;
+  }
 }
