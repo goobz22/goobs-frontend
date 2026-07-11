@@ -281,6 +281,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
               <button
                 type="button"
                 aria-label="Increase CIDR"
+                data-action="increment"
                 onMouseDown={handleIncrementMouseDown}
                 onClick={handleIncrementClick}
                 disabled={disabled}
@@ -291,6 +292,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
               <button
                 type="button"
                 aria-label="Decrease CIDR"
+                data-action="decrement"
                 onMouseDown={handleDecrementMouseDown}
                 onClick={handleDecrementClick}
                 disabled={disabled}

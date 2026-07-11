@@ -286,6 +286,7 @@ const InternalIncrementNumberField: React.FC<
               <button
                 type="button"
                 aria-label="Increase subnet mask"
+                data-action="increment"
                 onMouseDown={handleIncrementMouseDown}
                 onClick={handleIncrementClick}
                 disabled={disabled}
@@ -296,6 +297,7 @@ const InternalIncrementNumberField: React.FC<
               <button
                 type="button"
                 aria-label="Decrease subnet mask"
+                data-action="decrement"
                 onMouseDown={handleDecrementMouseDown}
                 onClick={handleDecrementClick}
                 disabled={disabled}

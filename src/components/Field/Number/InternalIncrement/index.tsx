@@ -298,6 +298,7 @@ const InternalIncrementNumberField: React.FC<
                   if (event.detail === 0) handleIncrement()
                 }}
                 aria-label="Increase value"
+                data-action="increment"
                 disabled={disabled}
                 className={cssStyles.button}
               >
@@ -310,6 +311,7 @@ const InternalIncrementNumberField: React.FC<
                   if (event.detail === 0) handleDecrement()
                 }}
                 aria-label="Decrease value"
+                data-action="decrement"
                 disabled={disabled}
                 className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
               >

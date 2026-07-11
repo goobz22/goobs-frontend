@@ -427,6 +427,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
                 onMouseDown={() => handlePressStart(handleIncrement)}
                 onClick={() => handleActivate(handleIncrement)}
                 aria-label="increment"
+                data-action="increment"
                 disabled={disabled}
                 className={cssStyles.button}
               >
@@ -440,6 +441,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
                 onMouseDown={() => handlePressStart(handleDecrement)}
                 onClick={() => handleActivate(handleDecrement)}
                 aria-label="decrement"
+                data-action="decrement"
                 disabled={disabled}
                 className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
               >

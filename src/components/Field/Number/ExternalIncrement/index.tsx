@@ -205,6 +205,7 @@ const ExternalIncrementNumberField: React.FC<
           <button
             type="button"
             aria-label="Decrease value"
+            data-action="decrement"
             onClick={handleDecrement}
             disabled={disabled}
             className={cssStyles.button}
@@ -233,6 +234,7 @@ const ExternalIncrementNumberField: React.FC<
           <button
             type="button"
             aria-label="Increase value"
+            data-action="increment"
             onClick={handleIncrement}
             disabled={disabled}
             className={cssStyles.button}

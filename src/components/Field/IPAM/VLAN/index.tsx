@@ -289,6 +289,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
             <button
               type="button"
               aria-label="Increase VLAN ID"
+              data-action="increment"
               onMouseDown={handleIncrementMouseDown}
               onClick={handleIncrementClick}
               disabled={disabled}
@@ -299,6 +300,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
             <button
               type="button"
               aria-label="Decrease VLAN ID"
+              data-action="decrement"
               onMouseDown={handleDecrementMouseDown}
               onClick={handleDecrementClick}
               disabled={disabled}
