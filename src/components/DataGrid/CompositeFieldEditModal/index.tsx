@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useId } from 'react'
 import Dialog from '../../Dialog'
 import Typography from '../../Typography'
 import CustomButton from '../../Button'
@@ -48,6 +48,14 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
   styles,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
+
+  // Accessible name for the wrapping <Dialog> — points at the visible
+  // "Edit Fields" heading so the surface the goobs <Dialog> owns (which already
+  // renders role="dialog" + aria-modal + the APG focus trap) is announced by
+  // its heading. The inner content wrapper below no longer re-declares the
+  // dialog role (a dialog nested in a dialog is an ARIA bug + a second,
+  // unmanaged modal surface — see the missing-dialog-focus-trap gate).
+  const titleId = useId()
 
   // Initialize field values from rowData
   const [fieldValues, setFieldValues] = useState<Record<string, any>>(() => {
@@ -622,18 +630,20 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
       open={open}
       onClose={handleCancel}
       styles={{ theme: isSacredTheme ? 'sacred' : 'light' }}
+      ariaLabelledBy={titleId}
     >
       <div
-        // Marks this Dialog as the composite-field editor so tests can
-        // distinguish it from any other Dialog open on the page (e.g.
-        // a confirm dialog or app-level modal).
+        // Content wrapper for the composite-field editor. Marks the surface so
+        // tests can distinguish it from any other Dialog open on the page (e.g.
+        // a confirm dialog or app-level modal). It is NOT itself a dialog — the
+        // wrapping goobs <Dialog> owns role="dialog", aria-modal, and the APG
+        // focus trap; re-declaring them here would nest a second, unmanaged
+        // modal (missing-dialog-focus-trap). The Dialog's accessible name is the
+        // visible "Edit Fields" heading via ariaLabelledBy={titleId}.
         // - data-composite-modal: presence flag
         // - data-composite-row-id: the row being edited (when known)
         data-composite-modal="true"
         data-composite-row-id={(rowData?._id ?? rowData?.id) || undefined}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Edit fields"
       >
         {/* Header */}
         <div
@@ -644,6 +654,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           }}
         >
           <Typography
+            id={titleId}
             text="Edit Fields"
             styles={{
               variant: 'cinzelh5',
