@@ -131,6 +131,53 @@ button `aria-label` as the sole accessible name.
 
 ---
 
+## Re-audit 2026-07-11 (two gaps the prior pass missed)
+
+### 7. Input rest border invisible on dark & sacred themes — MODERATE, WCAG 1.4.11 Non-text Contrast (AA) — FIXED
+`pattern: color-only-state` / non-text-contrast
+
+Issue #1 restored a *focus* ring, but the **resting** border stayed hardcoded as
+`1px solid var(--goobs-black-a20)` (`rgba(0,0,0,0.2)` — a **surface-independent**
+fixed black alpha). Because these inputs have a `transparent` background, that
+border is the input's only boundary. On the dark surface
+(`--goobs-dark-surface #1e293b`) and sacred (near-black `--goobs-sacred-control-bg`),
+black-at-20% composites *darker than the background* → ≈1.1:1, an effectively
+**invisible input boundary** — visual information required to identify the
+component under 1.4.11.
+
+- `Address/Address.module.css:13`, `CIDR/CIDR.module.css:18`,
+  `MACAddress/MACAddress.module.css:12`, `Subnet/Subnet.module.css:19`,
+  `VLAN/VLAN.module.css:18`
+
+**Fix:** switched the rest border to `var(--field-border-default)` — the same
+per-theme token FieldShell's own `.inputSlot` uses, cascaded from the `.shell`
+ancestor (the `:focus-visible` rule already relied on that cascade via
+`--field-border-focus`, proving it resolves). Resolves to light `#e2e8f0` / dark
+`#334155` / sacred gold-a30, so the boundary is theme-appropriate and consistent
+with every other library field. Applied to all five module.css files.
+
+### 8. Spinbutton inputs inert to Up/Down arrows — MINOR, WCAG 2.1.1 Keyboard (A) — FIXED
+`pattern: missing-keyboard-arrow-nav`
+
+Issue #2 made the +/- **buttons** keyboard-operable, but the numeric value
+**input** itself still ignored `ArrowUp`/`ArrowDown`. A keyboard user who focuses
+the value field and presses Up/Down (the universal spinner expectation) got
+nothing — the only keyboard path to a step was Tab-ing away to the separate
+buttons. Raw 2.1.1 was already met via the buttons, so this is spinbutton
+keyboard-table *completeness* rather than a hard failure — hence MINOR.
+
+- `CIDR/index.tsx`, `VLAN/index.tsx`, `Subnet/index.tsx` (internal mask field)
+
+**Fix:** added a `handleInputKeyDown` on each numeric input mapping `ArrowUp` →
+increment / `ArrowDown` → decrement, **reusing the existing clamped (and VLAN
+skip-reserved) `handleIncrement`/`handleDecrement`** so range/reserved rules match
+the buttons exactly. The caller's `onKeyDown` still runs first and may
+`preventDefault()` to opt out (CIDR/Subnet). `role="textbox"` is unchanged, so the
+machine-test selector contract and the existing `getByRole('textbox', …)`
+play-tests keep passing. `Address`/`MACAddress` are plain text fields (no steppers)
+and were untouched. This lands the arrow-stepping half of what issue #-Deferred had
+recorded as the optional spinbutton enhancement — done the safe way (no role change).
+
 ## Hearing
 
 No `Audio`/`AudioContext`/`<audio>`/`<video>`/`navigator.vibrate`/
@@ -172,8 +219,11 @@ primary content. **Clean.**
 | 4 | `role="status"` + `aria-live="polite"` on live readouts | CIDR / Subnet `index.tsx` |
 | 5 | `aria-hidden` on decorative stepper caret icons | CIDR / Subnet / VLAN `index.tsx` |
 | 6 | `@media (prefers-reduced-motion: reduce)` on `.button` | CIDR / Subnet / VLAN `*.module.css` |
+| 7 | rest border → theme-aware `--field-border-default` (1.4.11) | all 5 `*.module.css` |
+| 8 | ArrowUp/ArrowDown spinbutton stepping on the input (2.1.1) | CIDR / VLAN / Subnet `index.tsx` |
 
-Per-file gate `bun lint:file` passed (exit 0) on every edited `.tsx`.
+Per-file gate `bun lint:file` passed (exit 0) on every edited `.tsx`. Re-audit
+commits: `c8968ef8` (border contrast) and `ccee34e8` (arrow-key stepping + stories).
 
 ## Stories updated
 
@@ -196,23 +246,58 @@ exercised (with `play` interaction tests via `storybook/test`):
 These fail against the pre-fix code (steppers inert to `{Enter}`, range inputs
 unnamed, readouts without `role="status"`), so they lock in the regressions.
 
+**Re-audit (2026-07-11) extensions** — the three stepper a11y play-tests were
+extended to also assert the new ArrowUp/ArrowDown input stepping (issue #8), all
+still resolving the control via `getByRole('textbox', …)` so the selector contract
+is proven intact:
+
+- `CIDR/CIDR.stories.tsx` → *Keyboard Steppers + Live Readout (a11y)*: focus input,
+  `{ArrowUp}` `/25`→`/26`, `{ArrowDown}` back to `/25`.
+- `VLAN/VLAN.stories.tsx` → *Keyboard Steppers (a11y)*: focus input, `{ArrowUp}`
+  `10`→`11`, `{ArrowDown}` back to `10`.
+- `Subnet/Subnet.stories.tsx` → *Keyboard Steppers + Live Readout (a11y)*: focus
+  mask input, `{ArrowUp}` `255.255.255.128`→`255.255.255.192` with the live readout
+  tracking `Subnet CIDR: /26`, `{ArrowDown}` back.
+
+The issue-#7 border change is a rest-state visual shift covered by every existing
+Light/Dark/Sacred theme story (their Chromatic baseline shifts once, as expected
+for a contrast fix).
+
 ## Deferred
 
-Nothing whose root cause is outside my directory blocks these fixes — all fixes
-landed at root cause inside `Field/IPAM`. `FieldShell`, the barrel, and
-`src/styles/global.css` were **not** modified.
+All IPAM-local fixes (#1–#8) landed at root cause inside `Field/IPAM`. The
+re-audit surfaced ONE item whose root cause is in files I do not own.
+
+- **Systemic field-border contrast — MODERATE, WCAG 1.4.11 Non-text Contrast (AA).**
+  Issue #7 routed IPAM inputs onto the correct shared token `--field-border-default`,
+  but that token is itself a **low-contrast** border by library design: light
+  `--goobs-light-border #e2e8f0` on white surface ≈ **1.25:1**; dark
+  `--goobs-dark-border #334155` on `#1e293b` ≈ **1.4:1**; sacred `--goobs-gold-a30`
+  similarly low — all below the 3:1 non-text-contrast threshold. This is a shared
+  decision baked into **`src/styles/global.css`** (`--goobs-light-border` line 282,
+  `--goobs-dark-border` line 322, sacred `--goobs-gold-a30`) and consumed by
+  **`Field/Shell/FieldShell.module.css` `.inputSlot`** (border at line 149) — files
+  outside my directory. Fixing it in IPAM alone would desync these fields from the
+  whole library. **Suggested change (styles/Shell owner):** raise the resting
+  field-border tokens to clear 3:1 against their surfaces (light →
+  `--goobs-light-border-strong #cbd5e1` or darker; dark → a lighter grade than
+  `#334155`; sacred → a higher gold alpha), once in `global.css`/`.inputSlot`; every
+  field — including these IPAM inputs, which now consume `--field-border-default` —
+  then benefits automatically.
 
 **Non-blocking observations (no owner action required):**
 
-- **Optional enhancement (not a violation):** the CIDR / Subnet / VLAN steppers
-  could adopt the full ARIA `spinbutton` pattern (`role="spinbutton"` +
-  `aria-valuenow`/`valuemin`/`valuemax` + native Up/Down arrow stepping on the
-  input). Left as-is because the values are formatted strings, direct text entry
-  already works, and re-typing the value model risks the Playwright
-  `data-field-name` text-input contract. Purely additive if pursued later.
+- **Optional enhancement, partly DONE:** the arrow-stepping half of the ARIA
+  `spinbutton` pattern is now implemented (issue #8 — `ArrowUp`/`ArrowDown` step the
+  value with the input focused). The remaining, still-deferred half is the full
+  `role="spinbutton"` + `aria-valuenow`/`valuemin`/`valuemax` value model, left
+  as-is because the values are formatted strings, direct text entry already works,
+  and switching the role off `textbox` would break the Playwright
+  `getByRole('textbox', …)` / `data-field-name` text-input contract. Purely additive
+  if ever pursued.
 - **Architectural note (FieldShell, NOT changed):** `FieldShell` only supplies a
-  focus ring for children that opt into its `.inputSlot` class; IPAM (and other
-  bare-input fields) render the `<input>` directly, so each module owns its own
-  `:focus-visible`. Fixed locally here (#1). If the later Shell pass wants a
-  single canonical focus treatment for bare-input fields, that would live in
-  `FieldShell.module.css` — but it is not required and nothing is broken.
+  focus ring / border for children that opt into its `.inputSlot` class; IPAM (and
+  other bare-input fields) render the `<input>` directly, so each module owns its own
+  `:focus-visible` and rest border (fixed locally in #1/#7). If the later Shell pass
+  wants a single canonical treatment for bare-input fields, it would live in
+  `FieldShell.module.css` — not required, nothing broken.
