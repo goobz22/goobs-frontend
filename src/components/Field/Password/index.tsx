@@ -186,6 +186,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             type="button"
             onClick={togglePasswordVisibility}
             className={cssStyles.eyeButton}
+            data-action="toggle-password"
             disabled={disabled}
             aria-label={passwordVisible ? 'Hide password' : 'Show password'}
           >

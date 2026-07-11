@@ -204,6 +204,7 @@ const CodeCopy: FC<CodeCopyProps> = props => {
                   : '⧉'
             }
             onClick={handleCopy}
+            action="copy"
             // The visible label is a bare ⧉ / ✓ glyph with no text meaning, so
             // the button carries a stable accessible name for assistive tech
             // (WCAG 4.1.2). The transient "Copied" confirmation is announced

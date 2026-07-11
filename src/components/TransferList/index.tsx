@@ -86,12 +86,18 @@ const TransferButton: React.FC<TransferButtonProps> = ({
   children,
   name,
 }) => {
+  // Canonical action verb keyed off the transfer direction (`name`), e.g.
+  // `all-right` → `move-all-right`, `checked-left` → `move-selected-left`, so
+  // tests target `[data-action="move-all-right"]` regardless of the glyph label.
+  const action =
+    'move-' + name.replace(/^all-/, 'all-').replace(/^checked-/, 'selected-')
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
       className={cssStyles.button}
+      data-action={action}
       data-animation-delay={name === 'all-left' ? 'all-left' : undefined}
     >
       {children}
@@ -256,6 +262,7 @@ const TransferList: React.FC<TransferListProps> = ({
               key={value}
               onClick={handleToggle(value)}
               className={cssStyles.listItem}
+              data-action="toggle"
               data-checked={isChecked ? 'true' : undefined}
             >
               <div className={cssStyles.checkboxContainer}>

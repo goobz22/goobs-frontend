@@ -233,6 +233,7 @@ const Stepper: React.FC<StepperProps> = ({
               <CustomButton
                 text="Start Over"
                 onClick={onReset}
+                action="reset"
                 styles={{ theme }}
               />
             )}
@@ -245,7 +246,12 @@ const Stepper: React.FC<StepperProps> = ({
       <div className={cssStyles.wizardNavigation}>
         <div>
           {!isFirstStep && onBack && (
-            <CustomButton text="← Back" onClick={onBack} styles={{ theme }} />
+            <CustomButton
+              text="← Back"
+              onClick={onBack}
+              action="back"
+              styles={{ theme }}
+            />
           )}
         </div>
 
@@ -259,6 +265,7 @@ const Stepper: React.FC<StepperProps> = ({
             <CustomButton
               text={isLastStep ? 'Finish' : 'Continue'}
               onClick={onNext}
+              action="next"
               styles={{ theme }}
             />
           )}
@@ -297,6 +304,7 @@ const Stepper: React.FC<StepperProps> = ({
                   <button
                     onClick={() => handleStepClick(step, index)}
                     disabled={!isClickable}
+                    data-action="goto-step"
                     className={cssStyles.stepButton}
                   >
                     {step.label}

@@ -344,6 +344,7 @@ const Chip: React.FC<ChipProps> = ({
         <button
           type="button"
           className={cssStyles.closeButton}
+          data-action="delete"
           onClick={event => {
             event.stopPropagation()
             if (!isDisabled) onDelete()

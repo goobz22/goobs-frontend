@@ -147,6 +147,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
             className={itemClassName}
             style={itemOverride}
             aria-current="page"
+            data-action="navigate"
             onClick={event => handleItemClick(item, event)}
           >
             {content}
@@ -192,6 +193,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           type="button"
           className={itemClassName}
           style={itemOverride}
+          data-action="navigate"
           onClick={event => handleItemClick(item, event)}
         >
           {content}

@@ -169,6 +169,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
       disabled={disabled}
       aria-label={ariaLabel}
       aria-pressed={selected}
+      data-action="toggle"
       data-value={value}
     >
       {children}

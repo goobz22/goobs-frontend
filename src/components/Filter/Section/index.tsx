@@ -595,6 +595,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       onClick={handleToggle}
       aria-expanded={isExpanded}
       aria-controls={panelId}
+      data-action="toggle"
       data-testid={toggleTestId}
       data-state={state}
       className={styles.toggle}

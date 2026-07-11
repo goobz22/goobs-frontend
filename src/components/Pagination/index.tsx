@@ -120,12 +120,15 @@ const PaginationButton: FC<{
   disabled: boolean
   children: ReactNode
   'aria-label'?: string
-}> = ({ onClick, disabled, children, 'aria-label': ariaLabel }) => {
+  /** Canonical action verb emitted as `data-action` (first/prev/next/last). */
+  action: string
+}> = ({ onClick, disabled, children, 'aria-label': ariaLabel, action }) => {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
+      data-action={action}
       className={mergeClassNames(cssStyles.button, cssStyles.navButton)}
     >
       {children}
@@ -179,6 +182,7 @@ const PaginationItem: FC<{
       className={mergeClassNames(cssStyles.button, cssStyles.pageButton)}
       aria-current={isSelected ? 'page' : undefined}
       aria-label={`Go to page ${item}`}
+      data-action="goto-page"
       data-pagination-page={item}
       data-pagination-selected={isSelected ? 'true' : 'false'}
     >
@@ -312,6 +316,7 @@ const Pagination: FC<PaginationProps> = ({
               onClick={handleFirstPage}
               disabled={page <= 1 || !!isDisabled}
               aria-label="Go to first page"
+              action="first"
             >
               <FirstPageIcon
                 aria-hidden="true"
@@ -331,6 +336,7 @@ const Pagination: FC<PaginationProps> = ({
               onClick={handlePreviousPage}
               disabled={page <= 1 || !!isDisabled}
               aria-label="Go to previous page"
+              action="prev"
             >
               <KeyboardArrowLeftIcon
                 aria-hidden="true"
@@ -362,6 +368,7 @@ const Pagination: FC<PaginationProps> = ({
               onClick={handleNextPage}
               disabled={page >= count || !!isDisabled}
               aria-label="Go to next page"
+              action="next"
             >
               <KeyboardArrowRightIcon
                 aria-hidden="true"
@@ -381,6 +388,7 @@ const Pagination: FC<PaginationProps> = ({
               onClick={handleLastPage}
               disabled={page >= count || !!isDisabled}
               aria-label="Go to last page"
+              action="last"
             >
               <LastPageIcon
                 aria-hidden="true"

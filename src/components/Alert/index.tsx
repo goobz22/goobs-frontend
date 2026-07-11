@@ -488,6 +488,7 @@ const Alert: React.FC<AlertProps> = ({
           type="button"
           onClick={handleClose}
           className={cssStyles.closeButton}
+          data-action="close"
           aria-label="Close"
         >
           {/* Glyph is decorative; the accessible name comes from aria-label. */}

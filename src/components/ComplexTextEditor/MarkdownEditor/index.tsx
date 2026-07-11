@@ -112,6 +112,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         type="button"
         onClick={() => setShowPreview(!showPreview)}
         aria-pressed={showPreview}
+        data-action="toggle"
         {...(showPreview && { 'aria-controls': previewId })}
       >
         Toggle Preview

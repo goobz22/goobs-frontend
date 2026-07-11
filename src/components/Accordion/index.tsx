@@ -273,6 +273,7 @@ const Accordion: FC<AccordionProps> = props => {
       <button
         type="button"
         className={cssStyles.summary}
+        data-action="toggle"
         data-active={isActive ? 'true' : undefined}
         data-disabled={disabled ? 'true' : undefined}
         onClick={handleClick}
@@ -320,6 +321,7 @@ const Accordion: FC<AccordionProps> = props => {
         type="button"
         className={cssStyles.summary}
         data-menu="true"
+        data-action="navigate"
         data-active={isActive ? 'true' : undefined}
         data-disabled={disabled ? 'true' : undefined}
         onClick={handleClick}
