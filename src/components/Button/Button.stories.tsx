@@ -547,3 +547,47 @@ export const GroupToggleSemantics: Story = {
     await expect(send).toHaveAttribute('aria-pressed', 'false')
   },
 }
+
+/**
+ * A decorative icon is hidden from assistive tech ONLY when the button also has
+ * a text label; an icon-ONLY button must keep its icon exposed (hiding it would
+ * leave the button nameless). This pins BOTH branches of the `hasLabel`
+ * conditional (`index.tsx:625`): the accessible-name query can't see the change
+ * (the goobs `<svg>` carries no role/name, so it never contributes to the name
+ * either way), so these assertions read the `aria-hidden` attribute directly —
+ * reverting either branch of the fix fails this story (WCAG 1.1.1 / 4.1.2).
+ */
+export const DecorativeIconHiddenFromAT: Story = {
+  name: 'A11y/Decorative icon hidden',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      {/* Labelled: the icon is decorative → its wrapper is aria-hidden. */}
+      <Button
+        text="Send"
+        icon={<SendIcon styles={{ theme: 'sacred' }} />}
+        styles={{ theme: 'light' }}
+      />
+      {/* Icon-only: the icon is the button's meaning → NOT aria-hidden; the
+          accessible name comes from aria-label. */}
+      <Button
+        aria-label="Add item"
+        icon={<AddIcon styles={{ theme: 'sacred' }} />}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Labelled button: the icon wrapper hides the decorative svg from AT.
+    const labelled = canvas.getByRole('button', { name: 'Send' })
+    const hiddenIcon = labelled.querySelector('span[aria-hidden="true"] svg')
+    await expect(hiddenIcon).toBeInTheDocument()
+
+    // Icon-only button: the icon wrapper must NOT be hidden.
+    const iconOnly = canvas.getByRole('button', { name: 'Add item' })
+    const exposedSvg = iconOnly.querySelector('svg')
+    await expect(exposedSvg).toBeInTheDocument()
+    await expect(exposedSvg?.closest('span')).not.toHaveAttribute('aria-hidden')
+  },
+}
