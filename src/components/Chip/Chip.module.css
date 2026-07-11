@@ -280,6 +280,15 @@
   border-radius: var(--goobs-radius-pill);
 }
 
+/* WCAG 2.5.8 Target Size (Minimum) — AA in WCAG 2.2. A read-only status pill
+   is not a pointer target, so its compact 22px resting height is fine. But a
+   *clickable* pill (`onClick` → role="button", data-chip-clickable) IS a
+   target and must clear the 24 CSS-px floor — bump only that case, leaving the
+   read-only pill compact. (The default `.chip` root is already 32px.) */
+.pill[data-chip-clickable='true'] {
+  min-height: 24px;
+}
+
 .pill .icon {
   width: 0.9em;
   height: 0.9em;
@@ -367,6 +376,26 @@
     opacity 180ms ease;
   position: relative;
   z-index: 1;
+}
+
+/* WCAG 2.5.8 Target Size (Minimum) — AA in WCAG 2.2. The visible × glyph
+   renders at ~16px (2px padding + a 0.9em icon), below the 24 CSS-px floor.
+   Extend the *pointer target* to 24×24 with a centered pseudo-element so the
+   hit area meets the minimum WITHOUT enlarging the visible control or
+   stretching the row — a real min-height:24px on the button would grow the
+   32px chip to 36px (24px + 10px padding + 2px border). With this the delete
+   target AND the clickable-chip root are both ≥24px, so a chip that is both
+   clickable and deletable no longer depends on the undersized-target spacing
+   exception. The pseudo-element is transparent and absolutely positioned, so
+   it changes neither layout nor appearance. */
+.closeButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
 }
 
 /* Sacred is the bare default, so the gold close-button hover is the base

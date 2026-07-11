@@ -52,7 +52,15 @@ export const Default: Story = {
   globals: { backgrounds: { value: 'light' } },
 }
 
-/** A chip that can be deleted. */
+/**
+ * A chip that can be deleted. The `×` control is a real `<button type="button">`
+ * whose accessible name composes the chip label ("Remove Deletable Chip"), and
+ * its inner glyph is decorative — marked `aria-hidden` so AT announces only the
+ * button name (WCAG 1.1.1 / 4.1.2). The play function pins that name + the
+ * `aria-hidden` glyph, and that the delete control meets the WCAG 2.5.8 (AA 2.2)
+ * 24×24 CSS-px target-size floor via its extended `::before` hit area (the
+ * visible glyph is only ~16px).
+ */
 export const Deletable: Story = {
   args: {
     label: 'Deletable Chip',
@@ -62,6 +70,26 @@ export const Deletable: Story = {
     },
   },
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Real button, accessible name composed from the label.
+    const deleteButton = canvas.getByRole('button', {
+      name: 'Remove Deletable Chip',
+    })
+
+    // The × glyph is decorative — hidden from AT so the button reads by its
+    // aria-label alone, not as a nameless graphic (issue 4).
+    const glyph = deleteButton.querySelector('svg')
+    await expect(glyph).not.toBeNull()
+    await expect(glyph).toHaveAttribute('aria-hidden', 'true')
+
+    // Target size (WCAG 2.5.8): the pointer target is extended to ≥24×24 via a
+    // centered ::before hit area even though the visible glyph is ~16px.
+    const hitArea = getComputedStyle(deleteButton, '::before')
+    await expect(parseFloat(hitArea.width)).toBeGreaterThanOrEqual(24)
+    await expect(parseFloat(hitArea.height)).toBeGreaterThanOrEqual(24)
+  },
 }
 
 /** A disabled chip that cannot be interacted with. */
@@ -152,6 +180,64 @@ export const DisabledInteractive: Story = {
     // Clicking a disabled chip does nothing.
     await userEvent.click(chip)
     await expect(args.onClick).not.toHaveBeenCalled()
+  },
+}
+
+/**
+ * Pins the reduced-motion contract (WCAG 2.3.3): the module carries a
+ * `@media (prefers-reduced-motion: reduce)` block that zeroes the chip's
+ * color/border/shadow transitions on `.root` and `.closeButton`. A play
+ * function can't force the OS preference, so rather than emulate the media
+ * state this asserts the rule itself is present in the CSSOM and targets the
+ * chip root — if the `@media` block is deleted, the assertion fails, catching a
+ * silent regression of the fix.
+ */
+export const ReducedMotion: Story = {
+  name: 'A11y/Reduced Motion',
+  args: {
+    label: 'Reduced Motion',
+    onClick: fn(),
+    styles: {
+      theme: 'light',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const chip = canvas
+      .getByText('Reduced Motion')
+      .closest('[data-component="Chip"]') as HTMLElement | null
+    await expect(chip).not.toBeNull()
+
+    // The hashed CSS-module class for `.root` (e.g. "Chip_root__ab12c") — used
+    // to confirm the reduced-motion rule targets the chip specifically.
+    const rootClass =
+      Array.from(chip?.classList ?? []).find(cls => cls.includes('root')) ?? ''
+    await expect(rootClass).not.toBe('')
+
+    // Scan the CSSOM for the `@media (prefers-reduced-motion: reduce)` rule that
+    // zeroes the chip root's transition.
+    let hasReducedMotionRule = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRule[]
+      try {
+        rules = Array.from(sheet.cssRules)
+      } catch {
+        continue // cross-origin sheet — not introspectable, skip
+      }
+      for (const rule of rules) {
+        const media = (rule as CSSMediaRule).media
+        if (
+          media &&
+          media.mediaText.includes('prefers-reduced-motion') &&
+          rule.cssText.includes(rootClass) &&
+          /transition:\s*none/i.test(rule.cssText)
+        ) {
+          hasReducedMotionRule = true
+        }
+      }
+    }
+    await expect(hasReducedMotionRule).toBe(true)
   },
 }
 
@@ -357,5 +443,31 @@ export const PillTones: Story = {
       // Two pills per tone: plain + leading-dot.
       await expect(tonedPills).toHaveLength(2)
     }
+  },
+}
+
+/**
+ * A clickable `variant="pill"`. Passing `onClick` promotes the pill to a real
+ * `role="button"`; because it is now a pointer target it must clear the WCAG
+ * 2.5.8 (AA 2.2) 24 CSS-px minimum height, unlike the resting compact 22px
+ * read-only status pill. The play function pins the button role and the 24px
+ * target height.
+ */
+export const InteractivePill: Story = {
+  name: 'Variants/Interactive Pill',
+  args: {
+    variant: 'pill',
+    tone: 'info',
+    label: 'Toggle',
+    onClick: fn(),
+  },
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const pill = canvas.getByRole('button', { name: 'Toggle' })
+
+    // Clickable → real button and a ≥24px-tall pointer target (WCAG 2.5.8).
+    await expect(pill).toHaveAttribute('data-chip-clickable', 'true')
+    await expect(pill.getBoundingClientRect().height).toBeGreaterThanOrEqual(24)
   },
 }
