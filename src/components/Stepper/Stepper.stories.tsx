@@ -1317,3 +1317,145 @@ export const SacredTheme: Story = {
   ),
   globals: { backgrounds: { value: 'sacred' } },
 }
+
+/**
+ * Accessibility regression pins for navigation mode. The play function asserts
+ * the semantic contract screen-reader users depend on:
+ *  - a `<nav aria-label="Progress">` landmark wrapping a real `<ol>`/`<li>`
+ *    list (WCAG 1.3.1) so AT announces "list, 3 items" / "step X of 3";
+ *  - reachable steps render as real crawlable `<a href>` anchors (WCAG 4.1.2 /
+ *    SEO), not JS-navigating buttons;
+ *  - the active step carries `aria-current="step"` and is wired to its
+ *    secondary description via `aria-describedby` (WCAG 1.3.1);
+ *  - each step's status (completed / locked) is exposed as visually-hidden
+ *    text, not conveyed by icon + colour alone (WCAG 1.1.1 / 1.4.1);
+ *  - the locked (inactive) step is a disabled `<button>`.
+ */
+export const NavigationSemantics: Story = {
+  name: 'A11y/Navigation Semantics',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Landmark + ordered-list structure.
+    await expect(
+      canvas.getByRole('navigation', { name: 'Progress' })
+    ).toBeInTheDocument()
+    await expect(canvas.getByRole('list')).toBeInTheDocument()
+    await expect(canvas.getAllByRole('listitem')).toHaveLength(3)
+
+    // Completed step: a real crawlable link that announces its status.
+    const completed = canvas.getByRole('link', { name: /Personal Info/i })
+    await expect(completed).toHaveAttribute('href', '#personal')
+    await expect(completed).toHaveTextContent(/Completed/)
+
+    // Active step: link flagged current + described by its secondary text.
+    const active = canvas.getByRole('link', { name: /Account Details/i })
+    await expect(active).toHaveAttribute('aria-current', 'step')
+    const descId = active.getAttribute('aria-describedby') ?? ''
+    await expect(descId).not.toBe('')
+    await expect(
+      canvas.getByText('Set your username and password')
+    ).toHaveAttribute('id', descId)
+
+    // Locked step: a disabled button whose status reads as "Locked".
+    const locked = canvas.getByRole('button', { name: /Preferences/i })
+    await expect(locked).toBeDisabled()
+    await expect(locked).toHaveTextContent(/Locked/)
+  },
+  render: () => {
+    const navSteps: StepperProps['steps'] = [
+      { label: 'Personal Info', stepLink: '#personal', status: 'completed' },
+      {
+        label: 'Account Details',
+        stepLink: '#account',
+        status: 'active',
+        description: 'Set your username and password',
+      },
+      { label: 'Preferences', stepLink: '#prefs', status: 'inactive' },
+    ]
+
+    return (
+      <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '32px' }}>
+        <div
+          style={{ background: '#ffffff', borderRadius: '12px', padding: '32px' }}
+        >
+          <Stepper
+            steps={navSteps}
+            styles={{ theme: 'light', orientation: 'horizontal' }}
+          />
+        </div>
+      </div>
+    )
+  },
+}
+
+/**
+ * Accessibility regression pin for wizard completion. Advancing through every
+ * step surfaces the "All steps completed!" pane, which is a polite
+ * `role="status"` live region so screen readers announce it without a focus
+ * change (WCAG 4.1.3 Status Messages). The play function drives the wizard to
+ * completion and asserts the live region + the "Start Over" reset.
+ */
+export const WizardCompletionAnnouncement: Story = {
+  name: 'A11y/Wizard Completion',
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Advance through both steps to reach the completed pane.
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Finish' }))
+
+    // The completion message is a polite live region.
+    const message = await canvas.findByText('All steps completed!')
+    await expect(message).toHaveAttribute('role', 'status')
+    await expect(
+      canvas.getByRole('button', { name: 'Start Over' })
+    ).toBeVisible()
+  },
+  render: () => {
+    const Component = () => {
+      const [activeStep, setActiveStep] = useState(0)
+
+      const wizardSteps: StepperProps['steps'] = [
+        {
+          label: 'Plan',
+          content: (
+            <div style={{ color: '#374151' }}>Plan the rollout scope.</div>
+          ),
+        },
+        {
+          label: 'Ship',
+          content: (
+            <div style={{ color: '#374151' }}>Deploy and verify.</div>
+          ),
+        },
+      ]
+
+      return (
+        <div
+          style={{ minHeight: '100vh', background: '#f3f4f6', padding: '32px' }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '32px',
+            }}
+          >
+            <Stepper
+              mode="wizard"
+              steps={wizardSteps}
+              activeStep={activeStep}
+              onNext={() => setActiveStep(step => step + 1)}
+              onBack={() => setActiveStep(step => Math.max(0, step - 1))}
+              onReset={() => setActiveStep(0)}
+              finalActions={<Button>View Summary</Button>}
+              styles={{ theme: 'light', orientation: 'horizontal' }}
+            />
+          </div>
+        </div>
+      )
+    }
+    return <Component />
+  },
+}
