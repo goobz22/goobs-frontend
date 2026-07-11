@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState, useRef, useEffect } from 'react'
+import React, { useMemo, useState, useRef, useEffect, useId } from 'react'
 import {
   startOfMonth,
   endOfMonth,
@@ -184,6 +184,14 @@ export interface BigCalendarProps {
   startHour?: number
   /** Hour the week/day grid ends at (exclusive). Default 24. */
   endHour?: number
+  /**
+   * Heading level (1–6) for the visually-hidden period heading that names the
+   * calendar's `region` landmark (e.g. "Calendar, June 2026"). Rendered as a
+   * real `<h1>`–`<h6>` so it participates in the page heading outline (SEO) and
+   * screen-reader heading navigation. Set to match the surrounding page's
+   * heading hierarchy. Default 2.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Theme plus container/typography/toolbar/surface overrides. See BigCalendarStyles. */
   styles?: BigCalendarStyles
   /** Shows the CalendarFilters panel between the toolbar and the grid. Default false. */
@@ -250,6 +258,7 @@ export default function BigCalendar({
   hourHeight = 60,
   startHour = 0,
   endHour = 24,
+  headingLevel = 2,
   styles,
   showFilters = false,
   filters = {},
@@ -282,6 +291,10 @@ export default function BigCalendar({
   const [focusedCellKey, setFocusedCellKey] = useState<string | null>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const focusPendingRef = useRef(false)
+
+  // Stable id linking the visually-hidden period heading to the root `region`
+  // landmark via aria-labelledby (so the landmark is named by the period).
+  const headingId = useId()
 
   useEffect(() => {
     if (!focusPendingRef.current) return
@@ -1008,7 +1021,15 @@ export default function BigCalendar({
             ))}
           </div>
 
-          <div className={cssStyles.weekDaysContainer}>
+          {/* The hour cells share a single roving tab stop navigated by arrow
+              keys; `role="toolbar"` advertises that composite keyboard model to
+              AT (a bare group does not), keeping every cell keyboard-reachable
+              via one tab stop + arrows (WCAG 2.1.1). */}
+          <div
+            className={cssStyles.weekDaysContainer}
+            role="toolbar"
+            aria-label={`Hour cells, week of ${format(startOfWeek(selectedDate), 'MMMM d, yyyy')}`}
+          >
             {viewDates.map((day, dayIndex) => {
               const dayKey = format(day, 'yyyy-MM-dd')
               const isSelected =
@@ -1137,11 +1158,17 @@ export default function BigCalendar({
             ))}
           </div>
 
+          {/* Vertical stack of hour cells sharing one roving tab stop; the
+              `toolbar` role + aria-orientation advertise the arrow-key model to
+              AT (a bare group does not) — WCAG 2.1.1. */}
           <div
             className={mergeClassNames(
               cssStyles.dayContentColumn,
               isSelected ? cssStyles.dayContentColumnSelected : undefined
             )}
+            role="toolbar"
+            aria-orientation="vertical"
+            aria-label={`Hour cells, ${format(selectedDate, 'EEEE, MMMM d, yyyy')}`}
           >
             {hours.map((hour, hourIndex) => {
               const hourEvents = getEventsForDate(selectedDate, hour)
@@ -1270,6 +1297,19 @@ export default function BigCalendar({
     selectionTitle ? `. Selected: ${selectionTitle}` : ''
   }`
 
+  // Real heading element for the current period. Typography renders only a
+  // <span>, so the heading tag is emitted directly (an intrinsic element chosen
+  // by `headingLevel`); it is visually hidden but present in the SSR'd HTML for
+  // SEO heading structure and screen-reader heading navigation, and names the
+  // root `region` landmark via aria-labelledby.
+  const PeriodHeading = `h${headingLevel}` as
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+
   return (
     <div
       ref={gridRef}
@@ -1278,7 +1318,16 @@ export default function BigCalendar({
       data-theme={theme}
       data-state={view}
       style={dynamicRootStyle}
+      role="region"
+      aria-labelledby={headingId}
     >
+      {/* Visually-hidden heading naming the current period; provides a real
+          heading element for SEO + screen-reader heading navigation and is the
+          accessible name of the surrounding region landmark. */}
+      <PeriodHeading id={headingId} className={cssStyles.srOnly}>
+        {`Calendar, ${periodText}`}
+      </PeriodHeading>
+
       {/* Polite live region: announces the current period + selection whenever
           navigation, the view toggle, or a cell selection changes it
           (WCAG 4.1.3 Status Messages). */}
@@ -1330,33 +1379,43 @@ export default function BigCalendar({
               </Typography>
             </div>
 
-            <ToggleButtonGroup
-              value={view}
-              exclusive
-              onChange={(e, newValue) => {
-                if (
-                  newValue === 'day' ||
-                  newValue === 'week' ||
-                  newValue === 'month' ||
-                  newValue === null
-                ) {
-                  handleViewChange(e, newValue as any)
-                }
-              }}
-              {...buttonStylesProp}
+            {/* Group wrapper gives the view toggles a collective accessible
+                name (WCAG 1.3.1); `display: contents` (viewSwitcherGroup) keeps
+                it out of the flex layout so the toolbar is visually unchanged
+                while the group role stays in the accessibility tree. */}
+            <div
+              className={cssStyles.viewSwitcherGroup}
+              role="group"
+              aria-label="Calendar view"
             >
-              <ToggleButton value="day" {...buttonStylesProp}>
-                <span className={cssStyles.viewLabel}>Day</span>
-              </ToggleButton>
-              <ToggleButton value="week" {...buttonStylesProp}>
-                <DateRangeIcon aria-hidden="true" />
-                <span className={cssStyles.viewLabel}>Week</span>
-              </ToggleButton>
-              <ToggleButton value="month" {...buttonStylesProp}>
-                <CalendarMonthIcon aria-hidden="true" />
-                <span className={cssStyles.viewLabel}>Month</span>
-              </ToggleButton>
-            </ToggleButtonGroup>
+              <ToggleButtonGroup
+                value={view}
+                exclusive
+                onChange={(e, newValue) => {
+                  if (
+                    newValue === 'day' ||
+                    newValue === 'week' ||
+                    newValue === 'month' ||
+                    newValue === null
+                  ) {
+                    handleViewChange(e, newValue as any)
+                  }
+                }}
+                {...buttonStylesProp}
+              >
+                <ToggleButton value="day" {...buttonStylesProp}>
+                  <span className={cssStyles.viewLabel}>Day</span>
+                </ToggleButton>
+                <ToggleButton value="week" {...buttonStylesProp}>
+                  <DateRangeIcon aria-hidden="true" />
+                  <span className={cssStyles.viewLabel}>Week</span>
+                </ToggleButton>
+                <ToggleButton value="month" {...buttonStylesProp}>
+                  <CalendarMonthIcon aria-hidden="true" />
+                  <span className={cssStyles.viewLabel}>Month</span>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
           </div>
         </Paper>
       )}

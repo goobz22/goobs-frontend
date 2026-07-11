@@ -248,6 +248,15 @@
   margin-left: 4px;
 }
 
+/* Accessible group wrapper around the view-switch ToggleButtonGroup. `display:
+   contents` removes the wrapper from the layout box tree (the ToggleButtonGroup
+   stays a direct flex child of .toolbarContent, so the toolbar layout is
+   unchanged) while the wrapper keeps its role="group" + aria-label in the
+   accessibility tree — same technique as .gridRow. */
+.viewSwitcherGroup {
+  display: contents;
+}
+
 /* --------------------------------------------------------------------------
    CALENDAR GRID (inside the calendar <Paper>)
    -------------------------------------------------------------------------- */
