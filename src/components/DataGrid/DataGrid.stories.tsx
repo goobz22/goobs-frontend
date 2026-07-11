@@ -2184,3 +2184,421 @@ export const AccessibleOverlays: Story = {
     })
   },
 }
+
+// ============================================================================
+// ACCESSIBILITY — keyboard operability + status messages (adversarial-review
+// fixes D2/D4/D5, the footer menu keyboard model, and the coverage gaps the
+// review flagged: mobile-card a11y, column-visibility labels, focus-visible +
+// reduced-motion CSS). goobs has no unit tests — these play stories are the
+// regression net for behaviour that could otherwise silently regress green.
+// ============================================================================
+
+const onColumnResizeSpy = fn()
+
+/**
+ * ACCESSIBILITY — APG Grid keyboard navigation (WCAG 2.1.1) + valid grid
+ * semantics (D2 / D3). Pins: the interactive-grid role/aria live on the real
+ * `<table>` (not the outer wrapper) with `<thead>/<tbody>` rowgroups; the grid
+ * body is a single tab stop (one `tabindex="0"` cell); Arrow keys move focus
+ * between cells; Space selects a row and Enter edits an editable cell of a
+ * selected row; and the pagination count is a `role="status"` region (4.1.3).
+ */
+export const AccessibleGridKeyboard: Story = {
+  name: 'A11y — Grid Keyboard Navigation',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-grid-kbd',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // 1. Grid semantics sit on the real <table> with rowgroups (D3).
+    const table = canvasElement.querySelector<HTMLTableElement>(
+      'table[role="grid"]'
+    )
+    if (!table) throw new Error('table[role="grid"] did not render')
+    await expect(table).toHaveAttribute('aria-rowcount')
+    await expect(table).toHaveAttribute('aria-colcount')
+    await expect(table.querySelector('thead')).toHaveAttribute(
+      'role',
+      'rowgroup'
+    )
+    await expect(table.querySelector('tbody')).toHaveAttribute(
+      'role',
+      'rowgroup'
+    )
+
+    // 2. Exactly one data cell is in the tab order (roving tabindex).
+    await expect(
+      table.querySelectorAll('td[role="gridcell"][tabindex="0"]').length
+    ).toBe(1)
+
+    // 3. Arrow keys move focus between cells.
+    const row1 = table.querySelector<HTMLElement>('tr[data-row-id="1"]')
+    const nameCell1 = row1?.querySelector<HTMLTableCellElement>(
+      'td[data-field-name="name"]'
+    )
+    if (!nameCell1) throw new Error('name cell of row 1 did not render')
+    nameCell1.focus()
+    await expect(nameCell1).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowDown}')
+    const nameCell2 = table
+      .querySelector<HTMLElement>('tr[data-row-id="2"]')
+      ?.querySelector<HTMLTableCellElement>('td[data-field-name="name"]')
+    await waitFor(() => expect(nameCell2).toHaveFocus())
+
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => {
+      const activeCell = document.activeElement as HTMLElement
+      expect(activeCell.getAttribute('role')).toBe('gridcell')
+      expect(activeCell.getAttribute('data-field-name')).not.toBe('name')
+    })
+
+    // 4. Space selects the row; Enter then edits the (editable) name cell.
+    nameCell2!.focus()
+    await userEvent.keyboard(' ')
+    await waitFor(() =>
+      expect(nameCell2!.closest('tr')).toHaveAttribute(
+        'data-row-state',
+        'selected'
+      )
+    )
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() =>
+      expect(nameCell2).toHaveAttribute('data-cell-state', 'editing')
+    )
+
+    // 5. The pagination count is an announced status region (WCAG 4.1.3).
+    await expect(
+      canvasElement.querySelector('[data-pagination-status][role="status"]')
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * ACCESSIBILITY — keyboard column resize / reorder / menu roving (D4 / D5,
+ * WCAG 2.1.1). Pins: the resize handle is a focusable `role="separator"` whose
+ * Arrow keys change the column width; the column-actions menu supports Arrow
+ * roving between its items; and "Move column right" reorders columns from the
+ * keyboard (a pointer-free alternative to header drag-and-drop).
+ */
+export const AccessibleColumnKeyboard: Story = {
+  name: 'A11y — Column Keyboard (Resize / Reorder / Menu)',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-col-kbd',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+    onColumnResize: onColumnResizeSpy,
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    if (!nameHeader) throw new Error('Name column header did not render')
+
+    // 1. Keyboard resize: the handle is an operable separator (D4).
+    const resizeHandle = nameHeader.querySelector<HTMLElement>(
+      '[data-action="resize-handle"]'
+    )
+    if (!resizeHandle) throw new Error('Resize handle did not render')
+    await expect(resizeHandle).toHaveAttribute('role', 'separator')
+    await expect(resizeHandle).toHaveAttribute('aria-orientation', 'vertical')
+    resizeHandle.focus()
+    await expect(resizeHandle).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => expect(onColumnResizeSpy).toHaveBeenCalled())
+    const resizeCall = onColumnResizeSpy.mock.calls.at(-1) as
+      | [string, number]
+      | undefined
+    await expect(resizeCall?.[0]).toBe('name')
+    await expect(resizeCall?.[1] ?? 0).toBeGreaterThan(150)
+
+    // 2. Menu arrow-key roving (D5): the Popover focuses the first item on
+    //    open, ArrowDown moves to the next.
+    const menuTrigger = nameHeader.querySelector<HTMLButtonElement>(
+      '[data-action="open-column-menu"]'
+    )
+    if (!menuTrigger) throw new Error('Column menu trigger did not render')
+    await userEvent.click(menuTrigger)
+    const sortAsc = await waitFor(() => {
+      const btn = document.body.querySelector<HTMLButtonElement>(
+        '[data-column-menu-for="name"] [data-action="sort-asc"]'
+      )
+      if (!btn) throw new Error('Column menu did not open')
+      return btn
+    })
+    await waitFor(() => expect(sortAsc).toHaveFocus())
+    await userEvent.keyboard('{ArrowDown}')
+    const sortDesc = document.body.querySelector<HTMLButtonElement>(
+      '[data-column-menu-for="name"] [data-action="sort-desc"]'
+    )
+    await waitFor(() => expect(sortDesc).toHaveFocus())
+
+    // 3. Keyboard reorder via the menu (D4): "Move column right" swaps name
+    //    with the next column, so the first data header becomes "age".
+    const moveRight = document.body.querySelector<HTMLButtonElement>(
+      '[data-column-menu-for="name"] [data-action="move-right"]'
+    )
+    if (!moveRight) throw new Error('Move-right menu item did not render')
+    await userEvent.click(moveRight)
+    await waitFor(() =>
+      expect(
+        canvasElement.querySelector('thead th[role="columnheader"]')
+      ).toHaveAttribute('data-column-header', 'age')
+    )
+  },
+}
+
+/**
+ * ACCESSIBILITY — footer export menu keyboard model (WCAG 2.1.1). Pins the
+ * menu-button pattern the review flagged as missing: opening the menu moves
+ * focus INTO it (first item), and Arrow keys roving-cycle between the
+ * portalled menuitems (previously the portalled items fell to the end of the
+ * page tab order with no keyboard model).
+ */
+export const AccessibleFooterMenuKeyboard: Story = {
+  name: 'A11y — Footer Menu Keyboard',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-footer-kbd',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const exportBtn = within(canvasElement).getByRole('button', {
+      name: 'Export options',
+    })
+    await userEvent.click(exportBtn)
+
+    // Focus moves into the menu (first item) on open.
+    const firstItem = await waitFor(() => {
+      const item = document.body.querySelector<HTMLButtonElement>(
+        '[role="menu"] [role="menuitem"]'
+      )
+      if (!item) throw new Error('Export menu did not open')
+      return item
+    })
+    await waitFor(() => expect(firstItem).toHaveFocus())
+
+    const items = document.body.querySelectorAll<HTMLButtonElement>(
+      '[role="menu"] [role="menuitem"]'
+    )
+    await expect(items.length).toBeGreaterThanOrEqual(2)
+
+    // ArrowDown moves to the next item; ArrowUp wraps back.
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(items[1]).toHaveFocus())
+    await userEvent.keyboard('{ArrowUp}')
+    await waitFor(() => expect(items[0]).toHaveFocus())
+  },
+}
+
+/**
+ * ACCESSIBILITY — column-visibility checkbox names (issue 7, WCAG 1.3.1 /
+ * 4.1.2). The Manage Columns dialog's toggles have only an adjacent plain
+ * `<span>` name; this pins that each toggle carries a programmatic
+ * "Show <column> column" accessible name.
+ */
+export const AccessibleColumnVisibility: Story = {
+  name: 'A11y — Column Visibility Labels',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-col-vis',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    const menuTrigger = nameHeader?.querySelector<HTMLButtonElement>(
+      '[data-action="open-column-menu"]'
+    )
+    if (!menuTrigger) throw new Error('Column menu trigger did not render')
+    await userEvent.click(menuTrigger)
+
+    const manageBtn = await waitFor(() => {
+      const btn = document.body.querySelector<HTMLButtonElement>(
+        '[data-column-menu-for="name"] [data-action="manage-columns"]'
+      )
+      if (!btn) throw new Error('Manage-columns menu item did not appear')
+      return btn
+    })
+    await userEvent.click(manageBtn)
+
+    const dialog = await canvas.findByRole('dialog')
+    await expect(
+      within(dialog).getByRole('checkbox', {
+        name: 'Show Email Address column',
+      })
+    ).toBeInTheDocument()
+    await expect(
+      within(dialog).getByRole('checkbox', { name: 'Show Department column' })
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * ACCESSIBILITY — mobile card view (issues 10 & 12 + D6). The card view is in
+ * the DOM at every viewport (display:none on desktop), so its accessibility
+ * ATTRIBUTES are asserted directly: the row Card is a keyboard-operable
+ * `role="row"` (tabindex), each field label is associated with its input via
+ * `htmlFor`, the expand toggle exposes `aria-expanded`, the card container is a
+ * valid grid owner (D3), and the pagination count is a status region (4.1.3).
+ */
+export const AccessibleMobileCard: Story = {
+  name: 'A11y — Mobile Card Semantics',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-mobile',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // The mobile card container is a valid grid owner for its role="row" cards
+    // (D3), and carries row/column counts.
+    const mobileGrid = canvasElement.querySelector<HTMLElement>(
+      '[role="grid"][aria-label="Data grid (card view)"]'
+    )
+    if (!mobileGrid) throw new Error('Mobile card grid did not render')
+    await expect(mobileGrid).toHaveAttribute('aria-rowcount')
+
+    // D6: the row card is a keyboard-operable role="row".
+    const card = canvasElement.querySelector<HTMLElement>('[data-card="true"]')
+    if (!card) throw new Error('Mobile card did not render')
+    await expect(card).toHaveAttribute('role', 'row')
+    await expect(card).toHaveAttribute('tabindex', '0')
+
+    // Issue 10: field labels are associated with their inputs via htmlFor.
+    const label = card.querySelector<HTMLLabelElement>('label[for]')
+    if (!label) throw new Error('Card field label htmlFor association missing')
+    await expect(label.getAttribute('for')).toBeTruthy()
+
+    // Issue 12: the expand/collapse toggle exposes its state.
+    const expandBtn = card.querySelector<HTMLButtonElement>(
+      'button[aria-expanded]'
+    )
+    if (!expandBtn) throw new Error('Card expand toggle aria-expanded missing')
+    await expect(expandBtn).toHaveAttribute('aria-expanded', 'false')
+
+    // WCAG 4.1.3: the mobile pagination count is an announced status region.
+    await expect(
+      mobileGrid.parentElement?.querySelector('[role="status"]')
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * ACCESSIBILITY — CSS-only fixes shipped (issues 4 & 5). Focus indicators
+ * (:focus-visible) and prefers-reduced-motion neutralization are pure CSS, so
+ * they're guarded by scanning the injected stylesheet for the DataGrid-specific
+ * rules — a regression that deletes them fails this story with a green suite
+ * otherwise.
+ */
+export const AccessibleStyleGuards: Story = {
+  name: 'A11y — Focus-Visible & Reduced-Motion CSS',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-css',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async () => {
+    const cellClass = cssStyles.cell
+    const exportMenuClass = cssStyles.exportMenu
+    let hasCellFocusRing = false
+    let hasReducedMotion = false
+
+    const scan = (rules: CSSRuleList) => {
+      for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i]
+        if (rule instanceof CSSStyleRule) {
+          if (
+            rule.selectorText.includes(cellClass) &&
+            rule.selectorText.includes(':focus-visible')
+          ) {
+            hasCellFocusRing = true
+          }
+        } else if (rule instanceof CSSMediaRule) {
+          if (
+            rule.media.mediaText.includes('prefers-reduced-motion') &&
+            rule.cssText.includes(exportMenuClass)
+          ) {
+            hasReducedMotion = true
+          }
+          scan(rule.cssRules)
+        }
+      }
+    }
+
+    for (let s = 0; s < document.styleSheets.length; s++) {
+      try {
+        scan(document.styleSheets[s]!.cssRules)
+      } catch {
+        // Cross-origin stylesheet — skip (cssRules access throws).
+      }
+    }
+
+    // The keyboard focus ring on the roving grid cell (issue 4) …
+    await expect(hasCellFocusRing).toBe(true)
+    // … and the reduced-motion neutralization block (issue 5) both shipped.
+    await expect(hasReducedMotion).toBe(true)
+  },
+}
