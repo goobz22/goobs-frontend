@@ -644,3 +644,83 @@ export const InteractionTest: Story = {
     await expect(input).toHaveValue('75.5%')
   },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY: SPINBUTTON SEMANTICS + KEYBOARD STEPPING
+// --------------------------------------------------------------------------
+
+/**
+ * The field is exposed as a WAI-ARIA `spinbutton`: it carries
+ * aria-valuenow / aria-valuemin / aria-valuemax and a human-readable
+ * aria-valuetext ("50%"), and it steps with ArrowUp / ArrowDown — matching a
+ * native <input type="number">. This is the primary keyboard path for users
+ * who never touch the +/- buttons (WCAG 4.1.2, 2.1.1).
+ */
+export const KeyboardStepping: Story = {
+  name: 'A11y — Keyboard Stepping (Arrow keys)',
+  render: () => (
+    <PercentageFieldWithState
+      label="Keyboard Percentage"
+      initialValue="50"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('spinbutton', { name: /Keyboard Percentage/i })
+
+    // Spinbutton value semantics are exposed to assistive technology.
+    await expect(input).toHaveAttribute('aria-valuemin', '0')
+    await expect(input).toHaveAttribute('aria-valuemax', '100')
+    await expect(input).toHaveAttribute('aria-valuenow', '50')
+    await expect(input).toHaveAttribute('aria-valuetext', '50%')
+
+    // ArrowUp / ArrowDown step by `step` (default 1) and keep the exposed
+    // value in sync — no mouse required.
+    await userEvent.click(input)
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(input).toHaveValue('51%')
+    await expect(input).toHaveAttribute('aria-valuenow', '51')
+
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+    await expect(input).toHaveValue('49%')
+    await expect(input).toHaveAttribute('aria-valuenow', '49')
+  },
+}
+
+/**
+ * The +/- buttons are reachable by Tab and activate with Enter/Space — a
+ * regression guard for the old mousedown-only handlers, which fired on
+ * `mousedown` only and were completely inert for keyboard users (WCAG 2.1.1).
+ */
+export const ButtonKeyboardActivation: Story = {
+  name: 'A11y — Button Keyboard Activation (Tab + Enter)',
+  render: () => (
+    <PercentageFieldWithState
+      label="Stepper Percentage"
+      initialValue="10"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('spinbutton', { name: /Stepper Percentage/i })
+    const incrementButton = canvas.getByRole('button', { name: 'increment' })
+    const decrementButton = canvas.getByRole('button', { name: 'decrement' })
+
+    // Tab from the input reaches the increment button, and Enter activates it.
+    await userEvent.click(input)
+    await userEvent.tab()
+    await expect(incrementButton).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(input).toHaveValue('11%')
+
+    // Tab again to the decrement button; Space activates it.
+    await userEvent.tab()
+    await expect(decrementButton).toHaveFocus()
+    await userEvent.keyboard(' ')
+    await expect(input).toHaveValue('10%')
+  },
+}
