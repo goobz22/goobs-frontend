@@ -957,3 +957,74 @@ export const BlockLinkKeyboardFocus: Story = {
     await expect(link).toHaveFocus()
   },
 }
+
+// --------------------------------------------------------------------------
+// CARD ROOT aria-labelledby — dangling-idref reconciliation (title optional)
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the root `aria-labelledby` dangling-idref fix (a11y audit 2026-07-11
+ * review finding). `<Card.Title>` is OPTIONAL — a stat-only / banner-only card
+ * composes none — yet the root emits `aria-labelledby={titleId}` for SSR. Left
+ * unreconciled that is a dangling idref on a title-less card (automated a11y
+ * scanners flag "aria-labelledby must reference an existing element"). A
+ * post-mount effect reconciles it: the title-LESS card ends with NO
+ * `aria-labelledby`, while the titled card keeps it wired to its rendered title
+ * element. (A nameless `<article>` is valid — removal is safe.) So a regression
+ * that re-emits the dangling reference, or that strips the label from a titled
+ * card, fails these assertions.
+ */
+export const RootLabelReconciliation: Story = {
+  name: 'Root/aria-labelledby Reconciliation',
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        width: '380px',
+      }}
+    >
+      {/* Title-LESS card: a stats + banner body with no Card.Title. */}
+      <Card cardType="stat-only" cardId="no-title-card" styles={{ theme: 'sacred' }}>
+        <CardBody>
+          <CardBanner
+            tone="info"
+            icon="ℹ️"
+            title="Uptime"
+            message="99.98% this month."
+          />
+          <CardStats columns={2}>
+            <CardStatCell label="Requests" value="1.2M" />
+            <CardStatCell label="Errors" value="212" />
+          </CardStats>
+        </CardBody>
+      </Card>
+      {/* Titled card: keeps the label wired to its rendered title element. */}
+      <Card cardType="titled" cardId="titled-card" styles={{ theme: 'sacred' }}>
+        <CardHeader>
+          <CardHeaderIcon>📊</CardHeaderIcon>
+          <CardTitle>System Health</CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    // The title-less card dropped its dangling aria-labelledby after mount.
+    const titleLess = canvasElement.querySelector(
+      '[data-card-id="no-title-card"]'
+    )
+    await expect(titleLess).not.toBeNull()
+    await expect(titleLess).toHaveAttribute('role', 'article')
+    await expect(titleLess).not.toHaveAttribute('aria-labelledby')
+    // The titled card keeps aria-labelledby pointing at its rendered title.
+    const titled = canvasElement.querySelector('[data-card-id="titled-card"]')
+    await expect(titled).not.toBeNull()
+    const labelledBy = titled?.getAttribute('aria-labelledby')
+    await expect(labelledBy).toBeTruthy()
+    const titleElement = document.getElementById(labelledBy ?? '')
+    await expect(titleElement).not.toBeNull()
+    await expect(titleElement).toHaveTextContent('System Health')
+  },
+}

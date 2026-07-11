@@ -8,7 +8,7 @@ it is a **composition of small patterns**, each audited on its own:
 
 | Sub-pattern | APG pattern | Verdict |
 |---|---|---|
-| `Card` root | `article` (labelled region) | OK (see minor note on dangling label) |
+| `Card` root | `article` (labelled region) | FIXED (dangling label reconciled post-mount) |
 | `Card.Title` block-link | link / button in a heading (Pickering block-link) | FIXED (focus parity) |
 | `Card.Progress` | **progressbar** | FIXED (was nameless) |
 | `Card.ConfirmDelete` | **alertdialog** | FIXED (was nameless, no focus/Escape) |
@@ -50,10 +50,12 @@ Primary APG references: **Progress Bar**, **Alert and Message Dialog
 - The hover `translateY(-2px)` was already wrapped in `@media (prefers-reduced-motion: no-preference)`, but the base `transition: … transform 180ms` on `.root` (`Card.module.css:54-58`) was ungated.
 - **Fix (`Card.module.css`):** added `@media (prefers-reduced-motion: reduce) { .root { transition: none } }`. Pattern: `missing-reduced-motion`.
 
-### 6. Root `aria-labelledby` is a dangling idref when no `Card.Title` is composed — MINOR — NOT FIXED (accepted limitation)
+### 6. Root `aria-labelledby` is a dangling idref when no `Card.Title` is composed — MINOR — FIXED (2026-07-11 review pass)
 - WCAG **4.1.2** (automated tools flag "aria-labelledby must reference an existing element").
-- `index.tsx:341` always sets `aria-labelledby={titleId}` on the root, but `Card.Title` (which owns that `id`) is optional. A title-less card (stat-only / banner-only) leaves the reference dangling.
-- **Why not fixed:** AT gracefully ignores a dangling idref (the article falls back to no name — valid for a non-landmark `article`). A clean fix needs the root to know whether a `Title` mounted, but `Card.Title` is an arbitrarily-nested descendant and any upward signal (context callback + state) would flip the attribute between SSR and client → hydration mismatch (violates the repo's realtime/SSR contract). The pattern is standard across card libraries; degradation is graceful. Left as a documented limitation rather than trading a hydration bug for a lint nicety. Pattern: `dangling-aria-idref`.
+- `index.tsx` (CardInner) always sets `aria-labelledby={titleId}` on the root, but `Card.Title` (which owns that `id`) is optional. A title-less card (stat-only / banner-only) leaves the reference dangling.
+- **Original audit disposition (overturned):** the first pass filed this as an accepted limitation, reasoning that any signal telling the root whether a `Title` mounted would flip the attribute between SSR and client → hydration mismatch. That justification was overstated: the mismatch only occurs if the *initial render* differs between server and client. Keeping the attribute in the SSR/first-client render (identical markup — no mismatch) and removing it **after** mount is an ordinary post-hydration DOM mutation, which React does not diff against the server output.
+- **Fix (`index.tsx` CardInner):** the root now carries an internal `rootElementRef`, merged with the caller's `ref` via an `assignRootRef` callback (so the consumer keeps their ref while the effect gets the node — the same merge shape as `CardConfirmDelete`'s `setPaneRef`). A post-mount `useEffect` reads `document.getElementById(titleId)`: if no element owns the id (title-less card) it `removeAttribute('aria-labelledby')`; if a title element is present it (re)asserts the attribute. `children` is a dependency so a composition that conditionally mounts/unmounts its title re-reconciles in both directions. SSR markup is unchanged, so no hydration mismatch; a nameless non-landmark `<article>` is valid, so removal is safe. Applied to both the `<article>` and the `asChild` render paths. Pattern: `dangling-aria-idref`.
+- **Markup change note:** no attribute/role/`data-*` was renamed or removed and no DOM element type changed — the only runtime change is that a title-less card's root loses `aria-labelledby` shortly after mount (it previously kept a dangling one). The `AsChildListItem` story (titled asChild card) still asserts `aria-labelledby` resolves to the title, confirming the titled path is unaffected.
 
 ---
 
@@ -113,10 +115,16 @@ is announced, never audio-only.
 3. `Card.module.css` — block-link `<button>` `:focus-visible` parity (+ `outline:none` base).
 4. `Card.module.css` — explicit `:focus-visible` on default confirm/cancel buttons.
 5. `Card.module.css` — `@media (prefers-reduced-motion: reduce)` gate on `.root` transitions.
+6. `index.tsx` — `CardInner`: merged root `ref` (`rootElementRef` + `assignRootRef`) and a
+   post-mount `useEffect` that removes the dangling root `aria-labelledby` when no
+   `Card.Title` owns `titleId`, and (re)asserts it when a title is present — reconciling both
+   render paths without an SSR/hydration mismatch (2026-07-11 review pass).
 
 No existing prop/export/`data-*`/`role`/`aria` attribute was renamed or removed;
 all changes are additive. Machine-test selectors preserved
-(`data-card-progress`, `data-card-confirm="delete"`, `data-action`, block-link markup).
+(`data-card-progress`, `data-card-confirm="delete"`, `data-action`, block-link markup,
+root `role="article"` + `data-card*`). The one runtime markup change is that a title-less
+card's root drops its (dangling) `aria-labelledby` shortly after mount — noted with issue #6.
 
 ## Stories updated
 
@@ -129,14 +137,19 @@ Added to `CardFamily.stories.tsx` (goobs' only regression tests):
   and Escape fires `onCancel` (not `onConfirm`).
 - **`BlockLink/Keyboard Focus`** — one `Tab` lands focus on the labelled
   block-link `<button>` (the whole-card click target).
+- **`Root/aria-labelledby Reconciliation`** (2026-07-11 review pass) — asserts a
+  title-LESS card (stats + banner body, no `Card.Title`) ends with **no**
+  `aria-labelledby` after mount while keeping `role="article"`, and a titled card
+  keeps `aria-labelledby` resolving to its rendered `<h*>` title.
 
-Existing `ConfirmDeleteFlow` / `BannerTones` / `GridOfCards` etc. remain green
-(no role/selector changes touched their assertions).
+Existing `ConfirmDeleteFlow` / `BannerTones` / `GridOfCards` / `AsChildListItem` etc.
+remain green (no role/selector changes touched their assertions; the titled asChild
+card still resolves `aria-labelledby` to its title).
 
 ## Deferred
 
-None outside this component's ownership. All fixes were made at root cause inside
-`src/components/Card/`. Issue #6 (dangling `aria-labelledby` on a title-less card)
-is an in-directory **accepted limitation** documented above — not deferred to
-another file; it is intentionally left because the only clean fix would introduce
-an SSR/hydration mismatch.
+None. All six findings were fixed at root cause inside `src/components/Card/` — nothing
+falls outside this component's ownership. Issue #6 (dangling `aria-labelledby` on a
+title-less card), previously logged as an accepted limitation, was FIXED in the
+2026-07-11 review pass via a post-mount reconciliation effect (no SSR/hydration mismatch);
+see issue #6 above.

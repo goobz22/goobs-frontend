@@ -292,6 +292,23 @@ function CardInner({
     [titleId, theme]
   )
 
+  // Internal handle to the rendered root node (the `<article>`, or — under
+  // `asChild` — the caller's child element). Merged with the caller-supplied
+  // `ref` so BOTH the consumer and the aria-labelledby reconciliation effect
+  // below reach the same DOM node without the consumer losing their ref.
+  const rootElementRef = useRef<HTMLElement | null>(null)
+  const assignRootRef = useCallback(
+    (node: HTMLElement | null): void => {
+      rootElementRef.current = node
+      if (typeof ref === 'function') {
+        ref(node)
+      } else if (ref) {
+        ref.current = node
+      }
+    },
+    [ref]
+  )
+
   const resolvedState = dragging
     ? 'dragging'
     : disabled
@@ -321,6 +338,29 @@ function CardInner({
       })
     }
   }, [resolvedState, cardType])
+
+  // aria-labelledby reconciliation. `<Card.Title>` (which owns the `titleId`
+  // element) is OPTIONAL — a stat-only / banner-only card composes no title —
+  // yet the root always emits `aria-labelledby={titleId}` for SSR. Left as-is
+  // that is a dangling idref on a title-less card (automated a11y scanners flag
+  // "aria-labelledby must reference an existing element"). `Card.Title` is an
+  // arbitrarily-nested descendant, so the root cannot know at render time
+  // whether one mounted. We keep the attribute in the server markup (identical
+  // SSR/hydration output — no mismatch) and reconcile it AFTER mount as a plain
+  // DOM mutation (not an initial-render diff): drop it when the id resolves to
+  // nothing, (re)assert it when a title element is present. `children` is a
+  // dependency so a composition that conditionally mounts/unmounts its title
+  // re-reconciles. A nameless `<article>` is valid, so removal is safe.
+  useEffect(() => {
+    const node = rootElementRef.current
+    if (node === null) return
+    const hasTitle = document.getElementById(titleId) !== null
+    if (hasTitle) {
+      node.setAttribute('aria-labelledby', titleId)
+    } else {
+      node.removeAttribute('aria-labelledby')
+    }
+  }, [titleId, children])
 
   const rootClassName = mergeClassNames(
     cssStyles.root,
@@ -373,7 +413,7 @@ function CardInner({
     return (
       <CardContext.Provider value={contextValue}>
         <AsChildSlot
-          ref={ref}
+          ref={assignRootRef}
           child={children}
           parentProps={sharedProps}
           parentClassName={rootClassName}
@@ -383,7 +423,7 @@ function CardInner({
   }
 
   return (
-    <article ref={ref} {...sharedProps}>
+    <article ref={assignRootRef} {...sharedProps}>
       {content}
     </article>
   )
