@@ -195,7 +195,39 @@ announced **exactly once** (no double-announcement) and always into an already-p
 completion** (`toHaveTextContent('All steps completed!')`), and that exactly **two** nodes carry
 the text (`getAllByText(...).toHaveLength(2)` — the sr-only region + the visible heading), which
 regresses to one if the persistent region is removed and would throw on `getByRole('status')` if
-the visible title's role were re-added.
+the visible title's role were re-added. Note this pin **still passes unchanged after RF-3**: the
+new step-transition region is `aria-live="polite"` (NOT `role="status"`), so `getByRole('status')`
+still uniquely resolves the completion region, and the region holds `''` at completion, so the
+`getAllByText('All steps completed!')` count stays exactly two.
+
+### RF-3 (moderate) — wizard STEP transitions were not announced (WCAG 4.1.3)
+
+Issue 8 / RF-2 announced only the terminal "all steps completed" state. The **intermediate** step
+moves — clicking Continue or Back — swap the rendered `content` and move the active step **without
+moving focus** (focus stays on the Continue/Back button), so a screen-reader user got no signal
+that they had advanced or gone back a step. This is the same 4.1.3 "content changes without focus,
+not announced" shape as the completion gap, one level up (per-step, not just at the end).
+
+The original pass's closing "non-blocking observation" had looked at this and declined **two heavy
+options** — wrapping the arbitrary consumer `content` in an `aria-live` region (over-announces: the
+content can be a whole form) and moving focus into the new content (an unexpected behaviour change).
+RF-3 takes the **lighter, standard third path those two never considered**: announce only the
+compact **step position**, not the content, and move no focus.
+
+**Fix:** a **separate** persistent `aria-live="polite" aria-atomic="true"` visually-hidden
+(`.srOnly`) region at the component root (`index.tsx`), rendered for the whole life of a wizard-mode
+Stepper. It holds `Step ${activeStep + 1} of ${steps.length}: ${label}` while `activeStep <
+steps.length` and `''` otherwise. Because it is present at mount its initial value is silent; each
+later change is announced politely; and it clears at completion so it never overlaps the
+`role="status"` completion announcer. It is deliberately **not** `role="status"` so it stays a
+distinct region from the completion announcer (and so the RF-2 test's `getByRole('status')` stays
+unambiguous). Additive-only — no prop, `data-*`, `role`, or `aria` attribute was removed or renamed;
+machine-test selectors untouched.
+
+**Regression pin:** `WizardMode`'s `play` function asserts the region reads "Step 1 of 3: Plan" on
+mount, "Step 2 of 3: Build" after Continue, and "Step 1 of 3: Plan" again after Back (with the prior
+string gone at each step), matching the full "Step X of N: <label>" string — unique to the live
+region, so it can't accidentally match the bare step-control label.
 
 ## Deferred
 
@@ -214,8 +246,11 @@ required: the status icons were already correctly decorative via the shared `res
 contract, and the focus-ring/`.srOnly` conventions reuse existing `--goobs-*` tokens and the
 repo-standard pattern.
 
-**Non-blocking observation (left as-is, not a WCAG failure):** on wizard step change the
-consumer-provided `content` swaps without an announcement or focus move. Wrapping arbitrary
-consumer content in an `aria-live` region would over-announce (it can be a whole form), and moving
-focus into it is a behaviour change consumers may not expect; the correct call is to let the
-consuming app own focus management for its own step content. Documented here rather than forced.
+**Superseded observation (now RF-3, fixed):** the original pass left wizard step changes
+unannounced, reasoning that wrapping the arbitrary consumer `content` in `aria-live` would
+over-announce and moving focus would be an unexpected behaviour change. RF-3 keeps both of those
+conclusions but adds the missing middle path — a compact position announcement ("Step X of N:
+<label>") that reports neither the full content nor a focus move — so a screen-reader user is now
+told they navigated. The remaining nuance (whether the consuming app should also own focus
+management for its own step content) is genuinely the consumer's call and is left to them; the
+per-step orientation announcement is the library's responsibility and is now provided.
