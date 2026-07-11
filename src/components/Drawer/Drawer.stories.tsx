@@ -75,6 +75,55 @@ const DrawerMenu = ({
   )
 }
 
+// Accessible menu variant: uses REAL <nav> + <a href> links and a native
+// <button> so the drawer's focus trap has genuine tab stops to cycle through,
+// and gives the heading an id so the drawer can reference it as its accessible
+// name via `ariaLabelledBy`.
+const AccessibleDrawerMenu = ({
+  theme,
+  headingId,
+  onClose,
+}: {
+  theme: 'light' | 'dark' | 'sacred'
+  headingId: string
+  onClose?: () => void
+}): React.JSX.Element => {
+  const color =
+    theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#F9FAFB' : '#1F2937'
+  return (
+    <div style={{ padding: '24px', minWidth: '240px', color }}>
+      <h3 id={headingId} style={{ margin: '0 0 16px 0', fontSize: '1.25rem' }}>
+        Navigation
+      </h3>
+      <nav
+        aria-label="Primary"
+        style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+      >
+        <a href="#dashboard" style={{ color }}>
+          Dashboard
+        </a>
+        <a href="#projects" style={{ color }}>
+          Projects
+        </a>
+        <a href="#team" style={{ color }}>
+          Team
+        </a>
+        <a href="#reports" style={{ color }}>
+          Reports
+        </a>
+        <a href="#settings" style={{ color }}>
+          Settings
+        </a>
+      </nav>
+      {onClose && (
+        <button type="button" onClick={onClose} style={{ marginTop: '16px' }}>
+          Close
+        </button>
+      )}
+    </div>
+  )
+}
+
 // --------------------------------------------------------------------------
 // INTERACTIVE WRAPPER
 // --------------------------------------------------------------------------
@@ -198,4 +247,69 @@ export const PersistentVariant: Story = {
   name: 'Variant/Persistent',
   render: () => <InteractiveDrawer theme="light" variant="persistent" />,
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+
+// Wrapper for the accessible temporary (modal) drawer: passes `ariaLabelledBy`
+// pointing at the in-panel heading, and renders real focusable content so the
+// focus trap, initial focus, and focus-restore behaviours are exercisable.
+const AccessibleDrawer = ({
+  theme = 'light',
+  anchor = 'left',
+}: {
+  theme?: 'light' | 'dark' | 'sacred'
+  anchor?: 'left' | 'right' | 'top' | 'bottom'
+}): React.JSX.Element => {
+  const [open, setOpen] = useState(false)
+  const headingId = 'drawer-nav-heading'
+  return (
+    <div style={{ padding: '24px', minHeight: '420px' }}>
+      <Button
+        text="Open Drawer"
+        styles={{ theme }}
+        onClick={() => setOpen(true)}
+      />
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        anchor={anchor}
+        variant="temporary"
+        styles={{ theme }}
+        ariaLabelledBy={headingId}
+      >
+        <AccessibleDrawerMenu
+          theme={theme}
+          headingId={headingId}
+          onClose={() => setOpen(false)}
+        />
+      </Drawer>
+    </div>
+  )
+}
+
+/**
+ * Accessible temporary (modal) drawer. Demonstrates the WAI-ARIA Dialog
+ * pattern: `ariaLabelledBy` points at the in-panel `<h3>` so screen readers
+ * announce the drawer on open; focus moves into the panel, Tab/Shift+Tab are
+ * trapped within it, Escape (or the Close button) dismisses it, and focus
+ * returns to the trigger button. The slide honours `prefers-reduced-motion`.
+ */
+export const AccessibleNameAndFocusTrap: Story = {
+  name: 'Accessibility/Accessible Name + Focus Trap',
+  render: () => <AccessibleDrawer theme="light" />,
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Sacred-theme accessible drawer. Confirms the accessible-name wiring and focus
+ * trap apply across themes, and that the decorative glyph canvas is
+ * `aria-hidden` (screen readers ignore it) and frozen under reduced motion.
+ */
+export const AccessibleSacred: Story = {
+  name: 'Accessibility/Accessible Sacred',
+  render: () => <AccessibleDrawer theme="sacred" />,
+  globals: { backgrounds: { value: 'sacred' } },
 }

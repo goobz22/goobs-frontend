@@ -268,6 +268,22 @@
 }
 
 /* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
+   Users who ask for reduced motion get no slide animation — the panel simply
+   appears/disappears in place. The exit delay is a JS timer, not this
+   transition, so removing the transition never breaks unmount timing. The
+   sacred glyph canvas honours the same preference in JS (see index.tsx).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .paper {
+    transition: none;
+  }
+  .content::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    SACRED BACKGROUND CANVAS — absolutely-positioned glyph particle layer.
    Replaces the inline style object on the <canvas>.
    -------------------------------------------------------------------------- */

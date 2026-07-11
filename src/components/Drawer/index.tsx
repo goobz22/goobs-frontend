@@ -114,6 +114,25 @@ export interface DrawerProps {
   /** Component styling */
   styles?: DrawerStyles
 
+  /**
+   * `aria-labelledby` for the drawer surface — the id of a heading inside
+   * `children` (the preferred accessible-name source for the `role="dialog"`
+   * panel). Screen readers announce this on open (WCAG 4.1.2).
+   */
+  ariaLabelledBy?: string
+
+  /**
+   * `aria-describedby` for the drawer surface — the id of descriptive text
+   * inside `children`, announced after the name.
+   */
+  ariaDescribedBy?: string
+
+  /**
+   * `aria-label` fallback accessible name for the drawer surface, used when
+   * there is no heading id to reference via `ariaLabelledBy`.
+   */
+  ariaLabel?: string
+
   /** Additional props */
   [key: string]: any
 }
@@ -146,6 +165,18 @@ const SacredBackground: FC<SacredBackgroundProps> = ({ width, height }) => {
 
     canvas.width = width
     canvas.height = height
+
+    // Respect the user's reduced-motion preference (WCAG 2.3.3 Animation from
+    // Interactions): skip the perpetual glyph animation entirely and leave the
+    // canvas cleared/static rather than running requestAnimationFrame forever.
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) {
+      ctx.clearRect(0, 0, width, height)
+      return
+    }
 
     const particles: Array<{
       x: number
@@ -204,7 +235,16 @@ const SacredBackground: FC<SacredBackgroundProps> = ({ width, height }) => {
     return () => cancelAnimationFrame(animationId)
   }, [width, height])
 
-  return <canvas ref={canvasRef} className={cssStyles.sacredCanvas} />
+  // Purely decorative particle layer — no information conveyed, so hide it from
+  // assistive tech (WCAG 1.1.1 Non-text Content: decorative content is exempt
+  // when programmatically hidden).
+  return (
+    <canvas
+      ref={canvasRef}
+      className={cssStyles.sacredCanvas}
+      aria-hidden="true"
+    />
+  )
 }
 
 // --------------------------------------------------------------------------
@@ -218,6 +258,9 @@ const Drawer: FC<DrawerProps> = ({
   variant = 'temporary',
   children,
   styles = {},
+  ariaLabelledBy,
+  ariaDescribedBy,
+  ariaLabel,
   ...other
 }) => {
   // Use lazy initialization for hydration consistency
@@ -232,6 +275,12 @@ const Drawer: FC<DrawerProps> = ({
 
   const theme = styles.theme || 'light'
   const isSacredTheme = theme === 'sacred'
+
+  // Did the caller already supply an accessible name via the `...other`
+  // passthrough (raw `aria-label` / `aria-labelledby`)? Used to avoid a false
+  // "nameless dialog" dev warning when a name arrives through that channel.
+  const callerProvidedName =
+    other['aria-label'] != null || other['aria-labelledby'] != null
 
   // Track previous open state for derived state pattern
   const [prevOpen, setPrevOpen] = useState(open)
@@ -305,14 +354,17 @@ const Drawer: FC<DrawerProps> = ({
     [onClose]
   )
 
-  // Handle escape key
+  // Handle escape key (WCAG 2.1.1 Keyboard). Closes any DISMISSIBLE drawer —
+  // the modal `temporary` variant AND the non-modal `persistent` variant (both
+  // expose `onClose`). `permanent` is an always-open inline panel with nothing
+  // to dismiss, so it is excluded.
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (
         event.key === 'Escape' &&
         open &&
         onClose &&
-        variant === 'temporary'
+        variant !== 'permanent'
       ) {
         onClose()
       }
@@ -323,6 +375,90 @@ const Drawer: FC<DrawerProps> = ({
       return () => document.removeEventListener('keydown', handleEscape)
     }
   }, [open, onClose, variant])
+
+  // WCAG modal focus management (WAI-ARIA APG Dialog pattern) — TEMPORARY
+  // variant only, the modal case (`aria-modal`). On open, move focus into the
+  // drawer and remember the trigger; while open, Tab is trapped so focus cycles
+  // within the panel (2.4.3 Focus Order); on close, restore focus to the
+  // trigger. Escape is handled by the effect above (which also covers the
+  // non-modal persistent variant). Persistent is non-modal and permanent is an
+  // inline landmark, so neither traps focus. Mirrors the sibling Dialog
+  // component's focus-trap so both overlays behave identically.
+  useEffect(() => {
+    if (variant !== 'temporary' || !open) return undefined
+    const drawer = drawerRef.current
+    if (!drawer) return undefined
+
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    const getFocusable = (): HTMLElement[] =>
+      Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(el => el.offsetParent !== null)
+
+    // Move focus into the drawer (first focusable, else the panel container,
+    // which carries tabIndex={-1} to receive programmatic focus).
+    const firstFocusable = getFocusable()[0]
+    if (firstFocusable) firstFocusable.focus()
+    else drawer.focus()
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+      const items = getFocusable()
+      if (items.length === 0) {
+        event.preventDefault()
+        drawer.focus()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return
+      const active = document.activeElement
+      // Cycle only at the boundaries. Deliberately NO "active outside drawer →
+      // recapture" branch: goobs overlays (SearchableSimple, Popover,
+      // MultiSelect, Tooltip, …) portal their menus to document.body, so a
+      // dropdown opened inside the drawer legitimately holds focus OUTSIDE
+      // drawerRef — recapturing there would yank focus out of the open menu and
+      // orphan it. Native Tab handles focus while a portalled descendant is
+      // active.
+      if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleTab)
+    return () => {
+      document.removeEventListener('keydown', handleTab)
+      // Restore focus to the element that opened the drawer.
+      previouslyFocused?.focus?.()
+    }
+  }, [open, variant])
+
+  // Accessible name (WCAG 4.1.2 Name, Role, Value) — every variant renders
+  // `role="dialog"`, which MUST expose an accessible name. The name comes from
+  // consumer content via `ariaLabelledBy` (a heading id inside `children`,
+  // preferred) or the `ariaLabel` fallback; the component can't invent it. Warn
+  // in development when an active drawer has neither so a nameless dialog
+  // surfaces at author time instead of silently shipping to screen-reader
+  // users. Dev-only — compiles out to a no-op in production bundles.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    const isActive = variant === 'permanent' || open
+    if (!isActive) return
+    if (!ariaLabelledBy && !ariaLabel && !callerProvidedName) {
+      console.warn(
+        'goobs Drawer: rendered as role="dialog" without an accessible name. ' +
+          'Pass `ariaLabelledBy` (the id of a heading inside the drawer) or, as ' +
+          'a fallback, `ariaLabel`, so screen readers announce it (WCAG 4.1.2).'
+      )
+    }
+  }, [open, variant, ariaLabelledBy, ariaLabel, callerProvidedName])
 
   // Persistent behaves like temporary for layout; permanent is always open.
   // Use a safe initial state for SSR - always closed initially to ensure
@@ -442,6 +578,10 @@ const Drawer: FC<DrawerProps> = ({
       style={paperVars}
       role="dialog"
       aria-modal={variant === 'temporary' ? open : undefined}
+      tabIndex={-1}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
+      aria-label={!ariaLabelledBy ? ariaLabel : undefined}
       {...other}
     >
       {/* Sacred background */}
