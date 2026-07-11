@@ -337,12 +337,18 @@ const PricingTable: FC<PricingProps> = props => {
     theme = 'light',
     disabled = false,
     highlightedPackageIndex,
+    headingLevel = 2,
   } = props
 
   const styles = getThemeStyles(theme, disabled)
   const isSacredTheme = theme === 'sacred'
   const packagenames = packagecolumns?.packagenames ?? []
   const numPackages = packagenames.length
+
+  // Stable, SSR-safe id linking the visible title heading to the <table> as its
+  // programmatic accessible name (aria-labelledby). useId must run before the
+  // early return so hook order stays stable across renders.
+  const headingId = useId()
 
   if (numPackages === 0) return null
 
