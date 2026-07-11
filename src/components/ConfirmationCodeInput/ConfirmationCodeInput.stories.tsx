@@ -2,8 +2,11 @@
  * @fileoverview Storybook stories for the ConfirmationCodeInput component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { fn } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
+import { z } from 'zod'
 import ConfirmationCodeInput from './index'
+import Form from '../Form'
+import Button from '../Button'
 
 const meta: Meta<typeof ConfirmationCodeInput> = {
   title: 'Components/ConfirmationCodeInput',
@@ -466,5 +469,107 @@ export const CustomHeadingLevel: Story = {
     styles: {
       theme: 'light',
     },
+  },
+}
+
+/**
+ * Form-bound validation error (WCAG 3.3.1 Error Identification, 4.1.2 / 4.1.3).
+ * The component is bound to a `<Form>` by `name` (no explicit value/onChange —
+ * the engine owns the value) with a schema that requires all six digits.
+ * Submitting empty makes the engine report an error, which the component
+ * surfaces as `aria-invalid="true"` on EVERY digit cell AND as a visible,
+ * linked `role="alert"` message the cells reference via `aria-describedby` —
+ * so a bound field's failure is IDENTIFIED to assistive tech, not just flagged
+ * "invalid" six times with no explanation. The play function pins this whole
+ * contract so a future edit can't silently break it.
+ */
+const codeFormSchema = z.object({
+  verificationCode: z
+    .string()
+    .length(6, 'Enter all 6 digits of the confirmation code.'),
+})
+
+export const FormBoundValidationError: Story = {
+  render: () => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Form-Bound Validation Error:</strong> Submitting the empty,
+          form-bound field flags every digit cell <code>aria-invalid</code> and
+          renders a linked <code>role=&quot;alert&quot;</code> error the cells
+          point at via <code>aria-describedby</code>.
+        </div>
+        <Form
+          schema={codeFormSchema}
+          initialValues={{ verificationCode: '' }}
+          subject="confirmation code"
+          id="cci-validation-form"
+          onSubmit={fn()}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              alignItems: 'center',
+            }}
+          >
+            <ConfirmationCodeInput
+              name="verificationCode"
+              isValid={false}
+              showActionButtons={false}
+              onDisableVerification={fn()}
+              styles={{ theme: 'light' }}
+            />
+            <Button
+              type="submit"
+              action="save"
+              text="Verify code"
+              styles={{ theme: 'light' }}
+            />
+          </div>
+        </Form>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const firstCell = canvas.getByRole('textbox', { name: /digit 1 of 6/i })
+    const lastCell = canvas.getByRole('textbox', { name: /digit 6 of 6/i })
+
+    // Pre-submit: no engine error yet, so no invalid state is exposed.
+    await expect(firstCell).not.toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.queryByRole('alert')).toBeNull()
+
+    // Submit the empty form → the engine validates and reports the error.
+    await userEvent.click(canvas.getByRole('button', { name: /verify code/i }))
+
+    // Every digit cell now advertises the invalid state (WCAG 4.1.2).
+    await expect(firstCell).toHaveAttribute('aria-invalid', 'true')
+    await expect(lastCell).toHaveAttribute('aria-invalid', 'true')
+
+    // A visible, linked error message identifies WHAT is wrong (WCAG 3.3.1)…
+    const alert = await canvas.findByRole('alert')
+    await expect(alert).toHaveTextContent(
+      'Enter all 6 digits of the confirmation code.'
+    )
+
+    // …and each cell is programmatically associated with it (aria-describedby).
+    await expect(firstCell).toHaveAttribute('aria-describedby', alert.id)
+    await expect(lastCell).toHaveAttribute('aria-describedby', alert.id)
   },
 }
