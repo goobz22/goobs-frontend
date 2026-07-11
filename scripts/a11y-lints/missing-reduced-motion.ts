@@ -197,6 +197,10 @@ const lint: A11yLint = {
       '.icon {\n  position: absolute;\n  top: 50%;\n  transform: translateY(-50%);\n  transition: transform 0.3s ease;\n}',
       // text-transform is not a movement transform; custom-prop defs are not applications
       '.label {\n  --x-transition: all 0.2s ease;\n  text-transform: uppercase;\n  transition: color 0.2s ease;\n}',
+      // transform-capable var() transition on .root, but the only transform lives
+      // in a keyframe that is DEFINED yet never APPLIED (no `animation:` runs it) —
+      // the real MenuItem "parity keyframe" shape: no applied motion, so no flag.
+      ".root {\n  transition: var(--goobs-transition-medium);\n}\n@keyframes sacredGlyphRotate {\n  from { transform: rotate(0deg); }\n  to { transform: rotate(360deg); }\n}",
     ],
   },
 }
