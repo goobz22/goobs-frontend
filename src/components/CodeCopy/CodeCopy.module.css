@@ -143,26 +143,16 @@
   text-shadow: 0 0 10px var(--goobs-gold-a60);
 }
 
-/* Copy-button KEYBOARD FOCUS ring (WCAG 2.4.7 Focus Visible).
-   The shared <Button> sets `outline: none` with no :focus-visible rule, so a
-   keyboard-focused copy button would show NO focus indicator. Restore a
-   visible, theme-appropriate ring here using the library's --goobs-focus-*
-   tokens, scoped to `.copyButtonSlot button` so only THIS button is affected.
-   The `.container` prefix raises specificity above Button.module.css's
-   `.button:hover:not(:disabled)` so the ring still wins when hovered+focused.
-   The ~3–4px ring sits inside the header's horizontal padding + the button's
-   vertical clearance, so the header's `overflow: hidden` does not clip it. */
-.container .copyButtonSlot button:focus-visible {
-  box-shadow: var(--goobs-focus-dark);
-}
-
-.container[data-theme='light'] .copyButtonSlot button:focus-visible {
-  box-shadow: var(--goobs-focus-light);
-}
-
-.container[data-theme='sacred'] .copyButtonSlot button:focus-visible {
-  box-shadow: var(--goobs-focus-sacred);
-}
+/* Copy-button KEYBOARD FOCUS ring — intentionally NOT defined here.
+   The shared <Button> owns a complete, theme-aware :focus-visible OUTLINE ring
+   (Button.module.css: sacred at .button:focus-visible, plus [data-theme='light']
+   and [data-theme='dark'] colour overrides), and the copy control is a <Button>
+   in all three themes, so it already receives that ring. A local box-shadow ring
+   here would DOUBLE the indicator (outline + box-shadow) on the same element. The
+   button's outline (offset 2px) fits within the header's 1rem horizontal padding
+   and the ~6px vertical clearance, so the header's `overflow: hidden` does not
+   clip it. Do NOT re-add a local ring — fix any focus-ring regression upstream in
+   Button.module.css so every goobs Button stays consistent. */
 
 /* --------------------------------------------------------------------------
    SCREEN-READER-ONLY COPY STATUS (WCAG 4.1.3 Status Messages)

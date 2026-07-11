@@ -71,12 +71,20 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   const { code, language, styles, ...rest } = props
 
   const codeRef = useRef<HTMLElement>(null)
+  const preRef = useRef<HTMLPreElement>(null)
   // Three-state copy status so the failure path is representable, not just
   // success. 'error' is reached only when BOTH the async Clipboard API and the
   // execCommand fallback fail — see handleCopy (WCAG 4.1.3 failure path).
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>(
     'idle'
   )
+  // The <pre> becomes a keyboard-focusable, named scroll region ONLY when the
+  // code actually overflows horizontally. Gating on measured overflow keeps
+  // narrow snippets out of the tab order and stops screen readers announcing an
+  // empty "group" for code that never scrolls, while still satisfying WCAG 2.1.1
+  // / axe scrollable-region-focusable when the region truly scrolls. Overflow is
+  // unknowable at SSR, so it is measured client-side in the effect below.
+  const [isPreScrollable, setIsPreScrollable] = useState(false)
 
   const theme = styles?.theme || 'dark'
   const isSacredTheme = theme === 'sacred'
@@ -177,6 +185,23 @@ const CodeCopy: FC<CodeCopyProps> = props => {
     }
   }, [code, language])
 
+  // Measure whether the <pre> overflows horizontally so its keyboard-focus
+  // affordances (tabIndex/role/aria-label below) are applied ONLY when the code
+  // truly scrolls. Runs on the client (overflow is unknowable at SSR) and
+  // re-measures on resize via ResizeObserver; re-runs when the code/language
+  // change since that changes the rendered width.
+  useEffect(() => {
+    const preElement = preRef.current
+    if (!preElement) return
+    const measureOverflow = () => {
+      setIsPreScrollable(preElement.scrollWidth > preElement.clientWidth)
+    }
+    measureOverflow()
+    const resizeObserver = new ResizeObserver(measureOverflow)
+    resizeObserver.observe(preElement)
+    return () => resizeObserver.disconnect()
+  }, [code, language])
+
   return (
     <div
       className={cssStyles.container}
@@ -273,18 +298,24 @@ const CodeCopy: FC<CodeCopyProps> = props => {
             code line is wider than the block. Without a tabindex it is NOT
             keyboard-focusable in Chromium/WebKit, so a keyboard-only user cannot
             scroll to read clipped wide code (WCAG 2.1.1; axe
-            scrollable-region-focusable). tabIndex=0 makes it focusable and
-            arrow-scrollable; role="group" + aria-label give it an accessible
-            name announced on focus. role="group" is deliberate over "region":
-            it supports naming (so aria-label is not an aria-prohibited-attr on a
-            bare <pre>) WITHOUT registering a landmark per snippet, and it is not
-            a name-from-content role so the code text inside stays readable. */}
+            scrollable-region-focusable). BUT these affordances are applied ONLY
+            when the code actually overflows (isPreScrollable, measured above):
+            a non-scrolling snippet stays out of the tab order and is not
+            announced as an empty region, avoiding tab-stop / screen-reader noise
+            on the common narrow case. When it DOES scroll: tabIndex=0 makes it
+            focusable and arrow-scrollable; role="group" + aria-label give it an
+            accessible name announced on focus. role="group" is deliberate over
+            "region": it supports naming (so aria-label is not an
+            aria-prohibited-attr on a bare <pre>) WITHOUT registering a landmark
+            per snippet, and it is not a name-from-content role so the code text
+            inside stays readable. */}
         <pre
+          ref={preRef}
           className={cssStyles.pre}
           style={preStyle}
-          tabIndex={0}
-          role="group"
-          aria-label={`${language} code`}
+          tabIndex={isPreScrollable ? 0 : undefined}
+          role={isPreScrollable ? 'group' : undefined}
+          aria-label={isPreScrollable ? `${language} code` : undefined}
         >
           <code ref={codeRef} className={`language-${language}`}>
             {code}
