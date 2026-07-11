@@ -32,10 +32,16 @@ const useLink = (props: {
     }
 
     // A link needs a discernible accessible name (WCAG 2.4.4 / 4.1.2). The name
-    // normally comes from the rendered Typography `text`; when `text` is omitted
-    // the anchor would announce as an empty link, so fall back to labelling it
-    // with its destination URL.
-    const hasVisibleText = typeof text === 'string' && text.length > 0
+    // comes from the rendered Typography content, which is `text || children`
+    // (Typography renders `text` when non-empty, else falls back to `children`).
+    // Only when BOTH are empty would the anchor announce as an empty link, so in
+    // that case label it with its destination URL. Mirroring Typography's own
+    // `text || children` resolution is required for children-rendered links: a
+    // visible child must NOT be overridden by an aria-label of the raw URL — that
+    // is a Label-in-Name / accessible-name mismatch (WCAG 2.5.3 A / 4.1.2 A) that
+    // blocks speech-input activation. `children` arrives via `restProps` (it is
+    // destructured off `linkItem` above) and is spread onto `<Typography>` below.
+    const hasVisibleText = Boolean(text || restProps.children)
 
     return (
       <LinkEl

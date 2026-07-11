@@ -255,9 +255,12 @@ export const ImageAltText: Story = {
 }
 
 /**
- * Link accessible name (WCAG 2.4.4 / 4.1.2). A link with visible text takes its
- * name from that text; a link with NO text falls back to an `aria-label` of its
- * destination URL so it is never announced as an empty link.
+ * Link accessible name (WCAG 2.4.4 / 4.1.2, 2.5.3 Label in Name). A link with
+ * visible text takes its name from that text; a link named by its visible
+ * `children` (no `text`) keeps THAT child as its name — the URL `aria-label`
+ * fallback must NOT override it (a Label-in-Name mismatch would block speech
+ * input); a link with NO visible content at all falls back to an `aria-label`
+ * of its destination URL so it is never announced as an empty link.
  */
 export const LinkAccessibleName: Story = {
   name: 'A11y/Link Accessible Name',
@@ -278,7 +281,14 @@ export const LinkAccessibleName: Story = {
             text: 'View pricing',
             styles: { theme: 'light' },
           },
-          // No text: the anchor is labelled with its href via aria-label.
+          // Named by its visible CHILDREN (no `text`): the accessible name is
+          // the rendered child ("Read the docs"), NOT an aria-label of the URL.
+          {
+            link: 'https://example.com/docs',
+            children: 'Read the docs',
+            styles: { theme: 'light' },
+          },
+          // No visible content: the anchor is labelled with its href via aria-label.
           { link: 'https://example.com/terms', styles: { theme: 'light' } },
         ],
       },

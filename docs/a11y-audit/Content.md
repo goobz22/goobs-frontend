@@ -65,6 +65,23 @@ components that each own their own APG-pattern compliance.
   anchor so it announces its destination URL instead of nothing. Purely additive; a link with text is
   unchanged.
 
+### 4. Fix-3 accessible-name guard ignored children-rendered links (Label-in-Name) — FIXED (review)
+- **Severity:** minor · **WCAG 2.5.3 Label in Name (A) / 4.1.2 Name, Role, Value (A)** · pattern `label-in-name-mismatch`
+- **File:** `src/components/Content/Structure/link/useLink.tsx:38` (pre-review-fix)
+- Adversarial review of Fix 3 found the guard was computed from ONLY the `text` prop
+  (`hasVisibleText = typeof text === 'string' && text.length > 0`). But `LinkProps extends
+  TypographyProps`, which carries `children` (Typography renders `content = text || children`,
+  `Typography/index.tsx:455`), and `children` flows through `...restProps` (`useLink.tsx:28`) onto the
+  rendered `<Typography>` (`useLink.tsx:55`). So a link with visible `children` but no `text` still had
+  `aria-label={link}` applied — the raw destination URL **overriding** the visible child text. That is
+  a Label-in-Name / accessible-name mismatch: a speech-input user cannot activate the link by its
+  visible label, and the announced name differs from what is shown.
+- **Fix:** recompute the guard to mirror Typography's own content resolution —
+  `const hasVisibleText = Boolean(text || restProps.children)`. This is strictly more correct than a
+  bare `children != null` check: when `children` renders nothing (`''`, `false`, `null`) it correctly
+  still falls back to the URL `aria-label`, and when `children` is real visible content the URL label
+  is not applied so the visible name wins. Purely additive; no DOM/attribute contract change.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
 **CLEAN.** Grepped the whole directory for `new Audio`, `AudioContext`, `navigator.vibrate`,
@@ -106,8 +123,10 @@ Added to `Content.stories.tsx` (the repo's only regression surface):
 - **`A11y/Image Alt Text`** — a meaningful-alt image next to an explicit `alt=""` decorative image,
   driven through the real `grids.image` API (exercises Issue 1's fix; uses a self-contained inline SVG
   data-URI, no network asset).
-- **`A11y/Link Accessible Name`** — a link with visible text beside a text-less link that gets its
-  name from the `aria-label` href fallback (exercises Issue 3's fix).
+- **`A11y/Link Accessible Name`** — a link with visible text, a link named by its visible `children`
+  (no `text`) whose child name must NOT be overridden by the URL `aria-label` (exercises Issue 4's
+  Label-in-Name fix), and a fully text-less link that gets its name from the `aria-label` href fallback
+  (exercises Issue 3's fix).
 - **`A11y/Reduced Motion`** — renders `AnimatedElement` across the slide/fade entrance variants so the
   reduced-motion CSS path is exercised (Issue 2).
 
