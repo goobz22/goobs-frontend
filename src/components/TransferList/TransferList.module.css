@@ -176,8 +176,12 @@
   scrollbar-color: auto;
 }
 
-/* Inner wrapper that had borderBottom:none inline */
+/* Inner wrapper — now a real <ul>. Reset the UA list chrome (margin / padding /
+   bullets) so the visual is identical to the former <div>. */
 .listInner {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   border-bottom: none;
 }
 
