@@ -201,6 +201,106 @@ const Popover: React.FC<PopoverProps> = ({
     }
   }, [open])
 
+  // WCAG modal focus management (WAI-ARIA APG Dialog(Modal) pattern) —
+  // `role="dialog"` ONLY, the modal case that emits `aria-modal="true"`. On
+  // open: remember the trigger, then move focus into the surface. While open,
+  // Tab is trapped so focus cycles within the surface (2.4.3 Focus Order),
+  // honouring the `aria-modal="true"` promise that the background is not
+  // keyboard-reachable. On close: restore focus to the trigger (4.1.2 Name,
+  // Role, Value). Mirrors the sibling Drawer/Dialog modal effect.
+  //
+  // DELIBERATELY NOT copied from Drawer/Dialog (documented so a later pass does
+  // not "restore parity" and regress this component):
+  //   - No background `inert`/`aria-hidden` isolation. This surface has NO
+  //     backdrop scrim and dismisses via the document-level outside-click
+  //     listener above; marking the background `inert` would swallow those
+  //     clicks and break outside-click dismissal for every consumer.
+  //     `aria-modal` + focus containment is the standard lightweight-popover
+  //     modal contract (react-modal / react-aria do the same).
+  //   - No body scroll-lock. The popover REPOSITIONS on scroll to stay anchored
+  //     to its trigger (see the reposition effect above); locking scroll would
+  //     fight that feature. A consumer needing hard background isolation should
+  //     use Drawer or Dialog, not Popover.
+  // Non-dialog roles (menu/listbox/tooltip/grid/region) are non-modal and their
+  // interior focus is consumer-managed, so they neither move focus nor trap.
+  useEffect(() => {
+    if (!open || role !== 'dialog') return undefined
+    const popover = popoverRef.current
+    if (!popover) return undefined
+
+    // Remember the trigger so focus can be restored to it on close.
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    const getFocusable = (): HTMLElement[] =>
+      Array.from(
+        popover.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(element => element.offsetParent !== null)
+
+    // Move focus into the surface: first focusable child, else the container
+    // (which carries tabIndex={-1} for exactly this programmatic-focus case).
+    const firstFocusable = getFocusable()[0]
+    if (firstFocusable) firstFocusable.focus()
+    else popover.focus()
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+      const items = getFocusable()
+      if (items.length === 0) {
+        // Nothing focusable inside — keep focus on the container, never let Tab
+        // escape a surface that claims aria-modal.
+        event.preventDefault()
+        popover.focus()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return
+      const active = document.activeElement
+      // Cycle ONLY at the boundaries. Deliberately NO "active outside surface →
+      // recapture" branch: goobs overlays (SearchableSimple, MultiSelect, a
+      // nested Popover, …) portal their menus to document.body, so a dropdown
+      // opened inside this dialog legitimately holds focus OUTSIDE popoverRef;
+      // recapturing there would yank focus out of the open menu and orphan it.
+      // Native Tab handles focus while such a portalled descendant is active.
+      if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleTab)
+    return () => {
+      document.removeEventListener('keydown', handleTab)
+      // Restore focus to the element that opened the dialog (APG requirement).
+      previouslyFocused?.focus?.()
+    }
+  }, [open, role])
+
+  // Accessible name (WCAG 4.1.2 Name, Role, Value) — a `role="dialog"` surface
+  // MUST expose an accessible name. It comes from consumer content via
+  // `ariaLabelledBy` (a heading id inside `children`, preferred) or the
+  // `ariaLabel` fallback; the component cannot invent it. Warn in development
+  // when an OPEN dialog popover has neither so a nameless dialog surfaces at
+  // author time instead of shipping silently to screen-reader users. Dev-only —
+  // compiles out to a no-op in production bundles. Non-dialog roles are exempt
+  // (a nameless tooltip/menu is valid).
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    if (!open || role !== 'dialog') return
+    if (!ariaLabel && !ariaLabelledBy) {
+      console.warn(
+        'goobs Popover: rendered as role="dialog" without an accessible name. ' +
+          'Pass `ariaLabelledBy` (the id of a heading inside the popover) or, as ' +
+          'a fallback, `ariaLabel`, so screen readers announce it (WCAG 4.1.2).'
+      )
+    }
+  }, [open, role, ariaLabel, ariaLabelledBy])
+
   // Diagnostic bus — emit an open/closed state transition whenever the
   // popover's `open` prop flips. Additive: observes the existing controlled
   // `open` state without altering any open/close behavior. No-op when no host
@@ -288,6 +388,10 @@ const Popover: React.FC<PopoverProps> = ({
       onMouseDown={handleMouseDownInside}
       role={role}
       aria-modal={role === 'dialog' ? true : undefined}
+      // tabIndex={-1} on the modal surface only, so focus can be moved into the
+      // container programmatically when it holds no focusable child (WCAG 2.4.3
+      // Focus Order — the focus-trap fallback above depends on this).
+      tabIndex={role === 'dialog' ? -1 : undefined}
       aria-label={!ariaLabelledBy ? ariaLabel : undefined}
       aria-labelledby={ariaLabelledBy}
       data-popover={dataPopover}

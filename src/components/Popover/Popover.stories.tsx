@@ -503,3 +503,98 @@ export const InteractionTest: Story = {
     await expect(popoverTitle).not.toBeVisible()
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — MODAL DIALOG FOCUS MANAGEMENT
+// --------------------------------------------------------------------------
+
+/**
+ * Exercises the WAI-ARIA APG Dialog(Modal) focus contract the default
+ * `role="dialog"` + `aria-modal="true"` surface now honours:
+ *   1. Opening moves focus INTO the surface (first focusable child).
+ *   2. Tab is trapped — from the last focusable, Tab wraps to the first, and
+ *      Shift+Tab from the first wraps to the last (WCAG 2.4.3 Focus Order).
+ *   3. Escape closes the dialog and RESTORES focus to the trigger (2.1.2 / 4.1.2).
+ *   4. `ariaLabelledBy` gives the dialog an accessible name (4.1.2).
+ * Native buttons are used inside so the test asserts real focusability without
+ * coupling to any other component's internals.
+ */
+const FocusManagementComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Open Dialog
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        ariaLabelledBy="fm-dialog-title"
+        styles={{ theme: 'light' }}
+      >
+        <div style={{ padding: '16px', minWidth: '220px' }}>
+          <h3 id="fm-dialog-title" style={{ margin: '0 0 12px 0' }}>
+            Confirm action
+          </h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button type="button" style={{ padding: '6px 12px' }}>
+              First action
+            </button>
+            <button type="button" style={{ padding: '6px 12px' }}>
+              Last action
+            </button>
+          </div>
+        </div>
+      </Popover>
+    </div>
+  )
+}
+
+export const DialogFocusManagement: Story = {
+  name: 'A11y/Dialog Focus Management',
+  render: () => <FocusManagementComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button', { name: 'Open Dialog' })
+    await userEvent.click(trigger)
+
+    // The popover PORTALS to document.body, so query the whole document.
+    const body = within(canvasElement.ownerDocument.body)
+
+    // The dialog exposes its accessible name from the ariaLabelledBy heading.
+    const dialog = await body.findByRole('dialog')
+    await expect(dialog).toHaveAccessibleName('Confirm action')
+
+    // 1. Opening moved focus INTO the surface (first focusable child).
+    const firstAction = body.getByRole('button', { name: 'First action' })
+    const lastAction = body.getByRole('button', { name: 'Last action' })
+    await waitFor(() => expect(firstAction).toHaveFocus())
+
+    // 2. Tab from the LAST focusable wraps back to the FIRST (trap).
+    lastAction.focus()
+    await userEvent.tab()
+    await waitFor(() => expect(firstAction).toHaveFocus())
+
+    // 2b. Shift+Tab from the FIRST wraps forward to the LAST (trap).
+    await userEvent.tab({ shift: true })
+    await waitFor(() => expect(lastAction).toHaveFocus())
+
+    // 3. Escape closes the dialog and RESTORES focus to the trigger.
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await waitFor(() => expect(trigger).toHaveFocus())
+  },
+}

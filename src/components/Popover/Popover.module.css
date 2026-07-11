@@ -67,3 +67,41 @@
   /* TRANSITIONS.premium */
   transition: var(--goobs-transition-premium);
 }
+
+/* --------------------------------------------------------------------------
+   FOCUS RING (WCAG 2.4.7 Focus Visible)
+   The surface carries tabIndex={-1} for the role="dialog" modal case so it can
+   receive programmatic focus when it holds no focusable child. That focus is
+   moved in by script (not the keyboard), so :focus-visible must NOT paint a ring
+   on it (a stray ring on a just-opened dialog reads as a bug). A ring IS shown
+   only if a keyboard user genuinely tabs the container into focus. Per-theme
+   ring tokens keep parity with the rest of the library's focus treatment.
+   -------------------------------------------------------------------------- */
+.popover:focus {
+  outline: none;
+}
+.popover:focus-visible {
+  outline: none;
+  box-shadow: var(--goobs-focus-light);
+}
+.popover[data-theme='dark']:focus-visible {
+  box-shadow: var(--goobs-focus-dark);
+}
+.popover[data-theme='sacred']:focus-visible {
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
+   Users who ask for reduced motion get no enter/exit transition — the surface
+   simply appears in place. Every theme sets its own `transition` (the dark and
+   sacred [data-theme] overrides are more specific than `.popover`), so each is
+   neutralised explicitly to win the cascade under the media query.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .popover,
+  .popover[data-theme='dark'],
+  .popover[data-theme='sacred'] {
+    transition: none;
+  }
+}
