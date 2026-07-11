@@ -764,3 +764,68 @@ export const AutocompleteDefault: Story = {
     expect(overrideInput).toHaveAttribute('autocomplete', 'off')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: PLACEHOLDER CONTRAST (WCAG 1.4.3)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for placeholder contrast. Without an explicit
+ * `::placeholder` rule the hint text renders in the UA-default gray, which
+ * falls below the 4.5:1 minimum on the dark surfaces this field ships on
+ * (sacred #0e0e0e, dark). Each theme's placeholder is now set to that theme's
+ * muted-text token — tuned in global.css to hold ≥4.5:1 on its own surface
+ * (sacred rgba(255,255,255,0.5) ≈ 5.30:1 on #0e0e0e; light #4b5563 6.17–7.56:1;
+ * dark #94a3b8 4.76–8.19:1) — visibly lighter than entered text yet legible.
+ * The three fields sit on their theme-matched surfaces (Chromatic baseline);
+ * the play fn reads the resolved `::placeholder` style and asserts the light
+ * field uses the explicit muted token (rgb(75, 85, 99) = #4b5563) at full
+ * opacity, not the UA default.
+ */
+export const PlaceholderContrastTest: Story = {
+  render: () => (
+    // Mixed-theme story: each field sits on its own theme-matched surface so
+    // the placeholder contrast reads against the surface it actually ships on.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Light placeholder"
+          placeholder="Light 555-555-5555"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Dark placeholder"
+          placeholder="Dark 555-555-5555"
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <PhoneNumberFieldWithState
+          label="Sacred placeholder"
+          placeholder="Sacred 555-555-5555"
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const lightInput = canvas.getByPlaceholderText('Light 555-555-5555')
+
+    // The placeholder must NOT fall back to the UA default — it's set to the
+    // light muted-text token #4b5563 = rgb(75, 85, 99), which holds ≥4.5:1 on
+    // the light surface (WCAG 1.4.3). opacity:1 keeps that contrast intact
+    // (Firefox otherwise dims placeholders and would erode the proven ratio).
+    const placeholderStyle = getComputedStyle(lightInput, '::placeholder')
+    expect(placeholderStyle.color).toBe('rgb(75, 85, 99)')
+    expect(placeholderStyle.opacity).toBe('1')
+  },
+}

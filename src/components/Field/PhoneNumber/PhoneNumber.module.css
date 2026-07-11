@@ -142,6 +142,32 @@
 }
 
 /* --------------------------------------------------------------------------
+   PLACEHOLDER CONTRAST (WCAG 1.4.3 Contrast — Minimum). Without an explicit
+   rule the placeholder ('555-555-5555') renders in the UA-default gray, which
+   is unspecified and typically falls below 4.5:1 on the dark surfaces this
+   field uses — notably sacred (#0e0e0e) and dark. Set it to the theme's
+   muted-text token, each of which is explicitly tuned in global.css to hold
+   ≥4.5:1 on its own surface (sacred rgba(255,255,255,0.5) ≈ 5.30:1 on #0e0e0e;
+   light #4b5563 6.17–7.56:1; dark #94a3b8 4.76–8.19:1) — the same tokens the
+   disabled text above uses. The muted token keeps the hint visibly lighter
+   than entered text (which uses --field-text) while staying legible.
+   `opacity: 1` resets Firefox's default placeholder opacity so the token's
+   real contrast isn't silently reduced below the value proven above.
+   -------------------------------------------------------------------------- */
+.input::placeholder {
+  color: var(--goobs-sacred-text-muted);
+  opacity: 1;
+}
+
+:global([data-component='FieldShell'][data-theme='light']) .input::placeholder {
+  color: var(--goobs-light-text-muted);
+}
+
+:global([data-component='FieldShell'][data-theme='dark']) .input::placeholder {
+  color: var(--goobs-dark-text-muted);
+}
+
+/* --------------------------------------------------------------------------
    REDUCED MOTION (WCAG 2.3.3 Animation from Interactions). The wrapper
    transitions border/background color on focus/hover/theme change (and the
    `all` transition also animates the focus ring's box-shadow). Honor the OS

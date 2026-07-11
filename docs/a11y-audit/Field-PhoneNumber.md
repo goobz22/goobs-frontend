@@ -1,6 +1,10 @@
 # Field/PhoneNumber — a11y audit (2026-07-11)
 
-**Status:** PARTIAL (3 issues fixed in-directory; 1 deferred to the serial Field/Shell pass)
+**Status:** PARTIAL (4 issues fixed in-directory; 1 deferred to the serial Field/Shell pass)
+
+> **Update 2026-07-11 (adversarial-review pass):** placeholder contrast (issue 5) fixed
+> in-directory; the label/custom-`id` divergence (issue 4) re-confirmed as genuinely Shell-owned
+> and correctly deferred (the reviewer verified `FieldShellProps` exposes no `id` prop).
 
 **Component:** `src/components/Field/PhoneNumber` — a US phone-number text input built on
 `FieldShell` with a fixed, non-interactive `+1` prefix glued to the left of a `type="tel"`
@@ -23,6 +27,7 @@ interactive control.
 | 2 | Moderate | 1.3.5 Identify Input Purpose (AA) | `index.tsx:251` (`autoComplete={autoComplete}` — undefined by default) | **FIXED** |
 | 3 | Minor    | 2.3.3 Animation from Interactions (AAA) | `PhoneNumber.module.css:24` (`transition: var(--goobs-transition-slow)`) | **FIXED** |
 | 4 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A); 3.3.2 Labels or Instructions (A) | `index.tsx:241` (`id={id ?? inputId}`) — root cause `Field/Shell/index.tsx:291,395` | **DEFERRED** |
+| 5 | Minor    | 1.4.3 Contrast — Minimum (AA) | `PhoneNumber.module.css` (no `::placeholder` rule → UA-default gray) | **FIXED** |
 
 ### 1 — No visible keyboard focus indicator (Serious) — FIXED
 `.input` sets `outline: none` (`PhoneNumber.module.css:97`), removing the UA focus ring. Unlike
@@ -72,6 +77,26 @@ auto-rendered `<label htmlFor={inputId}>` (line ~395) and the `inputId` passed t
 use the consumer id when supplied. Then each field spreads `id={inputId}` from the slot and drops
 its own `id ?? inputId` override. This fixes the whole class in one place.
 
+**Re-confirmed by the 2026-07-11 adversarial review** as genuinely Shell-owned and correctly
+deferred: `FieldShellProps` exposes no `id` prop (grep of `Field/Shell/index.tsx` returns none),
+so it cannot be resolved inside this directory without either dropping the public `id` prop's
+effect on the input (a runtime API regression) or editing Shell (owned by a later serial pass).
+Same class in the peer `Field/USD:302`.
+
+### 5 — Placeholder contrast not addressed (Minor) — FIXED
+There was no `::placeholder` color rule in `PhoneNumber.module.css` (nor in FieldShell/global.css),
+so the placeholder (`'555-555-5555'`) rendered in the UA-default gray regardless of theme — which
+can fall below 4.5:1, notably on the sacred (#0e0e0e) and dark surfaces this field ships on. This
+is an uncovered text-contrast gap in the field's own markup (WCAG 1.4.3).
+
+**Fix:** added per-theme `.input::placeholder` rules (`PhoneNumber.module.css`) mirroring the
+existing `.input` theme structure, each pointing at that theme's already-AA-tuned muted-text token
+(the same tokens the disabled text uses): sacred `--goobs-sacred-text-muted` (`rgba(255,255,255,0.5)`
+≈ 5.30:1 on #0e0e0e), light `--goobs-light-text-muted` (`#4b5563`, 6.17–7.56:1), dark
+`--goobs-dark-text-muted` (`#94a3b8`, 4.76–8.19:1). `opacity: 1` resets Firefox's default
+placeholder opacity so the token's proven contrast isn't silently reduced. The muted token keeps
+the hint visibly lighter than entered text (`--field-text`) while staying legible. No API change.
+
 ---
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
@@ -104,7 +129,9 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
 
 ## Fixes applied
 - `PhoneNumber.module.css`: added `.inputWrapper:focus-within` themed focus ring (WCAG 2.4.7 /
-  1.4.11); added `@media (prefers-reduced-motion: reduce)` guard (WCAG 2.3.3).
+  1.4.11); added `@media (prefers-reduced-motion: reduce)` guard (WCAG 2.3.3); added per-theme
+  `.input::placeholder` rules using each theme's AA-tuned muted-text token + `opacity: 1`
+  (WCAG 1.4.3).
 - `index.tsx`: `autoComplete` now defaults to `'tel'` (WCAG 1.3.5); added prop JSDoc.
 
 ## Stories updated
@@ -112,6 +139,10 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
   box-shadow ring is absent before focus and present while focused — regression guard for issue 1.
 - `AutocompleteDefault` (new): asserts the default input renders `autocomplete="tel"` and that a
   caller `autoComplete="off"` still overrides — regression guard for issue 2.
+- `PlaceholderContrastTest` (new): renders the placeholder in all three themes on their matched
+  surfaces (Chromatic baseline) and asserts the light field's resolved `::placeholder` color is the
+  explicit muted token `rgb(75, 85, 99)` at `opacity: 1`, not the UA default — regression guard for
+  issue 5.
 
 ## Deferred
 - **Issue 4** (label association breaks with a custom `id`) → `Field/Shell/index.tsx:291,395`.
