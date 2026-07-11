@@ -20,13 +20,31 @@
   --fade-duration: 0.5s;
   --fade-timing-function: var(--goobs-ease);
   --fade-delay: 0s;
+  /*
+   * Delay applied to the visibility swap (see [data-state] below). 0s while the
+   * node is showing (visibility flips to `visible` instantly, then opacity fades
+   * in); = the fade duration while hiding (visibility stays `visible` for the
+   * whole fade-out, then flips to `hidden`). This keeps faded-out content in the
+   * a11y tree + tab order for exactly as long as it is still visible, then drops
+   * it — so screen readers never announce, and keyboard users never Tab into,
+   * fully-transparent content (WCAG 1.3.1 / 2.4.3 / 4.1.2).
+   */
+  --fade-visibility-delay: 0s;
 
   opacity: 1;
+  visibility: visible;
+  /*
+   * `visibility` rides alongside opacity in the transition list so its swap can
+   * be delayed to the end of the fade-out (via --fade-visibility-delay). The
+   * two-value transition-delay maps position-for-position: opacity gets the
+   * caller's --fade-delay, visibility gets --fade-visibility-delay.
+   */
   transition: var(
-    --fade-transition,
-    opacity var(--fade-duration) var(--fade-timing-function)
-  );
-  transition-delay: var(--fade-delay);
+      --fade-transition,
+      opacity var(--fade-duration) var(--fade-timing-function)
+    ),
+    visibility 0s linear;
+  transition-delay: var(--fade-delay), var(--fade-visibility-delay);
 }
 
 /*
@@ -49,13 +67,22 @@
  * Visibility — the old `in` boolean. `in !== false` => visible (opacity 1),
  * `in === false` => hidden (opacity 0). visible.opacity / hidden.opacity are
  * identical across all three themes (1 and 0 respectively).
+ *
+ * Hidden also sets `visibility: hidden` so fully-transparent content is removed
+ * from the accessibility tree AND the tab order (opacity:0 alone leaves it
+ * screen-reader-announced and keyboard-focusable — WCAG 1.3.1 / 2.4.3 / 4.1.2).
+ * The visibility swap is deferred by the full fade duration so the fade-OUT
+ * still animates, then the node drops out the instant it is fully transparent.
  */
 .container[data-state='visible'] {
   opacity: 1;
+  visibility: visible;
 }
 
 .container[data-state='hidden'] {
   opacity: 0;
+  visibility: hidden;
+  --fade-visibility-delay: calc(var(--fade-delay) + var(--fade-duration));
 }
 
 /*
@@ -65,4 +92,16 @@
 .container[data-disabled='true'] {
   opacity: 0.6;
   transition: none;
+}
+
+/*
+ * Respect a user's reduced-motion request (WCAG 2.3.3): a Fade is nothing BUT a
+ * transition, so under prefers-reduced-motion we drop the animation and switch
+ * opacity/visibility instantly. Content still shows/hides and is still correctly
+ * added to / removed from the a11y tree — just without the animated fade.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    transition: none;
+  }
 }

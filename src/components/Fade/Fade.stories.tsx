@@ -291,3 +291,85 @@ export const CustomTiming: Story = {
   // light canvas so the label isn't black-on-#0e0e0e under the sacred default.
   globals: { backgrounds: { value: 'light' } },
 }
+
+// A11y regression — focus + screen-reader safety of the hidden state.
+// When faded OUT (`in: false`) the wrapper flips to `visibility: hidden` once the
+// fade completes, so any interactive content inside is removed from BOTH the tab
+// order and the screen-reader accessibility tree (opacity:0 alone leaves it
+// focusable + announced — WCAG 1.3.1 / 2.4.3 / 4.1.2). Tab through the row: with
+// the Fade hidden, focus jumps straight from "Before" to "After", skipping the
+// button inside the Fade.
+export const FocusAndScreenReaderSafety: Story = {
+  render: function FocusSafetyStory() {
+    const [isVisible, setIsVisible] = useState(false)
+
+    return (
+      <div style={{ width: '480px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          {isVisible ? 'Fade out' : 'Fade in'}
+        </CustomButton>
+        <div
+          style={{
+            marginTop: '16px',
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center',
+          }}
+        >
+          <button type="button">Before</button>
+          <Fade styles={{ in: isVisible, theme: 'light', timeout: 300 }}>
+            <button type="button">Inside Fade</button>
+          </Fade>
+          <button type="button">After</button>
+        </div>
+        <div style={{ marginTop: '16px' }}>
+          <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+            While faded out, the middle button is not tabbable and not announced
+            by screen readers — Tab moves from &ldquo;Before&rdquo; straight to
+            &ldquo;After&rdquo;.
+          </Typography>
+        </div>
+      </div>
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// A11y regression — reduced-motion awareness (WCAG 2.3.3). A Fade is nothing but
+// a transition, so under `prefers-reduced-motion: reduce` the animation is
+// dropped and opacity/visibility switch instantly. Turn on "Reduce motion" in
+// your OS/browser and the deliberately slow 1500ms toggle below snaps instead of
+// fading.
+export const ReducedMotion: Story = {
+  render: function ReducedMotionStory() {
+    const [isVisible, setIsVisible] = useState(true)
+
+    return (
+      <div style={{ width: '460px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          Toggle Fade
+        </CustomButton>
+        <div style={{ marginTop: '16px', height: '150px' }}>
+          <Fade styles={{ in: isVisible, theme: 'light', timeout: 1500 }}>
+            <Paper styles={{ theme: 'light', padding: '20px' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                Reduced-motion aware
+              </Typography>
+              <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+                With &ldquo;Reduce motion&rdquo; enabled, this snaps in and out
+                with no 1.5s fade.
+              </Typography>
+            </Paper>
+          </Fade>
+        </div>
+      </div>
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
