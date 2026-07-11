@@ -1,6 +1,8 @@
 # Field/Percentage — a11y audit (2026-07-11)
 
-**Status:** FIXED (all in-directory issues fixed; one root-cause-in-Shell issue DEFERRED)
+**Status:** FIXED (all in-directory issues fixed, including the adversarial review-pass
+findings below; one root-cause-in-Shell issue — custom `id` label association — remains
+DEFERRED, and one out-of-directory scope-disclosure is recorded for the sibling owners)
 
 **APG pattern:** [Spinbutton](https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/) — an
 auto-sizing numeric percentage input with stacked +/- stepper buttons. The correct semantics
@@ -131,3 +133,81 @@ Existing `InteractionTest` (decimal-typing) still passes with the added role.
     the shell's `<label htmlFor>` point at that same id. Then `Field/Percentage` would pass its
     `id` prop into the shell instead of overriding only the input's `id`. Cannot be fixed from the
     Percentage directory because the `<label>` and its `htmlFor` live entirely in Shell.
+
+---
+
+## Adversarial review pass (2026-07-11)
+
+A second, adversarial review of the first pass surfaced five findings. Resolution below.
+
+### R1 (moderate) — Custom `id` prop STILL breaks label association — DEFERRED (root cause in Shell)
+Same bug as Issue 5 above, re-confirmed OPEN at HEAD. The input renders `id={id ?? inputId}`
+(`index.tsx`) while Shell's `<label htmlFor={inputId}>` uses its own `useId` value
+(`src/components/Field/Shell/index.tsx:291,395`), so passing a public `id` diverges the two.
+Verified from source that Shell's `FieldShellSlot` exposes only `inputId`/`helperId`/`inputAriaProps`
+— there is **no** seam to redirect the `<label htmlFor>` from inside the Percentage directory, and
+Shell is owned by a later serial pass (must not be edited here). The review itself concurs this is
+"genuinely not fixable from inside the Percentage dir." **Stays DEFERRED** with the exact Shell
+root-cause + suggested `inputId?: string` prop change in the Deferred section above. Not marked fixed.
+
+### R2 (minor) — aria-valuenow could report a value outside [min, max] — FIXED — WCAG 4.1.2 / WAI-ARIA spinbutton
+`index.tsx` — `numericForAria` was the raw display number, so an out-of-range seed/prop
+(the `ErrorStates` story's `initialValue="150"` against `max=100`, or `"-25"` against `min=0`)
+exposed e.g. `aria-valuenow="150"` alongside `aria-valuemax="100"`, violating the spinbutton range
+constraint (aria-valuenow ∈ [aria-valuemin, aria-valuemax]).
+**Fix:** added `clampedNumericForAria = Math.min(max, Math.max(min, numericForAria))` and bound
+`aria-valuenow` to it. The **display value and `aria-valuetext` are intentionally left unclamped**
+(the field still shows the truthful "150%"/"-25%" for the error state); only the numeric
+`aria-valuenow` is constrained into range.
+**Pattern:** `aria-valuenow-out-of-range`
+
+### R3 (minor) — Generic stepper aria-labels are ambiguous with >1 field on a page — FIXED — WCAG 2.4.6 / 4.1.2
+`index.tsx` — both steppers carried the bare `aria-label="increment"`/`"decrement"`, so multiple
+Percentage/stepper fields on one page exposed indistinguishable controls to AT.
+**Fix:** derived `incrementAriaLabel`/`decrementAriaLabel` that reference the field label
+(`"Increase <label>"` / `"Decrease <label>"`), falling back to the bare verb when no label is set.
+The `data-action="increment"/"decrement"` attributes the ThothOS Playwright suite keys on are
+**unchanged** — only the AT-facing accessible name changed.
+**Pattern:** `ambiguous-control-name`
+
+### R4 (minor) — CSS-only a11y states not pinned by any story — FIXED
+`.input`/`.button:focus-visible` rings (`Percentage.module.css:61-69`) and the
+`@media (prefers-reduced-motion: reduce)` block (css:107-114) had no story exercising them, so the
+Chromatic baseline — the only regression test here — couldn't catch a silent rebuild regression.
+**Fix:** added `FocusVisibleAndReducedMotion` — a play function that Tabs (keyboard modality, so
+`:focus-visible` applies) onto the input and the increment button and asserts a real `outline`
+(`getComputedStyle(...).outlineStyle === 'solid'`) on each, and structurally asserts a
+`@media (prefers-reduced-motion: reduce)` rule zeroing `transition` exists in the injected stylesheet
+(engine-independent of the runner's OS motion setting). The keyboard-focused snapshot also gives
+Chromatic a visible-ring baseline.
+**Pattern:** `unpinned-css-a11y-state`
+
+### R5 (minor) — Out-of-directory scope expansion (commit `3d16a9bb`) — DISCLOSED (not in this dir)
+Commit `3d16a9bb` ("a11y-lint(missing-data-action-on-actions): add increment/decrement to Field
+steppers (6 files)") added `data-action` to five SIBLING components —
+`Field/Number/ExternalIncrement`, `Field/Number/InternalIncrement`, `Field/IPAM/CIDR`,
+`Field/IPAM/Subnet`, `Field/IPAM/VLAN` — alongside the in-scope `Field/Percentage` change. Verified
+via `git show --stat 3d16a9bb`: the edits are purely additive (a single `data-action` attribute each,
+a class-first lint remediation) and **non-breaking**, but they fall outside the Percentage directory's
+ownership boundary. There is **nothing to fix and nothing to revert here** (reverting is forbidden and
+those files are not ours); this is a **disclosure** so the sibling-component owners are aware their
+files were touched. Recorded in Deferred → sibling owners.
+
+### Review-pass stories added / changed
+- `OutOfRangeAriaClamp` — `initialValue="150"`, `max=100`: asserts `aria-valuenow="100"` while
+  `value`/`aria-valuetext` stay `"150%"` (R2 regression guard).
+- `BelowMinAriaClamp` — `initialValue="-25"`, `min=0`: asserts `aria-valuenow="0"` while
+  `value`/`aria-valuetext` stay `"-25%"` (R2 below-min mirror).
+- `FocusVisibleAndReducedMotion` — focus-ring + reduced-motion pins (R4).
+- `ButtonKeyboardActivation` — updated its `getByRole('button', { name })` queries to the new
+  label-scoped names (`"Increase Stepper Percentage"` / `"Decrease Stepper Percentage"`) and added an
+  assertion that `data-action` is still `increment`/`decrement` (R3 + selector-contract guard).
+
+### Deferred → sibling owners (out of this directory)
+- **Custom `id` label association** (R1 / Issue 5): `src/components/Field/Shell/index.tsx:291` (id
+  gen) + `:395` (`<label htmlFor={inputId}>`). Suggested: add an optional `inputId?: string` prop to
+  `FieldShell` so a sub-field accepting a public `id` can point the shell `<label htmlFor>` at it.
+- **Scope-expansion disclosure** (R5): commit `3d16a9bb` added an additive `data-action` to
+  `Field/Number/ExternalIncrement/index.tsx`, `Field/Number/InternalIncrement/index.tsx`,
+  `Field/IPAM/CIDR/index.tsx`, `Field/IPAM/Subnet/index.tsx`, `Field/IPAM/VLAN/index.tsx`. No change
+  needed (additive/non-breaking); flagged for those owners' awareness.
