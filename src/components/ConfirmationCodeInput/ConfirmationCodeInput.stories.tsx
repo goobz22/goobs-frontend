@@ -1,8 +1,9 @@
 /**
  * @fileoverview Storybook stories for the ConfirmationCodeInput component.
  */
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { z } from 'zod'
 import ConfirmationCodeInput from './index'
 import Form from '../Form'
@@ -589,5 +590,105 @@ export const FormBoundValidationError: Story = {
     // …and each cell is programmatically associated with it (aria-describedby).
     await expect(firstCell).toHaveAttribute('aria-describedby', alert.id)
     await expect(lastCell).toHaveAttribute('aria-describedby', alert.id)
+  },
+}
+
+/**
+ * Input → success TRANSITION (WCAG 4.1.3 Status Messages, 2.4.3 Focus Order).
+ * Every other success story mounts directly with `showSuccessState: true`, so
+ * the actual transition code path is never exercised. Here a stateful wrapper
+ * starts in the INPUT state and flips `showSuccessState` true when Verify is
+ * activated — the real flow a user hits after entering a code. The play
+ * function pins the two transition-only behaviours:
+ *
+ *  1. The persistent, always-mounted `role="status"` live region is SILENT in
+ *     the input state and receives "Verification Successful" as a CONTENT
+ *     MUTATION on the transition (a live region only announces content that
+ *     changes AFTER it exists — announcing content it mounted with is
+ *     unreliable, which is exactly why the region is persistent). WCAG 4.1.3.
+ *  2. Focus moves to the success view's sole control ("Disable Verification")
+ *     instead of being lost to `<body>` when the input branch (and the Verify
+ *     button the user just clicked) unmounts. WCAG 2.4.3.
+ *
+ * This is the behavioural regression test for the F1 announcement fix and the
+ * focus-order fix — a future edit that reverts either fails this story first.
+ */
+export const SuccessTransition: Story = {
+  render: args => {
+    // Stateful wrapper so Verify drives a real input→success transition
+    // (Storybook args are static, so the flip must live in component state).
+    const [verified, setVerified] = useState(false)
+    return (
+      <div
+        style={{
+          backgroundColor: '#f8fafc',
+          minHeight: '100vh',
+          padding: '2rem',
+          margin: 0,
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div style={{ maxWidth: '400px', width: '100%' }}>
+          <div
+            style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+          >
+            <strong>Success Transition:</strong> Clicking Verify flips the view
+            from the code inputs to the success confirmation — the live region
+            announces &quot;Verification Successful&quot; and focus moves to the
+            remaining control rather than dropping to the page body.
+          </div>
+          <ConfirmationCodeInput
+            {...args}
+            value="123456"
+            showSuccessState={verified}
+            onVerify={() => setVerified(true)}
+          />
+        </div>
+      </div>
+    )
+  },
+  args: {
+    ...commonArgs,
+    isValid: true,
+    styles: {
+      theme: 'light',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The persistent announcer is the ONLY role="status" region that also
+    // carries aria-live="polite" (the validity dot is role="status" with no
+    // aria-live; the form-error region is role="alert"). Query it directly so
+    // the assertion pins the transition announcer specifically.
+    const announcer = canvasElement.querySelector<HTMLElement>(
+      '[role="status"][aria-live="polite"]'
+    )
+
+    // Input state: no success view yet, and the announcer is silent (empty),
+    // so the message is delivered by a CONTENT MUTATION, not initial content.
+    await expect(
+      canvas.queryByRole('button', { name: /disable verification/i })
+    ).toBeNull()
+    await expect(announcer).not.toBeNull()
+    await expect(announcer?.textContent ?? '').toBe('')
+
+    // Activate Verify → the wrapper flips showSuccessState true (the real
+    // input→success transition a user triggers after entering their code).
+    await userEvent.click(canvas.getByRole('button', { name: /^verify$/i }))
+
+    // 1. The pre-existing live region now announces the confirmation (4.1.3).
+    await waitFor(() =>
+      expect(announcer).toHaveTextContent('Verification Successful')
+    )
+
+    // 2. Focus landed on the success view's sole control, not on <body> (2.4.3).
+    const disableButton = canvas.getByRole('button', {
+      name: /disable verification/i,
+    })
+    await waitFor(() => expect(disableButton).toHaveFocus())
   },
 }
