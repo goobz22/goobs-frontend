@@ -134,7 +134,7 @@ export interface TypographyProps {
     /** CSS `align-self`. */
     alignSelf?: string
     /** Theme, emitted as `data-theme`: `'sacred'` flips the default color fallback to gold; `'light'`/`'dark'` remap it to their role text tokens. Unset → the near-white non-sacred default. An explicit `color` always wins over the theme fallback. */
-    theme?: 'sacred' | 'dark' | 'light' | string
+    theme?: 'sacred' | 'dark' | 'light'
     /** `true` → the visible outline treatment (`1px solid currentcolor` + 3px offset, keyed to the resolved per-theme text color); a string passes through verbatim as the CSS `outline` value; `false`/unset → no outline. Wins over the top-level `outline`. */
     outline?: string | boolean
     /** CSS `width`; wins over the top-level `width`. */
