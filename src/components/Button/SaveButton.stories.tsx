@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect } from 'storybook/test'
+import { within, expect, userEvent } from 'storybook/test'
 import { z } from 'zod'
 import SaveButton from './SaveButton'
 import Form from '../Form'
@@ -58,6 +58,45 @@ export const Pending: Story = {
     await expect(button).toHaveAttribute('aria-busy', 'true')
     // The polite live region carries the busy announcement.
     await expect(canvas.getByRole('status')).toHaveTextContent(/Saving/)
+  },
+}
+
+/**
+ * The busy lifecycle is announced at BOTH edges (WCAG 4.1.3): the polite
+ * `role="status"` region carries `pendingLabel` when a save starts and
+ * `completedLabel` when it finishes. This pins the completion edge — before the
+ * fix the region cleared to `''` on `pending: true → false`, so an AT user
+ * heard "Saving…" but never that the save concluded. The toggle drives a real
+ * `pending` transition in both directions so both announcements are asserted.
+ */
+const BusyLifecycleDemo: React.FC = () => {
+  const [pending, setPending] = useState(false)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <button type="button" onClick={() => setPending(p => !p)}>
+        toggle pending
+      </button>
+      <SaveButton valid pending={pending} subject="contract" />
+    </div>
+  )
+}
+
+export const CompletionAnnounced: Story = {
+  name: 'Busy lifecycle announced (start + completion)',
+  render: () => <BusyLifecycleDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const status = canvas.getByRole('status')
+    const toggle = canvas.getByRole('button', { name: 'toggle pending' })
+
+    // Start the save → the region announces the pending label.
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Saving/)
+
+    // Finish the save → the region announces completion (was silently cleared
+    // before the fix; this assertion fails if the completion edge regresses).
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Save complete/)
   },
 }
 

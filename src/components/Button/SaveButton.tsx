@@ -110,15 +110,17 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   // ends, so an AT user hears both edges (WCAG 4.1.3). The completion edge is
   // the gap the audit flagged: previously the region silently cleared to ''
   // on `pending: true → false`, so the user heard "Saving…" but never that it
-  // finished. Derived from the previous-render `pending` via the ref-guarded
-  // set-state-during-render pattern (no effect → no set-state-in-effect lint);
-  // the initializer seeds a mount that is already pending.
+  // finished. Derived from the previous-render `pending` via React's
+  // adjust-state-during-render pattern (previous value held in state, not a
+  // ref, and no effect — so neither the react-hooks refs nor set-state-in-
+  // effect rules apply); the `announcement` initializer seeds a mount that is
+  // already pending.
   const [announcement, setAnnouncement] = React.useState(
     pending ? pendingLabel : ''
   )
-  const prevPendingRef = React.useRef(pending)
-  if (prevPendingRef.current !== pending) {
-    prevPendingRef.current = pending
+  const [prevPending, setPrevPending] = React.useState(pending)
+  if (prevPending !== pending) {
+    setPrevPending(pending)
     setAnnouncement(pending ? pendingLabel : completedLabel)
   }
 
