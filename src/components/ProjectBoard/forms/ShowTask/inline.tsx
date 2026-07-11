@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import type {
   ProjectBoardStyles,
   Comment,
@@ -31,6 +31,17 @@ import cssStyles from './ShowTask.module.css'
  */
 const cx = (...names: Array<string | false | null | undefined>): string =>
   names.filter(Boolean).join(' ')
+
+// Keyboard parity for role="button" cards that wrap block content (headings,
+// grids) and so can't be native <button>s: Enter/Space fire the same handler
+// as the click (WCAG 2.1.1).
+const activateOnKey =
+  (handler: () => void) => (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handler()
+    }
+  }
 
 export interface InlineShowTaskProps {
   taskId: string
@@ -187,6 +198,34 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   variant = 'employee',
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('details')
+  // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern
+  // (order matches the rendered tab strip).
+  const tabOrder: TabType[] = [
+    'details',
+    'comments',
+    'scheduling',
+    'knowledgeBase',
+    'resolution',
+    'caseUpdates',
+  ]
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    let next: number | null = null
+    if (event.key === 'ArrowRight') next = (index + 1) % tabOrder.length
+    else if (event.key === 'ArrowLeft')
+      next = (index - 1 + tabOrder.length) % tabOrder.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = tabOrder.length - 1
+    if (next === null) return
+    event.preventDefault()
+    const target = tabOrder[next]
+    if (!target) return
+    setActiveTab(target)
+    requestAnimationFrame(() => tabRefs.current[next]?.focus())
+  }
   const [isEditMode, setIsEditMode] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
@@ -684,20 +723,25 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       data-collapsed={isSidebarCollapsed ? 'true' : undefined}
       data-mobile={mobileAttr}
     >
-      {/* Collapse/Expand Button */}
+      {/* Collapse/Expand Button — the »/« glyph is meaningless to a screen
+          reader, so name the control explicitly and expose its state via
+          aria-expanded (WCAG 4.1.2). */}
       <button
+        type="button"
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         className={cssStyles.collapseButton}
+        aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-expanded={!isSidebarCollapsed}
         title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
-        {isSidebarCollapsed ? '»' : '«'}
+        <span aria-hidden="true">{isSidebarCollapsed ? '»' : '«'}</span>
       </button>
 
       {/* Collapsed State - Show icon only */}
       {isSidebarCollapsed ? (
         <div className={cssStyles.collapsedIcons}>
           <div title="Ticket Summary" className={cssStyles.collapsedIcon}>
-            📋
+            <span aria-hidden="true">📋</span>
           </div>
         </div>
       ) : (
@@ -1127,6 +1171,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   value={editedCompanyNotes}
                   onChange={e => setEditedCompanyNotes(e.target.value)}
                   placeholder="Add internal notes about this company..."
+                  aria-label="Internal company notes"
                   className={cssStyles.notesTextarea}
                 />
                 <div className={cssStyles.notesFormActions}>
@@ -1151,7 +1196,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               /* Display Company Notes - from company record */
               <div className={cssStyles.notesDisplay}>
                 <div className={cssStyles.notesDisplayHeader}>
-                  <span>🏢</span>
+                  <span aria-hidden="true">🏢</span>
                   <span>Company Notes</span>
                 </div>
                 <div className={cssStyles.notesDisplayBody}>
@@ -1211,6 +1256,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   value={editedCustomerNotes}
                   onChange={e => setEditedCustomerNotes(e.target.value)}
                   placeholder="Add internal notes about this customer..."
+                  aria-label="Internal customer notes"
                   className={cssStyles.notesTextarea}
                 ></textarea>
                 <div className={cssStyles.notesFormActions}>
@@ -1235,7 +1281,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               /* Display Customer Notes - from customer record */
               <div className={cssStyles.notesDisplay}>
                 <div className={cssStyles.notesDisplayHeader}>
-                  <span>📋</span>
+                  <span aria-hidden="true">📋</span>
                   <span>Customer Notes</span>
                 </div>
                 <div className={cssStyles.notesDisplayBody}>
@@ -1316,17 +1362,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     const sectionAccent = isInternal
       ? isSacred
         ? '#FF9800'
-        : '#F59E0B'
+        : 'var(--goobs-warn)'
       : isSacred
-        ? '#FFD700'
-        : '#3B82F6'
+        ? 'var(--goobs-gold)'
+        : 'var(--goobs-info)'
 
     // Add-comment textarea border (internal gets amber accent).
     const commentInputBorderVars = isInternal
       ? ({
           ['--st-input-border']: isSacred
             ? 'rgba(255, 152, 0, 0.3)'
-            : '#F59E0B',
+            : 'var(--goobs-warn)',
         } as React.CSSProperties)
       : undefined
 
@@ -1338,33 +1384,38 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               ? 'rgba(255, 152, 0, 0.2)'
               : isDark
                 ? '#78350f'
-                : '#F59E0B',
-            ['--st-submit-color']: isSacred ? '#FF9800' : '#FFFFFF',
+                : 'var(--goobs-warn)',
+            ['--st-submit-color']: isSacred ? '#FF9800' : 'var(--goobs-light-surface)',
           }
         : {
             ['--st-submit-bg']: isSacred
-              ? 'rgba(255, 215, 0, 0.2)'
+              ? 'var(--goobs-gold-a20)'
               : isDark
-                ? '#374151'
-                : '#3B82F6',
-            ['--st-submit-color']: isSacred ? '#FFD700' : '#FFFFFF',
+                ? 'var(--goobs-light-text-secondary)'
+                : 'var(--goobs-info)',
+            ['--st-submit-color']: isSacred ? 'var(--goobs-gold)' : 'var(--goobs-light-surface)',
           }
     ) as React.CSSProperties
 
     return (
       <div className={cssStyles.card}>
-        {/* Section Toggle */}
+        {/* Section Toggle — two mutually-exclusive views; aria-pressed exposes
+            which is active to AT (WCAG 4.1.2). */}
         <div className={cssStyles.commentToggleRow}>
           <button
+            type="button"
             className={cssStyles.sectionToggle}
             data-active={commentSection === 'external' ? 'true' : undefined}
+            aria-pressed={commentSection === 'external'}
             onClick={() => setCommentSection('external')}
           >
             External Comments ({publicComments.length})
           </button>
           <button
+            type="button"
             className={cssStyles.sectionToggle}
             data-active={commentSection === 'internal' ? 'true' : undefined}
+            aria-pressed={commentSection === 'internal'}
             onClick={() => setCommentSection('internal')}
           >
             Internal Comments ({internalNotes.length})
@@ -1391,10 +1442,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 ? 'Add a comment for the customer...'
                 : 'Add an internal note (only visible to employees)...'
             }
+            aria-label={
+              commentSection === 'external'
+                ? 'Add a comment for the customer'
+                : 'Add an internal note (only visible to employees)'
+            }
             className={cssStyles.commentTextarea}
             style={commentInputBorderVars}
           />
           <button
+            type="button"
             className={cx(cssStyles.button, cssStyles.commentSubmitButton)}
             style={submitVars}
             onClick={handleAddComment}
@@ -1428,7 +1485,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       ['--st-comment-border']: isSacred
                         ? 'rgba(255, 152, 0, 0.2)'
                         : 'rgba(245, 158, 11, 0.3)',
-                      ['--st-comment-accent']: isSacred ? '#FF9800' : '#F59E0B',
+                      ['--st-comment-accent']: isSacred ? '#FF9800' : 'var(--goobs-warn)',
                     }
                   : {}
               ) as React.CSSProperties
@@ -1490,6 +1547,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       <textarea
                         value={editingCommentText}
                         onChange={e => setEditingCommentText(e.target.value)}
+                        aria-label="Edit comment"
                         className={cssStyles.commentEditTextarea}
                       />
                       <div className={cssStyles.inlineButtonRow}>
@@ -1535,13 +1593,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                             const revisionVars = {
                               ['--st-revision-bg']: revision.isOriginal
                                 ? isSacred
-                                  ? 'rgba(255, 215, 0, 0.1)'
-                                  : 'rgba(59, 130, 246, 0.1)'
+                                  ? 'var(--goobs-gold-a10)'
+                                  : 'var(--goobs-blue-a10)'
                                 : 'transparent',
                               ['--st-revision-accent']: revision.isOriginal
                                 ? isSacred
-                                  ? '#FFD700'
-                                  : '#3B82F6'
+                                  ? 'var(--goobs-gold)'
+                                  : 'var(--goobs-info)'
                                 : undefined,
                             } as React.CSSProperties
                             return (
@@ -1589,10 +1647,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const renderCaseUpdatesTab = () => {
     const updateTypeColors: Record<string, string> = {
-      created: isSacred ? '#4ade80' : isDark ? '#10B981' : '#10B981',
-      status_change: isSacred ? '#60a5fa' : isDark ? '#3B82F6' : '#3B82F6',
+      created: isSacred ? 'var(--goobs-dark-success-text)' : isDark ? '#10B981' : '#10B981',
+      status_change: isSacred ? 'var(--goobs-dark-info-text)' : isDark ? 'var(--goobs-info)' : 'var(--goobs-info)',
       assignment: isSacred ? '#a78bfa' : isDark ? '#8B5CF6' : '#8B5CF6',
-      comment: isSacred ? '#FFD700' : isDark ? '#F59E0B' : '#F59E0B',
+      comment: isSacred ? 'var(--goobs-gold)' : isDark ? 'var(--goobs-warn)' : 'var(--goobs-warn)',
       field_update: isSacred ? '#fb923c' : isDark ? '#F97316' : '#F97316',
     }
 
@@ -1936,14 +1994,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {meetingError && (
-            <div className={cssStyles.errorBanner}>{meetingError}</div>
+            <div className={cssStyles.errorBanner} role="alert">
+              {meetingError}
+            </div>
           )}
 
           {/* Meeting Title */}
           <div className={cssStyles.fieldBlock}>
-            <label className={cssStyles.meetingLabel}>Meeting Title *</label>
+            <label htmlFor="meeting-title" className={cssStyles.meetingLabel}>
+              Meeting Title <span aria-hidden="true">*</span>
+            </label>
             <input
+              id="meeting-title"
               type="text"
+              aria-required="true"
               value={meetingTitle}
               onChange={e => setMeetingTitle(e.target.value)}
               placeholder="e.g., Project Discussion, Sprint Planning"
@@ -1951,10 +2015,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             />
           </div>
 
-          {/* Meeting Type */}
+          {/* Meeting Type — the radios share name="meetingType"; expose them as
+              a named radiogroup so AT announces the group purpose. */}
           <div className={cssStyles.fieldBlock}>
-            <label className={cssStyles.meetingLabel}>Meeting Type *</label>
-            <div className={cssStyles.radioGroup}>
+            <span id="meeting-type-label" className={cssStyles.meetingLabel}>
+              Meeting Type <span aria-hidden="true">*</span>
+            </span>
+            <div
+              className={cssStyles.radioGroup}
+              role="radiogroup"
+              aria-labelledby="meeting-type-label"
+            >
               {(['video', 'phone', 'in-person'] as const).map(type => (
                 <label
                   key={type}
@@ -1967,7 +2038,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     value={type}
                     checked={meetingType === type}
                     onChange={() => setMeetingType(type)}
-                    style={{ accentColor: isSacred ? '#FFD700' : '#3B82F6' }}
+                    style={{ accentColor: isSacred ? 'var(--goobs-gold)' : 'var(--goobs-info)' }}
                   />
                   {type === 'video'
                     ? 'Video Call'
@@ -1982,9 +2053,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Location (for in-person) */}
           {meetingType === 'in-person' && (
             <div className={cssStyles.fieldBlock}>
-              <label className={cssStyles.meetingLabel}>Location *</label>
+              <label
+                htmlFor="meeting-location"
+                className={cssStyles.meetingLabel}
+              >
+                Location <span aria-hidden="true">*</span>
+              </label>
               <input
+                id="meeting-location"
                 type="text"
+                aria-required="true"
                 value={meetingLocation}
                 onChange={e => setMeetingLocation(e.target.value)}
                 placeholder="e.g., Conference Room A"
@@ -1996,9 +2074,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Attendee Info */}
           <div className={cssStyles.twoColForm}>
             <div>
-              <label className={cssStyles.meetingLabel}>Attendee Name *</label>
+              <label
+                htmlFor="meeting-attendee-name"
+                className={cssStyles.meetingLabel}
+              >
+                Attendee Name <span aria-hidden="true">*</span>
+              </label>
               <input
+                id="meeting-attendee-name"
                 type="text"
+                aria-required="true"
                 value={meetingAttendeeName}
                 onChange={e => setMeetingAttendeeName(e.target.value)}
                 placeholder="Full name"
@@ -2006,9 +2091,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               />
             </div>
             <div>
-              <label className={cssStyles.meetingLabel}>Attendee Email *</label>
+              <label
+                htmlFor="meeting-attendee-email"
+                className={cssStyles.meetingLabel}
+              >
+                Attendee Email <span aria-hidden="true">*</span>
+              </label>
               <input
+                id="meeting-attendee-email"
                 type="email"
+                aria-required="true"
                 value={meetingAttendeeEmail}
                 onChange={e => setMeetingAttendeeEmail(e.target.value)}
                 placeholder="email@example.com"
@@ -2051,8 +2143,11 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Notes */}
           <div className={cssStyles.fieldBlock}>
-            <label className={cssStyles.meetingLabel}>Notes</label>
+            <label htmlFor="meeting-notes" className={cssStyles.meetingLabel}>
+              Notes
+            </label>
             <textarea
+              id="meeting-notes"
               value={meetingNotes}
               onChange={e => setMeetingNotes(e.target.value)}
               placeholder="Any additional information..."
@@ -2258,7 +2353,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {meetingError && (
-            <div className={cssStyles.errorBanner}>{meetingError}</div>
+            <div className={cssStyles.errorBanner} role="alert">
+              {meetingError}
+            </div>
           )}
 
           {/* Current Meeting Info */}
@@ -2505,13 +2602,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cssStyles.meetingListColumn}>
             {scheduledMeetings.map(meeting => {
               const statusColors = getMeetingStatusColor(meeting.status)
+              const openMeeting = () => {
+                setSelectedMeeting(meeting)
+                setSchedulingView('details')
+              }
               return (
                 <div
                   key={meeting._id}
-                  onClick={() => {
-                    setSelectedMeeting(meeting)
-                    setSchedulingView('details')
-                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View meeting details: ${meeting.eventTypeName}`}
+                  onClick={openMeeting}
+                  onKeyDown={activateOnKey(openMeeting)}
                   className={cssStyles.meetingListCard}
                 >
                   <div className={cssStyles.meetingListHeader}>
@@ -2641,17 +2743,27 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         <div className={cssStyles.card}>
           <div className={cssStyles.kbArticleHeader}>
             <button
+              type="button"
               onClick={() => setSelectedArticleForView(null)}
               className={cssStyles.kbBackButton}
             >
-              ← Back to Articles
+              <span aria-hidden="true">←</span> Back to Articles
             </button>
             <button
+              type="button"
               onClick={handleToggleLinkCase}
               className={cssStyles.kbLinkButton}
               data-linked={isLinkedToCase ? 'true' : undefined}
             >
-              {isLinkedToCase ? '✕ Unlink from Case' : '✓ Link to Case'}
+              {isLinkedToCase ? (
+                <>
+                  <span aria-hidden="true">✕ </span>Unlink from Case
+                </>
+              ) : (
+                <>
+                  <span aria-hidden="true">✓ </span>Link to Case
+                </>
+              )}
             </button>
           </div>
 
@@ -2748,14 +2860,22 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               {linkedArticles.map(article => (
                 <div
                   key={article._id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View article: ${article.articleTitle} (linked)`}
                   onClick={() => setSelectedArticleForView(article)}
+                  onKeyDown={activateOnKey(() =>
+                    setSelectedArticleForView(article)
+                  )}
                   className={cssStyles.kbLinkedArticleCard}
                 >
                   <div className={cssStyles.kbCardHeader}>
                     <h3 className={cssStyles.kbCardTitle}>
                       {article.articleTitle}
                     </h3>
-                    <span className={cssStyles.kbCardCheck}>✓</span>
+                    <span className={cssStyles.kbCardCheck} aria-hidden="true">
+                      ✓
+                    </span>
                   </div>
                   {article.categoryName && (
                     <div className={cssStyles.kbCardCategory}>
@@ -2812,7 +2932,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 return (
                   <div
                     key={article._id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View article: ${article.articleTitle}${
+                      isLinked ? ' (linked)' : ''
+                    }`}
                     onClick={() => setSelectedArticleForView(article)}
+                    onKeyDown={activateOnKey(() =>
+                      setSelectedArticleForView(article)
+                    )}
                     className={cssStyles.kbArticleCard}
                     data-linked={isLinked ? 'true' : undefined}
                   >
@@ -2831,6 +2959,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                             cssStyles.kbCardCheck,
                             cssStyles.kbCardCheckSpaced
                           )}
+                          aria-hidden="true"
                         >
                           ✓
                         </span>
@@ -2955,10 +3084,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
                 {/* Resolution Writeup */}
                 <div className={cssStyles.kbSection}>
-                  <label className={cssStyles.resolutionLabel}>
+                  <label
+                    htmlFor="resolution-writeup"
+                    className={cssStyles.resolutionLabel}
+                  >
                     Resolution Writeup
                   </label>
                   <textarea
+                    id="resolution-writeup"
                     value={resolutionWriteup}
                     onChange={e => setResolutionWriteup(e.target.value)}
                     placeholder="Describe how this case was resolved, what steps were taken, and any follow-up actions needed..."
@@ -3056,7 +3189,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             ) : (
               /* Empty state */
               <div className={cssStyles.resolutionEmpty}>
-                <div className={cssStyles.resolutionEmptyIcon}>📋</div>
+                <div className={cssStyles.resolutionEmptyIcon} aria-hidden="true">
+                  📋
+                </div>
                 <div className={cssStyles.resolutionEmptyTitle}>
                   No resolution information yet
                 </div>
@@ -3080,62 +3215,66 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       {renderSidebar()}
 
       <div className={cssStyles.mainContent}>
-        {/* Tabs */}
-        <div className={cssStyles.tabsContainer} data-mobile={mobileAttr}>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'details' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </div>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'comments' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('comments')}
-          >
-            Comments
-          </div>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'scheduling' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('scheduling')}
-          >
-            Scheduling
-          </div>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'knowledgeBase' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('knowledgeBase')}
-          >
-            Knowledgebase{' '}
-            {knowledgebaseArticles.length > 0 &&
-              `(${knowledgebaseArticles.length})`}
-          </div>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'resolution' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('resolution')}
-          >
-            Resolution
-          </div>
-          <div
-            className={cssStyles.tab}
-            data-active={activeTab === 'caseUpdates' ? 'true' : undefined}
-            data-mobile={mobileAttr}
-            onClick={() => setActiveTab('caseUpdates')}
-          >
-            Case History
-          </div>
+        {/* Tabs — real WAI-ARIA tablist: native <button role="tab">s with
+            aria-selected, roving tabindex, and arrow/Home/End keyboard nav.
+            (They were onClick <div>s: unfocusable, unoperable by keyboard —
+            WCAG 2.1.1 / 4.1.2.) data-active/data-mobile preserved for CSS. */}
+        <div
+          className={cssStyles.tabsContainer}
+          data-mobile={mobileAttr}
+          role="tablist"
+          aria-label="Task sections"
+        >
+          {tabOrder.map((tabKey, index) => {
+            const tabLabel =
+              tabKey === 'details'
+                ? 'Details'
+                : tabKey === 'comments'
+                  ? 'Comments'
+                  : tabKey === 'scheduling'
+                    ? 'Scheduling'
+                    : tabKey === 'knowledgeBase'
+                      ? `Knowledgebase${
+                          knowledgebaseArticles.length > 0
+                            ? ` (${knowledgebaseArticles.length})`
+                            : ''
+                        }`
+                      : tabKey === 'resolution'
+                        ? 'Resolution'
+                        : 'Case History'
+            const isActive = activeTab === tabKey
+            return (
+              <button
+                key={tabKey}
+                type="button"
+                role="tab"
+                id={`show-task-tab-${tabKey}`}
+                aria-selected={isActive}
+                aria-controls={`show-task-panel-${tabKey}`}
+                tabIndex={isActive ? 0 : -1}
+                ref={el => {
+                  tabRefs.current[index] = el
+                }}
+                className={cssStyles.tab}
+                data-active={isActive ? 'true' : undefined}
+                data-mobile={mobileAttr}
+                onClick={() => setActiveTab(tabKey)}
+                onKeyDown={event => handleTabKeyDown(event, index)}
+              >
+                {tabLabel}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Content Area */}
-        <div className={cssStyles.contentArea} data-mobile={mobileAttr}>
+        {/* Content Area — the active tab's panel. */}
+        <div
+          className={cssStyles.contentArea}
+          data-mobile={mobileAttr}
+          role="tabpanel"
+          id={`show-task-panel-${activeTab}`}
+          aria-labelledby={`show-task-tab-${activeTab}`}
+        >
           {renderTabContent()}
         </div>
       </div>

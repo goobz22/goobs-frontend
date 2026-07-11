@@ -1777,3 +1777,48 @@
   align-items: center;
   margin-bottom: 1rem;
 }
+
+/* --------------------------------------------------------------------------
+   KEYBOARD FOCUS RINGS (WCAG 2.4.7)
+   The tab buttons, section toggles, collapse button, the role="button" cards
+   (meeting list, KB article cards), the shared buttons, and every text
+   input/textarea now show a clear focus ring for keyboard/AT users. One rule
+   covers sacred/light/dark via the per-theme --st-text token.
+   -------------------------------------------------------------------------- */
+.tab:focus-visible,
+.collapseButton:focus-visible,
+.sectionToggle:focus-visible,
+.button:focus-visible,
+.notesEditButton:focus-visible,
+.kbBackButton:focus-visible,
+.kbLinkButton:focus-visible,
+.meetingListCard:focus-visible,
+.kbArticleCard:focus-visible,
+.kbLinkedArticleCard:focus-visible,
+.meetingInput:focus-visible,
+.notesTextarea:focus-visible,
+.commentTextarea:focus-visible,
+.commentEditTextarea:focus-visible,
+.resolutionTextarea:focus-visible {
+  outline: 2px solid var(--st-text);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — drop the tab/card/button transitions and the
+   active-tab nudge for users who ask their OS for less motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .button,
+  .sectionToggle,
+  .meetingListCard,
+  .kbArticleCard,
+  .kbLinkedArticleCard {
+    transition: none;
+  }
+
+  .tab[data-active='true'] {
+    transform: none;
+  }
+}
