@@ -377,6 +377,117 @@ export const ReducedMotion: Story = {
   },
 }
 
+/**
+ * A11y — EXIT ANIMATION SURVIVES A CALLER TIMING OVERRIDE (WCAG 1.3.1 / 2.4.3 / 4.1.2).
+ *
+ * The delayed-inert exit (slid-out content stays perceivable/announced until the slide
+ * finishes, THEN leaves the a11y tree + tab order) must hold even when a consumer supplies
+ * their OWN timing. Earlier, `styles.transition` (a full shorthand) and `styles.transitionDelay`
+ * were emitted as INLINE `transition` / `transition-delay` properties, which wholesale-replaced
+ * the module-CSS `transition` — stripping its `visibility 0s linear var(--slide-duration)` half,
+ * so on slide-OUT the content flipped to `visibility:hidden` INSTANTLY and the exit animation was
+ * cut short (content vanished instead of sliding out). Fix: those overrides now feed the
+ * `--slide-transition` / `--slide-delay` custom properties, so the stylesheet keeps ownership of
+ * the visibility half — the exit animation plays in full for BOTH override paths.
+ *
+ * Both panels below wrap a real focusable `<a>`: with a panel OUT the inner link must leave the
+ * tab order only AFTER its slide-out completes; slid IN, it is tabbable + announced immediately.
+ * The LEFT panel overrides the full `transition` shorthand (800ms); the RIGHT panel overrides
+ * `transitionDelay`. Toggle and watch: each still animates out over its own duration before going
+ * inert. Under the old inline-`transition` behaviour the left panel would have snapped out.
+ */
+export const ExitAnimationSurvivesTimingOverride: Story = {
+  render: function ExitAnimationSurvivesTimingOverrideStory() {
+    const [isVisible, setIsVisible] = useState(true)
+
+    return (
+      <div style={{ width: '640px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          {isVisible ? 'Slide both out' : 'Slide both in'}
+        </CustomButton>
+
+        <div style={{ display: 'flex', gap: '20px', marginTop: '16px' }}>
+          {/* Full `transition` shorthand override — the primary defeat path. */}
+          <div style={{ flex: 1 }}>
+            <Typography styles={{ variant: 'merrihelperfooter', theme: 'light' }}>
+              <code>styles.transition</code> = &lsquo;transform 800ms
+              ease-in-out&rsquo;
+            </Typography>
+            <div
+              style={{
+                height: '180px',
+                position: 'relative',
+                overflow: 'hidden',
+                border: '2px dashed #ccc',
+                borderRadius: '8px',
+              }}
+            >
+              <Slide
+                styles={{
+                  in: isVisible,
+                  direction: 'left',
+                  theme: 'light',
+                  transition: 'transform 800ms ease-in-out',
+                }}
+              >
+                <Paper styles={{ theme: 'light', padding: '20px' }}>
+                  <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                    Custom transition
+                  </Typography>
+                  <a href="https://example.com">Focusable link (transition)</a>
+                </Paper>
+              </Slide>
+            </div>
+          </div>
+
+          {/* `transitionDelay` override — the second defeat path. */}
+          <div style={{ flex: 1 }}>
+            <Typography styles={{ variant: 'merrihelperfooter', theme: 'light' }}>
+              <code>styles.transitionDelay</code> = &lsquo;150ms&rsquo;, 600ms
+              duration
+            </Typography>
+            <div
+              style={{
+                height: '180px',
+                position: 'relative',
+                overflow: 'hidden',
+                border: '2px dashed #ccc',
+                borderRadius: '8px',
+              }}
+            >
+              <Slide
+                styles={{
+                  in: isVisible,
+                  direction: 'right',
+                  theme: 'light',
+                  timeout: 600,
+                  transitionDelay: '150ms',
+                }}
+              >
+                <Paper styles={{ theme: 'light', padding: '20px' }}>
+                  <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                    Custom delay
+                  </Typography>
+                  <a href="https://example.com">Focusable link (delay)</a>
+                </Paper>
+              </Slide>
+            </div>
+          </div>
+        </div>
+
+        <Typography styles={{ variant: 'merrihelperfooter', theme: 'light' }}>
+          Both panels keep their delayed-inert exit: slid OUT, each animates fully
+          before its inner link leaves the tab order — the caller timing override no
+          longer strips the visibility delay.
+        </Typography>
+      </div>
+    )
+  },
+}
+
 // Story with custom timing
 export const CustomTiming: Story = {
   render: function CustomTimingStory() {

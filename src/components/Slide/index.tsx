@@ -78,8 +78,10 @@ function mergeClassNames(...names: Array<string | false | undefined>): string {
  * hidden→visible toggle is the `.in` class — all transform/timing lives in
  * Slide.module.css. Caller-supplied timing overrides (timeout / transitionDuration
  * / transitionTimingFunction / transition / transitionDelay) remain in JS and are
- * forwarded as CSS custom properties (or inline transition for the full-shorthand
- * `transition` override), preserving exact parity with the old getSlideStyles.
+ * forwarded as CSS custom properties (--slide-duration / --slide-timing /
+ * --slide-transition / --slide-delay) — never as an inline `transition` property —
+ * so the stylesheet keeps ownership of the delayed-inert visibility transition
+ * (the exit animation is never cut short), preserving parity with the old getSlideStyles.
  */
 const Slide = forwardRef<HTMLDivElement, SlideProps>(
   ({ children, styles, className: callerClassName, ...restProps }, ref) => {
@@ -88,16 +90,25 @@ const Slide = forwardRef<HTMLDivElement, SlideProps>(
     const isVisible = styles?.in !== false
     const direction = styles?.direction || 'up'
 
-    // Caller-supplied timing overrides stay in JS (dynamic user props). When the
-    // caller passes a full `transition` shorthand it replaces the computed value
-    // verbatim; otherwise timeout / transitionDuration / transitionTimingFunction
-    // feed the --slide-duration / --slide-timing custom properties that the CSS
-    // transition shorthand reads. Disabled forces `transition: none` via the
-    // [data-disabled] CSS rule, so no inline timing is emitted in that case.
+    // Caller-supplied timing overrides stay in JS (dynamic user props) but are
+    // forwarded as CSS CUSTOM PROPERTIES — never as inline `transition` /
+    // `transition-delay` properties. This is deliberate and load-bearing for a11y:
+    // the module CSS composes only the TRANSFORM half of the transition from these
+    // vars while ALWAYS owning the VISIBILITY half (the delayed-inert exit that keeps
+    // slid-out content perceivable until the animation finishes, then removes it from
+    // the a11y tree + tab order). Emitting an inline `transition` shorthand instead
+    // would replace the whole property and strip that visibility delay, cutting the
+    // exit animation short; routing through --slide-transition / --slide-delay keeps
+    // the stylesheet in control of the visibility transition. A full `transition`
+    // shorthand → --slide-transition (replaces the transform half verbatim); otherwise
+    // timeout / transitionDuration / transitionTimingFunction feed --slide-duration /
+    // --slide-timing and transitionDelay feeds --slide-delay. Disabled forces
+    // `transition: none` via [data-disabled], so no timing vars are emitted in that case.
     const dynamicStyle: CSSProperties = {}
     if (!isDisabled) {
       if (styles?.transition !== undefined) {
-        dynamicStyle.transition = styles.transition
+        ;(dynamicStyle as Record<string, string>)['--slide-transition'] =
+          styles.transition
       } else {
         if (styles?.timeout !== undefined) {
           ;(dynamicStyle as Record<string, string>)['--slide-duration'] =
@@ -112,7 +123,8 @@ const Slide = forwardRef<HTMLDivElement, SlideProps>(
         }
       }
       if (styles?.transitionDelay !== undefined) {
-        dynamicStyle.transitionDelay = styles.transitionDelay
+        ;(dynamicStyle as Record<string, string>)['--slide-delay'] =
+          styles.transitionDelay
       }
     }
 
