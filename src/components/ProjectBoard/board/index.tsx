@@ -72,6 +72,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
         checked={checked}
         onChange={onCheck}
         className={cssStyles.taskCheckbox}
+        // The checkbox selects this task (to then "Manage" it). Icon/position
+        // alone gave it no accessible name — screen readers announced a bare
+        // "checkbox". Name it by the task it selects (WCAG 4.1.2 / 1.3.1).
+        aria-label={`Select task: ${title}`}
       />
 
       {isEditing ? (
@@ -82,21 +86,27 @@ const TaskCard: React.FC<TaskCardProps> = ({
             onChange={e => setEditTitle(e.target.value)}
             className={cssStyles.taskInput}
             placeholder="Task title"
+            // Placeholder is not an accessible label (it vanishes on input and
+            // is not reliably exposed) — give the field a real name (WCAG 1.3.1).
+            aria-label="Task title"
           />
           <textarea
             value={editDescription}
             onChange={e => setEditDescription(e.target.value)}
             className={cssStyles.taskTextarea}
             placeholder="Task description"
+            aria-label="Task description"
           />
           <div className={cssStyles.taskActions}>
             <button
+              type="button"
               className={`${cssStyles.taskButton} ${cssStyles.taskSaveButton}`}
               onClick={handleSave}
             >
               Save
             </button>
             <button
+              type="button"
               className={`${cssStyles.taskButton} ${cssStyles.taskCancelButton}`}
               onClick={handleCancel}
             >
@@ -170,6 +180,7 @@ export default function Board({
       return (
         <div
           key={task._id}
+          role="listitem"
           className={cssStyles.taskWrapper}
           style={
             isDragging
@@ -319,7 +330,11 @@ export default function Board({
             {column.tasks.length === 0 ? (
               <div className={cssStyles.noTasks}>No tasks yet</div>
             ) : (
-              <div className={cssStyles.tasksList}>
+              <div
+                className={cssStyles.tasksList}
+                role="list"
+                aria-label={`${column.title} tasks`}
+              >
                 {column.tasks.map((task, taskIndex) =>
                   renderTask(task, taskIndex, columnIndex)
                 )}
