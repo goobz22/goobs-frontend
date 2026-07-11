@@ -246,10 +246,15 @@ const Stepper: React.FC<StepperProps> = ({
     if (isCompleted && finalActions) {
       return (
         <div className={cssStyles.wizardCompleted}>
-          {/* Polite live region: the completion pane is conditionally mounted
-              when the wizard finishes, so role="status" announces it to screen
-              readers without stealing focus (WCAG 4.1.3 Status Messages). */}
-          <div className={cssStyles.wizardCompletedTitle} role="status">
+          {/* Visible completion heading for sighted users. The screen-reader
+              ANNOUNCEMENT is made separately, by the persistent initially-empty
+              role="status" live region declared once at the component root (see
+              the main return): populating an already-present live region is
+              announced reliably, whereas a role="status" node inserted already
+              containing its text is dropped by some assistive tech. This
+              heading therefore carries NO role, so the completion message is
+              announced exactly once (WCAG 4.1.3 Status Messages). */}
+          <div className={cssStyles.wizardCompletedTitle}>
             All steps completed!
           </div>
           <div className={cssStyles.wizardCompletedActions}>
@@ -304,9 +309,18 @@ const Stepper: React.FC<StepperProps> = ({
   // <nav aria-label="Progress"> landmark wraps it (the steps are genuine
   // links); in wizard mode there is no navigation landmark, so the <ol> names
   // itself.
+  //
+  // role="list" is set EXPLICITLY even though <ol> carries that role
+  // implicitly: .stepperContainer applies `list-style: none` (required for the
+  // flex row/column layout), and WebKit strips the implicit list role from any
+  // list whose computed list-style is `none`. On Safari + VoiceOver (the
+  // default AT stack on macOS/iOS) the "list, N items" / "step X of N"
+  // announcement would otherwise silently disappear. The explicit role
+  // restores it. (See Scott O'Hara, "Fixing lists".)
   const stepList = (
     <ol
       className={cssStyles.stepperContainer}
+      role="list"
       data-orientation={orientation}
       aria-label={isWizardMode ? 'Progress' : undefined}
     >
@@ -413,6 +427,21 @@ const Stepper: React.FC<StepperProps> = ({
 
       {renderWizardContent()}
       {renderWizardNavigation()}
+
+      {/* Persistent, initially-EMPTY polite live region for the wizard-
+          completion announcement (WCAG 4.1.3). It is mounted for the whole life
+          of a wizard-mode Stepper and only its text content changes when the
+          wizard finishes: assistive tech announces text inserted into an
+          already-present role="status" reliably, but may drop a role="status"
+          node that is inserted already populated. The visible heading in the
+          completion pane carries no role, so the message is announced once. */}
+      {isWizardMode && (
+        <div className={cssStyles.srOnly} role="status">
+          {activeStep >= steps.length && finalActions
+            ? 'All steps completed!'
+            : ''}
+        </div>
+      )}
     </div>
   )
 }

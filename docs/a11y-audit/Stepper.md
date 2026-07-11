@@ -18,14 +18,14 @@ readers.
 
 | # | Severity | WCAG | Location (pre-fix) | Issue | Status |
 |---|----------|------|--------------------|-------|--------|
-| 1 | Serious | 1.3.1 Info & Relationships (A) | `index.tsx:284-330` | Steps rendered as `<div class="stepperContainer">` › `<div class="stepContainer">` — **no list semantics**. AT never announced "list, N items" / "step X of N"; the step set had no programmatic grouping. In navigation mode there was also no landmark. | FIXED (`<nav aria-label="Progress">` › `<ol>` › `<li>`; wizard mode uses a self-labelled `<ol>`) |
+| 1 | Serious | 1.3.1 Info & Relationships (A) | `index.tsx:284-330` | Steps rendered as `<div class="stepperContainer">` › `<div class="stepContainer">` — **no list semantics**. AT never announced "list, N items" / "step X of N"; the step set had no programmatic grouping. In navigation mode there was also no landmark. | FIXED (`<nav aria-label="Progress">` › `<ol role="list">` › `<li>`; wizard mode uses a self-labelled `<ol role="list">`). **Explicit `role="list"` added in the 2026-07-11 review follow-up — see below.** |
 | 2 | Serious | 4.1.2 Name, Role, Value (A); 1.4.1 Use of Color (A) | `index.tsx:299` (`iconContainer[data-status]`) | The **current/active step carried no `aria-current`** — which step is "current" was conveyed only by the active icon shape + background colour, so a screen-reader user could not tell where they are. | FIXED (`aria-current="step"` on the active step's control) |
 | 3 | Serious | 1.1.1 Non-text Content (A); 1.4.1 Use of Color (A); 1.3.1 (A) | `index.tsx:299-311` | A step's **status (completed / error / locked) had no text or programmatic equivalent**. The status icons are decorative-by-default (`resolveIconA11y` → `aria-hidden`), so status reached sighted users through icon+colour but reached AT users through *nothing*. | FIXED (visually-hidden `.srOnly` status word — "Completed"/"Error"/"Locked" — appended to each control's accessible name; active uses `aria-current`) |
 | 4 | Serious | 4.1.2 Name, Role, Value (A); 1.3.1 (A) / SEO | `index.tsx:198-199, 304-311` | Reachable navigation-mode steps were `<button>`s that navigated via **`window.location.assign()`** on click — wrong role (button, not link), **not crawlable** in the SSR'd HTML, and no middle-click / open-in-new-tab / status-bar URL. | FIXED (reachable navigation steps are real `<a href>` anchors that navigate natively; `onClick` now only emits the diagnostic) |
 | 5 | Moderate | 1.3.1 Info & Relationships (A) | `index.tsx:312-316` | The secondary `description` was a sibling `<div>` **not associated** with its step control — a screen reader read the label and the description as disconnected text. | FIXED (`aria-describedby` on the control → the description's `id`, via `React.useId`) |
 | 6 | Moderate | 2.4.7 Focus Visible (AA) | `Stepper.module.css:173-195` (`.stepButton`, no `:focus-visible`) | The module had `:hover` and `:disabled` rules but **no `:focus-visible` treatment** — keyboard focus fell back to the UA default outline, easily lost against the sacred gold-on-dark and themed surfaces. | FIXED (`.stepButton:focus-visible` 2px ring using the per-theme `--goobs-*-focus-ring` tokens) |
 | 7 | Minor | 2.3.3 Animation from Interactions (AAA) | `Stepper.module.css:139, 182` | `.iconContainer` and `.stepButton` use `transition: all 0.3s ease` with **no `prefers-reduced-motion` guard**. | FIXED (`@media (prefers-reduced-motion: reduce)` drops both transitions) |
-| 8 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx:227-229` | The wizard's **"All steps completed!"** pane appears (conditionally mounted) with **no live region**, so a screen-reader user gets no announcement that the wizard finished. | FIXED (`role="status"` on the completion title) |
+| 8 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx:227-229` | The wizard's **"All steps completed!"** pane appears (conditionally mounted) with **no live region**, so a screen-reader user gets no announcement that the wizard finished. | FIXED (announcement now via a **persistent, initially-empty** `role="status"` region at the component root; the visible title carries no role — hardened in the 2026-07-11 review follow-up, see below) |
 
 No hearing/media issues: a grep of the component for `new Audio`/`AudioContext`/`<audio>`/
 `<video>`/`navigator.vibrate`/`.play(` returned nothing — Stepper conveys no information by sound.
@@ -38,10 +38,12 @@ applicable.
 
 ## Reading & screen reader
 
-- **List structure (Issue 1):** steps are a real `<ol>`/`<li>`, so AT announces the count and
-  position ("list, 4 items", "step 2 of 4"). Navigation mode wraps the list in a
-  `<nav aria-label="Progress">` landmark (its steps are genuine links); wizard mode omits the
-  landmark (its steps do not navigate) and labels the `<ol>` itself `aria-label="Progress"`.
+- **List structure (Issue 1 / RF-1):** steps are a real `<ol role="list">`/`<li>`, so AT announces
+  the count and position ("list, 4 items", "step 2 of 4"). The `role="list"` is explicit because
+  `.stepperContainer` uses `list-style: none`, which makes WebKit strip the implicit list role
+  (Safari/VoiceOver) — see RF-1. Navigation mode wraps the list in a `<nav aria-label="Progress">`
+  landmark (its steps are genuine links); wizard mode omits the landmark (its steps do not
+  navigate) and labels the `<ol>` itself `aria-label="Progress"`.
 - **Current step (Issue 2):** the active step's control carries `aria-current="step"` — the state
   is now programmatic + icon-shape + colour, never colour alone (1.4.1 satisfied).
 - **Status (Issue 3):** each control's accessible name ends with a visually-hidden status word
@@ -56,8 +58,10 @@ applicable.
   description text via `aria-describedby`, so the secondary text is announced with the step.
 - **Focus (Issue 6):** `.stepButton:focus-visible` draws a 2px outline (per-theme focus-ring
   token, 2px offset) on both the `<a>` and `<button>` variants across sacred/light/dark.
-- **Completion (Issue 8):** the "All steps completed!" title is a polite `role="status"` live
-  region, announced on mount without stealing focus.
+- **Completion (Issue 8 / RF-2):** the wizard-completion announcement rides a **persistent,
+  initially-empty** polite `role="status"` region at the component root; when the wizard finishes
+  it is populated with "All steps completed!" and announced without stealing focus. The visible
+  heading carries no role, so the message is announced exactly once (RF-2 hardening).
 - **Keyboard model:** a stepper needs no arrow-key roving (like breadcrumb, it is an ordinary set
   of links/buttons) — Tab/Shift+Tab move between the real `<a>`/`<button>` step controls and the
   wizard Back/Continue/Finish/Start-Over `<button>`s; Enter (and Space on buttons) activate them
@@ -108,31 +112,93 @@ no existing `data-*`/`role`/`aria` selector removed):
   now crawlable). Locked navigation steps and wizard steps stay `<button>` (unchanged element),
   gaining `type="button"`.
 - New attributes only (nothing removed/renamed): `aria-current="step"`, `aria-describedby`,
-  `aria-label="Progress"`, `role="status"`, `aria-hidden` on connectors. `data-component`,
+  `aria-label="Progress"`, **`role="list"` on the `<ol>` (RF-1)**, `role="status"` on the
+  persistent completion live region (RF-2), `aria-hidden` on connectors. `data-component`,
   `data-theme`, `data-status`, and `data-action="goto-step"` are all preserved on their prior
   elements (the peer-added `data-action="goto-step"` now rides on both the `<a>` and `<button>`
   variants).
 
 ## Stories updated
 
-- **`NavigationSemantics`** (new) — navigation mode with a `play` function that pins: the
-  `<nav aria-label="Progress">` landmark, the `<ol>`/`<li>` list with the right item count, the
-  completed step as a real `<a href>` whose accessible text includes "Completed", the active step
-  as a link with `aria-current="step"` wired to its description via `aria-describedby`, and the
-  locked step as a disabled `<button>` reading "Locked". These fail if any of Issues 1–5 regress.
-- **`WizardCompletionAnnouncement`** (new) — drives the wizard to completion (Continue → Finish)
-  and asserts the "All steps completed!" message carries `role="status"` (Issue 8) plus the
-  "Start Over" reset. Fails if the completion live region regresses.
+- **`NavigationSemantics`** (new; extended in the 2026-07-11 follow-up) — navigation mode with a
+  `play` function that pins: the `<nav aria-label="Progress">` landmark, the `<ol>`/`<li>` list
+  with the right item count **plus the explicit `role="list"` attribute on the `<ol>` (RF-1 — the
+  Safari/VoiceOver guard)**, the completed step as a real `<a href>` whose accessible text includes
+  "Completed", the active step as a link with `aria-current="step"` wired to its description via
+  `aria-describedby`, and the locked step as a disabled `<button>` reading "Locked". These fail if
+  any of Issues 1–5 or RF-1 regress.
+- **`WizardCompletionAnnouncement`** (new; extended in the 2026-07-11 follow-up) — drives the
+  wizard to completion (Continue → Finish) and asserts the completion announcement uses a
+  **persistent, initially-empty `role="status"` region** (RF-2): the region exists and is empty
+  before completion, is populated with "All steps completed!" after, and exactly two nodes carry
+  the text (sr-only region + visible heading) — plus the "Start Over" reset. Fails if the
+  completion live region regresses to a conditionally-mounted / already-populated form.
 - Existing `WizardMode`, `ThemeShowcase`, `SacredTheme`, `InteractiveDemo`, and the checkout /
   setup demo stories continue to exercise the status icons, themes, orientations, and wizard flow
   under the new markup.
 
+## Adversarial review follow-up (2026-07-11)
+
+A fresh adversarial review of the pass above found two remaining issues; both are now fixed at
+root cause, additive-only, inside `src/components/Stepper/`.
+
+### RF-1 (moderate) — Safari/VoiceOver list-role stripping was unguarded (WCAG 1.3.1)
+
+`.stepperContainer` sets `list-style: none` (needed for the flex row/column layout). **WebKit
+intentionally strips the implicit list role from any `<ul>`/`<ol>` whose computed `list-style`
+is `none`** (documented WebKit behaviour; Scott O'Hara, "Fixing lists"). So on Safari + VoiceOver
+— the default AT stack on macOS **and iOS** — the `<ol>` was NOT exposed as a list and the whole
+"list, N items" / "step X of N" announcement (the headline promise of Issue 1) silently
+regressed for a large screen-reader population. The `NavigationSemantics` story's
+`getByRole('list')` gave false assurance because it runs under Chromium, where `list-style:none`
+does **not** strip the role.
+
+**Fix:** added an **explicit `role="list"`** to the `<ol>` (`index.tsx`, the `stepList` element).
+Explicit `role="list"` overrides WebKit's implicit-role suppression, so the list is exposed on
+Safari/VoiceOver again. The fix is additive (no attribute removed/renamed; machine-test
+selectors untouched).
+
+**Regression pin:** `NavigationSemantics` now asserts `list.tagName === 'OL'` **and**
+`toHaveAttribute('role', 'list')` — the attribute assertion (not just the resolved role) fails if
+the explicit `role` is dropped, so it actually protects the Safari path even though the play
+function runs under Chromium.
+
+### RF-2 (minor) — completion live region was injected already-populated (WCAG 4.1.3)
+
+Issue 8's `role="status"` lived on the visible completion title, which is **conditionally mounted
+already containing its text**. Live regions inserted into the DOM already populated are announced
+inconsistently by some assistive tech; the robust pattern is a **persistent, initially-empty**
+`role="status"` region that is populated later.
+
+**Fix:** moved the announcement to a persistent, visually-hidden (`.srOnly`) `role="status"`
+region declared **once at the component root** (rendered for the whole life of a wizard-mode
+Stepper, empty until `activeStep >= steps.length && finalActions`, then populated with
+"All steps completed!"). The visible completion heading now carries **no role**, so the message is
+announced **exactly once** (no double-announcement) and always into an already-present live region.
+
+**Regression pin:** `WizardCompletionAnnouncement` now asserts the live region exists and is
+**empty before completion** (`getByRole('status')`, `textContent === ''`), is **populated after
+completion** (`toHaveTextContent('All steps completed!')`), and that exactly **two** nodes carry
+the text (`getAllByText(...).toHaveLength(2)` — the sr-only region + the visible heading), which
+regresses to one if the persistent region is removed and would throw on `getByRole('status')` if
+the visible title's role were re-added.
+
 ## Deferred
 
-None in owned scope — every fix lived inside `src/components/Stepper/`. No shared-file change
-(Icons, Button, `global.css`, barrel) was required: the status icons were already correctly
-decorative via the shared `resolveIconA11y` contract, and the focus-ring/`.srOnly` conventions
-reuse existing `--goobs-*` tokens and the repo-standard pattern.
+- **Breadcrumb (cross-component — same list-role class as RF-1).** `src/components/Breadcrumb/index.tsx:246`
+  renders `<ol className={cssStyles.list}>` with **no explicit `role="list"`**, and
+  `src/components/Breadcrumb/Breadcrumb.module.css:67` sets `list-style: none`. This is the exact
+  WebKit implicit-list-role-stripping bug fixed for Stepper in RF-1, so Breadcrumb's list is not
+  exposed on Safari/VoiceOver. **Suggested change:** add `role="list"` to the `<ol>` at
+  `Breadcrumb/index.tsx:246` (`<ol role="list" className={cssStyles.list}>`) and pin it with a
+  story assertion. Not fixed here because `src/components/Breadcrumb/` is outside this fix-owner's
+  directory.
+
+Nothing else deferred — every Stepper fix (original pass + this review follow-up) lived inside
+`src/components/Stepper/`. No shared-file change (Icons, Button, `global.css`, barrel) was
+required: the status icons were already correctly decorative via the shared `resolveIconA11y`
+contract, and the focus-ring/`.srOnly` conventions reuse existing `--goobs-*` tokens and the
+repo-standard pattern.
 
 **Non-blocking observation (left as-is, not a WCAG failure):** on wizard step change the
 consumer-provided `content` swaps without an announcement or focus move. Wrapping arbitrary

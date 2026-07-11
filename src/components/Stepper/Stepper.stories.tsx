@@ -1322,7 +1322,9 @@ export const SacredTheme: Story = {
  * Accessibility regression pins for navigation mode. The play function asserts
  * the semantic contract screen-reader users depend on:
  *  - a `<nav aria-label="Progress">` landmark wrapping a real `<ol>`/`<li>`
- *    list (WCAG 1.3.1) so AT announces "list, 3 items" / "step X of 3";
+ *    list (WCAG 1.3.1) so AT announces "list, 3 items" / "step X of 3" — the
+ *    `<ol>` carries an EXPLICIT `role="list"` so Safari/VoiceOver (which strips
+ *    the implicit role from a `list-style:none` list) still exposes it;
  *  - reachable steps render as real crawlable `<a href>` anchors (WCAG 4.1.2 /
  *    SEO), not JS-navigating buttons;
  *  - the active step carries `aria-current="step"` and is wired to its
@@ -1340,7 +1342,15 @@ export const NavigationSemantics: Story = {
     await expect(
       canvas.getByRole('navigation', { name: 'Progress' })
     ).toBeInTheDocument()
-    await expect(canvas.getByRole('list')).toBeInTheDocument()
+    // The <ol> carries an EXPLICIT role="list". .stepperContainer sets
+    // `list-style: none`, and WebKit (Safari + VoiceOver) strips the implicit
+    // list role from any list styled that way — so the explicit attribute is
+    // what keeps "list, N items" announced on Apple's default AT stack.
+    // Asserting the attribute itself (not just the resolved role, which passes
+    // in Chromium regardless) guards the Safari fix even under this Chromium run.
+    const list = canvas.getByRole('list')
+    await expect(list.tagName).toBe('OL')
+    await expect(list).toHaveAttribute('role', 'list')
     await expect(canvas.getAllByRole('listitem')).toHaveLength(3)
 
     // Completed step: a real crawlable link that announces its status.
@@ -1390,24 +1400,43 @@ export const NavigationSemantics: Story = {
 }
 
 /**
- * Accessibility regression pin for wizard completion. Advancing through every
- * step surfaces the "All steps completed!" pane, which is a polite
- * `role="status"` live region so screen readers announce it without a focus
- * change (WCAG 4.1.3 Status Messages). The play function drives the wizard to
- * completion and asserts the live region + the "Start Over" reset.
+ * Accessibility regression pin for wizard completion. The completion message is
+ * announced through a PERSISTENT, initially-empty polite `role="status"` live
+ * region (declared once at the Stepper root) that is populated only when the
+ * wizard finishes — the pattern assistive tech announces reliably, unlike a
+ * `role="status"` node inserted already containing its text (WCAG 4.1.3 Status
+ * Messages). The play function pins that the live region exists and is EMPTY
+ * before completion, that advancing through every step populates it with
+ * "All steps completed!", that a separate visible heading also shows the text
+ * to sighted users, and that the "Start Over" reset appears.
  */
 export const WizardCompletionAnnouncement: Story = {
   name: 'A11y/Wizard Completion',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
+    // Before completion: the polite live region is present but EMPTY. Declaring
+    // it up-front (rather than mounting an already-populated role="status" when
+    // the wizard finishes) is what lets assistive tech announce the message
+    // reliably once the region is later filled.
+    const liveRegion = canvas.getByRole('status')
+    await expect(liveRegion.textContent).toBe('')
+
     // Advance through both steps to reach the completed pane.
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await userEvent.click(canvas.getByRole('button', { name: 'Finish' }))
 
-    // The completion message is a polite live region.
-    const message = await canvas.findByText('All steps completed!')
-    await expect(message).toHaveAttribute('role', 'status')
+    // The SAME persistent live region is now populated → announced politely.
+    // It is the only role="status" node (the visible heading carries no role),
+    // so the message is announced exactly once.
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      'All steps completed!'
+    )
+
+    // Both the sr-only live region and the visible heading carry the text:
+    // exactly two nodes (this regresses to one if the live region is dropped).
+    await expect(canvas.getAllByText('All steps completed!')).toHaveLength(2)
+
     await expect(
       canvas.getByRole('button', { name: 'Start Over' })
     ).toBeVisible()
