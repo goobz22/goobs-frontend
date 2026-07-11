@@ -8,6 +8,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import { Markdown } from './'
 
 // --------------------------------------------------------------------------
@@ -181,7 +182,8 @@ export const FullWidth: Story = {
 // --------------------------------------------------------------------------
 // ACCESSIBILITY STORIES
 // Exercise the a11y guarantees added in the 2026-07-11 audit: reflow-safe
-// media (WCAG 1.4.10) and a surface-adaptive keyboard focus ring (WCAG 2.4.7).
+// media AND inline text (WCAG 1.4.10) and a surface-adaptive keyboard focus
+// ring (WCAG 2.4.7, tabbed to via a play fn so the ring actually paints).
 // --------------------------------------------------------------------------
 
 /**
@@ -239,4 +241,63 @@ export const FocusableLinks: Story = {
     ),
   ],
   globals: { backgrounds: { value: 'dark' } },
+  // Regression-gate the keyboard focus indicator (WCAG 2.4.7). The play fn moves
+  // real keyboard focus (Tab) onto the first rendered link so
+  // `.root a:focus-visible` actually paints — Chromatic captures that visible
+  // `currentColor` ring in the baseline. Without a play fn no link is ever
+  // focused, so the ring never renders in the snapshot and deleting the
+  // `.root a:focus-visible` rule would change no baseline and pass silently.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const first = canvas.getByRole('link', { name: 'first link' })
+    // Tab from the body: focus lands on the first focusable element in the
+    // block (the first link), driving its :focus-visible ring for the snapshot.
+    await userEvent.tab()
+    await expect(first).toHaveFocus()
+    // The later links are keyboard-reachable too (only one element can hold
+    // focus per snapshot, so their rings are gated by this same rule).
+    await expect(canvas.getByRole('link', { name: 'second link' })).toHaveAttribute(
+      'href',
+      'https://example.org'
+    )
+    await expect(canvas.getByRole('link', { name: 'third link' })).toHaveAttribute(
+      'href',
+      'https://example.net'
+    )
+  },
+}
+
+/**
+ * Inline-text reflow (WCAG 1.4.10 Reflow). The reflow-safe-media story covers
+ * `<pre>` and `<img>`, but a pathological unbroken INLINE string — a bare long
+ * URL used as link text, or a long inline `<code>` token from `mdToHtml` — is
+ * neither, and would overflow horizontally at a narrow viewport without
+ * `.root { overflow-wrap: break-word }`. Rendered in a narrow 320px frame (the
+ * WCAG reflow width); a regression that removes `overflow-wrap` makes this
+ * frame scroll sideways instead of wrapping the long token.
+ */
+export const ReflowSafeInlineText: Story = {
+  name: 'A11y/Reflow-safe inline text',
+  args: {
+    children: [
+      '# Inline reflow',
+      '',
+      'A bare long URL as link text must wrap, not overflow:',
+      '',
+      '[https://example.com/a-single-unbroken-path-segment-far-wider-than-any-narrow-viewport-that-must-wrap-instead-of-scrolling-1234567890](https://example.com)',
+      '',
+      'A long inline `code` token must also wrap:',
+      '',
+      '`a-single-unbroken-inline-code-token-far-wider-than-any-narrow-viewport-that-must-wrap-1234567890`',
+    ].join('\n'),
+    maxWidth: 0,
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '320px', padding: '1rem', color: '#1a1a1a' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'light' } },
 }

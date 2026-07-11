@@ -1,6 +1,6 @@
 # Markdown — a11y audit (2026-07-11)
 
-**Status: FIXED**
+**Status: FIXED** (incl. adversarial-review follow-up — see "Adversarial-review fixes" below)
 
 ## APG pattern
 
@@ -28,6 +28,8 @@ so the audit centred on **keyboard focus visibility** and **reflow**.
 | 2 | Moderate | 1.4.10 Reflow (AA) | `Markdown.module.css` (no `img` rule pre-fix) | Rendered `<img>` had **no width constraint** despite the component JSDoc (`index.tsx:33-35`) explicitly promising "image responsiveness". A wide image overflowed the content box and forced a two-dimensional page scroll at narrow viewports / high zoom. | **FIXED** |
 | 3 | Moderate | 1.4.10 Reflow (AA) | `Markdown.module.css` (no `pre` rule pre-fix) | Rendered `<pre><code>` code blocks were **not scroll-contained**. A long unbroken code line overflowed the container and widened the page instead of scrolling inside its own box. | **FIXED** |
 | 4 | Minor | 1.4.4 Resize Text (AA) | `Markdown.module.css:25` (pre-fix `font-size: 16px`) | Body copy was a **fixed `16px`**, so the block did not scale with a reader's larger browser default-font-size preference (browser zoom still worked, but user-set base font size was ignored). | **FIXED** |
+| 5 | Minor | 1.4.10 Reflow (AA) | `Markdown.module.css:15-28` (no inline-wrap rule pre-fix) | `.root` had **no `overflow-wrap`/`word-break`**. The `<pre>`/`<img>` rules fixed code-block and media reflow, but a pathological unbroken **inline** string — a bare long URL used as link text, or a long inline `<code>` token from `mdToHtml` (`conversion.ts:19`) — is neither, and overflowed horizontally at a 320px viewport / 400% zoom (residual 1.4.10 failure). | **FIXED** |
+| 6 | Minor | (test-integrity, not a WCAG item) | `Markdown.stories.tsx` (FocusableLinks, pre-fix) | The `FocusableLinks` story had **no `play`/interaction function**, so no link was ever focused and the `.root a:focus-visible` ring (issue 1's fix) never rendered in the Chromatic-captured state. Removing the focus-visible rule would have produced an identical snapshot — the a11y state was effectively **unexercised** by goobs' only regression net. | **FIXED** |
 
 ### Hearing-impaired (WCAG 1.2.x / 1.4.2) — CLEAN
 
@@ -74,10 +76,31 @@ all `data-*` test selectors are untouched.
   (`Markdown.module.css:24-27`). Visually identical at the UA-default 16px root,
   but now scales with a reader's browser font-size preference.
 
+## Adversarial-review fixes (2026-07-11, follow-up pass)
+
+An adversarial review of the pass above found two residual minor issues; both
+fixed at root cause (all changes stay inside `Markdown/` — no un-owned file
+touched, no DOM/API/`data-*` change):
+
+- **Issue 5 — inline-text reflow** — added `overflow-wrap: break-word` to `.root`
+  (`Markdown.module.css:15-28`). `break-word` introduces a soft-wrap opportunity
+  *only* inside a word that would otherwise overflow, so normal prose wrapping is
+  unchanged, but a pathological unbroken inline string (long bare-URL link text,
+  long inline `<code>`) now wraps instead of widening the page at a 320px
+  viewport / 400% zoom. Completes the 1.4.10 coverage the `<pre>`/`<img>` rules
+  started (those handle only block-level code and media, not inline runs).
+- **Issue 6 — `FocusableLinks` was unexercised** — added a `play` function
+  (`storybook/test` `userEvent.tab()` + `expect(...).toHaveFocus()`, matching the
+  `Avatar` `Accessibility/Focusable` template) that Tabs real keyboard focus onto
+  the first rendered link, so `.root a:focus-visible` actually paints in the
+  Chromatic baseline. Without it the ring never rendered and deleting the
+  focus-visible rule would have passed silently. The play fn also asserts the
+  second/third links' `href`s to confirm all three are keyboard-reachable.
+
 ## Stories updated
 
-Stories are this repo's only regression tests. Added two to
-`Markdown.stories.tsx`, matching the file's JSDoc-per-story convention:
+Stories are this repo's only regression tests. `Markdown.stories.tsx` now carries
+three a11y stories (matching the file's JSDoc-per-story convention):
 
 - **`A11y/Reflow-safe media`** (`ReflowSafeMedia`) — renders a deliberately
   1200px-wide inline-SVG data-URI image (self-contained, renders offline) plus a
@@ -85,10 +108,16 @@ Stories are this repo's only regression tests. Added two to
   frame. Exercises `.root img { max-width: 100% }` and
   `.root pre { overflow-x: auto }`; a regression (removing either rule) makes the
   360px frame scroll horizontally.
+- **`A11y/Reflow-safe inline text`** (`ReflowSafeInlineText`, added in the review
+  pass) — a long bare-URL link and a long inline `<code>` token inside a narrow
+  320px frame (the WCAG reflow width). Exercises the new
+  `.root { overflow-wrap: break-word }`; removing that rule makes the frame scroll
+  sideways instead of wrapping the token.
 - **`A11y/Focusable links (dark)`** (`FocusableLinks`) — three markdown links on
-  the dark canvas (inherited light text). Tabbing shows the `currentcolor`
-  `:focus-visible` ring; exercises `.root a:focus-visible` on the exact surface
-  where a UA-default dark outline would disappear.
+  the dark canvas (inherited light text), now with a `play` function that Tabs
+  onto the first link so the `currentcolor` `:focus-visible` ring paints and is
+  captured; exercises `.root a:focus-visible` on the exact surface where a
+  UA-default dark outline would disappear.
 
 The existing `LightTheme` / `DarkTheme` / `SacredTheme` stories already render
 links, headings, lists, code, and emphasis across all three surfaces and remain
