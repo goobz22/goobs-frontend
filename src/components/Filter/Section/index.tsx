@@ -227,6 +227,14 @@ export interface FilterSectionProps {
   /** Stable test selector for the whole section. Surfaced as
    *  `data-filter-section-field` on the wrapper. */
   dataField?: string
+  /**
+   * Base `data-testid` for this section's toggle/panel pair (default
+   * `'filter-section'`): the toggle gets `${base}-toggle`, the panel
+   * `${base}-panel` (collapsible mode only). Override it to disambiguate
+   * multiple filter sections on one page so their test ids don't collide.
+   * Matches the additive `data-testid` prop convention (see Markdown).
+   */
+  'data-testid'?: string
 }
 
 function kebab(input: string): string {
@@ -264,11 +272,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   style,
   styles: propStyles,
   dataField,
+  'data-testid': dataTestId = 'filter-section',
 }) => {
   const [isExpanded, setIsExpanded] = useState(initiallyOpen)
   const reactId = useId()
   const panelId = `filter-section-panel-${reactId}`
   const state = isExpanded ? 'open' : 'closed'
+  // Sibling toggle/panel ids derive from the overridable base testid so two
+  // filter sections on one page don't collide on the same fixed selector.
+  const toggleTestId = `${dataTestId}-toggle`
+  const panelTestId = `${dataTestId}-panel`
 
   // Additive diagnostics: on a collapse/expand transition, surface the new
   // open/closed state to the host diagnostics bus (no-op when none present).
@@ -582,7 +595,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       onClick={handleToggle}
       aria-expanded={isExpanded}
       aria-controls={panelId}
-      data-testid="filter-section-toggle"
+      data-testid={toggleTestId}
       data-state={state}
       className={styles.toggle}
     >
@@ -622,7 +635,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           id={panelId}
           role="region"
           aria-label={title}
-          data-testid="filter-section-panel"
+          data-testid={panelTestId}
           className={styles.panel}
         >
           {filterContent}
