@@ -133,6 +133,30 @@ const Snackbar: React.FC<SnackbarProps> = ({
     }
   }
 
+  // A11y (WCAG 2.1.1 Keyboard) — Escape dismisses the toast when focus is WITHIN
+  // it. This is the library-wide dismiss affordance for overlays (Dialog,
+  // Popover, Drawer) and the standard behavior of dismissible-toast patterns
+  // (Radix Toast / react-aria), giving a keyboard user who has Tabbed to the
+  // Close control the universal "dismiss" key rather than requiring them to
+  // land Enter/Space precisely on the small button.
+  //
+  // Scope matters for a NON-MODAL toast: this is a delegated `onKeyDown` on the
+  // root, so it only fires when a descendant (the Close button) is focused and
+  // the keydown bubbles up — it can NEVER hijack Escape for a user typing
+  // elsewhere on the page (a document-level listener, which is correct for the
+  // Popover the user just opened, would be wrong here). `stopPropagation` keeps
+  // the Escape from ALSO dismissing an ancestor overlay (e.g. a Dialog the
+  // snackbar renders inside) — the toast is the innermost dismissible surface.
+  // Dismissal mirrors the auto-hide path exactly (`setIsOpen(false)` + `onClose`,
+  // no exit animation), so a reused-and-remounted instance closes consistently.
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation()
+      setIsOpen(false)
+      onClose()
+    }
+  }
+
   if (!isOpen) {
     return null
   }
@@ -151,6 +175,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocusWithin(true)}
       onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
     >
       <Alert
         message={message}

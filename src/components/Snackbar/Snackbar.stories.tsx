@@ -446,6 +446,41 @@ export const PauseOnFocus: Story = {
 }
 
 /**
+ * WCAG 2.1.1 (Keyboard) — Escape dismisses the toast when focus is WITHIN it.
+ * A keyboard user who has Tabbed to the Close button gets the universal dismiss
+ * key (the same affordance the library's Dialog/Popover/Drawer expose). The
+ * play function focuses the Close button, presses Escape, and asserts the toast
+ * is removed. `autoHideDuration={0}` disables the timer so the dismissal is
+ * unambiguously attributable to Escape, not to auto-hide. Against code with no
+ * Escape handler this assertion fails (the toast stays visible).
+ */
+export const DismissOnEscape: Story = {
+  name: 'Behavior/Dismiss On Escape (WCAG 2.1.1)',
+  args: {
+    open: true,
+    message: 'Press Escape to dismiss me.',
+    severity: 'info',
+    autoHideDuration: 0,
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const message = 'Press Escape to dismiss me.'
+    const closeButton = canvas.getByRole('button', { name: 'Close' })
+
+    // Move focus into the snackbar (onto the Close button), then press Escape.
+    closeButton.focus()
+    await expect(closeButton).toHaveFocus()
+    await userEvent.keyboard('{Escape}')
+
+    // The toast is dismissed.
+    await waitFor(() =>
+      expect(canvas.queryByText(message)).not.toBeInTheDocument()
+    )
+  },
+}
+
+/**
  * Controlled wrapper for the pause-flag reset regression. The parent keeps the
  * Snackbar MOUNTED and only toggles `open` (an external button re-opens it,
  * `onClose` closes it), so React state on the ONE Snackbar instance persists
