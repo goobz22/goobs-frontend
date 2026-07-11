@@ -214,6 +214,16 @@ export interface BigCalendarProps {
   bedroomOptions?: Array<string | number>
   /** Price-range options for the filter panel's standardized dropdown. Default []. */
   priceRanges?: string[]
+  /**
+   * Forwarded ref to the root `<div role="region">` container (React 19
+   * ref-as-prop), MERGED with the internal `gridRef` the calendar uses to scope
+   * roving focus. The calendar renders MANY `<button>`s (event chips + the
+   * prev/today/next toolbar + view toggles), so there is no single "the button"
+   * — the region root is the meaningful consumer handle (scroll it into view,
+   * measure it, or query its controls). Individual controls stay reachable via
+   * their `data-action`/aria-labels.
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -270,6 +280,7 @@ export default function BigCalendar({
   propertyTypes = [],
   bedroomOptions = [],
   priceRanges = [],
+  ref,
 }: BigCalendarProps) {
   const [view, setView] = useState<CalendarView>(propView)
   const [selectedDate, setSelectedDate] = useState(currentDate)
