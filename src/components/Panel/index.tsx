@@ -131,6 +131,17 @@ function PanelInner({
     [titleId, variant]
   )
 
+  // The region labels itself via the header title's id — but ONLY when a
+  // Panel.Header is actually composed in. A header-less Panel (Body-only)
+  // must not emit a dangling `aria-labelledby` pointing at an id that never
+  // renders: an invalid IDREF leaves the region with no accessible name and
+  // trips AT/validators. Detect a direct Panel.Header child and gate the attr
+  // so the header-less case degrades to an un-named region (or a consumer's
+  // own `aria-label`/`aria-labelledby` via restProps) rather than a broken ref.
+  const hasHeader = React.Children.toArray(children).some(
+    child => React.isValidElement(child) && child.type === PanelHeader
+  )
+
   return (
     <PanelContext.Provider value={contextValue}>
       <section
@@ -141,7 +152,7 @@ function PanelInner({
           className
         )}
         role="region"
-        aria-labelledby={titleId}
+        aria-labelledby={hasHeader ? titleId : undefined}
         data-component="Panel"
         data-panel="true"
         data-panel-variant={variant}
@@ -170,6 +181,14 @@ export interface PanelHeaderProps extends Omit<
   backLabel?: string
   /** Panel title — rendered as the `aria-labelledby` target of the root. */
   title: ReactNode
+  /**
+   * Heading level for the title, rendered as a real `<h1>`–`<h6>` element so
+   * the title is a true document heading (screen-reader heading navigation +
+   * SEO outline), not merely styled text. Defaults to `2` — a Panel title is
+   * a sub-section of the host page's `<h1>`. The heading element carries the
+   * `id` the Panel root references via `aria-labelledby`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Optional secondary line under the title. */
   subtitle?: ReactNode
   /**
@@ -186,6 +205,7 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
       onBack,
       backLabel = 'Back',
       title,
+      headingLevel = 2,
       subtitle,
       actions,
       className,
@@ -199,6 +219,15 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
     // gets light-theme text/icons — light text on the dark takeover fails WCAG
     // contrast (#1f2937 on near-black is 1.43:1; sacred gold is 14.97:1).
     const headerTheme = variant === 'standard' ? 'light' : 'sacred'
+    // Render the title as a REAL heading element (not a styled span) so screen
+    // readers expose it for heading navigation and the SSR outline is correct.
+    const HeadingTag = `h${headingLevel}` as
+      | 'h1'
+      | 'h2'
+      | 'h3'
+      | 'h4'
+      | 'h5'
+      | 'h6'
     return (
       <div
         ref={ref}
