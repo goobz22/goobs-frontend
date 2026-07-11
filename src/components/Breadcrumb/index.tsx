@@ -127,17 +127,38 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     const content = <span className={cssStyles.itemContent}>{item.label}</span>
 
     // Current page — flagged with aria-current="page" per the WAI-ARIA
-    // breadcrumb pattern so assistive tech announces "current page", and
-    // rendered as non-navigable text (active crumbs never became links).
-    // onClick is preserved for diagnostic / consumer-callback parity.
+    // breadcrumb pattern so assistive tech announces "current page".
+    //
+    // With no onClick the current page is non-navigable, non-interactive text
+    // (the APG ideal — the current page is not a control). When the consumer
+    // explicitly wires an onClick onto the active crumb they have opted it into
+    // being an interactive control, so it renders as a native <button> — natively
+    // keyboard-focusable and Enter/Space-operable — so keyboard users can
+    // activate it exactly like mouse users (WCAG 2.1.1), while it still carries
+    // aria-current="page". (A prior span+onClick fired on mouse click but was
+    // NOT keyboard-focusable/operable — a keyboard-operability gap this closes;
+    // onClick continues to fire for diagnostic / consumer-callback parity.)
     if (item.isActive) {
+      if (item.onClick) {
+        return (
+          <button
+            key={index}
+            type="button"
+            className={itemClassName}
+            style={itemOverride}
+            aria-current="page"
+            onClick={event => handleItemClick(item, event)}
+          >
+            {content}
+          </button>
+        )
+      }
       return (
         <span
           key={index}
           className={itemClassName}
           style={itemOverride}
           aria-current="page"
-          onClick={event => handleItemClick(item, event)}
         >
           {content}
         </span>

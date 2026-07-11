@@ -104,7 +104,7 @@ export const InteractiveCallback: Story = {
     // Native <button> ⇒ Enter activates it and fires onClick without any
     // custom key handler (the deprecated onKeyPress span is gone).
     await userEvent.keyboard('{Enter}')
-    await expect(args.items[0].onClick).toHaveBeenCalled()
+    await expect(args.items[0]?.onClick).toHaveBeenCalled()
   },
 }
 
@@ -173,8 +173,8 @@ export const ActiveCrumbWithOnClick: Story = {
     await userEvent.tab()
     await expect(current).toHaveFocus()
     await userEvent.keyboard('{Enter}')
-    await expect(args.items[1].onClick).toHaveBeenCalledTimes(1)
+    await expect(args.items[1]?.onClick).toHaveBeenCalledTimes(1)
     await userEvent.keyboard(' ')
-    await expect(args.items[1].onClick).toHaveBeenCalledTimes(2)
+    await expect(args.items[1]?.onClick).toHaveBeenCalledTimes(2)
   },
 }
