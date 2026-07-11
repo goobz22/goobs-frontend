@@ -658,7 +658,7 @@ export const ColorVariantsSacred: Story = {
       <Badge
         content="Warning"
         styles={{
-          backgroundColor: 'rgba(245, 158, 11, 0.9)',
+          backgroundColor: '#78350f',
           color: '#FFD700',
           theme: 'sacred',
         }}
@@ -682,7 +682,7 @@ export const ColorVariantsSacred: Story = {
       <Badge
         content="Info"
         styles={{
-          backgroundColor: 'rgba(59, 130, 246, 0.9)',
+          backgroundColor: '#1e40af',
           color: '#FFD700',
           theme: 'sacred',
         }}
@@ -706,6 +706,28 @@ export const ColorVariantsSacred: Story = {
     </div>
   ),
   globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const chips = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>(
+        '[data-component="Badge"] > span'
+      )
+    )
+    await expect(chips).toHaveLength(4)
+    // Gold (#FFD700) text on an OPAQUE, dark-enough fill clears WCAG AA 1.4.3
+    // (4.5:1) for every sacred severity tile. A revert to a translucent
+    // rgba(...,0.9) fill (the old ~1.7–3.44:1 demo) re-fails these assertions.
+    const expectedFills = [
+      'rgb(153, 27, 27)', // Error   #991b1b — 5.92:1
+      'rgb(20, 83, 45)', //  Success #14532d — 6.50:1
+      'rgb(120, 53, 15)', // Warning #78350f — 6.47:1
+      'rgb(30, 64, 175)', // Info    #1e40af — 6.22:1
+    ]
+    for (let index = 0; index < expectedFills.length; index++) {
+      await expect(getComputedStyle(chips[index]).backgroundColor).toBe(
+        expectedFills[index]
+      )
+    }
+  },
 }
 
 // --------------------------------------------------------------------------

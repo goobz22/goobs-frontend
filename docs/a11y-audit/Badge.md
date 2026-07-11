@@ -1,6 +1,6 @@
 # Badge — a11y audit (2026-07-11)
 
-**Status:** FIXED (incl. adversarial-review follow-up — Issues 3 & 4 below)
+**Status:** FIXED (incl. two adversarial-review follow-ups — Issues 3, 4 & 5 below)
 
 **Component:** `src/components/Badge/index.tsx`, `Badge.module.css`,
 `Badge.stories.tsx`
@@ -8,7 +8,11 @@
 > An adversarial review of the first pass found two remaining issues: the sacred
 > theme was never contrast-graded and failed (Issue 3), and defaulting every
 > badge to a `role="status"` live region was over-reach while the unlabeled
-> default still lacked meaning (Issue 4). Both are now fixed at root cause.
+> default still lacked meaning (Issue 4). A second adversarial review found the
+> Issue-3 contrast fix was applied to the shipped default but NOT to the
+> component's own `ColorVariantsSacred` demo story, which kept demonstrating the
+> exact failing gold-on-translucent combos (Issue 5). All three are now fixed at
+> root cause.
 
 ## APG pattern
 
@@ -129,6 +133,35 @@ status semantics the pattern requires.
   library can do; a consumer that ignores all three still ships an unlabeled
   count. This is a documented consumer responsibility, not a component defect.
 
+### 5. `ColorVariantsSacred` demo story ships the exact failing gold-on-translucent contrast Issue 3 flagged — MINOR (second adversarial-review finding)
+
+- **WCAG:** 1.4.3 Contrast (Minimum) (AA)
+- **Where:** `Badge.stories.tsx` `ColorVariantsSacred` (was lines 601-696) — four
+  sacred severity tiles rendered gold text (`#FFD700`) on translucent fills:
+  `rgba(220,38,38,0.9)` (Error), `rgba(34,197,94,0.9)` (Success),
+  `rgba(245,158,11,0.9)` (Warning), `rgba(59,130,246,0.9)` (Info).
+- **Detail:** Issue 3 fixed the shipped sacred DEFAULT (base `.badge` →
+  opaque `#991b1b`) but the component's own demo story still passed
+  translucent low-contrast fills as `styles.backgroundColor` overrides. Gold on
+  `rgba(220,38,38,0.9)` is only ~3.44:1 solid (the identical combo Issue 3
+  calls out) and gold on amber `rgba(245,158,11,0.9)` is only **~1.7:1** — both
+  fail 4.5:1 for the 12px-bold, non-large badge text. These are consumer-supplied
+  override colors, so the *component* is not defective — but the story is the
+  repo's only regression test AND its Chromatic baseline, so the audit was
+  shipping a visual baseline that ratifies the very contrast failure it claims to
+  have graded. (Ratios re-verified with the WCAG relative-luminance formula.)
+- **Pattern:** `contrast-minimum`
+- **Status:** FIXED — the four demo fills changed to OPAQUE, dark-enough colors
+  that clear 4.5:1 against gold text while keeping the severity semantics:
+  Error `#991b1b` red-800 (5.92:1, matches the shipped default), Success
+  `#14532d` green-900 (6.50:1), Warning `#78350f` amber-900 (6.47:1), Info
+  `#1e40af` blue-800 (6.22:1). Added a `ColorVariantsSacred` play function that
+  pins each computed `background-color` (`rgb(153,27,27)` / `rgb(20,83,45)` /
+  `rgb(120,53,15)` / `rgb(30,64,175)`), so a revert to a translucent
+  low-contrast fill re-fails the story. No component/CSS change was needed — the
+  defect was entirely in the demo. `styles.backgroundColor` remains a fully
+  additive public override; only the demo's chosen values changed.
+
 ## Hearing
 
 No sound/media APIs are used — `grep` for `new Audio` / `AudioContext` /
@@ -206,6 +239,15 @@ server-side. No SEO-semantic issue.
    `MutedByDefault` (new) pins `aria-live="off"`; `LabeledStatus` asserts muted;
    `LiveCountUpdate` JSDoc clarified. Commit `ef2ec54b`.
 
+### Second adversarial-review follow-up (this pass)
+
+6. `Badge.stories.tsx` — `ColorVariantsSacred` demo fills changed from
+   translucent gold-on-`rgba(...,0.9)` (~1.7–3.44:1, failing WCAG 1.4.3) to
+   opaque red-800/green-900/amber-900/blue-800 (5.9–6.5:1); new play function
+   pins the computed fills so a low-contrast revert re-fails (Issue 5). No
+   component/CSS change — the failure was demo-only; `styles.backgroundColor`
+   stays a fully additive public override.
+
 No existing `data-*` / `role` / `aria` attribute was removed or renamed; every
 API change is additive (still three optional props; `role="status"` is retained
 and merely muted by default). Per-file gates green: `bun lint:file` on all three
@@ -248,12 +290,22 @@ Adversarial-review pass:
 - **`LiveCountUpdate`** — JSDoc clarified that announcements are opt-in via the
   explicit `ariaLive="polite"` it already passes (its assertions are unchanged).
 
+Second adversarial-review pass:
+
+- **`ColorVariantsSacred` (Colors/Color Variants - Sacred Theme)** — the four
+  translucent low-contrast fills replaced with opaque red-800/green-900/
+  amber-900/blue-800 (all ≥5.9:1 against gold text); JSDoc now explains why
+  sacred (gold-text) fills must be opaque + dark; NEW play function pins each
+  computed `background-color` so a revert to the translucent ~1.7–3.44:1 demo
+  re-fails. Pins Issue 5.
+
 ## Deferred
 
-None. All four issues — including the two adversarial-review findings — were
+None. All five issues — including the three adversarial-review findings — were
 fixable entirely inside the owned Badge directory (`index.tsx`,
 `Badge.module.css`, `Badge.stories.tsx`). No shared util / Field / Shell /
 `global.css` / barrel change was required. The sacred fill uses a local `#991b1b`
 literal (matching the existing local `#d32f2f`/`#b91c1c` red literals in the same
 file), so no `--goobs-*` token addition in `global.css` (which is out of scope)
-was needed.
+was needed. Issue 5 was demo-only (the `ColorVariantsSacred` story's chosen
+override colors) and required no component or CSS change.
