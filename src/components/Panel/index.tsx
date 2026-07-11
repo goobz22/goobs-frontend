@@ -244,28 +244,24 @@ const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(
             data-action="cancel"
             styles={{ theme: headerTheme }}
           >
-            <ArrowBackIcon styles={{ theme: headerTheme }} />
+            {/* Decorative glyph — the button's aria-label supplies the name. */}
+            <ArrowBackIcon aria-hidden="true" styles={{ theme: headerTheme }} />
           </IconButton>
         )}
-        <div
-          id={titleId}
-          className={cssStyles.headerTitleBlock}
-          data-panel-title="true"
-        >
-          {typeof title === 'string' ? (
-            <Typography
-              text={title}
-              variant="cinzelh5"
-              styles={{ theme: headerTheme }}
-            />
-          ) : (
-            <Typography
-              variant="cinzelh5"
-              styles={{ theme: headerTheme }}
-            >
-              {title}
-            </Typography>
-          )}
+        <div className={cssStyles.headerTitleBlock} data-panel-title="true">
+          <HeadingTag id={titleId} className={cssStyles.headerHeading}>
+            {typeof title === 'string' ? (
+              <Typography
+                text={title}
+                variant="cinzelh5"
+                styles={{ theme: headerTheme }}
+              />
+            ) : (
+              <Typography variant="cinzelh5" styles={{ theme: headerTheme }}>
+                {title}
+              </Typography>
+            )}
+          </HeadingTag>
           {subtitle !== undefined && (
             <span
               className={cssStyles.headerSubtitle}
@@ -304,6 +300,13 @@ const PanelBody = forwardRef<HTMLDivElement, PanelBodyProps>(function PanelBody(
     <div
       ref={ref}
       className={mergeClassNames(cssStyles.body, className)}
+      // The body is a flex:1 `overflow:auto` scroll region. When its content
+      // overflows but holds no focusable children (e.g. a read-only "show"
+      // surface), keyboard-only users cannot scroll it — WCAG 2.1.1. Making
+      // it focusable lets arrow/Page keys scroll it. Placed before restProps
+      // so a consumer can override `tabIndex` (e.g. -1) when the body already
+      // contains its own focusable content.
+      tabIndex={0}
       data-panel-body="true"
       {...restProps}
     >
