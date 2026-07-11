@@ -59,19 +59,22 @@ export interface BadgeProps {
   ariaLabel?: string
   /**
    * ARIA role for the badge chip. Defaults to `'status'`, so the badge is
-   * exposed as a status indicator and — because a live region only ever
-   * announces CHANGES, never its initial value — a count that updates after
-   * render is read out while a static badge stays silent on load. Pass an
-   * explicit role to override, e.g. `'none'` (or `'presentation'`) for a
-   * purely decorative badge that should not be announced at all.
+   * exposed as a status indicator. The status region is MUTED by default
+   * (`aria-live="off"`) so a page full of static badges is not a swarm of
+   * announcing live regions — set `ariaLive` to `'polite'`/`'assertive'` to opt
+   * a dynamic count into change announcements. Pass an explicit role to
+   * override, e.g. `'none'` (or `'presentation'`) for a purely decorative badge
+   * that should not be exposed to assistive tech at all.
    */
   role?: string
   /**
    * Live-region politeness for badges whose value updates dynamically (a
    * notification or cart count going `5` → `6`). Only applied when the badge
-   * resolves to `role="status"`; `'off'` suppresses the implicit polite
-   * announcement of a status region. Defaults to the status region's implicit
-   * `'polite'`.
+   * resolves to `role="status"`. Defaults to `'off'`: a status badge is SILENT
+   * unless you opt in, so static badges never announce and a grid of counts
+   * does not flood assistive tech with polite chatter. Pass `'polite'` for a
+   * count that should announce its new value on change, or `'assertive'` for an
+   * urgent one.
    */
   ariaLive?: 'off' | 'polite' | 'assertive'
   /** Theme, corner position/offset, and `--badge-*` scalar overrides. See BadgeStyles. */
@@ -79,11 +82,31 @@ export interface BadgeProps {
 }
 
 /**
+ * True when `content` is a context-free count — a number, or a numeric string
+ * like `"5"`, `"99+"`, or `"1,234"` — as opposed to self-describing text
+ * (`"NEW"`, `"Error"`). Used ONLY to decide whether to emit the dev-time
+ * missing-`ariaLabel` nudge; it has no effect on rendered output.
+ */
+function isBareCount(content: React.ReactNode): boolean {
+  if (typeof content === 'number') return true
+  if (typeof content === 'string') return /^\s*\d[\d,]*\+?\s*$/.test(content)
+  return false
+}
+
+// Module-scoped so the dev-only missing-label nudge fires at most ONCE per
+// session, not once per badge — a grid of count badges must never spam the
+// console (the very verbosity an unlabeled live region would cause).
+let hasWarnedMissingLabel = false
+
+/**
  * Small count or status indicator overlaid at a configurable corner of its
  * wrapped children, with light/dark/sacred theming and CSS-variable style
- * overrides. Accessible by default: the chip is a `role="status"` live region
- * (announces count changes, silent on initial render) and takes an `ariaLabel`
- * to give a bare number meaning — both overridable for decorative badges.
+ * overrides. Accessible by default: the chip is a `role="status"` region —
+ * MUTED via `aria-live="off"` so a page full of static badges is not a swarm
+ * of announcing live regions; opt a genuinely dynamic count into change
+ * announcements with `ariaLive` — and it takes an `ariaLabel` to give a bare
+ * number meaning (a dev warning nudges you when one is missing). Both are
+ * overridable for decorative badges.
  */
 const Badge: React.FC<BadgeProps> = ({
   content,
@@ -98,12 +121,40 @@ const Badge: React.FC<BadgeProps> = ({
   const offset = styles?.offset ?? 8
 
   // A badge is a status/count indicator, so it defaults to a `role="status"`
-  // live region (accessible-by-default; matches the read-only Chip pill).
+  // region (accessible-by-default; matches the read-only Chip pill). The region
+  // is muted by default (see `resolvedAriaLive`), so it carries status
+  // semantics WITHOUT turning every badge into an announcing live region.
   // `none`/`presentation` opt out entirely for decorative badges.
   const resolvedRole = role ?? 'status'
   const isStatus = resolvedRole === 'status'
   const isDecorative =
     resolvedRole === 'none' || resolvedRole === 'presentation'
+
+  // Live-region politeness is OPT-IN: a status badge defaults to
+  // `aria-live="off"` (silent), so a static badge never announces and a grid of
+  // counts doesn't flood assistive tech. A consumer sets `ariaLive` to escalate
+  // a genuinely dynamic count to `'polite'`/`'assertive'`.
+  const resolvedAriaLive = isStatus ? (ariaLive ?? 'off') : undefined
+
+  // Dev-only accessible-name nudge (compiled out in production; warns once per
+  // session). A bare numeric count like "5"/"99+" has no meaning to a screen
+  // reader on its own — its visible text becomes the badge's accessible name,
+  // so it announces just the number. Prompt the consumer to pass a descriptive
+  // `ariaLabel`. Skipped for decorative badges and for self-describing text
+  // ("NEW", "Error"). Mirrors the Dialog missing-accessible-name warning.
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    if (hasWarnedMissingLabel) return
+    if (isDecorative || ariaLabel !== undefined || !isBareCount(content)) return
+    hasWarnedMissingLabel = true
+    console.warn(
+      'goobs Badge: a numeric `content` was rendered without an `ariaLabel`, ' +
+        'so a screen reader announces only the raw number with no context. ' +
+        'Pass e.g. ariaLabel="5 unread notifications" to give the count ' +
+        'meaning (WCAG 1.3.1, 4.1.2), or role="none" for a purely decorative ' +
+        'badge.'
+    )
+  }, [ariaLabel, content, isDecorative])
 
   // Caller-supplied overrides are passed as CSS custom properties; each var is
   // set ONLY when the caller provided it, so the CSS fallback (the theme value)
@@ -138,8 +189,9 @@ const Badge: React.FC<BadgeProps> = ({
         role={resolvedRole}
         {...(!isDecorative &&
           ariaLabel !== undefined && { 'aria-label': ariaLabel })}
-        {...(isStatus &&
-          ariaLive !== undefined && { 'aria-live': ariaLive })}
+        {...(resolvedAriaLive !== undefined && {
+          'aria-live': resolvedAriaLive,
+        })}
         {...(isStatus && { 'aria-atomic': 'true' })}
         style={dynamicStyle}
       >

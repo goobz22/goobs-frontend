@@ -28,7 +28,17 @@
    * Each property reads a caller-override CSS var with the sacred value as
    * fallback; the var is only set inline in JS when the caller provides it,
    * exactly replicating the old `...(value && { value })` spread. */
-  background-color: var(--badge-background-color, rgba(220, 38, 38, 0.9));
+
+  /* Opaque red-800 (was translucent rgba(220,38,38,0.9)). The sacred badge's
+     gold text (--goobs-gold #ffd700) needs a dark-enough fill to clear WCAG AA
+     1.4.3 (4.5:1 for 12px bold, non-large text). The old translucent red was
+     only ~3.44:1 solid — and as low as ~3.08:1 once composited over a light
+     backdrop — so it FAILED regardless of what showed through. Opaque #991b1b
+     lifts gold text to ~5.92:1 and no longer depends on the backdrop. The gold
+     glow box-shadow, gold border, and gold text-shadow below preserve the
+     sacred look. (backdrop-filter is kept for callers who override
+     --badge-background-color back to a translucent value.) */
+  background-color: var(--badge-background-color, #991b1b);
   color: var(--badge-color, var(--goobs-gold));
   border-radius: var(--badge-border-radius, 50%);
   width: var(--badge-width, 20px);
