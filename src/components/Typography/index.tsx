@@ -28,6 +28,26 @@ export interface TypographyProps {
    * `styles.variant`.
    */
   variant?: 'h5' | 'body1' | 'body2' | 'h1' | 'h2' | 'h3' | 'h4' | 'h6' | string
+  /**
+   * The HTML element (or React component) actually rendered. Defaults to
+   * `'span'` — valid phrasing content inside `<button>`, `<a>`, and `<h1>`–`<h6>`,
+   * and the SSR/hydration-safe default (see the render note at the bottom of
+   * this file).
+   *
+   * ⚠️ ACCESSIBILITY / SEO: a heading `variant` (`'h1'`–`'h6'`, `'cinzelh1'`,
+   * `'merrih2'`, …) only STYLES the text at heading sizes — it does NOT emit a
+   * heading element. When this Typography IS a section heading, pass the
+   * matching semantic element (`component="h2"`) so screen-reader heading
+   * navigation (rotor / "next heading") and search crawlers see a real
+   * `<h2>` in the document outline. Likewise pass `component="p"` for a
+   * standalone paragraph, `component="label"` for a form label,
+   * `component="figcaption"` for a caption, etc. Left as `'span'` by default so
+   * the phrasing-content nesting contract (Typography inside buttons/links/
+   * headings) and existing markup are preserved. Additive — never changes the
+   * default rendered element. (WCAG 1.3.1 Info and Relationships, 2.4.6
+   * Headings and Labels.)
+   */
+  component?: React.ElementType
   /** Text color. Unset → the per-theme CSS fallback (near-white base, gold on sacred, dark-on-light on light). The merri helper/footer variants pin their own color, which wins over this. */
   color?: string
   /** Font size; wins over the variant's default size. */
@@ -314,15 +334,21 @@ function resolveVariant(variant: string): VariantResolution {
 }
 
 /**
- * Themeable text primitive rendering a `<span>` (valid as phrasing content
- * inside buttons, links, and headings) with heading, body, and sacred
+ * Themeable text primitive rendering a `<span>` by default (valid as phrasing
+ * content inside buttons, links, and headings) with heading, body, and sacred
  * Cinzel/Merriweather variants. Resolves font family, weight, and color per
  * variant and theme, and forwards scalar style overrides as CSS variables.
+ *
+ * The rendered element is polymorphic via `component`: a heading `variant`
+ * only styles the text, so pass `component="h2"` (etc.) to emit a REAL
+ * semantic heading for assistive-tech outline navigation and SEO — see the
+ * `component` prop doc. The default stays `'span'` for phrasing-content safety.
  */
 const Typography: React.FC<TypographyProps> = ({
   text,
   children,
   variant = 'body1',
+  component,
   color,
   fontSize,
   fontFamily,
