@@ -116,8 +116,9 @@ export interface DrawerProps {
 
   /**
    * `aria-labelledby` for the drawer surface — the id of a heading inside
-   * `children` (the preferred accessible-name source for the `role="dialog"`
-   * panel). Screen readers announce this on open (WCAG 4.1.2).
+   * `children` (the preferred accessible-name source). Names the `role="dialog"`
+   * panel for the `temporary`/`persistent` variants (announced on open) and the
+   * `complementary` landmark for the `permanent` variant (WCAG 4.1.2).
    */
   ariaLabelledBy?: string
 
@@ -376,20 +377,72 @@ const Drawer: FC<DrawerProps> = ({
     }
   }, [open, onClose, variant])
 
-  // WCAG modal focus management (WAI-ARIA APG Dialog pattern) — TEMPORARY
-  // variant only, the modal case (`aria-modal`). On open, move focus into the
-  // drawer and remember the trigger; while open, Tab is trapped so focus cycles
-  // within the panel (2.4.3 Focus Order); on close, restore focus to the
-  // trigger. Escape is handled by the effect above (which also covers the
-  // non-modal persistent variant). Persistent is non-modal and permanent is an
-  // inline landmark, so neither traps focus. Mirrors the sibling Dialog
-  // component's focus-trap so both overlays behave identically.
+  // WCAG modal focus management + background isolation (WAI-ARIA APG
+  // Dialog(Modal) pattern) — TEMPORARY variant only, the modal case
+  // (`aria-modal`). On open: remember the trigger, LOCK BODY SCROLL (parity with
+  // the sibling Dialog, which does the same — Dialog/index.tsx), mark the
+  // background `inert` + `aria-hidden` so it's unreachable even where an AT only
+  // imperfectly honours `aria-modal`, then move focus into the panel. While
+  // open, Tab is trapped so focus cycles within the panel (2.4.3 Focus Order).
+  // On close: un-inert + unlock scroll FIRST, then restore focus to the trigger
+  // (a still-inert trigger cannot be focused). Escape is handled by the effect
+  // above (which also covers the non-modal persistent variant). Persistent is
+  // non-modal and permanent is an inline landmark, so neither isolates or traps.
+  // Mirrors the sibling Dialog component's modal behaviour so both overlays
+  // behave identically.
   useEffect(() => {
     if (variant !== 'temporary' || !open) return undefined
     const drawer = drawerRef.current
     if (!drawer) return undefined
 
+    // Remember the trigger BEFORE inerting the background: inerting the
+    // currently-focused trigger would blur it and destroy the restore target.
     const previouslyFocused = document.activeElement as HTMLElement | null
+
+    // Body scroll-lock so the page can't scroll behind the scrim while the modal
+    // is open (Dialog parity). Save/restore the previous value rather than
+    // clearing, so nesting inside another scroll-locking overlay is safe.
+    const previousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    // Background isolation: `aria-modal="true"` already asks assistive tech to
+    // treat everything outside the panel as inert, but support for that hint is
+    // uneven, so ALSO enforce it. Walk from the panel up to <body> and mark every
+    // sibling off the panel's ancestor path `inert` + `aria-hidden`. The backdrop
+    // scrim is skipped (it must stay clickable to dismiss). Only elements present
+    // at open time are touched, so a goobs overlay (SearchableSimple, Popover,
+    // MultiSelect, …) that later portals its menu to document.body from inside
+    // the drawer is NOT isolated and stays interactive — the same deliberate
+    // portal exception the Tab-trap makes below. Prior `inert`/`aria-hidden`
+    // values are captured and restored so nothing the consumer set is clobbered.
+    const isolated: Array<{
+      element: HTMLElement
+      hadInert: boolean
+      previousAriaHidden: string | null
+    }> = []
+    let node: HTMLElement | null = drawer
+    while (node && node !== document.body) {
+      const parent: HTMLElement | null = node.parentElement
+      if (!parent) break
+      const currentNode = node
+      Array.from(parent.children).forEach(sibling => {
+        if (
+          sibling === currentNode ||
+          sibling === backdropRef.current ||
+          !(sibling instanceof HTMLElement)
+        ) {
+          return
+        }
+        isolated.push({
+          element: sibling,
+          hadInert: sibling.inert,
+          previousAriaHidden: sibling.getAttribute('aria-hidden'),
+        })
+        sibling.inert = true
+        sibling.setAttribute('aria-hidden', 'true')
+      })
+      node = parent
+    }
 
     const getFocusable = (): HTMLElement[] =>
       Array.from(
@@ -435,22 +488,37 @@ const Drawer: FC<DrawerProps> = ({
     document.addEventListener('keydown', handleTab)
     return () => {
       document.removeEventListener('keydown', handleTab)
+      // Restore the background (scroll + inert) BEFORE restoring focus — the
+      // trigger lives in the now-un-inerted background and can't be focused
+      // while still inert.
+      document.body.style.overflow = previousBodyOverflow
+      isolated.forEach(({ element, hadInert, previousAriaHidden }) => {
+        element.inert = hadInert
+        if (previousAriaHidden === null) {
+          element.removeAttribute('aria-hidden')
+        } else {
+          element.setAttribute('aria-hidden', previousAriaHidden)
+        }
+      })
       // Restore focus to the element that opened the drawer.
       previouslyFocused?.focus?.()
     }
   }, [open, variant])
 
-  // Accessible name (WCAG 4.1.2 Name, Role, Value) — every variant renders
-  // `role="dialog"`, which MUST expose an accessible name. The name comes from
-  // consumer content via `ariaLabelledBy` (a heading id inside `children`,
-  // preferred) or the `ariaLabel` fallback; the component can't invent it. Warn
-  // in development when an active drawer has neither so a nameless dialog
-  // surfaces at author time instead of silently shipping to screen-reader
-  // users. Dev-only — compiles out to a no-op in production bundles.
+  // Accessible name (WCAG 4.1.2 Name, Role, Value) — the DISMISSIBLE variants
+  // (`temporary`/`persistent`) render `role="dialog"`, which MUST expose an
+  // accessible name. The name comes from consumer content via `ariaLabelledBy`
+  // (a heading id inside `children`, preferred) or the `ariaLabel` fallback; the
+  // component can't invent it. Warn in development when an OPEN dialog drawer has
+  // neither so a nameless dialog surfaces at author time instead of silently
+  // shipping to screen-reader users. The `permanent` variant is a complementary
+  // landmark, not a dialog, so an accessible name is optional there (a nameless
+  // landmark is valid) and it is excluded from the check. Dev-only — compiles
+  // out to a no-op in production bundles.
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return
-    const isActive = variant === 'permanent' || open
-    if (!isActive) return
+    // Only the dialog variants require a name; permanent is a landmark.
+    if (variant === 'permanent' || !open) return
     if (!ariaLabelledBy && !ariaLabel && !callerProvidedName) {
       console.warn(
         'goobs Drawer: rendered as role="dialog" without an accessible name. ' +
@@ -576,7 +644,13 @@ const Drawer: FC<DrawerProps> = ({
       data-open={safeOpen ? 'true' : 'false'}
       data-state={safeOpen ? 'open' : 'closed'}
       style={paperVars}
-      role="dialog"
+      // Role by variant (WCAG 1.3.1 / 4.1.2): the DISMISSIBLE `temporary`
+      // (modal) and `persistent` (non-modal) variants are dialogs; the
+      // always-open, never-dismissable `permanent` variant is an inline side
+      // panel, so it is exposed as a `complementary` landmark instead of a
+      // modal-style dialog. `aria-modal` remains temporary-only. All `data-*`
+      // selectors are unchanged.
+      role={variant === 'permanent' ? 'complementary' : 'dialog'}
       aria-modal={variant === 'temporary' ? open : undefined}
       tabIndex={-1}
       aria-labelledby={ariaLabelledBy}

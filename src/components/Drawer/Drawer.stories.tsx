@@ -216,14 +216,25 @@ export const AnchorBottom: Story = {
 
 /**
  * A permanent drawer is always open and renders inline (no backdrop), so it is
- * shown directly without a trigger button.
+ * shown directly without a trigger button. Because it is never dismissable it is
+ * exposed to assistive tech as a `complementary` landmark (NOT a modal-style
+ * `role="dialog"`); `ariaLabelledBy` points at the in-panel heading so the
+ * landmark carries an accessible name, letting screen-reader users jump to it
+ * via landmark navigation (WCAG 1.3.1 / 4.1.2).
  */
 export const PermanentVariant: Story = {
   name: 'Variant/Permanent',
   render: () => (
     <div style={{ display: 'flex', minHeight: '420px' }}>
-      <Drawer variant="permanent" styles={{ theme: 'light' }}>
-        <DrawerMenu theme="light" />
+      <Drawer
+        variant="permanent"
+        styles={{ theme: 'light' }}
+        ariaLabelledBy="permanent-drawer-heading"
+      >
+        <AccessibleDrawerMenu
+          theme="light"
+          headingId="permanent-drawer-heading"
+        />
       </Drawer>
       <div style={{ flex: 1, padding: '24px', color: '#1F2937' }}>
         <h2 style={{ marginTop: 0 }}>Main Content</h2>
@@ -312,4 +323,65 @@ export const AccessibleSacred: Story = {
   name: 'Accessibility/Accessible Sacred',
   render: () => <AccessibleDrawer theme="sacred" />,
   globals: { backgrounds: { value: 'sacred' } },
+}
+
+// Wrapper demonstrating the modal drawer's background isolation. While the
+// temporary (modal) drawer is open, body scroll is locked (parity with the
+// sibling Dialog) and every element behind the scrim is marked `inert` +
+// `aria-hidden`, so neither the pointer nor a virtual cursor can reach it. The
+// page is intentionally tall (to show the scroll-lock) and includes a focusable
+// background link (to show it becomes unreachable). Opens by default so the
+// locked/inerted background state is what the snapshot captures.
+const ModalIsolationDrawer = (): React.JSX.Element => {
+  const [open, setOpen] = useState(true)
+  const headingId = 'modal-isolation-heading'
+  return (
+    <div style={{ padding: '24px', minHeight: '1200px' }}>
+      <Button
+        text="Open Drawer"
+        styles={{ theme: 'light' }}
+        onClick={() => setOpen(true)}
+      />
+      <h2 style={{ color: '#1F2937' }}>Main Content</h2>
+      <p style={{ maxWidth: '520px', color: '#1F2937' }}>
+        This page is intentionally tall. While the modal drawer is open the body
+        cannot scroll and every element here is marked <code>inert</code> +{' '}
+        <code>aria-hidden</code>, so neither the pointer nor a virtual cursor can
+        reach it — only the drawer is reachable.
+      </p>
+      <a href="#background-target" style={{ color: '#2563EB' }}>
+        A background link (unreachable while the modal is open)
+      </a>
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        variant="temporary"
+        styles={{ theme: 'light' }}
+        ariaLabelledBy={headingId}
+      >
+        <AccessibleDrawerMenu
+          theme="light"
+          headingId={headingId}
+          onClose={() => setOpen(false)}
+        />
+      </Drawer>
+    </div>
+  )
+}
+
+/**
+ * Modal background isolation (WAI-ARIA Dialog(Modal)). While the temporary
+ * (modal) drawer is open the page behind the scrim is locked from scrolling and
+ * marked `inert` + `aria-hidden`, so it is unreachable by pointer and by a
+ * virtual cursor even where an AT only imperfectly honours `aria-modal` —
+ * matching the sibling Dialog's body scroll-lock and going beyond it with
+ * enforced background inerting. The backdrop scrim stays clickable to dismiss,
+ * and any goobs overlay opened from inside the drawer (which portals to
+ * `document.body`) stays interactive. Opens by default so the isolated
+ * background is exercised.
+ */
+export const ModalBackgroundIsolation: Story = {
+  name: 'Accessibility/Modal Background Isolation',
+  render: () => <ModalIsolationDrawer />,
+  globals: { backgrounds: { value: 'light' } },
 }
