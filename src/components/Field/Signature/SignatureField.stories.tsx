@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fireEvent, userEvent, within, waitFor, expect } from 'storybook/test'
 import { z } from 'zod'
 import SignatureField from './index'
 import Form from '../../Form'
@@ -225,4 +226,91 @@ export const Disabled: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// STATUS-ANNOUNCEMENT interaction coverage (WCAG 4.1.3 Status Messages)
+//
+// The role="status" live region only populates on a real user interaction, so
+// the visual/theme stories above never render its "Signature captured." /
+// "Signature cleared." text. Because a story is the only regression test in
+// this repo, these two `play` functions drive the interactions and assert the
+// live-region text — otherwise the announcement wiring (and the endStroke /
+// handleClear branches that set it) would have zero coverage and could be
+// deleted with every baseline still green.
+// --------------------------------------------------------------------------
+
+/**
+ * Drawing a stroke announces "Signature captured." A pointer down + up on the
+ * empty pad runs `endStroke`, which marks the field signed, enables Clear, and
+ * writes the polite `role="status"` region. The `play` fn dispatches the pointer
+ * pair and asserts the announcement text + the now-enabled Clear button.
+ */
+export const CaptureAnnouncement: Story = {
+  name: 'Announce: signature captured (interaction)',
+  render: () => {
+    const [value, setValue] = useState('')
+    return (
+      <SignatureField
+        label="Signature"
+        value={value}
+        onChange={setValue}
+        helperText="Drawing a stroke announces “Signature captured.”"
+        styles={{ theme: 'light' }}
+      />
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const pad = canvas.getByRole('img')
+    const clear = canvas.getByRole('button', { name: /clear/i })
+    const status = canvas.getByRole('status')
+    // Empty to start: nothing announced, Clear disabled.
+    await expect(status).toBeEmptyDOMElement()
+    await expect(clear).toBeDisabled()
+    // A pointer press + release is the smallest gesture that ends a stroke.
+    fireEvent.pointerDown(pad, { pointerId: 1, clientX: 24, clientY: 24 })
+    fireEvent.pointerUp(pad, { pointerId: 1, clientX: 24, clientY: 24 })
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Signature captured.')
+    )
+    await expect(clear).toBeEnabled()
+  },
+}
+
+/**
+ * Clearing a signed pad announces "Signature cleared." Starting from a
+ * pre-filled value, the `play` fn clicks the (enabled) Clear button, which runs
+ * `handleClear`: it wipes the surface, disables Clear, and writes the polite
+ * `role="status"` region. Asserts the announcement text + the re-disabled Clear.
+ */
+export const ClearAnnouncement: Story = {
+  name: 'Announce: signature cleared (interaction)',
+  render: () => {
+    const [value, setValue] = useState<string>(SIGNED_PNG)
+    return (
+      <SignatureField
+        label="Signature"
+        value={value}
+        onChange={setValue}
+        helperText="Clearing announces “Signature cleared.”"
+        styles={{ theme: 'light' }}
+      />
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const clear = canvas.getByRole('button', { name: /clear/i })
+    const status = canvas.getByRole('status')
+    // Pre-filled: Clear is enabled, nothing announced yet.
+    await expect(clear).toBeEnabled()
+    await expect(status).toBeEmptyDOMElement()
+    await userEvent.click(clear)
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Signature cleared.')
+    )
+    await expect(clear).toBeDisabled()
+  },
 }
