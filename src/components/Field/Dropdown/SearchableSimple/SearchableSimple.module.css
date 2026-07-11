@@ -60,9 +60,18 @@
   box-shadow: 0 0 10px var(--goobs-gold-a20);
 }
 
-.button.open {
+.button.open,
+.button:focus-visible {
   border-color: var(--goobs-gold-a60);
   box-shadow: 0 0 15px var(--goobs-gold-a30);
+}
+
+/* Keyboard focus indicator (WCAG 2.4.7) — the trigger sets outline:none, so
+   :focus-visible must supply its own clearly-visible ring for a keyboard-focused
+   (but closed) trigger. */
+.button:focus-visible {
+  outline: 2px solid var(--goobs-gold-a60);
+  outline-offset: 2px;
 }
 
 .button:disabled {
@@ -174,6 +183,17 @@
   color: var(--goobs-gold);
 }
 
+/* Roving keyboard highlight (Arrow-key active option). The .active class was
+   applied in markup with NO rule here, so keyboard navigation showed no visible
+   highlight (WCAG 2.4.7). The inset outline distinguishes the keyboard-active
+   option from pointer :hover and the persistent .selected row. */
+.option.active {
+  background-color: var(--goobs-gold-a15);
+  color: var(--goobs-gold);
+  outline: 2px solid var(--goobs-gold-a50);
+  outline-offset: -2px;
+}
+
 /* --------------------------------------------------------------------------
    Empty State
    -------------------------------------------------------------------------- */
@@ -231,9 +251,15 @@
   box-shadow: 0 0 0 3px var(--goobs-blue-a10);
 }
 
-[data-component='FieldShell'][data-theme='light'] .button.open {
+[data-component='FieldShell'][data-theme='light'] .button.open,
+[data-component='FieldShell'][data-theme='light'] .button:focus-visible {
   border-color: var(--goobs-light-primary);
   box-shadow: 0 0 0 3px var(--goobs-blue-a10);
+}
+
+[data-component='FieldShell'][data-theme='light'] .button:focus-visible {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: 2px;
 }
 
 [data-component='FieldShell'][data-theme='light'] .button:disabled {
@@ -297,6 +323,12 @@
   color: var(--goobs-light-primary);
 }
 
+.menu[data-theme='light'] .option.active {
+  background-color: #f3f4f6;
+  color: var(--goobs-light-text);
+  outline-color: var(--goobs-light-primary);
+}
+
 .menu[data-theme='light'] .emptyState {
   color: var(--goobs-light-text-disabled);
 }
@@ -322,9 +354,15 @@
   box-shadow: 0 0 0 3px var(--goobs-blue-a20);
 }
 
-[data-component='FieldShell'][data-theme='dark'] .button.open {
+[data-component='FieldShell'][data-theme='dark'] .button.open,
+[data-component='FieldShell'][data-theme='dark'] .button:focus-visible {
   border-color: var(--goobs-dark-primary-strong);
   box-shadow: 0 0 0 3px var(--goobs-blue-a20);
+}
+
+[data-component='FieldShell'][data-theme='dark'] .button:focus-visible {
+  outline: 2px solid var(--goobs-dark-primary-strong);
+  outline-offset: 2px;
 }
 
 [data-component='FieldShell'][data-theme='dark'] .button:disabled {
@@ -386,6 +424,12 @@
 .menu[data-theme='dark'] .option.selected {
   background-color: var(--goobs-info-bg);
   color: var(--goobs-dark-primary);
+}
+
+.menu[data-theme='dark'] .option.active {
+  background-color: var(--goobs-dark-border);
+  color: #f1f5f9;
+  outline-color: var(--goobs-dark-primary-strong);
 }
 
 .menu[data-theme='dark'] .emptyState {

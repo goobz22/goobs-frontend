@@ -269,6 +269,15 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     >
       {({ inputId, inputAriaProps }) => {
         const listboxId = `${inputId}-listbox`
+        // Stable per-option DOM ids so the (focused) search input can point
+        // aria-activedescendant at the arrow-key-highlighted option, exposing
+        // the roving highlight to assistive tech (WCAG 4.1.2 / 2.1.1).
+        const optionDomId = (index: number): string =>
+          `${listboxId}-option-${index}`
+        const activeOptionId =
+          activeIndex >= 0 && filteredOptions[activeIndex]
+            ? optionDomId(activeIndex)
+            : undefined
         return (
           <>
             <button
@@ -339,7 +348,18 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                       placeholder="Search..."
                       value={searchTerm}
                       aria-label={`Search ${label}`}
-                      onChange={e => setSearchTerm(e.target.value)}
+                      // The search input holds DOM focus while the menu is open,
+                      // so it — not the trigger — owns the roving-highlight ARIA:
+                      // aria-controls links it to the listbox and
+                      // aria-activedescendant names the active option.
+                      aria-controls={listboxId}
+                      aria-activedescendant={activeOptionId}
+                      onChange={e => {
+                        setSearchTerm(e.target.value)
+                        // A new filter changes the option list — drop the stale
+                        // highlight so aria-activedescendant never dangles.
+                        setActiveIndex(-1)
+                      }}
                       onKeyDown={handleKeyDown}
                     />
                   </div>
@@ -369,9 +389,11 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                         return (
                           <button
                             key={`${option._id ?? ''}-${option.value}-${index}`}
+                            id={optionDomId(index)}
                             type="button"
                             role="option"
                             aria-selected={isSelected}
+                            {...(isActive && { 'data-active': 'true' })}
                             data-value={option.value}
                             data-option-id={option._id}
                             className={optionClassNames}

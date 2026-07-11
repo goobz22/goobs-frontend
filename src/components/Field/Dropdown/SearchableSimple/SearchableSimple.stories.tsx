@@ -734,3 +734,63 @@ export const InteractionTest: Story = {
     expect(dropdown).toHaveAttribute('aria-expanded', 'false')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Arrow-key navigation over the portalled listbox
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `missing-keyboard-arrow-nav` class (WCAG 2.1.1 /
+ * 2.4.7 / 4.1.2). While the menu is open the search input holds focus and the
+ * Arrow keys rove a highlight through the `role="option"` list. Previously that
+ * highlight had NO visual treatment (the `.active` class had no CSS rule) and was
+ * invisible to assistive tech (no `aria-activedescendant`; options had no `id`).
+ * This proves the fix: the (portalled) search input exposes `aria-controls` +
+ * `aria-activedescendant`, and ArrowDown roves the highlight (mirrored to
+ * `data-active` on each option). Options portal into document.body.
+ */
+export const KeyboardArrowNavigation: Story = {
+  name: 'A11y: keyboard arrow navigation',
+  render: () => (
+    <SearchableSimpleWithState
+      label="Keyboard Nav"
+      placeholder="Search and select..."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Open — the listbox + search input portal into document.body.
+    await userEvent.click(combobox)
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+
+    const body = within(document.body)
+    const search = await body.findByRole('textbox', { name: /Search/i })
+    // Focus the search input explicitly so the Arrow keys land on it.
+    await userEvent.click(search)
+    expect(search).toHaveAttribute('aria-controls')
+    expect(search).not.toHaveAttribute('aria-activedescendant')
+
+    const options = await body.findAllByRole('option')
+    expect(options.length).toBeGreaterThan(1)
+
+    // ArrowDown highlights the first option and points the input's
+    // aria-activedescendant at its id.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[0]).toHaveAttribute('data-active', 'true')
+    expect(search).toHaveAttribute('aria-activedescendant', options[0]!.id)
+
+    // A second ArrowDown advances the roving highlight.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[1]).toHaveAttribute('data-active', 'true')
+    expect(options[0]).not.toHaveAttribute('data-active')
+    expect(search).toHaveAttribute('aria-activedescendant', options[1]!.id)
+
+    // Enter activates the highlighted option and closes the listbox.
+    await userEvent.keyboard('{Enter}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'false')
+  },
+}
