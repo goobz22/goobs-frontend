@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, type ElementType } from 'react'
 import { useProjectBoard } from '../context/ProjectBoardContext'
 import { useColumnDragAndDrop } from '../utils/useDragandDrop/columns'
 import { useTaskDragAndDrop } from '../utils/useDragandDrop/tasks'
@@ -21,6 +21,8 @@ interface TaskCardProps {
   onDragEnter?: (e: React.DragEvent) => void
   onDragLeave?: (e: React.DragEvent) => void
   onDrop?: (e: React.DragEvent) => void
+  /** Level for the task-card title heading (Board passes board level + 2). */
+  titleHeadingLevel?: number
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -35,6 +37,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onDragEnter,
   onDragLeave,
   onDrop,
+  titleHeadingLevel = 4,
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(title)
@@ -56,6 +59,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const taskCardClassName = draggable
     ? `${cssStyles.taskCard} ${cssStyles.taskCardDraggable}`
     : cssStyles.taskCard
+
+  // Real heading element for the task title at the board-derived level
+  // (default `h4`), replacing a hardcoded `<h4>` that could skip a level.
+  const TaskHeading = `h${Math.min(6, titleHeadingLevel)}` as ElementType
 
   return (
     <div
@@ -118,7 +125,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </>
       ) : (
         <>
-          <h4 className={cssStyles.taskTitle}>{title}</h4>
+          <TaskHeading className={cssStyles.taskTitle}>{title}</TaskHeading>
           <p className={cssStyles.taskDescription}>{description}</p>
         </>
       )}
@@ -133,6 +140,8 @@ export interface BoardProps {
   columnDragAndDrop: ReturnType<typeof useColumnDragAndDrop>
   taskDragAndDrop: ReturnType<typeof useTaskDragAndDrop>
   styles?: ProjectBoardStyles
+  /** Base heading level; column titles render at this + 1, task titles + 2. */
+  headingLevel?: number
 }
 
 export default function Board({
@@ -142,12 +151,19 @@ export default function Board({
   columnDragAndDrop,
   taskDragAndDrop,
   styles,
+  headingLevel = 2,
 }: BoardProps) {
   const { columns: allColumns, setColumns: setAllColumns } = useProjectBoard()
 
   // data-theme on the .board root cascades the theme CSS variables to every
   // column / task card, so no per-column JS style computation is needed.
   const theme = styles?.theme ?? 'light'
+
+  // Real heading elements at the caller-controlled level: column titles one
+  // level below the board (default `h3`), task-card titles two below (`h4`),
+  // replacing hardcoded `<h3>`/`<h4>` that could skip levels (WCAG 1.3.1).
+  const ColumnHeading = `h${Math.min(6, headingLevel + 1)}` as ElementType
+  const taskHeadingLevel = Math.min(6, headingLevel + 2)
 
   const handleTaskSelect = useCallback(
     (taskId: string) => {
@@ -191,6 +207,7 @@ export default function Board({
           }
         >
           <TaskCard
+            titleHeadingLevel={taskHeadingLevel}
             title={task.title}
             description={task.description}
             checked={isSelected}
@@ -302,7 +319,9 @@ export default function Board({
             }}
             onDragEnd={handleColumnDragEnd}
           >
-            <h3 className={cssStyles.columnTitle}>{column.title}</h3>
+            <ColumnHeading className={cssStyles.columnTitle}>
+              {column.title}
+            </ColumnHeading>
             <p className={cssStyles.columnDescription}>{column.description}</p>
           </div>
 
