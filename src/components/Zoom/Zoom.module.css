@@ -77,11 +77,22 @@
 .zoomRoot[data-state='visible'] {
   transform: scale(var(--zoom-scale-enter));
   opacity: 1;
+  visibility: visible;
 }
 
+/*
+ * Hidden also sets `visibility: hidden` so a fully zoomed-out wrapper is removed
+ * from the accessibility tree AND the tab order (opacity:0 + scale alone leaves
+ * it screen-reader-announced and keyboard-focusable — WCAG 1.3.1 / 2.4.3 /
+ * 4.1.2). The swap is deferred to the end of the zoom-OUT by the discrete
+ * `visibility` transition on `.zoomRoot` (visible->hidden holds `visible` until
+ * the transition completes), so the zoom-OUT still animates and the node drops
+ * out the instant it is fully hidden.
+ */
 .zoomRoot[data-state='hidden'] {
   transform: scale(var(--zoom-scale-exit));
   opacity: 0;
+  visibility: hidden;
 }
 
 /* --------------------------------------------------------------------------
@@ -91,4 +102,19 @@
   transition: none;
   transform: scale(1);
   opacity: 0.6;
+  /* Disabled is a purely-visual dimmed treatment that ALWAYS shows the content,
+     so it must win over a coincident hidden state's `visibility: hidden`. */
+  visibility: visible;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3) — a Zoom is nothing BUT a transition, so under
+   prefers-reduced-motion we drop the animation and switch scale/opacity/
+   visibility instantly. Content still shows/hides and is still correctly added
+   to / removed from the a11y tree — just without the animated zoom.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .zoomRoot {
+    transition: none;
+  }
 }

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import Zoom from './index'
 import CustomButton from '../Button'
 import Typography from '../Typography'
@@ -277,6 +278,188 @@ export const CustomScale: Story = {
         </div>
       </div>
     )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// A11y regression — focus + screen-reader safety of the hidden state.
+// When zoomed OUT (`in: false`) the wrapper flips to `visibility: hidden` once
+// the zoom completes, so any interactive content inside is removed from BOTH the
+// tab order and the screen-reader accessibility tree (opacity:0 + a scale alone
+// leaves it focusable + announced — WCAG 1.3.1 / 2.4.3 / 4.1.2). Tab through the
+// row: with the Zoom hidden, focus jumps straight from "Before" to "After",
+// skipping the button inside the Zoom.
+export const FocusAndScreenReaderSafety: Story = {
+  render: function FocusSafetyStory() {
+    const [isVisible, setIsVisible] = useState(false)
+
+    return (
+      <div style={{ width: '480px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          {isVisible ? 'Zoom out' : 'Zoom in'}
+        </CustomButton>
+        <div
+          style={{
+            marginTop: '16px',
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center',
+          }}
+        >
+          <button type="button">Before</button>
+          <Zoom styles={{ in: isVisible, theme: 'light', timeout: 300 }}>
+            <button type="button" data-testid="zoom-inner-button">
+              Inside Zoom
+            </button>
+          </Zoom>
+          <button type="button">After</button>
+        </div>
+        <div style={{ marginTop: '16px' }}>
+          <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+            While zoomed out, the middle button is not tabbable and not announced
+            by screen readers — Tab moves from &ldquo;Before&rdquo; straight to
+            &ldquo;After&rdquo;.
+          </Typography>
+        </div>
+      </div>
+    )
+  },
+  // Behavioral regression gate (runs in @storybook/test-runner, a real browser):
+  // proves the hidden state removes the inner control from BOTH the a11y tree and
+  // the tab order — the property a Chromatic pixel-diff cannot see, because
+  // `visibility: hidden` and the old `opacity: 0` are pixel-identical. This FAILS
+  // against an opacity:0-only Zoom (the button would stay accessible + focusable),
+  // so it truly protects the hidden-state a11y fix.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const zoom = canvasElement.querySelector(
+      '[data-component="Zoom"]'
+    ) as HTMLElement
+    const insideButton = canvasElement.querySelector(
+      '[data-testid="zoom-inner-button"]'
+    ) as HTMLButtonElement
+    const beforeButton = canvas.getByRole('button', { name: 'Before' })
+
+    // Starts zoomed OUT (in:false). No mount transition, so visibility is already
+    // hidden: the inner button is out of the accessibility tree (queryByRole
+    // walks that tree) and cannot receive focus (visibility:hidden is unfocusable).
+    await waitFor(() => expect(getComputedStyle(zoom).visibility).toBe('hidden'))
+    expect(canvas.queryByRole('button', { name: 'Inside Zoom' })).toBeNull()
+    beforeButton.focus()
+    insideButton.focus()
+    expect(insideButton).not.toHaveFocus()
+    expect(beforeButton).toHaveFocus()
+
+    // Zoom IN: the inner button re-enters the a11y tree and becomes focusable.
+    await userEvent.click(canvas.getByRole('button', { name: /Zoom (in|out)/ }))
+    await waitFor(() =>
+      expect(getComputedStyle(zoom).visibility).toBe('visible')
+    )
+    expect(
+      canvas.getByRole('button', { name: 'Inside Zoom' })
+    ).toBeInTheDocument()
+    insideButton.focus()
+    expect(insideButton).toHaveFocus()
+
+    // Zoom OUT again: the deferred DISCRETE visibility swap holds the node
+    // present for the whole zoom-out, then drops it once fully hidden.
+    await userEvent.click(canvas.getByRole('button', { name: /Zoom (in|out)/ }))
+    await waitFor(() => expect(getComputedStyle(zoom).visibility).toBe('hidden'))
+    expect(canvas.queryByRole('button', { name: 'Inside Zoom' })).toBeNull()
+    beforeButton.focus()
+    insideButton.focus()
+    expect(insideButton).not.toHaveFocus()
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// A11y regression — reduced-motion awareness (WCAG 2.3.3). A Zoom is nothing but
+// a transition, so under `prefers-reduced-motion: reduce` the animation is
+// dropped and scale/opacity/visibility switch instantly. Turn on "Reduce motion"
+// in your OS/browser and the deliberately slow 1500ms toggle below snaps instead
+// of zooming.
+export const ReducedMotion: Story = {
+  render: function ReducedMotionStory() {
+    const [isVisible, setIsVisible] = useState(true)
+
+    return (
+      <div style={{ width: '460px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          Toggle Zoom
+        </CustomButton>
+        <div style={{ marginTop: '16px', height: '150px' }}>
+          <Zoom styles={{ in: isVisible, theme: 'light', timeout: 1500 }}>
+            <Paper styles={{ theme: 'light', padding: '20px' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                Reduced-motion aware
+              </Typography>
+              <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+                With &ldquo;Reduce motion&rdquo; enabled, this snaps in and out
+                with no 1.5s zoom.
+              </Typography>
+            </Paper>
+          </Zoom>
+        </div>
+      </div>
+    )
+  },
+  // Regression gate for the reduced-motion fix. Chromatic cannot emulate
+  // `prefers-reduced-motion` and a visible reduced-motion Zoom is pixel-identical
+  // to a normal one, so a visual diff can't protect this. Instead assert the
+  // guard RULE structurally in the CSSOM (it fails if the
+  // `@media (prefers-reduced-motion: reduce)` block that zeroes the transition is
+  // ever removed), plus a real behavioral check when the runner DOES request
+  // reduced motion.
+  play: async ({ canvasElement }) => {
+    const zoom = canvasElement.querySelector(
+      '[data-component="Zoom"]'
+    ) as HTMLElement
+    expect(zoom).toBeInTheDocument()
+
+    // Structural presence gate: some stylesheet must carry a
+    // `@media (prefers-reduced-motion: reduce)` rule that sets `transition: none`
+    // on this component's container class. getComputedStyle can't read a
+    // non-matching media query's value, so walk the CSSOM directly.
+    const containerClass = zoom.classList[0]
+    let hasReducedMotionGuard = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        continue // cross-origin sheet — not readable, skip
+      }
+      for (const rule of Array.from(rules)) {
+        if (
+          rule instanceof CSSMediaRule &&
+          rule.media.mediaText.includes('prefers-reduced-motion') &&
+          rule.media.mediaText.includes('reduce')
+        ) {
+          for (const inner of Array.from(rule.cssRules)) {
+            if (
+              inner instanceof CSSStyleRule &&
+              inner.selectorText.includes(containerClass) &&
+              /transition:\s*none/i.test(inner.cssText)
+            ) {
+              hasReducedMotionGuard = true
+            }
+          }
+        }
+      }
+    }
+    expect(hasReducedMotionGuard).toBe(true)
+
+    // Behavioral gate when the environment actually requests reduced motion
+    // (e.g. a runner configured to emulate it): the transition must be off.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      expect(getComputedStyle(zoom).transitionProperty).toBe('none')
+    }
   },
   globals: { backgrounds: { value: 'light' } },
 }

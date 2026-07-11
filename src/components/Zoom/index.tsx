@@ -8,6 +8,49 @@ import React, { forwardRef } from 'react'
 import cssStyles from './Zoom.module.css'
 
 // --------------------------------------------------------------------------
+// TIMING HELPERS
+// --------------------------------------------------------------------------
+
+/**
+ * Best-effort extraction of a CSS `transition` shorthand's longest running time
+ * — duration + delay, summed per comma-separated segment — in milliseconds.
+ *
+ * Zoom defers its `visibility: hidden` swap (which drops zoomed-out content from
+ * the accessibility tree and tab order) until the zoom-OUT visually completes,
+ * keyed off the `--zoom-duration` token in Zoom.module.css. When a caller
+ * supplies the full `transition` shorthand override, the real zoom duration
+ * lives INSIDE that string and is otherwise invisible to the CSS, so
+ * `--zoom-duration` would keep its theme default and the visibility swap could
+ * fire early — chopping the animation and, worse, dropping content from the
+ * a11y tree before it is actually gone. Parsing the longest segment time here
+ * and feeding it back into `--zoom-duration` keeps the deferral in lockstep
+ * with the real animation for arbitrary, even multi-segment, transitions.
+ *
+ * Errs LONG on purpose (sums duration + delay, takes the max across segments):
+ * deferring the a11y-tree drop slightly past the zoom is harmless, dropping it
+ * early is the actual defect. Returns `undefined` when no `<time>` token is
+ * present, so the caller falls back to the `timeout` / `transitionDuration`
+ * value (or, failing that, the CSS token default).
+ */
+function transitionRuntimeMs(transition: string): number | undefined {
+  let max: number | undefined
+  for (const segment of transition.split(',')) {
+    // Unsigned <time> tokens only (a negative delay would shorten the sum and
+    // risk an early drop — ignoring it keeps us on the safe, longer side).
+    const times = segment.match(/\d*\.?\d+(?:ms|s)\b/gi)
+    if (!times || times.length === 0) continue
+    // Per the shorthand grammar the first <time> is the duration and the second
+    // (if any) the delay; sum them so the deferral spans duration + delay.
+    const totalMs = times.slice(0, 2).reduce((sum, token) => {
+      const value = parseFloat(token)
+      return sum + (/ms$/i.test(token) ? value : value * 1000)
+    }, 0)
+    if (max === undefined || totalMs > max) max = totalMs
+  }
+  return max
+}
+
+// --------------------------------------------------------------------------
 // PROPS INTERFACE
 // --------------------------------------------------------------------------
 
@@ -112,6 +155,20 @@ const Zoom = forwardRef<HTMLDivElement, ZoomProps>(
     if (styles) {
       if (styles.transition !== undefined) {
         dynamicStyle['--zoom-transition'] = styles.transition
+        // --zoom-duration governs the DEFERRED visibility swap that keeps
+        // zoomed-out content out of the a11y tree / tab order. A full
+        // `transition` override embeds the real running time, so prefer the
+        // duration parsed out of it (keeps the deferral matched to the actual
+        // animation); otherwise fall back to timeout / transitionDuration, else
+        // leave the CSS per-theme default.
+        const runtime = transitionRuntimeMs(styles.transition)
+        if (runtime !== undefined) {
+          dynamicStyle['--zoom-duration'] = `${runtime}ms`
+        } else if (styles.timeout !== undefined) {
+          dynamicStyle['--zoom-duration'] = `${styles.timeout}ms`
+        } else if (styles.transitionDuration !== undefined) {
+          dynamicStyle['--zoom-duration'] = styles.transitionDuration
+        }
       } else {
         const duration =
           styles.timeout !== undefined
@@ -120,6 +177,10 @@ const Zoom = forwardRef<HTMLDivElement, ZoomProps>(
         const timingFunction = styles.transitionTimingFunction ?? 'ease'
         dynamicStyle['--zoom-transition'] =
           `transform ${duration} ${timingFunction}, opacity ${duration} ${timingFunction}`
+        // Keep the deferred visibility swap in lockstep with the transform/
+        // opacity duration so the a11y-tree drop lands exactly at the end of
+        // the zoom-OUT.
+        dynamicStyle['--zoom-duration'] = duration
       }
     }
 
