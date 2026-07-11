@@ -125,3 +125,44 @@ export const InteractionTest: Story = {
     await expect(group).toHaveAttribute('data-field-grid', 'true')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11y — the field cluster is NAMED from a real, crawlable <h2> via
+// aria-labelledby (forwarded through rest props). This is the primary
+// accessible-by-default usage: a visible section heading names the
+// role="group" so assistive tech announces the cluster as one named set,
+// giving the fields a programmatic group relationship (WCAG 1.3.1) whose
+// accessible name is the heading text (WCAG 4.1.2). Guards the ...restProps
+// aria-* forwarding contract and the SSR-crawlable heading semantics.
+// --------------------------------------------------------------------------
+/**
+ * Names the `role="group"` from a real `<h2>` heading via `aria-labelledby`
+ * (forwarded through rest props) — the recommended way to label a FieldGrid.
+ * The group's accessible name resolves to the heading text, so assistive tech
+ * announces the field cluster as one named set instead of an anonymous group.
+ */
+export const LabelledByHeading: Story = {
+  name: 'A11y (named by heading)',
+  render: args => {
+    const headingId = 'fieldgrid-billing-heading'
+    return (
+      <section>
+        <h2 id={headingId} style={{ marginBottom: 12 }}>
+          Billing
+        </h2>
+        <FieldGrid {...args} aria-labelledby={headingId}>
+          <StatefulTextField label="Card Name" styles={{ theme: 'light' }} />
+          <StatefulTextField label="Card Number" styles={{ theme: 'light' }} />
+        </FieldGrid>
+      </section>
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Accessible name is computed from the external <h2> via aria-labelledby.
+    const group = canvas.getByRole('group', { name: 'Billing' })
+    await expect(group).toBeVisible()
+    await expect(group).toHaveAttribute('data-component', 'FieldGrid')
+  },
+}
