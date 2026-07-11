@@ -438,6 +438,25 @@ const Stepper: React.FC<StepperProps> = ({
       {renderWizardContent()}
       {renderWizardNavigation()}
 
+      {/* Persistent polite live region announcing wizard STEP TRANSITIONS
+          (WCAG 4.1.3 Status Messages). Advancing (Continue) or retreating
+          (Back) swaps the rendered `content` and moves the active step WITHOUT
+          moving focus — the Continue/Back button keeps focus — so a
+          screen-reader user gets no signal that they navigated. This region is
+          mounted for the whole life of a wizard-mode Stepper; its initial
+          content is NOT announced (a polite region present at mount stays
+          silent), and each later change announces "Step X of N: <label>". It
+          holds `aria-live="polite"` (not `role="status"`) so it is a separate
+          region from the completion announcer below — never both at once,
+          because it clears to '' once the all-steps-completed pane is reached. */}
+      {isWizardMode && (
+        <div className={cssStyles.srOnly} aria-live="polite" aria-atomic="true">
+          {activeStep < steps.length && steps[activeStep]
+            ? `Step ${activeStep + 1} of ${steps.length}: ${steps[activeStep].label}`
+            : ''}
+        </div>
+      )}
+
       {/* Persistent, initially-EMPTY polite live region for the wizard-
           completion announcement (WCAG 4.1.3). It is mounted for the whole life
           of a wizard-mode Stepper and only its text content changes when the
