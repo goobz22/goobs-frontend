@@ -2016,3 +2016,170 @@ export const ReadOnlyPermissions: Story = {
     ).toBeNull()
   },
 }
+
+/**
+ * ACCESSIBILITY — table header semantics + sort state.
+ *
+ * Pins the native-table a11y contract the audit added:
+ *  - every column header is a `<th scope="col" role="columnheader">` so
+ *    assistive tech associates each data cell with its column (WCAG 1.3.1);
+ *  - the leading select-all checkbox has a programmatic name (WCAG 4.1.2);
+ *  - the grid reports both aria-rowcount and aria-colcount;
+ *  - sorting a column via its header menu exposes `aria-sort` on that header
+ *    ("ascending"/"descending"), which was previously never emitted.
+ */
+export const AccessibleHeaderSemantics: Story = {
+  name: 'A11y — Header Semantics & Sort',
+  render: args => (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-headers',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // 1. The grid root exposes row + column counts.
+    const grid = canvasElement.querySelector<HTMLElement>('[role="grid"]')
+    if (!grid) throw new Error('Grid root [role="grid"] did not render')
+    await expect(grid).toHaveAttribute('aria-rowcount')
+    await expect(grid).toHaveAttribute('aria-colcount')
+
+    // 2. Column headers are real scoped <th> cells.
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    if (!nameHeader) throw new Error('Name column header did not render')
+    await expect(nameHeader).toHaveAttribute('scope', 'col')
+    await expect(nameHeader).toHaveAttribute('role', 'columnheader')
+    // Unsorted headers carry no aria-sort.
+    await expect(nameHeader).not.toHaveAttribute('aria-sort')
+
+    // 3. The select-all checkbox has an accessible name.
+    await expect(
+      within(canvasElement).getByRole('checkbox', { name: 'Select all rows' })
+    ).toBeInTheDocument()
+
+    // 4. Sorting via the header menu surfaces aria-sort. The menu is a
+    //    portalled Popover, so query document.body for its items.
+    const menuTrigger = nameHeader.querySelector<HTMLButtonElement>(
+      '[data-action="open-column-menu"]'
+    )
+    if (!menuTrigger) throw new Error('Column menu trigger did not render')
+    await expect(menuTrigger).toHaveAttribute('aria-haspopup', 'menu')
+    await userEvent.click(menuTrigger)
+
+    const sortAsc = await waitFor(() => {
+      const btn = document.body.querySelector<HTMLButtonElement>(
+        '[data-column-menu-for="name"] [data-action="sort-asc"]'
+      )
+      if (!btn) throw new Error('Sort ascending menu item did not appear')
+      return btn
+    })
+    await userEvent.click(sortAsc)
+
+    await waitFor(() =>
+      expect(nameHeader).toHaveAttribute('aria-sort', 'ascending')
+    )
+  },
+}
+
+/**
+ * ACCESSIBILITY — dialog + menu overlays.
+ *
+ * Pins the overlay semantics the audit added:
+ *  - the Manage Columns modal is a labelled `role="dialog" aria-modal`, moves
+ *    focus in, and closes on Escape (WCAG 2.1.2 / 4.1.2);
+ *  - the footer export control is a proper menu button (aria-haspopup +
+ *    aria-expanded) opening a `role="menu"`.
+ */
+export const AccessibleOverlays: Story = {
+  name: 'A11y — Dialog & Menu Overlays',
+  render: args => (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-overlays',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // --- Manage Columns dialog ------------------------------------------
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    if (!nameHeader) throw new Error('Name column header did not render')
+    const menuTrigger = nameHeader.querySelector<HTMLButtonElement>(
+      '[data-action="open-column-menu"]'
+    )
+    if (!menuTrigger) throw new Error('Column menu trigger did not render')
+    await userEvent.click(menuTrigger)
+
+    const manageBtn = await waitFor(() => {
+      const btn = document.body.querySelector<HTMLButtonElement>(
+        '[data-column-menu-for="name"] [data-action="manage-columns"]'
+      )
+      if (!btn) throw new Error('Manage-columns menu item did not appear')
+      return btn
+    })
+    await userEvent.click(manageBtn)
+
+    // The dialog renders inline inside the grid (not portalled).
+    const dialog = await canvas.findByRole('dialog')
+    await expect(dialog).toHaveAttribute('aria-modal', 'true')
+    // aria-labelledby resolves to the visible "Manage Columns" heading.
+    const labelId = dialog.getAttribute('aria-labelledby')
+    if (!labelId) throw new Error('Dialog is missing aria-labelledby')
+    // getElementById avoids CSS-escaping the colon-bearing useId value.
+    await expect(
+      canvasElement.ownerDocument.getElementById(labelId)
+    ).toHaveTextContent('Manage Columns')
+
+    // Escape closes the dialog (keyboard operable, WCAG 2.1.2).
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull())
+
+    // --- Export menu button ---------------------------------------------
+    const exportBtn = canvas.getByRole('button', { name: 'Export options' })
+    await expect(exportBtn).toHaveAttribute('aria-haspopup', 'menu')
+    await expect(exportBtn).toHaveAttribute('aria-expanded', 'false')
+
+    await userEvent.click(exportBtn)
+    await expect(exportBtn).toHaveAttribute('aria-expanded', 'true')
+    // The menu is portalled to document.body with a menu role.
+    await waitFor(() => {
+      const menu = document.body.querySelector('[role="menu"]')
+      if (!menu) throw new Error('Export menu [role="menu"] did not appear')
+    })
+  },
+}
