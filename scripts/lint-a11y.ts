@@ -122,6 +122,10 @@ function selftest(lint: A11yLint): string[] {
 const argv = process.argv.slice(2)
 const selftestOnly = argv.includes('--selftest')
 const onlyIdx = argv.indexOf('--only')
+if (onlyIdx >= 0 && !argv[onlyIdx + 1]) {
+  console.error('✗ --only requires a lint module name')
+  process.exit(1)
+}
 const only = onlyIdx >= 0 ? argv[onlyIdx + 1] : null
 
 let lints = await loadLints()

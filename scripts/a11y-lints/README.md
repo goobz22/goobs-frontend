@@ -69,6 +69,6 @@ export default lint
 - False positives are worse than missed edge cases: a lint that cries wolf gets
   deleted. Encode legitimate escape hatches (e.g. `aria-hidden` decorative icons)
   into the check, not into an ignore list.
-- After the lint is green, it must STAY in `bun run check`/`lint:all` — never
-  delete a module because it is inconvenient; fix the code.
+- After the lint is green, it must STAY in `lint:all` — never delete a module
+  because it is inconvenient; fix the code.
 - Verify with `bun scripts/lint-a11y.ts --only <name>` before committing.
