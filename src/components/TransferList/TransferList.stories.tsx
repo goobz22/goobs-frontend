@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import { z } from 'zod'
 import TransferList, { TransferListDropdownDataMap } from './index'
 import Form from '../Form'
-import { expect, fireEvent, userEvent, within } from 'storybook/test'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 
 const meta: Meta<typeof TransferList> = {
   title: 'Components/TransferList',
@@ -613,5 +613,66 @@ export const ValidationError: Story = {
     const group = canvas.getByRole('group')
     await expect(group).toHaveAttribute('aria-invalid', 'true')
     await expect(group).toHaveAttribute('aria-describedby', errorText.id)
+  },
+}
+
+/**
+ * 8) Keyboard focus is retained across a transfer.
+ *
+ * Activating a transfer arrow can disable that very button — "move all right"
+ * empties the left list, so its own precondition (`currentLeft.length === 0`)
+ * becomes true. A focused element that becomes disabled is blurred by the
+ * browser and focus falls to `<body>`, dropping a keyboard user out of the
+ * control (WCAG 2.4.3 Focus Order / 2.4.7 Focus Visible). After each move the
+ * component redirects focus to the first still-enabled transfer button, so
+ * focus never leaves the button group. Here, moving every item right disables
+ * "move all right"; focus lands on the now-enabled reciprocal "move all left".
+ *
+ * jsdom does NOT auto-blur a disabled element, so before the fix focus would
+ * remain trapped on the now-disabled button — this play fails against that
+ * pre-fix behavior (and against a real browser, where focus would instead have
+ * fallen to `<body>`).
+ */
+const FocusRetentionRenderer = () => {
+  const [left, setLeft] = React.useState(['Item A', 'Item B'])
+  const [right, setRight] = React.useState<string[]>([])
+  return (
+    <div style={{ width: '700px', padding: '24px' }}>
+      <TransferList
+        leftItems={left}
+        rightItems={right}
+        onChange={(newLeft, newRight) => {
+          setLeft(newLeft)
+          setRight(newRight)
+        }}
+      />
+    </div>
+  )
+}
+
+export const FocusRetainedAfterTransfer: Story = {
+  render: () => <FocusRetentionRenderer />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const moveAllRight = canvas.getByRole('button', { name: 'move all right' })
+    const moveAllLeft = canvas.getByRole('button', { name: 'move all left' })
+
+    // Before the transfer: the left list has items so "move all right" is
+    // enabled, and "move all left" is disabled (the right list is empty).
+    await expect(moveAllRight).toBeEnabled()
+    await expect(moveAllLeft).toBeDisabled()
+
+    // Activating "move all right" moves every item right, which flips the button
+    // that was just used to disabled.
+    await userEvent.click(moveAllRight)
+    await expect(moveAllRight).toBeDisabled()
+
+    // Focus is redirected to the first still-enabled transfer button rather than
+    // being dropped on the now-disabled button (or lost to <body>): the
+    // reciprocal "move all left" (the right list is now non-empty) takes focus.
+    await waitFor(() => expect(moveAllLeft).toHaveFocus())
+    await expect(moveAllRight).not.toHaveFocus()
+    await expect(document.body).not.toHaveFocus()
   },
 }

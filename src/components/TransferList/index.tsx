@@ -224,6 +224,49 @@ const TransferList: React.FC<TransferListProps> = ({
     useState<string>('')
   const [checked, setChecked] = useState<readonly string[]>([])
 
+  // Keyboard focus retention across a transfer (WCAG 2.4.3 Focus Order / 2.4.7
+  // Focus Visible). Activating a transfer arrow can flip that same button to
+  // `disabled` — e.g. "move all right" empties the left list, so its own
+  // precondition (`currentLeft.length === 0`) becomes true. When a focused
+  // element becomes disabled the browser blurs it and focus falls to <body>, so
+  // a keyboard user loses their place in the control. After every move we bump
+  // this nonce; the effect below then redirects focus to the first still-enabled
+  // transfer button (a move always leaves the reciprocal "move all …" button
+  // enabled, since the destination list is now non-empty), so focus never drops
+  // out of the button group. The effect proactively moves focus when the
+  // just-activated button is now disabled — it does not rely on the browser's
+  // blur-on-disable, which also keeps this observable in jsdom-based stories.
+  const buttonGroupRef = React.useRef<HTMLDivElement>(null)
+  const [transferNonce, setTransferNonce] = useState(0)
+  const noteTransfer = React.useCallback(() => {
+    setTransferNonce(nonce => nonce + 1)
+  }, [])
+
+  React.useEffect(() => {
+    // Skip the initial mount — only run after an actual transfer.
+    if (transferNonce === 0) return
+    const group = buttonGroupRef.current
+    if (!group) return
+    const buttons = Array.from(
+      group.querySelectorAll<HTMLButtonElement>('button')
+    )
+    const active = document.activeElement
+    // The button the user just activated became disabled (jsdom keeps it as the
+    // active element), or the browser already blurred it to <body> (real DOM).
+    const activeButtonNowDisabled =
+      active instanceof HTMLButtonElement &&
+      group.contains(active) &&
+      active.disabled
+    const focusFellToBody = active === document.body || active === null
+    if (activeButtonNowDisabled || focusFellToBody) {
+      const firstEnabled = buttons.find(button => !button.disabled)
+      // `preventScroll` so restoring focus never yanks the viewport; the button
+      // group is already on-screen. :focus-visible stays keyboard-gated, so a
+      // pointer user does not get a spurious ring from this programmatic focus.
+      firstEnabled?.focus({ preventScroll: true })
+    }
+  }, [transferNonce])
+
   // Custom handler that resets checked when dropdown changes
   const setSelectedDropdownValue = React.useCallback(
     (value: string) => {
@@ -272,6 +315,7 @@ const TransferList: React.FC<TransferListProps> = ({
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
     setChecked([])
+    noteTransfer()
   }
 
   const handleCheckedRight = () => {
@@ -284,6 +328,7 @@ const TransferList: React.FC<TransferListProps> = ({
       newRight,
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
+    noteTransfer()
   }
 
   const handleCheckedLeft = () => {
@@ -296,6 +341,7 @@ const TransferList: React.FC<TransferListProps> = ({
       newRight,
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
+    noteTransfer()
   }
 
   const handleAllLeft = () => {
@@ -307,6 +353,7 @@ const TransferList: React.FC<TransferListProps> = ({
       variant === 'multipleSelection' ? selectedDropdownValue : undefined
     )
     setChecked([])
+    noteTransfer()
   }
 
   /**
@@ -475,7 +522,7 @@ const TransferList: React.FC<TransferListProps> = ({
       )}
       <div className={cssStyles.row}>
         <div className={cssStyles.column}>{renderLeftColumn()}</div>
-        <div className={cssStyles.buttonGroup}>
+        <div className={cssStyles.buttonGroup} ref={buttonGroupRef}>
           <TransferButton
             onClick={handleAllRight}
             disabled={currentLeft.length === 0}
