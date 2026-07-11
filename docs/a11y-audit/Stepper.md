@@ -1,0 +1,141 @@
+# Stepper — a11y audit (2026-07-11)
+
+**Status:** FIXED
+**APG pattern:** No dedicated WAI-ARIA APG "stepper" pattern exists; a step/progress indicator
+is conventionally built as the [Breadcrumb](https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/)
+shape — a labelled `<ol>`/`<li>` list of steps where reachable steps are real links, the current
+step carries `aria-current="step"`, and each step's status has a text equivalent. This audit
+aligns Stepper's `navigation` mode with that pattern (mirroring the already-audited sibling
+`Breadcrumb`); `wizard` mode reuses the same list semantics without a `nav` landmark (its steps
+are non-navigating buttons) and adds a completion status message.
+
+Before this pass the component rendered every step as a stack of `<div>`s with a JS-navigating
+`<button>` label, no list semantics, no current-step ARIA, and status conveyed **only** by a
+decorative (already `aria-hidden`) status icon plus background colour — invisible to screen
+readers.
+
+## Issues found
+
+| # | Severity | WCAG | Location (pre-fix) | Issue | Status |
+|---|----------|------|--------------------|-------|--------|
+| 1 | Serious | 1.3.1 Info & Relationships (A) | `index.tsx:284-330` | Steps rendered as `<div class="stepperContainer">` › `<div class="stepContainer">` — **no list semantics**. AT never announced "list, N items" / "step X of N"; the step set had no programmatic grouping. In navigation mode there was also no landmark. | FIXED (`<nav aria-label="Progress">` › `<ol>` › `<li>`; wizard mode uses a self-labelled `<ol>`) |
+| 2 | Serious | 4.1.2 Name, Role, Value (A); 1.4.1 Use of Color (A) | `index.tsx:299` (`iconContainer[data-status]`) | The **current/active step carried no `aria-current`** — which step is "current" was conveyed only by the active icon shape + background colour, so a screen-reader user could not tell where they are. | FIXED (`aria-current="step"` on the active step's control) |
+| 3 | Serious | 1.1.1 Non-text Content (A); 1.4.1 Use of Color (A); 1.3.1 (A) | `index.tsx:299-311` | A step's **status (completed / error / locked) had no text or programmatic equivalent**. The status icons are decorative-by-default (`resolveIconA11y` → `aria-hidden`), so status reached sighted users through icon+colour but reached AT users through *nothing*. | FIXED (visually-hidden `.srOnly` status word — "Completed"/"Error"/"Locked" — appended to each control's accessible name; active uses `aria-current`) |
+| 4 | Serious | 4.1.2 Name, Role, Value (A); 1.3.1 (A) / SEO | `index.tsx:198-199, 304-311` | Reachable navigation-mode steps were `<button>`s that navigated via **`window.location.assign()`** on click — wrong role (button, not link), **not crawlable** in the SSR'd HTML, and no middle-click / open-in-new-tab / status-bar URL. | FIXED (reachable navigation steps are real `<a href>` anchors that navigate natively; `onClick` now only emits the diagnostic) |
+| 5 | Moderate | 1.3.1 Info & Relationships (A) | `index.tsx:312-316` | The secondary `description` was a sibling `<div>` **not associated** with its step control — a screen reader read the label and the description as disconnected text. | FIXED (`aria-describedby` on the control → the description's `id`, via `React.useId`) |
+| 6 | Moderate | 2.4.7 Focus Visible (AA) | `Stepper.module.css:173-195` (`.stepButton`, no `:focus-visible`) | The module had `:hover` and `:disabled` rules but **no `:focus-visible` treatment** — keyboard focus fell back to the UA default outline, easily lost against the sacred gold-on-dark and themed surfaces. | FIXED (`.stepButton:focus-visible` 2px ring using the per-theme `--goobs-*-focus-ring` tokens) |
+| 7 | Minor | 2.3.3 Animation from Interactions (AAA) | `Stepper.module.css:139, 182` | `.iconContainer` and `.stepButton` use `transition: all 0.3s ease` with **no `prefers-reduced-motion` guard**. | FIXED (`@media (prefers-reduced-motion: reduce)` drops both transitions) |
+| 8 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx:227-229` | The wizard's **"All steps completed!"** pane appears (conditionally mounted) with **no live region**, so a screen-reader user gets no announcement that the wizard finished. | FIXED (`role="status"` on the completion title) |
+
+No hearing/media issues: a grep of the component for `new Audio`/`AudioContext`/`<audio>`/
+`<video>`/`navigator.vibrate`/`.play(` returned nothing — Stepper conveys no information by sound.
+
+## Hearing
+
+Clean. The component plays no audio and vibrates nothing. Every state (status, current step,
+completion, hover, focus) is visual **and** now programmatic. No captions/transcript surface is
+applicable.
+
+## Reading & screen reader
+
+- **List structure (Issue 1):** steps are a real `<ol>`/`<li>`, so AT announces the count and
+  position ("list, 4 items", "step 2 of 4"). Navigation mode wraps the list in a
+  `<nav aria-label="Progress">` landmark (its steps are genuine links); wizard mode omits the
+  landmark (its steps do not navigate) and labels the `<ol>` itself `aria-label="Progress"`.
+- **Current step (Issue 2):** the active step's control carries `aria-current="step"` — the state
+  is now programmatic + icon-shape + colour, never colour alone (1.4.1 satisfied).
+- **Status (Issue 3):** each control's accessible name ends with a visually-hidden status word
+  ("… Completed" / "… Error" / "… Locked"). The active step relies on `aria-current="step"`
+  ("current step") rather than a redundant word. So status is conveyed three ways — programmatic,
+  icon shape (Check / Error / CircleOutline / Lock), and colour — never colour alone.
+- **Real links (Issue 4):** reachable navigation-mode steps are `<a href>` anchors — crawlable,
+  natively focusable, Enter-activatable, openable in a new tab. Locked (inactive) steps remain a
+  disabled `<button>` (correctly not a link — nowhere to go). Wizard steps stay `<button>`s
+  (disabled for not-yet-reached steps) since they fire a handler, not navigation.
+- **Description association (Issue 5):** a step with a `description` links its control to the
+  description text via `aria-describedby`, so the secondary text is announced with the step.
+- **Focus (Issue 6):** `.stepButton:focus-visible` draws a 2px outline (per-theme focus-ring
+  token, 2px offset) on both the `<a>` and `<button>` variants across sacred/light/dark.
+- **Completion (Issue 8):** the "All steps completed!" title is a polite `role="status"` live
+  region, announced on mount without stealing focus.
+- **Keyboard model:** a stepper needs no arrow-key roving (like breadcrumb, it is an ordinary set
+  of links/buttons) — Tab/Shift+Tab move between the real `<a>`/`<button>` step controls and the
+  wizard Back/Continue/Finish/Start-Over `<button>`s; Enter (and Space on buttons) activate them
+  natively. No keyboard trap; wizard mode is inline (no overlay/focus-trap surface).
+
+## SEO semantics
+
+Now SSR-crawlable and correctly structured: `<nav aria-label="Progress">` → `<ol>` → `<li>` →
+real `<a href>` step anchors (navigation mode). Previously the reachable steps were client-only
+`window.location.assign()` buttons that a crawler could not follow; the anchors expose the same
+destinations (`statusLink` ?? `stepLink` ?? `#`) in the server-rendered HTML. The decorative
+connector lines are `aria-hidden`. `data-component="Stepper"`, `data-theme`, `data-status`, and
+`data-action="goto-step"` machine-test selectors are all preserved. No heading is semantically
+owed by a progress indicator, so no `headingLevel` prop was added; the wizard-completion title is
+a status message (`role="status"`), not a document heading.
+
+## Fixes applied
+
+All at root cause, inside the component directory, additive-only (no prop renamed/removed/retyped;
+no existing `data-*`/`role`/`aria` selector removed):
+
+- `index.tsx`
+  - Root now renders `<nav aria-label="Progress"><ol>…</ol></nav>` (navigation) or a self-labelled
+    `<ol aria-label="Progress">` (wizard); each step is an `<li>`.
+  - Reachable navigation steps render as `<a href={getStepLink(step)}>`; locked navigation steps
+    and all wizard steps render as `<button type="button" disabled={!clickable}>`. Both variants
+    keep `data-action="goto-step"` and gain `aria-current="step"` (active) + `aria-describedby`.
+  - Added a `React.useId()` base and a `getStatusLabel()` helper; a `.srOnly` status `<span>` is
+    appended inside each control.
+  - `handleStepClick` no longer calls `window.location.assign` (the anchor navigates natively); it
+    only emits the `nav.change` diagnostic, unchanged.
+  - Decorative connectors gained `aria-hidden="true"`; the wizard-completion title gained
+    `role="status"`.
+  - Step controls gained `type="button"` (was an implicit `type="submit"` — a latent
+    form-submission hazard if a Stepper were placed inside a `<form>`).
+- `Stepper.module.css`
+  - `.stepperContainer` (now an `<ol>`) gained `list-style:none; margin:0; padding:0` so the
+    row/column layout is byte-for-byte unchanged.
+  - Added `.stepButton { display:inline-block }` so the `<a>` variant boxes identically to the
+    `<button>`; a `.stepButton:focus-visible` ring with per-theme override rules; a repo-standard
+    `.srOnly` utility; and a `@media (prefers-reduced-motion: reduce)` block.
+
+### Markup changes (per the API contract note)
+
+- Container `<div>` → `<ol>` (+ a `<nav aria-label="Progress">` wrapper in navigation mode); each
+  step `<div>` → `<li>`.
+- Reachable navigation-mode step: `<button onClick=assign>` → **`<a href>`** (role button → link;
+  now crawlable). Locked navigation steps and wizard steps stay `<button>` (unchanged element),
+  gaining `type="button"`.
+- New attributes only (nothing removed/renamed): `aria-current="step"`, `aria-describedby`,
+  `aria-label="Progress"`, `role="status"`, `aria-hidden` on connectors. `data-component`,
+  `data-theme`, `data-status`, and `data-action="goto-step"` are all preserved on their prior
+  elements (the peer-added `data-action="goto-step"` now rides on both the `<a>` and `<button>`
+  variants).
+
+## Stories updated
+
+- **`NavigationSemantics`** (new) — navigation mode with a `play` function that pins: the
+  `<nav aria-label="Progress">` landmark, the `<ol>`/`<li>` list with the right item count, the
+  completed step as a real `<a href>` whose accessible text includes "Completed", the active step
+  as a link with `aria-current="step"` wired to its description via `aria-describedby`, and the
+  locked step as a disabled `<button>` reading "Locked". These fail if any of Issues 1–5 regress.
+- **`WizardCompletionAnnouncement`** (new) — drives the wizard to completion (Continue → Finish)
+  and asserts the "All steps completed!" message carries `role="status"` (Issue 8) plus the
+  "Start Over" reset. Fails if the completion live region regresses.
+- Existing `WizardMode`, `ThemeShowcase`, `SacredTheme`, `InteractiveDemo`, and the checkout /
+  setup demo stories continue to exercise the status icons, themes, orientations, and wizard flow
+  under the new markup.
+
+## Deferred
+
+None in owned scope — every fix lived inside `src/components/Stepper/`. No shared-file change
+(Icons, Button, `global.css`, barrel) was required: the status icons were already correctly
+decorative via the shared `resolveIconA11y` contract, and the focus-ring/`.srOnly` conventions
+reuse existing `--goobs-*` tokens and the repo-standard pattern.
+
+**Non-blocking observation (left as-is, not a WCAG failure):** on wizard step change the
+consumer-provided `content` swaps without an announcement or focus move. Wrapping arbitrary
+consumer content in an `aria-live` region would over-announce (it can be a whole form), and moving
+focus into it is a behaviour change consumers may not expect; the correct call is to let the
+consuming app own focus management for its own step content. Documented here rather than forced.
