@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the Checkbox component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import Checkbox from './index'
 
 const meta: Meta<typeof Checkbox> = {
@@ -121,5 +122,75 @@ export const NoOutline: Story = {
     styles: {
       outline: false,
     },
+  },
+}
+
+// --------------------------------------------------------------------------
+// Accessibility Stories
+// --------------------------------------------------------------------------
+
+/**
+ * A checkbox with a visible inline label (`children`). Because the wrapper is a
+ * real `<label>` associated with the native `<input>`, the label text becomes
+ * the control's accessible name — a screen reader announces
+ * "Accept terms and conditions, checkbox". The `play` assertion resolves the
+ * checkbox purely by that accessible name, which also proves the decorative
+ * checkmark SVG (now `aria-hidden`) does NOT leak into the name.
+ */
+export const WithLabel: Story = {
+  name: 'A11y/Accessible Name',
+  args: {
+    children: 'Accept terms and conditions',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByRole with an exact name only matches if the accessible name is
+    // exactly the label text — i.e. the aria-hidden icon adds nothing.
+    const checkbox = canvas.getByRole('checkbox', {
+      name: 'Accept terms and conditions',
+    })
+    expect(checkbox).toBeInTheDocument()
+  },
+}
+
+/**
+ * Exercises the keyboard focus ring (WCAG 2.4.7 / 2.4.11). The native `<input>`
+ * is `opacity: 0`, so its own browser outline is invisible; the CSS module
+ * mirrors `:focus-visible` onto the visible box as a solid outline. The `play`
+ * tabs to the control with the keyboard (which triggers `:focus-visible`) so the
+ * ring renders in the Chromatic snapshot, then asserts the input is focused.
+ */
+export const KeyboardFocusRing: Story = {
+  name: 'A11y/Keyboard Focus Ring',
+  args: {
+    children: 'Focusable checkbox',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const checkbox = canvas.getByRole('checkbox', {
+      name: 'Focusable checkbox',
+    })
+    // Keyboard navigation (not a mouse click) is what activates :focus-visible.
+    await userEvent.tab()
+    expect(checkbox).toHaveFocus()
+  },
+}
+
+/**
+ * The indeterminate ("mixed") state announced programmatically. The native input
+ * carries the `indeterminate` DOM property plus `aria-checked="mixed"`, so a
+ * screen reader reports the tri-state rather than a plain unchecked box —
+ * conveying the state without relying on the dash glyph alone (WCAG 1.4.1).
+ */
+export const IndeterminateWithLabel: Story = {
+  name: 'A11y/Indeterminate Announced',
+  args: {
+    indeterminate: true,
+    children: 'Select all',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const checkbox = canvas.getByRole('checkbox', { name: 'Select all' })
+    expect(checkbox).toHaveAttribute('aria-checked', 'mixed')
   },
 }

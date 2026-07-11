@@ -365,6 +365,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         />
         <div
           className={cssStyles.box}
+          // Purely presentational chrome — the checked/indeterminate/disabled
+          // state it paints is already conveyed programmatically by the native
+          // <input> above (checked / indeterminate DOM prop / aria-checked).
+          // Hide it from the a11y tree so it adds no screen-reader noise.
+          aria-hidden="true"
           {...(checkedAttr && { 'data-checked': checkedAttr })}
           {...(indeterminateAttr && {
             'data-indeterminate': indeterminateAttr,
@@ -374,6 +379,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         ></div>
         <div
           className={cssStyles.icon}
+          // The Check / IndeterminateCheckBox SVG is a decorative duplicate of
+          // the native input's state. Hiding its wrapper keeps the checkmark
+          // graphic out of the a11y tree so it never leaks into the <label>'s
+          // accessible name or gets announced separately (WCAG 1.1.1 / 4.1.2).
+          aria-hidden="true"
           {...(checkedAttr && { 'data-checked': checkedAttr })}
           {...(indeterminateAttr && {
             'data-indeterminate': indeterminateAttr,

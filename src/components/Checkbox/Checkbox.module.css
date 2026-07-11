@@ -145,6 +145,29 @@
 }
 
 /* --------------------------------------------------------------------------
+   FOCUS-VISIBLE — the native <input> is `opacity: 0`, so its own browser focus
+   ring is painted invisible. Mirror keyboard focus onto the visible box as a
+   solid, high-contrast outline (WCAG 2.4.7 Focus Visible / 2.4.11 Focus
+   Appearance). `:focus-visible` (not `:focus`) means the ring shows for keyboard
+   users only, not on mouse click, matching platform convention. The box is the
+   input's following sibling in `.container`, so the `~` combinator reaches it.
+   `outline` is used rather than `box-shadow` so it never collides with the
+   state-dependent `box-shadow` set on the box for hover/checked/disabled.
+   -------------------------------------------------------------------------- */
+.input:focus-visible ~ .box {
+  outline: 2px solid var(--goobs-light-primary);
+  outline-offset: 2px;
+}
+
+.wrapper[data-theme='dark'] .input:focus-visible ~ .box {
+  outline-color: var(--goobs-dark-primary);
+}
+
+.wrapper[data-theme='sacred'] .input:focus-visible ~ .box {
+  outline-color: var(--goobs-gold);
+}
+
+/* --------------------------------------------------------------------------
    BOX — LIGHT theme defaults (old checkboxThemes.light.box)
    -------------------------------------------------------------------------- */
 .box {
