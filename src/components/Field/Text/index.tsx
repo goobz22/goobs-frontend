@@ -54,6 +54,23 @@ export interface TextFieldProps {
   ariaLabelledby?: string
   /** Native input `type` (default 'text'). Ignored when `multiline` is set. */
   type?: string
+  /**
+   * Native HTML autofill token forwarded verbatim as `autoComplete` on the
+   * input/textarea (e.g. `'name'`, `'email'`, `'username'`,
+   * `'current-password'`, `'postal-code'`, `'one-time-code'`). Lets the browser
+   * autofill and assistive tech identify the field's purpose — the mechanism
+   * WCAG 1.3.5 Identify Input Purpose (AA) requires. The component cannot infer
+   * purpose, so the consumer supplies the token; omitted → the attribute is not
+   * emitted, so existing callsites render byte-for-byte identically.
+   */
+  autoComplete?: string
+  /**
+   * Native `inputMode` hint forwarded to the input/textarea — tells on-screen
+   * keyboards which layout to present (`'numeric'`, `'tel'`, `'email'`, `'url'`,
+   * `'decimal'`, `'search'`, …). Typed as the native React union; omitted → the
+   * attribute is not emitted.
+   */
+  inputMode?: React.HTMLAttributes<HTMLElement>['inputMode']
   /** Renders a `<textarea>` instead of a single-line input (default false). */
   multiline?: boolean
   /** Minimum textarea height in rows (default 3; applied as 1.5em per row). */
