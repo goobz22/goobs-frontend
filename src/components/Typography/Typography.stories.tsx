@@ -462,3 +462,131 @@ export const InteractionTest: Story = {
     expect(footer).toHaveStyle({ 'text-align': 'right' })
   },
 }
+
+// --------------------------------------------------------------------------
+// ATTRIBUTE PASS-THROUGH STORIES (a11y — id / htmlFor / aria-* forwarding)
+// --------------------------------------------------------------------------
+
+/**
+ * A `component`-upgraded heading is now usable as an `aria-labelledby` TARGET:
+ * because Typography spreads standard DOM attributes onto the rendered element,
+ * a `component="h2" id="region-title"` heading supplies the accessible NAME of a
+ * region/dialog that references it. Regression baseline: before the attribute
+ * pass-through, `id` was dropped on the floor, the IDREF resolved to nothing,
+ * and the region had no accessible name — the standard "heading names a
+ * dialog/landmark" pattern was non-functional (WCAG 1.3.1 Info and
+ * Relationships, 4.1.2 Name, Role, Value).
+ */
+export const HeadingAsLabelledbyTarget: Story = {
+  name: 'Semantics/Heading Names a Region (aria-labelledby)',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <section aria-labelledby="region-title">
+      <Typography
+        component="h2"
+        id="region-title"
+        text="Account Settings"
+        styles={{ theme: 'light', variant: 'merrih2' }}
+      />
+      <Typography
+        component="p"
+        text="Region body content."
+        styles={{ theme: 'light', variant: 'merriparagraph' }}
+      />
+    </section>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The id rode through to the REAL <h2>, so the section becomes a named
+    // region whose accessible name resolves via aria-labelledby to the heading.
+    const region = canvas.getByRole('region', { name: 'Account Settings' })
+    await expect(region).toBeVisible()
+    const heading = canvas.getByRole('heading', { level: 2 })
+    await expect(heading).toHaveAttribute('id', 'region-title')
+    // The polymorphic element still carries the machine-test selector contract.
+    await expect(heading).toHaveAttribute('data-component', 'Typography')
+  },
+}
+
+/**
+ * `component="label"` + `htmlFor` now programmatically associates the label with
+ * a form control by the control's id (rendered as the `for` attribute) — the
+ * advertised label affordance is functional. Regression baseline: before
+ * `htmlFor` was declared + passed through, the `<label>` carried no `for`
+ * attribute, so clicking it did not focus the input and screen readers did not
+ * announce the label as the control's accessible name (WCAG 1.3.1, 3.3.2 Labels
+ * or Instructions, 4.1.2 Name, Role, Value).
+ */
+export const LabelAssociation: Story = {
+  name: 'Semantics/Label Associates With Control (htmlFor)',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+      <Typography
+        component="label"
+        htmlFor="email-input"
+        text="Email address"
+        styles={{ theme: 'light', variant: 'merriparagraph' }}
+      />
+      <input id="email-input" type="email" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByLabelText resolves ONLY when the label's `for` matches the input id.
+    const input = canvas.getByLabelText('Email address')
+    await expect(input).toBeVisible()
+    await expect(input.tagName).toBe('INPUT')
+    // The label rendered as a real <label> carrying the association + contract.
+    const label = canvas.getByText('Email address')
+    await expect(label.tagName).toBe('LABEL')
+    await expect(label).toHaveAttribute('for', 'email-input')
+    await expect(label).toHaveAttribute('data-component', 'Typography')
+  },
+}
+
+/**
+ * Contract lock for attribute pass-through: a caller `className` is MERGED with
+ * the resolved classes (never replaces them), arbitrary DOM attributes (`id`,
+ * `aria-describedby`) reach the element, and the machine-test selector contract
+ * (`data-component`/`data-theme`) can NEVER be clobbered by pass-through props —
+ * `{...rest}` is spread before the contract attributes so the component's own
+ * attributes always win. Guards against a regression that would let a caller
+ * overwrite `data-component` or drop the resolved root/variant classes.
+ */
+export const AttributePassThroughPreservesContract: Story = {
+  name: 'Semantics/Attribute Pass-Through (contract preserved)',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <div>
+      <Typography
+        component="h3"
+        id="passthrough-heading"
+        className="caller-added-class"
+        aria-describedby="passthrough-desc"
+        text="Described heading"
+        styles={{ theme: 'light', variant: 'merrih3' }}
+      />
+      <Typography
+        component="p"
+        id="passthrough-desc"
+        text="Supplementary description."
+        styles={{ theme: 'light', variant: 'merriparagraph' }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const heading = canvas.getByRole('heading', { level: 3 })
+    // id + aria-describedby rode through to the real <h3>.
+    await expect(heading).toHaveAttribute('id', 'passthrough-heading')
+    await expect(heading).toHaveAttribute('aria-describedby', 'passthrough-desc')
+    // Caller className is MERGED alongside the resolved classes, not replacing
+    // them (root + variant classes remain, so >1 class is present).
+    await expect(heading).toHaveClass('caller-added-class')
+    await expect(heading.classList.length).toBeGreaterThan(1)
+    // Contract attributes are NOT clobbered by the pass-through spread.
+    await expect(heading).toHaveAttribute('data-component', 'Typography')
+    await expect(heading).toHaveAttribute('data-theme', 'light')
+  },
+}

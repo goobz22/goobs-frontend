@@ -509,9 +509,15 @@ const Typography: React.FC<TypographyProps> = ({
     cssStyles.root,
     resolved.className,
     hasBooleanOutline ? cssStyles.outlined : '',
+    classNameProp,
   ]
     .filter(Boolean)
     .join(' ')
+
+  // Merge a caller-supplied `style` UNDER the resolved dynamicStyle so the
+  // component's resolved CSS-vars / margins keep precedence, while still
+  // letting a caller set properties the styling API doesn't cover.
+  const mergedStyle: React.CSSProperties = { ...styleProp, ...dynamicStyle }
 
   const content = text || children
 
@@ -549,13 +555,21 @@ const Typography: React.FC<TypographyProps> = ({
   // so on. Defaults to 'span' so the phrasing-content contract above and every
   // existing caller's markup are unchanged. The data-component / data-theme
   // test-selector contract and all styling ride the resolved element verbatim.
+  //
+  // `{...rest}` (id, htmlFor, role, tabIndex, aria-*, event handlers, …) is
+  // spread FIRST so the component's own contract attributes — data-component,
+  // data-theme, the resolved className/style — are written AFTER and can never
+  // be clobbered by pass-through props. This is what lets `component="h2"
+  // id="…"` be an aria-labelledby target and `component="label" htmlFor="…"`
+  // bind to a control, without weakening the machine-test selector contract.
   const Element = component ?? 'span'
   return (
     <Element
+      {...rest}
       className={className}
       data-component="Typography"
       data-theme={styles?.theme}
-      style={dynamicStyle}
+      style={mergedStyle}
     >
       {content}
     </Element>
