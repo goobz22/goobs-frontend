@@ -59,7 +59,16 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  color: var(--signature-placeholder, rgba(0, 0, 0, 0.35));
+  /*
+   * Sits on the always-white default signing surface (--signature-bg #ffffff).
+   * The old rgba(0,0,0,0.35) resolved to ~#a6a6a6 = only 2.43:1 on white —
+   * failing WCAG 1.4.3 (1.4.11 too) for this meaningful "draw to sign"
+   * instruction. rgba(0,0,0,0.55) resolves to ~#737373 = 4.74:1, clearing the
+   * 4.5:1 text minimum with margin while still reading as muted placeholder.
+   * Consumers who set a DARK `backgroundColor` should override
+   * `--signature-placeholder` so the cue stays visible on their surface.
+   */
+  color: var(--signature-placeholder, rgba(0, 0, 0, 0.55));
   font-size: 0.9rem;
   user-select: none;
 }

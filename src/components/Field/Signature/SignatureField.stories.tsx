@@ -157,6 +157,19 @@ export const RequiredEmpty: Story = {
     )
   },
   globals: { backgrounds: { value: 'light' } },
+  // Locks the stateful accessible name (WCAG 1.1.1 / 4.1.2): the pointer-only
+  // canvas exposes required-ness AND empty-ness through its name (aria-required
+  // is invalid on role="img", so the name is the sole programmatic carrier).
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByRole with `name` throws unless the accessible name matches, so this
+    // single query asserts the name carries BOTH required-ness and empty-state.
+    canvas.getByRole('img', { name: /required, no signature, draw to sign/i })
+    // Nothing to clear yet → the keyboard-reachable Clear control is disabled.
+    await expect(
+      canvas.getByRole('button', { name: /clear/i })
+    ).toBeDisabled()
+  },
 }
 
 /**
@@ -184,6 +197,17 @@ export const Prefilled: Story = {
     )
   },
   globals: { backgrounds: { value: 'light' } },
+  // Edit-mode signed state must surface through the accessible name so an AT
+  // user perceives a signature already exists (WCAG 1.1.1 / 4.1.2).
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Asserts the canvas name reports the signed state.
+    canvas.getByRole('img', { name: /signature present/i })
+    // A signature exists → Clear is operable.
+    await expect(
+      canvas.getByRole('button', { name: /clear/i })
+    ).toBeEnabled()
+  },
 }
 
 /**
