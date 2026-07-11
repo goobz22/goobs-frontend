@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the ProjectBoard component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { expect, userEvent, within } from 'storybook/test'
 import ProjectBoard from '../index'
 import { ProjectBoardProvider } from '../context/ProjectBoardContext'
 import {
@@ -576,6 +577,55 @@ export const CompanyVariant: Story = {
     },
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Pins the board-level accessibility contract: each task-selection checkbox
+ * carries an accessible name ("Select task: …" — the bare checkbox had none),
+ * each column's tasks render as a named `role="list"`, and opening "Create
+ * Task" reveals the Breadcrumb `<nav>` landmark so keyboard/AT users can find
+ * their way back (WCAG 4.1.2 / 1.3.1 / 2.4.1).
+ */
+export const BoardAccessibility: Story = {
+  render: args => (
+    <ProjectBoardProvider>
+      <div
+        style={{
+          backgroundColor: '#f8fafc',
+          minHeight: '100vh',
+          padding: '2rem',
+          margin: 0,
+          boxSizing: 'border-box',
+        }}
+      >
+        <ProjectBoard {...args} />
+      </div>
+    </ProjectBoardProvider>
+  ),
+  args: {
+    ...administratorArgs,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Every task checkbox is named by the task it selects.
+    const checkboxes = canvas.getAllByRole('checkbox', {
+      name: /Select task:/,
+    })
+    await expect(checkboxes.length).toBeGreaterThan(0)
+
+    // Each populated column exposes its tasks as a named list.
+    const lists = canvas.getAllByRole('list', { name: /tasks/ })
+    await expect(lists.length).toBeGreaterThan(0)
+
+    // Opening the Create Task view surfaces the Breadcrumb navigation landmark.
+    await userEvent.click(canvas.getByRole('button', { name: 'Create Task' }))
+    await expect(
+      await canvas.findByRole('navigation', { name: 'Breadcrumb' })
+    ).toBeInTheDocument()
+  },
 }
 
 export const CustomerVariant: Story = {

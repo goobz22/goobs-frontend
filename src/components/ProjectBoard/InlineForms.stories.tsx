@@ -385,7 +385,49 @@ export const AddTaskValidationError: Story = {
         /Please fill in all required fields \(Title, Description, Severity, Status, Product\/Service\)/
       )
     ).toBeInTheDocument()
+    // The banner is exposed as a live region (role="alert") so screen readers
+    // announce the missing-field summary the moment it renders (WCAG 4.1.3).
+    await expect(canvas.getByRole('alert')).toHaveTextContent(
+      /Please fill in all required fields/
+    )
     await expect(args.onAdd).not.toHaveBeenCalled()
+  },
+}
+
+/**
+ * Pins the accessible tab semantics of the add-task form: the strip is a
+ * `role="tablist"` of native `role="tab"` buttons with `aria-selected`
+ * reflecting the active tab, and arrow-key navigation moves the selection
+ * (WAI-ARIA tabs pattern). The rendered panel is a `role="tabpanel"` labelled
+ * by the active tab.
+ */
+export const AddTaskAccessibleTabs: Story = {
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const tablist = canvas.getByRole('tablist', { name: 'Task form sections' })
+    await expect(tablist).toBeInTheDocument()
+
+    const tabs = canvas.getAllByRole('tab')
+    await expect(tabs).toHaveLength(2)
+
+    const detailsTab = canvas.getByRole('tab', { name: 'Task Details' })
+    await expect(detailsTab).toHaveAttribute('aria-selected', 'true')
+
+    // Keyboard: arrow-right from the active tab moves selection to the next.
+    detailsTab.focus()
+    await userEvent.keyboard('{ArrowRight}')
+
+    const kbTab = canvas.getByRole('tab', { name: /Knowledgebase/ })
+    await expect(kbTab).toHaveAttribute('aria-selected', 'true')
+    await expect(detailsTab).toHaveAttribute('aria-selected', 'false')
+
+    // The visible panel is labelled by whichever tab is active.
+    await expect(canvas.getByRole('tabpanel')).toHaveAttribute(
+      'aria-labelledby',
+      'add-task-tab-knowledgeBase'
+    )
   },
 }
 
@@ -419,4 +461,88 @@ export const ShowTaskSacred: Story = {
     <InlineShowTask {...showTaskProps} styles={{ theme: 'sacred' }} />
   ),
   globals: { backgrounds: { value: 'sacred' } },
+}
+
+/**
+ * Pins the accessible tab semantics of the manage-task view: the strip is a
+ * `role="tablist"` of six native `role="tab"` buttons with `aria-selected`,
+ * arrow-key navigation moves the selection, and switching to the Comments tab
+ * surfaces an add-comment textbox that carries a real accessible name (its
+ * placeholder was NOT a label — WCAG 1.3.1 / 4.1.2).
+ */
+export const ShowTaskAccessibleTabs: Story = {
+  render: () => <InlineShowTask {...showTaskProps} />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const tablist = canvas.getByRole('tablist', { name: 'Task sections' })
+    await expect(tablist).toBeInTheDocument()
+
+    const tabs = canvas.getAllByRole('tab')
+    await expect(tabs).toHaveLength(6)
+
+    const detailsTab = canvas.getByRole('tab', { name: 'Details' })
+    await expect(detailsTab).toHaveAttribute('aria-selected', 'true')
+
+    // Keyboard: arrow-right moves selection to Comments.
+    detailsTab.focus()
+    await userEvent.keyboard('{ArrowRight}')
+
+    const commentsTab = canvas.getByRole('tab', { name: 'Comments' })
+    await expect(commentsTab).toHaveAttribute('aria-selected', 'true')
+
+    // The add-comment textarea is reachable by its accessible name.
+    await expect(
+      canvas.getByRole('textbox', {
+        name: /Add a comment for the customer/i,
+      })
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * Pins the accessible meeting-scheduling form: opening the Scheduling tab and
+ * launching "Schedule Meeting" reveals text fields whose `<label>`s are
+ * programmatically associated (reachable via their accessible name) and whose
+ * required fields carry `aria-required` — the asterisks alone did not convey
+ * required-ness (WCAG 1.3.1 / 3.3.2 / 4.1.2).
+ */
+export const ShowTaskMeetingFormLabels: Story = {
+  render: () => (
+    <InlineShowTask
+      {...showTaskProps}
+      taskId="task-no-meetings"
+      meetings={[]}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Go to the Scheduling tab.
+    await userEvent.click(canvas.getByRole('tab', { name: 'Scheduling' }))
+
+    // Empty state → open the meeting form.
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Schedule Meeting' })
+    )
+
+    // Labels are associated, so the fields are found by their accessible name.
+    const titleField = canvas.getByRole('textbox', { name: /Meeting Title/ })
+    await expect(titleField).toBeInTheDocument()
+    await expect(titleField).toHaveAttribute('aria-required', 'true')
+
+    await expect(
+      canvas.getByRole('textbox', { name: /Attendee Name/ })
+    ).toHaveAttribute('aria-required', 'true')
+    await expect(
+      canvas.getByRole('textbox', { name: /Attendee Email/ })
+    ).toHaveAttribute('aria-required', 'true')
+
+    // The meeting-type radios form a named radiogroup.
+    await expect(
+      canvas.getByRole('radiogroup', { name: /Meeting Type/ })
+    ).toBeInTheDocument()
+  },
 }
