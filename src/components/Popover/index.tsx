@@ -201,35 +201,79 @@ const Popover: React.FC<PopoverProps> = ({
     }
   }, [open])
 
-  // WCAG modal focus management (WAI-ARIA APG Dialog(Modal) pattern) —
-  // `role="dialog"` ONLY, the modal case that emits `aria-modal="true"`. On
-  // open: remember the trigger, then move focus into the surface. While open,
-  // Tab is trapped so focus cycles within the surface (2.4.3 Focus Order),
-  // honouring the `aria-modal="true"` promise that the background is not
-  // keyboard-reachable. On close: restore focus to the trigger (4.1.2 Name,
-  // Role, Value). Mirrors the sibling Drawer/Dialog modal effect.
+  // WCAG modal focus management + background isolation (WAI-ARIA APG
+  // Dialog(Modal) pattern) — `role="dialog"` ONLY, the modal case that emits
+  // `aria-modal="true"`. On open: remember the trigger, aria-hide the background
+  // so a screen-reader virtual cursor can't wander into it, then move focus into
+  // the surface. While open, Tab is trapped so focus cycles within the surface
+  // (2.4.3 Focus Order), honouring the `aria-modal="true"` promise that the
+  // background is not keyboard-reachable. On close: un-hide the background, then
+  // restore focus to the trigger (4.1.2 Name, Role, Value). Mirrors the sibling
+  // Drawer/Dialog modal effect.
   //
-  // DELIBERATELY NOT copied from Drawer/Dialog (documented so a later pass does
-  // not "restore parity" and regress this component):
-  //   - No background `inert`/`aria-hidden` isolation. This surface has NO
-  //     backdrop scrim and dismisses via the document-level outside-click
-  //     listener above; marking the background `inert` would swallow those
-  //     clicks and break outside-click dismissal for every consumer.
-  //     `aria-modal` + focus containment is the standard lightweight-popover
-  //     modal contract (react-modal / react-aria do the same).
+  // Isolation uses `aria-hidden`, NOT `inert` — the ONE deliberate divergence
+  // from Drawer/Dialog (documented so a later "restore parity" pass does not
+  // regress it): this surface has NO backdrop scrim and dismisses via the
+  // document-level outside-click listener above. `inert` would ALSO block
+  // pointer events and swallow that dismissing click, breaking outside-click
+  // dismissal for every consumer; `aria-hidden` hides the background from
+  // assistive tech WITHOUT blocking pointer events, so it completes the
+  // `aria-modal` contract (virtual-cursor containment, not just focus
+  // containment) AND preserves outside-click dismissal.
+  //
+  // Also DELIBERATELY NOT copied from Drawer/Dialog (documented so a later pass
+  // does not "restore parity" and regress this component):
   //   - No body scroll-lock. The popover REPOSITIONS on scroll to stay anchored
   //     to its trigger (see the reposition effect above); locking scroll would
-  //     fight that feature. A consumer needing hard background isolation should
-  //     use Drawer or Dialog, not Popover.
+  //     fight that feature. A consumer needing hard pointer-level background
+  //     isolation (a true scrim) should use Drawer or Dialog, not Popover.
   // Non-dialog roles (menu/listbox/tooltip/grid/region) are non-modal and their
-  // interior focus is consumer-managed, so they neither move focus nor trap.
+  // interior focus is consumer-managed, so they neither move focus, isolate, nor
+  // trap.
   useEffect(() => {
     if (!open || role !== 'dialog') return undefined
     const popover = popoverRef.current
     if (!popover) return undefined
 
-    // Remember the trigger so focus can be restored to it on close.
+    // Remember the trigger so focus can be restored to it on close. Captured
+    // BEFORE isolating the background so nothing below can disturb the target.
     const previouslyFocused = document.activeElement as HTMLElement | null
+
+    // Background isolation — COMPLETE the `aria-modal="true"` contract. That
+    // attribute only ASKS assistive tech to treat everything outside the surface
+    // as hidden, and support is uneven, so ALSO enforce it: walk from the surface
+    // up to <body> and mark every sibling off the surface's ancestor path
+    // `aria-hidden="true"`. This is what stops a screen-reader virtual cursor
+    // (VoiceOver / NVDA browse mode) from wandering into the background; the
+    // keyboard Tab-trap below only covers keyboard users. `aria-hidden` (not
+    // `inert`, see the block comment above) keeps the background pointer-clickable
+    // so the outside-click dismissal still fires. Prior `aria-hidden` values are
+    // captured and restored so nothing the consumer set is clobbered. Only
+    // elements present at open time are touched, so a goobs overlay
+    // (SearchableSimple, MultiSelect, a nested Popover, …) that later portals its
+    // menu to document.body from INSIDE this dialog is NOT hidden and stays
+    // announced — the same portal exception the Tab-trap makes below.
+    const isolated: Array<{
+      element: HTMLElement
+      previousAriaHidden: string | null
+    }> = []
+    let node: HTMLElement | null = popover
+    while (node && node !== document.body) {
+      const parent: HTMLElement | null = node.parentElement
+      if (!parent) break
+      const currentNode = node
+      Array.from(parent.children).forEach(sibling => {
+        if (sibling === currentNode || !(sibling instanceof HTMLElement)) {
+          return
+        }
+        isolated.push({
+          element: sibling,
+          previousAriaHidden: sibling.getAttribute('aria-hidden'),
+        })
+        sibling.setAttribute('aria-hidden', 'true')
+      })
+      node = parent
+    }
 
     const getFocusable = (): HTMLElement[] =>
       Array.from(
@@ -276,6 +320,15 @@ const Popover: React.FC<PopoverProps> = ({
     document.addEventListener('keydown', handleTab)
     return () => {
       document.removeEventListener('keydown', handleTab)
+      // Restore the background's AT visibility BEFORE restoring focus, so focus
+      // never lands on a still-`aria-hidden` trigger (a WCAG 4.1.2 violation).
+      isolated.forEach(({ element, previousAriaHidden }) => {
+        if (previousAriaHidden === null) {
+          element.removeAttribute('aria-hidden')
+        } else {
+          element.setAttribute('aria-hidden', previousAriaHidden)
+        }
+      })
       // Restore focus to the element that opened the dialog (APG requirement).
       previouslyFocused?.focus?.()
     }

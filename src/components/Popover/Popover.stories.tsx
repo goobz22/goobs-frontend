@@ -598,3 +598,106 @@ export const DialogFocusManagement: Story = {
     await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — MODAL DIALOG BACKGROUND ISOLATION
+// --------------------------------------------------------------------------
+
+/**
+ * Regression story for the `aria-modal="true"` contract COMPLETION: a modal
+ * dialog must remove the background from the accessibility tree, not merely trap
+ * keyboard focus. On open, every `document.body` sibling of the portalled surface
+ * is marked `aria-hidden="true"` so a screen-reader virtual cursor (VoiceOver /
+ * NVDA browse mode) cannot wander into the background; on close it is restored.
+ *
+ * Isolation uses `aria-hidden`, NOT `inert` — the surface has no backdrop scrim
+ * and dismisses via a document-level outside-click, so the background must stay
+ * pointer-clickable. `aria-hidden` hides from AT without blocking pointer events;
+ * `inert` would swallow the dismissing click. The play step proves the background
+ * gains a hidden ancestor while open, that the dialog surface itself is NOT
+ * hidden, and that the background is fully restored on close.
+ */
+const BackgroundIsolationComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      <p data-testid="background-text">Background content behind the dialog.</p>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Open Dialog
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        ariaLabelledBy="bi-dialog-title"
+        styles={{ theme: 'light' }}
+      >
+        <div style={{ padding: '16px', minWidth: '220px' }}>
+          <h3 id="bi-dialog-title" style={{ margin: '0 0 12px 0' }}>
+            Isolated dialog
+          </h3>
+          <button type="button" style={{ padding: '6px 12px' }}>
+            Inside action
+          </button>
+        </div>
+      </Popover>
+    </div>
+  )
+}
+
+export const DialogBackgroundIsolation: Story = {
+  name: 'A11y/Dialog Background Isolation',
+  render: () => <BackgroundIsolationComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const doc = canvasElement.ownerDocument
+    const body = within(doc.body)
+
+    const trigger = canvas.getByRole('button', { name: 'Open Dialog' })
+    // Captured before open: after open the story root becomes aria-hidden, and
+    // getByRole would then skip elements inside it (accessibility-tree filtered).
+    const backgroundText = canvas.getByTestId('background-text')
+
+    // Walk from a node up to <body>, reporting whether any ancestor (the
+    // isolated body-level sibling) is `aria-hidden="true"`.
+    const hasHiddenAncestor = (element: Element): boolean => {
+      let node: Element | null = element
+      while (node && node !== doc.body) {
+        if (node.getAttribute('aria-hidden') === 'true') return true
+        node = node.parentElement
+      }
+      return false
+    }
+
+    // Before open: the background is fully exposed to assistive tech.
+    await expect(hasHiddenAncestor(backgroundText)).toBe(false)
+
+    await userEvent.click(trigger)
+
+    // The dialog is announced (surface itself is NOT aria-hidden)...
+    const dialog = await body.findByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect(hasHiddenAncestor(dialog)).toBe(false)
+
+    // ...and the background is now removed from the accessibility tree, so a
+    // virtual cursor can't wander into it (COMPLETES the aria-modal contract).
+    await waitFor(() => expect(hasHiddenAncestor(backgroundText)).toBe(true))
+
+    // Closing RESTORES the background to the accessibility tree.
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await waitFor(() => expect(hasHiddenAncestor(backgroundText)).toBe(false))
+  },
+}
