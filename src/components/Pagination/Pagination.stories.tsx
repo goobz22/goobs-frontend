@@ -204,3 +204,28 @@ export const Disabled: Story = {
   ),
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+// Exercises the accessible structure: the items render inside a real
+// <nav aria-label> landmark as a <ul>/<li> list (screen readers announce the
+// item count + step through pages); the selected page carries aria-current
+// ="page"; every control has an accessible name (numbered buttons
+// "Go to page N", the direction buttons "Go to first/previous/next/last
+// page" with their icons aria-hidden); Tab moves between the buttons and the
+// keyboard focus ring is visible via :focus-visible. Tab into the row to see
+// the focus indicator; boundary buttons are disabled at page 1 / last page.
+
+export const AccessibleStructure: Story = {
+  name: 'Accessibility/Keyboard & Semantics',
+  render: () => (
+    <InteractivePagination
+      count={20}
+      initialPage={1}
+      showFirstButton
+      showLastButton
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
