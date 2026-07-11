@@ -51,6 +51,14 @@ export interface BreadcrumbProps {
   styles?: BreadcrumbStyles
   /** ARIA label for accessibility */
   'aria-label'?: string
+  /**
+   * Forwarded ref to the root `<nav>` breadcrumb landmark (React 19
+   * ref-as-prop) so consumers can measure, scroll, or move focus into the
+   * crumb bar. A breadcrumb renders one interactive `<button>`/`<a>` PER crumb,
+   * so there is no single control to ref — the ref lands on the nav container
+   * (the library's root-forwarding convention, matching TreeView).
+   */
+  ref?: React.Ref<HTMLElement>
 }
 
 // --------------------------------------------------------------------------
@@ -63,6 +71,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   maxItems,
   styles,
   'aria-label': ariaLabel = 'breadcrumb',
+  ref,
 }) => {
   const theme = styles?.theme || 'sacred'
 
@@ -227,6 +236,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
 
   return (
     <nav
+      ref={ref}
       aria-label={ariaLabel}
       className={cssStyles.container}
       data-component="Breadcrumb"

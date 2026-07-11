@@ -59,6 +59,12 @@ export interface ConfirmationCodeInputsProps {
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ConfirmationCodeInputStyles
+  /**
+   * Forwarded ref to the FIRST digit `<input>` (React 19 ref-as-prop) — the
+   * cell that receives initial focus, so consumers can focus the code field on
+   * demand. Merged with the internal per-cell refs used for auto-advance.
+   */
+  ref?: React.Ref<HTMLInputElement>
 }
 
 // --------------------------------------------------------------------------
@@ -108,6 +114,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSuccessState = false,
   headingLevel = 3,
   styles,
+  ref,
 }) => {
   // Tier-1 form binding. Inside a <Form> with a `name` and no explicit `value`,
   // the code string + its setter come from the form engine; otherwise the
@@ -431,6 +438,14 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
                 key={index}
                 ref={el => {
                   inputRefs.current[index] = el
+                  // The public consumer ref lands on the first cell (the one
+                  // that receives initial focus); merged with the internal refs.
+                  if (index === 0) {
+                    if (typeof ref === 'function') ref(el)
+                    else if (ref)
+                      (ref as React.RefObject<HTMLInputElement | null>).current =
+                        el
+                  }
                 }}
                 type="text"
                 inputMode="numeric"

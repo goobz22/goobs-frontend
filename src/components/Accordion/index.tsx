@@ -76,6 +76,14 @@ export interface AccordionProps {
    * `type="menu"`.
    */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
+  /**
+   * Forwarded ref to the summary toggle `<button>` — the disclosure trigger
+   * (React 19 ref-as-prop) — so consumers can focus or measure the header. It
+   * lands on the accordion-type `<button>` and the menu-type (no-href)
+   * `<button>`; the menu-with-`href` variant renders an `<a>` instead and is
+   * not covered by this button ref.
+   */
+  ref?: React.Ref<HTMLButtonElement>
 }
 
 const useAccordionState = ({
@@ -139,6 +147,7 @@ const Accordion: FC<AccordionProps> = props => {
     expanded: controlledExpanded,
     defaultExpanded,
     onChange,
+    ref,
     ...rest
   } = props
 
@@ -271,6 +280,7 @@ const Accordion: FC<AccordionProps> = props => {
   if (!isMenuType) {
     const triggerButton = (
       <button
+        ref={ref}
         type="button"
         className={cssStyles.summary}
         data-action="toggle"
@@ -318,6 +328,7 @@ const Accordion: FC<AccordionProps> = props => {
   } else {
     summaryContent = (
       <button
+        ref={ref}
         type="button"
         className={cssStyles.summary}
         data-menu="true"

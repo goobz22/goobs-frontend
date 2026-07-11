@@ -30,6 +30,12 @@ export interface MenuItemProps extends React.OptionHTMLAttributes<HTMLOptionElem
    * `data-subject="<value>"` so multiple menus on one page disambiguate.
    */
   subject?: string
+  /**
+   * Forwarded ref to the rendered `<option>` element (React 19 ref-as-prop) so
+   * consumers can scroll it into view or measure it within its parent
+   * `<Select>`. The `<option>` IS the leaf this component renders.
+   */
+  ref?: React.Ref<HTMLOptionElement>
 }
 
 function mergeClassNames(...names: Array<string | undefined>): string {
@@ -48,6 +54,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   action = 'select',
   subject,
   onClick,
+  ref,
   ...props
 }) => {
   const theme = styles?.theme || 'sacred'
@@ -86,6 +93,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <option
+      ref={ref}
       className={mergeClassNames(cssStyles.root, className)}
       data-component="MenuItem"
       data-theme={theme}

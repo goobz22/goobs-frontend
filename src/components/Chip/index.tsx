@@ -153,6 +153,13 @@ export interface ChipProps {
    * per-key basis (the React-style `style` is treated as the base layer).
    */
   style?: ChipStyles
+  /**
+   * Forwarded ref to the root chip `<div>` (React 19 ref-as-prop). For a
+   * clickable chip this root IS the `role="button"` control (consumers focus /
+   * measure / position it); the optional `onDelete` affordance is a secondary
+   * internal `<button>`, so the ref lands on the chip root.
+   */
+  ref?: React.Ref<HTMLDivElement>
 }
 
 function buildCssVarOverrides(styles?: ChipStyles): React.CSSProperties {
@@ -250,6 +257,7 @@ const Chip: React.FC<ChipProps> = ({
   ariaLive,
   styles,
   style,
+  ref,
 }) => {
   // `style` is an alias for `styles`. When both are passed, `styles` wins
   // on a per-key basis — treat React's `style` spelling as the base layer
@@ -294,6 +302,7 @@ const Chip: React.FC<ChipProps> = ({
 
   return (
     <div
+      ref={ref}
       className={rootClassName}
       style={cssVarStyle}
       data-component="Chip"

@@ -61,6 +61,12 @@ export interface ToggleButtonProps {
   isFirst?: boolean
   isLast?: boolean
   'aria-label'?: string
+  /**
+   * Forwarded ref to the underlying `<button>` element (React 19 ref-as-prop)
+   * so consumers can focus or measure an individual toggle. The `<button>` IS
+   * the leaf this component renders.
+   */
+  ref?: React.Ref<HTMLButtonElement>
 }
 
 // --------------------------------------------------------------------------
@@ -130,6 +136,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   isFirst = false,
   isLast = false,
   'aria-label': ariaLabel,
+  ref,
 }) => {
   const theme: ToggleButtonTheme = styles?.theme || 'light'
 
@@ -158,6 +165,7 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
 
   return (
     <button
+      ref={ref}
       className={cssStyles.button}
       {...(Object.keys(dynamicStyle).length > 0 && { style: dynamicStyle })}
       data-theme={theme}

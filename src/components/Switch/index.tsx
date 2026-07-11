@@ -62,6 +62,13 @@ export interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement>
   rightLabel?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties */
   styles?: SwitchStyles
+  /**
+   * Forwarded ref to the underlying `<input type="checkbox">` element (React 19
+   * ref-as-prop) so consumers can focus the toggle or read its checked state.
+   * The `<label>` wrapper, track, and thumb are decorative — the ref lands on
+   * the real control.
+   */
+  ref?: React.Ref<HTMLInputElement>
 }
 
 // --------------------------------------------------------------------------
@@ -81,6 +88,7 @@ const Switch: React.FC<SwitchProps> = ({
   onChange,
   leftLabel,
   rightLabel,
+  ref,
   ...props
 }) => {
   const theme = styles?.theme ?? 'dark'
@@ -177,6 +185,7 @@ const Switch: React.FC<SwitchProps> = ({
             / `aria-labelledby` (spread through `...props`) or via the wrapping
             <label> (leftLabel/rightLabel live inside it). */}
         <input
+          ref={ref}
           type="checkbox"
           role="switch"
           className={cssStyles.input}

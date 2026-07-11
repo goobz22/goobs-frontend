@@ -105,6 +105,13 @@ export interface RadioGroupProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   /** Custom styles to apply using the theme system */
   styles?: RadioGroupStyles
+  /**
+   * Forwarded ref to the FIRST radio `<input>` in the group (React 19
+   * ref-as-prop) — the group's roving tab-stop entry point, so consumers can
+   * move focus into the radiogroup. The wrapping `<div role="radiogroup">` and
+   * the per-option `<label>`s are structural; the ref lands on a real control.
+   */
+  ref?: React.Ref<HTMLInputElement>
 }
 
 /**
@@ -185,6 +192,7 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   dataFieldName,
   onChange,
   styles,
+  ref,
 }) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue)
 
@@ -237,6 +245,9 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           return (
             <label key={index} className={cssStyles.optionLabel}>
               <input
+                // The consumer ref lands on the first radio — the group's
+                // roving tab-stop entry point.
+                ref={index === 0 ? ref : undefined}
                 type="radio"
                 name={name}
                 value={option.label}
