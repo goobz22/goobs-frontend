@@ -77,6 +77,9 @@
   --bc-current-hour-bg: var(--goobs-gold-a10);
   --bc-today-date-color: var(--goobs-gold);
 
+  /* Keyboard focus ring (sacred default); light/dark override below. */
+  --bc-focus-ring: var(--goobs-sacred-focus-ring);
+
   display: flex;
   flex-direction: column;
   background-color: transparent;
@@ -131,6 +134,8 @@
   --bc-current-hour-bg: var(--goobs-blue-a10);
   --bc-today-date-color: inherit;
 
+  --bc-focus-ring: var(--goobs-light-focus-ring);
+
   box-shadow: none;
 }
 
@@ -173,6 +178,8 @@
   --bc-week-col-selected-bg: rgba(59, 130, 246, 0.06);
   --bc-current-hour-bg: var(--goobs-blue-a10);
   --bc-today-date-color: inherit;
+
+  --bc-focus-ring: var(--goobs-dark-focus-ring);
 
   box-shadow: none;
 }
@@ -295,6 +302,14 @@
   grid-auto-rows: var(--bc-cell-min-height);
 }
 
+/* Week rows exist only to give the ARIA grid valid row > gridcell structure.
+   `display: contents` removes the wrapper from the layout box tree so the day
+   cells remain direct grid items of .monthGrid (the visual grid is unchanged)
+   while the row keeps its role in the accessibility tree. */
+.gridRow {
+  display: contents;
+}
+
 /* --------------------------------------------------------------------------
    WEEK / DAY GRIDS
    -------------------------------------------------------------------------- */
@@ -385,8 +400,19 @@
   background-color: var(--bc-event-bg);
 }
 
+/* Clickable events render as a native <button>; strip the UA chrome while
+   keeping .event's surface (background/radius/padding/font-size). */
 .eventClickable {
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
 .eventStatic {
@@ -475,4 +501,49 @@
 .hourCellSelected {
   background-color: var(--bc-hour-selected-bg);
   outline: var(--bc-hour-selected-outline);
+}
+
+/* --------------------------------------------------------------------------
+   ACCESSIBILITY
+   -------------------------------------------------------------------------- */
+
+/* Visually-hidden but exposed to assistive tech (live region + static-event
+   full names). Standard clip-rect pattern. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible keyboard focus indicator (WCAG 2.4.7). Rendered only for keyboard
+   focus via :focus-visible; the ring color is theme-driven (--bc-focus-ring).
+   Grid/hour cells use an inset offset so the ring stays inside the cell border;
+   nav buttons and event chips use a positive offset. */
+.navButton:focus-visible,
+.event:focus-visible {
+  outline: 2px solid var(--bc-focus-ring);
+  outline-offset: 2px;
+}
+
+.cell:focus-visible,
+.hourCell:focus-visible {
+  outline: 2px solid var(--bc-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Honor a reduced-motion preference (WCAG 2.3.3): drop the theme transitions on
+   every element that animates background/box-shadow on state change. */
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .cell,
+  .hourCell,
+  .event {
+    transition: none;
+  }
 }

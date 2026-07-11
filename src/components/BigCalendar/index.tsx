@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useRef, useEffect } from 'react'
 import {
   startOfMonth,
   endOfMonth,
@@ -209,6 +209,17 @@ export interface BigCalendarProps {
 }
 
 const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Full weekday names (same order) used as the column-header accessible names so
+// screen readers announce "Sunday" rather than the abbreviated "Sun".
+const dayHeadersFull = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
 
 function mergeClassNames(...names: Array<string | false | undefined>): string {
   return names.filter(Boolean).join(' ')
@@ -259,6 +270,36 @@ export default function BigCalendar({
   >([])
   const [internalFilters, setInternalFilters] =
     useState<CalendarFilterOptions>(filters)
+
+  // --- Roving-tabindex focus management (WCAG 2.1.1 keyboard operability) ---
+  // The month view is an ARIA grid and the week/day hour cells are a keyboard
+  // group; in every case exactly ONE cell is in the tab order (tabIndex 0) and
+  // the arrow keys move focus between cells. `focusedCellKey` records the
+  // last-focused cell (month keys are `yyyy-MM-dd`; week/day hour keys are
+  // `yyyy-MM-dd#<hour>`). `gridRef` scopes the querySelector used to move focus,
+  // and `focusPendingRef` gates the focus effect so a mouse click never has its
+  // focus stolen back — only a keyboard-driven move sets the flag.
+  const [focusedCellKey, setFocusedCellKey] = useState<string | null>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const focusPendingRef = useRef(false)
+
+  useEffect(() => {
+    if (!focusPendingRef.current) return
+    focusPendingRef.current = false
+    if (focusedCellKey == null) return
+    gridRef.current
+      ?.querySelector<HTMLElement>(`[data-focus-key="${focusedCellKey}"]`)
+      ?.focus()
+  }, [focusedCellKey])
+
+  // Move keyboard focus to another cell: flag the move, update the roving
+  // index, and let the effect focus the (already-rendered) target node. Works
+  // across a view/period change too, since the target cell exists after the
+  // re-render the setState triggers.
+  const requestCellFocus = (key: string) => {
+    focusPendingRef.current = true
+    setFocusedCellKey(key)
+  }
 
   // Old getBigCalendarStyles defaulted to 'light' when no theme was supplied;
   // data-theme is always emitted explicitly so the base-class sacred defaults
@@ -533,6 +574,180 @@ export default function BigCalendar({
     (_, i) => startHour + i
   )
 
+  // --- Focus-key model ---------------------------------------------------
+  // Flat, in-DOM-order list of month cell keys used for arrow navigation.
+  const monthFocusKeys =
+    view === 'month' ? viewDates.map(d => format(d, 'yyyy-MM-dd')) : []
+
+  // Week/day hour-cell focus key: date + hour, delimited so it never collides
+  // with the date's own dashes.
+  const timeFocusKey = (day: Date, hour: number) =>
+    `${format(day, 'yyyy-MM-dd')}#${hour}`
+
+  // Is a stored focus key still valid for the currently rendered view? (Guards
+  // against a stale key left over from a different view/period.)
+  const isKeyInView = (key: string | null): key is string => {
+    if (!key) return false
+    if (view === 'month') return monthFocusKeys.includes(key)
+    const [datePart, hourPart] = key.split('#')
+    if (hourPart === undefined) return false
+    return (
+      hours.includes(Number(hourPart)) &&
+      viewDates.some(d => format(d, 'yyyy-MM-dd') === datePart)
+    )
+  }
+
+  // The cell that owns tabIndex 0 when nothing has been focused yet: the
+  // selected day if visible, else today if visible, else the first cell.
+  const defaultFocusKey = (): string => {
+    if (view === 'month') {
+      const selKey = format(selectedDate, 'yyyy-MM-dd')
+      if (monthFocusKeys.includes(selKey)) return selKey
+      const todayKey = format(new Date(), 'yyyy-MM-dd')
+      if (monthFocusKeys.includes(todayKey)) return todayKey
+      return monthFocusKeys[0] ?? selKey
+    }
+    const firstHour = hours[0] ?? startHour
+    const selIdx = viewDates.findIndex(d => isSameDay(d, selectedDate))
+    const todayIdx = viewDates.findIndex(d => isSameDay(d, new Date()))
+    const idx = selIdx >= 0 ? selIdx : todayIdx >= 0 ? todayIdx : 0
+    return timeFocusKey(viewDates[idx] ?? selectedDate, firstHour)
+  }
+
+  const effectiveFocusKey = isKeyInView(focusedCellKey)
+    ? focusedCellKey
+    : defaultFocusKey()
+
+  // --- Cell activation (shared by pointer click AND keyboard Enter/Space) --
+  const activateDayCell = (day: Date) => {
+    toggleDateSelection(day)
+    onCellClick?.(day)
+  }
+
+  const activateHourCell = (day: Date, hour: number) => {
+    toggleHourSpan(day, hour)
+    onCellClick?.(setHours(day, hour), hour)
+  }
+
+  // Month grid keyboard model (WAI-ARIA Grid / APG date-picker):
+  // arrows move by day/week, Home/End jump to the week edge, PageUp/PageDown
+  // change the month (keeping focus on the equivalent day), Enter/Space select.
+  const handleMonthCellKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+    index: number
+  ) => {
+    // Only the cell itself drives grid navigation — let keys bubbling from a
+    // focused event <button> inside the cell act on the button, not the grid.
+    if (event.target !== event.currentTarget) return
+    const len = monthFocusKeys.length
+    let target = -1
+    switch (event.key) {
+      case 'ArrowRight':
+        target = Math.min(index + 1, len - 1)
+        break
+      case 'ArrowLeft':
+        target = Math.max(index - 1, 0)
+        break
+      case 'ArrowDown':
+        target = Math.min(index + 7, len - 1)
+        break
+      case 'ArrowUp':
+        target = Math.max(index - 7, 0)
+        break
+      case 'Home':
+        target = index - (index % 7)
+        break
+      case 'End':
+        target = Math.min(index - (index % 7) + 6, len - 1)
+        break
+      case 'PageUp': {
+        event.preventDefault()
+        const nd = subMonths(viewDates[index]!, 1)
+        setSelectedDate(nd)
+        onDateChange?.(nd)
+        requestCellFocus(format(nd, 'yyyy-MM-dd'))
+        return
+      }
+      case 'PageDown': {
+        event.preventDefault()
+        const nd = addMonths(viewDates[index]!, 1)
+        setSelectedDate(nd)
+        onDateChange?.(nd)
+        requestCellFocus(format(nd, 'yyyy-MM-dd'))
+        return
+      }
+      case 'Enter':
+      case ' ':
+        event.preventDefault()
+        activateDayCell(viewDates[index]!)
+        return
+      default:
+        return
+    }
+    if (target >= 0 && target !== index) {
+      event.preventDefault()
+      requestCellFocus(monthFocusKeys[target]!)
+    }
+  }
+
+  // Week/day hour-cell keyboard model: Left/Right change day (week only),
+  // Up/Down change hour, Home/End jump to first/last hour, Enter/Space select.
+  const handleTimeCellKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+    dayIndex: number,
+    hourIndex: number
+  ) => {
+    // Only the hour cell itself drives navigation — not a focused event
+    // <button> nested inside it (whose own keys should reach the button).
+    if (event.target !== event.currentTarget) return
+    const dayCount = viewDates.length
+    const hourCount = hours.length
+    let nd = dayIndex
+    let nh = hourIndex
+    switch (event.key) {
+      case 'ArrowRight':
+        nd = Math.min(dayIndex + 1, dayCount - 1)
+        break
+      case 'ArrowLeft':
+        nd = Math.max(dayIndex - 1, 0)
+        break
+      case 'ArrowDown':
+        nh = Math.min(hourIndex + 1, hourCount - 1)
+        break
+      case 'ArrowUp':
+        nh = Math.max(hourIndex - 1, 0)
+        break
+      case 'Home':
+        nh = 0
+        break
+      case 'End':
+        nh = hourCount - 1
+        break
+      case 'Enter':
+      case ' ':
+        event.preventDefault()
+        activateHourCell(viewDates[dayIndex]!, hours[hourIndex]!)
+        return
+      default:
+        return
+    }
+    if (nd !== dayIndex || nh !== hourIndex) {
+      event.preventDefault()
+      requestCellFocus(timeFocusKey(viewDates[nd]!, hours[nh]!))
+    }
+  }
+
+  // Full, screen-reader-friendly name for an event (the hover Tooltip is not
+  // exposed to assistive tech, so the interactive/labelled element carries the
+  // whole story: title, resource, description, and the start–end time range).
+  const eventAccessibleName = (event: CalendarEvent): string =>
+    `${event.title}${event.resource ? ` - ${event.resource}` : ''}${
+      event.description ? `, ${event.description}` : ''
+    }, ${format(event.startDate, 'MMM d, h:mm a')} to ${format(
+      event.endDate,
+      'MMM d, h:mm a'
+    )}`
+
   const getEventsForDate = (date: Date, hour?: number) => {
     return filteredEvents.filter(event => {
       if (hour !== undefined) {
@@ -562,6 +777,51 @@ export default function BigCalendar({
     const label = isCompact
       ? event.title
       : `${event.title}${event.resource ? ` - ${event.resource}` : ''}`
+    const accessibleName = eventAccessibleName(event)
+
+    const visibleLabel = (
+      <Typography
+        styles={{
+          ...styles,
+          fontSize: isCompact ? '0.7rem' : '0.75rem',
+          color: 'white',
+          fontWeight: 500,
+          lineHeight: 1.2,
+        }}
+      >
+        {label}
+      </Typography>
+    )
+
+    const chipClassName = mergeClassNames(
+      cssStyles.event,
+      onEventClick ? cssStyles.eventClickable : cssStyles.eventStatic,
+      isCompact ? cssStyles.eventCompact : undefined
+    )
+
+    // Clickable events are real <button>s (native keyboard + role); the visible
+    // text stays as the child while the full detail rides on aria-label. Static
+    // events are non-interactive, so the visible chip is hidden from AT and a
+    // visually-hidden node supplies the same full detail exactly once.
+    const chip = onEventClick ? (
+      <button
+        type="button"
+        onClick={() => onEventClick(event)}
+        className={chipClassName}
+        style={{ ['--bc-event-bg' as string]: eventColor }}
+        aria-label={accessibleName}
+      >
+        <span aria-hidden="true">{visibleLabel}</span>
+      </button>
+    ) : (
+      <div
+        className={chipClassName}
+        style={{ ['--bc-event-bg' as string]: eventColor }}
+      >
+        <span aria-hidden="true">{visibleLabel}</span>
+        <span className={cssStyles.srOnly}>{accessibleName}</span>
+      </div>
+    )
 
     return (
       <StyledTooltip
@@ -569,38 +829,36 @@ export default function BigCalendar({
         title={`${event.title}${event.description ? ` — ${event.description}` : ''}${event.resource ? ` | Resource: ${event.resource}` : ''} (${format(event.startDate, 'MMM d, h:mm a')} - ${format(event.endDate, 'MMM d, h:mm a')})`}
         {...tooltipStylesSpread}
       >
-        <div
-          onClick={() => onEventClick?.(event)}
-          className={mergeClassNames(
-            cssStyles.event,
-            onEventClick ? cssStyles.eventClickable : cssStyles.eventStatic,
-            isCompact ? cssStyles.eventCompact : undefined
-          )}
-          style={{ ['--bc-event-bg' as string]: eventColor }}
-        >
-          <Typography
-            styles={{
-              ...styles,
-              fontSize: isCompact ? '0.7rem' : '0.75rem',
-              color: 'white',
-              fontWeight: 500,
-              lineHeight: 1.2,
-            }}
-          >
-            {label}
-          </Typography>
-        </div>
+        {chip}
       </StyledTooltip>
     )
   }
 
   const renderMonthView = () => {
+    // Chunk the 6-week block into rows of 7 for valid grid > row > gridcell
+    // structure. The row wrapper uses `display: contents` (cssStyles.gridRow)
+    // so the CSS grid layout of .monthGrid is unaffected.
+    const weeks: Date[][] = []
+    for (let i = 0; i < viewDates.length; i += 7) {
+      weeks.push(viewDates.slice(i, i + 7))
+    }
+
     return (
-      <div className={cssStyles.calendarGrid}>
+      <div
+        className={cssStyles.calendarGrid}
+        role="grid"
+        aria-multiselectable="true"
+        aria-label={`Calendar, ${format(selectedDate, 'MMMM yyyy')}`}
+      >
         {/* Day headers */}
-        <div className={cssStyles.headerContainer}>
-          {dayHeaders.map(day => (
-            <div key={day} className={cssStyles.headerCell}>
+        <div className={cssStyles.headerContainer} role="row">
+          {dayHeaders.map((day, i) => (
+            <div
+              key={day}
+              className={cssStyles.headerCell}
+              role="columnheader"
+              aria-label={dayHeadersFull[i]}
+            >
               <Typography
                 styles={{ ...styles, fontSize: '0.75rem', fontWeight: 700 }}
               >
@@ -611,62 +869,79 @@ export default function BigCalendar({
         </div>
 
         {/* Calendar cells */}
-        <div className={cssStyles.monthGrid}>
-          {viewDates.map(day => {
-            const dayEvents = getEventsForDate(day)
-            const isToday = isSameDay(day, new Date())
-            const isCurrentMonth = isSameMonth(day, selectedDate)
-            const cellKey = format(day, 'yyyy-MM-dd')
-            const isSelected = selectedDates.has(cellKey)
+        <div className={cssStyles.monthGrid} role="rowgroup">
+          {weeks.map((week, weekIndex) => (
+            <div key={weekIndex} className={cssStyles.gridRow} role="row">
+              {week.map((day, dayIndex) => {
+                const flatIndex = weekIndex * 7 + dayIndex
+                const dayEvents = getEventsForDate(day)
+                const isToday = isSameDay(day, new Date())
+                const isCurrentMonth = isSameMonth(day, selectedDate)
+                const cellKey = format(day, 'yyyy-MM-dd')
+                const isSelected = selectedDates.has(cellKey)
+                const eventSummary = dayEvents.length
+                  ? `, ${dayEvents.length} event${dayEvents.length > 1 ? 's' : ''}`
+                  : ''
 
-            return (
-              <div
-                key={cellKey}
-                className={mergeClassNames(
-                  cssStyles.cell,
-                  !isCurrentMonth ? cssStyles.cellOtherMonth : undefined,
-                  isToday ? cssStyles.cellToday : undefined,
-                  isSelected ? cssStyles.cellSelected : undefined
-                )}
-                style={{
-                  ['--bc-min-cell-height' as string]: `${minCellHeight}px`,
-                }}
-                onClick={() => {
-                  toggleDateSelection(day)
-                  onCellClick?.(day)
-                }}
-              >
-                <div className={cssStyles.cellDateNumber}>
-                  <Typography
-                    styles={{
-                      ...styles,
-                      fontSize: '0.8rem',
-                      fontWeight: isToday ? 700 : 400,
-                      ...(isToday && isSacredTheme
-                        ? { color: 'rgba(255, 215, 0, 1)' }
-                        : {}),
+                return (
+                  <div
+                    key={cellKey}
+                    role="gridcell"
+                    tabIndex={effectiveFocusKey === cellKey ? 0 : -1}
+                    data-focus-key={cellKey}
+                    aria-selected={isSelected}
+                    aria-current={isToday ? 'date' : undefined}
+                    aria-label={`${format(day, 'EEEE, MMMM d, yyyy')}${eventSummary}`}
+                    className={mergeClassNames(
+                      cssStyles.cell,
+                      !isCurrentMonth ? cssStyles.cellOtherMonth : undefined,
+                      isToday ? cssStyles.cellToday : undefined,
+                      isSelected ? cssStyles.cellSelected : undefined
+                    )}
+                    style={{
+                      ['--bc-min-cell-height' as string]: `${minCellHeight}px`,
                     }}
+                    onClick={() => {
+                      setFocusedCellKey(cellKey)
+                      activateDayCell(day)
+                    }}
+                    onKeyDown={e => handleMonthCellKeyDown(e, flatIndex)}
                   >
-                    {format(day, 'd')}
-                  </Typography>
-                </div>
-                <div className={cssStyles.cellEventContainer}>
-                  {dayEvents.slice(0, 3).map(event => renderEvent(event, true))}
-                  {dayEvents.length > 3 && (
-                    <Typography
-                      styles={{
-                        ...styles,
-                        fontSize: '0.65rem',
-                        marginTop: '2px',
-                      }}
-                    >
-                      +{dayEvents.length - 3} more
-                    </Typography>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+                    <div className={cssStyles.cellDateNumber} aria-hidden="true">
+                      <Typography
+                        styles={{
+                          ...styles,
+                          fontSize: '0.8rem',
+                          fontWeight: isToday ? 700 : 400,
+                          ...(isToday && isSacredTheme
+                            ? { color: 'rgba(255, 215, 0, 1)' }
+                            : {}),
+                        }}
+                      >
+                        {format(day, 'd')}
+                      </Typography>
+                    </div>
+                    <div className={cssStyles.cellEventContainer}>
+                      {dayEvents
+                        .slice(0, 3)
+                        .map(event => renderEvent(event, true))}
+                      {dayEvents.length > 3 && (
+                        <Typography
+                          styles={{
+                            ...styles,
+                            fontSize: '0.65rem',
+                            marginTop: '2px',
+                          }}
+                        >
+                          +{dayEvents.length - 3} more
+                        </Typography>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
     )
@@ -679,7 +954,11 @@ export default function BigCalendar({
     const timeColWidth = isSacredTheme ? '80px' : '60px'
 
     return (
-      <div className={cssStyles.calendarGrid}>
+      <div
+        className={cssStyles.calendarGrid}
+        role="group"
+        aria-label={`Calendar, week of ${format(startOfWeek(selectedDate), 'MMMM d, yyyy')}`}
+      >
         {/* Day headers */}
         <div
           className={mergeClassNames(
@@ -691,7 +970,7 @@ export default function BigCalendar({
           }}
         >
           {/* Blank header cell to align with time column */}
-          <div className={cssStyles.headerCell} />
+          <div className={cssStyles.headerCell} aria-hidden="true" />
           {viewDates.map(day => (
             <div
               key={format(day, 'yyyy-MM-dd')}
@@ -713,7 +992,9 @@ export default function BigCalendar({
 
         {/* Time grid */}
         <div className={cssStyles.weekGrid}>
-          <div className={cssStyles.timeColumn}>
+          {/* The hour labels duplicate each cell's own accessible name, so they
+              are decorative for assistive tech. */}
+          <div className={cssStyles.timeColumn} aria-hidden="true">
             {hours.map(hour => (
               <div
                 key={hour}
@@ -728,7 +1009,7 @@ export default function BigCalendar({
           </div>
 
           <div className={cssStyles.weekDaysContainer}>
-            {viewDates.map(day => {
+            {viewDates.map((day, dayIndex) => {
               const dayKey = format(day, 'yyyy-MM-dd')
               const isSelected =
                 selectedDates.has(dayKey) ||
@@ -742,7 +1023,7 @@ export default function BigCalendar({
                   )}
                   style={{ ['--bc-week-col-width' as string]: cellWidth }}
                 >
-                  {hours.map(hour => {
+                  {hours.map((hour, hourIndex) => {
                     const hourEvents = getEventsForDate(day, hour)
                     const isCurrentHour =
                       isSameDay(day, new Date()) &&
@@ -754,9 +1035,22 @@ export default function BigCalendar({
                         hour >= s.startHour &&
                         hour <= s.endHour
                     )
+                    const cellFocusKey = timeFocusKey(day, hour)
                     return (
                       <div
                         key={`${dayKey}-${hour}`}
+                        role="button"
+                        tabIndex={
+                          effectiveFocusKey === cellFocusKey ? 0 : -1
+                        }
+                        data-focus-key={cellFocusKey}
+                        aria-pressed={spanSelected}
+                        aria-current={isCurrentHour ? 'time' : undefined}
+                        aria-label={`${format(setHours(day, hour), 'EEEE, MMMM d, yyyy, h a')}${
+                          hourEvents.length
+                            ? `, ${hourEvents.length} event${hourEvents.length > 1 ? 's' : ''}`
+                            : ''
+                        }`}
                         className={mergeClassNames(
                           cssStyles.hourCell,
                           isCurrentHour ? cssStyles.hourCellCurrent : undefined,
@@ -766,9 +1060,12 @@ export default function BigCalendar({
                           ['--bc-hour-height' as string]: `${hourHeight}px`,
                         }}
                         onClick={() => {
-                          toggleHourSpan(day, hour)
-                          onCellClick?.(setHours(day, hour), hour)
+                          setFocusedCellKey(cellFocusKey)
+                          activateHourCell(day, hour)
                         }}
+                        onKeyDown={e =>
+                          handleTimeCellKeyDown(e, dayIndex, hourIndex)
+                        }
                       >
                         {hourEvents.map(event => renderEvent(event, true))}
                       </div>
@@ -791,7 +1088,11 @@ export default function BigCalendar({
     // Time column width is theme-driven (60px light/dark, 80px sacred).
     const timeColWidth = isSacredTheme ? '80px' : '60px'
     return (
-      <div className={cssStyles.calendarGrid}>
+      <div
+        className={cssStyles.calendarGrid}
+        role="group"
+        aria-label={`Calendar, ${format(selectedDate, 'EEEE, MMMM d, yyyy')}`}
+      >
         {/* Day header aligned with time column */}
         <div
           className={mergeClassNames(
@@ -803,7 +1104,7 @@ export default function BigCalendar({
           }}
         >
           {/* Blank header cell to align with time column */}
-          <div className={cssStyles.headerCell} />
+          <div className={cssStyles.headerCell} aria-hidden="true" />
           <div className={cssStyles.headerCell}>
             <Typography
               styles={{ ...styles, fontSize: '0.95rem', fontWeight: 700 }}
@@ -820,7 +1121,9 @@ export default function BigCalendar({
 
         {/* Time grid */}
         <div className={cssStyles.dayGrid}>
-          <div className={cssStyles.timeColumn}>
+          {/* The hour labels duplicate each cell's own accessible name, so they
+              are decorative for assistive tech. */}
+          <div className={cssStyles.timeColumn} aria-hidden="true">
             {hours.map(hour => (
               <div
                 key={hour}
@@ -840,7 +1143,7 @@ export default function BigCalendar({
               isSelected ? cssStyles.dayContentColumnSelected : undefined
             )}
           >
-            {hours.map(hour => {
+            {hours.map((hour, hourIndex) => {
               const hourEvents = getEventsForDate(selectedDate, hour)
               const isCurrentHour =
                 isSameDay(selectedDate, new Date()) &&
@@ -853,9 +1156,20 @@ export default function BigCalendar({
                   hour >= s.startHour &&
                   hour <= s.endHour
               )
+              const cellFocusKey = timeFocusKey(selectedDate, hour)
               return (
                 <div
                   key={hour}
+                  role="button"
+                  tabIndex={effectiveFocusKey === cellFocusKey ? 0 : -1}
+                  data-focus-key={cellFocusKey}
+                  aria-pressed={spanSelected}
+                  aria-current={isCurrentHour ? 'time' : undefined}
+                  aria-label={`${format(setHours(selectedDate, hour), 'EEEE, MMMM d, yyyy, h a')}${
+                    hourEvents.length
+                      ? `, ${hourEvents.length} event${hourEvents.length > 1 ? 's' : ''}`
+                      : ''
+                  }`}
                   className={mergeClassNames(
                     cssStyles.hourCell,
                     isCurrentHour ? cssStyles.hourCellCurrent : undefined,
@@ -863,9 +1177,10 @@ export default function BigCalendar({
                   )}
                   style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
                   onClick={() => {
-                    toggleHourSpan(selectedDate, hour)
-                    onCellClick?.(setHours(selectedDate, hour), hour)
+                    setFocusedCellKey(cellFocusKey)
+                    activateHourCell(selectedDate, hour)
                   }}
+                  onKeyDown={e => handleTimeCellKeyDown(e, 0, hourIndex)}
                 >
                   {hourEvents.map(event => renderEvent(event))}
                 </div>
@@ -939,41 +1254,68 @@ export default function BigCalendar({
       .join(', ')
   }
 
+  const selectionTitle = getSelectionTitle()
+  // Period announced to assistive tech on navigation / view change. The visible
+  // toolbar shows only the SELECTION, so without this a screen-reader user has
+  // no spoken cue for which month/week/day is on screen after prev/next/today.
+  const periodText =
+    view === 'month'
+      ? format(selectedDate, 'MMMM yyyy')
+      : view === 'week'
+        ? `week of ${format(startOfWeek(selectedDate), 'MMMM d, yyyy')}`
+        : format(selectedDate, 'EEEE, MMMM d, yyyy')
+  const viewLabelText =
+    view === 'month' ? 'Month' : view === 'week' ? 'Week' : 'Day'
+  const liveMessage = `${viewLabelText} view, ${periodText}${
+    selectionTitle ? `. Selected: ${selectionTitle}` : ''
+  }`
+
   return (
     <div
+      ref={gridRef}
       className={cssStyles.root}
       data-component="BigCalendar"
       data-theme={theme}
       data-state={view}
       style={dynamicRootStyle}
     >
+      {/* Polite live region: announces the current period + selection whenever
+          navigation, the view toggle, or a cell selection changes it
+          (WCAG 4.1.3 Status Messages). */}
+      <div className={cssStyles.srOnly} aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </div>
+
       {showToolbar && (
         <Paper styles={paperToolbarStyles}>
           <div className={cssStyles.toolbarContent}>
             <div className={cssStyles.toolbarSection}>
               <button
+                type="button"
                 onClick={handlePrevious}
                 className={cssStyles.navButton}
-                aria-label="Previous"
+                aria-label={`Previous ${view}`}
               >
-                <ChevronLeftIcon styles={{ theme }} />
+                <ChevronLeftIcon styles={{ theme }} aria-hidden="true" />
               </button>
               <button
+                type="button"
                 onClick={handleToday}
                 className={mergeClassNames(
                   cssStyles.navButton,
                   cssStyles.navButtonToday
                 )}
-                aria-label="Today"
+                aria-label="Go to today"
               >
-                <CalendarIcon styles={{ theme }} />
+                <CalendarIcon styles={{ theme }} aria-hidden="true" />
               </button>
               <button
+                type="button"
                 onClick={handleNext}
                 className={cssStyles.navButton}
-                aria-label="Next"
+                aria-label={`Next ${view}`}
               >
-                <ChevronRightIcon styles={{ theme }} />
+                <ChevronRightIcon styles={{ theme }} aria-hidden="true" />
               </button>
 
               <Typography
@@ -984,7 +1326,7 @@ export default function BigCalendar({
                   marginLeft: '16px',
                 }}
               >
-                {getSelectionTitle()}
+                {selectionTitle}
               </Typography>
             </div>
 
@@ -1007,11 +1349,11 @@ export default function BigCalendar({
                 <span className={cssStyles.viewLabel}>Day</span>
               </ToggleButton>
               <ToggleButton value="week" {...buttonStylesProp}>
-                <DateRangeIcon />
+                <DateRangeIcon aria-hidden="true" />
                 <span className={cssStyles.viewLabel}>Week</span>
               </ToggleButton>
               <ToggleButton value="month" {...buttonStylesProp}>
-                <CalendarMonthIcon />
+                <CalendarMonthIcon aria-hidden="true" />
                 <span className={cssStyles.viewLabel}>Month</span>
               </ToggleButton>
             </ToggleButtonGroup>

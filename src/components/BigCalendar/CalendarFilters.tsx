@@ -109,7 +109,10 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
           width: '100%',
         }}
       >
-        <FilterListIcon styles={{ theme: styles?.theme ?? 'sacred' }} />
+        <FilterListIcon
+          styles={{ theme: styles?.theme ?? 'sacred' }}
+          aria-hidden="true"
+        />
         <Typography
           styles={{
             theme,
@@ -137,7 +140,9 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
         )}
         <div style={{ flexGrow: 1 }} />
         {activeFilterCount > 0 && (
-          <div
+          <button
+            type="button"
+            aria-label="Clear all filters"
             onClick={e => {
               e.stopPropagation()
               clearAllFilters()
@@ -150,6 +155,8 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'background-color 0.2s',
+              border: 'none',
+              background: 'transparent',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.backgroundColor =
@@ -163,8 +170,9 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
           >
             <CloseIcon
               styles={{ theme: styles?.theme ?? 'sacred', size: 16 }}
+              aria-hidden="true"
             />
-          </div>
+          </button>
         )}
       </div>
     ),
