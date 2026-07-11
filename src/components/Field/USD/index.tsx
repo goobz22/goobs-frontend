@@ -69,6 +69,7 @@ const USDField: React.FC<USDFieldProps> = ({
   dataField,
   dataFieldName,
   name,
+  onKeyDown: onKeyDownProp,
   styles,
   ...rest
 }) => {
@@ -98,6 +99,14 @@ const USDField: React.FC<USDFieldProps> = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Polite live-region text for stepper/arrow-key changes. Focus stays on the
+  // pressed button (or in the input for arrow keys), so the new amount would
+  // otherwise never be spoken. `stepOriginRef` gates the announcement to
+  // step-driven changes only — typing keystrokes must NOT be announced here
+  // (the input speaks those itself). WCAG 4.1.3.
+  const [stepAnnouncement, setStepAnnouncement] = useState('')
+  const stepOriginRef = useRef(false)
 
   // When bound, the engine is the source of truth: mirror its value into the
   // local display state whenever it changes externally (e.g. form reset /
@@ -148,6 +157,7 @@ const USDField: React.FC<USDFieldProps> = ({
 
   const handleIncrement = useCallback(() => {
     if (disabled) return
+    stepOriginRef.current = true
     setInternalValue(prev => {
       const num = parseFloat(prev) || 0
       const newValue =
@@ -162,6 +172,7 @@ const USDField: React.FC<USDFieldProps> = ({
 
   const handleDecrement = useCallback(() => {
     if (disabled) return
+    stepOriginRef.current = true
     setInternalValue(prev => {
       const num = parseFloat(prev) || 0
       const newValue = Math.max(min || 0, num - incrementStep)
@@ -180,7 +191,30 @@ const USDField: React.FC<USDFieldProps> = ({
     document.addEventListener('mouseup', clearTimers, { once: true })
   }
 
+  // Keyboard activation for the stepper buttons. `onMouseDown` alone left them
+  // pointer-operable ONLY — Enter/Space on a focused <button> fire `click`, not
+  // `mousedown`, so keyboard users could focus the button but never step. A
+  // single step per key press; the browser's native key-repeat covers
+  // hold-to-repeat. `preventDefault` suppresses the synthesized click. WCAG 2.1.1.
+  const handleButtonKeyDown =
+    (handler: () => void) =>
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        handler()
+      }
+    }
+
   useEffect(() => clearTimers, [clearTimers])
+
+  // Announce step-driven value changes via the polite live region below. Runs
+  // on every internalValue commit but only speaks when the change originated
+  // from a stepper button or an arrow key (typing leaves the flag false).
+  useEffect(() => {
+    if (!stepOriginRef.current) return
+    stepOriginRef.current = false
+    setStepAnnouncement(internalValue ? `$${internalValue}` : '')
+  }, [internalValue])
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +238,25 @@ const USDField: React.FC<USDFieldProps> = ({
       onChange?.(formattedValue)
     },
     [onChange, precision, min, max, disabled]
+  )
+
+  // Arrow Up / Down adjust the value when the stepper is enabled — the native
+  // number-input affordance, so keyboard users can change the amount without
+  // reaching for the buttons. Chained after any consumer `onKeyDown`; a
+  // consumer that calls preventDefault opts out. WCAG 2.1.1.
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      onKeyDownProp?.(event)
+      if (event.defaultPrevented || !enableIncrement || disabled) return
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        handleIncrement()
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        handleDecrement()
+      }
+    },
+    [onKeyDownProp, enableIncrement, disabled, handleIncrement, handleDecrement]
   )
 
   // Inner chrome lives in USD.module.css. The dollar-sign start adornment +
@@ -258,7 +311,11 @@ const USDField: React.FC<USDFieldProps> = ({
           style={wrapperCssVars as React.CSSProperties}
         >
           <div className={`${cssStyles.adornment} ${cssStyles.startAdornment}`}>
-            {sacredTheme && <span className={cssStyles.sacredGlyph}>𓊹</span>}
+            {sacredTheme && (
+              <span aria-hidden="true" className={cssStyles.sacredGlyph}>
+                𓊹
+              </span>
+            )}
             <span className={cssStyles.dollarSign}>$</span>
           </div>
           <input
@@ -272,6 +329,7 @@ const USDField: React.FC<USDFieldProps> = ({
             onChange={handleChange}
             onFocus={onFocus}
             onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
             disabled={disabled}
             required={required}
             placeholder={resolvedPlaceholder}
@@ -285,6 +343,7 @@ const USDField: React.FC<USDFieldProps> = ({
                 <button
                   type="button"
                   onMouseDown={() => handleMouseDown(handleIncrement)}
+                  onKeyDown={handleButtonKeyDown(handleIncrement)}
                   aria-label="increment"
                   disabled={disabled}
                   className={cssStyles.button}
@@ -299,6 +358,7 @@ const USDField: React.FC<USDFieldProps> = ({
                 <button
                   type="button"
                   onMouseDown={() => handleMouseDown(handleDecrement)}
+                  onKeyDown={handleButtonKeyDown(handleDecrement)}
                   aria-label="decrement"
                   disabled={disabled}
                   className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
@@ -313,6 +373,18 @@ const USDField: React.FC<USDFieldProps> = ({
               </div>
             </div>
           )}
+          {/* Polite live region: speaks the new amount after a stepper button
+              or arrow-key change (focus doesn't move to the value, so it's
+              otherwise silent for screen-reader users). Typing is not
+              announced here. WCAG 4.1.3. */}
+          <span
+            role="status"
+            aria-live="polite"
+            className={cssStyles.srOnly}
+            data-usd-status=""
+          >
+            {stepAnnouncement}
+          </span>
         </div>
       )}
     </FieldShell>
