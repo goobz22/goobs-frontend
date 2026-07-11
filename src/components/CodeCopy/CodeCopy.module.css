@@ -143,6 +143,45 @@
   text-shadow: 0 0 10px var(--goobs-gold-a60);
 }
 
+/* Copy-button KEYBOARD FOCUS ring (WCAG 2.4.7 Focus Visible).
+   The shared <Button> sets `outline: none` with no :focus-visible rule, so a
+   keyboard-focused copy button would show NO focus indicator. Restore a
+   visible, theme-appropriate ring here using the library's --goobs-focus-*
+   tokens, scoped to `.copyButtonSlot button` so only THIS button is affected.
+   The `.container` prefix raises specificity above Button.module.css's
+   `.button:hover:not(:disabled)` so the ring still wins when hovered+focused.
+   The ~3–4px ring sits inside the header's horizontal padding + the button's
+   vertical clearance, so the header's `overflow: hidden` does not clip it. */
+.container .copyButtonSlot button:focus-visible {
+  box-shadow: var(--goobs-focus-dark);
+}
+
+.container[data-theme='light'] .copyButtonSlot button:focus-visible {
+  box-shadow: var(--goobs-focus-light);
+}
+
+.container[data-theme='sacred'] .copyButtonSlot button:focus-visible {
+  box-shadow: var(--goobs-focus-sacred);
+}
+
+/* --------------------------------------------------------------------------
+   SCREEN-READER-ONLY COPY STATUS (WCAG 4.1.3 Status Messages)
+   Visually-hidden live region driven by the copied state in index.tsx.
+   Standard clip-rect hide technique — removed from the visual layout but kept
+   in the accessibility tree so its text change is announced politely.
+   -------------------------------------------------------------------------- */
+.srStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* --------------------------------------------------------------------------
    CODE BLOCK — base = DARK
    -------------------------------------------------------------------------- */
@@ -279,4 +318,15 @@
 .container[data-theme='sacred'] .pre :global(.hljs-function),
 .container[data-theme='sacred'] .pre :global(.hljs-title) {
   color: var(--goobs-gold-a90);
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3)
+   The container carries `transition: var(--goobs-transition-medium)` (an `all`
+   transition). Honour a user's reduced-motion preference by removing it.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    transition: none;
+  }
 }

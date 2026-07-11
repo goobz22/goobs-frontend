@@ -172,6 +172,15 @@ const CodeCopy: FC<CodeCopyProps> = props => {
           <Button
             text={copied ? '✓' : '⧉'}
             onClick={handleCopy}
+            // The visible label is a bare ⧉ / ✓ glyph with no text meaning, so
+            // the button carries a stable accessible name for assistive tech
+            // (WCAG 4.1.2). The transient "Copied" confirmation is announced
+            // separately through the role="status" live region below rather than
+            // by mutating this name, so the button's name stays stable under a
+            // screen-reader's virtual cursor. type="button" guards against an
+            // implicit form submit if CodeCopy is ever placed inside a <form>.
+            aria-label="Copy code"
+            type="button"
             styles={{
               ...(!isSacredTheme && { theme: styles?.theme || 'dark' }),
               backgroundColor: 'transparent',
@@ -201,9 +210,20 @@ const CodeCopy: FC<CodeCopyProps> = props => {
         </div>
       </div>
 
+      {/* Visually-hidden polite live region: announces the copy result to
+          assistive tech (WCAG 4.1.3). Kept in the DOM at all times so the live
+          region is registered before its text changes; the ⧉→✓ glyph swap is a
+          silent, visual-only cue otherwise. */}
+      <div role="status" aria-live="polite" className={cssStyles.srStatus}>
+        {copied ? 'Copied to clipboard' : ''}
+      </div>
+
       <div className={cssStyles.codeBlock} style={codeBlockStyle}>
         {shouldShowLineNumbers && (
-          <div className={cssStyles.lineNumbers}>
+          // Line numbers are a decorative visual affordance; hiding them from
+          // assistive tech keeps "1 2 3 4 …" out of the code's reading order
+          // (WCAG 1.3.1). The <code> below carries the real, readable content.
+          <div className={cssStyles.lineNumbers} aria-hidden="true">
             {lineNumbers.map(num => (
               <div key={num} className={cssStyles.lineNumber}>
                 {num}
