@@ -103,6 +103,27 @@
   opacity: 0.6;
 }
 
+/* Keyboard focus indicator (WCAG 2.4.7 Focus Visible / 2.4.11 Focus
+   Appearance). The base `.tab` sets `outline: none` to drop the UA ring; this
+   restores a clearly-visible ring for keyboard/AT focus ONLY. It uses `outline`
+   (not box-shadow) so it never fights the active glow, and — crucially — stays
+   visible even when the roving-tabindex focus lands on a NON-active tab (a
+   controlled `activeTab` that hasn't caught up, or a route/onClick tab whose
+   host never updates it), a case where the active styling is absent entirely.
+   Per-theme ring colours mirror Button's focus treatment. */
+.tab:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
+.tab[data-theme='light']:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.tab[data-theme='dark']:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
 /* --------------------------------------------------------------------------
    LEADING ICON glyph
    -------------------------------------------------------------------------- */
