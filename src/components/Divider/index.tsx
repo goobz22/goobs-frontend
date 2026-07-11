@@ -52,12 +52,31 @@ function mergeClassNames(...names: Array<string | false | undefined>): string {
  * (width/height/margins/colors) ride in as `--divider-*` CSS custom
  * properties, and `styles.backgroundColor` swaps the gradient for a solid
  * color. All other div attributes (except `style`) pass through to the root.
+ *
+ * Renders with `role="separator"` + `aria-orientation` by default so AT
+ * announces the thematic break. For a purely decorative rule, pass
+ * `role="presentation"` (or `role="none"`): the separator-only ARIA
+ * (`aria-orientation`/`aria-labelledby`) is then dropped automatically, so
+ * `role="presentation"` alone is sufficient — no extra `aria-hidden` is needed
+ * to stay `aria-allowed-attr`-clean.
  */
 const Divider = forwardRef<HTMLDivElement, DividerProps>(
-  ({ children, styles, ...restProps }, ref) => {
+  ({ children, styles, role, ...restProps }, ref) => {
     const orientation = styles?.orientation || 'horizontal'
     const disabled = styles?.disabled || false
     const theme = styles?.theme || 'sacred'
+
+    // A divider is a thematic break, so it DEFAULTS to the ARIA `separator`
+    // role (the equivalent of a native `<hr>`). A caller can opt out for a
+    // purely decorative rule by passing `role="presentation"` (or `"none"`).
+    // We resolve the EFFECTIVE role here because `aria-orientation` and
+    // `aria-labelledby` are separator-specific attributes: axe's
+    // `aria-allowed-attr` rule forbids them on `presentation`/`none`, so they
+    // must be GATED on the separator role rather than emitted unconditionally.
+    // `role` is destructured out of `restProps` so the caller's override still
+    // wins while we can also see it to drive that gate.
+    const effectiveRole = role ?? 'separator'
+    const isSeparator = effectiveRole === 'separator'
 
     // Stable id linking the centered label to the separator's accessible name.
     // `role="separator"` marks its descendants as presentational (ARIA
@@ -132,16 +151,17 @@ const Divider = forwardRef<HTMLDivElement, DividerProps>(
         data-component="Divider"
         data-theme={theme}
         data-orientation={orientation}
-        // A divider IS a thematic break between content, so it carries the
-        // native `separator` role (the ARIA equivalent of <hr>) by default.
-        // `aria-orientation` conveys vertical vs horizontal to AT (the role's
-        // implicit default is horizontal). Both sit before `{...restProps}` so
-        // a caller can still override (e.g. `role="presentation"` for a purely
-        // decorative rule) without losing the accessible default.
-        role="separator"
-        aria-orientation={orientation}
-        // When a label is present it names the separator (see contentId note).
-        aria-labelledby={children ? contentId : undefined}
+        // Default `separator` (see effectiveRole note); a caller override to
+        // `presentation`/`none` for a decorative rule flows through here.
+        role={effectiveRole}
+        // `aria-orientation` (direction) and `aria-labelledby` (the label as the
+        // accessible name — see contentId note) are separator-ONLY attributes.
+        // Emit them only when the effective role is `separator`, so a decorative
+        // override never yields an invalid `role="presentation" aria-orientation`
+        // pair (axe `aria-allowed-attr`). Both sit before `{...restProps}` so a
+        // caller can still override them explicitly if they need to.
+        aria-orientation={isSeparator ? orientation : undefined}
+        aria-labelledby={isSeparator && children ? contentId : undefined}
         style={dynamicStyle}
         {...restProps}
       >

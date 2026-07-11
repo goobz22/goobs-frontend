@@ -136,10 +136,29 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  box-sizing: border-box;
   background: var(--divider-content-bg);
   padding: 0 var(--goobs-space-md);
   color: var(--divider-content-color);
   font-size: var(--goobs-text-md);
   font-family: var(--goobs-font-sacred);
+  text-align: center;
+}
+
+/* Resize / reflow (WCAG 1.4.4, 1.4.10). On a HORIZONTAL rule the full-width
+   line can bound the label, so constrain it to the rule width and let a long
+   label — or one at 200% text zoom — WRAP onto multiple lines (as a centered
+   chip over the rule) instead of overflowing the container and forcing a
+   horizontal scrollbar. `overflow-wrap: break-word` keeps a single very long
+   token from overflowing too. */
+.horizontal > .content {
+  max-width: calc(100% - 2 * var(--goobs-space-lg));
+  overflow-wrap: break-word;
+}
+
+/* A VERTICAL rule is only ~2px wide, so it cannot bound the label (a %
+   max-width would collapse it toward zero and wrap every character). Keep the
+   label on one line, extending across the thin rule as before. */
+.vertical > .content {
   white-space: nowrap;
 }

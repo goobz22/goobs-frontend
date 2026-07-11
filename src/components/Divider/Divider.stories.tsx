@@ -246,9 +246,20 @@ export const AccessibleSeparator: Story = {
 
 /**
  * Escape hatch: a purely decorative rule can opt out of the separator semantics
- * by passing `role="presentation"` (and/or `aria-hidden`) through — the pass-
- * through attributes sit after the accessible defaults, so a caller override
- * wins. Verify this rule is absent from the accessibility tree.
+ * by passing `role="presentation"` (or `role="none"`) through. Because
+ * `aria-orientation`/`aria-labelledby` are separator-ONLY attributes, the
+ * component drops them automatically when the effective role isn't `separator`,
+ * so `role="presentation"` on its own is `aria-allowed-attr`-clean — no extra
+ * `aria-hidden` is required.
+ *
+ * Verify in the accessibility tree / with axe:
+ *  • first rule  → `role="presentation"` ALONE, and crucially NO
+ *    `aria-orientation` attribute (the axe `aria-allowed-attr` regression this
+ *    story guards — a `role="presentation" aria-orientation="horizontal"` pair
+ *    would be a violation).
+ *  • second rule → `role="none"`, likewise no `aria-orientation`.
+ *  • third rule  → `role="presentation"` + `aria-hidden` (the belt-and-braces
+ *    form) still works and is redundant, not required.
  */
 export const DecorativeOverride: Story = {
   name: 'A11y/Decorative Override',
@@ -256,8 +267,38 @@ export const DecorativeOverride: Story = {
   render: () => (
     <div style={{ width: '480px' }}>
       <p style={{ margin: 0 }}>Above</p>
+      {/* role="presentation" ALONE — must NOT emit aria-orientation. */}
+      <Divider styles={{ theme: 'light' }} role="presentation" />
+      <p style={{ margin: 0 }}>Middle</p>
+      {/* role="none" alone — also drops the separator-only ARIA. */}
+      <Divider styles={{ theme: 'light' }} role="none" />
+      <p style={{ margin: 0 }}>Middle</p>
+      {/* Redundant belt-and-braces form (aria-hidden no longer needed). */}
       <Divider styles={{ theme: 'light' }} role="presentation" aria-hidden />
       <p style={{ margin: 0 }}>Below</p>
+    </div>
+  ),
+}
+
+/**
+ * Resize / reflow (WCAG 1.4.4 Resize Text, 1.4.10 Reflow): a long label — or a
+ * short one at 200% text zoom — must WRAP within the rule width as a centered
+ * chip instead of overflowing the container and forcing a horizontal scrollbar.
+ * The narrow (240px) wrapper makes the wrap visible at default zoom; the label
+ * stays centered on the rule and readable, and nothing overflows horizontally.
+ * (A vertical rule is exempt — it is only ~2px wide and keeps its label on one
+ * line; see `A11y/Separator Semantics` for the vertical case.)
+ */
+export const LongLabelReflow: Story = {
+  name: 'A11y/Long Label Reflow',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <div style={{ width: '240px' }}>
+      <p style={{ margin: 0 }}>Section above</p>
+      <Divider styles={{ theme: 'light' }}>
+        OR continue with this considerably longer separator label
+      </Divider>
+      <p style={{ margin: 0 }}>Section below</p>
     </div>
   ),
 }

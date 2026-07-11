@@ -21,6 +21,40 @@ added via `role="separator"` on the div, which is fully equivalent for AT.
 | 2 | Moderate | 1.3.1 Info & Relationships (A) | `src/components/Divider/index.tsx:121` (pre-fix) | Vertical orientation was conveyed **only via CSS class** (`.vertical`) — no `aria-orientation`, so AT could not tell a vertical rule from a horizontal one. | FIXED |
 | 3 | Moderate | 4.1.2 Name, Role, Value (A); 1.3.1 (A) | `src/components/Divider/index.tsx:129` (pre-fix) | The centered label (e.g. `"OR"`) had no programmatic association to the rule. Once `role="separator"` is applied, ARIA marks descendants **presentational** ("children presentational: true"), so the visible label would be dropped from the a11y tree unless it is wired as the separator's accessible name. | FIXED |
 
+### Adversarial-review round (2026-07-11) — 2 remaining issues, both FIXED
+
+| # | Severity | WCAG 2.2 | Location | Issue | Status |
+|---|----------|----------|----------|-------|--------|
+| 4 | Minor | 4.1.2 Name, Role, Value (A) / axe `aria-allowed-attr` | `src/components/Divider/index.tsx:142` (pre-fix) | `aria-orientation` (and `aria-labelledby`) were rendered **unconditionally**, before `{...restProps}`. The documented decorative escape hatch is `role="presentation"`, but a `restProps` override of `role` cannot remove the separately-keyed `aria-orientation`, so `role="presentation"` **alone** produced `<div role="presentation" aria-orientation="horizontal">` — an axe `aria-allowed-attr` violation (`aria-orientation` is not allowed on `role="presentation"`). The `DecorativeOverride` story only avoided it because it *also* passed `aria-hidden`. | FIXED |
+| 5 | Minor | 1.4.4 Resize Text (AA); 1.4.10 Reflow (AA) | `src/components/Divider/Divider.module.css:134-145` (pre-fix) | The labeled-separator overlay `.content` used `white-space: nowrap` on a `position: absolute` centered element with no width bound → a long label, or a short label at 200% text zoom, overflowed its container and forced a horizontal scrollbar. Never assessed in the first pass (ARIA-only). | FIXED |
+
+**Fix #4 (root cause — `index.tsx`):** destructure `role` out of props and derive
+`effectiveRole = role ?? 'separator'` + `isSeparator = effectiveRole === 'separator'`. The
+root now renders `role={effectiveRole}` and **gates the separator-only ARIA** —
+`aria-orientation={isSeparator ? orientation : undefined}` and
+`aria-labelledby={isSeparator && children ? contentId : undefined}`. A decorative override
+(`role="presentation"`/`"none"`) therefore drops those attributes automatically, so
+`role="presentation"` **alone** is now `aria-allowed-attr`-clean — no `aria-hidden` needed.
+The default separator case is unchanged (still emits `role="separator"` +
+`aria-orientation`), so the machine-test contract and prior stories are preserved. Component
+JSDoc updated to document the escape hatch.
+
+**Fix #5 (root cause — `Divider.module.css`):** removed the blanket `white-space: nowrap`
+from `.content`; added `text-align: center` + `box-sizing: border-box`. Scoped
+resize/reflow behavior by orientation: `.horizontal > .content` gets
+`max-width: calc(100% - 2 * var(--goobs-space-lg))` + `overflow-wrap: break-word` so a long
+label **wraps** within the rule width as a centered chip instead of overflowing;
+`.vertical > .content` keeps `white-space: nowrap` because the ~2px-wide vertical rule cannot
+bound the label (a `%` max-width would collapse it). Short labels like `"OR"` render
+identically (single centered line) — zero visual regression.
+
+**Stories added/extended (regression tests):**
+- `A11y/Decorative Override` (`DecorativeOverride`) — now renders `role="presentation"`
+  **alone**, `role="none"` alone, AND the redundant `role="presentation" aria-hidden` form;
+  JSDoc pins the exact axe expectation (no `aria-orientation` on the presentation/none rules).
+- `A11y/Long Label Reflow` (`LongLabelReflow`) — a long label in a narrow 240px wrapper,
+  proving the label wraps within the rule instead of overflowing horizontally.
+
 No other checklist categories applied:
 - **Hearing (1.2.x / 1.4.2):** no `Audio`/`AudioContext`/`<audio>`/`<video>`/`navigator.vibrate` anywhere in the component (grep clean). No audio-only status. N/A.
 - **Motion (2.3.3):** `Divider.module.css` contains **no `transition`, `animation`, or `@keyframes`** (grep clean), so `prefers-reduced-motion` is not needed. N/A.
