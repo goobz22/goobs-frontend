@@ -33,15 +33,23 @@ export default meta
 
 type Story = StoryObj<typeof Dialog>
 
-// Interactive wrapper for stories
+// Interactive wrapper for stories. Forwards the accessible-name wiring
+// (`ariaLabelledBy`/`ariaDescribedBy`) and the optional `alertdialog` role so
+// stories can demonstrate a fully-named modal per WCAG 4.1.2.
 const InteractiveDialog = ({
   styles,
   children,
   buttonText = 'Open Dialog',
+  ariaLabelledBy,
+  ariaDescribedBy,
+  dialogRole,
 }: {
   styles?: any
   children: React.ReactNode
   buttonText?: string
+  ariaLabelledBy?: string
+  ariaDescribedBy?: string
+  dialogRole?: 'dialog' | 'alertdialog'
 }) => {
   const [open, setOpen] = useState(false)
 
@@ -56,7 +64,14 @@ const InteractiveDialog = ({
         text={buttonText}
         onClick={() => setOpen(true)}
       />
-      <Dialog open={open} onClose={() => setOpen(false)} styles={styles as any}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        styles={styles as any}
+        ariaLabelledBy={ariaLabelledBy}
+        ariaDescribedBy={ariaDescribedBy}
+        role={dialogRole}
+      >
         {children}
       </Dialog>
     </div>
@@ -140,7 +155,9 @@ const UserProfileForm = ({ theme }: { theme: 'light' | 'dark' | 'sacred' }) => {
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Create User Profile</h2>
+      <h2 id="dialog-profile-title" style={titleStyle}>
+        Create User Profile
+      </h2>
 
       <div style={formGridStyle}>
         <TextField
@@ -624,8 +641,10 @@ const ConfirmationDialog = ({
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Confirm Action</h2>
-      <p style={messageStyle}>
+      <h2 id="dialog-confirm-title" style={titleStyle}>
+        Confirm Action
+      </h2>
+      <p id="dialog-confirm-desc" style={messageStyle}>
         Are you sure you want to delete this user account? This action cannot be
         undone and will permanently remove all associated data.
       </p>
@@ -1183,6 +1202,101 @@ export const SacredSettings: Story = {
           buttonText="Open Settings"
         >
           <SettingsDialog theme="sacred" />
+        </InteractiveDialog>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * Accessible-name wiring (WCAG 4.1.2). The dialog heading carries an `id`
+ * (`dialog-profile-title`) and the Dialog receives `ariaLabelledBy` pointing at
+ * it, so a screen reader announces "Create User Profile dialog" the moment the
+ * modal opens and focus moves inside. This is the recommended pattern — prefer
+ * `ariaLabelledBy` (heading id) over the `ariaLabel` string fallback so the
+ * visible heading is the single source of truth. Without it the component
+ * logs a development warning about the missing accessible name.
+ */
+export const AccessibleLabelledForm: Story = {
+  render: () => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '800px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '2rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Accessible Labelled Form:</strong> the dialog is named by its
+          heading via <code>ariaLabelledBy=&quot;dialog-profile-title&quot;</code>,
+          so assistive tech announces the dialog on open (WCAG 4.1.2).
+          <br />
+          <strong>Also verifies:</strong> focus moves into the dialog, Tab is
+          trapped, Escape closes, and focus returns to the trigger button.
+        </div>
+        <InteractiveDialog
+          styles={{ theme: 'light' }}
+          buttonText="Open User Profile Form"
+          ariaLabelledBy="dialog-profile-title"
+        >
+          <UserProfileForm theme="light" />
+        </InteractiveDialog>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * Alert Dialog pattern (WAI-ARIA `role="alertdialog"`). A destructive
+ * confirmation interrupts the user and demands a response, so it opts into
+ * `role="alertdialog"` (via the additive `role` prop) and points
+ * `ariaDescribedBy` at the message paragraph. Assistive tech announces both the
+ * title (`ariaLabelledBy`) and the consequence text on open, and Escape / the
+ * Cancel button dismiss it. A plain form or settings dialog must stay the
+ * default `role="dialog"`.
+ */
+export const AccessibleAlertConfirmation: Story = {
+  render: () => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '600px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '2rem', fontSize: '14px', color: '#94a3b8' }}
+        >
+          <strong>Accessible Alert Dialog:</strong> destructive confirmation
+          using <code>role=&quot;alertdialog&quot;</code> with{' '}
+          <code>ariaLabelledBy</code> (title) and <code>ariaDescribedBy</code>{' '}
+          (consequence text) so screen readers announce the full prompt on open.
+          <br />
+          <strong>Also verifies:</strong> Escape dismisses and focus is restored
+          to the trigger.
+        </div>
+        <InteractiveDialog
+          styles={{ theme: 'dark' }}
+          buttonText="Delete Account"
+          dialogRole="alertdialog"
+          ariaLabelledBy="dialog-confirm-title"
+          ariaDescribedBy="dialog-confirm-desc"
+        >
+          <ConfirmationDialog theme="dark" />
         </InteractiveDialog>
       </div>
     </div>

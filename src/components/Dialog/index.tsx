@@ -107,6 +107,16 @@ export interface DialogProps {
    * is the source of truth).
    */
   ariaLabel?: string
+  /**
+   * ARIA role for the dialog surface. Defaults to `'dialog'`. Set
+   * `'alertdialog'` for confirmations / error prompts that interrupt the user
+   * and demand a response (e.g. "Delete account?") — per the WAI-ARIA Alert
+   * Dialog pattern this makes assistive tech announce the dialog's message
+   * (point `ariaDescribedBy` at it) immediately on open. A plain settings or
+   * form dialog must stay `'dialog'`, so the correct role is caller-specified
+   * rather than inferred.
+   */
+  role?: 'dialog' | 'alertdialog'
 }
 
 /**
@@ -127,6 +137,7 @@ const Dialog: React.FC<DialogProps> = ({
   ariaLabelledBy,
   ariaDescribedBy,
   ariaLabel,
+  role = 'dialog',
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -229,6 +240,25 @@ const Dialog: React.FC<DialogProps> = ({
       emitDiag({ type: 'dialog.closed', id, action: 'dismiss' })
     }
   }, [open, dataDialog, dataSubject])
+
+  // Accessible name (WCAG 4.1.2 Name, Role, Value): a modal `role="dialog"` /
+  // `role="alertdialog"` MUST expose an accessible name. The name comes from
+  // consumer content via `ariaLabelledBy` (the heading id, preferred) or the
+  // `ariaLabel` fallback — the component can't invent it. Warn in development
+  // when a dialog opens with neither, so a nameless modal surfaces at author
+  // time instead of silently shipping to screen-reader users. Dev-only; the
+  // check compiles out to a no-op in production bundles.
+  useEffect(() => {
+    if (!open) return
+    if (process.env.NODE_ENV === 'production') return
+    if (!ariaLabelledBy && !ariaLabel) {
+      console.warn(
+        'goobs Dialog: opened without an accessible name. Pass `ariaLabelledBy` ' +
+          '(the id of the heading inside `children`) or, as a fallback, ' +
+          '`ariaLabel`, so screen readers announce the dialog on open (WCAG 4.1.2).'
+      )
+    }
+  }, [open, ariaLabelledBy, ariaLabel])
 
   // Body scroll-lock + wheel forwarding. The wheel handler reads runtime
   // measurements (scrollHeight / clientHeight / scrollTop) off the scrollable
@@ -378,7 +408,7 @@ const Dialog: React.FC<DialogProps> = ({
         data-theme={theme}
         style={dialogStyle}
         onClick={e => e.stopPropagation()}
-        role="dialog"
+        role={role}
         aria-modal="true"
         tabIndex={-1}
         aria-labelledby={ariaLabelledBy}
