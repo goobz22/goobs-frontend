@@ -20,31 +20,36 @@
   --fade-duration: 0.5s;
   --fade-timing-function: var(--goobs-ease);
   --fade-delay: 0s;
-  /*
-   * Delay applied to the visibility swap (see [data-state] below). 0s while the
-   * node is showing (visibility flips to `visible` instantly, then opacity fades
-   * in); = the fade duration while hiding (visibility stays `visible` for the
-   * whole fade-out, then flips to `hidden`). This keeps faded-out content in the
-   * a11y tree + tab order for exactly as long as it is still visible, then drops
-   * it — so screen readers never announce, and keyboard users never Tab into,
-   * fully-transparent content (WCAG 1.3.1 / 2.4.3 / 4.1.2).
-   */
-  --fade-visibility-delay: 0s;
 
   opacity: 1;
   visibility: visible;
   /*
-   * `visibility` rides alongside opacity in the transition list so its swap can
-   * be delayed to the end of the fade-out (via --fade-visibility-delay). The
-   * two-value transition-delay maps position-for-position: opacity gets the
-   * caller's --fade-delay, visibility gets --fade-visibility-delay.
+   * `visibility` rides alongside opacity in the transition list so faded-out
+   * content leaves BOTH the accessibility tree and the tab order (opacity:0
+   * alone keeps it screen-reader-announced + keyboard-focusable — WCAG 1.3.1 /
+   * 2.4.3 / 4.1.2).
+   *
+   * `visibility` is a DISCRETE property with special transition semantics: a
+   * `visible`→`hidden` transition holds `visible` for the WHOLE duration and
+   * flips to `hidden` only at the very end, while `hidden`→`visible` becomes
+   * `visible` immediately. Running it over the SAME --fade-duration as opacity
+   * therefore keeps the node present for exactly the length of the fade-OUT
+   * (then drops it the instant it is fully transparent) and re-adds it instantly
+   * on fade-IN — with NO separate, position-fragile transition-delay list.
+   *
+   * Each segment carries its own duration + delay INLINE (not via a shared
+   * position-mapped `transition-delay`), so a caller-supplied full `transition`
+   * override — even a multi-segment one like 'opacity 1s, transform 1s' — can
+   * never shift the visibility timing onto the wrong list position and defeat
+   * the deferral. The JS keeps --fade-duration in lockstep with that override's
+   * real running time (index.tsx `transitionRuntimeMs`) so the visibility swap
+   * tracks the actual fade length in every case, not just the token default.
    */
   transition: var(
       --fade-transition,
-      opacity var(--fade-duration) var(--fade-timing-function)
+      opacity var(--fade-duration) var(--fade-timing-function) var(--fade-delay)
     ),
-    visibility 0s linear;
-  transition-delay: var(--fade-delay), var(--fade-visibility-delay);
+    visibility var(--fade-duration) linear var(--fade-delay);
 }
 
 /*
@@ -71,8 +76,10 @@
  * Hidden also sets `visibility: hidden` so fully-transparent content is removed
  * from the accessibility tree AND the tab order (opacity:0 alone leaves it
  * screen-reader-announced and keyboard-focusable — WCAG 1.3.1 / 2.4.3 / 4.1.2).
- * The visibility swap is deferred by the full fade duration so the fade-OUT
- * still animates, then the node drops out the instant it is fully transparent.
+ * The visibility swap is deferred to the end of the fade-OUT by the discrete
+ * `visibility` transition declared on `.container` (visible→hidden holds
+ * `visible` until the transition completes), so the fade-OUT still animates and
+ * the node drops out the instant it is fully transparent.
  */
 .container[data-state='visible'] {
   opacity: 1;
@@ -82,7 +89,6 @@
 .container[data-state='hidden'] {
   opacity: 0;
   visibility: hidden;
-  --fade-visibility-delay: calc(var(--fade-delay) + var(--fade-duration));
 }
 
 /*
