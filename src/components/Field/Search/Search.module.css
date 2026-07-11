@@ -126,6 +126,34 @@
   box-sizing: border-box;
 }
 
+/* --------------------------------------------------------------------------
+   PLACEHOLDER CONTRAST (WCAG 1.4.3 Contrast Minimum, AA). Without an explicit
+   ::placeholder rule the hint renders in the UA-default gray, which is a
+   translucent tint of the input `color` (and Firefox reduces its opacity
+   further) — ungoverned and, on a light surface, easily below 4.5:1. This
+   matters more for Search than most fields: a label-less search bar exposes
+   the placeholder string as its aria-label, so the hint is doing accessible-
+   name duty and MUST be legible. Use the same contrast-proven muted role
+   tokens as Field/Text + Field/PhoneNumber (sacred rgba(255,255,255,0.5)
+   ≈ 5.30:1 on #0e0e0e; light #4b5563 ≈ 6.17:1 on the light surface; dark
+   #94a3b8 ≈ 4.76:1 on the dark surface), all ≥ 4.5:1. `opacity: 1` resets
+   Firefox's default placeholder opacity so the token's real contrast isn't
+   silently reduced below the proven value. The hint stays visibly lighter
+   than entered text (which uses --search-text-color/--field-text).
+   -------------------------------------------------------------------------- */
+.input::placeholder {
+  color: var(--goobs-sacred-text-muted);
+  opacity: 1;
+}
+
+:global([data-component='FieldShell'][data-theme='light']) .input::placeholder {
+  color: var(--goobs-light-text-muted);
+}
+
+:global([data-component='FieldShell'][data-theme='dark']) .input::placeholder {
+  color: var(--goobs-dark-text-muted);
+}
+
 /* type="search" adds a webkit-only, mouse-only clear button (and search
    decoration) that is not keyboard-operable, is not announced by AT, and
    renders unstyled — strip it for consistent cross-browser appearance. No

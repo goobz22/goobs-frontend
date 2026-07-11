@@ -781,3 +781,72 @@ export const AccessibleNameFallback: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: PLACEHOLDER CONTRAST (WCAG 1.4.3)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for placeholder contrast. Without an explicit
+ * `::placeholder` rule the hint renders in the UA-default gray — a translucent
+ * tint of the input `color` (Firefox dims it further) — which drifts below the
+ * 4.5:1 minimum, most visibly on a light surface. This matters more for Search
+ * than most fields: a label-less search bar exposes the placeholder as its
+ * `aria-label`, so the hint is doing accessible-name duty and MUST be legible.
+ * Each theme's placeholder is now set to that theme's muted-text token, tuned
+ * in global.css to hold ≥4.5:1 on its own surface (sacred rgba(255,255,255,0.5)
+ * ≈ 5.30:1 on #0e0e0e; light #4b5563 ≈ 6.17:1; dark #94a3b8 ≈ 4.76:1) —
+ * visibly lighter than entered text yet legible. The three fields sit on their
+ * theme-matched surfaces (Chromatic baseline); the play fn reads the resolved
+ * `::placeholder` style and asserts the light field uses the explicit muted
+ * token (rgb(75, 85, 99) = #4b5563) at full opacity, not the UA default.
+ */
+export const PlaceholderContrastTest: Story = {
+  name: 'Placeholder Contrast (WCAG 1.4.3)',
+  render: () => (
+    // Mixed-theme story: each field sits on its own theme-matched surface so
+    // the placeholder contrast reads against the surface it actually ships on.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div
+        style={{ background: '#ffffff', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchBarWithState
+          label="Light placeholder"
+          placeholder="Light search hint..."
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div
+        style={{ background: '#111827', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchBarWithState
+          label="Dark placeholder"
+          placeholder="Dark search hint..."
+          styles={{ theme: 'dark' }}
+        />
+      </div>
+      <div
+        style={{ background: '#0e0e0e', padding: '1rem', borderRadius: '8px' }}
+      >
+        <SearchBarWithState
+          label="Sacred placeholder"
+          placeholder="Sacred search hint..."
+          styles={{ theme: 'sacred' }}
+        />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const lightInput = canvas.getByPlaceholderText('Light search hint...')
+
+    // The placeholder must NOT fall back to the UA default — it's set to the
+    // light muted-text token #4b5563 = rgb(75, 85, 99), which holds ≥4.5:1 on
+    // the light surface (WCAG 1.4.3). opacity:1 keeps that contrast intact
+    // (Firefox otherwise dims placeholders and would erode the proven ratio).
+    const placeholderStyle = getComputedStyle(lightInput, '::placeholder')
+    expect(placeholderStyle.color).toBe('rgb(75, 85, 99)')
+    expect(placeholderStyle.opacity).toBe('1')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
