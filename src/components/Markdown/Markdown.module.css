@@ -21,7 +21,10 @@
   text-align: left;
   color: inherit;
   line-height: 1.65;
-  font-size: 16px;
+  /* `rem`, not a fixed 16px, so the block scales with the reader's browser
+     font-size preference (WCAG 1.4.4 Resize Text). At the UA-default root of
+     16px this is visually identical to the previous value. */
+  font-size: 1rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -56,4 +59,36 @@
 .root a {
   color: inherit;
   text-decoration: underline;
+}
+
+/* Keyboard focus indicator (WCAG 2.4.7 Focus Visible / 2.4.13 Focus Appearance).
+   The UA default outline is not removed, but on dark/sacred surfaces it can be
+   near-invisible. Because this component is deliberately theme-less (text color
+   is `inherit`), the ring is drawn in `currentColor` so it always contrasts the
+   surface the block sits on — the same guarantee the inherited text color relies
+   on. Applies only to keyboard/AT focus, never a pointer click. */
+.root a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   MEDIA / CODE-BLOCK REFLOW (WCAG 1.4.10 Reflow)
+   mdToHtml emits bare <img> and <pre><code> blocks. Without constraints a wide
+   image or a long unwrapped code line overflows the container and forces a
+   two-dimensional page scroll — the exact failure 1.4.10 forbids (content must
+   reflow to a 320px-wide viewport / 400% zoom without horizontal scrolling).
+   Images are held to the content width; code blocks scroll INSIDE their own box
+   instead of widening the page. Fulfils the "image responsiveness" the
+   component's JSDoc has always promised.
+   -------------------------------------------------------------------------- */
+.root img {
+  max-width: 100%;
+  height: auto;
+}
+
+.root pre {
+  max-width: 100%;
+  overflow-x: auto;
 }
