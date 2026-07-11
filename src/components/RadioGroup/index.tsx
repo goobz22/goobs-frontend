@@ -214,6 +214,12 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   const theme = styles?.theme || 'light'
   const overrideVars = buildOverrideVars(styles)
 
+  // Resolved group heading (labelText wins over label). The radiogroup only
+  // advertises `aria-labelledby` when this is non-empty — pointing at an empty
+  // element would leave the group with no accessible name (WCAG 4.1.2).
+  const groupLabel = labelText || label
+  const labelId = `${name}-label`
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Keep internal state in sync for the uncontrolled path; harmless when
     // controlled/bound (the effectiveValue precedence ignores it).
@@ -235,10 +241,15 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       data-theme={theme}
       style={overrideVars}
     >
-      <label id={`${name}-label`} className={cssStyles.formLabel}>
-        {labelText || label}
-      </label>
-      <div role="radiogroup" aria-labelledby={`${name}-label`}>
+      {groupLabel ? (
+        <span id={labelId} className={cssStyles.formLabel}>
+          {groupLabel}
+        </span>
+      ) : null}
+      <div
+        role="radiogroup"
+        aria-labelledby={groupLabel ? labelId : undefined}
+      >
         {options.map((option, index) => {
           const isChecked = effectiveValue === option.label
 
@@ -255,7 +266,10 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
                 className={cssStyles.input}
                 onChange={handleChange}
               />
-              <span className={cssStyles.radioSpan}>
+              {/* Purely presentational ring/dot — the native radio above
+                  already conveys checked state to assistive tech, so this
+                  decorative graphic is hidden from the a11y tree. */}
+              <span className={cssStyles.radioSpan} aria-hidden="true">
                 <span className={cssStyles.radioOuter} />
                 <span className={cssStyles.radioInner} />
               </span>

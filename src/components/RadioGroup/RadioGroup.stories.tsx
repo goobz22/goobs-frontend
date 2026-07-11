@@ -544,3 +544,56 @@ export const InteractionTest: Story = {
     await expect(radio1).not.toBeChecked()
   },
 }
+
+/**
+ * A11y regression guard for the visually-hidden-but-accessible native inputs.
+ * The radios must stay in the accessibility tree and the keyboard tab order
+ * (they are clipped to 1px, NEVER `display:none`). This story fails against the
+ * old `display:none` markup: `getAllByRole('radio')` returns nothing when the
+ * inputs are removed from the a11y tree, and Tab never lands on a radio. It
+ * verifies the radiogroup exposes its accessible name (WCAG 4.1.2), every
+ * option is a reachable `radio` role, Tab moves focus into the group onto the
+ * checked radio (native roving tab-stop — WCAG 2.1.1), and the Arrow key moves
+ * selection to the next option (native radiogroup keyboard interaction).
+ */
+export const KeyboardA11y: Story = {
+  name: 'A11y/Keyboard Navigation',
+  args: {
+    name: 'keyboard-radio',
+    label: 'Keyboard accessible radio group',
+    options: basicOptions,
+    defaultValue: 'Option 1',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The radiogroup advertises an accessible name via aria-labelledby.
+    const group = canvas.getByRole('radiogroup', {
+      name: 'Keyboard accessible radio group',
+    })
+    await expect(group).toBeInTheDocument()
+
+    // All three options are real, accessible `radio` roles. This query returns
+    // [] when the input is `display:none` (removed from the a11y tree), so it
+    // is the primary regression guard for the visually-hidden fix.
+    const radios = canvas.getAllByRole('radio')
+    await expect(radios).toHaveLength(3)
+
+    // Default selection is exposed programmatically to assistive tech.
+    const radio1 = canvas.getByRole('radio', { name: 'Option 1' })
+    await expect(radio1).toBeChecked()
+
+    // Tab moves focus INTO the group and lands on the checked radio (native
+    // roving tab-stop) — impossible when the input is display:none.
+    await userEvent.tab()
+    await expect(radio1).toHaveFocus()
+
+    // Arrow key moves selection to the next option (native radiogroup keyboard).
+    await userEvent.keyboard('{ArrowDown}')
+    const radio2 = canvas.getByRole('radio', { name: 'Option 2' })
+    await expect(radio2).toBeChecked()
+    await expect(radio1).not.toBeChecked()
+  },
+}
