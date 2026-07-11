@@ -34,6 +34,10 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  *   - Any `<h1>`–`<h6>` mention inside a `/* … *​/` block comment / JSDoc or a
  *     `//` line comment, or wrapped in backticks (`` `<h1>` `` / `` `h${x}` ``) —
  *     documentation of the pattern, not a rendered tag.
+ *   - `<h1>`–`<h6>` inside a STRING or REGEX literal — a heading tag that is
+ *     text DATA, not JSX: e.g. ComplexTextEditor's markdown↔HTML converter
+ *     ``md.replace(/<h1>([^<]*)<\/h1>/g, '# $1')`` parses heading tags out of an
+ *     HTML string; it never renders one.
  *   - `<header>` / `<html>` / any tag whose name merely starts with `h` (only a
  *     real numbered heading `<h1>`–`<h6>` is a heading level).
  *   - A `<p>` that is NOT title/heading-classed (`.description`, `.subtitle`,
@@ -78,6 +82,14 @@ function stripNonCode(rawLine: string, state: { inBlock: boolean }): string {
   // Strip backtick spans: JSDoc `` `<h3>` `` inline-code and template literals
   // such as `` `h${headingLevel}` `` must never read as a rendered heading tag.
   line = line.replace(/`[^`]*`/g, '')
+  // Strip quoted-string literals, then regex literals: a heading tag inside a
+  // string ('<h2>hi</h2>') or a regex (/<h1>([^<]*)<\/h1>/g, the ComplexTextEditor
+  // markdown converter) is text DATA the code operates on, not a rendered tag.
+  // Strings first so a `/` inside a string can't be read as a regex delimiter;
+  // a mis-stripped division span only risks a false negative, never a positive.
+  line = line.replace(/'(?:[^'\\]|\\.)*'/g, '')
+  line = line.replace(/"(?:[^"\\]|\\.)*"/g, '')
+  line = line.replace(/\/(?![*/])(?:\\.|[^/\n\\])+\/[a-z]*/g, '')
   return line
 }
 
@@ -137,6 +149,11 @@ const lint: A11yLint = {
       'export const G6 = () => <p className={s.description}>{description}</p>',
       // A subtitle paragraph — lowercase `subtitle` is not a heading.
       'export const G7 = () => <p className={s.cardSubtitle}>{subtitle}</p>',
+      // Heading tags inside regex literals — HTML→markdown parsing, not JSX
+      // (the ComplexTextEditor conversion utility archetype).
+      "function htmlToMd(html: string) {\n  let md = html\n  md = md.replace(/<h1>([^<]*)<\\/h1>/g, '# $1')\n  md = md.replace(/<h2>([^<]*)<\\/h2>/g, '## $1')\n  return md\n}",
+      // A heading tag inside a string literal — template text data, not JSX.
+      "export const G9 = () => {\n  const tpl = '<h2>Section</h2>'\n  return <div dangerouslySetInnerHTML={{ __html: tpl }} />\n}",
     ],
   },
 }
