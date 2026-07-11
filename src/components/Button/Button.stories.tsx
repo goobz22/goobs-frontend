@@ -294,6 +294,7 @@ export const LightThemeGroup: Story = {
           exclusive
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'light' }}
+          aria-label="Content actions"
         >
           <Button
             value="send"
@@ -328,6 +329,7 @@ export const DarkThemeGroup: Story = {
           exclusive
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'dark' }}
+          aria-label="Content actions"
         >
           <Button
             value="send"
@@ -363,6 +365,7 @@ export const SacredThemeGroup: Story = {
           exclusive
           onChange={(_, newValue) => newValue && setValue(newValue)}
           styles={{ theme: 'sacred' }}
+          aria-label="Content actions"
         >
           <Button
             value="send"
@@ -589,5 +592,132 @@ export const DecorativeIconHiddenFromAT: Story = {
     const exposedSvg = iconOnly.querySelector('svg')
     await expect(exposedSvg).toBeInTheDocument()
     await expect(exposedSvg?.closest('span')).not.toHaveAttribute('aria-hidden')
+  },
+}
+
+/**
+ * The sacred (default) keyboard-focus ring must be an OPAQUE colour, not the
+ * translucent `--goobs-sacred-focus-ring` (gold-a60). A translucent ring
+ * composites against whatever sits behind it, so its contrast is
+ * backdrop-dependent — it falls below the WCAG 1.4.11 / 2.4.11 3:1 non-text
+ * floor over a light page and, inside a ButtonGroup, over the button's own
+ * translucent control background (the ring is drawn inset there). This story
+ * moves keyboard focus onto a sacred button and reads the computed
+ * `outline-color`, asserting it resolves to the solid gold `rgb(255, 215, 0)`
+ * (`--goobs-sacred-primary`). Reverting `.button:focus-visible` to the
+ * translucent token yields an `rgba(…, 0.6)` value and fails this assertion.
+ */
+export const SacredFocusRingOpaque: Story = {
+  name: 'A11y/Sacred focus ring is opaque',
+  globals: { backgrounds: { value: 'dark' } },
+  args: { text: 'Focus me', styles: { theme: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Focus me' })
+    // Keyboard focus drives :focus-visible (the only state that shows the ring).
+    await userEvent.tab()
+    await expect(button).toHaveFocus()
+    // Opaque gold → `rgb(255, 215, 0)`; the old translucent token computed to
+    // `rgba(255, 215, 0, 0.6)`, so this pins the opacity of the ring.
+    const outlineColor = getComputedStyle(button).outlineColor
+    await expect(outlineColor).toBe('rgb(255, 215, 0)')
+  },
+}
+
+/**
+ * `role="group"` is gated on an accessible name: a ButtonGroup with NEITHER
+ * `aria-label` nor `aria-labelledby` must NOT emit a nameless `role="group"`
+ * (a contextless group announcement is AT noise). This renders an unlabelled
+ * group and asserts no `group` role is exposed while the member buttons remain
+ * present and individually announced (WCAG 1.3.1 / 4.1.2). Reverting the gate
+ * (emitting `role="group"` unconditionally) makes `queryByRole('group')`
+ * resolve and fails this story.
+ */
+export const UnnamedGroupHasNoRole: Story = {
+  name: 'A11y/Unnamed group has no role',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      return (
+        <ButtonGroup
+          value={value}
+          exclusive
+          onChange={(_, newValue) => newValue && setValue(newValue)}
+          styles={{ theme: 'light' }}
+        >
+          <Button value="send" text="Send" />
+          <Button value="add" text="Add" />
+        </ButtonGroup>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // No accessible name supplied → no group boundary in the a11y tree.
+    await expect(canvas.queryByRole('group')).toBeNull()
+    // The buttons themselves are still present and reachable.
+    await expect(canvas.getByRole('button', { name: 'Send' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Add' })).toBeVisible()
+  },
+}
+
+/**
+ * Pins the reduced-motion guard (WCAG 2.3.3): the
+ * `@media (prefers-reduced-motion: reduce)` block in Button.module.css zeroes
+ * the button's `transition` and its hover `transform`. Rather than emulate the
+ * media query (which a play function can't force), this reads the stylesheet
+ * directly — it finds the reduced-motion `@media` rule and asserts it carries a
+ * rule zeroing `transition` for the button class and a hover rule zeroing
+ * `transform`. Removing (or un-zeroing) the guard block fails this story.
+ */
+export const ReducedMotionZeroesTransition: Story = {
+  name: 'A11y/Reduced motion zeroes transition',
+  args: { text: 'Motion-safe', styles: { theme: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Motion-safe' })
+    // The base CSS-module class for `.button` (first className token).
+    const buttonClass = button.className.split(' ')[0]
+
+    let mediaBlockFound = false
+    let transitionZeroed = false
+    let hoverTransformZeroed = false
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList | null = null
+      try {
+        rules = sheet.cssRules
+      } catch {
+        // Cross-origin stylesheet — cssRules is inaccessible; skip it.
+        continue
+      }
+      if (!rules) continue
+      for (const rule of Array.from(rules)) {
+        if (
+          !(rule instanceof CSSMediaRule) ||
+          !rule.media.mediaText.includes('prefers-reduced-motion')
+        ) {
+          continue
+        }
+        mediaBlockFound = true
+        for (const inner of Array.from(rule.cssRules)) {
+          if (!(inner instanceof CSSStyleRule)) continue
+          if (!inner.selectorText.includes(buttonClass)) continue
+          if (inner.style.transition === 'none') transitionZeroed = true
+          if (
+            inner.selectorText.includes(':hover') &&
+            inner.style.transform === 'none'
+          ) {
+            hoverTransformZeroed = true
+          }
+        }
+      }
+    }
+
+    await expect(mediaBlockFound).toBe(true)
+    await expect(transitionZeroed).toBe(true)
+    await expect(hoverTransformZeroed).toBe(true)
   },
 }

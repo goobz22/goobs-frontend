@@ -20,10 +20,13 @@ export interface ButtonGroupProps {
   /** Styling forwarded onto every child Button — group keys override each child's own `styles` keys — and applied as the container's `data-theme` (default `'sacred'`). */
   styles?: ButtonStyles
   /**
-   * Accessible name for the segmented group, applied to the container's
-   * `role="group"`. Strongly recommended for a segmented single-select so
-   * assistive tech announces the set (e.g. "View mode, group") before its
-   * toggle buttons (WCAG 1.3.1 / 4.1.2).
+   * Accessible name for the segmented group. When supplied (or when
+   * `aria-labelledby` is), the container renders as a named `role="group"` so
+   * assistive tech announces the set (e.g. "View mode, group") before its toggle
+   * buttons (WCAG 1.3.1 / 4.1.2). With NEITHER name present the container stays a
+   * plain `<div>` — an unnamed group boundary is contextless AT noise, so
+   * `role="group"` is gated on there being a name to announce. Strongly
+   * recommended for a segmented single-select.
    */
   'aria-label'?: string
   /**
@@ -78,11 +81,20 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
     return child
   })
 
+  // A group boundary is only meaningful with an accessible NAME. An unnamed
+  // `role="group"` adds a contextless "group" announcement in assistive tech
+  // without telling the user what the set is — noise, and exactly the unlabelled
+  // pattern the audit warned against. So emit `role="group"` ONLY when the caller
+  // supplies a name (`aria-label` or `aria-labelledby`); an unlabelled ButtonGroup
+  // stays a plain `<div>` and its buttons are announced individually
+  // (WCAG 1.3.1 / 4.1.2). A named group still resolves `getByRole('group', {name})`.
+  const hasAccessibleName = Boolean(ariaLabel || ariaLabelledby)
+
   return (
     <div
       className={cssStyles.buttonGroup}
       data-theme={theme}
-      role="group"
+      {...(hasAccessibleName ? { role: 'group' } : {})}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >

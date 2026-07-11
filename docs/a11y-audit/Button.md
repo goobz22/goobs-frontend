@@ -156,6 +156,46 @@ cause within Button ownership (one shared-token improvement deferred to `global.
   announces the error itself and may override/suppress `completedLabel`. Pinned by the new
   `Busy lifecycle announced (start + completion)` story.
 
+## Second adversarial review — remaining issues fixed (2026-07-11)
+
+A follow-up adversarial review of the first review-fix pass (R1–R3 above) found three residual
+issues. All fixed at root cause within Button ownership; no unowned files touched.
+
+- **R4 (moderate, 1.4.11 / 2.4.11) — sacred focus ring left translucent.** R1 switched light/dark
+  to opaque `--goobs-*-primary` but left the SACRED (default) `:focus-visible` ring sourced from the
+  translucent `--goobs-sacred-focus-ring` (= gold-a60, `rgba(255,215,0,0.6)`, `Button.module.css:83`).
+  A translucent ring composites against its backdrop, so its contrast is backdrop-DEPENDENT: ~5.5:1
+  over the theme's dark surfaces but only ~1.2–1.5:1 over a light page, and — inside a ButtonGroup,
+  where the ring is drawn INSET (`Button.module.css:290`) over the button's own translucent
+  `--goobs-sacred-control-bg` — below 3:1. Since sacred is the component-wide DEFAULT, that fails the
+  backdrop-independence R1 claimed. **Fixed** (`Button.module.css:83`) by pointing
+  `.button:focus-visible` at the SOLID, opaque `--goobs-sacred-primary` (= `--goobs-gold`, #ffd700) —
+  the sacred analogue of the `--goobs-light-primary`/`--goobs-dark-primary` R1 used. Opaque gold is
+  backdrop-independent and holds well above 3:1 on sacred's intended dark surfaces (~12:1 on #0e0e0e).
+  *Residual, honestly noted:* a gold ring on a PURE-WHITE page is inherently ~1.3:1 because the sacred
+  accent colour itself is light — no gold token can clear 3:1 there. That is a theme-appropriateness
+  matter (sacred is a dark-designed theme), not a translucency defect; it is now no worse and, being
+  opaque, strictly clearer than the a60 ring. Pinned by the new `A11y/Sacred focus ring is opaque`
+  story. *No `global.css` edit — references the existing `:root` token.*
+- **R5 (minor, 1.3.1 / 4.1.2) — `role="group"` emitted unconditionally / nameless.** `ButtonGroup`
+  emitted `role="group"` even with NO `aria-label`/`aria-labelledby` (`index.tsx:85`), producing a
+  contextless group announcement in AT; and the three theme-group stories shipped no name, modelling
+  that unlabelled pattern. **Fixed** (`index.tsx`) by gating `role="group"` on a supplied accessible
+  name (`aria-label` OR `aria-labelledby`) — an unlabelled group now stays a plain `<div>` with its
+  buttons announced individually, and a NAMED group still resolves `getByRole('group', {name})`. The
+  three theme-group stories (`Group/Light|Dark|Sacred Theme`) now pass `aria-label="Content actions"`,
+  modelling the correct named pattern. Pinned by the new `A11y/Unnamed group has no role` story
+  (asserts no `group` role when unnamed) alongside the existing `A11y/Group role + pressed`
+  (asserts a NAMED group still resolves). Additive/gating only — no attribute renamed or removed, and
+  no ThothOS selector keys on a nameless ButtonGroup `role="group"` (it was introduced in this very
+  a11y pass, not yet published).
+- **R6 (minor, T4 / 2.3.3) — reduced-motion block unpinned.** The `@media (prefers-reduced-motion:
+  reduce)` guard (Issue 6, `Button.module.css:321`) had no story, so reverting it failed no
+  regression test. **Fixed** with the new `A11y/Reduced motion zeroes transition` story: a play
+  function that can't force the media query instead reads `document.styleSheets`, locates the
+  reduced-motion `@media` rule, and asserts it carries a rule zeroing the button class's `transition`
+  AND a hover rule zeroing `transform`. Removing or un-zeroing the guard block now fails the story.
+
 ## SEO semantics
 
 `Button` is an interactive control, not a heading/landmark/link/list/table, so the SEO-semantic
@@ -216,6 +256,17 @@ Per-file gate: `bun lint:file` on `index.tsx`, `SaveButton.tsx`, `Button.stories
 - **`A11y/Decorative icon hidden`** (new, review-fix R2) — reads `aria-hidden` on the icon wrapper
   directly and pins both branches of `hasLabel`: labelled → hidden, icon-only → exposed. Fails if
   the `index.tsx:625` fix is reverted.
+- **`Group/Light|Dark|Sacred Theme`** (review-fix R5) — now pass `aria-label="Content actions"`, so
+  they model the correct named-group pattern and render `role="group"` under the new name-gate.
+- **`A11y/Sacred focus ring is opaque`** (new, review-fix R4) — keyboard-focuses a sacred button and
+  asserts the computed `outline-color` is the opaque `rgb(255, 215, 0)`; reverting to the translucent
+  `--goobs-sacred-focus-ring` (`rgba(…, 0.6)`) fails it.
+- **`A11y/Unnamed group has no role`** (new, review-fix R5) — asserts a ButtonGroup with no
+  `aria-label`/`aria-labelledby` exposes NO `group` role while its buttons stay reachable; reverting
+  the gate (unconditional `role="group"`) fails it.
+- **`A11y/Reduced motion zeroes transition`** (new, review-fix R6) — reads the stylesheet's
+  `@media (prefers-reduced-motion: reduce)` block and asserts it zeroes the button `transition` and
+  the hover `transform`; removing the guard block fails it.
 
 `SaveButton.stories.tsx`:
 - **`Pending (spinner)`** — added a `play` asserting `aria-busy="true"`, `toBeDisabled()`, and a
@@ -242,17 +293,20 @@ Per-file gate: `bun lint:file` on `index.tsx`, `SaveButton.tsx`, `Button.stories
   consumer. **Suggested owner change:** `src/components/Icons/*.tsx` — add `aria-hidden="true"` by
   default on the `<svg>` (overridable when an icon is used as standalone content). Not edited
   (outside Button ownership).
-- **Shared focus-ring tokens are below 3:1 (review-fix R1 root cause).** The translucent
-  `--goobs-light-focus-ring: rgba(59,130,246,0.4)` (`src/styles/global.css:305`) and
-  `--goobs-dark-focus-ring: rgba(96,165,250,0.45)` (`src/styles/global.css:336`) composite below
-  the 3:1 non-text-contrast floor over their host surfaces. Button was fixed locally by switching
-  its `:focus-visible` to the solid `--goobs-*-primary` tokens, but the shared focus-ring tokens
-  are **still consumed by 4 other components** (`Accordion`, `Breadcrumb`, `Chip`, `BigCalendar`
-  `.module.css`), which remain below threshold. **Suggested owner change (unowned file):** in
-  `src/styles/global.css`, redefine `--goobs-light-focus-ring: #2563eb` and
-  `--goobs-dark-focus-ring: #60a5fa` (solid), or raise the alpha until the composite clears 3:1 on
-  each host surface — then those four components (and, optionally, Button reverted back to the
-  token) all pass. Not edited (outside Button ownership; `src/styles/**` is off-limits).
+- **Shared focus-ring tokens are below 3:1 (review-fix R1 + R4 root cause).** The translucent
+  `--goobs-light-focus-ring: rgba(59,130,246,0.4)` (`src/styles/global.css:305`),
+  `--goobs-dark-focus-ring: rgba(96,165,250,0.45)` (`src/styles/global.css:336`), and
+  `--goobs-sacred-focus-ring: var(--goobs-gold-a60)` (`src/styles/global.css:251`) composite below
+  the 3:1 non-text-contrast floor over one or more of their host surfaces. Button was fixed locally
+  for ALL THREE themes by switching its `:focus-visible` to the solid `--goobs-*-primary` tokens
+  (light/dark in R1, sacred in R4), but the shared focus-ring tokens are **still consumed by other
+  components** (`Accordion`, `Breadcrumb`, `Chip`, `BigCalendar` `.module.css`), which remain below
+  threshold. **Suggested owner change (unowned file):** in `src/styles/global.css`, redefine
+  `--goobs-light-focus-ring: #2563eb` and `--goobs-dark-focus-ring: #60a5fa` (solid), and reconsider
+  `--goobs-sacred-focus-ring` (an opaque gold clears 3:1 only on dark surfaces — the sacred theme's
+  intended context), or raise the alpha until each composite clears 3:1 on its host surface — then
+  those components (and, optionally, Button reverted back to the tokens) all pass. Not edited
+  (outside Button ownership; `src/styles/**` is off-limits).
 - **`styles.outline` can override the focus ring.** If a consumer sets `styles.outline` (inline
   CSS `outline`), that inline style beats the stylesheet `:focus-visible` outline. This only
   affects consumers who explicitly opt into a custom persistent outline; the default path (no

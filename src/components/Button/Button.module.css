@@ -74,13 +74,24 @@
   background-color: var(--goobs-gold-a20);
 }
 
-/* Keyboard focus indicator (WCAG 2.4.7 / 2.4.11). The base `.button` sets
-   `outline: none` to drop the UA ring for pointer users; :focus-visible
+/* Keyboard focus indicator (WCAG 2.4.7 / 2.4.11 / 1.4.11). The base `.button`
+   sets `outline: none` to drop the UA ring for pointer users; :focus-visible
    restores a clearly-visible ring ONLY for keyboard/AT focus. Uses `outline`
    (not box-shadow) so it never fights the hover glow, with an offset for
-   contrast against the button's own border. Per-theme colours below. */
+   contrast against the button's own border.
+
+   Sacred (the DEFAULT theme) rings with the SOLID, opaque `--goobs-sacred-primary`
+   (= --goobs-gold, #ffd700) — NOT the translucent `--goobs-sacred-focus-ring`
+   (gold-a60, 0.6 alpha). A 60%-alpha ring composites against whatever sits behind
+   it, so it is backdrop-DEPENDENT: fine over the theme's dark surfaces (~5.5:1) but
+   dropping to ~1.2–1.5:1 over a light page and — inside a ButtonGroup, where the
+   ring is drawn INSET (see `.buttonGroup .button:focus-visible`) — over the button's
+   own translucent `--goobs-sacred-control-bg`. Since sacred is the component-wide
+   default, the ring is switched to the opaque primary so its contrast is
+   backdrop-independent and holds ≥3:1 on sacred's dark surfaces, exactly as
+   light/dark were switched to their opaque `--goobs-*-primary` below. */
 .button:focus-visible {
-  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline: 2px solid var(--goobs-sacred-primary);
   outline-offset: 2px;
 }
 
