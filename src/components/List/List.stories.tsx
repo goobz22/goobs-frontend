@@ -6,6 +6,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { expect, within } from 'storybook/test'
 import { List, ListItem, ListItemIcon, ListItemText } from './'
 import HomeIcon from '../Icons/Home'
 import AccountIcon from '../Icons/Account'
@@ -144,4 +145,34 @@ export const TextOnly: Story = {
     </List>
   ),
   globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY REGRESSION STORY
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the list-semantics a11y pattern (WCAG 1.3.1). The stylesheet sets
+ * `list-style: none`, which makes WebKit/VoiceOver drop the implicit list role
+ * from the `<ul>` (and `listitem` from its `<li>` children), so `List` renders
+ * an explicit `role="list"` on the root. The play assertions verify the list
+ * is exposed as a list of the expected size and that each row is a real `<li>`
+ * — a regression that drops the role or swaps the elements fails here.
+ */
+export const A11ySemantics: Story = {
+  name: 'A11y/List Semantics',
+  render: () => renderList('light'),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The root must expose an accessible list of the right size.
+    const list = canvas.getByRole('list')
+    await expect(list.tagName).toBe('UL')
+    await expect(list).toHaveAttribute('role', 'list')
+    await expect(list).toHaveAttribute('data-component', 'List')
+    // Each row is a genuine <li>, announced as a listitem under role="list".
+    const items = canvas.getAllByRole('listitem')
+    await expect(items).toHaveLength(mockEntries.length)
+    await expect(items[0].tagName).toBe('LI')
+  },
 }

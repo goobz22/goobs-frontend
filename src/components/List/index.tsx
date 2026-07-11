@@ -81,12 +81,18 @@ export interface ListItemTextProps {
  * `ListItemText`. Each part stamps its own `data-theme` (light default) and
  * optional `data-dense` from the `styles` it receives — the List's theme does
  * NOT cascade to items, so pass the same `styles` to every part.
+ *
+ * The `<ul>` carries an explicit `role="list"` because the stylesheet sets
+ * `list-style: none`; WebKit/VoiceOver strip the implicit list semantics from a
+ * bulletless `<ul>` (and its `<li>` children lose `listitem`), so the role
+ * restores the "list, N items" announcement and list navigation (WCAG 1.3.1).
  */
 export const List: React.FC<ListProps> = ({ children, styles }) => {
   const theme = styles?.theme ?? 'light'
   return (
     <ul
       className={cssStyles.container}
+      role="list"
       data-theme={theme}
       data-component="List"
       {...(styles?.dense && { 'data-dense': 'true' })}
