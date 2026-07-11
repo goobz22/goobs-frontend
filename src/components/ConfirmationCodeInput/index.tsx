@@ -78,6 +78,22 @@ const SacredBottomDecorations: React.FC = () => {
   )
 }
 
+// Visually-hidden (clip-rect) style for the status text held inside the
+// role="status" live region. Kept as a static, non-theme utility object
+// (there is no shared sr-only class in the library) so a state-text content
+// mutation is announced by assistive tech without altering the dot visually.
+const STATUS_TEXT_SR_ONLY: CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+}
+
 // --------------------------------------------------------------------------
 // MAIN COMPONENT
 // --------------------------------------------------------------------------
@@ -451,7 +467,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
             role="status"
             aria-label={isValid ? 'Code is valid' : 'Code is invalid'}
           >
-            <span className={cssStyles.statusText}>
+            <span style={STATUS_TEXT_SR_ONLY}>
               {isValid ? 'Code is valid' : 'Code is invalid'}
             </span>
           </div>
