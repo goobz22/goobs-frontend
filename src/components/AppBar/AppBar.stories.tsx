@@ -195,3 +195,49 @@ export const LabelledLandmarks: Story = {
   ),
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * Exercises the `styles.containerAnimation` code path — a caller-supplied
+ * looping animation applied to the bar container (here a perpetual gold glow).
+ * This is the regression test for the reduced-motion fix (WCAG 2.3.3): the
+ * `@media (prefers-reduced-motion: reduce)` block in `AppBar.module.css` sets
+ * `.container { animation: none }`, so under an emulated reduced-motion
+ * preference (Storybook a11y addon / a reduced-motion Chromatic snapshot) the
+ * glow is suppressed while the default snapshot shows it running. Reverting that
+ * one CSS line would let the animation keep looping under reduced motion and
+ * change this story's reduced-motion baseline.
+ *
+ * The keyframe is declared globally (not via the CSS module) because a
+ * consumer's `containerAnimation` string references an author-supplied
+ * `@keyframes` by its literal name; CSS-module keyframe names are scoped and
+ * would not match a runtime string, so callers bring their own keyframe exactly
+ * as demonstrated here.
+ */
+export const ContainerAnimation: Story = {
+  name: 'Accessibility/Container Animation (Reduced Motion)',
+  render: () => (
+    <>
+      <style>{`
+        @keyframes appbarReviewGlow {
+          0%,
+          100% {
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 32px rgba(212, 175, 55, 0.6);
+          }
+        }
+      `}</style>
+      <AppBar
+        ariaLabel="Animated banner"
+        styles={{
+          theme: 'sacred',
+          containerAnimation: 'appbarReviewGlow 2s ease-in-out infinite',
+        }}
+      >
+        <NavContent color="#FFD700" />
+      </AppBar>
+    </>
+  ),
+  globals: { backgrounds: { value: 'sacred' } },
+}

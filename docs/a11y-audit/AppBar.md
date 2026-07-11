@@ -76,16 +76,26 @@ apply. No status is ever conveyed audio-only. Section clean; no changes required
 - Added **`Accessibility/Labelled Landmarks`** (`AppBar.stories.tsx`) — renders two stacked
   AppBars with distinct `ariaLabel` values, exercising the new `ariaLabel` → `aria-label` behavior
   and the native `<header>` banner landmark. This is the regression test for issues #1 and #2.
-- Reduced-motion (issue #3) is a media-query CSS rule with no rendered JS state to assert via a
-  story; it is covered structurally by the CSS + Storybook's a11y addon running under a
-  reduced-motion preference.
+- Added **`Accessibility/Container Animation (Reduced Motion)`** (`AppBar.stories.tsx`) — renders an
+  AppBar with `styles.containerAnimation` set to a looping gold glow (a global `@keyframes` declared
+  in the story, since CSS-module keyframe names are scoped and callers supply their own). This
+  exercises the previously-storyless `containerAnimation` code path and is the regression test for
+  issue #3: under an emulated reduced-motion preference the `.container { animation: none }` rule
+  suppresses the glow, and reverting that CSS line would change this story's reduced-motion baseline.
+  (Supersedes the earlier note that issue #3 had "no rendered JS state to assert" — the
+  container-animation prop path is now explicitly rendered.)
 
 ## Deferred
-- **`onClick` keyboard/AT parity (component-owned, intentionally not "fixed").** The optional
-  `onClick` fires on the whole banner region but the region is not keyboard-focusable. This is left
-  as-is on purpose: the primary interactions are the AppBar's children (real buttons/links), and
-  making a `role="banner"` landmark itself focusable+activatable would be a semantic anti-pattern.
-  No change recommended unless the API is redefined to make the bar itself a control.
+- **`onClick` keyboard/AT parity (component-owned, intentionally not "fixed" — now documented).**
+  The optional `onClick` fires on the whole banner region but the region is not keyboard-focusable,
+  so a handler wired there is pointer-only (WCAG 2.1.1). The landmark is left non-focusable on
+  purpose: the primary interactions are the AppBar's children (real buttons/links), and making a
+  `role="banner"` landmark itself focusable+activatable would be a semantic anti-pattern. The
+  residual limitation is now surfaced to consumers via an explicit ⚠️ JSDoc warning on the `onClick`
+  prop (`index.tsx`), directing must-be-keyboard-operable actions to a real interactive child and
+  reserving `onClick` for redundant pointer conveniences. No DOM/behavior change (non-breaking); the
+  API would need to be redefined to make the bar itself a control before `onClick` could be made
+  keyboard-operable.
 - **Disabled state not surfaced to AT (shared-concept, not AppBar-owned).** When `styles.disabled`
   is set, the bar suppresses its own `onClick` and dims inherited text, but children remain
   keyboard-focusable and activatable (only `pointer-events` is removed). There is no meaningful

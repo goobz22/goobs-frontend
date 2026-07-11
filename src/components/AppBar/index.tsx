@@ -118,7 +118,19 @@ export interface AppBarProps {
    * banner/app-bar landmark (assistive tech otherwise lists them identically).
    */
   ariaLabel?: string
-  /** Callback fired when the app bar is clicked */
+  /**
+   * Callback fired when the app bar is clicked.
+   *
+   * ⚠️ Accessibility (WCAG 2.1.1 Keyboard): this fires on the `banner` landmark
+   * itself, which is intentionally NOT keyboard-focusable, so a handler wired
+   * here is **pointer-only** — it cannot be reached or activated by keyboard or
+   * assistive-tech users. Making a `role="banner"` region focusable/activatable
+   * would be a semantic anti-pattern, so the landmark is deliberately left
+   * non-interactive. Therefore: put any action that MUST be operable by everyone
+   * on a real interactive child (a `<button>`/`<a>` inside `children`), and use
+   * `onClick` only for a redundant pointer convenience that duplicates such a
+   * child control — never as the sole way to trigger a behavior.
+   */
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
