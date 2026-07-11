@@ -25,6 +25,9 @@ interactive element is the copy button, reachable by Tab and activated by Enter/
 | 4 | Moderate | 1.3.1 (A) | `index.tsx:206-212` | Decorative line-number `<div>`s ("1 2 3 4 …") are read into the code's reading order, polluting it for screen-reader users. | **FIXED** |
 | 5 | Minor | 2.3.3 (AAA) | `CodeCopy.module.css:25` | `.container` has an `all` `transition` with no `prefers-reduced-motion` opt-out. | **FIXED** |
 | 6 | Minor | 3.2.2 (A) robustness | `index.tsx:172` | Copy `<button>` had no explicit `type`; inside a `<form>` it would default to `type="submit"` and submit the form on copy. | **FIXED** (set `type="button"`) |
+| 7 | Moderate | 2.1.1 (A) | `CodeCopy.module.css:264` / `index.tsx` `<pre>` | Adversarial-review find: the `<pre>` is an `overflow:auto` horizontal-scroll container (wide lines clip) with no `tabindex`, so the scroll region is **not keyboard-focusable** — a keyboard-only user cannot scroll to read clipped code (axe `scrollable-region-focusable`). | **FIXED** |
+| 8 | Minor | 4.1.3 (AA) failure branch | `index.tsx:130-131` | Adversarial-review find: `navigator.clipboard.writeText(...).then(markCopied)` had **no `.catch`**; a rejected write fired neither the ✓ glyph nor a live-region announcement, so a screen-reader user is falsely told nothing failed. | **FIXED** |
+| 9 | Housekeeping | — | `CodeCopy.module.css:180` | Pre-existing stylelint error in the owned file: `.srStatus` used the deprecated `clip: rect()` (would block the `lint:css` gate). | **FIXED** (→ `clip-path: inset(50%)`) |
 
 ## Hearing
 
@@ -55,6 +58,22 @@ name), so there is no audio-only channel. **No hearing-impaired issues.**
   and affects every `Button` usage — see Deferred.)
 - **Decorative line numbers (Issue 4, WCAG 1.3.1):** the `.lineNumbers` gutter now has
   `aria-hidden="true"`; the readable content stays in the `<pre><code>`.
+- **Keyboard-scrollable code region (Issue 7, WCAG 2.1.1):** the `<pre>` is an
+  `overflow:auto` scroll container for wide code. It now carries `tabIndex={0}` so it is
+  keyboard-focusable and arrow-scrollable (the axe `scrollable-region-focusable` fix), plus
+  `role="group"` + `aria-label={`${language} code`}` for an accessible name. `role="group"`
+  is chosen over `role="region"` on purpose: it is a **naming-capable** role (so `aria-label`
+  on the otherwise-generic `<pre>` is not an `aria-prohibited-attr` violation) but is **not a
+  landmark**, so it adds no landmark noise / `landmark-unique` risk when many snippets share a
+  language, and it is not a name-from-content role so the code text inside stays readable.
+  A theme-aware **inset** `:focus-visible` ring on `.pre` (colours matched to the
+  `--goobs-focus-*` tokens, using `inset` so the container's `overflow:hidden` cannot clip it)
+  gives the focus a visible indicator (WCAG 2.4.7).
+- **Copy-failure announcement (Issue 8, WCAG 4.1.3 failure branch):** `handleCopy` now models
+  three states (`idle`/`copied`/`error`). The async `writeText` gains a `.catch` that falls
+  back to the `execCommand` path; when **both** fail it settles to `error`, which drives both
+  a visible `✕` glyph and a `"Copy failed"` announcement through the same `role="status"` live
+  region — so a rejected copy (permission/focus loss) is never silently read as a success.
 - **Disabled state (WCAG 1.4.1):** disabled is conveyed programmatically — `data-disabled`
   on the container + the native `disabled` attribute on the copy `<button>` — not by
   colour/opacity alone. No change needed; now covered by the new `Disabled` story.
@@ -81,6 +100,12 @@ All within the owned directory:
 4. `CodeCopy.module.css` — added `.container .copyButtonSlot button:focus-visible` ring
    (dark/light/sacred via `--goobs-focus-*`), the `.srStatus` visually-hidden utility, and a
    `@media (prefers-reduced-motion: reduce)` block disabling the container transition.
+5. `index.tsx` — the `<pre>` gains `tabIndex={0}` + `role="group"` + `aria-label` so the wide-code
+   scroll region is keyboard-focusable and named (Issue 7).
+6. `index.tsx` — `handleCopy` refactored to a three-state model with a `.catch` fallback and an
+   `error` status; the live region + glyph announce `"Copy failed"` / `✕` (Issue 8).
+7. `CodeCopy.module.css` — added an inset `.pre:focus-visible` ring (dark/light/sacred) and
+   modernized `.srStatus`'s deprecated `clip` to `clip-path: inset(50%)` (Issue 9).
 
 No existing `data-*`, `role`, or `aria-*` attribute was removed or renamed; the
 `data-component="CodeCopy"` / `data-theme` / `data-disabled` selector contract is preserved.
@@ -97,8 +122,16 @@ Changes are additive to the public API (no prop renamed/removed/retyped).
   `role="status"` `aria-live="polite"` region exists; the line-number column is
   `aria-hidden="true"` (and holds the digit "1", proving it's out of the readable path); and
   the copy button is keyboard-focusable (renders the `:focus-visible` ring).
+- **`WideScrollableCode`** (new) — renders over-wide code inside a narrow (`max-width:480px`)
+  wrapper so the `<pre>` becomes a horizontal-scroll container; `play` asserts the `<pre>` has
+  `tabindex="0"`, `role="group"`, `aria-label="typescript code"`, and actually accepts focus
+  (Issue 7 regression guard).
+- **`CopyFailure`** (new) — stubs `navigator.clipboard.writeText` to reject **and**
+  `document.execCommand` to return `false`, clicks copy, and asserts the `role="status"` region
+  announces `"Copy failed"` and the button shows the `✕` glyph — the failure branch of Issue 8.
+  Both the clipboard descriptor and `execCommand` are restored in a `finally` block.
 
-Both pass `bun lint:file`.
+All pass `bun lint:file`.
 
 ## Deferred
 
@@ -112,8 +145,6 @@ Both pass `bun lint:file`.
   `.button[data-theme='dark']:focus-visible { box-shadow: var(--goobs-focus-dark); }` (tokens
   already exist in `src/styles/global.css:388-390`). This is cross-component class
   `missing-focus-visible-style`.
-- **Robustness note (not a WCAG failure):** `handleCopy` (`index.tsx:130-132`) calls
-  `navigator.clipboard.writeText(...).then(markCopied)` with **no `.catch`** — if the write
-  rejects (permission/focus), the success state never fires and the failure is silent. Not an
-  a11y checklist item and left unchanged to avoid altering copy semantics, but worth a
-  follow-up `.catch` that falls back to the `execCommand` path already present below it.
+
+The prior pass's "robustness note" about the missing `.catch` is now **resolved** — see
+Issue 8 above (no longer deferred).
