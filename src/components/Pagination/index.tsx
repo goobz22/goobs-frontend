@@ -296,82 +296,104 @@ const Pagination: FC<PaginationProps> = ({
       }
       {...rest}
     >
-      <div className={cssStyles.buttonContainer}>
+      {/*
+        Pagination is a list of navigation controls, so the items render as a
+        real <ul>/<li> list inside the <nav> landmark (mirrors the Breadcrumb
+        landmark). Screen readers announce the item count and let users step
+        through the pages; the flat <div> gave no such structure (WCAG 1.3.1).
+        The direction icons are decorative — the wrapping <button> already
+        carries the accessible name via aria-label — so each is aria-hidden to
+        avoid redundant / noisy SVG announcements (WCAG 1.1.1 / 4.1.2).
+      */}
+      <ul className={cssStyles.buttonContainer}>
         {showFirstButton && (
-          <PaginationButton
-            onClick={handleFirstPage}
-            disabled={page <= 1 || !!isDisabled}
-            aria-label="Go to first page"
-          >
-            <FirstPageIcon
-              styles={
-                styles?.theme
-                  ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
-                  : {}
-              }
-            />
-          </PaginationButton>
+          <li className={cssStyles.listItem}>
+            <PaginationButton
+              onClick={handleFirstPage}
+              disabled={page <= 1 || !!isDisabled}
+              aria-label="Go to first page"
+            >
+              <FirstPageIcon
+                aria-hidden="true"
+                styles={
+                  styles?.theme
+                    ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
+                    : {}
+                }
+              />
+            </PaginationButton>
+          </li>
         )}
 
         {!hidePrevButton && (
-          <PaginationButton
-            onClick={handlePreviousPage}
-            disabled={page <= 1 || !!isDisabled}
-            aria-label="Go to previous page"
-          >
-            <KeyboardArrowLeftIcon
-              styles={
-                styles?.theme
-                  ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
-                  : {}
-              }
-            />
-          </PaginationButton>
+          <li className={cssStyles.listItem}>
+            <PaginationButton
+              onClick={handlePreviousPage}
+              disabled={page <= 1 || !!isDisabled}
+              aria-label="Go to previous page"
+            >
+              <KeyboardArrowLeftIcon
+                aria-hidden="true"
+                styles={
+                  styles?.theme
+                    ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
+                    : {}
+                }
+              />
+            </PaginationButton>
+          </li>
         )}
 
         {items.map((item, index) => (
-          <PaginationItem
-            key={index}
-            item={item}
-            page={page}
-            count={count}
-            onChange={handleChange}
-            {...(renderItem ? { renderItem } : {})}
-          />
+          <li key={index} className={cssStyles.listItem}>
+            <PaginationItem
+              item={item}
+              page={page}
+              count={count}
+              onChange={handleChange}
+              {...(renderItem ? { renderItem } : {})}
+            />
+          </li>
         ))}
 
         {!hideNextButton && (
-          <PaginationButton
-            onClick={handleNextPage}
-            disabled={page >= count || !!isDisabled}
-            aria-label="Go to next page"
-          >
-            <KeyboardArrowRightIcon
-              styles={
-                styles?.theme
-                  ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
-                  : {}
-              }
-            />
-          </PaginationButton>
+          <li className={cssStyles.listItem}>
+            <PaginationButton
+              onClick={handleNextPage}
+              disabled={page >= count || !!isDisabled}
+              aria-label="Go to next page"
+            >
+              <KeyboardArrowRightIcon
+                aria-hidden="true"
+                styles={
+                  styles?.theme
+                    ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
+                    : {}
+                }
+              />
+            </PaginationButton>
+          </li>
         )}
 
         {showLastButton && (
-          <PaginationButton
-            onClick={handleLastPage}
-            disabled={page >= count || !!isDisabled}
-            aria-label="Go to last page"
-          >
-            <LastPageIcon
-              styles={
-                styles?.theme
-                  ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
-                  : {}
-              }
-            />
-          </PaginationButton>
+          <li className={cssStyles.listItem}>
+            <PaginationButton
+              onClick={handleLastPage}
+              disabled={page >= count || !!isDisabled}
+              aria-label="Go to last page"
+            >
+              <LastPageIcon
+                aria-hidden="true"
+                styles={
+                  styles?.theme
+                    ? { theme: styles.theme as 'sacred' | 'dark' | 'light' }
+                    : {}
+                }
+              />
+            </PaginationButton>
+          </li>
         )}
-      </div>
+      </ul>
     </nav>
   )
 }
