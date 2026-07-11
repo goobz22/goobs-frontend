@@ -109,7 +109,10 @@ export interface FormDataGridProps<TRow extends RowData = RowData> {
    */
   datagrid: DatagridProps<TRow>
   /**
-   * Use sacred (dark/gold) theme styling.
+   * @deprecated Use the `styles.theme` union (`'sacred' | 'light' | 'dark'`),
+   * the house convention emitted as `data-theme`. This boolean only maps to
+   * `'sacred'` (true, the default) or `'light'` (false) and cannot express the
+   * `dark` palette. Still honored: it is mapped to the theme string internally.
    * - true (default): Dark background, gold accents, animated effects
    * - false: Light/white theme with standard styling
    */

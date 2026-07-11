@@ -139,12 +139,20 @@ export interface ContentSectionProps {
     style?: React.CSSProperties
   }>
   width?: number
-  /** Enable Egyptian/Sacred theming for all components */
+  /**
+   * @deprecated Enable Egyptian/Sacred theming for all components. Prefer each
+   * child component's `styles.theme` union (`'sacred' | 'light' | 'dark'`),
+   * which also exposes the `dark` palette this boolean cannot express. Still
+   * honored: when set, it is injected into every child as their theme choice.
+   */
   sacredtheme?: boolean
 }
 
 const RenderContent: React.FC<
-  ContentSectionProps['grids'][0] & { sacredtheme?: boolean }
+  ContentSectionProps['grids'][0] & {
+    /** @deprecated see `ContentSectionProps` — use child `styles.theme`. */
+    sacredtheme?: boolean
+  }
 > = ({ boxProps, style, customComponent, sacredtheme, ...props }) => {
   const elements: React.ReactElement[] = []
 

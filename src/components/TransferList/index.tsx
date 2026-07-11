@@ -48,6 +48,12 @@ export interface TransferListProps {
   ) => void
   leftTitle?: string
   rightTitle?: string
+  /**
+   * @deprecated Use `styles.theme` (the `'sacred' | 'light' | 'dark'` union)
+   * below — it supersedes this boolean and can also express the `dark` palette
+   * this cannot. Still honored: when `styles.theme` is omitted, the resolved
+   * theme falls back to `sacredtheme ? 'sacred' : 'light'`.
+   */
   sacredtheme?: boolean
   /**
    * Full theme selector, matching every sibling field's `styles={{ theme }}`

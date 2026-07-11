@@ -19,6 +19,12 @@ export interface FormProjectBoardProps {
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   description: string
   projectboard: ProjectBoardProps
+  /**
+   * @deprecated Use the `styles.theme` union (`'sacred' | 'light' | 'dark'`),
+   * the house convention emitted as `data-theme`. This boolean only maps to
+   * `'sacred'` (true, the default) or `'light'` (false). Still honored: it is
+   * mapped to the theme string internally.
+   */
   sacredtheme?: boolean
 }
 
