@@ -358,3 +358,16 @@
     font-size: 11px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Reduced motion — WCAG 2.3.3: neutralise the chevron rotation and control
+   transitions for users who prefer reduced motion. The .arrow.open rotate is
+   kept as a static state indicator; only the animated transition is removed.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .option,
+  .arrow {
+    transition: none;
+  }
+}

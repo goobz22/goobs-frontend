@@ -276,3 +276,22 @@
   color: var(--rg-text-hover-color-override, var(--rg-text-hover-color));
   text-shadow: var(--rg-text-hover-shadow);
 }
+
+/* --------------------------------------------------------------------------
+   Reduced motion — WCAG 2.3.3: drop the sacred hover translateX shift and make
+   the checked-dot scale + colour transitions instant for users who prefer
+   reduced motion. The radioInner scale(0)/scale(1) still toggles the dot as a
+   state indicator — only its animated transition is removed.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .optionLabel,
+  .radioOuter,
+  .radioInner,
+  .text {
+    transition: none;
+  }
+
+  .optionLabel:hover {
+    transform: none;
+  }
+}

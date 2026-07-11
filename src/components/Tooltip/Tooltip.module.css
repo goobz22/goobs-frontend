@@ -177,3 +177,20 @@
   transform: translateY(-50%);
   border-right-color: var(--tooltip-arrow-color);
 }
+
+/* --------------------------------------------------------------------------
+   Reduced motion — WCAG 2.3.3: remove the enter scale movement and any
+   caller-injected animation for users who prefer reduced motion. The tooltip
+   still appears/hides via opacity; it simply does not scale or animate.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip,
+  .tooltip.visible {
+    transition: none;
+    transform: none;
+  }
+
+  .content {
+    animation: none;
+  }
+}
