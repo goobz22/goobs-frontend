@@ -433,7 +433,7 @@ export default function BigCalendar({
   // Sacred calendar surface background image (theme/bigcalendar.ts sacred.backgroundImage)
   const sacredCalendarBackgroundImage = `
         linear-gradient(135deg, var(--goobs-gold-a05) 0%, transparent 50%, var(--goobs-gold-a05) 100%),
-        radial-gradient(circle at top right, rgba(255, 215, 0, 0.03) 0%, transparent 50%)
+        radial-gradient(circle at top right, var(--goobs-gold-a02) 0%, transparent 50%)
       `
 
   // Theme passthrough for child components — typed against each child's own
@@ -1333,7 +1333,7 @@ export default function BigCalendar({
 
   return (
     <div
-      ref={gridRef}
+      ref={setRootRef}
       className={cssStyles.root}
       data-component="BigCalendar"
       data-theme={theme}
