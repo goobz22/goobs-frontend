@@ -8,6 +8,7 @@ import SearchIcon from '../../../Icons/Search'
 import HistoryIcon from '../../../Icons/History'
 import {
   useEscape,
+  useArrowKeyNav,
   getRequiredProps,
   type FieldStyleOverrides,
 } from '../../Shell'
@@ -79,6 +80,11 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     return []
   })
   const [activeTab, setActiveTab] = useState<'overview' | 'history'>('overview')
+  // Roving highlight for the listbox: index into the FLAT visible-option list
+  // (`visibleItems` below), or -1 when nothing is highlighted. Drives
+  // aria-activedescendant + the option's data-active highlight so keyboard
+  // users can navigate the combobox+listbox with the Arrow keys (WCAG 2.1.1).
+  const [activeIndex, setActiveIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchBoxRef = useRef<HTMLDivElement>(null)
@@ -196,18 +202,22 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     if (!isOpen) {
       setIsOpen(true)
     }
+    // A new filter changes the visible-option list — drop the stale highlight.
+    setActiveIndex(-1)
     // Stay on current tab when typing
   }
 
   const handleInputFocus = () => {
     setIsOpen(true)
     setActiveTab('overview')
+    setActiveIndex(-1)
   }
 
   const handleItemSelect = (item: NavigationItem) => {
     setSelectedItem(item)
     setSearchTerm(item.label)
     setIsOpen(false)
+    setActiveIndex(-1)
 
     // Add to history
     setHistory(prev => {
@@ -220,6 +230,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
 
   const clearHistory = () => {
     setHistory([])
+    setActiveIndex(-1)
     localStorage.removeItem('searchableHistory')
   }
 
@@ -234,8 +245,42 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     )
   })
 
+  // Flat, render-order list of the options CURRENTLY visible in the open tab —
+  // the sequence the Arrow keys walk. It MUST match the JSX below exactly: the
+  // overview groups filteredItems by the fixed category order, the history tab
+  // lists `history`. `indexOfId` maps an option back to its flat index so
+  // renderItem can highlight the active one without re-deriving position.
+  const visibleItems: NavigationItem[] =
+    activeTab === 'overview'
+      ? ['Workspace', 'Space', 'View'].flatMap(category =>
+          filteredItems.filter(item => item.category === category)
+        )
+      : history
+  const indexOfId = new Map(visibleItems.map((item, i) => [item.id, i]))
+  const optionDomId = (index: number) => `${inputId}-option-${index}`
+  const activeOptionId =
+    activeIndex >= 0 && visibleItems[activeIndex]
+      ? optionDomId(activeIndex)
+      : undefined
+
+  // WAI-ARIA combobox 1.2 keyboard model: the handler is attached to the search
+  // input (below) so options are navigable without moving DOM focus off the
+  // input. ArrowUp/Down + Home/End rove the highlight; Enter selects the active
+  // option. Shared with the four Dropdown listboxes via Field/Shell.
+  const handleListKeyDown = useArrowKeyNav({
+    count: visibleItems.length,
+    activeIndex,
+    onActiveIndexChange: setActiveIndex,
+    onActivate: index => {
+      const item = visibleItems[index]
+      if (item) handleItemSelect(item)
+    },
+  })
+
   const renderItem = (item: NavigationItem) => {
+    const flatIndex = indexOfId.get(item.id) ?? -1
     const isSelected = selectedItem?.id === item.id
+    const isActive = flatIndex === activeIndex
     const itemClassNames = [cssStyles.item, isSelected && cssStyles.selected]
       .filter(Boolean)
       .join(' ')
@@ -243,8 +288,16 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     return (
       <div
         key={item.id}
+        id={optionDomId(flatIndex)}
+        // Real listbox-option semantics: the row is now a role="option" with
+        // aria-selected, and data-active mirrors the Arrow-key highlight (also
+        // set on hover so pointer + keyboard share one highlighted row).
+        role="option"
+        aria-selected={isSelected}
+        {...(isActive && { 'data-active': 'true' })}
         className={itemClassNames}
         onClick={() => handleItemSelect(item)}
+        onMouseEnter={() => setActiveIndex(flatIndex)}
       >
         <div className={cssStyles.itemLabel}>{item.label}</div>
         {item.description && (
@@ -305,6 +358,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             aria-haspopup="listbox"
             aria-expanded={isOpen}
             aria-controls={listboxId}
+            aria-activedescendant={activeOptionId}
             aria-label={!label ? placeholder : undefined}
             aria-describedby={helperText ? helperId : undefined}
             data-action={isOpen ? 'close' : 'open'}
@@ -313,6 +367,22 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             value={searchTerm}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
+            // Arrow keys navigate the listbox options (WCAG 2.1.1). When closed,
+            // ArrowUp/Down opens the menu first (combobox 1.2); once open, the
+            // shared roving handler owns Up/Down/Home/End + Enter-to-select.
+            onKeyDown={event => {
+              if (
+                !isOpen &&
+                (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+              ) {
+                event.preventDefault()
+                setIsOpen(true)
+                setActiveTab('overview')
+                setActiveIndex(-1)
+                return
+              }
+              if (isOpen) handleListKeyDown(event)
+            }}
             placeholder={placeholder}
             className={cssStyles.input}
             disabled={styles?.disabled}
@@ -383,6 +453,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     e.stopPropagation()
                     e.preventDefault()
                     setActiveTab('overview')
+                    setActiveIndex(-1)
                   }}
                   type="button"
                   data-action="select-tab"
@@ -399,6 +470,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
                     e.stopPropagation()
                     e.preventDefault()
                     setActiveTab('history')
+                    setActiveIndex(-1)
                   }}
                   type="button"
                   data-action="select-tab"

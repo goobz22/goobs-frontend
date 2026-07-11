@@ -312,7 +312,8 @@
   --sh-item-hover-shadow: none;
 }
 
-.item:hover:not(.selected) {
+.item:hover:not(.selected),
+.item[data-active='true']:not(.selected) {
   background-color: var(--sh-item-hover-bg);
   box-shadow: var(--sh-item-hover-shadow);
 }

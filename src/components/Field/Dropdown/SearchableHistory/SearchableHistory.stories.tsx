@@ -271,3 +271,61 @@ export const ToggleButtonExposesExpandedState: Story = {
     expect(combobox).toHaveAttribute('aria-expanded', 'true')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Arrow-key navigation over the listbox options
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `missing-keyboard-arrow-nav` class (WCAG 2.1.1). The
+ * `role="listbox"` options used to be pointer-only `<div onClick>`s with no
+ * `role="option"` and no keyboard model — the combobox pattern requires the
+ * items be reachable with the Arrow keys, because the listbox role removes them
+ * from the Tab order. This play function proves the fix: focusing the combobox
+ * opens the (portalled) listbox; ArrowDown moves a roving highlight through the
+ * options (mirrored to `aria-activedescendant` on the input and `data-active`
+ * on the option); Enter selects the highlighted option and closes the listbox.
+ * The options render into a document.body portal, so they are queried there.
+ */
+export const ArrowKeysNavigateOptions: Story = {
+  name: 'A11y: arrow keys navigate listbox options',
+  args: {
+    label: 'Navigate',
+    placeholder: 'Search navigation...',
+    items: navigationItems,
+    name: 'navigation',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Focusing the combobox opens the listbox on the Overview tab.
+    await userEvent.click(combobox)
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    // Nothing is highlighted until the user arrows.
+    expect(combobox).not.toHaveAttribute('aria-activedescendant')
+
+    // The listbox + its role="option" rows are portalled into document.body.
+    const body = within(document.body)
+    const options = await body.findAllByRole('option')
+    expect(options.length).toBeGreaterThan(1)
+
+    // ArrowDown highlights the first option and points aria-activedescendant
+    // at it — the item is now reachable without a mouse.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[0]).toHaveAttribute('data-active', 'true')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[0]!.id)
+
+    // A second ArrowDown advances the roving highlight to the next option.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[1]).toHaveAttribute('data-active', 'true')
+    expect(options[0]).not.toHaveAttribute('data-active')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[1]!.id)
+
+    // Enter activates the highlighted option: the listbox closes (selection made).
+    await userEvent.keyboard('{Enter}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'false')
+  },
+}
