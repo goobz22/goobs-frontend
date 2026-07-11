@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import Slider from './index'
 
 // Wrapper component for state management. Slider is controlled — onChange
@@ -307,6 +308,13 @@ export const WithValueText: Story = {
  * is fully keyboard-operable out of the box — Arrow Left/Right/Up/Down adjust
  * by `step`, Home/End jump to min/max, PageUp/PageDown take larger steps.
  * (WCAG 2.1.1 Keyboard / 2.4.7 Focus Visible / 2.4.11 Focus Appearance.)
+ *
+ * The `play` fn moves real keyboard focus (Tab) onto the first (light) slider so
+ * the `:focus-visible` ring actually paints and Chromatic captures it in the
+ * baseline. Without this the ring never renders in the snapshot — deleting the
+ * `.input:focus-visible` rule would change no baseline and pass silently. The
+ * sacred slider's gold ring is snapshot-gated by `KeyboardFocusRingSacred`,
+ * since only one element can hold focus per snapshot.
  */
 export const KeyboardFocusRing: Story = {
   render: () => (
@@ -336,6 +344,54 @@ export const KeyboardFocusRing: Story = {
     </div>
   ),
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Both range inputs expose the implicit `slider` role.
+    const sliders = canvas.getAllByRole('slider')
+    expect(sliders).toHaveLength(2)
+    // Keyboard navigation (Tab), not a pointer click, is what activates
+    // `:focus-visible`. Tabbing from the body lands focus on the first (light)
+    // slider, driving its ring for the snapshot.
+    await userEvent.tab()
+    const light = canvas.getByRole('slider', { name: 'Light (Tab to focus)' })
+    await expect(light).toHaveFocus()
+    // The sacred slider is keyboard-reachable too (a native, enabled range
+    // input); its gold ring is gated by KeyboardFocusRingSacred below.
+    const sacred = canvas.getByRole('slider', { name: 'Sacred (Tab to focus)' })
+    await expect(sacred).toBeEnabled()
+  },
+}
+
+/**
+ * The sacred-theme focus ring in isolation. A single focusable sacred slider is
+ * tabbed to so its gold `:focus-visible` outline paints and is captured by
+ * Chromatic — this specifically gates the sacred value of the inherited
+ * `--field-border-focus` token (gold, not blue) that the `.input:focus-visible`
+ * rule resolves. Because only one element can hold focus per snapshot, the base
+ * `KeyboardFocusRing` story cannot also baseline this variant.
+ * (WCAG 2.4.7 Focus Visible / 2.4.11 Focus Appearance.)
+ */
+export const KeyboardFocusRingSacred: Story = {
+  render: () => (
+    <div style={{ background: '#0e0e0e', padding: '1.5rem', borderRadius: '8px' }}>
+      <SliderWithState
+        label="Sacred (Tab to focus)"
+        min={0}
+        max={100}
+        step={1}
+        initialValue={50}
+        helperText="Gold focus ring on the sacred canvas"
+        styles={{ theme: 'sacred' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.tab()
+    const sacred = canvas.getByRole('slider', { name: 'Sacred (Tab to focus)' })
+    await expect(sacred).toHaveFocus()
+  },
 }
 
 // --------------------------------------------------------------------------

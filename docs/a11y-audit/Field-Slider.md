@@ -134,7 +134,52 @@ Both landed in commit `ced6ed21`. `bun lint:file` clean on `index.tsx` and
   is rendered into the DOM attribute).
 - **`KeyboardFocusRing`** — renders the slider on light and sacred surfaces
   with instructions to Tab to it, documenting the new `:focus-visible` ring and
-  the native keyboard operability. Baseline for the focus-ring CSS.
+  the native keyboard operability. **Now carries a `play` fn** that moves real
+  keyboard focus (`userEvent.tab()`) onto the first (light) slider, so the
+  `:focus-visible` outline actually paints and is captured in the Chromatic
+  baseline — deleting the `.input:focus-visible` rule now changes the snapshot
+  (previously the story rendered unfocused and the rule was not baseline-guarded;
+  see review-finding fix below). Asserts `toHaveFocus()` on the light slider and
+  `toBeEnabled()` on the sacred one (keyboard-reachable). Matches the repo's
+  established Avatar/Checkbox/Breadcrumb `KeyboardFocusRing` `play`-tab convention.
+- **`KeyboardFocusRingSacred`** *(new)* — a single sacred-theme slider on the
+  dark canvas, tabbed to via `play` so its **gold** `:focus-visible` outline
+  paints in isolation and Chromatic gates the *sacred* value of the inherited
+  `--field-border-focus` token (gold, not blue). Only one element can hold focus
+  per snapshot, so the base story cannot also baseline this variant — mirrors the
+  Avatar `Focusable` / `FocusableSacred` split.
+
+## Adversarial-review findings (post-pass)
+
+### R1. `:focus-visible` ring not regression-exercised by a story — FIXED
+- **Severity:** minor · **WCAG:** 2.4.7 Focus Visible (AA) · **Pattern:**
+  `focus-ring-not-baseline-guarded`
+- **Where:** `src/components/Field/Slider/Slider.stories.tsx` (the
+  `KeyboardFocusRing` story rendered the slider in its default *unfocused* state,
+  with no keyboard-focus `play` fn).
+- **Root cause:** in this repo the story **+ Chromatic baseline is the only
+  regression test**, and `:focus-visible` only matches on keyboard focus. With no
+  `play` fn to Tab into the control, the snapshot was identical whether or not
+  `.input:focus-visible` existed — so the second new a11y state (the focus ring)
+  was undefended: deleting the CSS rule would have changed no baseline and passed
+  silently. (The aria-valuetext path was already truly exercised by
+  `WithValueText`, which renders the formatted string into the DOM attribute.)
+- **Fix:** added a `play` fn to `KeyboardFocusRing` (`userEvent.tab()` →
+  `expect(light).toHaveFocus()`) that drives real keyboard focus onto the light
+  slider so the ring paints in the baseline, plus a dedicated
+  `KeyboardFocusRingSacred` story that tabs to a lone sacred slider to gate the
+  gold token value in isolation (one element holds focus per snapshot). Uses the
+  repo's established `storybook/test` `userEvent`/`within`/`expect` convention
+  (identical to Avatar/Checkbox/Breadcrumb `KeyboardFocusRing`). No component or
+  CSS change — the CSS rule was correct; only its baseline guard was missing.
+- **Note (why no keyboard-operation assertions):** the `play` deliberately does
+  **not** assert value changes from `{Home}`/`{End}`/arrow keys. A native
+  `<input type="range">` moves its thumb only on **trusted** key events; the
+  synthetic events `userEvent.keyboard` dispatches do not trigger the browser's
+  default range behavior, so such assertions would be flaky/false. The keyboard
+  table is native-UA-guaranteed (documented above) and does not need — and cannot
+  soundly get — a synthetic-event regression test. The `play`'s sole job is to
+  establish the keyboard-focus modality so `:focus-visible` renders.
 
 ## Deferred (root cause outside my directory — Field/Shell, owned by a later serial pass)
 
