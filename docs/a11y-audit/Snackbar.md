@@ -47,6 +47,33 @@ positioning `<div>` (no competing role). Consumers: `DataGrid`, plus the public 
   The additive `data-paused` attribute exposes the pause state for tests/observability without
   altering semantics.
 
+### 2. Pause flags never reset across the open→close→open lifecycle — MODERATE — FIXED
+- **WCAG:** 2.2.1 Timing Adjustable (Level A) — regression introduced by fix #1.
+- **Pattern:** `stale-lifecycle-state`
+- **Where:** `src/components/Snackbar/index.tsx` — the fix #1 `isHovered` / `isFocusWithin` are
+  component state, and the parent almost always keeps the Snackbar MOUNTED and merely toggles
+  `open` (we `return null` when `!isOpen`, so React state PERSISTS across an open→closed→open
+  cycle for the same instance). The only resets were the DOM release handlers (`onMouseLeave` /
+  `onBlur`), which do NOT fire when the toast is dismissed WHILE paused:
+  - keyboard/AT path — Enter/Space on the focused Close button runs Alert's 200ms exit, then
+    `onClose` → parent sets `open=false` → the node unmounts while the button still holds focus;
+    a native blur on an element removed during React's own commit is not reliably delivered to
+    the delegated focus listener, so `handleBlur` never runs and `isFocusWithin` stays `true`;
+  - pointer path — clicking the inner Close X while still hovering unmounts the node under the
+    pointer, so no `mouseleave` fires and `isHovered` stays `true`.
+  Either way the pause flag is STUCK `true`. On the NEXT `open` for that instance the auto-hide
+  effect (`if (isOpen && !isPaused && autoHideDuration > 0)`) never schedules a timer, so the
+  reused toast never auto-dismisses — silently breaking the documented auto-hide contract on the
+  a11y-critical dismiss path.
+- **Failure scenario (pinned by story):** open a toast, hover it (`data-paused="true"`), dismiss
+  it via its own Close button while still hovered, then reopen the SAME instance — pre-fix the
+  reopened toast carries `data-paused="true"` and never auto-hides.
+- **Fix:** a dedicated `useEffect` keyed on `isOpen` clears `isHovered` and `isFocusWithin`
+  whenever the snackbar is closed (`if (!isOpen) { setIsHovered(false); setIsFocusWithin(false) }`).
+  Keying off `isOpen` (the render gate) rather than the `open` prop covers every close path
+  (parent toggle, internal auto-hide, Close button), so every reopen starts unpaused with a fresh
+  full-duration countdown. Public API unchanged (fully additive).
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 CLEAN. Grepped the directory for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
 `navigator.vibrate` — zero matches. The snackbar conveys status purely visually (severity
@@ -86,10 +113,15 @@ N/A in this directory — `Snackbar.module.css` contains only static fixed-posit
 handling).
 
 ## Fixes applied
-- `src/components/Snackbar/index.tsx` — pause the auto-hide countdown while the snackbar is
-  hovered or contains focus (WCAG 2.2.1); resume with a fresh full-duration timer on release;
+- `src/components/Snackbar/index.tsx` — (fix #1) pause the auto-hide countdown while the snackbar
+  is hovered or contains focus (WCAG 2.2.1); resume with a fresh full-duration timer on release;
   additive `data-paused` observability attribute. Public API unchanged (fully additive; no prop
   renamed/removed/retyped). No rendered element type changed.
+- `src/components/Snackbar/index.tsx` — (fix #2, review) reset the `isHovered` / `isFocusWithin`
+  pause flags whenever the snackbar closes (dedicated `useEffect` keyed on `isOpen`), so a REUSED
+  Snackbar instance (parent keeps it mounted, toggles `open`) that was dismissed while paused
+  cannot carry a stuck pause into its next open and lose auto-hide. Fully additive; no markup or
+  API change.
 
 ## Stories updated
 `src/components/Snackbar/Snackbar.stories.tsx`:
@@ -99,12 +131,21 @@ handling).
 - **`Behavior/Pause On Focus (WCAG 2.2.1)`** — focuses the Close button, asserts the countdown
   pauses (`data-paused="true"`) and the toast stays visible past `autoHideDuration`, then blurs
   and asserts the countdown resumes. Exercises the keyboard/AT path.
+- **`Behavior/Pause Flag Resets On Reopen (WCAG 2.2.1)`** (NEW, review fix #2) — opens a REUSED
+  Snackbar, hovers it to pause, dismisses it via its own Close button while still hovered (node
+  unmounts under the pointer → no `mouseleave`), reopens the same instance, and asserts the
+  reopened toast is NOT paused and auto-dismisses again. Fails against the pre-fix stuck-flag code
+  (the reopened toast keeps `data-paused="true"` and never auto-hides).
 - Added `waitFor` to the `storybook/test` imports.
 
 ## Deferred
-None. The remaining live-region / name / colour / icon semantics are all correctly implemented in
-the shared `src/components/Alert` component (outside this directory) and are covered by
-`docs/a11y-audit/Alert.md`. I evaluated whether the inner Alert's use of `role="alert"` (assertive)
-for non-error severities (success/info) is over-assertive for a toast; the Alert audit documents
-this as a deliberate, convention-backed choice for all severities, so it is NOT recorded here as a
-defect.
+- **Alert `role="alert"` (assertive) for non-urgent severities** — `src/components/Alert/index.tsx:466`
+  applies `role="alert"` (implicit `aria-live="assertive"`) to ALL severities, so a success/info
+  toast interrupts whatever the screen reader is currently announcing; `role="status"` (polite) is
+  the conventional choice for non-error/warning toasts. This is owned by the shared **Alert**
+  component (outside this directory's editable scope) — recorded here for completeness and flagged
+  for the Alert audit (`docs/a11y-audit/Alert.md`), where it is currently documented as a
+  deliberate convention-backed choice. Suggested change (Alert-side): derive
+  `role = severity === 'error' || severity === 'warning' ? 'alert' : 'status'` and set the matching
+  `aria-live` (`assertive` vs `polite`) on the container `<div>` at `src/components/Alert/index.tsx`
+  (the `role="alert"` on line 466 and the fallback on line 450). Not a Snackbar-side blocker.
