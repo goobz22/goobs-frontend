@@ -441,3 +441,68 @@
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
   }
 }
+
+/* Non-vestibular activity cue used to replace the horizontal indeterminate
+   SWEEP when the user prefers reduced motion — a gentle opacity fade conveys
+   "still loading" without any translation/movement. */
+@keyframes progressReducedMotionPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION (WCAG 2.3.3 Animation from Interactions / 2.2.2 Pause,
+   Stop, Hide) — every animation above auto-starts and loops INFINITELY
+   (the indeterminate sweep, the stripe scroll, the pulse rings) and the
+   determinate fill animates its width via a transition. Users who set
+   "reduce motion" at the OS level get the motion neutralized here.
+
+   The determinate width transition is dropped (the fill jumps to its value).
+   The determinate decorative loops (stripes / pulse) are turned off entirely.
+   The indeterminate bar KEEPS an activity indicator, but the vestibular
+   horizontal sweep + stripe scroll are replaced by a static bar that gently
+   fades (opacity), so a loading state is still perceivable without motion.
+
+   Selectors mirror the animated rules above at equal-or-higher specificity and
+   come later in source order, so they win without !important.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /* Neutralize the fill width / position transitions. */
+  .bar,
+  .bar[data-theme='sacred'] {
+    transition: none;
+  }
+
+  /* Determinate decorative loops (stripe scroll, pulse rings) → no motion. */
+  .bar[data-striped='true'][data-animated='true']:not(
+      [data-variant='indeterminate']
+    ),
+  .bar[data-striped='true'][data-animated='true'][data-theme='sacred']:not(
+      [data-variant='indeterminate']
+    ),
+  .bar[data-pulse='true']:not([data-variant='indeterminate']):not(
+      [data-theme='sacred']
+    ),
+  .bar[data-pulse='true'][data-striped='true'][data-animated='true']:not(
+      [data-variant='indeterminate']
+    ):not([data-theme='sacred']) {
+    animation: none;
+  }
+
+  /* Indeterminate (all themes, striped or not): drop the sweep + stripe scroll,
+     keep a motion-free opacity pulse so the loading state stays perceivable. */
+  .bar[data-variant='indeterminate'],
+  .bar[data-variant='indeterminate'][data-theme='dark'],
+  .bar[data-variant='indeterminate'][data-theme='sacred'],
+  .bar[data-striped='true'][data-variant='indeterminate'],
+  .bar[data-striped='true'][data-variant='indeterminate'][data-theme='dark'],
+  .bar[data-striped='true'][data-variant='indeterminate'][data-theme='sacred'] {
+    transform: none;
+    animation: progressReducedMotionPulse 2s ease-in-out infinite;
+  }
+}

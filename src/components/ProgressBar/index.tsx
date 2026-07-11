@@ -325,11 +325,18 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         />
       </div>
       {showLabel && (
+        // aria-hidden: the visible label only duplicates what the progressbar
+        // already exposes via aria-valuetext (the same percentage / custom label
+        // / "Loading"). Hiding it from the a11y tree prevents a screen reader
+        // announcing the value twice (once as the progressbar's value, once as a
+        // standalone text node) while keeping the on-screen label for sighted
+        // users. data-testid is preserved for the machine-test selector contract.
         <div
           className={cssStyles.label}
           data-theme={theme}
           style={labelStyle}
           data-testid="progress-bar-label"
+          aria-hidden="true"
         >
           {getLabel()}
         </div>

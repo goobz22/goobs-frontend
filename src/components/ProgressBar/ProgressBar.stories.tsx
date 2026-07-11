@@ -587,6 +587,74 @@ export const FileUploadSimulation: Story = {
   },
 }
 
+/**
+ * Accessibility showcase — anchors the a11y contract as a regression test.
+ *
+ * Determinate exposes role="progressbar" with aria-valuemin/max/now and an
+ * aria-valuetext ("65 percent"); indeterminate OMITS aria-valuenow/min/max
+ * (the correct ARIA signal for an unknown value) and sets
+ * aria-valuetext="Loading". The visible label is aria-hidden because it only
+ * duplicates aria-valuetext (prevents a double screen-reader announcement).
+ *
+ * Every looping/moving effect here (the indeterminate sweep, stripe scroll,
+ * and pulse rings) is neutralized under `@media (prefers-reduced-motion:
+ * reduce)` — enable "Reduce motion" in your OS to see the motion-free
+ * rendering; the indeterminate bar keeps a gentle opacity pulse so a loading
+ * state is still conveyed without vestibular motion.
+ */
+export const AccessibilityShowcase: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        width: '400px',
+      }}
+    >
+      <div>
+        <h4>Determinate — value announced via aria-valuenow + aria-valuetext</h4>
+        <ProgressBar
+          value={65}
+          variant="determinate"
+          showLabel
+          aria-label="Upload progress"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div>
+        <h4>Indeterminate — aria-valuenow omitted, aria-valuetext is Loading</h4>
+        <ProgressBar
+          variant="indeterminate"
+          showLabel
+          aria-label="Loading data"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+      <div>
+        <h4>Pulse + striped — motion neutralized under prefers-reduced-motion</h4>
+        <ProgressBar
+          value={60}
+          variant="determinate"
+          showLabel
+          styles={{ theme: 'light', striped: true, animated: true, pulse: true }}
+        />
+      </div>
+    </div>
+  ),
+  // theme:'light' content with no wrapper surface — pin the light canvas so the
+  // h4s aren't judged against the sacred #0e0e0e default (h4 #000 on #fff = 21.0).
+  globals: { backgrounds: { value: 'light' } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Screen-reader ARIA contract and reduced-motion behavior of the ProgressBar: correct progressbar roles/values for determinate vs indeterminate, an aria-hidden visible label, and prefers-reduced-motion neutralizing the looping animations.',
+      },
+    },
+  },
+}
+
 export const ThemeComparison: Story = {
   render: () => (
     <div
