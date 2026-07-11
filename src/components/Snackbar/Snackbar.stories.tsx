@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import Snackbar from './index'
 
 const meta: Meta<typeof Snackbar> = {
@@ -356,6 +356,92 @@ export const NoAutoHide: Story = {
         'This snackbar will not auto-hide - you must close it manually'
       )
     ).toBeVisible()
+  },
+}
+
+/**
+ * WCAG 2.2.1 (Timing Adjustable) — hovering the snackbar PAUSES its auto-hide
+ * countdown so a user reading the message is never rushed. The play function
+ * pins the behavior: with a short auto-hide, the snackbar is hovered before the
+ * timer elapses, stays `data-paused="true"` and VISIBLE well past
+ * `autoHideDuration`, then dismisses only after the pointer leaves. Against the
+ * old always-run timer this assertion fails (the toast vanishes while hovered).
+ */
+export const PauseOnHover: Story = {
+  name: 'Behavior/Pause On Hover (WCAG 2.2.1)',
+  args: {
+    open: true,
+    message: 'Hover me — I will wait until you move away.',
+    severity: 'info',
+    autoHideDuration: 1200,
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvasElement.querySelector(
+      '[data-component="Snackbar"]'
+    ) as HTMLElement
+    await expect(root).toBeInTheDocument()
+
+    // Hovering pauses the auto-hide countdown.
+    await userEvent.hover(root)
+    await waitFor(() => expect(root).toHaveAttribute('data-paused', 'true'))
+
+    // Well past the auto-hide window it is STILL visible, because it is paused.
+    await new Promise(resolve => setTimeout(resolve, 1600))
+    await expect(
+      canvas.getByText('Hover me — I will wait until you move away.')
+    ).toBeVisible()
+
+    // Leaving resumes a fresh full-duration countdown; the snackbar then closes.
+    await userEvent.unhover(root)
+    await waitFor(() => expect(root).not.toHaveAttribute('data-paused'))
+    await waitFor(
+      () =>
+        expect(
+          canvas.queryByText('Hover me — I will wait until you move away.')
+        ).not.toBeInTheDocument(),
+      { timeout: 2500 }
+    )
+  },
+}
+
+/**
+ * WCAG 2.2.1 keyboard/AT parity — when focus is WITHIN the snackbar (the user
+ * has tabbed to the Close button) the auto-hide countdown pauses, so the
+ * dismiss control can never disappear from under the keyboard. Blurring away
+ * resumes the countdown.
+ */
+export const PauseOnFocus: Story = {
+  name: 'Behavior/Pause On Focus (WCAG 2.2.1)',
+  args: {
+    open: true,
+    message: 'Focus the close button and the timer holds.',
+    severity: 'warning',
+    autoHideDuration: 1200,
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvasElement.querySelector(
+      '[data-component="Snackbar"]'
+    ) as HTMLElement
+    const closeButton = canvas.getByRole('button', { name: 'Close' })
+
+    // Moving focus into the snackbar pauses the countdown.
+    closeButton.focus()
+    await expect(closeButton).toHaveFocus()
+    await waitFor(() => expect(root).toHaveAttribute('data-paused', 'true'))
+
+    // Still visible past the auto-hide window while focused.
+    await new Promise(resolve => setTimeout(resolve, 1600))
+    await expect(
+      canvas.getByText('Focus the close button and the timer holds.')
+    ).toBeVisible()
+
+    // Focus leaving the snackbar resumes the countdown.
+    closeButton.blur()
+    await waitFor(() => expect(root).not.toHaveAttribute('data-paused'))
   },
 }
 

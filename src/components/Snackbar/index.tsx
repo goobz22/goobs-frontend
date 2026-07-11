@@ -37,6 +37,20 @@ const Snackbar: React.FC<SnackbarProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(open)
 
+  // A11y (WCAG 2.2.1 Timing Adjustable) — the auto-hide countdown is a
+  // content-imposed time limit on reading the message, so it must be
+  // pausable/extendable by the user. We track hover and focus-within
+  // independently and pause the timer whenever EITHER is active, so:
+  //   • a pointer user hovering to read the toast, and
+  //   • a keyboard/AT user who has tabbed to the Close button
+  // never have it yanked away mid-interaction. When both release, the effect
+  // below reschedules a FRESH full-duration timer, so the user always gets the
+  // complete reading window after they stop interacting. (Turning auto-hide off
+  // entirely remains available to the consumer via `autoHideDuration={0}`.)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFocusWithin, setIsFocusWithin] = useState(false)
+  const isPaused = isHovered || isFocusWithin
+
   useEffect(() => {
     setIsOpen(open)
   }, [open])
@@ -70,8 +84,13 @@ const Snackbar: React.FC<SnackbarProps> = ({
   // "never auto-hide": no timer is scheduled, so the snackbar stays open
   // until dismissed manually. (Previously the timer was ALWAYS scheduled, so
   // `autoHideDuration={0}` hid the snackbar after 0ms instead of disabling.)
+  //
+  // The timer is ALSO suppressed while `isPaused` (hover or focus-within, see
+  // above) — WCAG 2.2.1. Because `isPaused` is an effect dependency, releasing
+  // the interaction re-runs this effect and schedules a fresh, full-duration
+  // countdown rather than resuming a nearly-elapsed one.
   useEffect(() => {
-    if (isOpen && autoHideDuration > 0) {
+    if (isOpen && !isPaused && autoHideDuration > 0) {
       const timer = setTimeout(() => {
         setIsOpen(false)
         onClose()
@@ -80,7 +99,15 @@ const Snackbar: React.FC<SnackbarProps> = ({
       return () => clearTimeout(timer)
     }
     return undefined
-  }, [isOpen, autoHideDuration, onClose])
+  }, [isOpen, isPaused, autoHideDuration, onClose])
+
+  // Focus leaving the snackbar entirely (relatedTarget is outside the root)
+  // releases the focus pause; focus moving BETWEEN descendants keeps it paused.
+  const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsFocusWithin(false)
+    }
+  }
 
   if (!isOpen) {
     return null
@@ -91,6 +118,15 @@ const Snackbar: React.FC<SnackbarProps> = ({
       className={cssStyles.root}
       data-component="Snackbar"
       data-state={isOpen ? 'open' : 'closed'}
+      // `data-paused` exposes the WCAG 2.2.1 hover/focus pause purely as an
+      // additive test/observability hook (absent when running). It does not
+      // alter semantics — the live-region announcement is owned by the inner
+      // Alert's role="alert".
+      data-paused={isPaused || undefined}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocusWithin(true)}
+      onBlur={handleBlur}
     >
       <Alert
         message={message}
