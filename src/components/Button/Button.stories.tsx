@@ -154,13 +154,22 @@ export const WithIconAbove: Story = {
 }
 
 /**
- * A button that only contains an icon.
+ * A button that only contains an icon. An icon-only button has no text to name
+ * it, so it MUST carry an `aria-label` (passed through to the native
+ * `<button>`) — otherwise assistive tech announces an anonymous "button"
+ * (WCAG 4.1.2). The play function pins that the accessible name resolves.
  */
 export const IconOnly: Story = {
   name: 'Icon/Only',
   args: {
     icon: <SendIcon styles={{ theme: 'sacred' }} />,
     styles: { theme: 'light' },
+    'aria-label': 'Send',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Resolves ONLY if the aria-label supplies the accessible name.
+    await expect(canvas.getByRole('button', { name: 'Send' })).toBeVisible()
   },
 }
 
@@ -410,17 +419,21 @@ export const InteractiveGroupDemo: Story = {
             exclusive
             onChange={(_, newValue) => newValue && setValue(newValue)}
             styles={{ theme }}
+            aria-label="Action"
           >
             <Button
               value="send"
+              aria-label="Send"
               icon={<SendIcon styles={{ theme: 'sacred' }} />}
             />
             <Button
               value="add"
+              aria-label="Add"
               icon={<AddIcon styles={{ theme: 'sacred' }} />}
             />
             <Button
               value="download"
+              aria-label="Download"
               icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
             />
           </ButtonGroup>
@@ -428,5 +441,109 @@ export const InteractiveGroupDemo: Story = {
       )
     }
     return <Component />
+  },
+}
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY REGRESSION STORIES (2026-07-11 a11y audit)
+// --------------------------------------------------------------------------
+
+/**
+ * Selected state is exposed as a real toggle-button state, not colour alone:
+ * a `selected` Button emits `aria-pressed` so assistive tech announces the
+ * pressed state (WCAG 1.4.1 / 4.1.2). Also captures the focus ring for
+ * Chromatic — the play function moves keyboard focus onto the button.
+ */
+export const SelectedTogglePressed: Story = {
+  name: 'A11y/Selected → aria-pressed',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Button text="Unselected" styles={{ theme: 'light' }} selected={false} />
+      <Button text="Selected" styles={{ theme: 'light' }} selected />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const selected = canvas.getByRole('button', { name: 'Selected' })
+    const unselected = canvas.getByRole('button', { name: 'Unselected' })
+    await expect(selected).toHaveAttribute('aria-pressed', 'true')
+    await expect(unselected).toHaveAttribute('aria-pressed', 'false')
+    // Keyboard focus lands and the button is focusable (drives :focus-visible,
+    // which the Chromatic snapshot captures as the visible ring).
+    await userEvent.tab()
+    await expect(unselected).toHaveFocus()
+  },
+}
+
+/**
+ * A plain Button that is NOT a toggle must not leak toggle semantics: with no
+ * `selected` prop it emits no `aria-pressed`, so assistive tech announces a
+ * normal command button (WCAG 4.1.2).
+ */
+export const PlainButtonHasNoPressedState: Story = {
+  name: 'A11y/Plain button (no aria-pressed)',
+  args: { text: 'Just a button', styles: { theme: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Just a button' })
+    await expect(button).not.toHaveAttribute('aria-pressed')
+  },
+}
+
+/**
+ * ButtonGroup is a labelled group of toggle buttons: the container exposes
+ * `role="group"` + its `aria-label`, and the child whose `value` matches is
+ * `aria-pressed="true"` while the others are `false` (WCAG 1.3.1 / 4.1.2).
+ * The decorative icons inside labelled buttons are hidden from AT, so the
+ * accessible name stays clean.
+ */
+export const GroupToggleSemantics: Story = {
+  name: 'A11y/Group role + pressed',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => {
+    const Component = () => {
+      const [value, setValue] = useState('send')
+      return (
+        <ButtonGroup
+          value={value}
+          exclusive
+          onChange={(_, newValue) => newValue && setValue(newValue)}
+          styles={{ theme: 'light' }}
+          aria-label="View mode"
+        >
+          <Button
+            value="send"
+            text="Send"
+            icon={<SendIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="add"
+            text="Add"
+            icon={<AddIcon styles={{ theme: 'sacred' }} />}
+          />
+          <Button
+            value="download"
+            text="Download"
+            icon={<DownloadIcon styles={{ theme: 'sacred' }} />}
+          />
+        </ButtonGroup>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The container is an accessibly-named group.
+    const group = canvas.getByRole('group', { name: 'View mode' })
+    await expect(group).toBeInTheDocument()
+    // Selected child is pressed; a sibling is not.
+    const send = canvas.getByRole('button', { name: 'Send' })
+    const add = canvas.getByRole('button', { name: 'Add' })
+    await expect(send).toHaveAttribute('aria-pressed', 'true')
+    await expect(add).toHaveAttribute('aria-pressed', 'false')
+    // Selecting another child moves the pressed state.
+    await userEvent.click(add)
+    await expect(add).toHaveAttribute('aria-pressed', 'true')
+    await expect(send).toHaveAttribute('aria-pressed', 'false')
   },
 }

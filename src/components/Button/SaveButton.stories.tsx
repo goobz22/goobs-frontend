@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import { z } from 'zod'
 import SaveButton from './SaveButton'
 import Form from '../Form'
@@ -40,10 +41,24 @@ export const InvalidAndIdle: Story = {
   args: { valid: false, pending: false, subject: 'contract' },
 }
 
-/** Saving: spinner + "Saving…" label, disabled to block double-submit. */
+/**
+ * Saving: spinner + "Saving…" label, disabled to block double-submit. The busy
+ * state is exposed programmatically — `aria-busy="true"` on the button and a
+ * polite live region carrying "Saving…" — so assistive tech announces the
+ * in-flight save even though the control is disabled (WCAG 4.1.3). The spinner
+ * is `aria-hidden`, so it never leaks into the accessible name.
+ */
 export const Pending: Story = {
   name: 'Pending (spinner)',
   args: { valid: true, pending: true, subject: 'contract' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: /Saving/ })
+    await expect(button).toBeDisabled()
+    await expect(button).toHaveAttribute('aria-busy', 'true')
+    // The polite live region carries the busy announcement.
+    await expect(canvas.getByRole('status')).toHaveTextContent(/Saving/)
+  },
 }
 
 /**
