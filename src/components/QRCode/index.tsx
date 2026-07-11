@@ -89,6 +89,15 @@ export interface QRCodeProps {
   fgColor?: string
   /** Heading rendered above the frame; also names the canvas aria-label ('MFA Setup' fallback). */
   title?: string
+  /**
+   * Heading level (`h1`–`h6`) rendered for the `title` heading and the
+   * success-state message, so the consumer can slot this panel correctly into
+   * the surrounding document outline and avoid a skipped-heading-level
+   * violation (WCAG 1.3.1 / 2.4.6). Matches the library-wide `headingLevel`
+   * convention (Accordion, EmptyState, ConfirmationCodeInput). Defaults to
+   * `5`, preserving the historical `<h5>`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Renders a full-width "Verify Code" button under the QR. Default false. */
   showVerifyButton?: boolean
   /** Verify-button click handler; a returned promise's rejection is caught and logged. */
@@ -120,6 +129,12 @@ export interface QRCodeProps {
   confirmationCodeProps?: Partial<ConfirmationCodeInputsProps>
   /** Theme plus frame/title/state styling overrides. See QRCodeStyles. */
   styles?: QRCodeStyles
+  /**
+   * `data-testid` for the QR canvas (default `'mfa-qrcode'`). Override it to
+   * disambiguate multiple QR codes on one page so their test ids don't collide.
+   * Matches the additive `data-testid` prop convention (see Markdown).
+   */
+  'data-testid'?: string
 }
 
 /**
@@ -140,6 +155,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     bgColor = '#FFFFFF',
     fgColor = '#000000',
     title,
+    headingLevel = 5,
     showVerifyButton = false,
     onVerify,
     onDisableVerification,
@@ -151,6 +167,7 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     confirmationCode = '',
     onConfirmationCodeChange,
     confirmationCodeProps = {},
+    'data-testid': dataTestId = 'mfa-qrcode',
     styles,
   }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -159,6 +176,32 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
     // The theme variant drives the [data-theme] attribute on each themed
     // element. Default 'light' preserves the prior runtime behaviour.
     const theme = styles?.theme || 'light'
+
+    // Consumer-controlled heading tag for the title + success message. Renders
+    // a real <h1>–<h6> at the caller's outline level (default h5, preserving
+    // prior DOM) rather than a fixed <h5> that could skip levels (WCAG 1.3.1 /
+    // 2.4.6). Capitalised local so JSX treats it as an element type; the
+    // `.title` / `.successMessage` CSS keys off className + data-theme, not the
+    // tag, so visuals are unchanged.
+    const HeadingTag = `h${headingLevel}` as ElementType
+
+    // The success pane replaces the QR panel with no focus move, so its arrival
+    // is a status message that must be announced (WCAG 4.1.3). A persistent,
+    // always-mounted role="status" region (below) announces the message as a
+    // CONTENT MUTATION — the reliable pattern (a region created together with
+    // its content is frequently missed by NVDA/JAWS), mirroring
+    // ConfirmationCodeInput / SaveButton. Derived from the previous render via
+    // the adjust-state-during-render pattern (no effect). Gated on qrValue too:
+    // a missing value shows the error branch, never the success pane.
+    const inSuccessView = Boolean(qrValue) && showSuccessState
+    const [successAnnouncement, setSuccessAnnouncement] = useState(
+      inSuccessView ? successMessage : ''
+    )
+    const [prevInSuccessView, setPrevInSuccessView] = useState(inSuccessView)
+    if (prevInSuccessView !== inSuccessView) {
+      setPrevInSuccessView(inSuccessView)
+      setSuccessAnnouncement(inSuccessView ? successMessage : '')
+    }
 
     // Runtime-measured responsive size — stays in JS, surfaced to CSS as the
     // --qr-size custom property on the QR container. styles.size overrides
@@ -258,8 +301,12 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
       }
     }, [qrValue, responsiveSize, bgColor, fgColor, level, theme])
 
+    // Branch content is computed into a local so the persistent live region
+    // (below) stays mounted across ALL states — that is what makes the success
+    // announcement reliable (WCAG 4.1.3).
+    let content: React.ReactNode
     if (!qrValue) {
-      return (
+      content = (
         <div
           className={cssStyles.errorContainer}
           role="alert"
@@ -274,24 +321,35 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
           </span>
         </div>
       )
-    }
-
-    if (showSuccessState) {
-      return (
+    } else if (showSuccessState) {
+      content = (
         <div
           className={cssStyles.successContainer}
           data-component="QRCode"
           data-theme={theme}
         >
-          {theme === 'sacred' && <span className={cssStyles.glyph}>𓊹</span>}
-          <CheckCircle style={successIconStyle} />
-          <h5
+          {/* Decorative Egyptian glyph — hidden from assistive tech so it is
+              not read as a stray character (WCAG 1.1.1). */}
+          {theme === 'sacred' && (
+            <span className={cssStyles.glyph} aria-hidden="true">
+              𓊹
+            </span>
+          )}
+          {/* The success heading already conveys the state, so the check icon
+              is decorative and hidden from AT (WCAG 1.1.1). goobs icons default
+              to aria-hidden when unnamed, but it is set explicitly here. */}
+          <CheckCircle
+            aria-hidden="true"
+            focusable="false"
+            style={successIconStyle}
+          />
+          <HeadingTag
             className={cssStyles.successMessage}
             data-theme={theme}
             style={successMessageStyle}
           >
             {successMessage}
-          </h5>
+          </HeadingTag>
           <div className={cssStyles.buttonContainer} style={{ width: '100%' }}>
             <CustomButton
               text="Disable Verification"
@@ -311,64 +369,86 @@ const QRCodeComponent: FC<QRCodeProps> = React.memo(
           </div>
         </div>
       )
+    } else {
+      content = (
+        <>
+          {title && (
+            <HeadingTag
+              className={cssStyles.title}
+              data-theme={theme}
+              style={titleStyle}
+            >
+              {title}
+            </HeadingTag>
+          )}
+          <div
+            className={cssStyles.qrCodeContainer}
+            data-component="QRCode"
+            data-theme={theme}
+            style={qrContainerStyle}
+          >
+            {/* role="img" makes the aria-label the authoritative text
+                alternative for the canvas bitmap (WCAG 1.1.1 / 4.1.2); some
+                screen readers otherwise ignore an aria-label on a bare
+                <canvas>. */}
+            <canvas
+              ref={canvasRef}
+              className={cssStyles.canvas}
+              role="img"
+              aria-label={`QR Code for ${title || 'MFA Setup'}`}
+              data-testid={dataTestId}
+            />
+          </div>
+          {showConfirmationInput && (
+            <div className={cssStyles.confirmationContainer}>
+              <ConfirmationCodeInputs
+                isValid={false}
+                codeLength={6}
+                value={confirmationCode}
+                onChange={val => onConfirmationCodeChange?.(val)}
+                showActionButtons={false}
+                onDisableVerification={() => {}}
+                {...confirmationCodeProps}
+              />
+            </div>
+          )}
+          {showVerifyButton && (
+            <div className={cssStyles.buttonContainer}>
+              <CustomButton
+                text="Verify Code"
+                styles={{
+                  theme: styles?.theme || 'light',
+                  width: '100%',
+                  minHeight: '40px',
+                }}
+                {...verifyButtonProps}
+                onClick={() => {
+                  const result = onVerify?.()
+                  if (result instanceof Promise) {
+                    result.catch(console.error)
+                  }
+                }}
+                disabled={
+                  verifyButtonProps?.disabled ||
+                  (showConfirmationInput && confirmationCode.length < 6)
+                }
+              />
+            </div>
+          )}
+        </>
+      )
     }
 
     return (
       <>
-        {title && (
-          <h5 className={cssStyles.title} data-theme={theme} style={titleStyle}>
-            {title}
-          </h5>
-        )}
-        <div
-          className={cssStyles.qrCodeContainer}
-          data-component="QRCode"
-          data-theme={theme}
-          style={qrContainerStyle}
-        >
-          <canvas
-            ref={canvasRef}
-            className={cssStyles.canvas}
-            aria-label={`QR Code for ${title || 'MFA Setup'}`}
-            data-testid="mfa-qrcode"
-          />
+        {/* Persistent, always-mounted polite live region. It is empty (silent)
+            in the QR and error states; when the success pane arrives it is
+            populated with the success message (via successAnnouncement) so the
+            confirmation is announced without a focus move (WCAG 4.1.3). */}
+        <div className={cssStyles.srOnly} role="status" aria-live="polite">
+          {successAnnouncement}
         </div>
-        {showConfirmationInput && (
-          <div className={cssStyles.confirmationContainer}>
-            <ConfirmationCodeInputs
-              isValid={false}
-              codeLength={6}
-              value={confirmationCode}
-              onChange={val => onConfirmationCodeChange?.(val)}
-              showActionButtons={false}
-              onDisableVerification={() => {}}
-              {...confirmationCodeProps}
-            />
-          </div>
-        )}
-        {showVerifyButton && (
-          <div className={cssStyles.buttonContainer}>
-            <CustomButton
-              text="Verify Code"
-              styles={{
-                theme: styles?.theme || 'light',
-                width: '100%',
-                minHeight: '40px',
-              }}
-              {...verifyButtonProps}
-              onClick={() => {
-                const result = onVerify?.()
-                if (result instanceof Promise) {
-                  result.catch(console.error)
-                }
-              }}
-              disabled={
-                verifyButtonProps?.disabled ||
-                (showConfirmationInput && confirmationCode.length < 6)
-              }
-            />
-          </div>
-        )}
+        {content}
       </>
     )
   }

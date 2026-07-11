@@ -217,6 +217,26 @@
 }
 
 /* --------------------------------------------------------------------------
+   VISUALLY-HIDDEN (screen-reader-only) text — the standard clip recipe
+   (matches ConfirmationCodeInput / Button `.srOnly`). Hosts the persistent
+   role="status" success announcer so its CONTENT MUTATION is announced by
+   assistive tech (WCAG 4.1.3) with no visual footprint.
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  /* Modern sr-only clip; keeps the box in the accessibility tree so the
+     live-region text is still announced (the legacy clip: rect() is deprecated). */
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
    Mobile optimizations (preserved from the original module)
    -------------------------------------------------------------------------- */
 @media (width <= 768px) {
