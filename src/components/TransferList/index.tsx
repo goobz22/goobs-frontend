@@ -307,6 +307,14 @@ const TransferList: React.FC<TransferListProps> = ({
    * selection is conveyed programmatically, never by colour alone (WCAG 1.4.1).
    * The list is named by its column heading (`labelledBy`) or, in the dropdown
    * variant that has no heading, by `ariaLabel`.
+   *
+   * `role="list"`/`role="listitem"` are set EXPLICITLY even though a `<ul>`/`<li>`
+   * carry them implicitly: WebKit/Safari strips the implicit list & listitem
+   * roles from any list whose `list-style` computes to `none` (which
+   * `.listInner` sets), so without the explicit roles VoiceOver on Safari would
+   * NOT announce "list, N items / item X of N" — silently defeating the list
+   * semantics on a primary screen-reader combo. The explicit roles are
+   * redundant-but-harmless everywhere else.
    */
   const renderList = (
     items: readonly string[],
@@ -317,6 +325,7 @@ const TransferList: React.FC<TransferListProps> = ({
     <div className={cssStyles.list}>
       <ul
         className={cssStyles.listInner}
+        role="list"
         {...(labelledBy ? { 'aria-labelledby': labelledBy } : {})}
         {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
       >
@@ -333,8 +342,24 @@ const TransferList: React.FC<TransferListProps> = ({
             <li
               key={value}
               className={cssStyles.listItem}
+              role="listitem"
               data-action="toggle"
               data-checked={isChecked ? 'true' : undefined}
+              // The row is a genuine click target — clicking anywhere on it
+              // toggles this item's checkbox, which makes the `cursor: pointer`
+              // + hover affordance the CSS paints TRUTHFUL (not a mismatch) and
+              // keeps a pointer/Playwright click on the row — or on the
+              // `[data-action="toggle"]` selector — actually toggling selection.
+              // The guard fires this handler ONLY for clicks that land on the
+              // row's own padding / inter-control gaps (`event.target` is the
+              // <li> itself); clicks on the checkbox or its <label> are handled
+              // natively, so a row is never toggled twice. Keyboard/AT users
+              // operate the native checkbox directly (Tab + Space) — this is a
+              // pointer-only convenience layered on the fully-accessible
+              // control, so the non-focusable <li> needs no key handler.
+              onClick={event => {
+                if (event.target === event.currentTarget) handleToggle(value)()
+              }}
             >
               <span className={cssStyles.checkboxContainer}>
                 {/* The native checkbox is the real, focusable control: keyboard
@@ -417,8 +442,14 @@ const TransferList: React.FC<TransferListProps> = ({
       data-field-name={dataFieldName ?? name}
       data-filled={hasValue ? 'true' : undefined}
       // Group the two lists + transfer controls so a validation error can be
-      // programmatically associated with the whole composite field.
+      // programmatically associated with the whole composite field. A group
+      // MUST carry an accessible name or assistive tech announces a bare,
+      // context-free "group"; name it from the two column titles (which also
+      // adapts to any consumer-supplied `leftTitle`/`rightTitle`) so the whole
+      // composite is announced with purpose. `aria-describedby` (added below on
+      // error) is a description, not a name — it does not substitute for this.
       role="group"
+      aria-label={`Transfer items between ${leftTitle} and ${rightTitle}`}
       {...(engineError && {
         'data-error': 'true',
         'aria-invalid': true,
