@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the CodeCopy component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, within } from 'storybook/test'
+import { expect, within, waitFor } from 'storybook/test'
 import CodeCopy from './index'
 
 const meta: Meta<typeof CodeCopy> = {
@@ -76,6 +76,11 @@ const pythonCode = `def fibonacci(n):
 # Generate first 10 fibonacci numbers
 for i in range(10):
     print(f"F({i}) = {fibonacci(i)}")`
+
+// Deliberately over-wide lines so the <pre> becomes a horizontal-scroll
+// container (overflow:auto) — exercises the keyboard-focusable scroll region.
+const wideCode = `const config = { alpha: 1, beta: 2, gamma: 3, delta: 4, epsilon: 5, zeta: 6, eta: 7, theta: 8, iota: 9, kappa: 10, lambda: 11, mu: 12, nu: 13 };
+export const veryLongFunctionNameThatForcesHorizontalOverflow = (firstArgument: string, secondArgument: number, thirdArgument: boolean, fourthArgument: string[]): void => {};`
 
 const commonArgs = {
   code: reactCode,
@@ -349,5 +354,132 @@ export const AccessibilityChecks: Story = {
     //    :focus-visible ring defined in CodeCopy.module.css).
     copyButton.focus()
     await expect(copyButton).toHaveFocus()
+  },
+}
+
+/**
+ * Keyboard-accessible scrollable code region (WCAG 2.1.1 Level A; axe
+ * `scrollable-region-focusable`). When a code line is wider than the block the
+ * `<pre>` becomes a horizontal-scroll container. It must be keyboard-focusable
+ * so a keyboard-only user can arrow-scroll to read the clipped code, and it
+ * must carry an accessible name (via a naming-capable `role="group"`, not a
+ * bare `<pre>` which would make `aria-label` a prohibited attribute).
+ */
+export const WideScrollableCode: Story = {
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}>
+        <strong>Wide code:</strong> lines exceed the block width, so the code
+        area scrolls horizontally. The scroll region is keyboard-focusable
+        (Tab to it, then use arrow keys) and exposes an accessible name.
+      </div>
+      <div style={{ maxWidth: '480px' }}>
+        <CodeCopy {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    code: wideCode,
+    language: 'typescript',
+    styles: {
+      theme: 'dark',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const pre = canvasElement.querySelector<HTMLPreElement>('pre')
+
+    // The scroll container is keyboard-focusable (the axe
+    // scrollable-region-focusable fix) …
+    await expect(pre).toHaveAttribute('tabindex', '0')
+    // … and carries a naming-capable role + accessible name so screen-reader
+    // users know what the focusable region is.
+    await expect(pre).toHaveAttribute('role', 'group')
+    await expect(pre).toHaveAttribute('aria-label', 'typescript code')
+
+    // It actually accepts focus (proves tabindex takes effect at runtime).
+    pre?.focus()
+    await expect(pre).toHaveFocus()
+  },
+}
+
+/**
+ * Copy-failure status (WCAG 4.1.3 Status Messages — the failure branch). When
+ * both the async Clipboard API write AND the execCommand fallback fail, the
+ * component must NOT leave the user believing the copy succeeded: it surfaces
+ * an error glyph and announces "Copy failed" through the live region, instead
+ * of the silent no-op the un-caught promise used to produce.
+ */
+export const CopyFailure: Story = {
+  name: 'Copy Failure Announced',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#0f172a',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#94a3b8' }}>
+        <strong>Copy failure:</strong> both clipboard paths are stubbed to fail
+        in this story, so activating copy reports an error rather than a false
+        success.
+      </div>
+      <CodeCopy {...args} />
+    </div>
+  ),
+  args: {
+    code: jsCode,
+    language: 'javascript',
+    styles: {
+      theme: 'dark',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const copyButton = await canvas.findByRole('button', { name: 'Copy code' })
+    const status = canvasElement.querySelector('[role="status"]')
+
+    // Force BOTH copy mechanisms to fail: the async write rejects, and the
+    // execCommand fallback returns false. The component must then report an
+    // error state instead of silently claiming success.
+    const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(
+      navigator,
+      'clipboard'
+    )
+    const originalExecCommand = document.execCommand
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: () => Promise.reject(new Error('blocked')) },
+    })
+    document.execCommand = () => false
+
+    try {
+      copyButton.click()
+      // The live region announces the failure (not a false "Copied").
+      await waitFor(() => expect(status).toHaveTextContent('Copy failed'))
+      // And the visible glyph reflects the error, not the success check.
+      await expect(copyButton).toHaveTextContent('✕')
+    } finally {
+      document.execCommand = originalExecCommand
+      if (originalClipboardDescriptor) {
+        Object.defineProperty(
+          navigator,
+          'clipboard',
+          originalClipboardDescriptor
+        )
+      } else {
+        delete (navigator as unknown as { clipboard?: unknown }).clipboard
+      }
+    }
   },
 }
