@@ -32,6 +32,14 @@ export interface DateRangeProps {
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
   /**
+   * Accessible name for the pair. The start/end inputs are two related
+   * controls that make up a single range, so the wrapper is exposed as a
+   * `role="group"` and this string becomes its `aria-label` — assistive tech
+   * announces the two fields as one named set (WCAG 1.3.1). Defaults to
+   * `'Date range'` when omitted.
+   */
+  ariaLabel?: string
+  /**
    * Form-engine binding key. When set inside a `<Form>` and no explicit
    * `value` is passed, the {start,end} range is read/written through the form
    * engine; the engine's error/required for this field also attach to the
