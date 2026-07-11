@@ -40,8 +40,15 @@
  * Save button itself (keeps the dependency graph one-directional, mirrors the
  * `Card.ConfirmDelete` `renderActions` contract).
  *
- * a11y: the root is a `<section role="region">` labelled by the header title
- * (`aria-labelledby`), so screen readers announce the panel by its title.
+ * a11y: for the `sacred`/`standard` variants the root is a `<section>` that
+ * becomes a named `role="region"` landmark ONLY when it has an accessible name
+ * (a composed `Panel.Header` title via `aria-labelledby`, or a consumer-supplied
+ * `aria-label`/`aria-labelledby`); a nameless panel degrades to a plain
+ * `<section>` rather than an unnamed landmark. The `fullscreen` variant is a
+ * viewport takeover over an opaque backdrop — i.e. a modal — so it renders as
+ * `role="dialog"` + `aria-modal="true"` and gets the full APG dialog focus
+ * contract (focus moved in on mount, Tab trapped inside, `Escape` → `onClose`,
+ * focus restored on unmount), mirroring `Dialog`.
  *
  * Panel is stateless by default (no open/collapse state), so no `component.state`
  * diagnostics are emitted from the root — there is no internal transition to
@@ -52,8 +59,12 @@
 
 import React, {
   forwardRef,
+  useCallback,
+  useEffect,
   useId,
   useMemo,
+  useRef,
+  useState,
   type ReactElement,
   type ReactNode,
 } from 'react'
@@ -61,6 +72,23 @@ import IconButton from '../IconButton'
 import { ArrowBackIcon } from '../Icons'
 import Typography from '../Typography'
 import cssStyles from './Panel.module.css'
+
+// -----------------------------------------------------------------------------
+// FOCUS UTILITIES — shared by the fullscreen focus-trap and the Panel.Body
+// scrollable-region-focusable heuristic. The selector mirrors the library's
+// canonical trap (see Dialog/index.tsx): visible, enabled, tabbable elements.
+// -----------------------------------------------------------------------------
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), ' +
+  'input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/** Visible, tabbable DESCENDANTS of `container` (excludes the container itself). */
+function getFocusableWithin(container: HTMLElement): HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+  ).filter(element => element.offsetParent !== null)
+}
 
 // -----------------------------------------------------------------------------
 // SHARED CONTEXT — links Panel.Header's title id to Panel root's aria-labelledby
