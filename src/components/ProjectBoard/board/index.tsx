@@ -281,6 +281,7 @@ export default function Board({
       handleTaskSelect,
       allColumns,
       setAllColumns,
+      taskHeadingLevel,
     ]
   )
 
@@ -382,6 +383,7 @@ export default function Board({
       allColumns,
       setAllColumns,
       renderTask,
+      ColumnHeading,
     ]
   )
 

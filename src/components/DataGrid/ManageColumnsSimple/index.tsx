@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useId, useRef } from 'react'
+import React, { useEffect, useId, useRef, type ElementType } from 'react'
 import type { ColumnDef, DataGridStyles } from '../types'
 import Checkbox from '../../Checkbox'
 import cssStyles from '../DataGrid.module.css'
@@ -13,6 +13,14 @@ interface ManageColumnsSimpleProps {
   onColumnShow: (field: string) => void
   onColumnHide: (field: string) => void
   styles?: DataGridStyles
+  /**
+   * Semantic level for the dialog title. It renders as a real `<h1>`–`<h6>`
+   * (via ``h${headingLevel}``) so it names the dialog and sits in the document
+   * outline at the caller's level, rather than a hardcoded `<h3>` that could
+   * skip a level in the surrounding page (WCAG 1.3.1 / 2.4.6). Defaults to `3`,
+   * preserving the prior markup.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 }
 
 const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
@@ -23,6 +31,7 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
   onColumnShow,
   onColumnHide,
   styles,
+  headingLevel = 3,
 }) => {
   const isSacredTheme = styles?.theme === 'sacred'
   // Modal chrome / colors / fonts are CSS now, keyed off data-theme; the
@@ -103,6 +112,10 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
     return !isVisible || visibleColumnCount > 1
   }
 
+  // Real heading element for the dialog title at the caller-controlled level
+  // (default `h3`, preserving the prior markup), replacing a hardcoded `<h3>`.
+  const TitleHeading = `h${headingLevel}` as ElementType
+
   return (
     <div className={cssStyles.manageColumnsOverlay} onClick={onClose}>
       <div
@@ -114,9 +127,9 @@ const ManageColumnsSimple: React.FC<ManageColumnsSimpleProps> = ({
         aria-labelledby={titleId}
         onClick={e => e.stopPropagation()}
       >
-        <h3 id={titleId} className={cssStyles.manageColumnsTitle}>
+        <TitleHeading id={titleId} className={cssStyles.manageColumnsTitle}>
           {'Manage Columns'}
-        </h3>
+        </TitleHeading>
 
         <div>
           {columns.map(column => {

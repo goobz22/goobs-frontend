@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type ElementType,
+} from 'react'
 import type {
   ProjectBoardStyles,
   Comment,
@@ -126,6 +132,13 @@ export interface InlineShowTaskProps {
       newValue?: string
     }
   ) => Promise<void> | void
+  /**
+   * Base heading level for the form's real `<h1>`–`<h6>` section headings
+   * (card titles render one level below), so the board participates in the
+   * host page's outline instead of a hardcoded level (WCAG 1.3.1 / 2.4.6).
+   * Defaults to `2` (sections `h2`, cards `h3`), preserving the prior markup.
+   */
+  headingLevel?: number
 }
 
 type TabType =
@@ -196,7 +209,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   // Case history audit logging
   onCaseUpdate,
   variant = 'employee',
+  headingLevel = 2,
 }) => {
+  // Real heading elements at the caller-controlled level: knowledgebase
+  // section headings at `headingLevel` (default `h2`), card titles one below
+  // (`h3`), replacing hardcoded `<h2>`/`<h3>` that could skip levels.
+  const SectionHeading = `h${Math.min(6, headingLevel)}` as ElementType
+  const CardHeading = `h${Math.min(6, headingLevel + 1)}` as ElementType
   const [activeTab, setActiveTab] = useState<TabType>('details')
   // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern
   // (order matches the rendered tab strip).
@@ -2806,9 +2825,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             </button>
           </div>
 
-          <h2 className={cssStyles.kbArticleTitle}>
+          <SectionHeading className={cssStyles.kbArticleTitle}>
             {selectedArticleForView.articleTitle}
-          </h2>
+          </SectionHeading>
 
           {selectedArticleForView.categoryName && (
             <div className={cssStyles.kbCategoryChip}>
@@ -2909,9 +2928,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   className={cssStyles.kbLinkedArticleCard}
                 >
                   <div className={cssStyles.kbCardHeader}>
-                    <h3 className={cssStyles.kbCardTitle}>
+                    <CardHeading className={cssStyles.kbCardTitle}>
                       {article.articleTitle}
-                    </h3>
+                    </CardHeading>
                     <span className={cssStyles.kbCardCheck} aria-hidden="true">
                       ✓
                     </span>
@@ -2984,14 +3003,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     data-linked={isLinked ? 'true' : undefined}
                   >
                     <div className={cssStyles.kbCardHeader}>
-                      <h3
+                      <CardHeading
                         className={cx(
                           cssStyles.kbCardTitle,
                           cssStyles.kbCardTitleFlex
                         )}
                       >
                         {article.articleTitle}
-                      </h3>
+                      </CardHeading>
                       {isLinked && (
                         <span
                           className={cx(

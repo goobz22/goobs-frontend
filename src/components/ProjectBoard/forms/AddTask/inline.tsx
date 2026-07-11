@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef, type ElementType } from 'react'
 import type {
   ProjectBoardStyles,
   Task,
@@ -62,6 +62,13 @@ export interface InlineAddTaskProps {
   rawRegions: RawRegion[]
   knowledgebaseArticles?: RawArticle[]
   styles: ProjectBoardStyles
+  /**
+   * Base heading level for the form's real `<h1>`–`<h6>` section headings
+   * (card titles render one level below). Lets the board sit in the host
+   * page's outline instead of a hardcoded level (WCAG 1.3.1 / 2.4.6).
+   * Defaults to `2` (sections `h2`, cards `h3`), preserving the prior markup.
+   */
+  headingLevel?: number
 }
 
 export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
@@ -81,7 +88,13 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   rawRegions,
   knowledgebaseArticles = [],
   styles,
+  headingLevel = 2,
 }) => {
+  // Real heading elements at the caller-controlled level: view/section
+  // headings at `headingLevel` (default `h2`), knowledgebase card titles one
+  // below (`h3`), replacing hardcoded `<h2>`/`<h3>` that could skip levels.
+  const SectionHeading = `h${Math.min(6, headingLevel)}` as ElementType
+  const CardHeading = `h${Math.min(6, headingLevel + 1)}` as ElementType
   const [activeTab, setActiveTab] = useState<AddTaskTabType>('details')
   // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern.
   const tabOrder: AddTaskTabType[] = ['details', 'knowledgeBase']
@@ -401,7 +414,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
         >
           {activeTab === 'details' ? (
             <>
-              <h2 className={cssStyles.heading}>Create New Task</h2>
+              <SectionHeading className={cssStyles.heading}>
+                Create New Task
+              </SectionHeading>
 
               {/* Title & Description */}
               <div className={cssStyles.fieldWrapper}>
@@ -593,9 +608,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                     </button>
                   </div>
 
-                  <h2 className={cssStyles.articleHeading}>
+                  <SectionHeading className={cssStyles.articleHeading}>
                     {viewingArticle.articleTitle}
-                  </h2>
+                  </SectionHeading>
 
                   {/* Link/Unlink Button */}
                   <div className={cssStyles.linkActionRow}>
@@ -720,9 +735,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               ) : (
                 /* Article List View */
                 <>
-                  <h2 className={cssStyles.kbHeading}>
+                  <SectionHeading className={cssStyles.kbHeading}>
                     Link Knowledgebase Articles
-                  </h2>
+                  </SectionHeading>
                   <p className={cssStyles.kbIntro}>
                     Search and select articles to link to this task. Click an
                     article to view details.
@@ -818,9 +833,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             data-selected={isSelected}
                           >
                             <div className={cssStyles.articleCardHeader}>
-                              <h3 className={cssStyles.articleCardTitle}>
+                              <CardHeading className={cssStyles.articleCardTitle}>
                                 {article.articleTitle}
-                              </h3>
+                              </CardHeading>
                               {isSelected && (
                                 <span
                                   className={cssStyles.articleCardCheck}

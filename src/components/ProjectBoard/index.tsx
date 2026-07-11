@@ -114,6 +114,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     onCaseUpdate,
     employees,
     administrators,
+    headingLevel = 2,
   } = props
   // rawCompanies exists ONLY on the administrator variant (narrowed off the `variant` discriminant);
   // company/customer boards default to the stable module empty. rawCustomers/rawProducts are
@@ -435,6 +436,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     // Unified inline form for all variants
     return (
       <InlineAddTask
+        headingLevel={headingLevel}
         onAdd={handleAddTask}
         onCancel={handleBackToBoard}
         topics={rawTopics}
@@ -491,6 +493,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
 
     return (
       <InlineShowTask
+        headingLevel={headingLevel}
         taskId={activeTaskId}
         taskTitle={currentShowTask.title}
         createdBy={currentShowTask.createdBy}
@@ -595,6 +598,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
 
           <div className={cssStyles.toolbarContainer}>
             <Board
+              headingLevel={headingLevel}
               columns={filteredColumnState}
               selectedTaskId={selectedTaskId}
               onTaskSelect={handleTaskSelect}

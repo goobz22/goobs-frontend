@@ -340,6 +340,16 @@ interface ProjectBoardBaseProps {
   onComment: (commentText: string, _id: string) => void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles: ProjectBoardStyles
+  /**
+   * Base heading level for the board's real `<h1>`–`<h6>` headings. Column
+   * titles render one level below this, task-card titles two below, and the
+   * inline Add/Show-task views render their section headings at this level
+   * (card titles one below), so the board participates in the host page's
+   * document outline instead of a fixed hardcoded level that could skip a level
+   * (WCAG 1.3.1 / 2.4.6). Defaults to `2` (columns `h3`, tasks `h4`, form
+   * sections `h2`), preserving the prior markup.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Permissions control - determines read/write access */
   permissions: {
     access: 'no-access' | 'read' | 'write'
