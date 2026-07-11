@@ -812,3 +812,166 @@ export const MarkdownWithPreview: Story = {
     />
   ),
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY REGRESSION TESTS (2026-07-11 a11y audit)
+// These play tests pin the accessible semantics added in the audit so a
+// regression fails the Storybook interaction run.
+// --------------------------------------------------------------------------
+
+/**
+ * Rich-text toolbar accessibility: every icon-only formatting button exposes
+ * an accessible name (WCAG 4.1.2), the toolbar is a labelled `role="toolbar"`,
+ * toggle-capable buttons carry `aria-pressed`, and the contenteditable surface
+ * is a labelled `role="textbox"` with `aria-multiline` (WCAG 1.3.1 / 4.1.2).
+ */
+export const ToolbarAccessibility: Story = {
+  name: 'A11y — Rich Toolbar Semantics',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Rich Text Content"
+      editorType="rich"
+      initialValue="Formatted content lives here."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The toolbar is a labelled toolbar landmark.
+    const toolbar = canvas.getByRole('toolbar', { name: /text formatting/i })
+    expect(toolbar).toBeVisible()
+
+    // Every icon-only button has an accessible name.
+    for (const name of [
+      'Undo',
+      'Redo',
+      'Bold',
+      'Italic',
+      'Underline',
+      'Strikethrough',
+      'Code',
+      'Insert link',
+      'Numbered list',
+      'Bulleted list',
+    ]) {
+      expect(canvas.getByRole('button', { name })).toBeVisible()
+    }
+
+    // Toggle-capable buttons expose their pressed state programmatically.
+    expect(canvas.getByRole('button', { name: 'Bold' })).toHaveAttribute(
+      'aria-pressed'
+    )
+    expect(canvas.getByRole('button', { name: 'Bulleted list' })).toHaveAttribute(
+      'aria-pressed'
+    )
+    // Command buttons are NOT exposed as toggles.
+    expect(canvas.getByRole('button', { name: 'Undo' })).not.toHaveAttribute(
+      'aria-pressed'
+    )
+
+    // The editable surface is a labelled multiline textbox.
+    const textbox = canvas.getByRole('textbox', { name: 'Rich Text Content' })
+    expect(textbox).toHaveAttribute('aria-multiline', 'true')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * The Simple/Rich/Markdown mode switch is a labelled group whose buttons carry
+ * `aria-pressed` reflecting the active mode (state was previously conveyed by
+ * the selected-class colour alone — WCAG 1.4.1 / 4.1.2).
+ */
+export const ModeToggleAccessibility: Story = {
+  name: 'A11y — Mode Toggle State',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Document"
+      editorType="rich"
+      initialValue="Mode switch demo."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The segmented control is a labelled group.
+    const group = canvas.getByRole('group', { name: /editor mode/i })
+    expect(group).toBeVisible()
+
+    // Only the active mode is pressed.
+    expect(
+      canvas.getByRole('button', { name: /rich text/i })
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(canvas.getByRole('button', { name: /^simple$/i })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    )
+
+    // Switching mode moves the pressed state.
+    await userEvent.click(canvas.getByRole('button', { name: /^simple$/i }))
+    expect(canvas.getByRole('button', { name: /^simple$/i })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * The simple textarea gets its accessible name from the visible label via
+ * `aria-labelledby` (programmatic association — WCAG 1.3.1 / 3.3.2 / 4.1.2).
+ */
+export const LabelAssociation: Story = {
+  name: 'A11y — Label Association',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Meeting Notes"
+      editorType="simple"
+      initialValue="Notes go here."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByRole with an accessible-name filter only resolves if the textarea
+    // is programmatically associated with the visible label.
+    const textbox = canvas.getByRole('textbox', { name: 'Meeting Notes' })
+    expect(textbox).toBeVisible()
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * The markdown "Toggle Preview" control is a real `type="button"` (so it never
+ * submits an enclosing form) whose `aria-pressed` reflects whether the preview
+ * pane is showing (WCAG 4.1.2).
+ */
+export const MarkdownPreviewAccessibility: Story = {
+  name: 'A11y — Markdown Preview Toggle',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Markdown Content"
+      editorType="markdown"
+      initialValue="# Title\n\n**Bold** text"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const toggle = canvas.getByRole('button', { name: 'Toggle Preview' })
+    expect(toggle).toHaveAttribute('type', 'button')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+    // The markdown textarea is labelled.
+    expect(
+      canvas.getByRole('textbox', { name: 'Markdown Content' })
+    ).toBeVisible()
+
+    // Toggling flips the pressed state.
+    await userEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
