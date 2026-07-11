@@ -4,7 +4,7 @@
  */
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect } from 'react'
 import CustomButton, { ButtonProps } from '../Button'
 
 // --------------------------------------------------------------------------
@@ -29,6 +29,22 @@ export interface IconButtonProps extends Omit<ButtonProps, 'text'> {
     | 'default'
   /** The icon element to display */
   children: React.ReactNode
+  /**
+   * Accessible name for this icon-only button (WCAG 4.1.2 Name, Role, Value /
+   * 1.1.1 Non-text Content). **Required in practice:** the button renders only
+   * an icon with no visible text, and the goobs icon `<svg>` carries no text
+   * alternative, so without this the control reaches screen-reader users as an
+   * unlabelled "button". Supply a concise action phrase, e.g.
+   * `aria-label="Delete row"`. (Development builds warn when neither this nor
+   * `aria-labelledby` is set.)
+   */
+  'aria-label'?: string
+  /**
+   * ID reference to a visible element that already names this action — the
+   * `labelledby` alternative to `aria-label` (WCAG 4.1.2). Provide exactly one
+   * of the two.
+   */
+  'aria-labelledby'?: string
 }
 
 // --------------------------------------------------------------------------
@@ -43,6 +59,27 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     { size = 'medium', color = 'default', children, styles, ...restProps },
     ref
   ) => {
+    // Accessible name (WCAG 4.1.2 Name, Role, Value / 1.1.1 Non-text Content).
+    // An icon-only button has no visible text and the goobs icon `<svg>` carries
+    // no text alternative, so the accessible name MUST come from `aria-label`
+    // (or `aria-labelledby`) on the button — both flow through `restProps` onto
+    // the underlying <button> untouched. Warn in development when neither is
+    // supplied, so a nameless control surfaces at author time instead of
+    // silently shipping to screen-reader users (mirrors the goobs Dialog nudge).
+    // Dev-only; the guard compiles the branch out of production bundles.
+    const ariaLabel = restProps['aria-label']
+    const ariaLabelledby = restProps['aria-labelledby']
+    useEffect(() => {
+      if (process.env.NODE_ENV === 'production') return
+      if (ariaLabel == null && ariaLabelledby == null) {
+        console.warn(
+          'goobs IconButton: rendered without an accessible name. Pass ' +
+            '`aria-label` (e.g. "Delete row") or `aria-labelledby` so screen ' +
+            'readers announce the button’s purpose (WCAG 4.1.2).'
+        )
+      }
+    }, [ariaLabel, ariaLabelledby])
+
     // Map size to button dimensions
     const sizeMap = {
       xsmall: { width: '20px', height: '20px', padding: '2px' },
@@ -119,8 +156,16 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       // hover wash rides the REAL ButtonStyles hover key (the old
       // emotion-style '&:hover' object is not a ButtonStyles key — it was
       // silently dead and the hover never rendered).
+      //
+      // NOTE: do NOT set `outline: false` here. The resting outline is already
+      // `none` (Button.module.css `.button { outline: none }`), so forcing it
+      // inline is redundant — and worse, an inline `outline: none` OUTRANKS the
+      // `.button:focus-visible { outline: 2px solid … }` rule (inline styles beat
+      // pseudo-class selectors without `!important`), erasing the keyboard focus
+      // ring on every sacred icon button (WCAG 2.4.7 Focus Visible / 2.4.11).
+      // Leaving outline unset lets :focus-visible restore the ring for keyboard
+      // users while pointer users still see no resting outline.
       ...(styles?.theme === 'sacred' && {
-        outline: false as const,
         border: 'none',
         borderWidth: '0',
         borderStyle: 'none',
