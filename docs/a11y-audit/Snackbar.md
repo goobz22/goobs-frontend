@@ -169,6 +169,9 @@ handling).
   unmounts under the pointer → no `mouseleave`), reopens the same instance, and asserts the
   reopened toast is NOT paused and auto-dismisses again. Fails against the pre-fix stuck-flag code
   (the reopened toast keeps `data-paused="true"` and never auto-hides).
+- **`Behavior/Dismiss On Escape (WCAG 2.1.1)`** (NEW, fix #3) — `autoHideDuration={0}` so auto-hide
+  cannot confound the result; focuses the Close button, presses Escape, and asserts the message is
+  removed. Fails against code with no Escape handler (the toast stays visible).
 - Added `waitFor` to the `storybook/test` imports.
 
 ## Deferred
