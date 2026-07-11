@@ -7,6 +7,7 @@ import React, {
   useRef,
   useCallback,
   type CSSProperties,
+  type ElementType,
   type FC,
 } from 'react'
 import CheckCircleOutline from '../Icons/CheckCircleOutline'
@@ -48,12 +49,13 @@ export interface ConfirmationCodeInputsProps {
   successMessage?: string
   showSuccessState?: boolean
   /**
-   * Heading level (`h1`–`h6`) rendered for the success message so the consumer
-   * can slot it correctly into the surrounding document outline (avoids a
-   * skipped-heading-level WCAG 1.3.1 / 2.4.6 violation). Defaults to `3`,
-   * preserving the historical `<h3>`.
+   * Heading level (`h1`–`h6`) rendered for the success-state message so the
+   * consumer can slot it correctly into the surrounding document outline
+   * (avoids a skipped-heading-level WCAG 1.3.1 / 2.4.6 violation). Matches the
+   * library-wide `headingLevel` convention (Accordion, EmptyState). Defaults
+   * to `3`, preserving the historical `<h3>`.
    */
-  successMessageHeadingLevel?: 1 | 2 | 3 | 4 | 5 | 6
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ConfirmationCodeInputStyles
 }
@@ -119,7 +121,7 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
   showSendResendButton = true,
   successMessage = 'Verification Successful',
   showSuccessState = false,
-  successMessageHeadingLevel = 3,
+  headingLevel = 3,
   styles,
 }) => {
   // Tier-1 form binding. Inside a <Form> with a `name` and no explicit `value`,
@@ -358,14 +360,9 @@ const ConfirmationCodeInputs: FC<ConfirmationCodeInputsProps> = ({
 
   if (showSuccessState) {
     // Render the success message at the consumer-controlled heading level
-    // (default h3). Capitalised tag name so JSX treats it as an element type.
-    const SuccessHeading = `h${successMessageHeadingLevel}` as
-      | 'h1'
-      | 'h2'
-      | 'h3'
-      | 'h4'
-      | 'h5'
-      | 'h6'
+    // (default h3). Capitalised tag name so JSX treats it as an element type;
+    // `as ElementType` mirrors the EmptyState/Card heading pattern.
+    const SuccessHeading = `h${headingLevel}` as ElementType
     return (
       // role="status" (an aria-live region) so the transition into the success
       // state is announced to screen-reader users, whose focus was on the now-
