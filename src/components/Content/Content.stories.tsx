@@ -9,6 +9,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import Content from './'
 import { AnimatedElement, type Animation } from './Structure/animations'
 
@@ -298,40 +299,149 @@ export const LinkAccessibleName: Story = {
 }
 
 /**
- * Reduced-motion entrance animations (WCAG 2.3.3). AnimatedElement drives the
- * slide/fade entrance variants. Under `prefers-reduced-motion: reduce` the
- * module CSS disables the transform-based movement and jumps each variant to its
- * stable end state (slides/fadeIn stay fully visible, fadeOut stays hidden).
+ * Movement variants exercised by the reduced-motion story. Kept at module scope
+ * so the `render` (which additionally shows `fadeOut`) and the `play` regression
+ * gate agree on exactly which animation classes must be neutralised.
+ */
+const MOVEMENT_VARIANTS: Animation[] = [
+  'slideInLeft',
+  'slideInRight',
+  'slideInUp',
+  'slideInDown',
+  'fadeIn',
+]
+
+/**
+ * Reduced-motion entrance animations (WCAG 2.3.3 Animation from Interactions /
+ * 2.2.2). `AnimatedElement` drives the slide/fade entrance variants. Under
+ * `prefers-reduced-motion: reduce` the module CSS disables the transform-based
+ * movement and jumps each variant to its stable end state (slides/`fadeIn` stay
+ * fully visible with `transform: none`, `fadeOut` jumps to its hidden
+ * `opacity: 0` end state).
+ *
+ * This story is the regression net for that `@media (prefers-reduced-motion:
+ * reduce)` block (`Structure/animations.module.css`). Because the media feature
+ * is OFF by default, a plain render would NOT re-fail if the block were deleted,
+ * so — unlike the image-alt / link-name stories whose fixes show up as rendered
+ * attributes — the reduced-motion fix is guarded two ways:
+ *   1. `parameters.chromatic.prefersReducedMotion: 'reduce'` makes Chromatic
+ *      emulate the OS "Reduce motion" setting for THIS snapshot (Chromatic only
+ *      pauses animations at their first frame otherwise, and never activates
+ *      `prefers-reduced-motion`), so the reduced-motion rendering is captured as
+ *      a real visual baseline instead of the default full-motion one.
+ *   2. The `play` function asserts, via the CSSOM and scoped to AnimatedElement's
+ *      own hashed CSS-module classes, that the reduced-motion block still exists
+ *      and still neutralises every variant to `animation: none` (`fadeOut` also
+ *      to `opacity: 0`). This fails deterministically in the test-runner — with
+ *      or without Chromatic — the instant the block is removed or weakened.
  */
 export const ReducedMotionAnimations: Story = {
   name: 'A11y/Reduced Motion',
-  render: () => {
-    const variants: Animation[] = [
-      'slideInLeft',
-      'slideInRight',
-      'slideInUp',
-      'slideInDown',
-      'fadeIn',
-    ]
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {variants.map(variant => (
-          <AnimatedElement
-            key={variant}
-            animationtype={variant}
-            style={{
-              padding: '0.5rem 0.75rem',
-              borderRadius: 8,
-              background: 'rgba(126, 34, 206, 0.12)',
-              color: 'rgba(126, 34, 206, 1)',
-              fontFamily: 'sans-serif',
-            }}
-          >
-            {variant}
-          </AnimatedElement>
-        ))}
-      </div>
-    )
-  },
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {[...MOVEMENT_VARIANTS, 'fadeOut' as const].map(variant => (
+        <AnimatedElement
+          key={variant}
+          animationtype={variant}
+          style={{
+            padding: '0.5rem 0.75rem',
+            borderRadius: 8,
+            background: 'rgba(126, 34, 206, 0.12)',
+            color: 'rgba(126, 34, 206, 1)',
+            fontFamily: 'sans-serif',
+          }}
+        >
+          {variant}
+        </AnimatedElement>
+      ))}
+    </div>
+  ),
   globals: { backgrounds: { value: 'light' } },
+  parameters: {
+    // Force the prefers-reduced-motion media feature ONLY for this snapshot so
+    // Chromatic captures the reduced-motion CSS path (see the JSDoc above); the
+    // `play` gate below makes the guard deterministic even without Chromatic.
+    chromatic: { prefersReducedMotion: 'reduce' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Read back the hashed CSS-module class AnimatedElement applied for each
+    // rendered variant (each element labels itself with its animation name).
+    const classFor = (variant: Animation): string => {
+      const el = canvas.getByText(variant)
+      expect(el).toBeInTheDocument()
+      const cls = el.className.trim().split(/\s+/).find(Boolean) ?? ''
+      expect(cls).not.toBe('')
+      return cls
+    }
+    const movementClasses = MOVEMENT_VARIANTS.map(classFor)
+    const fadeOutClass = classFor('fadeOut')
+
+    // Collect every style rule inside a `@media (prefers-reduced-motion: reduce)`
+    // block from the same-origin injected stylesheets (cross-origin sheets throw
+    // on `.cssRules` and are skipped).
+    const reducedMotionRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList): void => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (
+            /prefers-reduced-motion/i.test(mediaText) &&
+            /reduce/i.test(mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) reducedMotionRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+    expect(reducedMotionRules.length).toBeGreaterThan(0)
+
+    // Every movement variant (slides + fadeIn) must be neutralised to
+    // `animation: none` under reduced motion so no transform entrance runs.
+    for (const cls of movementClasses) {
+      const guarded = reducedMotionRules.some(
+        rule =>
+          typeof rule.selectorText === 'string' &&
+          rule.selectorText.includes(cls) &&
+          /animation:\s*none/i.test(rule.cssText)
+      )
+      expect(guarded).toBe(true)
+    }
+
+    // fadeOut must also be neutralised AND jump to its hidden end state
+    // (`opacity: 0`) instead of animating there.
+    const fadeOutGuarded = reducedMotionRules.some(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        rule.selectorText.includes(fadeOutClass) &&
+        /animation:\s*none/i.test(rule.cssText) &&
+        /opacity:\s*0/i.test(rule.cssText)
+    )
+    expect(fadeOutGuarded).toBe(true)
+
+    // Behavioural gate when the environment actually requests reduced motion
+    // (e.g. Chromatic capturing with `prefersReducedMotion: 'reduce'`): the
+    // resolved animation must actually be off, not merely declared off.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const variant of MOVEMENT_VARIANTS) {
+        expect(getComputedStyle(canvas.getByText(variant)).animationName).toBe(
+          'none'
+        )
+      }
+    }
+  },
 }

@@ -128,9 +128,33 @@ Added to `Content.stories.tsx` (the repo's only regression surface):
   Label-in-Name fix), and a fully text-less link that gets its name from the `aria-label` href fallback
   (exercises Issue 3's fix).
 - **`A11y/Reduced Motion`** — renders `AnimatedElement` across the slide/fade entrance variants so the
-  reduced-motion CSS path is exercised (Issue 2).
+  reduced-motion CSS path is exercised (Issue 2). **Hardened (review, see Issue 5)** into a real
+  regression net: it now forces the media feature via `chromatic.prefersReducedMotion: 'reduce'` AND
+  carries a CSSOM-scanning `play` gate.
 
-Committed in `f3471108`.
+Committed in `f3471108`; the Reduced-Motion guard hardening in a follow-up review commit.
+
+### 5. Reduced-motion story did not deterministically exercise the `@media` block — FIXED (review)
+- **Severity:** minor · **WCAG 2.3.3 Animation from Interactions (AAA) / 2.2.2 (A)** · pattern `unguarded-reduced-motion-story`
+- **File:** `src/components/Content/Content.stories.tsx` (the `A11y/Reduced Motion` story)
+- Adversarial review of Fix 2 found the story rendered `AnimatedElement` across the slide/fade variants
+  but never emulated `prefers-reduced-motion: reduce`. Since that media feature is OFF by default, the
+  story's default Chromatic snapshot exercised only the full-motion path — so a future deletion of the
+  `@media (prefers-reduced-motion: reduce)` block (`animations.module.css:132-148`) would NOT re-fail
+  this story, unlike the image-alt / link-name stories whose fixes surface as rendered attributes.
+- **Fix:** guard the reduced-motion block two ways, matching the repo's established pattern
+  (ProgressBar's `chromatic.prefersReducedMotion` + Zoom/Switch/Fade's CSSOM `play` assertion):
+  1. `parameters.chromatic.prefersReducedMotion: 'reduce'` — Chromatic emulates the OS "Reduce motion"
+     setting for this snapshot (it otherwise only pauses animations at their first frame and never
+     activates the media feature), capturing the reduced-motion rendering as a distinct visual baseline.
+  2. A `play` function that walks the CSSOM for the `@media (prefers-reduced-motion: reduce)` block,
+     scoped to `AnimatedElement`'s own hashed CSS-module classes (read back off the rendered elements),
+     and asserts every movement variant (slides + `fadeIn`) is neutralised to `animation: none` and
+     `fadeOut` also jumps to `opacity: 0`. This fails deterministically in the test-runner — with or
+     without Chromatic — if the block is removed or weakened. Also added `fadeOut` to the rendered set
+     so both inner reduced-motion rules are exercised, plus a `matchMedia` behavioural gate
+     (`getComputedStyle(...).animationName === 'none'`) that runs when the environment actually requests
+     reduced motion. Story-only change; no component DOM/attribute contract change.
 
 ## Deferred (correct fix lives outside this directory — do not edit from here)
 
