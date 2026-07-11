@@ -378,6 +378,16 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
 
   const iconStyle: React.CSSProperties = { fontSize: '18px' }
 
+  // Give each stepper an accessible name that references the field's label, so
+  // multiple Percentage/stepper fields on one page expose distinguishable
+  // controls to assistive technology instead of ambiguous, identical
+  // "increment"/"decrement" buttons (WCAG 2.4.6 Headings and Labels / 4.1.2
+  // Name, Role, Value). Falls back to the bare verb when the field has no
+  // label. The data-action attributes ("increment"/"decrement") that the
+  // Playwright selector contract keys on are unchanged.
+  const incrementAriaLabel = label ? `Increase ${label}` : 'increment'
+  const decrementAriaLabel = label ? `Decrease ${label}` : 'decrement'
+
   // Percentage uses width: 'auto' on the FieldShell wrapper so the
   // outer block hugs the (small) numeric input rather than stretching
   // to its container.
@@ -436,7 +446,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
                 type="button"
                 onMouseDown={() => handlePressStart(handleIncrement)}
                 onClick={() => handleActivate(handleIncrement)}
-                aria-label="increment"
+                aria-label={incrementAriaLabel}
                 data-action="increment"
                 disabled={disabled}
                 className={cssStyles.button}
@@ -450,7 +460,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
                 type="button"
                 onMouseDown={() => handlePressStart(handleDecrement)}
                 onClick={() => handleActivate(handleDecrement)}
-                aria-label="decrement"
+                aria-label={decrementAriaLabel}
                 data-action="decrement"
                 disabled={disabled}
                 className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}

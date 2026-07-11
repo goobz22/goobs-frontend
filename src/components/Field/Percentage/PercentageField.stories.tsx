@@ -865,7 +865,10 @@ export const FocusVisibleAndReducedMotion: Story = {
           Array.from(rule.cssRules).some(
             inner =>
               inner instanceof CSSStyleRule &&
-              inner.style.transition === 'none'
+              // `transition: none` can serialize as "none" or "none 0s ease 0s"
+              // depending on the engine — match either, and fail if a real
+              // (non-none) transition is ever reintroduced under reduced-motion.
+              inner.style.transition.includes('none')
           )
       )
     })
