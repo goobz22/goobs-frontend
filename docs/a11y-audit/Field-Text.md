@@ -95,8 +95,17 @@ Stories are the only regression tests in this repo; each new behaviour is now pi
   the wrapper (`input.parentElement`) enters `:focus-within` via `wrapper.matches(':focus-within')`
   — the CSS-native focus-ring hook from fix #1.
 - **`ReducedMotion`** (new) — renders sacred + light fields with JSDoc explaining the
-  `prefers-reduced-motion` behaviour; the Chromatic baseline captures the rendered result (the
-  media query itself can't be toggled inside a `play` function).
+  `prefers-reduced-motion` behaviour; the Chromatic baseline captures the rendered result. The
+  `play` test is a **structural CSSOM guard** (added in the review follow-up, see below): CSS
+  `@media` queries are engine-evaluated from the OS setting and can't be toggled from a `play`
+  function (mocking `matchMedia` does not change `getComputedStyle`), so it walks
+  `document.styleSheets`, finds the `@media (prefers-reduced-motion: reduce)` block, and asserts
+  it sets `transition: none` on **this field's** hashed wrapper class — failing if the guard is
+  removed or a transition is re-added.
+- **`IdentifyInputPurpose`** (new, review follow-up) — renders name / email / one-time-code
+  fields using the new `autoComplete` + `inputMode` props; the `play` test asserts each
+  attribute is forwarded to the DOM (`autocomplete`, `inputmode`) and that a field without
+  `inputMode` set omits the attribute (additive). Regression guard for the 1.3.5 fix.
 
 ## SEO semantics
 
@@ -129,10 +138,46 @@ is a functional gap for the common (labelled) case — these are Shell-level har
     that also receive the native `disabled` attribute (or document that consumers pass one or the
     other). Low priority — cosmetic only.
 
-- **`autoComplete` / `inputMode` not forwardable (WCAG 1.3.5 Identify Input Purpose, AA).**
-  Text has no `autoComplete` passthrough, so a consumer collecting name/email/etc. cannot set the
-  autofill token needed for 1.3.5. This one *is* in my directory to add, but it is a value only
-  the consumer can supply correctly (the component can't infer purpose) and is orthogonal to the
-  accessible-by-default fixes above; flagged as a follow-up additive prop rather than fixed in
-  this pass to keep the change surface focused. **Suggested change (this directory, follow-up):**
-  add `autoComplete?: string` + `inputMode?: string` passthrough props on the input/textarea.
+_(The `autoComplete` / `inputMode` item that was previously deferred here is now **FIXED** —
+see the review follow-up section below.)_
+
+## Adversarial-review follow-up fixes (2026-07-11)
+
+A review of the pass above found three remaining items. All three are addressed at root cause in
+this directory; none required a Shell change.
+
+- **[moderate] WCAG 1.3.5 Identify Input Purpose (AA) — `autoComplete` / `inputMode` not
+  forwardable.** **FIXED** (`index.tsx`). Added two **additive**, JSDoc'd props:
+  `autoComplete?: string` → forwarded as `autoComplete`, and
+  `inputMode?: React.HTMLAttributes<HTMLElement>['inputMode']` → forwarded as `inputMode`, on
+  **both** the `<input>` and `<textarea>`. `inputMode` is typed as the native React union (not a
+  bare `string`) so it type-matches the DOM prop exactly and rejects invalid keyboard hints at the
+  callsite, same as a native input. Both default `undefined` → React omits the attribute, so every
+  existing callsite renders byte-for-byte identically; only fields that opt in gain the attribute.
+  No existing prop/export renamed/removed/retyped; no `data-*`/role/aria attribute touched, so the
+  Playwright selector contract is preserved. **Markup change:** two new optional attributes
+  (`autocomplete`, `inputmode`), emitted only when the prop is set. Pinned by the new
+  `IdentifyInputPurpose` story.
+
+- **[minor] Stale/misleading focus comment.** **FIXED** (`index.tsx`, the comment above
+  `const [isFocused, …]`). The old text claimed inputs "use `:focus-visible` selectors and don't
+  need this state" — but there is no `:focus-visible` selector (the fix used `:focus-within`), and
+  the JS `.focused` class **is** applied to the wrapper for both the input and textarea. The
+  comment now accurately states: focus is tracked in JS and applied as `.focused` on the wrapper
+  for both control types; the stylesheet **also** matches `.inputWrapper:focus-within`, making the
+  ring pure-CSS and hydration-independent; the JS class is retained only because the focus/blur
+  handlers additionally run the consumer callbacks and the form binding's touched-onBlur; both
+  selectors resolve to the identical treatment.
+
+- **[minor] `ReducedMotion` story had no programmatic assertion.** **FIXED**
+  (`TextField.stories.tsx`). Added a `play` function. A naive "mock `matchMedia` + read computed
+  `transition`" test would be *wrong* — CSS `@media (prefers-reduced-motion: reduce)` is evaluated
+  by the rendering engine from the OS/browser setting and is not driven by the `window.matchMedia`
+  JS API, so mocking it does not change `getComputedStyle`. The `play` test therefore asserts the
+  guard **structurally**: it reads the focused field's hashed wrapper class, walks
+  `document.styleSheets`, locates the `@media (prefers-reduced-motion: reduce)` rule, and asserts a
+  nested rule targeting that wrapper class sets `transition: none`. This is hydration- and
+  environment-independent and fails if the guard block is deleted or a transition is reintroduced
+  under reduced motion.
+
+## Deferred (still Shell-owned)
