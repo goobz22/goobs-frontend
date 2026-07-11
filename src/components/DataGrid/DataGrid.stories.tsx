@@ -21,6 +21,7 @@ import type {
 } from './types'
 import type { DropdownOption } from '../Field/Dropdown/Regular'
 import type { ButtonProps } from '../Button'
+import cssStyles from './DataGrid.module.css'
 
 const sampleColumns: ColumnDef[] = [
   { field: 'id', headerName: 'ID', width: 90, resizable: true },
