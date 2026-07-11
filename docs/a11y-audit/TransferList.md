@@ -29,6 +29,14 @@ to fire a button) is satisfied by native semantics with no custom key handling.
 | 9 | Moderate | 1.3.1 Info & Relationships | `index.tsx` (pre-fix, `<h3>`/list adjacency only) | The list and its column heading were visually adjacent but not programmatically associated (no accessible name on the list). | FIXED |
 | 10 | Minor | 1.1.1 Non-text Content | `index.tsx` (pre-fix L317) | The decorative sacred glyph `𓊨` (and the raw arrow glyphs `≫ > < ≪`) were exposed to assistive tech. | FIXED |
 
+### Adversarial-review follow-ups (2026-07-11)
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| 11 | Moderate | 1.3.1 Info & Relationships | `index.tsx` `renderList` (the `<ul>`/`<li>`) | The list-semantics fix (#2) was silently defeated on WebKit/Safari + VoiceOver: `.listInner` sets `list-style: none`, and Safari strips the implicit `list`/`listitem` roles from a `<ul>`/`<li>` styled that way, so "list, N items / item X of N" was never announced there. jsdom keeps the implicit roles, so `getByRole('list')` false-passed. | FIXED |
+| 12 | Minor | 4.1.2 Name, Role, Value | `index.tsx` container (`role="group"`) | The composite `role="group"` had no accessible name — only an `aria-describedby` (a description) when an engine error was present — so AT announced a bare, context-free "group". | FIXED |
+| 13 | Moderate | 3.2.4 / affordance + test contract | `index.tsx` `<li>` + `TransferList.module.css` `.listItem` | `data-action="toggle"`/`data-checked` sat on a non-interactive `<li>` that still carried `cursor: pointer` + a `:hover` transform — signalling the whole row was clickable when only the checkbox/label toggled, and a consumer test clicking `[data-action="toggle"]` on the row padding silently no-op'd. | FIXED |
+
 **Hearing-impaired (A):** CLEAN. Grep for `new Audio` / `AudioContext` /
 `navigator.vibrate` / `<audio>` / `<video>` / `speechSynthesis` in the component
 directory returned nothing — no information is conveyed by sound. The new status
@@ -68,6 +76,31 @@ All fixes are inside the component directory (`src/components/TransferList/`).
 - **Decorative glyph hidden (issue 10):** `aria-hidden="true"` on the sacred
   sigil.
 
+#### Adversarial-review follow-ups (2026-07-11)
+- **Explicit `role="list"` / `role="listitem"` (issue 11).** The `<ul>` now sets
+  `role="list"` and each `<li>` sets `role="listitem"` explicitly. WebKit/Safari
+  removes the implicit list & listitem roles from any list whose `list-style`
+  computes to `none` (which `.listInner` does), so on Safari + VoiceOver the
+  restored "list, N items" announcement (issue 2) only lands with the attributes
+  literally present. Redundant-but-harmless in every other engine.
+- **Named group (issue 12).** The container `role="group"` now carries
+  `aria-label={`Transfer items between ${leftTitle} and ${rightTitle}`}` — a real
+  accessible NAME (adapts to consumer-supplied titles), so AT announces the
+  composite's purpose. `aria-describedby` (still added on error) is a description,
+  not a name, and never substituted for this.
+- **Whole-row click is now truthful (issue 13).** Each row `<li>` gets a guarded
+  `onClick` (`event.target === event.currentTarget → handleToggle(value)()`) so a
+  pointer click anywhere on the row — its padding / inter-control gaps, and the
+  `[data-action="toggle"]` selector — genuinely toggles the row's checkbox. This
+  makes the CSS `cursor: pointer` + hover affordance ACCURATE (rather than
+  removing it) and restores the classic whole-row-click UX. The guard fires only
+  for clicks whose target is the `<li>` itself; clicks on the checkbox or its
+  `<label>` are handled natively, so a row is never toggled twice. Keyboard/AT
+  users still operate the native checkbox (Tab + Space) — the `<li>` stays
+  non-focusable with no key handler, so no new custom-widget semantics were
+  introduced. `data-action="toggle"` / `data-checked` stayed on the `<li>`
+  (selector contract unchanged).
+
 ### Styling — `TransferList.module.css`
 - **`:focus-visible` ring on the transfer buttons (issue 3)** — themed
   `outline` (gold / light-primary / dark-primary), using `outline` (not
@@ -97,12 +130,24 @@ a `play` that fails against the pre-fix markup:
 - **`ValidationError`** (new): binds the field into a `<Form>` whose schema
   requires ≥1 assigned item; a blocked submit renders the error as visible
   `role="alert"` text and marks the group `aria-invalid` + `aria-describedby`.
+- **`AccessibleStructure`** (extended, review follow-up): asserts the raw
+  `role="list"` on each `<ul>` and `role="listitem"` on each `<li>` (jsdom keeps
+  the implicit roles, so `getByRole('list')` alone false-passes — the attribute
+  assertion is what a Safari-strip regression would fail on), and that the
+  `role="group"` is findable by its `aria-label` accessible name.
+- **`RowClickToggle`** (new, review follow-up): `fireEvent.click` on the row
+  `<li>` (target === the `<li>`) toggles then untoggles the checkbox + flips
+  `data-checked`, exercising the guarded row `onClick` / the
+  `[data-action="toggle"]` selector. `InteractiveDemo` already guards the
+  no-double-toggle-on-label invariant (a label click ends single-toggled).
 
 ---
 
 ## Commits
 - `f58af4d1` — runtime + CSS a11y fixes
 - `a759e90c` — stories exercising the new states
+- `7b651e37` — review follow-ups: explicit list/listitem roles, named group, whole-row-clickable toggle
+- `4fa192fb` — stories pinning the review follow-ups
 
 ---
 
