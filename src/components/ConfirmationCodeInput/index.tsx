@@ -77,7 +77,11 @@ const SacredGlyphs: React.FC = () => {
 
 const SacredBottomDecorations: React.FC = () => {
   return (
-    <div className={cssStyles.bottomGlyphContainer}>
+    // Purely-decorative sacred flourish (three floating "." glyphs) — hidden
+    // from assistive tech so a screen reader does not announce "period period
+    // period" after the code field (WCAG 1.3.1). The dots carry no meaning; the
+    // real controls and status live elsewhere in the reading order.
+    <div className={cssStyles.bottomGlyphContainer} aria-hidden="true">
       {Array.from({ length: 3 }).map((_, i) => (
         <span key={i} className={cssStyles.bottomGlyph}>
           .

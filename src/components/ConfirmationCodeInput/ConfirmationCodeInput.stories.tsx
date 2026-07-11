@@ -128,6 +128,13 @@ export const DarkTheme: Story = {
   },
 }
 
+/**
+ * Sacred theme. Beyond the palette, the sacred variant renders a purely-visual
+ * bottom flourish of three floating "." glyphs. That decoration is `aria-hidden`
+ * so a screen reader does not announce "period period period" after the code
+ * field — decorative content must stay out of the reading order (WCAG 1.3.1).
+ * The play function pins that the flourish is hidden from assistive tech.
+ */
 export const SacredTheme: Story = {
   render: args => (
     <div
@@ -161,6 +168,17 @@ export const SacredTheme: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+  play: async ({ canvasElement }) => {
+    // The sacred bottom flourish (three floating "." glyphs) is purely
+    // decorative, so it is hidden from assistive tech via aria-hidden — a
+    // screen reader must not read "period period period" after the code field
+    // (WCAG 1.3.1). Asserting the hidden flourish exists fails first if the
+    // aria-hidden is ever dropped.
+    const decoration = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')
+    ).find(el => el.textContent?.replace(/\s/g, '') === '...')
+    await expect(decoration).toBeTruthy()
   },
 }
 
