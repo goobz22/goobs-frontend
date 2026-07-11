@@ -11,15 +11,27 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  * `<button>✕</button>` (U+2715) and the CodeCopy copy button whose only child
  * was `⧉`/`✓`. Both announced nothing meaningful.
  *
- * ── THE LOGICAL SHAPE THIS MODULE DETECTS (crisp, near-zero false positive) ──
- * A NATIVE `<button>` (always interactive) or `<a href>` (interactive link)
- * whose STATIC child content is a NON-EMPTY run of ONLY glyph / symbol /
- * punctuation characters — no ASCII letters, no digits, no nested element, no
- * `{expression}` — AND whose opening tag supplies NO name mechanism
- * (`aria-label`, `aria-labelledby`, `title`) and NO prop spread (`{...x}` could
- * carry a name at runtime). Such a control's accessible name is provably empty.
- * HTML character entities (`&times;`, `&#x2715;`) count as glyphs, so an
- * entity-only control is caught too.
+ * ── THE LOGICAL SHAPES THIS MODULE DETECTS (crisp, near-zero false positive) ──
+ *
+ * SHAPE 1 — glyph-only interactive element. A NATIVE `<button>` (always
+ * interactive) or `<a href>` (interactive link) whose STATIC child content is a
+ * NON-EMPTY run of ONLY glyph / symbol / punctuation characters — no ASCII
+ * letters, no digits, no nested element, no `{expression}` — AND whose opening
+ * tag supplies NO name mechanism (`aria-label`, `aria-labelledby`, `title`) and
+ * NO prop spread (`{...x}` could carry a name at runtime). Such a control's
+ * accessible name is provably empty. HTML character entities (`&times;`,
+ * `&#x2715;`) count as glyphs, so an entity-only control is caught too.
+ *
+ * SHAPE 2 — named `<canvas>` with no role. A `<canvas>` whose opening tag DOES
+ * carry a naming intent (`aria-label` / `aria-labelledby`) but supplies NO
+ * `role` (and no prop spread that could inject one) leaves that name UNEXPOSED —
+ * some screen readers ignore an accessible name on a bare `<canvas>` because it
+ * has no name-bearing role. This is the QRCode audit shape (the QR `<canvas>`
+ * had an `aria-label` but no `role`, so the code's text alternative was never
+ * announced). The fix is `role="img"` (or the appropriate graphics role), which
+ * makes the supplied name authoritative. A canvas with NO naming intent is
+ * decorative (its home is the `decorative-content-not-hidden` class, which wants
+ * `aria-hidden`), not this class — so it is NOT flagged here.
  *
  * ── ESCAPE HATCHES (encoded in the CHECK, never an ignore-list) ──
  *  1. `aria-label` / `aria-labelledby` / `title` on the tag → has a name.
@@ -48,6 +60,9 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
 // because `>` is in the lookahead class.
 const BUTTON_OPEN_RE = /<button(?=[\s/>])/g
 const ANCHOR_OPEN_RE = /<a(?=[\s/>])/g
+// SHAPE 2: `<canvas>` (self-closing or with fallback children). The lookahead
+// stops `<canvas` matching a longer identifier; only the opening tag is read.
+const CANVAS_OPEN_RE = /<canvas(?=[\s/>])/g
 
 /**
  * Blank the CONTENT of `//` and `/* … *\/` comments (JSDoc included) to spaces,
@@ -195,6 +210,11 @@ const hasNameMechanism = (body: string) =>
 const hasSpread = (body: string) => /\{\s*\.\.\./.test(body)
 const hasHref = (body: string) => /\bhref\s*=/.test(body)
 const isSelfClosing = (body: string) => /\/\s*>$/.test(body.trimEnd())
+// SHAPE 2 predicates: an explicit `role` makes the supplied name authoritative;
+// a naming intent (`aria-label`/`aria-labelledby`) is what a role must expose.
+const hasRole = (body: string) => /\brole\s*=/.test(body)
+const hasAriaNamingIntent = (body: string) =>
+  /\baria-label\b/.test(body) || /\baria-labelledby\b/.test(body)
 
 /**
  * Is `content` a bare-glyph-only child run — i.e. it announces no name?
@@ -213,9 +233,9 @@ function isGlyphOnly(content: string): boolean {
 
 const lint: A11yLint = {
   name: 'missing-accessible-name',
-  wcag: '4.1.2',
+  wcag: '4.1.2, 1.1.1',
   description:
-    'A native <button> or <a href> whose only child content is a bare icon/symbol glyph (e.g. ✕, ⧉, ‹, or an HTML entity) and that carries no aria-label / aria-labelledby / title (and no prop spread that could inject one) computes to an EMPTY accessible name — screen readers announce nothing meaningful. Add a text label or aria-label (and mark the glyph aria-hidden). Escape hatches encoded in the check: any name mechanism or spread on the tag, letters/digits in the content, a nested element or {expression} child (icon-component shape, delegated to a caller aria-label), and empty content. goobs <Button>/<IconButton> are intentionally not linted here (their name may come from text=/children/icon+aria-label/spread); their icon-only-name contract is enforced by a dev warn + stories.',
+    'Two static shapes of the missing-accessible-name class. SHAPE 1: a native <button> or <a href> whose only child content is a bare icon/symbol glyph (e.g. ✕, ⧉, ‹, or an HTML entity) and that carries no aria-label / aria-labelledby / title (and no prop spread that could inject one) computes to an EMPTY accessible name — screen readers announce nothing meaningful. Add a text label or aria-label (and mark the glyph aria-hidden). SHAPE 2: a <canvas> that carries a naming intent (aria-label / aria-labelledby) but no role (and no prop spread) leaves that name UNEXPOSED — some screen readers ignore a name on a bare canvas; add role="img" so the name is authoritative (the QRCode audit shape). Escape hatches encoded in the check: any name mechanism or spread on a glyph tag, letters/digits in the content, a nested element or {expression} child (icon-component shape, delegated to a caller aria-label), empty content, an explicit role on the canvas, and a decorative canvas with no naming intent (its home is the decorative-content-not-hidden class). goobs <Button>/<IconButton> and role="dialog" surfaces (Popover/Drawer/Dialog) are intentionally not linted here (their name may come from text=/children/icon+aria-label/spread/a runtime prop); their name contract is enforced by a dev warn + stories.',
   check(files: LintFile[]): Violation[] {
     const violations: Violation[] = []
     for (const { path, text: raw } of files) {
@@ -260,6 +280,25 @@ const lint: A11yLint = {
         true,
         'icon-only <a href> has no accessible name — its only content is a bare glyph; add link text or aria-label and mark the glyph aria-hidden (missing-accessible-name)'
       )
+
+      // SHAPE 2: a `<canvas>` with a naming intent but no role. Only the opening
+      // tag matters (the name/role live there), so no content read is needed.
+      CANVAS_OPEN_RE.lastIndex = 0
+      let cm: RegExpExecArray | null
+      while ((cm = CANVAS_OPEN_RE.exec(text))) {
+        const opened = readOpeningTag(text, cm.index)
+        if (!opened) continue
+        const { body } = opened
+        if (hasSpread(body)) continue // a spread may inject role at runtime
+        if (hasRole(body)) continue // an explicit role exposes the name
+        if (!hasAriaNamingIntent(body)) continue // decorative — different class
+        violations.push({
+          file: path,
+          line: offsetToLine(nl, cm.index),
+          message:
+            'named <canvas> has no role — it carries an aria-label/aria-labelledby but no role, so some screen readers ignore the name and leave it unexposed; add role="img" (or the appropriate graphics role) so the accessible name is authoritative (missing-accessible-name)',
+        })
+      }
     }
     return violations
   },
@@ -279,6 +318,12 @@ const lint: A11yLint = {
       'export const D = () => <button onClick={x}>&times;</button>',
       // chevron nav glyph
       'export const E = () => <button onClick={prev}>‹</button>',
+      // SHAPE 2: named canvas, no role (the shipped QRCode shape) — self-closing
+      'export const Q = () => <canvas aria-label="QR Code for MFA Setup" />',
+      // SHAPE 2: named-by-id canvas, no role, with fallback children
+      `export const R = () => (
+        <canvas ref={ref} aria-labelledby="cap">Your browser lacks canvas.</canvas>
+      )`,
     ],
     good: [
       // named via aria-label (the fix): glyph wrapped aria-hidden, name on button
@@ -303,6 +348,15 @@ const lint: A11yLint = {
       'export const O = () => <button onClick={x}>   </button>',
       // <a> without href is not an interactive link — not flagged
       'export const P = () => <a>↑</a>',
+      // SHAPE 2 fixed: role="img" makes the aria-label authoritative (QRCode fix)
+      'export const S = () => <canvas role="img" aria-label="QR Code" />',
+      // SHAPE 2: decorative canvas, no naming intent — belongs to the
+      // decorative-content-not-hidden class, not this one; not flagged
+      'export const T = () => <canvas ref={r} className={styles.bg} aria-hidden="true" />',
+      // SHAPE 2: a spread may inject role at runtime — not flagged
+      'export const U = () => <canvas {...canvasAriaProps} aria-label="Signature pad" />',
+      // SHAPE 2: bare decorative canvas (TreeView background) — no name intent
+      'export const V = () => <canvas ref={r} className={styles.sacred} />',
     ],
   },
 }
