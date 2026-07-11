@@ -101,6 +101,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <button
               type="button"
               className={`${cssStyles.taskButton} ${cssStyles.taskSaveButton}`}
+              data-action="save"
               onClick={handleSave}
             >
               Save
@@ -108,6 +109,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <button
               type="button"
               className={`${cssStyles.taskButton} ${cssStyles.taskCancelButton}`}
+              data-action="cancel"
               onClick={handleCancel}
             >
               Cancel

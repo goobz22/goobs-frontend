@@ -306,6 +306,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                 ref={browseButtonRef}
                 type="button"
                 className={cssStyles.dropTarget}
+                data-action="upload"
                 onClick={() => fileInputRef.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -351,6 +352,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                   onClick={handleRemove}
                   disabled={uploading}
                   aria-label={`Remove ${noun}`}
+                  data-action="remove"
                   data-file-dropzone-remove="true"
                 >
                   Remove

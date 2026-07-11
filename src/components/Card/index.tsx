@@ -539,6 +539,7 @@ function CardTitle({
         type="button"
         onClick={onClick}
         className={cssStyles.blockLink}
+        data-action="navigate"
         {...(ariaLabel !== undefined && { 'aria-label': ariaLabel })}
       >
         {children}
@@ -1368,6 +1369,7 @@ const CardDragHandle = forwardRef<HTMLDivElement, CardDragHandleProps>(
           onClick={onMoveUp}
           disabled={onMoveUp === undefined}
           aria-label="Move up"
+          data-action="move-up"
           data-card-drag-up="true"
         >
           ↑
@@ -1378,6 +1380,7 @@ const CardDragHandle = forwardRef<HTMLDivElement, CardDragHandleProps>(
           onClick={onMoveDown}
           disabled={onMoveDown === undefined}
           aria-label="Move down"
+          data-action="move-down"
           data-card-drag-down="true"
         >
           ↓

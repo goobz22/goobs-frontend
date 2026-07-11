@@ -821,6 +821,7 @@ export default function BigCalendar({
         type="button"
         onClick={() => onEventClick(event)}
         className={chipClassName}
+        data-action="select-event"
         style={{ ['--bc-event-bg' as string]: eventColor }}
         aria-label={accessibleName}
       >
@@ -1343,6 +1344,7 @@ export default function BigCalendar({
                 type="button"
                 onClick={handlePrevious}
                 className={cssStyles.navButton}
+                data-action="prev"
                 aria-label={`Previous ${view}`}
               >
                 <ChevronLeftIcon styles={{ theme }} aria-hidden="true" />
@@ -1354,6 +1356,7 @@ export default function BigCalendar({
                   cssStyles.navButton,
                   cssStyles.navButtonToday
                 )}
+                data-action="today"
                 aria-label="Go to today"
               >
                 <CalendarIcon styles={{ theme }} aria-hidden="true" />
@@ -1362,6 +1365,7 @@ export default function BigCalendar({
                 type="button"
                 onClick={handleNext}
                 className={cssStyles.navButton}
+                data-action="next"
                 aria-label={`Next ${view}`}
               >
                 <ChevronRightIcon styles={{ theme }} aria-hidden="true" />

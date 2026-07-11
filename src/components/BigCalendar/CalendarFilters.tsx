@@ -143,6 +143,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
           <button
             type="button"
             aria-label="Clear all filters"
+            data-action="clear"
             onClick={e => {
               e.stopPropagation()
               clearAllFilters()

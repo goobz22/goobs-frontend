@@ -46,6 +46,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
           <button
             type="button"
             onClick={onBack}
+            data-action="back"
             className={cssStyles.breadcrumbButton}
           >
             <svg

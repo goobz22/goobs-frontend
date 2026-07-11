@@ -585,6 +585,7 @@ const PricingTable: FC<PricingProps> = props => {
                       <CustomButton
                         text={text}
                         onClick={() => handleButtonClick(i)}
+                        action="select"
                         styles={{ theme, ...styles.button }}
                         disabled={disabled}
                       />
