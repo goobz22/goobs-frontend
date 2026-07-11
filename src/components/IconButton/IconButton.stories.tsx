@@ -216,3 +216,78 @@ export const DisabledStates: Story = {
     </div>
   ),
 }
+
+// --------------------------------------------------------------------------
+// ACCESSIBILITY STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Accessible name (WCAG 4.1.2 / 1.1.1). An icon-only button has no visible
+ * text and the goobs icon `<svg>` carries no text alternative, so a name MUST
+ * be supplied programmatically. This story shows both mechanisms:
+ *
+ * - **`aria-label`** — the common case; a concise action phrase becomes the
+ *   button's accessible name.
+ * - **`aria-labelledby`** — point at a visible element that already names the
+ *   action (here the "Add to cart" caption beside the button).
+ *
+ * Tab to either button in the a11y/Accessibility addon and confirm the name is
+ * announced. Rendering an IconButton with neither logs a development-only
+ * `console.warn`.
+ */
+export const AccessibleName: Story = {
+  name: 'Accessibility/Accessible name',
+  render: () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+      {/* aria-label supplies the name directly. */}
+      <IconButton styles={{ theme: 'light' }} aria-label="Delete row">
+        <DeleteIcon styles={{ theme: 'light' }} />
+      </IconButton>
+
+      {/* aria-labelledby borrows the name from the visible caption. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <IconButton styles={{ theme: 'light' }} aria-labelledby="add-cart-label">
+          <AddIcon styles={{ theme: 'light' }} />
+        </IconButton>
+        <span id="add-cart-label">Add to cart</span>
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Keyboard focus visibility (WCAG 2.4.7 Focus Visible / 2.4.11). Tab through
+ * the row: every theme — including **sacred** — renders a clearly-visible focus
+ * ring (`:focus-visible` in Button.module.css). Sacred previously suppressed the
+ * ring because the component forced an inline `outline: none`; that inline value
+ * outranked the `:focus-visible` rule. The forced outline was removed, so the
+ * keyboard ring is restored while pointer users still see no resting outline.
+ */
+export const KeyboardFocus: Story = {
+  name: 'Accessibility/Keyboard focus',
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem',
+        background: '#0e0e0e',
+        padding: '1.5rem',
+        borderRadius: '8px',
+      }}
+    >
+      <IconButton styles={{ theme: 'sacred' }} aria-label="Edit (sacred)">
+        <EditIcon styles={{ theme: 'sacred' }} />
+      </IconButton>
+      <IconButton styles={{ theme: 'dark' }} aria-label="Edit (dark)">
+        <EditIcon styles={{ theme: 'dark' }} />
+      </IconButton>
+      <div style={{ background: '#ffffff', padding: '0.5rem', borderRadius: 8 }}>
+        <IconButton styles={{ theme: 'light' }} aria-label="Edit (light)">
+          <EditIcon styles={{ theme: 'light' }} />
+        </IconButton>
+      </div>
+    </div>
+  ),
+}

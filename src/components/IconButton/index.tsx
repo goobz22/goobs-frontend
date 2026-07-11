@@ -53,6 +53,12 @@ export interface IconButtonProps extends Omit<ButtonProps, 'text'> {
 
 /**
  * A button component specifically designed for icon-only usage.
+ *
+ * Because it renders no visible text, an accessible name MUST be supplied via
+ * `aria-label` (or `aria-labelledby`) so screen-reader users know what the
+ * button does (WCAG 4.1.2 / 1.1.1) — development builds warn when it is
+ * omitted. Keyboard focus, reduced-motion, and disabled semantics are inherited
+ * from the underlying <Button> (native `<button>`, `:focus-visible` ring).
  */
 const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   (
