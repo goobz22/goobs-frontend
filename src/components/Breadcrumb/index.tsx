@@ -126,7 +126,27 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
 
     const content = <span className={cssStyles.itemContent}>{item.label}</span>
 
-    if (item.href && !item.isActive) {
+    // Current page — flagged with aria-current="page" per the WAI-ARIA
+    // breadcrumb pattern so assistive tech announces "current page", and
+    // rendered as non-navigable text (active crumbs never became links).
+    // onClick is preserved for diagnostic / consumer-callback parity.
+    if (item.isActive) {
+      return (
+        <span
+          key={index}
+          className={itemClassName}
+          style={itemOverride}
+          aria-current="page"
+          onClick={event => handleItemClick(item, event)}
+        >
+          {content}
+        </span>
+      )
+    }
+
+    // Real anchor for href crumbs — crawlable and natively keyboard/focus
+    // operable.
+    if (item.href) {
       return (
         <a
           key={index}
@@ -140,26 +160,27 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
       )
     }
 
+    // Interactive crumb without an href → a native <button>. The platform
+    // supplies the accessible name (from its text), Enter/Space activation, and
+    // focusability, replacing the former role="button" / tabIndex / onKeyPress
+    // span (onKeyPress is deprecated and never prevented Space from scrolling).
+    if (item.onClick) {
+      return (
+        <button
+          key={index}
+          type="button"
+          className={itemClassName}
+          style={itemOverride}
+          onClick={event => handleItemClick(item, event)}
+        >
+          {content}
+        </button>
+      )
+    }
+
+    // Plain, non-interactive crumb text (no href, no onClick, not current).
     return (
-      <span
-        key={index}
-        className={itemClassName}
-        style={itemOverride}
-        onClick={event => handleItemClick(item, event)}
-        role={item.onClick ? 'button' : undefined}
-        tabIndex={item.onClick ? 0 : undefined}
-        onKeyPress={event => {
-          if (item.onClick && (event.key === 'Enter' || event.key === ' ')) {
-            // Convert keyboard event to mouse event for consistency
-            const syntheticEvent = {
-              ...event,
-              preventDefault: event.preventDefault.bind(event),
-              stopPropagation: event.stopPropagation.bind(event),
-            } as unknown as React.MouseEvent<HTMLElement>
-            item.onClick(syntheticEvent)
-          }
-        }}
-      >
+      <span key={index} className={itemClassName} style={itemOverride}>
         {content}
       </span>
     )
@@ -171,6 +192,10 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         key={`separator-${index}`}
         className={cssStyles.separator}
         style={styles?.separator}
+        // Purely decorative delimiter between crumbs — hidden from assistive
+        // tech so screen readers don't announce "slash" / the icon between
+        // every item (WCAG 1.3.1).
+        aria-hidden="true"
       >
         {defaultSeparator}
       </span>

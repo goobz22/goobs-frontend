@@ -179,6 +179,35 @@
   background-color: transparent;
 }
 
+/* Interactive crumb rendered as a native <button> (an item with onClick but no
+   href). Strip the UA button chrome so it matches the <a>/<span> crumbs; the
+   shared .item rule above supplies colour / typography / padding / hover. */
+button.item {
+  border: none;
+  background: transparent;
+  margin: 0;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   FOCUS-VISIBLE — a clearly visible keyboard focus ring on link / button
+   crumbs (WCAG 2.4.7). Ring colour comes from the per-theme focus-ring tokens.
+   -------------------------------------------------------------------------- */
+.item:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--goobs-radius-md);
+}
+
+.container[data-theme='light'] .item:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.container[data-theme='dark'] .item:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
 /* --------------------------------------------------------------------------
    INNER CONTENT WRAPPER (was inline position:relative;display:inline-block)
    -------------------------------------------------------------------------- */
@@ -257,4 +286,20 @@
   );
   pointer-events: none;
   z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION — honour a user's prefers-reduced-motion request (WCAG 2.3.3)
+   by dropping the crumb hover transition and the sacred lift transform.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .container[data-theme='light'] .item,
+  .container[data-theme='dark'] .item {
+    transition: none;
+  }
+
+  .item:hover:not(.activeItem) {
+    transform: none;
+  }
 }

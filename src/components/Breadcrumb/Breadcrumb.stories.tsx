@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { fn } from 'storybook/test'
 import Breadcrumb from './index'
 import { ChevronRightIcon } from '../Icons'
 
@@ -70,6 +71,38 @@ export const MaxItems: Story = {
     ],
     maxItems: 4,
     styles: { theme: 'sacred' },
+  },
+  globals: { backgrounds: { value: 'dark' } },
+}
+
+/**
+ * A11y: crumbs given an `onClick` but no `href` render as native `<button>`
+ * elements — they carry an accessible name from their text, take focus, and
+ * activate with Enter/Space for free. The final `isActive` crumb is the current
+ * page and is exposed with `aria-current="page"`.
+ */
+export const InteractiveCallback: Story = {
+  args: {
+    items: [
+      { label: 'Home', onClick: fn() },
+      { label: 'Category', onClick: fn() },
+      { label: 'Current Page', isActive: true },
+    ],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * A11y: the current page is the last crumb (`isActive: true`) and is rendered
+ * as non-navigable text carrying `aria-current="page"`; the `/` separators are
+ * decorative and hidden from assistive tech via `aria-hidden`. Keyboard-focus
+ * any link to see the `:focus-visible` ring.
+ */
+export const CurrentPageAndSeparators: Story = {
+  args: {
+    items: sampleItems,
+    styles: { theme: 'dark' },
   },
   globals: { backgrounds: { value: 'dark' } },
 }
