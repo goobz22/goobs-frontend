@@ -66,6 +66,13 @@ export interface FileDropzoneProps {
 
   /** Theming. Default `'sacred'`. */
   styles?: { theme?: FieldTheme }
+  /**
+   * Forwarded ref to the hidden `<input type="file">` (React 19 ref-as-prop) so
+   * consumers can open the OS file picker programmatically (`ref.current.click()`)
+   * or reset the input. Merged with the component's internal input ref. The
+   * visible drop surface is a separate `<button>`.
+   */
+  ref?: React.Ref<HTMLInputElement>
 }
 
 function defaultAccept(variant: FileDropzoneVariant): string {
