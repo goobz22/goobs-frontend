@@ -38,12 +38,22 @@ export function areRowsEqual(
 }
 
 /**
- * Creates a stable key from a row for comparison purposes
+ * Creates a stable key from a row for comparison purposes.
+ *
+ * The identity falls back to a deterministic content signature (never
+ * Math.random()): a random fallback would produce a different key on every
+ * call, defeating comparison/memoisation and — if used as a React key —
+ * remounting the row on each render and mismatching during hydration.
  */
 export function getRowKey(row: RowData): string {
-  const id = row._id || row.id || Math.random().toString(36)
   const updated = row.updatedAt || row.createdAt || ''
-  return `${id}-${updated}`
+  const id = row._id || row.id
+  if (id) return `${id}-${updated}`
+  // Deterministic fallback for id-less rows (matches areRowsEqual's signature
+  // shape) so the key is stable across renders and between server and client.
+  const title = typeof row.title === 'string' ? row.title : ''
+  const status = typeof row.status === 'string' ? row.status : ''
+  return `row-${updated}-${title}-${status}`
 }
 
 /**

@@ -269,12 +269,10 @@ function formatCurrency(
   }
 
   const colorScheme = getColorScheme()
-  const formatId = `currency-${Math.random().toString(36).substr(2, 9)}`
 
   // Premium styled element with sophisticated design
   const element = (
     <span
-      id={formatId}
       style={{
         position: 'relative',
         display: 'inline-flex',
@@ -303,7 +301,7 @@ function formatCurrency(
         textShadow: isZero ? 'none' : '0 1px 2px rgba(255, 255, 255, 0.8)',
         // Add animation for large values
         animation: colorScheme.pulse
-          ? `pulse-${formatId} 2s ease-in-out infinite`
+          ? `pulse-datagrid-currency 2s ease-in-out infinite`
           : 'none',
       }}
       onMouseEnter={e => {
@@ -324,7 +322,7 @@ function formatCurrency(
       {colorScheme.pulse && (
         <style>
           {`
-            @keyframes pulse-${formatId} {
+            @keyframes pulse-datagrid-currency {
               0%, 100% { opacity: 1; }
               50% { opacity: 0.85; }
             }
@@ -380,12 +378,12 @@ function formatCurrency(
             height: '100%',
             background:
               'linear-gradient(90deg, transparent, var(--goobs-white-a30), transparent)',
-            animation: `shimmer-${formatId} 3s ease-in-out infinite`,
+            animation: `shimmer-datagrid-currency 3s ease-in-out infinite`,
           }}
         >
           <style>
             {`
-              @keyframes shimmer-${formatId} {
+              @keyframes shimmer-datagrid-currency {
                 0% { left: -100%; }
                 50%, 100% { left: 100%; }
               }
@@ -493,12 +491,9 @@ function formatCreditCard(
         borderColor: 'var(--goobs-dark-border-strong)',
       }
 
-  const formatId = `card-${Math.random().toString(36).substr(2, 9)}`
-
   // Premium styled element with security-focused design
   const element = (
     <span
-      id={formatId}
       style={{
         position: 'relative',
         display: 'inline-flex',
