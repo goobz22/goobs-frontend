@@ -208,6 +208,20 @@ export interface FilterSectionProps {
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6
 
   // Misc ----------------------------------------------------------
+  /**
+   * Accessible name for the search/filter landmark. In non-collapsible mode a
+   * FilterSection that includes a search box is a *search facility* (a search
+   * box plus its filter controls), so its root is exposed as a `role="search"`
+   * landmark (WAI-ARIA landmark best practice / WCAG 1.3.1) — this lets
+   * screen-reader users jump straight to the filters via landmark navigation.
+   * The landmark is given an accessible name (this prop → falls back to
+   * `title`, default `"Filters"`); pass a UNIQUE label to disambiguate when
+   * several filter sections share one page, so their landmarks don't all
+   * announce as the same name. Collapsible mode already exposes its panel as a
+   * named `role="region"` landmark, so this prop applies to non-collapsible
+   * mode only. No search box → no landmark (nothing to name).
+   */
+  landmarkLabel?: string
   styles?: { theme?: 'sacred' | 'light' | 'dark' }
   /**
    * Give the (non-collapsible) row a self-contained surface — padding, a
@@ -270,6 +284,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   surface = false,
   className,
   style,
+  landmarkLabel,
   styles: propStyles,
   dataField,
   'data-testid': dataTestId = 'filter-section',
@@ -574,6 +589,16 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         data-theme={theme}
         data-component="FilterSection"
         data-filter-section="true"
+        // A search box + its filter controls form a "search facility", so when
+        // a search box is present expose the section as a named `role="search"`
+        // landmark (WAI-ARIA landmarks / WCAG 1.3.1) for landmark navigation.
+        // Named via `landmarkLabel` (→ `title`, default "Filters") so multiple
+        // filter rows on a page can be disambiguated. Filter-only rows (no
+        // search box) get no landmark — an unnamed/ambiguous one adds noise.
+        {...(hasSearch && {
+          role: 'search',
+          'aria-label': landmarkLabel ?? title,
+        })}
         {...(surface && { 'data-surface': 'true' })}
         {...(dataField !== undefined && {
           'data-subject': dataField,
@@ -594,7 +619,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       type="button"
       onClick={handleToggle}
       aria-expanded={isExpanded}
-      aria-controls={panelId}
+      // The panel is mount-on-open ({isExpanded && …} below), so reference it
+      // via aria-controls ONLY while it is actually in the DOM — emitting a
+      // fixed IDREF while collapsed points at a non-existent node (a dangling
+      // aria-controls, a deviation from the WAI-ARIA APG Disclosure pattern).
+      // aria-expanded still conveys the collapsed state on its own.
+      {...(isExpanded && { 'aria-controls': panelId })}
       data-action="toggle"
       data-testid={toggleTestId}
       data-state={state}
