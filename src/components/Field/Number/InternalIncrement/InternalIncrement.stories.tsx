@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the InternalIncrementNumberField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import InternalIncrementNumberField from './index'
 
 const meta: Meta<typeof InternalIncrementNumberField> = {
@@ -315,5 +316,73 @@ export const SacredCounter: Story = {
     styles: {
       theme: 'sacred',
     },
+  },
+}
+
+/**
+ * A11y regression (WCAG 2.1.1 / 4.1.2 — APG spinbutton).
+ *
+ * Two things this pins:
+ *  1. The +/- buttons are keyboard-operable. They previously bound only
+ *     `onMouseDown`, so Enter/Space (which fire a `click`, never a
+ *     `mousedown`) did nothing — the stepper was mouse-only. A keyboard
+ *     `click` reports `detail === 0`, which now triggers a single step.
+ *  2. The input is a proper spinbutton: `role="spinbutton"` with
+ *     `aria-valuenow`/`aria-valuemin`/`aria-valuemax`, and Up/Down/Home/End
+ *     step it from the keyboard.
+ */
+export const KeyboardAccessible: Story = {
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <InternalIncrementNumberField {...args} />
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: 'Quantity',
+    initialValue: '1',
+    min: 0,
+    max: 5,
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const spinbutton = canvas.getByRole('spinbutton')
+
+    // Programmatic spinbutton semantics are present.
+    await expect(spinbutton).toHaveAttribute('aria-valuemin', '0')
+    await expect(spinbutton).toHaveAttribute('aria-valuemax', '5')
+    await expect(spinbutton).toHaveAttribute('aria-valuenow', '1')
+    await expect(spinbutton).toHaveValue('1')
+
+    // Up/Down arrows step the value from the keyboard.
+    await userEvent.click(spinbutton)
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(spinbutton).toHaveValue('2')
+    await expect(spinbutton).toHaveAttribute('aria-valuenow', '2')
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(spinbutton).toHaveValue('1')
+
+    // Home/End jump to the floor/ceiling (respecting min/max clamping).
+    await userEvent.keyboard('{End}')
+    await expect(spinbutton).toHaveValue('5')
+    await userEvent.keyboard('{Home}')
+    await expect(spinbutton).toHaveValue('0')
+
+    // The critical fix: the +/- buttons respond to Enter/Space (keyboard
+    // click, detail === 0) — the old mousedown-only wiring left them
+    // inert for keyboard/AT users.
+    const increase = canvas.getByRole('button', { name: 'Increase value' })
+    increase.focus()
+    await expect(increase).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(spinbutton).toHaveValue('1')
+    await userEvent.keyboard(' ')
+    await expect(spinbutton).toHaveValue('2')
+
+    const decrease = canvas.getByRole('button', { name: 'Decrease value' })
+    decrease.focus()
+    await userEvent.keyboard('{Enter}')
+    await expect(spinbutton).toHaveValue('1')
   },
 }

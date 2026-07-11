@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the ExternalIncrementNumberField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import ExternalIncrementNumberField from './index'
 
 const meta: Meta<typeof ExternalIncrementNumberField> = {
@@ -214,4 +215,54 @@ export const LargeSize: Story = {
       <ExternalIncrementNumberField {...args} />
     </div>
   ),
+}
+
+/**
+ * A11y regression (WCAG 2.1.1 / 4.1.2 — APG spinbutton). The input carries
+ * `role="spinbutton"` with `aria-valuenow`/`aria-valuemin`, and is fully
+ * keyboard-operable: Up/Down arrows step the value and Home jumps to the
+ * floor (0), so a value can be set without a mouse. The +/- buttons are
+ * native `<button>`s and remain operable with Enter/Space.
+ */
+export const KeyboardAccessible: Story = {
+  args: {
+    ...commonArgs,
+    label: 'Quantity',
+    initialValue: '3',
+  },
+  render: (args: any) => (
+    <div style={{ padding: '20px' }}>
+      <ExternalIncrementNumberField {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const spinbutton = canvas.getByRole('spinbutton')
+
+    // Programmatic spinbutton semantics are present.
+    await expect(spinbutton).toHaveAttribute('aria-valuemin', '0')
+    await expect(spinbutton).toHaveAttribute('aria-valuenow', '3')
+    await expect(spinbutton).toHaveValue('3')
+
+    // Arrow keys step the value with no mouse.
+    await userEvent.click(spinbutton)
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(spinbutton).toHaveValue('4')
+    await expect(spinbutton).toHaveAttribute('aria-valuenow', '4')
+
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
+    await expect(spinbutton).toHaveValue('2')
+
+    // Home resets to the floor.
+    await userEvent.keyboard('{Home}')
+    await expect(spinbutton).toHaveValue('0')
+    await expect(spinbutton).toHaveAttribute('aria-valuenow', '0')
+
+    // The +/- buttons work via keyboard activation (native button click).
+    const increase = canvas.getByRole('button', { name: 'Increase value' })
+    increase.focus()
+    await expect(increase).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(spinbutton).toHaveValue('1')
+  },
 }
