@@ -4,7 +4,7 @@
  */
 import React, { useState, useCallback } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect, userEvent } from 'storybook/test'
+import { within, expect, userEvent, waitFor } from 'storybook/test'
 import Popover, { type PopoverStyles } from './index'
 import Button from '../Button'
 
