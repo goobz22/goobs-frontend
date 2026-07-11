@@ -63,8 +63,8 @@ const calculateSubnetInfo = (cidr: number) => {
   const usableHosts = Math.max(totalHosts - 2, 0)
   return {
     mask,
-    hosts: totalHosts.toLocaleString(),
-    usableHosts: usableHosts.toLocaleString(),
+    hosts: totalHosts.toLocaleString('en-US'),
+    usableHosts: usableHosts.toLocaleString('en-US'),
   }
 }
 
@@ -609,8 +609,8 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     const totalHosts = Math.pow(2, 32 - cidr)
     const usableHosts = Math.max(totalHosts - 2, 0)
     return {
-      hosts: totalHosts.toLocaleString(),
-      usableHosts: usableHosts.toLocaleString(),
+      hosts: totalHosts.toLocaleString('en-US'),
+      usableHosts: usableHosts.toLocaleString('en-US'),
     }
   }
 

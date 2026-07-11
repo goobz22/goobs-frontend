@@ -409,7 +409,9 @@ const formatValueForCSV = (value: unknown): string => {
       try {
         const date = new Date(value)
         if (!isNaN(date.getTime())) {
-          return date.toLocaleString()
+          // Explicit locale keeps the exported CSV deterministic regardless of
+          // the exporter's runtime locale (and avoids SSR/client drift).
+          return date.toLocaleString('en-US')
         }
       } catch {
         // If parsing fails, return original string

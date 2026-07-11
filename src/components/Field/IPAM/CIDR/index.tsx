@@ -63,9 +63,9 @@ const calculateCIDRInfo = (cidr: number) => {
 
   return {
     mask,
-    networks: networks.toLocaleString(),
-    totalHosts: totalHosts.toLocaleString(),
-    usableHosts: usableHosts.toLocaleString(),
+    networks: networks.toLocaleString('en-US'),
+    totalHosts: totalHosts.toLocaleString('en-US'),
+    usableHosts: usableHosts.toLocaleString('en-US'),
   }
 }
 
