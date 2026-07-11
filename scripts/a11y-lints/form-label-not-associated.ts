@@ -188,11 +188,16 @@ const lint: A11yLint = {
         const tag = readOpeningTag(masked, m.index)
         if (!tag) continue
         const { body, end } = tag
+        // Attribute hatches read the RAW opening tag (offsets are identical —
+        // masking preserves length): the `aria-hidden="true"` VALUE lives in a
+        // string literal that the mask would blank, and attribute NAMES are
+        // never inside strings, so raw is both correct and safe here.
+        const rawBody = text.slice(m.index, end)
         // #1 explicit htmlFor · #2 id (aria-labelledby target) · #4 aria-hidden
         if (
-          HAS_HTMLFOR_RE.test(body) ||
-          HAS_ID_RE.test(body) ||
-          HAS_ARIA_HIDDEN_TRUE_RE.test(body)
+          HAS_HTMLFOR_RE.test(rawBody) ||
+          HAS_ID_RE.test(rawBody) ||
+          HAS_ARIA_HIDDEN_TRUE_RE.test(rawBody)
         )
           continue
         // #3 a labelable control nested inside the label (implicit association)
