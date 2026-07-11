@@ -241,3 +241,111 @@ export const ContainerAnimation: Story = {
   ),
   globals: { backgrounds: { value: 'sacred' } },
 }
+
+// --------------------------------------------------------------------------
+// A toolbar with REAL interactive children (buttons), used to demonstrate the
+// keyboard/AT symmetry of the disabled state: when the bar is enabled these
+// buttons are Tab-focusable and clickable; when it is disabled the `inert`
+// attribute takes the whole subtree out of the tab order AND out of pointer/AT
+// reach, so "disabled" means disabled-for-everyone (not just for mouse users).
+// --------------------------------------------------------------------------
+
+const InteractiveNav = ({
+  color = '#1F2937',
+}: {
+  color?: string
+}): React.JSX.Element => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+      padding: '0 1rem',
+      color,
+    }}
+  >
+    <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color }}>
+      ThothOS
+    </span>
+    <nav style={{ display: 'flex', gap: '0.75rem' }}>
+      <button type="button" style={{ color, cursor: 'pointer' }}>
+        Dashboard
+      </button>
+      <button type="button" style={{ color, cursor: 'pointer' }}>
+        Reports
+      </button>
+      <button type="button" style={{ color, cursor: 'pointer' }}>
+        Settings
+      </button>
+    </nav>
+  </div>
+)
+
+/**
+ * Regression test for the disabled-state keyboard/AT asymmetry fix (WCAG 2.1.1).
+ * A `disabled` AppBar carries `inert` on its root `<header>`, so its interactive
+ * children (the three `<button>`s here) are removed from the tab order and can
+ * NOT be reached or activated by keyboard or assistive tech — matching the
+ * pointer block (`pointer-events: none`) that already dead-ended mouse users.
+ * Before the fix the buttons stayed Tab-focusable and keyboard-activatable while
+ * the bar looked and behaved as disabled for the mouse (the pointer-events
+ * anti-pattern). Removing `inert={isDisabled || undefined}` in index.tsx would
+ * make the buttons Tab-reachable again and regress this baseline.
+ *
+ * The top (enabled) bar is the control: its buttons ARE Tab-focusable.
+ */
+export const DisabledIsInert: Story = {
+  name: 'Accessibility/Disabled Is Inert',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <AppBar
+        ariaLabel="Enabled toolbar"
+        styles={{ theme: 'light' }}
+      >
+        <InteractiveNav color="#1F2937" />
+      </AppBar>
+      <AppBar
+        ariaLabel="Disabled toolbar"
+        styles={{ theme: 'light', disabled: true }}
+      >
+        <InteractiveNav color="inherit" />
+      </AppBar>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Regression test for the landmark opt-out (axe `landmark-no-duplicate-banner` /
+ * `landmark-banner-is-top-level`). The primary bar keeps the default
+ * `landmark='banner'` (`role="banner"`); a SECONDARY bar passes `landmark='none'`
+ * so it does NOT emit a second banner landmark. The secondary bar still renders a
+ * native `<header>` (here nested inside `<main>`, where a `<header>`'s implicit
+ * role degrades to generic), so the page exposes exactly one banner. Reverting
+ * the conditional `role` in index.tsx would re-emit `role="banner"` on the
+ * secondary bar and reintroduce the duplicate-banner violation.
+ */
+export const SecondaryBarNoBanner: Story = {
+  name: 'Accessibility/Secondary Bar (No Banner Landmark)',
+  render: () => (
+    <div>
+      <AppBar
+        ariaLabel="Primary navigation"
+        styles={{ theme: 'light' }}
+      >
+        <NavContent color="#1F2937" />
+      </AppBar>
+      <main style={{ padding: '1rem' }}>
+        <AppBar
+          landmark="none"
+          styles={{ theme: 'light', borderRadius: '8px' }}
+          elevated={false}
+        >
+          <NavContent color="#1F2937" />
+        </AppBar>
+      </main>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}

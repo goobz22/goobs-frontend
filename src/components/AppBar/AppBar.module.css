@@ -134,6 +134,12 @@
    opacity < 1 over white keeps even pure black under 4.5:1, so the dim is now
    expressed as a dedicated disabled/muted text token — each proven ≥4.5:1 on
    its theme surface — while still reading as clearly disabled.
+
+   NOTE: `pointer-events: none` blocks only POINTER users; keyboard/AT symmetry
+   (children removed from the tab order, whole subtree out of AT reach) is
+   provided by the `inert` attribute set on the <header> in index.tsx when
+   disabled. This CSS rule keeps the pointer block + the accessible dim; `inert`
+   makes "disabled" mean disabled-for-everyone.
    -------------------------------------------------------------------------- */
 .container[data-disabled='true'] {
   pointer-events: none;

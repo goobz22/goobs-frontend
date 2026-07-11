@@ -282,9 +282,20 @@ const AppBar: FC<AppBarProps> = props => {
   // Renders as a native <header> — an app bar IS the page's banner landmark, so
   // the semantically correct element gives that landmark to assistive tech AND
   // to crawlers/SSR HTML natively (matching Breadcrumb/Pagination's native
-  // <nav>). role="banner" is kept explicitly: it preserves the machine-test
-  // selector contract AND guarantees the banner role even when a <header> is
-  // nested inside sectioning content (where its implicit role degrades).
+  // <nav>). role="banner" is emitted by DEFAULT (landmark='banner'): it
+  // preserves the machine-test selector contract AND guarantees the banner role
+  // even when a <header> is nested inside sectioning content (where its implicit
+  // role degrades). A secondary/nested bar can pass landmark='none' to drop the
+  // explicit role and let the native <header> degrade instead of forcing a
+  // duplicate/non-top-level banner landmark.
+  //
+  // `inert` when disabled makes "disabled" mean disabled-for-EVERYONE: it takes
+  // the whole subtree out of the tab order and out of pointer/AT reach, so the
+  // bar's children can't be keyboard-activated while the bar is dead to the
+  // mouse. Without it, `pointer-events: none` (CSS) blocked only pointer users
+  // and left keyboard/AT users fully able to operate a "disabled" bar. Matches
+  // the `inert` isolation precedent in Drawer. `undefined` (not `false`) is
+  // rendered when enabled so the attribute is simply absent.
   return (
     <header
       className={mergeClassNames(cssStyles.container, className)}
@@ -294,9 +305,11 @@ const AppBar: FC<AppBarProps> = props => {
       data-has-shadow={hasExplicitShadow ? 'true' : undefined}
       data-disabled={isDisabled ? 'true' : undefined}
       data-state={isDisabled ? 'disabled' : 'enabled'}
+      data-landmark={landmark}
+      inert={isDisabled || undefined}
       style={dynamicStyle}
       onClick={handleClick}
-      role="banner"
+      role={landmark === 'none' ? undefined : 'banner'}
       aria-label={ariaLabel}
       data-testid={dataTestId}
       {...rest}
