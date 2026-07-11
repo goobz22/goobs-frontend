@@ -19,6 +19,11 @@
  *     :171) into one primitive so the green↔grey gating is consistent.
  *   - While `pending`, the label swaps to a spinner + `'Saving…'` and the
  *     button is disabled so a double-submit can't fire.
+ *   - A polite `role="status"` live region announces the busy lifecycle to
+ *     assistive tech (WCAG 4.1.3): `pendingLabel` when a save starts and
+ *     `completedLabel` when `pending` returns to `false`. Success vs. failure
+ *     is caller-owned (SaveButton only sees `pending`) — a caller whose save
+ *     can fail announces the error itself and may override `completedLabel`.
  *   - Reuses CustomButton's `data-action="save"` selector and its
  *     `action.invoke` diagnostic emit (fired from CustomButton's own click
  *     handler) — SaveButton adds no diag of its own.
@@ -60,6 +65,17 @@ export interface SaveButtonProps extends Omit<
   /** Label shown while `pending`. Default `'Saving…'`. */
   pendingLabel?: string
   /**
+   * Announcement pushed to the polite live region when a save FINISHES — i.e.
+   * `pending` transitions `true → false` — so assistive tech hears the busy
+   * lifecycle CLOSE, not just its start (WCAG 4.1.3). Default `'Save complete'`.
+   *
+   * SaveButton only observes `pending`; it cannot know success vs. failure —
+   * that outcome is caller-owned. A caller whose save can FAIL should announce
+   * the error itself (e.g. via its error `<Alert role="alert">`) and may pass a
+   * custom `completedLabel`, or `''` to suppress the default completion cue.
+   */
+  completedLabel?: string
+  /**
    * Singular entity noun the save targets (e.g. `"contract"`). Forwarded to
    * CustomButton as `subject` → emitted as `data-subject` and carried on the
    * `action.invoke` diag.
@@ -82,11 +98,29 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   onSave,
   label = 'Save',
   pendingLabel = 'Saving…',
+  completedLabel = 'Save complete',
   subject,
   styles,
   ...restProps
 }) => {
   const isDisabled = !valid || pending
+
+  // Live-region text tracks the FULL busy lifecycle, not just its start. We
+  // announce `pendingLabel` when a save begins and `completedLabel` when it
+  // ends, so an AT user hears both edges (WCAG 4.1.3). The completion edge is
+  // the gap the audit flagged: previously the region silently cleared to ''
+  // on `pending: true → false`, so the user heard "Saving…" but never that it
+  // finished. Derived from the previous-render `pending` via the ref-guarded
+  // set-state-during-render pattern (no effect → no set-state-in-effect lint);
+  // the initializer seeds a mount that is already pending.
+  const [announcement, setAnnouncement] = React.useState(
+    pending ? pendingLabel : ''
+  )
+  const prevPendingRef = React.useRef(pending)
+  if (prevPendingRef.current !== pending) {
+    prevPendingRef.current = pending
+    setAnnouncement(pending ? pendingLabel : completedLabel)
+  }
 
   // Merge caller styles on top of the disabled flag so the underlying
   // CustomButton dims correctly. `disabled` in ButtonStyles is OR-ed with the
@@ -113,11 +147,12 @@ const SaveButton: React.FC<SaveButtonProps> = ({
         {...restProps}
       />
       {/* Polite live region carrying the busy-state announcement (WCAG
-          4.1.3). Empty when idle; populated with the pending label while a
-          save is in flight so assistive tech hears "Saving…" even though the
-          button itself is disabled. */}
+          4.1.3). Empty when idle; announces `pendingLabel` while a save is in
+          flight (so AT hears "Saving…" even though the button is disabled) and
+          `completedLabel` once it finishes, closing the busy lifecycle instead
+          of clearing silently. */}
       <span className={cssStyles.srOnly} role="status" aria-live="polite">
-        {pending ? pendingLabel : ''}
+        {announcement}
       </span>
     </>
   )
