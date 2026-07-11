@@ -942,6 +942,14 @@ const SacredBackground: FC<{
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Respect the user's reduced-motion preference (WCAG 2.3.3): when set, the
+    // drifting hieroglyph particles are painted ONCE as a static frame instead
+    // of continuously animating.
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     canvas.width = width
     canvas.height = height
 
@@ -971,20 +979,24 @@ const SacredBackground: FC<{
       })
     }
 
-    let animationId: number
+    let animationId: number | undefined
     const animate = (time: number) => {
       ctx.clearRect(0, 0, width, height)
       particles.forEach(particle => {
-        particle.x += particle.vx
-        particle.y += particle.vy
-        particle.opacity =
-          particle.maxOpacity *
-          (0.5 + 0.5 * Math.sin(time * 0.001 + particle.x * 0.01))
+        // Position + opacity only advance when motion is allowed; under
+        // reduced-motion the particles hold their initial positions.
+        if (!prefersReducedMotion) {
+          particle.x += particle.vx
+          particle.y += particle.vy
+          particle.opacity =
+            particle.maxOpacity *
+            (0.5 + 0.5 * Math.sin(time * 0.001 + particle.x * 0.01))
 
-        if (particle.x < -20) particle.x = width + 20
-        if (particle.x > width + 20) particle.x = -20
-        if (particle.y < -20) particle.y = height + 20
-        if (particle.y > height + 20) particle.y = -20
+          if (particle.x < -20) particle.x = width + 20
+          if (particle.x > width + 20) particle.x = -20
+          if (particle.y < -20) particle.y = height + 20
+          if (particle.y > height + 20) particle.y = -20
+        }
 
         ctx.save()
         ctx.globalAlpha = particle.opacity
@@ -997,11 +1009,17 @@ const SacredBackground: FC<{
         ctx.fillText(particle.glyph, particle.x, particle.y)
         ctx.restore()
       })
-      animationId = requestAnimationFrame(animate)
+      // Only schedule the next frame when motion is allowed; otherwise the one
+      // static frame above is the final render.
+      if (!prefersReducedMotion) {
+        animationId = requestAnimationFrame(animate)
+      }
     }
     animate(0)
 
-    return () => cancelAnimationFrame(animationId)
+    return () => {
+      if (animationId !== undefined) cancelAnimationFrame(animationId)
+    }
   }, [width, height, glyphColor])
 
   return <canvas ref={canvasRef} className={cssStyles.sacredBackground} />
@@ -1018,6 +1036,8 @@ const TreeItem: FC<TreeItemProps> = ({
   isExpanded = false,
   isFocused = false,
   hasChildren = false,
+  posInSet,
+  setSize,
   styles = {},
   onClick,
   onToggleExpansion,
@@ -1168,24 +1188,85 @@ const TreeItem: FC<TreeItemProps> = ({
     (event: React.KeyboardEvent) => {
       if (isDisabled && !disabledItemsFocusable) return
 
+      // The set of currently-visible tree items in DOM (== visual) order, used
+      // to move roving focus per the WAI-ARIA APG Tree View keyboard table.
+      const treeRoot = (event.currentTarget as HTMLElement).closest(
+        '[role="tree"]'
+      )
+      const visibleItems = treeRoot
+        ? Array.from(
+            treeRoot.querySelectorAll<HTMLElement>('[role="treeitem"]')
+          )
+        : []
+      const currentIndex = visibleItems.indexOf(
+        event.currentTarget as HTMLElement
+      )
+      const focusAt = (index: number) => {
+        const target = visibleItems[index]
+        if (target) target.focus()
+      }
+
       switch (event.key) {
         case 'Enter':
         case ' ':
           event.preventDefault()
           handleClick(event as any)
           break
+        case 'ArrowDown':
+          // Move focus to the next visible node.
+          event.preventDefault()
+          if (currentIndex >= 0 && currentIndex < visibleItems.length - 1) {
+            focusAt(currentIndex + 1)
+          }
+          break
+        case 'ArrowUp':
+          // Move focus to the previous visible node.
+          event.preventDefault()
+          if (currentIndex > 0) {
+            focusAt(currentIndex - 1)
+          }
+          break
+        case 'Home':
+          // Move focus to the first visible node.
+          event.preventDefault()
+          focusAt(0)
+          break
+        case 'End':
+          // Move focus to the last visible node.
+          event.preventDefault()
+          focusAt(visibleItems.length - 1)
+          break
         case 'ArrowRight':
           if (hasChildren && !isExpanded) {
+            // Closed parent → expand it.
             event.preventDefault()
             onToggleExpansion?.(event, itemId)
             context.onToggleExpansion(event, itemId)
+          } else if (hasChildren && isExpanded) {
+            // Open parent → move focus to its first child (next visible node).
+            event.preventDefault()
+            if (currentIndex >= 0 && currentIndex < visibleItems.length - 1) {
+              focusAt(currentIndex + 1)
+            }
           }
           break
         case 'ArrowLeft':
           if (hasChildren && isExpanded) {
+            // Open parent → collapse it.
             event.preventDefault()
             onToggleExpansion?.(event, itemId)
             context.onToggleExpansion(event, itemId)
+          } else {
+            // Closed node or leaf → move focus to the parent node.
+            event.preventDefault()
+            const parentId = context.parentMap.get(itemId)
+            if (parentId !== undefined) {
+              const parentEl = visibleItems.find(
+                el =>
+                  el.getAttribute('data-testid') === `tree-item-${parentId}`
+              )
+              if (parentEl) parentEl.focus()
+            }
           }
           break
       }
@@ -1214,14 +1295,36 @@ const TreeItem: FC<TreeItemProps> = ({
       style={itemOverrideStyle}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onFocus={event => {
+        // Keep roving-tabindex + the visual focus state in sync whenever the
+        // row receives DOM focus (Tab entry, arrow-key navigation, or click).
+        // Guarded to the row itself so focus bubbling from inner controls is
+        // ignored.
+        if (
+          event.target === event.currentTarget &&
+          context.focusedItem !== itemId
+        ) {
+          context.setFocusedItem(itemId)
+        }
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      tabIndex={isDisabled && !disabledItemsFocusable ? -1 : 0}
+      // Roving tabindex: exactly one treeitem is in the Tab sequence (APG Tree
+      // View). Arrow keys move DOM focus between nodes; disabled non-focusable
+      // rows are never tabbable.
+      tabIndex={
+        !(isDisabled && !disabledItemsFocusable) &&
+        context.tabbableItem === itemId
+          ? 0
+          : -1
+      }
       role="treeitem"
       aria-selected={isSelected}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-disabled={isDisabled}
       aria-level={level + 1}
+      aria-setsize={setSize}
+      aria-posinset={posInSet}
       data-testid={`tree-item-${itemId}`}
     >
       {/* Checkbox */}
@@ -1252,6 +1355,7 @@ const TreeItem: FC<TreeItemProps> = ({
           <ExpandMoreIcon
             styles={{ theme: styles.theme || 'sacred' }}
             style={expandIconStyle}
+            aria-hidden="true"
           />
         </div>
       )}
@@ -1364,6 +1468,25 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
       buildMaps(items)
       return { itemMap, parentMap, childrenMap }
     }, [items, getItemId, getItemChildren])
+
+    // Roving tabindex target (APG Tree View): exactly one treeitem is in the
+    // Tab sequence. It is the focused item when that item is currently visible
+    // (every ancestor expanded); otherwise it falls back to the first root item
+    // so Tab can always enter the tree even after the focused node is collapsed
+    // out of view.
+    const tabbableItem = useMemo<TreeViewItemId | null>(() => {
+      const isVisible = (id: TreeViewItemId): boolean => {
+        if (!itemMap.has(id)) return false
+        let parent = parentMap.get(id)
+        while (parent !== undefined) {
+          if (!expandedItems.has(parent)) return false
+          parent = parentMap.get(parent)
+        }
+        return true
+      }
+      if (focusedItem && isVisible(focusedItem)) return focusedItem
+      return items.length > 0 ? getItemId(items[0]) : null
+    }, [focusedItem, expandedItems, itemMap, parentMap, items, getItemId])
 
     // Container size tracking for sacred background
     useEffect(() => {
@@ -1500,7 +1623,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
     // Render tree recursively
     const renderTree = useCallback(
       (items: TreeViewItem[], level = 0): ReactNode => {
-        return items.map(item => {
+        return items.map((item, index) => {
           const itemId = getItemId(item)
           const children = getItemChildren(item)
           const hasChildren = children && children.length > 0
@@ -1517,6 +1640,8 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                 isExpanded={isItemExpanded}
                 isFocused={isItemFocused}
                 hasChildren={hasChildren}
+                posInSet={index + 1}
+                setSize={items.length}
                 styles={styles}
                 checkboxSelection={checkboxSelection}
                 multiSelect={multiSelect}
@@ -1534,6 +1659,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                 <div
                   className={cssStyles.childrenGroup}
                   data-theme={styles.theme || 'light'}
+                  role="group"
                   style={buildChildrenGroupOverrideStyle(
                     styles,
                     itemChildrenIndentation
@@ -1570,6 +1696,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
         selectedItems,
         expandedItems,
         focusedItem,
+        tabbableItem,
         disabledItems,
         itemMap,
         parentMap,
@@ -1596,6 +1723,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
         selectedItems,
         expandedItems,
         focusedItem,
+        tabbableItem,
         disabledItems,
         itemMap,
         parentMap,
@@ -1625,11 +1753,11 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
         <div
           ref={ref || containerRef}
           className={cssStyles.root}
+          data-component="TreeView"
           data-theme={styles.theme || 'light'}
           style={buildContainerOverrideStyle(styles)}
           role="tree"
           aria-multiselectable={multiSelect}
-          tabIndex={0}
           id={id}
           {...other}
         >
