@@ -49,6 +49,27 @@
   align-items: center;
 }
 
+/* --------------------------------------------------------------------------
+   SCREEN-READER-ONLY LIVE REGION (WCAG 4.1.3 Status Messages)
+   -------------------------------------------------------------------------
+   Removed from the visual layout but kept in the accessibility tree so the
+   `role="status"` page announcement ("Page N of M") is read by assistive tech
+   after every page change WITHOUT stealing focus. The standard clip-rect
+   technique (not `display:none`, which would drop it from the a11y tree, nor
+   `visibility:hidden`, which suppresses live-region announcements).
+   -------------------------------------------------------------------------- */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 /* ==========================================================================
    NAV / PAGE BUTTONS — shared box geometry
    ========================================================================== */
@@ -210,7 +231,11 @@
 }
 
 /* --------------------------------------------------------------------------
-   ELLIPSIS — MUI default color var(--goobs-black-a38) (non-sacred branch).
+   ELLIPSIS — the skipped-page-range indicator. MUI muted it to
+   var(--goobs-black-a38) (rgba(0,0,0,0.38) ≈ #9e9e9e → only 2.6:1 on white),
+   which FAILS WCAG 1.4.3 for text; the "…" is real informational text, so it
+   is lifted to var(--goobs-black-a60) (#666 → 5.7:1 on white). Still visibly
+   muted vs the a87 page numbers, so it never reads as an interactive control.
    -------------------------------------------------------------------------- */
 .ellipsis {
   min-width: 32px;
@@ -218,7 +243,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--goobs-black-a38);
+  color: var(--goobs-black-a60);
   font-family: inherit;
   font-size: 14px;
 }

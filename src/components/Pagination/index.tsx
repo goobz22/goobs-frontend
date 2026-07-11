@@ -311,6 +311,22 @@ const Pagination: FC<PaginationProps> = ({
       {...rest}
     >
       {/*
+        Screen-reader-only status (WCAG 4.1.3 Status Messages). Selecting a page
+        flips `aria-current` on a page button, but that attribute change is NOT
+        reliably announced when focus stays on the just-clicked control — so a
+        polite, atomic live region states the real active page after every
+        change. A live region never announces its initial value, so this speaks
+        only on a user-driven page change, not on first render.
+      */}
+      <div
+        className={cssStyles.visuallyHidden}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        Page {page} of {count}
+      </div>
+      {/*
         Pagination is a list of navigation controls, so the items render as a
         real <ul>/<li> list inside the <nav> landmark (mirrors the Breadcrumb
         landmark). Screen readers announce the item count and let users step
@@ -360,8 +376,20 @@ const Pagination: FC<PaginationProps> = ({
           </li>
         )}
 
-        {items.map((item, index) => (
-          <li key={index} className={cssStyles.listItem}>
+        {/*
+          Key on the item's CONTENT (page number, or the unique start/end
+          ellipsis token), NOT the array index. As the visible window shifts
+          the same DOM <button> is then reused for the same page, so keyboard/AT
+          focus stays on the page the user just activated (which becomes the
+          current page) instead of drifting to whatever number now occupies that
+          array slot (WCAG 2.4.3 Focus Order). Both ellipses are unique per
+          render, so keys never collide.
+        */}
+        {items.map((item) => (
+          <li
+            key={typeof item === 'number' ? `page-${item}` : item}
+            className={cssStyles.listItem}
+          >
             <PaginationItem
               item={item}
               page={page}

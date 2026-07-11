@@ -229,3 +229,24 @@ export const AccessibleStructure: Story = {
   ),
   globals: { backgrounds: { value: 'light' } },
 }
+
+// Exercises the screen-reader page-change announcement (WCAG 4.1.3). The
+// component renders a visually-hidden `role="status" aria-live="polite"` region
+// ("Page N of M") as the first child of the <nav>; changing pages updates its
+// text so assistive tech announces the new active page even though focus stays
+// on the just-clicked control. Enable a screen reader and click through the
+// pages — each selection is spoken as "Page N of M". The middle-of-range
+// starting page also shows the start/end ellipses, whose contrast was lifted to
+// meet WCAG 1.4.3 (they are informational "skipped range" text, not decoration).
+export const PageChangeAnnouncement: Story = {
+  name: 'Accessibility/Page Change Announcement',
+  render: () => (
+    <InteractivePagination
+      count={30}
+      initialPage={15}
+      showFirstButton
+      showLastButton
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
