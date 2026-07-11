@@ -71,6 +71,10 @@
   --cci-status-bg: var(--goobs-gold-a30);
   --cci-status-valid-bg: var(--goobs-gold);
 
+  /* sacred form-error text — theme-graded danger colour that holds ≥4.5:1 on
+     the dark sacred surface (WCAG 1.4.3). */
+  --cci-error-color: var(--goobs-sacred-danger-text);
+
   /* sacred success container */
   --cci-success-bg: rgba(10, 10, 10, 0.95);
   --cci-success-border-width: 2px;
@@ -151,6 +155,8 @@
   --cci-status-bg: var(--goobs-danger);
   --cci-status-valid-bg: var(--goobs-success);
 
+  --cci-error-color: var(--goobs-light-danger-text);
+
   --cci-success-bg: rgba(240, 253, 244, 0.95);
   --cci-success-border-width: 1px;
   --cci-success-border-color: var(--goobs-green-a40);
@@ -196,6 +202,8 @@
 
   --cci-status-bg: rgb(248, 113, 113);
   --cci-status-valid-bg: rgb(74, 222, 128);
+
+  --cci-error-color: var(--goobs-dark-danger-text);
 
   --cci-success-bg: rgba(20, 83, 45, 0.3);
   --cci-success-border-width: 1px;
@@ -313,6 +321,45 @@
   font-size: 0.85rem;
   font-weight: 700;
   line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   VISUALLY-HIDDEN (screen-reader-only) text — the standard clip-rect recipe
+   (matches Button/SaveButton's `.srOnly`). Used for (a) the persistent
+   role="status" success announcer mounted across both render branches and
+   (b) the status dot's swapped validity text, so their CONTENT MUTATIONS are
+   announced by assistive tech (WCAG 4.1.3) without any visual footprint.
+   Replaces the former inline-style object so styling stays in the CSS module.
+   -------------------------------------------------------------------------- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   FORM-ERROR MESSAGE — rendered (as a linked role="alert" region) when the
+   component is form-bound and the engine reports a validation error, so a
+   bound field failing validation is IDENTIFIED to assistive tech, not just
+   flagged aria-invalid on each cell (WCAG 3.3.1 Error Identification). The
+   digit cells point at it via aria-describedby. Theme-graded colour holds
+   ≥4.5:1 on every surface (WCAG 1.4.3).
+   -------------------------------------------------------------------------- */
+.errorMessage {
+  margin-top: 0.5rem;
+  color: var(--cci-error-color);
+  font-family: var(--goobs-font-standard);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  text-align: center;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 /* --------------------------------------------------------------------------
