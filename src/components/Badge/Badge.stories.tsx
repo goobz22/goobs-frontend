@@ -1140,11 +1140,11 @@ export const DecorativeBadge: Story = {
     const canvas = within(canvasElement)
     // The decorative badge exposes no status role and is not a live region.
     await expect(canvas.queryByRole('status')).toBeNull()
-    const badge = canvasElement.querySelector(
+    const badge = canvasElement.querySelector<HTMLElement>(
       '[data-component="Badge"] > span[role="none"]'
     )
     await expect(badge).not.toBeNull()
-    await expect(badge).not.toHaveAttribute('aria-label')
-    await expect(badge).not.toHaveAttribute('aria-live')
+    await expect(badge as HTMLElement).not.toHaveAttribute('aria-label')
+    await expect(badge as HTMLElement).not.toHaveAttribute('aria-live')
   },
 }
