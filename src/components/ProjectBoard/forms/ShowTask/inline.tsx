@@ -786,6 +786,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           aria-expanded (WCAG 4.1.2). */}
       <button
         type="button"
+        data-action="toggle"
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         className={cssStyles.collapseButton}
         aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -1023,6 +1024,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     cssStyles.flexButton,
                     cssStyles.saveButton
                   )}
+                  data-action="save"
                   onClick={handleSaveEdit}
                 >
                   Save
@@ -1033,6 +1035,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     cssStyles.flexButton,
                     cssStyles.ghostButton
                   )}
+                  data-action="cancel"
                   onClick={handleCancelEdit}
                 >
                   Cancel
@@ -1046,12 +1049,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     cssStyles.flexButton,
                     cssStyles.editButton
                   )}
+                  data-action="edit"
                   onClick={handleEditClick}
                 >
                   Edit
                 </button>
                 <button
                   className={cx(cssStyles.button, cssStyles.deleteButton)}
+                  data-action="delete"
                   onClick={onDelete}
                 >
                   Delete
@@ -1073,6 +1078,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 cssStyles.fullWidthButton,
                 cssStyles.ghostButton
               )}
+              data-action="back"
               onClick={onBack}
             >
               Back to Board
@@ -1205,6 +1211,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
               {!isEditingCompanyNotes && (
                 <button
+                  data-action="edit"
                   onClick={() => {
                     setEditedCompanyNotes(companyInternalNotes || '')
                     setIsEditingCompanyNotes(true)
@@ -1234,12 +1241,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 />
                 <div className={cssStyles.notesFormActions}>
                   <button
+                    data-action="save"
                     onClick={handleSaveCompanyNotes}
                     className={cssStyles.notesSaveButton}
                   >
                     Save Note
                   </button>
                   <button
+                    data-action="cancel"
                     onClick={() => {
                       setIsEditingCompanyNotes(false)
                       setEditedCompanyNotes(companyInternalNotes || '')
@@ -1290,6 +1299,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
               {!isEditingCustomerNotes && (
                 <button
+                  data-action="edit"
                   onClick={() => {
                     setEditedCustomerNotes(customerInternalNotes || '')
                     setIsEditingCustomerNotes(true)
@@ -1319,12 +1329,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 ></textarea>
                 <div className={cssStyles.notesFormActions}>
                   <button
+                    data-action="save"
                     onClick={handleSaveCustomerNotes}
                     className={cssStyles.notesSaveButton}
                   >
                     Save Note
                   </button>
                   <button
+                    data-action="cancel"
                     onClick={() => {
                       setIsEditingCustomerNotes(false)
                       setEditedCustomerNotes(customerInternalNotes || '')
@@ -1465,6 +1477,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             className={cssStyles.sectionToggle}
             data-active={commentSection === 'external' ? 'true' : undefined}
             aria-pressed={commentSection === 'external'}
+            data-action="select"
             onClick={() => setCommentSection('external')}
           >
             External Comments ({publicComments.length})
@@ -1474,6 +1487,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             className={cssStyles.sectionToggle}
             data-active={commentSection === 'internal' ? 'true' : undefined}
             aria-pressed={commentSection === 'internal'}
+            data-action="select"
             onClick={() => setCommentSection('internal')}
           >
             Internal Comments ({internalNotes.length})
@@ -1512,6 +1526,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             type="button"
             className={cx(cssStyles.button, cssStyles.commentSubmitButton)}
             style={submitVars}
+            data-action="add"
             onClick={handleAddComment}
           >
             {commentSection === 'external'
@@ -1575,6 +1590,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       {comment.editHistory &&
                         comment.editHistory.length > 1 && (
                           <button
+                            data-action="toggle"
                             onClick={() =>
                               setViewingRevisionHistoryId(
                                 viewingRevisionHistoryId === comment._id
@@ -1592,6 +1608,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       {comment.createdBy === currentUserName &&
                         editingCommentId !== comment._id && (
                           <button
+                            data-action="edit"
                             onClick={() => handleEditCommentClick(comment)}
                             className={cssStyles.commentEditButton}
                           >
@@ -1610,6 +1627,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       />
                       <div className={cssStyles.inlineButtonRow}>
                         <button
+                          data-action="save"
                           onClick={() => handleSaveCommentEdit(comment._id)}
                           className={cx(
                             cssStyles.button,
@@ -1620,6 +1638,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                           Save
                         </button>
                         <button
+                          data-action="cancel"
                           onClick={handleCancelCommentEdit}
                           className={cx(
                             cssStyles.button,
@@ -2039,6 +2058,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           >
             <span>Schedule New Meeting</span>
             <button
+              data-action="cancel"
               onClick={() => {
                 resetMeetingForm()
                 setSchedulingView('list')
@@ -2215,6 +2235,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Submit Button */}
           <div className={cssStyles.formActionsRight}>
             <button
+              data-action="cancel"
               onClick={() => {
                 resetMeetingForm()
                 setSchedulingView('list')
@@ -2228,6 +2249,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               Cancel
             </button>
             <button
+              data-action="create"
               onClick={handleScheduleMeeting}
               disabled={isSubmittingMeeting || !onScheduleMeeting}
               className={cx(
@@ -2265,6 +2287,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           >
             <span>Meeting Details</span>
             <button
+              data-action="back"
               onClick={() => {
                 setSelectedMeeting(null)
                 setSchedulingView('list')
@@ -2351,6 +2374,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cssStyles.detailActions}>
             {isPending && (
               <button
+                data-action="confirm"
                 onClick={() => handleConfirmMeetingAction(selectedMeeting._id)}
                 className={cx(cssStyles.button, cssStyles.confirmButton)}
               >
@@ -2359,6 +2383,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             )}
             {isActive && isUpcoming && (
               <button
+                data-action="reschedule"
                 onClick={() => {
                   initializeRescheduleForm(selectedMeeting)
                   setSchedulingView('reschedule')
@@ -2370,6 +2395,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             )}
             {isActive && isUpcoming && (
               <button
+                data-action="cancel-meeting"
                 onClick={() => handleCancelMeetingAction(selectedMeeting._id)}
                 className={cx(cssStyles.button, cssStyles.dangerButton)}
               >
@@ -2395,6 +2421,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           >
             <span>Reschedule Meeting</span>
             <button
+              data-action="cancel"
               onClick={() => {
                 setRescheduleDate(null)
                 setRescheduleTime(null)
@@ -2520,6 +2547,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           {/* Submit Button */}
           <div className={cssStyles.formActionsRight}>
             <button
+              data-action="cancel"
               onClick={() => {
                 setRescheduleDate(null)
                 setRescheduleTime(null)
@@ -2536,6 +2564,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               Cancel
             </button>
             <button
+              data-action="confirm"
               onClick={handleRescheduleMeetingAction}
               disabled={
                 isSubmittingMeeting || !rescheduleDate || !rescheduleTime
@@ -2598,6 +2627,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <div className={cssStyles.bookingCardActions}>
                     {/* Accept */}
                     <button
+                      data-action="confirm"
                       onClick={() => handleConfirmMeetingAction(meeting._id)}
                       className={cx(
                         cssStyles.button,
@@ -2609,6 +2639,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     </button>
                     {/* Propose new time */}
                     <button
+                      data-action="reschedule"
                       onClick={() => {
                         setSelectedMeeting(meeting)
                         setSchedulingView('reschedule')
@@ -2623,6 +2654,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     </button>
                     {/* Decline */}
                     <button
+                      data-action="cancel-meeting"
                       onClick={() => handleCancelMeetingAction(meeting._id)}
                       className={cx(
                         cssStyles.button,
@@ -2645,6 +2677,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               No meetings scheduled for this task yet.
             </p>
             <button
+              data-action="add"
               onClick={() => {
                 setMeetingTitle(`Meeting: ${taskTitle}`)
                 setSchedulingView('form')
@@ -2800,6 +2833,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cssStyles.kbArticleHeader}>
             <button
               type="button"
+              data-action="back"
               onClick={() => setSelectedArticleForView(null)}
               className={cssStyles.kbBackButton}
             >
@@ -2807,6 +2841,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             </button>
             <button
               type="button"
+              data-action="toggle"
               onClick={handleToggleLinkCase}
               className={cssStyles.kbLinkButton}
               data-linked={isLinkedToCase ? 'true' : undefined}
@@ -3065,6 +3100,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               </div>
               {!isEditingResolution && (
                 <button
+                  data-action="edit"
                   onClick={() => setIsEditingResolution(true)}
                   className={cssStyles.notesEditButton}
                 >
@@ -3158,12 +3194,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 {/* Save/Cancel Buttons */}
                 <div className={cssStyles.formActionsRight}>
                   <button
+                    data-action="cancel"
                     onClick={() => setIsEditingResolution(false)}
                     className={cssStyles.smallCancelButton}
                   >
                     Cancel
                   </button>
                   <button
+                    data-action="save"
                     onClick={() => {
                       // Save resolution data - this would call onEdit with resolution fields
                       onEdit({
