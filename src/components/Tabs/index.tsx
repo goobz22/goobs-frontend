@@ -1,11 +1,8 @@
 'use client'
 
 import React, { useRef } from 'react'
-import { alpha } from '../../utils'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tabs.module.css'
-
-const SACRED_GOLD = '#FFD700'
 
 /**
  * Capability profile for a single tab. Consumed by tooling that needs
@@ -200,7 +197,7 @@ const Tabs: React.FC<TabsProps> = ({
   // Handle tabLeftBorder - convert boolean to string
   const tabLeftBorderValue =
     styles?.tabLeftBorder === true
-      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
+      ? '1px solid var(--goobs-gold-a30)'
       : styles?.tabLeftBorder === false
         ? undefined
         : styles?.tabLeftBorder
@@ -208,7 +205,7 @@ const Tabs: React.FC<TabsProps> = ({
   // Handle tabRightBorder - convert boolean to string
   const tabRightBorderValue =
     styles?.tabRightBorder === true
-      ? `1px solid ${alpha(SACRED_GOLD, 0.3)}`
+      ? '1px solid var(--goobs-gold-a30)'
       : styles?.tabRightBorder === false
         ? undefined
         : styles?.tabRightBorder
@@ -355,6 +352,13 @@ export interface TabProps {
   /** Forwarded ref to the underlying `<button>` so the parent can
    *  programmatically focus a tab on keyboard nav. */
   buttonRef?: (el: HTMLButtonElement | null) => void
+  /**
+   * Public consumer ref to the tab's underlying `<button>` element (React 19
+   * ref-as-prop). Merged with the internal `buttonRef` the parent `<Tabs>`
+   * uses for roving keyboard focus, so both receive the node. The `<button>`
+   * IS the interactive leaf this component renders.
+   */
+  ref?: React.Ref<HTMLButtonElement>
   /** Forwarded keyboard handler — parent owns the arrow-key/home/end
    *  routing across the tablist. */
   onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void
@@ -372,6 +376,7 @@ export const Tab: React.FC<TabProps> = ({
   count,
   icon,
   buttonRef,
+  ref,
   onKeyDown,
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -382,10 +387,18 @@ export const Tab: React.FC<TabProps> = ({
     }
   }
 
+  // Merge the internal `buttonRef` (parent-owned roving focus) with the public
+  // consumer `ref` so a single DOM `ref` slot feeds both.
+  const setButtonRef = (el: HTMLButtonElement | null) => {
+    buttonRef?.(el)
+    if (typeof ref === 'function') ref(el)
+    else if (ref) (ref as React.RefObject<HTMLButtonElement | null>).current = el
+  }
+
   return (
     <button
       type="button"
-      ref={buttonRef}
+      ref={setButtonRef}
       role="tab"
       id={tabId ? `tab-${tabId}` : undefined}
       data-tab-id={tabId}
