@@ -86,26 +86,43 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
       active?: boolean
       onClick?: () => void
       action?: string
-      /** Descriptive accessible name (e.g. `"Page 5"`) for a control whose
-       *  visible label is only a bare digit — WCAG 2.4.6 / 4.1.2. Kept a
-       *  superstring of the visible text so it also satisfies 2.5.3 Label in
-       *  Name (`"5"` ⊂ `"Page 5"`). */
+      /** Descriptive accessible name for a control whose visible text is
+       *  abbreviated or non-descriptive: the numbered buttons (`"Page 5"` for a
+       *  bare digit — WCAG 2.4.6 / 4.1.2) and the Prev / Next controls
+       *  (`"Previous page"` / `"Next page"`, matching the WAI-ARIA APG
+       *  Pagination example). Always kept a superstring of the visible text so
+       *  it also satisfies 2.5.3 Label in Name (`"5"` ⊂ `"Page 5"`,
+       *  `"Prev"` ⊂ `"Previous page"`, `"Next"` ⊂ `"Next page"`). */
       ariaLabel?: string
     } = {}
-  ) => (
-    <button
-      key={key}
-      type="button"
-      className={cx(cssStyles.pageBtn, opts.active && cssStyles.pageBtnActive)}
-      disabled={opts.disabled}
-      onClick={opts.onClick}
-      aria-current={opts.active ? 'page' : undefined}
-      {...(opts.ariaLabel && { 'aria-label': opts.ariaLabel })}
-      {...(opts.action && { 'data-action': opts.action })}
-    >
-      {label}
-    </button>
-  )
+  ) => {
+    // Boundary controls (Prev on page 1, Next on the last page) are marked with
+    // aria-disabled rather than the native `disabled` attribute so they STAY
+    // focusable. A natively-disabled control that is focused at the instant it
+    // becomes disabled — e.g. tabbing to Prev on page 2 and activating it to
+    // REACH page 1, which disables Prev — is blurred by the browser, dropping
+    // keyboard focus to <body> so the user's next Tab restarts from the top of
+    // the page. aria-disabled keeps the element in the tab order (focus is
+    // preserved across the boundary activation) while the guarded onClick makes
+    // it an inert no-op (WCAG 2.4.3 Focus Order / 4.1.2). The attribute is
+    // OMITTED entirely when the control is enabled — never emitted as
+    // aria-disabled="false".
+    const isDisabled = opts.disabled === true
+    return (
+      <button
+        key={key}
+        type="button"
+        className={cx(cssStyles.pageBtn, opts.active && cssStyles.pageBtnActive)}
+        onClick={isDisabled ? undefined : opts.onClick}
+        aria-current={opts.active ? 'page' : undefined}
+        {...(isDisabled && { 'aria-disabled': true })}
+        {...(opts.ariaLabel && { 'aria-label': opts.ariaLabel })}
+        {...(opts.action && { 'data-action': opts.action })}
+      >
+        {label}
+      </button>
+    )
+  }
   return (
     // Native <nav> landmark (not div[role=navigation]) so the pagination is a
     // real, SSR-crawlable landmark — matches the library's Breadcrumb pattern.
@@ -118,6 +135,7 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
         disabled: page <= 1,
         onClick: () => onPageChange(page - 1),
         action: 'prev',
+        ariaLabel: 'Previous page',
       })}
       {pageSequence(page, totalPages).map((p, i) =>
         p === 'ellipsis' ? (
@@ -142,6 +160,7 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
         disabled: page >= totalPages,
         onClick: () => onPageChange(page + 1),
         action: 'next',
+        ariaLabel: 'Next page',
       })}
       {/* The visible range doubles as a polite live region so screen-reader
           users hear the new range when a page control is activated (focus

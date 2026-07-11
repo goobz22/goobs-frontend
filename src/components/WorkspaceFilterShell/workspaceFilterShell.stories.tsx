@@ -57,6 +57,37 @@ const CardsPlaceholder = ({ color }: { color: string }): React.JSX.Element => (
   </div>
 )
 
+/**
+ * Minimal pagination-only harness (no metrics / nav / filter slots) so the
+ * focus-ring and reduced-motion a11y stories exercise the built-in pagination
+ * control in isolation. Owns the `page` state so Prev/Next actually move.
+ */
+const PaginationOnly = ({
+  theme,
+  initialPage,
+  pageSize,
+  totalItems,
+  background,
+}: {
+  theme: 'sacred' | 'light' | 'dark'
+  initialPage: number
+  pageSize: number
+  totalItems: number
+  background: string
+}): React.JSX.Element => {
+  const [page, setPage] = React.useState(initialPage)
+  return (
+    <div style={{ padding: '24px', background, minHeight: '100vh' }}>
+      <WorkspaceFilterShell
+        styles={{ theme }}
+        pagination={{ page, pageSize, totalItems, onPageChange: setPage }}
+      >
+        <CardsPlaceholder color={theme === 'light' ? '#1e40af' : '#d4af37'} />
+      </WorkspaceFilterShell>
+    </div>
+  )
+}
+
 const ShellDemo = ({
   theme,
 }: {
@@ -322,5 +353,185 @@ export const PaginationA11y: Story = {
     await expect(
       paginationNav.querySelector('[aria-live="polite"]')?.textContent
     ).toBe('31-40 of 200')
+
+    // Prev/Next expose descriptive APG accessible names — each a superstring of
+    // its visible "Prev"/"Next" text so it still satisfies 2.5.3 Label in Name.
+    await expect(
+      canvas.getByRole('button', { name: 'Previous page' })
+    ).not.toBeNull()
+    await expect(
+      canvas.getByRole('button', { name: 'Next page' })
+    ).not.toBeNull()
+
+    // Keyboard focus lands a visible :focus-visible ring on a numbered control
+    // (drives the SACRED focus-ring token; the Chromatic snapshot captures the
+    // ring). After the Page 4 click above, Tab advances to the adjacent Page 5.
+    await userEvent.tab()
+    await expect(
+      canvas.getByRole('button', { name: 'Page 5' })
+    ).toHaveFocus()
+  },
+}
+
+/**
+ * 4) Boundary focus is PRESERVED (regression for the adversarial-review
+ * focus-loss finding). Prev/Next are marked `aria-disabled` — NOT the native
+ * `disabled` attribute — at the page-1 / last-page boundaries so the control
+ * stays keyboard-focusable: activating Prev to REACH page 1 (which disables it)
+ * must NOT blur focus to `<body>` and dump the user's keyboard position at the
+ * top of the page (WCAG 2.4.3 Focus Order). Starts on page 2 of 3 so Prev is
+ * live, then activates it and asserts focus survives on the now-boundary
+ * control. With the pre-fix native `disabled`, the browser would blur here and
+ * `toHaveFocus()` would fail.
+ */
+export const PaginationBoundaryFocus: Story = {
+  render: () => (
+    <PaginationOnly
+      theme="sacred"
+      initialPage={2}
+      pageSize={10}
+      totalItems={30}
+      background="#000000"
+    />
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const nav = canvas.getByRole('navigation', { name: 'Pagination' })
+    const prev = canvas.getByRole('button', { name: 'Previous page' })
+
+    // On page 2 Prev is live: focusable and NOT aria-disabled.
+    await expect(prev).not.toHaveAttribute('aria-disabled')
+
+    // Activating Prev reaches page 1 (the lower boundary) → Prev goes
+    // aria-disabled and the live region announces the new range...
+    await userEvent.click(prev)
+    await expect(prev).toHaveAttribute('aria-disabled', 'true')
+    await expect(nav.querySelector('[aria-live="polite"]')?.textContent).toBe(
+      '1-10 of 30'
+    )
+
+    // ...but keyboard focus STAYS on the control — the whole point of the fix.
+    await expect(prev).toHaveFocus()
+
+    // The boundary control is an inert no-op: clicking again does not page below
+    // 1 (the guarded onClick), and focus is still retained.
+    await userEvent.click(prev)
+    await expect(nav.querySelector('[aria-live="polite"]')?.textContent).toBe(
+      '1-10 of 30'
+    )
+    await expect(prev).toHaveFocus()
+  },
+}
+
+/**
+ * 5) Focus ring on the LIGHT pagination surface — pins the light-theme
+ * focus-ring token override (`--goobs-light-focus-ring`). Keyboard focus (Tab)
+ * lands on the first page control so the Chromatic baseline captures the light
+ * ring, which the sacred-only PaginationA11y story left visually unpinned.
+ */
+export const PaginationFocusLight: Story = {
+  render: () => (
+    <PaginationOnly
+      theme="light"
+      initialPage={3}
+      pageSize={10}
+      totalItems={100}
+      background="#f3f4f6"
+    />
+  ),
+  globals: { theme: 'light', backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Keyboard-origin focus (Tab) drives :focus-visible; the first focusable
+    // control in the nav is Prev.
+    await userEvent.tab()
+    await expect(
+      canvas.getByRole('button', { name: 'Previous page' })
+    ).toHaveFocus()
+  },
+}
+
+/**
+ * 6) Focus ring on the DARK pagination surface — pins the dark-theme focus-ring
+ * token override (`--goobs-dark-focus-ring`), the other half of the
+ * per-theme focus-ring coverage the sacred-only story could not exercise.
+ */
+export const PaginationFocusDark: Story = {
+  render: () => (
+    <PaginationOnly
+      theme="dark"
+      initialPage={3}
+      pageSize={10}
+      totalItems={100}
+      background="#111827"
+    />
+  ),
+  globals: { theme: 'dark', backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.tab()
+    await expect(
+      canvas.getByRole('button', { name: 'Previous page' })
+    ).toHaveFocus()
+  },
+}
+
+/**
+ * 7) Reduced motion — the page-button colour transition is dropped under
+ * `@media (prefers-reduced-motion: reduce)` (WCAG 2.3.3 Animation from
+ * Interactions), matching the sibling Breadcrumb / Button / Chip guards. Toggle
+ * your OS "reduce motion" setting (or Storybook's motion emulation) to observe
+ * the buttons snap between states with no colour fade. The play step asserts the
+ * guard actually SHIPPED for `.pageBtn` in the loaded stylesheet (it cannot
+ * regress silently to a documentary-only story).
+ */
+export const PaginationReducedMotion: Story = {
+  render: () => (
+    <PaginationOnly
+      theme="sacred"
+      initialPage={3}
+      pageSize={10}
+      totalItems={100}
+      background="#000000"
+    />
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The pagination renders...
+    await expect(
+      canvas.getByRole('navigation', { name: 'Pagination' })
+    ).not.toBeNull()
+
+    // ...and a prefers-reduced-motion guard that neutralises the .pageBtn
+    // transition is present in the loaded CSS. Resolve the hashed CSS-module
+    // class of a real page button, then scan every same-origin stylesheet for a
+    // reduced-motion @media block that targets THAT class and touches
+    // `transition` — so the assertion pins OUR guard, not a sibling's.
+    const pageButton = canvas.getByRole('button', { name: 'Previous page' })
+    const pageBtnClass = Array.from(pageButton.classList).find(name =>
+      name.includes('pageBtn')
+    )
+    await expect(pageBtnClass).toBeTruthy()
+
+    const guardTargetsPageBtn = Array.from(document.styleSheets).some(sheet => {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        // Cross-origin stylesheet — not ours; skip.
+        return false
+      }
+      return Array.from(rules).some(
+        rule =>
+          rule instanceof CSSMediaRule &&
+          rule.cssText.includes('prefers-reduced-motion') &&
+          rule.cssText.includes(pageBtnClass as string) &&
+          rule.cssText.includes('transition')
+      )
+    })
+    await expect(guardTargetsPageBtn).toBe(true)
   },
 }
