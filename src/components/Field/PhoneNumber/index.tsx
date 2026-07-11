@@ -42,6 +42,38 @@ export interface PhoneNumberFieldProps {
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
   error?: string | boolean
+  /**
+   * Marks the field required — renders the required indicator next to the label
+   * and sets `aria-required` (plus the native `required` attribute) on the
+   * input. Top-level ergonomic alias for `styles.required`; DEFAULTS from
+   * `styles?.required` when omitted, so every existing `styles={{ required: true }}`
+   * callsite renders identically. When both are set the top-level prop wins
+   * (same precedence FieldShell uses). Conveys required-ness programmatically
+   * (WCAG 1.3.1 / 3.3.2 / 4.1.2), not by the visual asterisk alone.
+   */
+  required?: boolean
+  /**
+   * Disables the field — dims the chrome, sets the native `disabled` attribute
+   * on the input (removing it from the tab order) and `aria-disabled` on the
+   * FieldShell wrapper. Top-level ergonomic alias for `styles.disabled`;
+   * DEFAULTS from `styles?.disabled` when omitted. When both are set the
+   * top-level prop wins.
+   */
+  disabled?: boolean
+  /**
+   * Accessible name for the input when no visible `label` is rendered (e.g. a
+   * caller passing `label={null}` for a bare input in a toolbar or table cell).
+   * A placeholder is NOT an accessible name. Forwarded as `aria-label` on the
+   * input. Prefer a visible `label` when the UI allows; setting this alongside
+   * a visible label overrides it, per the ARIA name-computation order.
+   */
+  ariaLabel?: string
+  /**
+   * IDs of the element(s) that name the input, when its accessible name lives in
+   * a separate visible element rather than the `label` prop. Forwarded as
+   * `aria-labelledby` on the input (takes precedence over `ariaLabel`).
+   */
+  ariaLabelledby?: string
   /** Placeholder text (default '555-555-5555'). */
   placeholder?: string
   id?: string
@@ -76,6 +108,10 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   label = 'Phone Number',
   helperText,
   error,
+  required: requiredProp,
+  disabled: disabledProp,
+  ariaLabel,
+  ariaLabelledby,
   placeholder = '555-555-5555',
   id,
   autoComplete,
@@ -117,8 +153,15 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   )
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const disabled = styles?.disabled || false
-  const required = styles?.required || false
+  // Top-level `disabled`/`required` props win, then fall back to the
+  // `styles`-nested equivalents so existing `styles={{ disabled/required: true }}`
+  // callsites render identically (same precedence FieldShell applies). Before
+  // these top-level aliases existed, a caller passing `disabled`/`required`
+  // (the ergonomic norm every sibling Field exposes) had them silently dropped
+  // — the field stayed enabled / non-required and never conveyed the state
+  // programmatically. `?? false` keeps the native input attributes plain booleans.
+  const disabled = disabledProp ?? styles?.disabled ?? false
+  const required = requiredProp ?? styles?.required ?? false
 
   // Listen for native 'input' events to support browser automation
   // tools that bypass React's synthetic event system.
@@ -255,6 +298,8 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
             required={required}
             placeholder={placeholder}
             autoComplete={autoComplete ?? 'tel'}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
             className={cssStyles.input}
             {...inputAriaProps}
           />
