@@ -13,15 +13,27 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  * conceptual color duplicated in dozens of ad-hoc spellings, unable to retune
  * from one place, and invisible to a theme switch.
  *
- * This lint flags a color literal in shipped JS whose value EXACTLY duplicates
- * a known `--goobs-*` token. That makes it a provable leak (it is literally a
- * token's value copied into JS) with a mechanical fix: replace the literal with
- * `var(--goobs-…)` (directly in an inline `style={{}}`, inside a CSS-value
- * string such as a gradient/shadow, or by moving the styling into the
- * component's `.module.css`). Colors that do NOT match any token (arbitrary
- * grays, one-off MUI leftovers, off-ladder alphas) are a separate, fuzzier
- * concern and are intentionally NOT flagged here — zero false positives is the
- * whole value of a gate that stays in `lint:all`.
+ * This lint flags TWO provable-leak shapes:
+ *
+ *   1. A color literal whose value EXACTLY duplicates a known `--goobs-*` token.
+ *      That is literally a token's value copied into JS, with a mechanical fix:
+ *      replace the literal with `var(--goobs-…)` (directly in an inline
+ *      `style={{}}`, inside a CSS-value string such as a gradient/shadow, or by
+ *      moving the styling into the component's `.module.css`).
+ *
+ *   2. ANY raw brand-gold triplet (`255, 215, 0` at any alpha, or `#ffd700`).
+ *      Gold is the library's signature accent — there is no legitimate reason
+ *      to hardcode it in shipped JS at ANY alpha, so it is a leak even when its
+ *      alpha does not land on the `--goobs-gold-a**` ladder (`rgba(255,215,0,
+ *      0.03)`); the fix rounds to the nearest ladder rung. This mirrors the
+ *      stylelint token gate, which already forbids the `255,215,0` triplet at
+ *      every alpha in `.css` — this rule carries that same guarantee into JS.
+ *
+ * Non-gold colors that do NOT match any token (arbitrary grays, one-off MUI
+ * leftovers, and — deliberately — the DataGrid/status data-driven SEVERITY
+ * palette at off-ladder alphas that `.claude/rules/goobs.md` keeps on purpose)
+ * are a separate, fuzzier concern and are intentionally NOT flagged here — zero
+ * false positives is the whole value of a gate that stays in `lint:all`.
  *
  * Escape hatches (encoded in the check, never a file ignore-list):
  *   - comments (JSDoc `@param`/inline `//`) are stripped before scanning;
@@ -29,7 +41,8 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  *     color CONSTRUCTORS (`rgba(${r}, ${g}, ${b}, ${o})` in the `alpha()`
  *     util) — they build a color from data, they don't hardcode one;
  *   - canvas 2D-context colors (`fillStyle`/`strokeStyle`/`shadowColor`)
- *     cannot resolve a CSS `var()`, so a concrete color there is legitimate;
+ *     cannot resolve a CSS `var()`, so a concrete color there is legitimate
+ *     (this also covers the canvas gold defaults `ctx.fillStyle = '#FFD700'`);
  *   - a pure black/white DEFAULT PARAM value (`bgColor = '#FFFFFF'`) is a
  *     theme-independent canvas/QR/signature default the consumer overrides.
  */
@@ -242,7 +255,19 @@ const lint: A11yLint = {
           const key = normalizeColor(raw)
           if (!key) continue
           const token = TOKEN_BY_VALUE.get(key)
-          if (!token) continue
+          if (!token) {
+            // Brand-gold leak: any raw 255,215,0 triplet in JS is a leak even
+            // when its alpha is off the --goobs-gold-a** ladder (round to the
+            // nearest rung). #ffd700 itself is an exact token, handled above.
+            if (/^rgb:255,215,0,/.test(key)) {
+              violations.push({
+                file: path,
+                line: i + 1,
+                message: `hardcoded brand-gold color '${raw}' — use the nearest var(--goobs-gold-a**) token (JS-side brand-gold leak; the stylelint gate forbids the 255,215,0 triplet at any alpha, but only scans .css)`,
+              })
+            }
+            continue
+          }
           // pure b/w DEFAULT PARAM (`ident = '#ffffff'`) — canvas/QR/signature
           // theme-independent default the consumer overrides.
           if (ACHROMATIC.has(key)) {
@@ -263,6 +288,8 @@ const lint: A11yLint = {
     bad: [
       "const s = { color: '#FFD700' }",
       "const s = { backgroundColor: 'rgba(255, 215, 0, 0.3)' }",
+      // brand-gold at an OFF-LADDER alpha (no --goobs-gold-a03 token) is still a leak
+      "const bg = { background: 'radial-gradient(circle, rgba(255, 215, 0, 0.03) 0%, transparent 50%)' }",
       "const s = { color: '#ef4444' }",
       "const bg = { background: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)' }",
       "const x = { borderColor: 'rgba(0, 0, 0, 0.12)' }",
@@ -271,11 +298,14 @@ const lint: A11yLint = {
     ],
     good: [
       "const s = { color: 'var(--goobs-gold)' }",
+      "const s = { background: 'var(--goobs-gold-a02)' }",
       'const c = `rgba(${r}, ${g}, ${b}, ${opacity})`',
       "// documented default color '#FFD700' lives here\nconst n = 1",
       "/** Light-module color drawn on the canvas. Default '#000000'. */\nconst n = 2",
       "function QR({ bgColor = '#FFFFFF', fgColor = '#000000' }) { return bgColor + fgColor }",
       "ctx.fillStyle = glyphColor ?? '#FFD700'",
+      // canvas escape-hatch also covers the extended brand-gold rule (off-ladder alpha)
+      "ctx.shadowColor = 'rgba(255, 215, 0, 0.03)'",
       "const s = { color: '#9ca3af' }",
     ],
   },
