@@ -42,6 +42,9 @@
   --dg-primary: var(--goobs-light-primary);
   --dg-secondary-text: var(--goobs-light-text-muted);
 
+  /* Keyboard focus indicator (WCAG 2.4.7). */
+  --dg-focus-ring: var(--goobs-light-primary);
+
   --dg-transition: var(--goobs-transition-medium);
 }
 
@@ -77,6 +80,9 @@
 
   --dg-primary: var(--goobs-dark-primary-strong);
   --dg-secondary-text: #94a3b8;
+
+  /* Keyboard focus indicator (WCAG 2.4.7). */
+  --dg-focus-ring: var(--goobs-dark-primary-strong);
 }
 
 /* Sacred Theme */
@@ -112,6 +118,9 @@
 
   --dg-primary: var(--goobs-gold);
   --dg-secondary-text: #d97706;
+
+  /* Keyboard focus indicator (WCAG 2.4.7). */
+  --dg-focus-ring: var(--goobs-gold);
 }
 
 /* --------------------------------------------------------------------------
@@ -900,6 +909,9 @@
   --ft-menu-item-color: var(--goobs-gold);
   --ft-menu-item-font: var(--goobs-font-sacred);
   --ft-menu-item-hover-bg: var(--goobs-gold-a15);
+  /* Portalled to document.body, so it can't inherit --dg-focus-ring from the
+     grid root — define it here for the menu-item focus styles. */
+  --dg-focus-ring: var(--goobs-gold);
 
   position: fixed;
   transform: translateY(-100%);
@@ -919,6 +931,7 @@
   --ft-menu-item-color: var(--goobs-light-text-secondary);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: #f3f4f6;
+  --dg-focus-ring: var(--goobs-light-primary);
 }
 
 .exportMenu[data-theme='dark'] {
@@ -928,6 +941,7 @@
   --ft-menu-item-color: var(--goobs-dark-text);
   --ft-menu-item-font: var(--goobs-font-standard);
   --ft-menu-item-hover-bg: var(--goobs-dark-border);
+  --dg-focus-ring: var(--goobs-dark-primary-strong);
 }
 
 .exportMenuItem {
@@ -2256,5 +2270,59 @@
   .mobileView {
     display: flex;
     flex-direction: column;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: keyboard focus indicators (WCAG 2.4.7)
+   The interactive controls below are custom-styled and previously exposed
+   only :hover feedback — keyboard users got no visible focus. A consistent
+   :focus-visible ring is added here (only shows for keyboard/AT focus, not
+   mouse clicks), themed via --dg-focus-ring.
+   -------------------------------------------------------------------------- */
+.headerMenuBtn:focus-visible,
+.resizeHandle:focus-visible,
+.dropdownBtn:focus-visible,
+.paginationBtn:focus-visible,
+.exportCogBtn:focus-visible,
+.exportMenuItem:focus-visible,
+.manageColumnsDoneBtn:focus-visible,
+.expandBtn:focus-visible,
+.manageRowActionBtn:focus-visible,
+.manageRowAddBtn:focus-visible,
+.actionBtn:focus-visible,
+.fieldBtn:focus-visible,
+.fieldInput:focus-visible {
+  outline: 2px solid var(--dg-focus-ring, currentColor);
+  outline-offset: 2px;
+}
+
+/* The sortable/draggable column header is reachable via its inner menu button;
+   give the header cell itself a focus ring too when it receives focus (e.g.
+   programmatic focus or a future roving-tabindex grid pattern). */
+.headerCell:focus-visible {
+  outline: 2px solid var(--dg-focus-ring, currentColor);
+  outline-offset: -2px;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: reduced motion (WCAG 2.3.3)
+   Honor the user's prefers-reduced-motion setting by neutralizing the
+   grid's animations (the sacred footer-glyph float, the data-driven currency
+   pulse/shimmer applied inline, and all transitions). The stylesheet
+   !important beats the non-important inline `animation` on the currency
+   formatter spans. .exportMenu is listed explicitly because it is portalled
+   to document.body, outside the .datagrid subtree.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .datagrid *,
+  .datagrid *::before,
+  .datagrid *::after,
+  .exportMenu,
+  .exportMenu * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
