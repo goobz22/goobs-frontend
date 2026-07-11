@@ -335,4 +335,70 @@ const KeyboardRovingRenderer = () => {
  */
 export const KeyboardRovingTabIndex: Story = {
   render: () => <KeyboardRovingRenderer />,
+  // Regression guard for Issue 2 (roving-tabindex keyboard pattern) + Issue 3
+  // (decorative glyph). None of this is visible to a Chromatic screenshot, so
+  // the keyboard contract is asserted here (mirrors the ComplexTextEditor
+  // ToolbarRovingTabIndex precedent).
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Labelled toolbar grouping.
+    const toolbar = canvas.getByRole('toolbar', { name: 'Inventory toolbar' })
+    await expect(toolbar).toHaveAttribute('aria-orientation', 'horizontal')
+
+    // The roving set is the three enabled controls: the two action buttons and
+    // the filter combobox (the searchbar <input> is not part of it).
+    const button1 = canvas.getByRole('button', { name: 'Button 1' })
+    const button2 = canvas.getByRole('button', { name: 'Button 2' })
+    const filter = canvas.getByRole('combobox', { name: 'Status' })
+    const search = canvas.getByRole('searchbox', { name: 'Search Something' })
+
+    // Single Tab stop: exactly one control is tabbable (tabindex 0), the rest -1.
+    await waitFor(() => expect(button1).toHaveAttribute('tabindex', '0'))
+    await expect(button2).toHaveAttribute('tabindex', '-1')
+    await expect(filter).toHaveAttribute('tabindex', '-1')
+
+    // Tabbing into the toolbar lands on that single stop, not on each control.
+    await userEvent.tab()
+    await expect(button1).toHaveFocus()
+
+    // Right Arrow moves focus AND the tab stop to the next control.
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(button2).toHaveFocus()
+    await expect(button2).toHaveAttribute('tabindex', '0')
+    await expect(button1).toHaveAttribute('tabindex', '-1')
+
+    // Right Arrow again reaches the filter combobox (Arrow keys do not open it).
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(filter).toHaveFocus()
+    await expect(filter).toHaveAttribute('tabindex', '0')
+
+    // Left Arrow steps back to the previous control.
+    await userEvent.keyboard('{ArrowLeft}')
+    await expect(button2).toHaveFocus()
+
+    // Home jumps to the first control, End to the last.
+    await userEvent.keyboard('{Home}')
+    await expect(button1).toHaveFocus()
+    await userEvent.keyboard('{End}')
+    await expect(filter).toHaveFocus()
+
+    // The searchbar text field KEEPS Arrow/Home/End for caret motion — the
+    // toolbar must not hijack them, so focus stays in the field (WCAG 2.1.1).
+    search.focus()
+    await expect(search).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(search).toHaveFocus()
+    await userEvent.keyboard('{Home}')
+    await expect(search).toHaveFocus()
+    await userEvent.keyboard('{End}')
+    await expect(search).toHaveFocus()
+
+    // The decorative sacred glyph is hidden from assistive tech (WCAG 1.1.1).
+    const glyph = canvasElement.querySelector(
+      '[data-component="Toolbar"] > span[aria-hidden="true"]'
+    )
+    await expect(glyph).not.toBeNull()
+    await expect(glyph).toHaveTextContent('𓊗')
+  },
 }
