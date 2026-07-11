@@ -187,17 +187,18 @@ function buildCssVarOverrides(styles?: ChipStyles): React.CSSProperties {
 /**
  * Resolve the chip's effective ARIA role:
  *   - explicit `role` prop wins
- *   - clickable        → button
+ *   - has `onClick`    → button (kept even when disabled, so the disabled
+ *                        state is announced as a dimmed button, not a bare div)
  *   - pill, read-only  → status (announces value changes for screen readers)
  *   - chip,  read-only → no role (decorative)
  */
 function resolveRole(
   explicitRole: string | undefined,
-  isClickable: boolean,
+  hasButtonIntent: boolean,
   variant: ChipVariant
 ): string | undefined {
   if (explicitRole) return explicitRole
-  if (isClickable) return 'button'
+  if (hasButtonIntent) return 'button'
   if (variant === 'pill') return 'status'
   return undefined
 }
@@ -257,6 +258,11 @@ const Chip: React.FC<ChipProps> = ({
     style || styles ? { ...style, ...styles } : undefined
   const isDisabled = Boolean(resolvedStyles?.disabled)
   const isClickable = Boolean(onClick) && !isDisabled
+  // A chip that carries `onClick` is semantically a button even while
+  // disabled — keep the `button` role + pressed state so screen readers
+  // announce a "dimmed button" (via aria-disabled) rather than a bare,
+  // roleless <div>. Activation/focusability stay gated on `isClickable`.
+  const hasButtonIntent = Boolean(onClick)
   const theme = resolvedStyles?.theme ?? 'sacred'
 
   const rootClassName = [cssStyles.root, cssStyles[variant]]
@@ -278,7 +284,7 @@ const Chip: React.FC<ChipProps> = ({
   }
 
   const dotColor = typeof dot === 'string' ? dot : undefined
-  const resolvedRole = resolveRole(role, isClickable, variant)
+  const resolvedRole = resolveRole(role, hasButtonIntent, variant)
   const resolvedAriaLabel = resolveAriaLabel(ariaLabel, label)
   // Accessible-name-for-the-delete-button incorporates the chip label
   // so screen readers say "Remove Status" instead of just "Remove".
@@ -309,7 +315,9 @@ const Chip: React.FC<ChipProps> = ({
       {...(resolvedRole === 'status' &&
         ariaLive !== undefined && { 'aria-live': ariaLive })}
       tabIndex={isClickable ? 0 : undefined}
-      aria-pressed={isClickable && active !== undefined ? active : undefined}
+      aria-pressed={
+        hasButtonIntent && active !== undefined ? active : undefined
+      }
       aria-disabled={isDisabled || undefined}
       onClick={isClickable ? handleClick : undefined}
       onKeyDown={isClickable ? handleKeyDown : undefined}
@@ -344,7 +352,9 @@ const Chip: React.FC<ChipProps> = ({
           aria-label={deleteButtonLabel}
           data-chip-delete="true"
         >
-          <CloseIcon styles={{ theme, size: 14 }} />
+          {/* The button carries the accessible name; hide the glyph so AT
+              doesn't announce a nameless graphic (WCAG 1.1.1). */}
+          <CloseIcon styles={{ theme, size: 14 }} aria-hidden="true" />
         </button>
       )}
     </div>

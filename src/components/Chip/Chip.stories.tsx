@@ -7,7 +7,7 @@
  * goobs has no unit tests.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, fn, within } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import Chip, { type ChipTone } from './index'
 
 const meta: Meta<typeof Chip> = {
@@ -76,6 +76,83 @@ export const Disabled: Story = {
     },
   },
   globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * An interactive (clickable) chip. Passing `onClick` promotes the chip to a
+ * real `role="button"` with a keyboard tab stop and Enter/Space activation
+ * (the WAI-ARIA button pattern), and `active` is surfaced as `aria-pressed`
+ * for the toggle-filter use-case. The play function pins the a11y contract:
+ * the chip is a focusable button, reports its pressed state, and fires on
+ * pointer click AND on keyboard Enter/Space. A `:focus-visible` ring
+ * (Chip.module.css) makes the keyboard focus visible.
+ */
+export const Interactive: Story = {
+  name: 'State/Interactive (button)',
+  args: {
+    label: 'Filter',
+    onClick: fn(),
+    active: false,
+    styles: {
+      theme: 'light',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // A clickable chip exposes a real button role, an accessible name, a tab
+    // stop, and its pressed state.
+    const chip = canvas.getByRole('button', { name: 'Filter' })
+    await expect(chip).toHaveAttribute('tabindex', '0')
+    await expect(chip).toHaveAttribute('aria-pressed', 'false')
+
+    // Keyboard focus + activation — the APG button interaction (Enter, Space).
+    chip.focus()
+    await expect(chip).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await userEvent.keyboard(' ')
+
+    // Pointer activation.
+    await userEvent.click(chip)
+
+    // Enter + Space + click = three activations.
+    await expect(args.onClick).toHaveBeenCalledTimes(3)
+  },
+}
+
+/**
+ * A disabled interactive chip. Even while disabled, an `onClick` chip keeps
+ * `role="button"` so screen readers announce a *dimmed / unavailable* button
+ * (via `aria-disabled="true"`) rather than a roleless `<div>` — but it is
+ * removed from the tab order and its handlers are inert. The play function
+ * pins that the button role + disabled state are exposed and no activation
+ * fires.
+ */
+export const DisabledInteractive: Story = {
+  name: 'State/Disabled (interactive)',
+  args: {
+    label: 'Disabled Filter',
+    onClick: fn(),
+    styles: {
+      theme: 'light',
+      disabled: true,
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // Role is still "button", but the state is programmatically disabled and
+    // the element is not in the tab order.
+    const chip = canvas.getByRole('button', { name: 'Disabled Filter' })
+    await expect(chip).toHaveAttribute('aria-disabled', 'true')
+    await expect(chip).not.toHaveAttribute('tabindex')
+
+    // Clicking a disabled chip does nothing.
+    await userEvent.click(chip)
+    await expect(args.onClick).not.toHaveBeenCalled()
+  },
 }
 
 // --------------------------------------------------------------------------

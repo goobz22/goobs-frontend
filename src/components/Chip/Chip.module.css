@@ -40,6 +40,9 @@
   --chip-font: var(--goobs-font-sacred);
   --chip-shadow: none;
   --chip-hover-shadow: 0 0 8px var(--goobs-gold-a20);
+  /* Keyboard focus ring — per-theme so it stays visible on every surface.
+     Sacred (default) uses the gold focus-ring; light/dark override below. */
+  --chip-focus: var(--goobs-sacred-focus-ring);
 
   display: inline-flex;
   align-items: center;
@@ -83,6 +86,18 @@
 }
 
 /* --------------------------------------------------------------------------
+   Keyboard focus — a visible :focus-visible ring is required (WCAG 2.4.7 /
+   2.4.11) because an interactive chip is a focusable div[role="button"] and a
+   deletable chip carries a focusable <button>. Only the keyboard-focus
+   pseudo-class is styled so a pointer click doesn't paint the ring.
+   -------------------------------------------------------------------------- */
+.root[data-chip-clickable='true']:focus-visible,
+.closeButton:focus-visible {
+  outline: 2px solid var(--chip-focus);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
    Light theme override
    -------------------------------------------------------------------------- */
 .root[data-theme='light'] {
@@ -103,6 +118,7 @@
   --chip-font: var(--goobs-font-standard);
   --chip-shadow: none;
   --chip-hover-shadow: 0 1px 4px var(--goobs-blue-a12);
+  --chip-focus: var(--goobs-light-focus-ring);
 }
 
 /* --------------------------------------------------------------------------
@@ -118,6 +134,7 @@
   --chip-active-border: rgba(59, 130, 246, 0.6);
   --chip-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   --chip-hover-shadow: 0 2px 6px var(--goobs-black-a30);
+  --chip-focus: var(--goobs-dark-focus-ring);
 }
 
 /* --------------------------------------------------------------------------
@@ -372,4 +389,15 @@
 .closeButton svg {
   width: 0.9em;
   height: 0.9em;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion (WCAG 2.3.3) — users who prefer reduced motion get no
+   color/border/shadow transitions on the chip or its delete button.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .closeButton {
+    transition: none;
+  }
 }
