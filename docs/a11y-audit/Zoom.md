@@ -35,7 +35,9 @@ of the zoom-OUT (visible→hidden holds `visible` for the full duration, flips o
 happens INSTANTLY on zoom-IN — the animation is preserved. The visible state and the disabled
 state both pin `visibility: visible` (`Zoom.module.css:80, 107`) so a disabled+hidden combination
 still shows its documented dimmed treatment.
-**Pattern:** `opacity-hidden-content-still-focusable`.
+**Pattern:** `hidden-content-still-focusable` (the cross-component class shared with
+`Fade`/`Slide` — a visually-hidden-but-focusable subtree; not opacity-specific, so the
+general slug is used to cluster it with the sibling transition components).
 
 ## Hearing
 CLEAN. Grepped the component for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
