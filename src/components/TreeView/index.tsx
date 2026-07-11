@@ -1042,7 +1042,16 @@ const SacredBackground: FC<{
     }
   }, [width, height, glyphColor])
 
-  return <canvas ref={canvasRef} className={cssStyles.sacredBackground} />
+  // Purely decorative particle overlay — hidden from assistive tech (WCAG
+  // 1.1.1 Non-text Content). It conveys no information and is pointer-inert, so
+  // a screen reader must not surface the bare <canvas> to the user.
+  return (
+    <canvas
+      ref={canvasRef}
+      className={cssStyles.sacredBackground}
+      aria-hidden="true"
+    />
+  )
 }
 
 // --------------------------------------------------------------------------
@@ -1388,7 +1397,12 @@ const TreeItem: FC<TreeItemProps> = ({
           : -1
       }
       role="treeitem"
-      aria-selected={isSelected}
+      // APG Tree View: `aria-selected` reflects selection state ONLY on a tree
+      // whose nodes are selectable. When selection is turned off entirely
+      // (`disableSelection`) no node can be selected, so the attribute is
+      // omitted rather than announcing a permanent, unchangeable
+      // "not selected" on every row (WCAG 4.1.2 Name, Role, Value).
+      aria-selected={context.disableSelection ? undefined : isSelected}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-disabled={isDisabled}
       aria-level={level + 1}

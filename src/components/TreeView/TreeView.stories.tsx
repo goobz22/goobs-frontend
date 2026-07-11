@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect, fn } from 'storybook/test'
+import { userEvent, within, expect, fn, waitFor } from 'storybook/test'
 import TreeView, { TreeViewItem, useTreeViewApiRef } from './index'
 
 const meta: Meta<typeof TreeView> = {
@@ -329,7 +329,14 @@ export const CheckboxSelection: Story = {
   globals: { backgrounds: { value: 'light' } },
 }
 
-/** Disabled selection mode. */
+/**
+ * Disabled selection mode. When selection is turned off entirely no node is
+ * selectable, so — per the WAI-ARIA APG Tree View pattern — `aria-selected` is
+ * OMITTED from every node rather than announcing a permanent, unchangeable
+ * "not selected" state (WCAG 4.1.2 Name, Role, Value). Pinned observable
+ * state: no `treeitem` carries an `aria-selected` attribute, yet the nodes are
+ * still keyboard-focusable and expandable.
+ */
 export const DisabledSelection: Story = {
   name: 'Selection/Disabled Selection',
   args: {
@@ -339,6 +346,20 @@ export const DisabledSelection: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const items = canvas.getAllByRole('treeitem')
+
+    // Selection is unsupported → aria-selected must be absent on every node.
+    for (const item of items) {
+      await expect(item).not.toHaveAttribute('aria-selected')
+    }
+
+    // The tree still enters via a roving-tabindex node and stays operable.
+    await expect(items[0]).toHaveAttribute('tabindex', '0')
+    items[0].focus()
+    await expect(items[0]).toHaveFocus()
+  },
 }
 
 // --------------------------------------------------------------------------
@@ -605,6 +626,16 @@ export const SacredTheme: Story = {
     styles: { theme: 'sacred' },
   },
   globals: { backgrounds: { value: 'sacred' } },
+  play: async ({ canvasElement }) => {
+    // The decorative SacredBackground particle canvas mounts client-side (in an
+    // effect); once present it must be hidden from assistive tech so a screen
+    // reader never surfaces the bare, information-free <canvas> (WCAG 1.1.1).
+    await waitFor(() => {
+      const decorativeCanvas = canvasElement.querySelector('canvas')
+      expect(decorativeCanvas).not.toBeNull()
+      expect(decorativeCanvas).toHaveAttribute('aria-hidden', 'true')
+    })
+  },
 }
 
 /**
