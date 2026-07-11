@@ -1,6 +1,10 @@
 # BigCalendar — a11y audit (2026-07-11)
 
-**Status:** FIXED
+**Status:** PARTIAL — every issue inside this component's ownership (11 of 14) is FIXED;
+the 3 deferred items (#12 view-switcher group label, #13 real heading for the period, #14
+Tooltip-on-focus) all require edits to **other** components (`ToggleButtonGroup`,
+`Typography`, `Tooltip`) that this owner may not touch, and each has a concrete suggested
+change recorded below.
 
 **APG pattern:** primarily the [Grid](https://www.w3.org/WAI/ARIA/apg/patterns/grid/)
 pattern, in the [Date Picker Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/datepicker-dialog/)
