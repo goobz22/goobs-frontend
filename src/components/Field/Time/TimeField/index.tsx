@@ -9,6 +9,15 @@ export interface TimeFieldProps {
   onChange?: (time: Date | null) => void
   value?: Date | null
   label?: string
+  /**
+   * Accessible name for the input when no visible `label` renders (bare time
+   * fields in toolbars, data-table cells, …). Forwarded to FieldShell, which
+   * applies it as `aria-label` on the input ONLY when no visible label is
+   * present — a visible `label` stays the name source (WCAG 2.5.3 Label in
+   * Name). A placeholder is NOT an accessible name; prefer a visible `label`
+   * when the layout allows.
+   */
+  ariaLabel?: string
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
   error?: string | boolean
@@ -45,6 +54,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
   onChange: onChangeProp,
   value: valueProp,
   label = 'Time',
+  ariaLabel,
   helperText,
   error,
   dataField,
@@ -102,6 +112,7 @@ const TimeField: React.FC<TimeFieldProps> = ({
   return (
     <FieldShell
       label={label}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}

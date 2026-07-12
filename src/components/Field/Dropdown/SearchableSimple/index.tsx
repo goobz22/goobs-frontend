@@ -17,6 +17,15 @@ export interface DropdownOption {
 
 export interface SearchableSimpleProps {
   label: string
+  /**
+   * Accessible name for the `role="combobox"` trigger when no visible `label`
+   * renders (`label=""` — bare selects in toolbars, filter bars, …). Forwarded
+   * to FieldShell, which merges it into the trigger's spread `inputAriaProps` as
+   * `aria-label` ONLY when no visible label is present — a visible `label` stays
+   * the name source (WCAG 2.5.3 Label in Name). Additive; omitting it preserves
+   * the previous behaviour byte-for-byte.
+   */
+  ariaLabel?: string
   options: DropdownOption[]
   /** Controlled value. Pair with `onChange` for fully-controlled mode. */
   value?: string | number
@@ -43,6 +52,7 @@ export interface SearchableSimpleProps {
 
 const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   label,
+  ariaLabel,
   options,
   value: valuePropRaw,
   defaultValue,
@@ -256,6 +266,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   return (
     <FieldShell
       label={label}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}

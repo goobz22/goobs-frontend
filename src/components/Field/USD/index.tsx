@@ -29,6 +29,15 @@ export interface USDFieldProps extends Omit<
   repeatInterval?: number
   value?: string
   placeholder?: string
+  /**
+   * Accessible name for the input when no visible `label` renders (bare
+   * currency fields in toolbars, data-table cells, …). Forwarded to FieldShell,
+   * which applies it as `aria-label` on the input ONLY when no visible label is
+   * present — a visible `label` stays the name source (WCAG 2.5.3 Label in
+   * Name). A placeholder is NOT an accessible name; prefer a visible `label`
+   * when the layout allows.
+   */
+  ariaLabel?: string
   id?: string
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
@@ -61,6 +70,7 @@ const USDField: React.FC<USDFieldProps> = ({
   repeatInterval = 100,
   value: valueProp,
   placeholder,
+  ariaLabel,
   id,
   onFocus,
   onBlur,
@@ -318,6 +328,7 @@ const USDField: React.FC<USDFieldProps> = ({
     <FieldShell
       id={id}
       label={resolvedLabel}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}

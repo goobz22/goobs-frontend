@@ -18,6 +18,15 @@ export interface DropdownOption {
 
 export interface DropdownProps {
   label: string
+  /**
+   * Accessible name for the `button[role="combobox"]` trigger. Emitted as
+   * `aria-label`, falling back to the visible `label` when unset
+   * (`aria-label={ariaLabel ?? label}`). Lets a label-less Dropdown (e.g.
+   * TransferList's category selector, rendered with `label=""`) expose an
+   * accessible name to assistive tech (WCAG 4.1.2). Additive — omitting it
+   * preserves the previous `aria-label={label}` behaviour byte-for-byte.
+   */
+  ariaLabel?: string
   options: DropdownOption[]
   defaultValue?: string | number
   /**
@@ -57,6 +66,7 @@ export interface DropdownProps {
  */
 const Dropdown: React.FC<DropdownProps> = ({
   label,
+  ariaLabel,
   options,
   defaultValue,
   onChange: onChangeProp,
@@ -246,7 +256,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               aria-expanded={isOpen}
               aria-controls={listboxId}
               aria-activedescendant={activeOptionId}
-              aria-label={label}
+              aria-label={ariaLabel ?? label}
               data-action={isOpen ? 'close' : 'open'}
               data-subject={dataField}
               className={buttonClassNames}

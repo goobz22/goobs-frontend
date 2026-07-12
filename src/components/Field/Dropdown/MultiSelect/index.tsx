@@ -19,6 +19,15 @@ export interface SelectOption {
 
 export interface MultiSelectChipProps {
   label?: React.ReactNode
+  /**
+   * Accessible name for the `role="combobox"` trigger when no visible `label`
+   * renders (bare multi-selects in toolbars, filter bars, …). Forwarded to
+   * FieldShell, which merges it into the trigger's spread `inputAriaProps` as
+   * `aria-label` ONLY when no visible label is present — a visible `label` stays
+   * the name source (WCAG 2.5.3 Label in Name). Additive; omitting it preserves
+   * the previous behaviour byte-for-byte.
+   */
+  ariaLabel?: string
   options?: SelectOption[]
   /**
    * Controlled list of selected ids (or values when no `_id` is set).
@@ -52,6 +61,7 @@ export interface MultiSelectChipProps {
 
 const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   label = '',
+  ariaLabel,
   options = [],
   value: valuePropRaw,
   defaultSelected = [],
@@ -249,6 +259,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   return (
     <FieldShell
       label={label}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}

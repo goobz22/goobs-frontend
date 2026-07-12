@@ -32,6 +32,15 @@ export interface PercentageFieldProps {
   showPercentSymbol?: boolean
   placeholder?: string
   /**
+   * Accessible name for the spinbutton input when no visible `label` renders
+   * (bare percentage fields in toolbars, data-table cells, …). Forwarded to
+   * FieldShell, which applies it as `aria-label` on the input ONLY when no
+   * visible label is present — a visible `label` stays the name source (WCAG
+   * 2.5.3 Label in Name). A placeholder is NOT an accessible name; prefer a
+   * visible `label` when the layout allows.
+   */
+  ariaLabel?: string
+  /**
    * Optional stable id applied to the field WRAPPER element. The value-bearing
    * `<input>` always keeps an internally-generated id so its `<label htmlFor>`
    * association (owned by FieldShell) stays intact — passing a custom `id`
@@ -73,6 +82,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   repeatInterval = 100,
   showPercentSymbol = true,
   placeholder,
+  ariaLabel,
   id,
   helperText,
   error,
@@ -443,6 +453,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   return (
     <FieldShell
       label={label}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}

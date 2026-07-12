@@ -7,6 +7,15 @@ import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DateFieldProps {
   label?: string
+  /**
+   * Accessible name for the input when no visible `label` renders (bare date
+   * fields in toolbars, data-table cells, …). Forwarded to FieldShell, which
+   * applies it as `aria-label` on the input ONLY when no visible label is
+   * present — a visible `label` stays the name source (WCAG 2.5.3 Label in
+   * Name). A placeholder is NOT an accessible name; prefer a visible `label`
+   * when the layout allows.
+   */
+  ariaLabel?: string
   value?: Date | null
   onChange: (date: Date | null) => void
   variant?: string
@@ -34,6 +43,7 @@ export interface DateFieldProps {
 
 const DateField: React.FC<DateFieldProps> = ({
   label,
+  ariaLabel,
   value: valueProp,
   onChange: onChangeProp,
   helperText,
@@ -125,6 +135,7 @@ const DateField: React.FC<DateFieldProps> = ({
   return (
     <FieldShell
       label={label}
+      ariaLabel={ariaLabel}
       helperText={helperText}
       error={error}
       disabled={disabled}
