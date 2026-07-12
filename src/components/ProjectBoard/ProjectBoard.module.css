@@ -143,6 +143,14 @@
   border-radius: var(--pb-toolbar-radius);
 }
 
+/* Programmatic focus target for view-transition focus management (WCAG 2.4.3):
+   the board region is focused (tabIndex=-1) when the user returns from an inline
+   form view, so keyboard/AT users aren't stranded on <body>. It's a
+   non-interactive scoping target, so it takes no visible focus ring. */
+.toolbarContainer:focus {
+  outline: none;
+}
+
 /* --------------------------------------------------------------------------
    GLYPH — absolutely-positioned decorative corner glyphs (sacred theme)
    -------------------------------------------------------------------------- */
@@ -293,6 +301,14 @@
   overflow: auto;
   opacity: var(--pb-aw-content-opacity, 1);
   transition: var(--pb-aw-content-transition, opacity 200ms ease-out);
+}
+
+/* Programmatic focus target for view-transition focus management (WCAG 2.4.3):
+   focus moves here (tabIndex=-1) when an inline view opens so keyboard/AT users
+   land at the top of the revealed form instead of being stranded on <body>.
+   It's a non-interactive scoping target, so it takes no visible focus ring. */
+.animationContent:focus {
+  outline: none;
 }
 
 /* --------------------------------------------------------------------------

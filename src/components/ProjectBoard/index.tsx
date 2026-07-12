@@ -5,7 +5,13 @@
  */
 'use client'
 
-import React, { useMemo, useEffect, useState, useCallback } from 'react'
+import React, {
+  useMemo,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from 'react'
 import {
   useProjectBoard,
   ProjectBoardProvider,
@@ -23,6 +29,7 @@ import {
   RawCompany,
   RawCustomer,
   RawProduct,
+  ViewState,
 } from './types'
 
 import { useColumnDragAndDrop } from './utils/useDragandDrop/columns'
@@ -205,6 +212,21 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   useEffect(() => {
     setColumnState(mergedColumns)
   }, [mergedColumns, setColumnState])
+
+  // View-transition focus management (WCAG 2.4.3 Focus Order). Opening an inline
+  // form is handled inside AnimationWrapper (focus moves into the revealed view);
+  // here we handle the RETURN to the board: the "Back to Board" / "Cancel"
+  // button that triggered the return has unmounted, so focus would be stranded
+  // on <body>. Move it to the board region so keyboard / AT users resume there.
+  const boardRegionRef = useRef<HTMLDivElement>(null)
+  const previousViewStateRef = useRef<ViewState>(viewState)
+  useEffect(() => {
+    const previous = previousViewStateRef.current
+    if (previous !== 'board' && viewState === 'board') {
+      boardRegionRef.current?.focus({ preventScroll: true })
+    }
+    previousViewStateRef.current = viewState
+  }, [viewState])
 
   // Local state
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
@@ -596,7 +618,11 @@ function ProjectBoardContent(props: ProjectBoardProps) {
             styles={{ theme: styles?.theme || 'light' }}
           />
 
-          <div className={cssStyles.toolbarContainer}>
+          <div
+            className={cssStyles.toolbarContainer}
+            ref={boardRegionRef}
+            tabIndex={-1}
+          >
             <Board
               headingLevel={headingLevel}
               columns={filteredColumnState}

@@ -19,6 +19,9 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
 }) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Focus target for the revealed inline view (see the focus-management effect
+  // below). tabIndex={-1} makes the content region programmatically focusable.
+  const contentRef = useRef<HTMLDivElement>(null)
   // Old getProjectBoardTheme defaulted to 'light' (overlay background was the
   // light container background); preserve that exact default.
   const theme = styles?.theme ?? 'light'
@@ -46,6 +49,18 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
       }
     }
   }, [isAnimating])
+
+  // View-transition focus management (WCAG 2.4.3 Focus Order). When this inline
+  // view opens, the button that triggered it (in the now-unmounted board
+  // toolbar / task card) is gone, so focus would otherwise be stranded on
+  // <body> and keyboard / screen-reader users lose their place. Move focus to
+  // the content region so they land at the top of the revealed form and can Tab
+  // straight into it. preventScroll avoids a scroll jump on focus.
+  useEffect(() => {
+    if (isVisible) {
+      contentRef.current?.focus({ preventScroll: true })
+    }
+  }, [isVisible])
 
   if (!isVisible) {
     return null
@@ -108,7 +123,12 @@ export const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
       data-theme={theme}
       style={overlayStyle}
     >
-      <div className={cssStyles.animationContent} style={contentStyle}>
+      <div
+        ref={contentRef}
+        tabIndex={-1}
+        className={cssStyles.animationContent}
+        style={contentStyle}
+      >
         {children}
       </div>
     </div>

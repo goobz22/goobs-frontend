@@ -1814,7 +1814,10 @@
   .sectionToggle,
   .meetingListCard,
   .kbArticleCard,
-  .kbLinkedArticleCard {
+  .kbLinkedArticleCard,
+  .sidebar,
+  .collapseButton,
+  .meetingRadioLabel {
     transition: none;
   }
 
