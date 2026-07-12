@@ -361,6 +361,11 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             aria-activedescendant={activeOptionId}
             aria-label={!label ? placeholder : undefined}
             aria-describedby={helperText ? helperId : undefined}
+            // Error state (styles.helperTextType === 'error') is otherwise
+            // conveyed only by the reddened border/label (colour-alone, WCAG
+            // 1.4.1). aria-invalid exposes it programmatically so screen readers
+            // announce the combobox as invalid (WCAG 3.3.1 / 4.1.2).
+            aria-invalid={isError || undefined}
             data-action={isOpen ? 'close' : 'open'}
             data-subject={dataField}
             type="text"
@@ -411,13 +416,16 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
             aria-label="Toggle options"
             disabled={styles?.disabled}
           >
-            <ArrowDropDownIcon
-              styles={{ theme }}
-              style={{
-                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.3s',
-              }}
-            />
+            {/* Rotation lives on this wrapper (not an inline style on the icon)
+                so the transition is a CSS rule the reduced-motion media query can
+                neutralise (WCAG 2.3.3); the rotated end-state is kept as a static
+                open/closed indicator. */}
+            <span
+              className={cssStyles.toggleArrow}
+              {...(isOpen && { 'data-open': 'true' })}
+            >
+              <ArrowDropDownIcon styles={{ theme }} />
+            </span>
           </button>
         </div>
         {isOpen &&
@@ -538,7 +546,14 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
       </div>
 
       {helperText && (
-        <div id={helperId} className={cssStyles.footerText}>
+        <div
+          id={helperId}
+          className={cssStyles.footerText}
+          // In the error state the helper text IS the validation message, so
+          // announce it live (WCAG 4.1.3). Plain helper text stays silent.
+          role={isError ? 'alert' : undefined}
+          aria-live={isError ? 'polite' : undefined}
+        >
           {helperText}
         </div>
       )}

@@ -155,6 +155,21 @@ export const ErrorState: Story = {
     styles: { theme: 'light', helperTextType: 'error' },
   },
   globals: { backgrounds: { value: 'light' } },
+  // Regression guard for the `color-only-state` / `form-error-not-associated`
+  // class (WCAG 1.4.1 / 3.3.1 / 4.1.2 / 4.1.3). The error state used to be
+  // conveyed only by the reddened border/label. The combobox now exposes
+  // aria-invalid, and the helper region — which holds the validation message —
+  // becomes a live role="alert" so screen readers announce it.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+    expect(combobox).toHaveAttribute('aria-invalid', 'true')
+
+    const alert = canvas.getByRole('alert')
+    expect(alert).toHaveTextContent('A destination is required.')
+    // aria-describedby links the combobox to that same message region.
+    expect(combobox.getAttribute('aria-describedby')).toBe(alert.id)
+  },
 }
 
 // --------------------------------------------------------------------------

@@ -138,6 +138,20 @@
   color: inherit;
 }
 
+/* Disclosure-arrow rotation. The transform lives on this wrapper span (driven
+   by the data-open attribute) instead of an inline style on the icon, so the
+   transition is a CSS rule the reduced-motion media query below can switch off
+   (WCAG 2.3.3) while the rotated end-state stays as a static open indicator. */
+.toggleArrow {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.toggleArrow[data-open='true'] {
+  transform: rotate(180deg);
+}
+
 .footerText {
   margin-top: var(--goobs-space-2xs);
   font-size: var(--goobs-text-xs);
@@ -332,4 +346,21 @@
   opacity: 0.6;
   margin-top: var(--goobs-space-2xs);
   font-family: var(--sh-item-font);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — WCAG 2.3.3: neutralise the disclosure-arrow rotation and the
+   label / search-box / tab / item transitions for users who prefer reduced
+   motion. State end-points (the rotated arrow, active tab, hovered item) remain
+   as static indicators; only the animated transition is removed. This block was
+   previously absent here while the three sibling Dropdown variants had it.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .label,
+  .searchBox,
+  .tab,
+  .item,
+  .toggleArrow {
+    transition: none;
+  }
 }
