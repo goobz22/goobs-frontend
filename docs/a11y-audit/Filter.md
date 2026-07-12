@@ -34,6 +34,8 @@ combobox/switch/button ARIA; FilterSection only composes them and forwards `labe
 | 2 | Serious | 2.4.7 Focus Visible (AA); 2.4.11 Focus Appearance (AA) | `src/components/Filter/Section/Section.module.css:77` (pre-fix `.toggle`) | The collapsible toggle `<button>` had **no `:focus-visible` treatment**. It is a fully custom-styled button with its own border on a themed background; the default UA outline is inconsistent/low-contrast and visually competes with the button border. Keyboard users could lose the focus location. | **FIXED** |
 | 3 | Minor | 2.3.3 Animation from Interactions (AAA; repo convention) | `src/components/Filter/Section/Section.module.css:102` (`.chevron`) | The chevron `transition: transform 0.2s ease` (rotates on open/close) had **no `prefers-reduced-motion` guard**, unlike sibling components (Accordion, +22 modules repo-wide). | **FIXED** |
 | 4 | Minor | 1.3.1 Info & Relationships (A); SEO document outline | `src/components/Filter/Section/index.tsx:553` (pre-fix toggle) | In collapsible mode the section title ("Filters") rendered as a bare `<span>` inside the toggle button, with **no way for a consumer to place it in the document outline / heading navigation**, unlike the APG Accordion pattern (trigger wrapped in a heading) and ~10 sibling goobs components that expose a `headingLevel` prop. | **FIXED** |
+| 5 | Minor | 1.3.6 Identify Purpose (AAA); WAI-ARIA landmark best practice | `src/components/Filter/Section/index.tsx` (root `role="search"`, pre-review-fix) | The non-collapsible `role="search"` landmark was placed on the section **root**, so it enclosed the entire toolbar — including the right-aligned action button(s) rendered from `visibleButtons` (e.g. the `+ Create Course` CTA). A create/CTA action is **not part of a search facility**, so a non-search control sat inside the search landmark. (Adversarial-review follow-up.) | **FIXED** |
+| 6 | Minor | (test integrity — no direct WCAG SC) | `src/components/Filter/Section/filterSection.stories.tsx` (`AccessibleHeading`, `AccessibleChipGroups`) | The two new a11y-state stories were **render-only** — no `play` assertions. goobs' only regression gate is the Chromatic **visual** diff, and both fixes are pixel-invisible (ARIA `role`/`aria-labelledby` aren't screenshot; the `<h2>` wrapper is `font:inherit;margin:0` so it's identical to a bare button). A regression that dropped `role="group"` or the heading wrapper would pass Chromatic + typecheck + lint silently. (Adversarial-review follow-up.) | **FIXED** |
 
 No hearing-impaired issues (A / WCAG 1.2.x, 1.4.2): grep for `new Audio` / `AudioContext` /
 `navigator.vibrate` / `<audio>` / `<video>` / `.play()` across the directory returned **zero
@@ -66,6 +68,23 @@ CLEAN — no audio, media, or vibration APIs used; no status conveyed by sound. 
   Enter/Space activation is native. No focus trap / Escape is required for a disclosure
   (it is not a modal overlay), so none was added.
 
+### Landmarks — `role="search"` (Issue 5, review follow-up)
+
+- A FilterSection with a search box is a *search facility*, so in **non-collapsible** mode the
+  **search box** is exposed as a named `role="search"` landmark (`aria-label` = `landmarkLabel`
+  → `title`, default "Filters") for landmark navigation. Filter-only rows (no search box) get no
+  landmark — an unnamed/ambiguous one only adds noise. Collapsible mode already exposes its panel
+  as a named `role="region"`, so the search landmark applies to non-collapsible mode only.
+- **Adversarial-review fix:** the landmark originally sat on the section **root**, so it enclosed
+  the whole toolbar, including the right-aligned action button(s) (`visibleButtons`, e.g. the
+  `+ Create Course` CTA). A create/CTA action is not part of a search facility. The landmark was
+  moved onto the **`searchCell`** (the search box wrapper) — a canonical, tightly-scoped search
+  landmark that structurally **excludes** the sibling `buttonsCell`. The fix is **pixel-identical**:
+  `searchCell` keeps its class and `flex: 1 1 min(320px,100%)` sizing, and `role`/`aria-label` do
+  not affect layout, so the Chromatic baseline is unchanged. `index.tsx` searchCell (in
+  `filterContent`) + non-collapsible root. The `landmarkLabel` and `ref` prop JSDoc were updated to
+  reflect that the landmark is the search box, not the root.
+
 ## SEO semantics
 
 - **Issue 4 (fixed):** added an additive, opt-in `headingLevel?: 1|2|3|4|5|6` prop. When set
@@ -93,6 +112,13 @@ All fixes are inside the owned directory `src/components/Filter/Section/`.
 4. **`Section.module.css`** — `@media (prefers-reduced-motion: reduce)` dropping the chevron
    transition.
 5. **`Section.module.css`** — `.heading` transparent-wrapper reset (`margin:0; font:inherit`).
+6. **`index.tsx`** (review follow-up, Issue 5) — moved the non-collapsible `role="search"` +
+   `aria-label` off the section root onto the **`searchCell`**, so the right-aligned action
+   button(s) are excluded from the search landmark. Zero visual change; `landmarkLabel` / `ref`
+   JSDoc updated accordingly.
+7. **`filterSection.stories.tsx`** (review follow-up, Issue 6) — added `play`-function assertions
+   to `AccessibleHeading` and `AccessibleChipGroups` so the Chromatic-invisible ARIA/heading fixes
+   are protected by an executable gate.
 
 All preserve the machine-test selector contract: `data-component="FilterSection"`,
 `data-filter-section`, `data-state`, `data-testid="filter-section-toggle"` /
@@ -118,6 +144,19 @@ pattern (`EmptyState`, `Panel`, `Form/DataGrid`, `BigCalendar`, `ConfirmationCod
 - The `:focus-visible` and reduced-motion behaviors are exercised by the existing
   `Collapsible (Open)` / `Collapsible (Closed)` stories (they render the toggle button whose
   keyboard focus ring and chevron transition are the changed surfaces).
+
+**Review follow-up (Issue 6) — the two a11y stories are no longer render-only.** Both fixes are
+invisible to the Chromatic visual gate, so each story now carries a `play` function that IS its
+regression test (matching the `Collapsible (Open/Closed)` precedent):
+
+- **`A11y/Heading Level`** (`AccessibleHeading`) — asserts a real `getByRole('heading', {level: 2,
+  name: /Course Filters/})` exists, that it `toContainElement` the `filter-section-toggle` button,
+  and that the toggle is `aria-expanded="true"`. A regression that drops the `headingLevel` wrapper
+  (visually invisible — `.heading { font: inherit; margin: 0 }`) now fails here.
+- **`A11y/Chip Groups`** (`AccessibleChipGroups`) — asserts each labelled cluster is exposed as
+  `getByRole('group', { name: /Status|Level|Tags/ })` and that the Status group wraps its four
+  `aria-pressed` toggle chips (`getAllByRole('button')` → length 4). A regression that drops
+  `role="group"` or the `aria-labelledby` association now fails here.
 
 ## Deferred
 
