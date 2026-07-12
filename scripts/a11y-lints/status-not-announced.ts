@@ -40,6 +40,59 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  *    not a literal live-region marker → not flagged (its story covers it).
  */
 
+/**
+ * Blank the CONTENT of `//` line and `/* … *​/` block comments to spaces,
+ * preserving every newline (offsets/line numbers unchanged). String- and
+ * template-aware so a `//` inside a URL string is not a comment. REQUIRED
+ * before openTags(): an apostrophe in an in-tag comment ("the group's …")
+ * desyncs the walker's quote tracking, and prose like `role="alert"` inside a
+ * JSDoc/JSX comment reads as a literal live-region marker (the RadioGroup
+ * false-positive, 2026-07-11).
+ */
+function blankComments(text: string): string {
+  const out = text.split('')
+  let str: string | null = null
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (str) {
+      if (c === '\\') {
+        i++
+        continue
+      }
+      if (c === str) str = null
+      continue
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      str = c
+      continue
+    }
+    if (c === '/' && text[i + 1] === '/') {
+      let j = i
+      while (j < text.length && text[j] !== '\n') {
+        out[j] = ' '
+        j++
+      }
+      i = j - 1
+      continue
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      let j = i
+      while (j < text.length && !(text[j] === '*' && text[j + 1] === '/')) {
+        if (text[j] !== '\n') out[j] = ' '
+        j++
+      }
+      if (j < text.length) {
+        out[j] = ' '
+        out[j + 1] = ' '
+        j += 1
+      }
+      i = j
+      continue
+    }
+  }
+  return out.join('')
+}
+
 /** True while `i` sits on the closing `>` of a JSX opening tag (depth 0). */
 interface OpenTag {
   /** full opening-tag text, `<tag …>` or `<tag …/>` */
@@ -150,7 +203,9 @@ const lint: A11yLint = {
     'A live region (role="status"/"alert" or non-off aria-live) that announces nothing: either it is empty and rides its message on an aria-label (screen readers do not re-announce label changes on a live region), or it is aria-hidden and thus removed from the accessibility tree. Render the status as text content and keep the live region in the a11y tree (WCAG 4.1.3).',
   check(files: LintFile[]): Violation[] {
     const violations: Violation[] = []
-    for (const { path, text } of files) {
+    for (const { path, text: raw } of files) {
+      // Comment-blanked copy: identical offsets, no prose/apostrophe hazards.
+      const text = blankComments(raw)
       for (const t of openTags(text)) {
         if (!isLiveRegion(t.tag)) continue
         if (hasAriaHiddenTrue(t.tag)) {
@@ -193,6 +248,20 @@ const lint: A11yLint = {
     good: [
       // Content-bearing polite region, no label — announces its changed text.
       `<div role="status" aria-live="polite">{copied ? 'Copied to clipboard' : ''}</div>`,
+      // Comment hazards must not fabricate a hit: an apostrophe inside an
+      // in-tag // comment (quote-state desync) plus prose role="alert" in a
+      // JSX comment (phantom live marker) — the RadioGroup false-positive.
+      `<label>
+        <input
+          // The consumer ref lands on the first radio — the group's
+          // roving tab-stop entry point.
+          type="radio"
+          checked={isChecked}
+        />
+        <span aria-hidden="true" className={s.dot} />
+      </label>
+      {/* Error region. Announced with role="alert" + aria-live while erroring. */}
+      <div role={hasError ? 'alert' : undefined} aria-live={hasError ? 'polite' : undefined}>{msg}</div>`,
       // Imperatively-/re-render-populated placeholder: empty but NO label.
       `<div ref={liveRef} role="status" aria-live="polite" />`,
       // Explicitly muted static badge — aria-live="off" is not a live region.
