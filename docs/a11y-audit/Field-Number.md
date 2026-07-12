@@ -5,6 +5,15 @@
 issue 7 (accessible error/label state now has executable regression coverage) and
 deferred item D3; issues 1–6 unchanged from the prior pass.
 
+**2026-07-11 owner re-audit (this session):** independently re-read all six
+`index.tsx` + `*.module.css` + `*.stories.tsx`, `FieldShell`, and the icon a11y
+resolver (`Icons/iconA11y.ts`) against the full checklist. **All fixes 1–7 hold**
+and every file:line citation below still resolves. **No new in-directory defect
+found.** Added one *considered-and-judged-compliant* note — Target size
+(WCAG 2.5.8) on the InternalIncrement stacked arrows — under "Target size" below;
+it is a documented design-constrained limitation, not an open defect. Deferrals
+D1–D3 re-confirmed as genuinely Shell-rooted (unchanged).
+
 **Component:** `src/components/Field/Number/*` — a family of six number-oriented
 fields, each composed inside the shared `FieldShell` (label / helper / error /
 theme chrome) and driven by `useFieldBinding`:
@@ -179,6 +188,32 @@ styled-div-as-heading, no onClick-div-as-link, no client-only injection of
 primary content. The masked default-value display is a presentation transform of
 a value the consumer already owns, not crawlable primary content. No
 SEO/semantic markup change applicable.
+
+## Target size (WCAG 2.5.8 Minimum, AA) — considered, judged compliant-via-exception
+
+**InternalIncrement's +/- buttons are 16×16 CSS px** (`InternalIncrement.module.css:65-70`
+— `width/height/min-width/min-height: 16px`), stacked with a 2px gap inside the
+40px-tall field. That bounding box is below the 24×24 minimum, and the two buttons
+sit too close for the *Spacing* exception to apply. I judge this **not a 2.5.8
+failure in context**, on three grounds:
+- **Equivalent function (the named 2.5.8 exception):** the identical
+  increment/decrement function is reachable through controls that meet the
+  criterion — the same field's `role="spinbutton"` input is a 40px-tall pointer +
+  full keyboard target (Arrow/Home/End, fixes 1–3), and the sibling
+  **ExternalIncrement** variant exposes the same steppers as 40×32px `−`/`+`
+  buttons for touch-primary use.
+- **Convention:** the stacked-arrow spinner mirrors the native
+  `<input type="number">` UA spinner (which is itself UA-exempt from 2.5.8); this
+  is the expected affordance for an *inside-the-frame* stepper.
+- **Layout-constrained:** two ≥24px targets stacked require ≥48px, which cannot
+  fit the 40px field without a visual redesign — so a strict fix would change the
+  rendered geometry rather than the a11y semantics.
+
+**Recommendation (non-blocking, for a maintainer, not applied here):** consumers
+whose stepper is touch-primary should prefer `ExternalIncrement`; if a future
+design pass wants strict 2.5.8 conformance for the internal variant, grow the field
+height so each arrow reaches 24px. ExternalIncrement's buttons (40px tall,
+`ExternalIncrement.module.css:15-30`) already pass.
 
 ## Motion (WCAG 2.3.3)
 
