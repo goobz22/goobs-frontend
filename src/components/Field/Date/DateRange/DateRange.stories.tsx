@@ -5,11 +5,13 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect, fn } from 'storybook/test'
+import { within, expect, fn, userEvent } from 'storybook/test'
+import { z } from 'zod'
 import DateRangeComponent, {
   type DateRange,
   type DateRangeProps,
 } from './index'
+import Form from '../../../Form'
 
 // Wrapper component for state management
 const DateRangeWithState = ({
@@ -755,5 +757,119 @@ export const DefaultGroupLabel: Story = {
     await expect(
       canvas.getByRole('group', { name: 'Date range' })
     ).toBeInTheDocument()
+  },
+}
+
+// A boolean `error={true}` (styling-only, no message — a documented FieldShell
+// mode) marks BOTH inputs invalid but renders NO message region. So NEITHER
+// input may carry an `aria-describedby`: a describedby pointing at the absent
+// region is a dangling/invalid ARIA reference (axe aria-valid-attr-value).
+// Regression guard for the boolean-error dangling-describedby fix — the end
+// input's ARIA now MIRRORS the start shell's resolved bag (which omits
+// aria-describedby when the shell renders no region) instead of re-deriving a
+// describedby from `Boolean(error)`.
+export const BooleanErrorNoMessage: Story = {
+  name: 'A11y: Boolean Error (no message)',
+  render: () => (
+    <DateRangeWithState
+      startLabel="Boolean Start"
+      endLabel="Boolean End"
+      error
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const startInput = canvas.getByLabelText('Boolean Start')
+    const endInput = canvas.getByLabelText('Boolean End')
+
+    // Both controls are programmatically invalid — a styling-only error still
+    // conveys the invalid STATE on both ends of the range (WCAG 4.1.2).
+    await expect(startInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(endInput).toHaveAttribute('aria-invalid', 'true')
+
+    // No message region is rendered, so NEITHER input references one. A
+    // dangling aria-describedby (pointing at a non-existent id) would be an
+    // invalid ARIA reference — the bug this guards against.
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    await expect(startInput).not.toHaveAttribute('aria-describedby')
+    await expect(endInput).not.toHaveAttribute('aria-describedby')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: FORM-ENGINE-DERIVED RANGE ERROR
+// --------------------------------------------------------------------------
+
+// The whole {start,end} range is one engine key; the range is invalid until
+// BOTH dates are supplied. The refine attaches its message at the `tripDates`
+// path, so the engine reports it for that key once the field is touched (on
+// submit) — with no explicit `error` prop on the DateRange.
+const RangeFormSchema = z.object({
+  tripDates: z
+    .object({
+      start: z.date().nullable(),
+      end: z.date().nullable(),
+    })
+    .refine(range => range.start !== null && range.end !== null, {
+      message: 'Both start and end dates are required.',
+    }),
+})
+
+const onRangeFormSubmit = fn()
+
+// When a DateRange is bound in a <Form> by `name` with NO explicit `error`, the
+// range error is DERIVED by the form engine and resolved on the START shell
+// (which carries `name`). The END input has no `name` and never reads the
+// engine — so it must MIRROR the start shell's resolved aria-invalid /
+// aria-describedby, not re-derive them from the (absent) explicit `error` prop.
+// Regression guard: reverting the mirror to `Boolean(error)` leaves the end
+// input neither invalid nor described on the engine-derived path (WCAG 1.3.1 /
+// 3.3.1 / 4.1.2).
+export const FormEngineDerivedError: Story = {
+  name: 'A11y: Form-Engine-Derived Range Error',
+  render: () => (
+    <Form
+      schema={RangeFormSchema}
+      initialValues={{ tripDates: { start: null, end: null } }}
+      subject="trip dates"
+      onSubmit={onRangeFormSubmit}
+    >
+      <DateRangeComponent
+        name="tripDates"
+        startLabel="Engine Start"
+        endLabel="Engine End"
+        ariaLabel="Trip dates"
+        styles={{ theme: 'light' }}
+      />
+      <button type="submit" style={{ marginTop: '1rem' }}>
+        Validate
+      </button>
+    </Form>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const startInput = canvas.getByLabelText('Engine Start')
+    const endInput = canvas.getByLabelText('Engine End')
+
+    // Submitting the empty required range surfaces the engine-derived error on
+    // the whole `tripDates` key (both dates null) — no explicit error prop.
+    await userEvent.click(canvas.getByRole('button', { name: 'Validate' }))
+
+    // The message region is the field helper (there is also a form-level status
+    // alert, so query by the message text, not by role).
+    const helper = await canvas.findByText(
+      'Both start and end dates are required.'
+    )
+
+    // The engine error is resolved on the START shell (it owns `name`); the END
+    // input MIRRORS it — both are invalid and both are described by that same
+    // region, so a screenreader on either control reads the reason.
+    await expect(startInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(endInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(startInput).toHaveAttribute('aria-describedby', helper.id)
+    await expect(endInput).toHaveAttribute('aria-describedby', helper.id)
   },
 }

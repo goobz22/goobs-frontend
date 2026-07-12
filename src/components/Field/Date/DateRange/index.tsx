@@ -2,7 +2,10 @@
 
 import React, { useRef, useEffect } from 'react'
 import cssStyles from './DateRange.module.css'
-import FieldShell, { type FieldStyleOverrides } from '../../Shell'
+import FieldShell, {
+  type FieldStyleOverrides,
+  type FieldShellSlot,
+} from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
 export interface DateRange {
@@ -191,31 +194,32 @@ const DateRange: React.FC<DateRangeProps> = ({
   }
 
   // Two FieldShells side-by-side share the start/end labels and helper
-  // wiring. Only the start shell carries `error` + `helperText` so the
-  // helper region (role="alert" + aria-live) renders once below the pair
+  // wiring. Only the start shell carries `error` + `helperText` + `name`, so
+  // the helper region (role="alert" + aria-live) renders once below the pair
   // for screenreader announcement — rendering it on both shells would
-  // duplicate the message. To avoid marking only ONE control invalid on a
-  // cross-field range error, aria-invalid is set directly on BOTH inputs
-  // (the start input via FieldShell's inputAriaProps, the end input via the
-  // explicit prop below), so both fields are programmatically invalid and
-  // both pick up the themed danger border (WCAG 1.3.1 / 4.1.2). The flex
-  // layout lives in DateRange.module.css; the caller-supplied `gap` override
-  // is passed through as the `--date-range-gap` CSS custom property.
-  const hasError = Boolean(error)
-  // The start FieldShell renders the ONE helper/error region for the pair
-  // (below). Capture the id it generates (via useId, exposed only through its
-  // render-prop slot) so the END input can point its aria-describedby at that
-  // SAME region — the start input already does, via inputAriaProps. A
-  // cross-field range error/helper describes BOTH controls, so a screenreader
-  // that lands on the end input can read the reason instead of hearing an
-  // unexplained "invalid" (WCAG 1.3.1 / 3.3.1). React evaluates the start
-  // shell's render-prop before the end shell's (document order) in the same
-  // render, and useId is stable across renders, so the ref holds the correct
-  // id by the time the end input renders. Only used as a describedby target
-  // when the region actually renders (error OR helperText present), so a
-  // dangling aria-describedby is never emitted.
-  const startHelperIdRef = useRef<string | undefined>(undefined)
-  const startHelperRendered = hasError || helperText != null
+  // duplicate the message. A cross-field range error is a property of the
+  // WHOLE range, so BOTH inputs must be marked invalid and BOTH must point at
+  // that one message region (WCAG 1.3.1 / 4.1.2 / 3.3.1).
+  //
+  // Rather than RE-DERIVE the end input's error state from the explicit
+  // `error` prop (`Boolean(error)`), we MIRROR the start shell's already-
+  // resolved `inputAriaProps` bag onto the end input. Re-derivation was wrong
+  // twice over: (a) it misses the form-engine-derived error the start shell
+  // resolves from `<Form>` context (bound via `name`, no explicit `error`),
+  // leaving the end input un-marked; and (b) for a boolean `error={true}` with
+  // no `helperText` the shell renders NO message region (its `aria-describedby`
+  // is omitted), yet a describedby gated on `Boolean(error)` would dangle at a
+  // non-existent id. Mirroring the resolved bag makes the end input's ARIA
+  // exactly track the start's — `aria-invalid` present iff the shell is
+  // invalid, `aria-describedby` present iff the shell actually rendered the
+  // region — so no dangling reference is ever emitted, the form-engine path is
+  // covered, and no Shell change / engine-logic duplication is needed. React
+  // evaluates the start shell's render-prop before the end shell's in the same
+  // render (document order), so the ref is populated by the time the end input
+  // renders. The themed danger border follows the mirrored `aria-invalid`. The
+  // flex layout lives in DateRange.module.css; the caller-supplied `gap`
+  // override is passed through as the `--date-range-gap` CSS custom property.
+  const startInputAriaRef = useRef<FieldShellSlot['inputAriaProps']>({})
   const fieldsWrapperStyle: React.CSSProperties | undefined =
     styles?.gap !== undefined
       ? ({ ['--date-range-gap']: styles.gap } as React.CSSProperties)
@@ -241,10 +245,11 @@ const DateRange: React.FC<DateRangeProps> = ({
             filled={value != null && (value.start != null || value.end != null)}
             styles={styles}
           >
-            {({ inputId, inputAriaProps, helperId }) => {
-              // Stash the shared helper-region id so the end input can be
-              // described by the same message (see startHelperIdRef above).
-              startHelperIdRef.current = helperId
+            {({ inputId, inputAriaProps }) => {
+              // Stash the start shell's fully-resolved ARIA bag so the end
+              // input can mirror its aria-invalid / aria-describedby onto
+              // itself (see startInputAriaRef above).
+              startInputAriaRef.current = inputAriaProps
               return (
                 <input
                   ref={startInputRef}
@@ -291,20 +296,23 @@ const DateRange: React.FC<DateRangeProps> = ({
                     : undefined
                 }
                 {...inputAriaProps}
-                // The end shell isn't passed `error` (the message renders once
-                // under the start shell), so its inputAriaProps carry no
-                // aria-invalid. Set it here so a range error marks BOTH inputs
-                // invalid, not just the start (WCAG 1.3.1 / 4.1.2). Undefined
-                // when there's no error so aria-invalid="false" is never
-                // emitted, preserving the test-selector contract.
-                aria-invalid={hasError || undefined}
-                // Point at the SAME helper/error region the start input is
-                // described by, so the reason is programmatically available on
-                // this control too — not just an unexplained "invalid" (WCAG
-                // 1.3.1 / 3.3.1). Undefined when the region isn't rendered so
-                // no dangling aria-describedby is emitted.
+                // Mirror the start shell's RESOLVED ARIA onto the end input so
+                // a range-level error marks BOTH controls invalid and points
+                // BOTH at the single message region (WCAG 1.3.1 / 3.3.1 /
+                // 4.1.2). These read from the start shell's resolved bag
+                // (captured in startInputAriaRef) — NOT a re-derivation of the
+                // `error` prop — so the form-engine-derived error is covered,
+                // and aria-describedby is present ONLY when the shell actually
+                // rendered the region (never dangling at a boolean-`error`
+                // no-message id). `|| undefined` keeps aria-invalid omitted
+                // (not "false") when valid, preserving the test-selector
+                // contract; the end shell's own bag carries neither attribute
+                // (it gets no error/helper), so this override is clean.
+                aria-invalid={
+                  startInputAriaRef.current['aria-invalid'] || undefined
+                }
                 aria-describedby={
-                  startHelperRendered ? startHelperIdRef.current : undefined
+                  startInputAriaRef.current['aria-describedby']
                 }
               />
             )}
