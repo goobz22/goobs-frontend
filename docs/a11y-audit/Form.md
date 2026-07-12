@@ -116,9 +116,11 @@ visual + programmatic. WCAG 1.2.x / 1.4.2 do not apply. No change needed.
   error, and deliberately *omits* `aria-required="false"`/`aria-disabled="false"` (keeps the AT
   tree quiet and preserves the machine-test contract that FieldShell removes `aria-disabled` when a
   field enables). Required is conveyed programmatically, not asterisk-only.
-- **`<form>` accessible name (correct, preserved):** the root is a native `<form role="form">` with
-  `aria-label={subject ?? id}` (`index.tsx:163-164`) — a named form landmark. `role="form"` is
-  retained unchanged per the machine-test selector contract.
+- **`<form>` accessible name (FIXED, review issue R3):** the root exposes `role="form"` +
+  `aria-label` **only when it has an accessible name** (`subject`, else `id`); with neither, it now
+  renders a plain, non-landmark `<form>` instead of a nameless `role="form"` landmark
+  (`index.tsx:169-185`). Named forms (every story + every migrated ThothOS form passes `subject`)
+  are byte-for-byte unchanged, so the machine-test selector contract is preserved for named forms.
 - **AutoFields names (correct):** each auto-emitted field gets a `label` (humanised from the schema
   key) and the boolean case renders `<Checkbox aria-label={label}>{label}</Checkbox>`
   (`AutoFields.tsx:181-192`) — an accessible name is always present (the visible text and the
@@ -149,9 +151,11 @@ visual + programmatic. WCAG 1.2.x / 1.4.2 do not apply. No change needed.
   genuine `<h1>`–`<h6>` with the level controllable via the additive `headingLevel` prop, so the
   crawled HTML carries real headings at a caller-chosen outline position; descriptions are real
   `<p>`.
-- **Landmarks:** the root is a native `<form>` (a `form` landmark when named, which it is). The two
-  shells are titled `<div>` wrappers framing a DataGrid / ProjectBoard that own their own
-  table/board semantics — no additional `<nav>`/`<header>`/`<aside>` applies.
+- **Landmarks:** the root is a native `<form>` — a named `form` landmark when `subject`/`id` is
+  present (`role="form"` + `aria-label`), and a plain non-landmark `<form>` when it has no name (no
+  nameless landmark; review issue R3). The two shells are titled `<div>` wrappers framing a DataGrid
+  / ProjectBoard that own their own table/board semantics — no additional
+  `<nav>`/`<header>`/`<aside>` applies.
 - **Links:** the Form and its shells render no links (no onClick-div-as-link) — no
   `clickable-noninteractive-element` defect. Any links come from consumer children.
 - **Lists/tables:** the DataGrid/ProjectBoard tabular content is owned by those components
@@ -192,6 +196,62 @@ gate agent per the ownership rules.
 - Reduced motion (issue 4) is a CSS media-query behaviour not assertable in a Storybook play
   function; the existing sacred DataGrid stories render the animated container so the Chromatic
   baseline still covers the visual, and the guard is a defensive CSS addition.
+
+## Review fixes (2026-07-11 adversarial pass)
+
+A follow-up adversarial review of the fixes above found three residual issues. All are fixed at
+root cause; each is pinned by a story that fails before the fix.
+
+### R1. Flagship regression test matched THREE `role="alert"` elements, not one — SERIOUS — FIXED
+- **Where:** `Form.stories.tsx` `SubmitStatusAnnouncement.play` used `canvas.getByRole('alert')`.
+  On the empty-submit path it exercises, the engine marks both required fields (`fullName` + `email`)
+  touched, so FieldShell renders `role="alert"` for EACH (`Field/Shell/index.tsx:412`) **plus** the
+  new form-level `role="alert"` region — three elements. Testing Library `getByRole('alert')` throws
+  "Found multiple elements"; wrapped in `waitFor` it retries to timeout and the play FAILS. The sole
+  regression test locking the flagship WCAG 4.1.3 fix was therefore not actually asserting (violates
+  the fail-first regression contract).
+- **Fix:** the play now scopes to the specific form-level node
+  `canvasElement.querySelector('[data-form-status]')` and asserts its text, so it targets the Form's
+  own live region regardless of how many field-level alerts co-exist. No product code changed for R1
+  — it was a test-correctness defect.
+
+### R2. Repeated blocked submit with an unchanged field count did not re-announce — MINOR — FIXED
+- **WCAG:** 4.1.3 Status Messages (AA)
+- **Where:** `index.tsx` `handleFormSubmit` re-set the SAME summary string (e.g. "2 fields need
+  attention…") on a second still-invalid submit. An assertive live region only fires on a DOM text
+  mutation; React commits no change when the value is identical, so the region stayed silent and a
+  screen-reader user who submitted the same invalid form twice heard the summary only once. (Note: a
+  plain `setSubmitStatus(''); setSubmitStatus(message)` does NOT fix this — React batches the two
+  updates in one handler and commits only the final value.)
+- **Fix:** `flushSync(() => setSubmitStatus('')); setSubmitStatus(message)` (`index.tsx:161-162`) —
+  the `flushSync` synchronously commits the empty string to the DOM first, then the message is set,
+  guaranteeing a real text mutation (message → '' → message) on every blocked submit, so each one
+  produces a fresh announcement. Text stays clean (no token pollution). `react-dom`'s `flushSync` is
+  a standard React 19 API; `react-dom` is already a dependency — no new dependency added.
+- **Markup change:** none. Behavioural-only (the same visually-hidden `role="alert"` region).
+
+### R3. Nameless `role="form"` landmark when neither `subject` nor `id` is set — MINOR — FIXED
+- **Where:** `index.tsx` rendered `role="form" aria-label={subject ?? id}` unconditionally. With
+  neither prop, `aria-label` is `undefined`, leaving an explicit `role="form"` with no accessible
+  name — a nameless landmark, which ARIA discourages (landmark noise with nothing to announce).
+- **Fix:** `role="form"` + `aria-label` are now emitted **only when an accessible name exists**
+  (`const accessibleName = subject ?? id`; conditional attribute spread, `index.tsx:169-185`).
+  Unnamed forms render a plain, non-landmark `<form>`; named forms are unchanged.
+- **Markup change (noted per audit rules):** for a Form rendered with NEITHER `subject` nor `id`,
+  the root `<form>` no longer carries `role="form"` (and carries no `aria-label`). This is a
+  conditional removal in the previously-broken un-named case only; every named Form (all stories,
+  all migrated ThothOS forms) is byte-for-byte identical. `role="form"` is not part of the documented
+  machine-test selector contract (which keys on `data-component`/`data-field-name`/`data-action`/
+  `data-state` + the dropdown combobox pattern), so no Playwright selector is affected.
+
+### Stories added/changed for the review fixes
+- **`SubmitStatusAnnouncement` (rewritten play)** — scopes to `[data-form-status]` (fixes R1) AND
+  re-submits under a `MutationObserver` on the region, asserting the second identical-count submit
+  still mutates the live region (locks R2 — the observer records zero mutations without the
+  `flushSync` clear-then-set, failing the play before the fix).
+- **`FormLandmarkNaming` (new)** — renders one named (`subject="contact"`) and one unnamed Form and
+  asserts the named one exposes `role="form"` + `aria-label="contact"` while the unnamed one has
+  neither (locks R3 — the unnamed assertion fails against the old always-on `role="form"`).
 
 ## Deferred
 

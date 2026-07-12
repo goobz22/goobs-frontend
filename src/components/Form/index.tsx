@@ -37,6 +37,7 @@ import React, {
   type ReactElement,
   type ReactNode,
 } from 'react'
+import { flushSync } from 'react-dom'
 import { z } from 'zod'
 import { FormContext, type FormContextValue, type FormEngine } from './context'
 import { useZodFormEngine } from './engine/zod'
@@ -144,24 +145,44 @@ function FormInner<TValues extends Record<string, unknown>>({
           )
         )
         const count = invalidPaths.size
-        setSubmitStatus(
+        const message =
           count === 1
             ? '1 field needs attention. Review the highlighted field below.'
             : `${count} fields need attention. Review the highlighted fields below.`
-        )
+        // Re-announce on EVERY blocked submit, even when the summary text is
+        // unchanged. An assertive live region only fires on a DOM text mutation,
+        // so re-submitting a still-invalid form with the SAME field count would
+        // set an identical string — React commits no change and the screen
+        // reader stays silent (a user who submits the same invalid form twice
+        // hears the summary only once). Force a real mutation by synchronously
+        // flushing the region to empty first, then setting the message, so each
+        // blocked submit produces a fresh announcement. (WCAG 4.1.3 — the status
+        // must be conveyed each time it occurs.)
+        flushSync(() => setSubmitStatus(''))
+        setSubmitStatus(message)
       }
       engine.handleSubmit(event)
     },
     [schema, engine]
   )
 
+  // A native `<form>` is exposed as a `form` LANDMARK only when it has an
+  // accessible name; emitting an explicit `role="form"` with no name creates a
+  // NAMELESS landmark, which ARIA discourages (landmark noise with nothing to
+  // announce). So expose the form landmark — `role="form"` + `aria-label` — ONLY
+  // when we actually have a name (`subject`, else `id`); otherwise render a
+  // plain, non-landmark `<form>`. Named forms (the common case) are unchanged.
+  const accessibleName = subject ?? id
+
   return (
     <form
       data-component="Form"
       {...(id !== undefined && { 'data-form': id })}
       {...(subject !== undefined && { 'data-subject': subject })}
-      role="form"
-      aria-label={subject ?? id}
+      {...(accessibleName !== undefined && {
+        role: 'form',
+        'aria-label': accessibleName,
+      })}
       onSubmit={handleFormSubmit}
       {...(className !== undefined && { className })}
       {...(style !== undefined && { style })}

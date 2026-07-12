@@ -418,6 +418,14 @@ export const DynamicFieldValues: Story = {
  * would otherwise get no feedback that the submit failed. The visually-hidden
  * `role="alert"` region announces a concise field-count summary ("2 fields need
  * attention…"), the audible counterpart to the visible per-field errors.
+ *
+ * The play scopes to the specific `[data-form-status]` node rather than
+ * `getByRole('alert')`: a blocked empty submit ALSO renders a FieldShell
+ * `role="alert"` error region for each required field (fullName + email), so
+ * `getByRole('alert')` would match three elements and throw. It then re-submits
+ * to prove the summary re-announces even with an unchanged field count (the
+ * live region must produce a fresh DOM mutation each time — the flushSync
+ * clear-then-set — or a repeat submit is silent to assistive tech).
  */
 export const SubmitStatusAnnouncement: Story = {
   name: 'Submit status announcement (role=alert)',
@@ -425,14 +433,94 @@ export const SubmitStatusAnnouncement: Story = {
   globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Submit the empty form → validation blocks it (fullName + email required).
-    await userEvent.click(canvas.getByRole('button', { name: /submit/i }))
-    // The live region announces the count of fields needing attention.
-    await waitFor(() =>
-      expect(canvas.getByRole('alert')).toHaveTextContent(
-        /fields need attention/i
-      )
+    // The form-level live region is the specific [data-form-status] node — NOT
+    // getByRole('alert'), which on a blocked empty submit also matches each
+    // field's FieldShell error region and would throw on "multiple elements".
+    const statusRegion = canvasElement.querySelector<HTMLElement>(
+      '[data-form-status]'
     )
+    if (!statusRegion) throw new Error('form-level status region is missing')
+
+    // Submit the empty form → validation blocks it (fullName + email required).
+    const submit = canvas.getByRole('button', { name: /submit/i })
+    await userEvent.click(submit)
+    // The form-level region announces the count of fields needing attention.
+    await waitFor(() =>
+      expect(statusRegion).toHaveTextContent(/fields need attention/i)
+    )
+
+    // Re-announce on a REPEATED still-invalid submit with the SAME field count.
+    // An assertive live region only fires on a DOM mutation, so re-setting the
+    // identical summary string must STILL mutate the region's text. Observe the
+    // region across the second submit and assert it mutated (regression for the
+    // flushSync clear-then-set; without it React commits no change on an
+    // identical value and a screen-reader user hears the summary only once).
+    let mutationCount = 0
+    const observer = new MutationObserver(() => {
+      mutationCount += 1
+    })
+    observer.observe(statusRegion, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
+    await userEvent.click(submit)
+    await waitFor(() => expect(mutationCount).toBeGreaterThan(0))
+    observer.disconnect()
+
+    // The summary is still present after the re-announcement.
+    expect(statusRegion).toHaveTextContent(/fields need attention/i)
+  },
+}
+
+/**
+ * Regression for the form landmark's accessible name (ARIA landmark hygiene). A
+ * native `<form>` is exposed as a `form` LANDMARK only when it has an accessible
+ * name; emitting an explicit `role="form"` with no name creates a nameless
+ * landmark (ARIA discourages this — landmark noise with nothing to announce). So
+ * the Form exposes `role="form"` + `aria-label` ONLY when a `subject` (else
+ * `id`) is present, and renders a plain, non-landmark `<form>` otherwise. This
+ * story renders one named and one unnamed Form and asserts both cases.
+ */
+export const FormLandmarkNaming: Story = {
+  name: 'Form landmark naming (role=form only when named)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <Form
+        schema={ContactSchema}
+        initialValues={initialContact}
+        subject="contact"
+        onSubmit={() => undefined}
+      >
+        <Form.AutoFields only={['fullName']} theme="light" />
+      </Form>
+      <Form
+        schema={ContactSchema}
+        initialValues={initialContact}
+        onSubmit={() => undefined}
+      >
+        <Form.AutoFields only={['fullName']} theme="light" />
+      </Form>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const namedForm = canvasElement.querySelector<HTMLElement>(
+      'form[data-subject="contact"]'
+    )
+    const unnamedForm = canvasElement.querySelector<HTMLElement>(
+      'form[data-component="Form"]:not([data-subject]):not([data-form])'
+    )
+    if (!namedForm || !unnamedForm) {
+      throw new Error('expected a named and an unnamed Form to render')
+    }
+    // Named form (subject="contact") → a named `form` landmark.
+    expect(namedForm).toHaveAttribute('role', 'form')
+    expect(namedForm).toHaveAttribute('aria-label', 'contact')
+    // Unnamed form (no subject/id) → NOT a landmark: neither an explicit
+    // role="form" nor a dangling nameless aria-label.
+    expect(unnamedForm).not.toHaveAttribute('role')
+    expect(unnamedForm).not.toHaveAttribute('aria-label')
   },
 }
 
