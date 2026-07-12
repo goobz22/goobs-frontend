@@ -117,6 +117,33 @@ const Stepper: React.FC<StepperProps> = ({
   // control via aria-describedby (SSR-safe; unique per Stepper instance).
   const baseId = React.useId()
 
+  // Id for the all-steps-completed pane's title, used both to label the pane
+  // (aria-labelledby) so it has an accessible name when focus lands on it.
+  const completedTitleId = `${baseId}-completed-title`
+
+  // Whether the wizard is showing its all-steps-completed pane THIS render.
+  const showCompletionPane =
+    isWizardMode && activeStep >= steps.length && Boolean(finalActions)
+
+  // Focus management for wizard completion (WCAG 2.4.3 Focus Order). Advancing
+  // into the completed pane UNMOUNTS the Continue/Finish button that held
+  // keyboard focus, so the browser drops focus to <body> and a keyboard user is
+  // stranded at the top of the document with no way back to the pane's actions
+  // except tabbing from scratch. Move focus to the completion pane (labelled by
+  // its title) on the not-completed → completed transition. It fires ONLY on
+  // that transition — never on initial mount (prevShowCompletionRef seeds to the
+  // first render's value, so a Stepper that renders already-completed does not
+  // steal focus on load, WCAG 3.2.1 On Focus). The persistent role="status"
+  // region below still carries the announcement independently.
+  const completedPaneRef = React.useRef<HTMLDivElement>(null)
+  const prevShowCompletionRef = React.useRef(showCompletionPane)
+  React.useEffect(() => {
+    if (showCompletionPane && !prevShowCompletionRef.current) {
+      completedPaneRef.current?.focus()
+    }
+    prevShowCompletionRef.current = showCompletionPane
+  }, [showCompletionPane])
+
   // Screen-reader-only status word for each step. A step's status is otherwise
   // conveyed only by the (decorative, aria-hidden) status icon plus colour, so
   // without this a non-sighted user cannot tell a completed step from a locked
@@ -254,7 +281,17 @@ const Stepper: React.FC<StepperProps> = ({
 
     if (isCompleted && finalActions) {
       return (
-        <div className={cssStyles.wizardCompleted}>
+        // role="group" + aria-labelledby give the pane an accessible name
+        // ("All steps completed!") for when focus is moved here on completion
+        // (see the completion-focus effect above); tabIndex={-1} makes it a
+        // programmatic-only focus target (never a Tab stop).
+        <div
+          ref={completedPaneRef}
+          className={cssStyles.wizardCompleted}
+          role="group"
+          aria-labelledby={completedTitleId}
+          tabIndex={-1}
+        >
           {/* Visible completion heading for sighted users. The screen-reader
               ANNOUNCEMENT is made separately, by the persistent initially-empty
               role="status" live region declared once at the component root (see
@@ -263,7 +300,7 @@ const Stepper: React.FC<StepperProps> = ({
               containing its text is dropped by some assistive tech. This
               heading therefore carries NO role, so the completion message is
               announced exactly once (WCAG 4.1.3 Status Messages). */}
-          <div className={cssStyles.wizardCompletedTitle}>
+          <div id={completedTitleId} className={cssStyles.wizardCompletedTitle}>
             All steps completed!
           </div>
           <div className={cssStyles.wizardCompletedActions}>

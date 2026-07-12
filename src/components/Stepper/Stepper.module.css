@@ -284,6 +284,23 @@
   border: 1px solid var(--stepper-completed-box-border);
 }
 
+/* When focus is programmatically moved to the completion pane (keyboard user
+   activates Finish → the Finish button unmounts → focus lands here), show a
+   ring so a sighted keyboard user can see where focus went (WCAG 2.4.7).
+   :focus-visible (not :focus) keeps the ring off for mouse/touch completion. */
+.wizardCompleted:focus-visible {
+  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline-offset: 2px;
+}
+
+.root[data-theme='light'] .wizardCompleted:focus-visible {
+  outline-color: var(--goobs-light-focus-ring);
+}
+
+.root[data-theme='dark'] .wizardCompleted:focus-visible {
+  outline-color: var(--goobs-dark-focus-ring);
+}
+
 .wizardCompletedTitle {
   color: var(--stepper-completed-title);
   font-weight: 600;

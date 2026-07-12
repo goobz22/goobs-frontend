@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import Stepper, { StepperProps } from './index'
 
 // Mock Dialog Component.
@@ -1435,6 +1435,12 @@ export const NavigationSemantics: Story = {
  * before completion, that advancing through every step populates it with
  * "All steps completed!", that a separate visible heading also shows the text
  * to sighted users, and that the "Start Over" reset appears.
+ *
+ * It ALSO pins wizard-completion FOCUS management (WCAG 2.4.3 Focus Order):
+ * activating Finish UNMOUNTS the button that held keyboard focus, so focus is
+ * moved to the completion pane (a role="group" labelled by its title) rather
+ * than dropped to <body> — the play function asserts the pane receives focus
+ * once the wizard finishes.
  */
 export const WizardCompletionAnnouncement: Story = {
   name: 'A11y/Wizard Completion',
@@ -1466,6 +1472,16 @@ export const WizardCompletionAnnouncement: Story = {
     await expect(
       canvas.getByRole('button', { name: 'Start Over' })
     ).toBeVisible()
+
+    // Focus moved to the completion pane (WCAG 2.4.3): activating Finish
+    // unmounted the focused Finish button, so focus lands on the labelled pane
+    // instead of falling to <body>. The pane is a role="group" named by its
+    // "All steps completed!" title.
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('group', { name: 'All steps completed!' })
+      ).toHaveFocus()
+    )
   },
   render: () => {
     const Component = () => {
