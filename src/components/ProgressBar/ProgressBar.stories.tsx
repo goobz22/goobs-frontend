@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useState, useEffect } from 'react'
+import { within, expect } from 'storybook/test'
 import ProgressBar from './index'
 
 const meta: Meta<typeof ProgressBar> = {
@@ -596,6 +597,15 @@ export const FileUploadSimulation: Story = {
  * aria-valuetext="Loading". The visible label is aria-hidden because it only
  * duplicates aria-valuetext (prevents a double screen-reader announcement).
  *
+ * The DOM/ARIA half of that contract cannot be observed by a Chromatic visual
+ * snapshot (pixels can't see attributes), so the `play` function below is what
+ * gates it: it asserts role="progressbar", the determinate aria-valuenow/min/max
+ * + aria-valuetext, the indeterminate OMISSION of aria-valuenow/min/max, and the
+ * aria-hidden="true" on every visible label (Issue 2). Removing aria-hidden or
+ * breaking aria-valuenow fails this story under the Storybook test-runner
+ * (`bun test-storybook`). Chromatic still gates the *visual* default-motion
+ * rendering of the same states.
+ *
  * This story captures the DEFAULT-motion baseline. Every looping/moving effect
  * here (the indeterminate sweep, stripe scroll, and pulse rings) is neutralized
  * under `@media (prefers-reduced-motion: reduce)`; that reduced-motion rendering
@@ -649,11 +659,48 @@ export const AccessibilityShowcase: Story = {
   // theme:'light' content with no wrapper surface — pin the light canvas so the
   // h4s aren't judged against the sacred #0e0e0e default (h4 #000 on #fff = 21.0).
   globals: { backgrounds: { value: 'light' } },
+  // Regression-gate the DOM/ARIA contract that a Chromatic pixel snapshot cannot
+  // see. Runs under the Storybook test-runner (`bun test-storybook`): removing
+  // the aria-hidden label (Issue 2) or breaking the determinate aria-valuenow /
+  // the indeterminate omission fails here, so the contract can't silently rot.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Determinate bar: role="progressbar" carrying the full numeric value
+    // contract — aria-valuenow/min/max + a human-readable aria-valuetext.
+    const determinate = canvas.getByRole('progressbar', {
+      name: 'Upload progress',
+    })
+    await expect(determinate).toHaveAttribute('aria-valuenow', '65')
+    await expect(determinate).toHaveAttribute('aria-valuemin', '0')
+    await expect(determinate).toHaveAttribute('aria-valuemax', '100')
+    await expect(determinate).toHaveAttribute('aria-valuetext', '65 percent')
+
+    // Indeterminate bar: aria-valuenow AND aria-valuemin/max are OMITTED (the
+    // ARIA-defined signal for an unknown value), with aria-valuetext="Loading"
+    // carrying the state instead.
+    const indeterminate = canvas.getByRole('progressbar', {
+      name: 'Loading data',
+    })
+    await expect(indeterminate).not.toHaveAttribute('aria-valuenow')
+    await expect(indeterminate).not.toHaveAttribute('aria-valuemin')
+    await expect(indeterminate).not.toHaveAttribute('aria-valuemax')
+    await expect(indeterminate).toHaveAttribute('aria-valuetext', 'Loading')
+
+    // Every visible label only duplicates aria-valuetext, so it is aria-hidden
+    // and does NOT re-announce the value (Issue 2). The node stays in the DOM
+    // (data-testid preserved) for sighted users and the test-selector contract.
+    const labels = canvas.getAllByTestId('progress-bar-label')
+    await expect(labels).toHaveLength(3)
+    for (const label of labels) {
+      await expect(label).toHaveAttribute('aria-hidden', 'true')
+    }
+  },
   parameters: {
     docs: {
       description: {
         story:
-          'Screen-reader ARIA contract and reduced-motion behavior of the ProgressBar: correct progressbar roles/values for determinate vs indeterminate, an aria-hidden visible label, and prefers-reduced-motion neutralizing the looping animations.',
+          'Screen-reader ARIA contract and reduced-motion behavior of the ProgressBar: correct progressbar roles/values for determinate vs indeterminate, an aria-hidden visible label, and prefers-reduced-motion neutralizing the looping animations. A play function asserts the role/aria-valuenow/aria-valuetext and aria-hidden-label contract under the Storybook test-runner.',
       },
     },
   },
