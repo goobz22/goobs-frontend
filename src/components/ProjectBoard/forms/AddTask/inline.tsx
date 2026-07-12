@@ -21,6 +21,7 @@ import MultiSelectChip, {
 } from '../../../Field/Dropdown/MultiSelect'
 import TextField from '../../../Field/Text'
 import ComplexTextEditor from '../../../ComplexTextEditor'
+import { sanitizeHtml } from '../../../ComplexTextEditor/utils/conversion'
 import SearchBar from '../../../Field/Search'
 import cssStyles from './AddTask.module.css'
 
@@ -669,7 +670,14 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             </div>
                             <div
                               className={cssStyles.articleFieldTextPreWrap}
-                              dangerouslySetInnerHTML={{ __html: value }}
+                              // Article field values carry authored HTML (bold,
+                              // images, code) by design, so they render as HTML
+                              // — sanitized here so a stored value can never
+                              // execute injected script (script/on*/dangerous-
+                              // URL stripped; formatting preserved).
+                              dangerouslySetInnerHTML={{
+                                __html: sanitizeHtml(value),
+                              }}
                             />
                           </div>
                         )

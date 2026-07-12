@@ -12,6 +12,7 @@ import {
   type ComplexTextEditorStyles,
 } from '../theme'
 import cssStyles from '../ComplexTextEditor.module.css'
+import { sanitizeHtml } from '../utils/conversion'
 
 export interface RichTextEditorProps {
   value: string
@@ -45,8 +46,13 @@ export function RichTextEditor({
 
   const editorRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value
+    // The value is HTML by design (contentEditable output), so it must be
+    // rendered as HTML — but it is sanitized at this seam so a loaded/pasted
+    // value can never execute injected script (script/on*/dangerous-URL
+    // stripped; formatting preserved). Mirrors the sanitized dSIH below.
+    const safe = sanitizeHtml(value)
+    if (editorRef.current && editorRef.current.innerHTML !== safe) {
+      editorRef.current.innerHTML = safe
     }
   }, [value])
   const handleInput = () => {
@@ -139,7 +145,9 @@ export function RichTextEditor({
           onInput={handleInput}
           className={cssStyles.richSurface}
           style={surfaceStyle}
-          dangerouslySetInnerHTML={{ __html: value }}
+          // value is rendered as HTML (rich-text by design) but sanitized here
+          // so injected script can never execute from a loaded editor value.
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(value) }}
         />
       </div>
     </div>
