@@ -1,9 +1,12 @@
 # Chip — a11y audit (2026-07-11)
 
-**Status:** FIXED (initial pass) + adversarial-review fixes applied — see
-"Adversarial-review fixes" below. One finding (focus-ring token contrast) is a
-shared `src/styles/global.css` palette token and is **deferred** (out of the
-Chip directory's ownership), with a precise recommendation recorded.
+**Status:** FIXED (initial pass) + two rounds of adversarial-review fixes
+applied — see "Adversarial-review fixes" and "Adversarial-review round 2"
+below. All findings are now resolved in-component. The focus-ring contrast gap
+(previously deferred to `src/styles/global.css`) is now fixed with a Chip-local
+`--chip-focus` override (in-scope, in `Chip.module.css`); a matching upstream
+token recommendation is still recorded in "Deferred" so the shared tokens can be
+raised for the other consumers too.
 
 **Component:** `src/components/Chip/index.tsx` (+ `Chip.module.css`, `Chip.stories.tsx`)
 
@@ -11,13 +14,20 @@ Chip directory's ownership), with a precise recommendation recorded.
 
 The interactive chip (`onClick` set) is the **WAI-ARIA Button pattern**
 (`role="button"`, tab stop, Enter/Space activation, `aria-pressed` for the
-toggle-filter use-case). It is rendered as a focusable `div[role="button"]`
-rather than a native `<button>` **on purpose**: a deletable chip nests a real
-`<button>` (the `×` delete control), and a native `<button>` cannot contain
-another `<button>` (invalid HTML). The div-button already implements the full
-keyboard contract (`handleKeyDown` → Enter/Space with `preventDefault`,
-`index.tsx:272-278`), so this is a legitimate pattern, not a defect — provided
-the focus indicator exists (fixed below).
+toggle-filter use-case). There are two structural cases (see R4):
+
+- **Clickable only** (`onClick`, no `onDelete`): rendered as a focusable
+  `div[role="button"]` (the root). A native `<button>` root is not used because
+  the `ref` type is `HTMLDivElement` and consumers/stories rely on the root
+  being the button. The div-button implements the full keyboard contract
+  (`handleKeyDown` → Enter/Space with `preventDefault`), so it is a legitimate
+  pattern — provided the focus indicator exists (fixed).
+- **Clickable AND deletable** (`onClick` + `onDelete`): rendered as a
+  `role="group"` root holding two sibling native `<button>`s — the primary
+  action (`aria-pressed`) and the delete control. This avoids nesting the
+  focusable delete `<button>` inside a `role="button"` (an ARIA
+  presentational-children conflict — R4), which the earlier div-button rationale
+  had introduced. Native buttons give Enter/Space activation for free.
 
 The read-only pill (`variant="pill"`, no `onClick`) resolves to `role="status"`,
 a live-region status indicator with optional `aria-live` politeness — the
@@ -130,23 +140,110 @@ A second, adversarial review of the initial pass surfaced three further items.
     (pins issue 2).
 - **Pattern:** `a11y-fix-without-regression-test`
 
-### R3. Focus-ring indicator contrast (light theme) — MINOR (DEFERRED — shared token)
-- **WCAG:** 1.4.11 Non-text Contrast / 2.4.11 Focus Appearance (AA)
+### R3. Focus-ring indicator contrast (light + dark themes) — MODERATE (FIXED — round 2)
+- **WCAG:** 1.4.11 Non-text Contrast / 2.4.11 Focus Appearance (AA, WCAG 2.2)
 - **Where:** the chip focus ring resolves through `--chip-focus`, which for the
-  light theme points at `--goobs-light-focus-ring = rgba(59, 130, 246, 0.4)`
+  light theme pointed at `--goobs-light-focus-ring = rgba(59, 130, 246, 0.4)`
   (`src/styles/global.css:305`). Composited over a white / near-white surface
-  that outline is ~1.6–1.8:1 — below the 3:1 non-text-contrast bar. The dark
+  that outline is ~1.7:1 — below the 3:1 non-text-contrast bar. The dark
   token `--goobs-dark-focus-ring = rgba(96, 165, 250, 0.45)`
-  (`src/styles/global.css:336`) is also marginal (~2.3:1 on dark surfaces). The
-  sacred token (`--goobs-sacred-focus-ring = gold-a60`) is ~5.6:1 and passes.
-- **Disposition:** DEFERRED. These are **shared design-system tokens** consumed
-  by Card / ListItemCard / Chip and others, and `src/styles/global.css` is
-  outside this component's ownership. Fixing the token centrally corrects every
-  component's focus ring at once and preserves the intentional cross-component
-  focus-ring consistency the initial pass established; a Chip-local override
-  would fix only Chip while diverging its focus indicator from every sibling, so
-  it was **not** applied. See "Deferred" below for the precise recommendation.
+  (`src/styles/global.css:336`) was also below threshold (~2.3:1 on dark
+  surfaces). The sacred token (`--goobs-sacred-focus-ring = gold-a60`) is ~5.6:1
+  and passes.
+- **Initial disposition (round 1):** DEFERRED to the shared tokens for
+  cross-component consistency. **Superseded:** the deferral was wrong to leave
+  the ring shipping below AA in 2/3 themes when the override is in-scope. The
+  `--chip-focus` custom property is declared and overridden *inside*
+  `Chip.module.css` (`:root` light block, `:root` dark block), so a per-theme
+  override is squarely within the component's ownership — deferring an
+  in-scope AA gap to a token that "someone should raise later" left the ring
+  non-conformant now.
+- **Fix (round 2):** override `--chip-focus` per theme with opaque,
+  high-contrast blues that already exist as role tokens:
+  - light → `--goobs-light-primary-strong` (`#1d4ed8` ≈ 6.7:1 on white; it is
+    already the light chip's `--chip-text`, so the ring stays palette-cohesive).
+  - dark → `--goobs-dark-primary` (`#60a5fa` ≈ 5.8–7:1 on `#1e293b` / `#111827`).
+  - sacred unchanged (gold-a60 already passes).
+  These replace the two `--chip-focus: var(--goobs-*-focus-ring)` lines in the
+  light/dark theme blocks. The upstream token fix is still recommended (see
+  "Deferred") for Card / ListItemCard etc., but Chip no longer waits on it.
 - **Pattern:** `focus-ring-contrast-below-3to1`
+- **Coverage:** new `A11y/Focus Ring Contrast` story resolves the effective
+  `--chip-focus` color per theme (via an inheriting probe element) and asserts
+  it is opaque AND clears 3:1 against the theme surface — a revert to the
+  translucent shared token fails the assertion.
+
+## Adversarial-review round 2 (2026-07-11)
+
+A third review surfaced two structural issues plus the R3 upgrade above.
+
+### R4. Focusable delete `<button>` nested inside `role="button"` — MODERATE (FIXED)
+- **WCAG:** 4.1.2 Name, Role, Value (A); ARIA 1.2 presentational-children /
+  APG author guidance.
+- **Where:** `index.tsx` — when a chip has BOTH `onClick` and `onDelete` (a
+  combination reachable through the public API), the old markup was
+  `<div role="button" tabindex=0 aria-label>…<button>×</button></div>`. `role="button"`
+  makes its subtree presentational; a focusable/interactive descendant inside it
+  is discouraged and yields inconsistent AT announcement of the delete control.
+  The initial pass justified the div-button *specifically* by needing to nest
+  the delete `<button>` — but never evaluated the a11y cost of that nesting, and
+  no story exercised the `onClick`+`onDelete` combination.
+- **Root cause:** the button semantics were placed on the *root* even when the
+  chip is a composite of two controls.
+- **Fix:** introduce a `role="group"` for the clickable+deletable case. The root
+  becomes a named `role="group"`; the primary action moves onto a real inner
+  `<button class="actionButton">` that is a **sibling** of the delete `<button>`
+  (never nested), so there is no interactive-descendant-in-`role="button"`
+  conflict. Native `<button>` semantics give Enter/Space activation for free
+  (no keydown shim), carry `aria-pressed` for the toggle state, and use native
+  `disabled` for the out-of-tab-order/inert behaviour. The **clickable-only**
+  chip is unchanged (root stays `role="button"` — the documented ref/`getByRole`
+  contract and the `Interactive`/`InteractivePill` stories rely on it); the
+  restructure fires **only** for the composite case. `ref` still lands on the
+  root `<div>` (type unchanged); `getByRole('button', { name })` now resolves to
+  the inner action button; `data-*` selectors stay on the root.
+  - New CSS: `.actionButton` (UA-button reset inheriting the chip box) +
+    `.actionButton:focus-visible` added to the shared focus-ring rule so the
+    composite's primary action has a visible keyboard focus indicator.
+  - **Markup change (noted per convention):** clickable+deletable chip root
+    `role` changes `button → group`; a new inner `<button data-chip-action>`
+    wraps the label. No prop/export changed (additive-only preserved).
+  - **Edge case:** if a caller passes an explicit `role` prop AND `onClick`+`onDelete`,
+    the explicit role still wins (public-API contract), so they own that
+    semantics; the default (no explicit role) yields the correct `group`.
+- **Pattern:** `interactive-descendant-in-presentational-role`
+- **Coverage:** new `State/Clickable + Deletable` story asserts the root is
+  `role="group"`, the action + delete controls are real sibling `<button>`s
+  (neither nested in the other, both direct children of the root), each fires
+  only its own handler, and the action activates on Enter.
+
+### R5. `aria-label` emitted on a generic (roleless) chip — MINOR (FIXED)
+- **WCAG:** 4.1.2; ARIA 1.2 (`aria-label` prohibited on the generic role).
+- **Where:** `index.tsx` — for `variant="chip"` with no `onClick` / `onDelete`
+  / explicit role, `resolveRole` returns `undefined` (generic `<div>`) but the
+  root still received `aria-label` (the string label, or an explicit `ariaLabel`
+  for a ReactNode label). For a string label it was a harmless duplicate of the
+  visible text; for a ReactNode label with an explicit `ariaLabel` the intended
+  accessible name landed on a generic element and may not be announced.
+  In-repo this affected the plain label chips in `DataGrid/Table/Rows` and
+  `BigCalendar/CalendarFilters` (redundant `aria-label`) and the deletable
+  chips in `MultiSelect` (a generic wrapper with an `aria-label`).
+- **Fix:** gate the root `aria-label` on the resolved role supporting a name
+  (`rootAriaLabel = resolvedRole !== undefined ? resolvedAriaLabel : undefined`),
+  and give an explicitly-named otherwise-roleless chip a name-bearing role:
+  - purely decorative + explicit `ariaLabel` → `role="img"` (a single named
+    token; safe because there are no interactive descendants for `img`'s
+    presentational children to hide).
+  - deletable-only + explicit `ariaLabel` → `role="group"` (keeps the real
+    delete `<button>` in the a11y tree, which `img` would hide).
+  - unnamed decorative chip → stays roleless with NO `aria-label`; its visible
+    text is the accessible name.
+  The delete button's own `aria-label` ("Remove …") is unaffected (it is a real
+  `<button>`, which supports naming).
+- **Pattern:** `aria-label-on-generic-role`
+- **Coverage:** new `A11y/Decorative Labeling` story asserts a plain decorative
+  chip has neither `role` nor `aria-label`, and an explicitly-named decorative
+  chip exposes `role="img"` + the `aria-label`.
 
 ## Hearing
 
@@ -167,8 +264,12 @@ optional `aria-live`), never by sound. No hearing-related issue. WCAG
   can't enforce it and adding a runtime warning is out of scope for a
   presentational library primitive).
 - **Roles/states:** button role + `aria-pressed` (toggle), `role="status"` +
-  `aria-live` (pill), `aria-disabled` — all now exposed, including the disabled
-  interactive case (issue 3).
+  `aria-live` (pill), `aria-disabled` — all exposed, including the disabled
+  interactive case (issue 3). A clickable+deletable chip is a `role="group"` of
+  two sibling buttons rather than a `role="button"` wrapping the delete button
+  (R4). `aria-label` is only ever placed on a role that supports a name — a
+  roleless decorative chip carries none, and an explicitly-named decorative /
+  deletable chip is promoted to `role="img"` / `role="group"` (R5).
 - **Keyboard:** Enter/Space activation with `preventDefault` already present;
   now backed by a visible focus ring (issue 1) and pinned by the new
   `Interactive` story play function.
@@ -201,6 +302,24 @@ No SEO-semantic issue.
 All in commit `4b63040c`. Per-file gates green: `bun lint:file` on both `.tsx`
 files (0 warnings), `stylelint` on the module (exit 0).
 
+Adversarial-review round 2 (`63009e2b`):
+
+5. `Chip.module.css` — per-theme `--chip-focus` override: light →
+   `--goobs-light-primary-strong`, dark → `--goobs-dark-primary` (opaque,
+   ≥3:1) so the keyboard focus ring passes WCAG 2.4.11 / 1.4.11 in every theme
+   (R3).
+6. `index.tsx` + `Chip.module.css` — a clickable+deletable chip renders as a
+   `role="group"` with an inner `.actionButton` sibling to the delete
+   `<button>`, removing the interactive-descendant-in-`role="button"` conflict;
+   `.actionButton:focus-visible` gives it a visible focus ring (R4).
+7. `index.tsx` — `aria-label` is gated on a name-bearing role; an
+   explicitly-named otherwise-roleless chip is promoted to `role="img"`
+   (decorative) or `role="group"` (deletable), never `aria-label` on a generic
+   element (R5).
+
+Round-2 gates: scoped `tsc --noEmit` over `index.tsx` + `Chip.stories.tsx`
+(exit 0), `bun lint:file` on both `.tsx` files (0 warnings).
+
 ## Stories updated
 
 `Chip.stories.tsx` (the only regression tests in this repo — goobs has no unit
@@ -228,27 +347,45 @@ Added in the adversarial-review pass (2026-07-11):
   play function asserts `role="button"`, `data-chip-clickable="true"`, and a
   ≥24px rendered target height (R1 pill-root).
 
+Added in adversarial-review round 2 (2026-07-11):
+
+- **`ClickableDeletable` (State/Clickable + Deletable)** — new. Exercises the
+  previously-untested `onClick`+`onDelete` combination; asserts the root is
+  `role="group"`, the action + delete controls are real sibling `<button>`s
+  (neither nested in the other, both direct children of the root), each fires
+  only its own handler, and the action activates on Enter (R4).
+- **`DecorativeLabeling` (A11y/Decorative Labeling)** — new. Asserts a plain
+  decorative chip has neither `role` nor `aria-label`, and an explicitly-named
+  decorative chip exposes `role="img"` + the `aria-label` (R5).
+- **`FocusRingContrast` (A11y/Focus Ring Contrast)** — new. Resolves the
+  effective `--chip-focus` color per theme via an inheriting probe element and
+  asserts it is opaque and clears 3:1 against the theme surface (R3).
+
 ## Deferred
 
-**Focus-ring token contrast (finding R3)** — `src/styles/global.css` (NOT owned
-by this component).
+**Focus-ring token contrast — upstream token improvement (NOT blocking; Chip is
+already fixed locally).** Chip's own focus ring now passes AA via the Chip-local
+`--chip-focus` override (finding R3, FIXED). The **shared** tokens in
+`src/styles/global.css` are still below threshold and used by other components
+(Card / ListItemCard / …), so raising them upstream would fix those consumers
+too and let Chip's override eventually collapse back onto the shared token. That
+file is outside this component's ownership, so the concrete recommendation is
+recorded here for whoever owns `src/styles/global.css`:
 
 - `src/styles/global.css:305` — `--goobs-light-focus-ring: rgba(59, 130, 246, 0.4);`
-  reads ~1.6–1.8:1 as a focus outline over white / near-white → fails
+  reads ~1.7:1 as a focus outline over white / near-white → fails
   WCAG 1.4.11 / 2.4.11 (needs ≥3:1). **Suggested:** raise to an opaque,
   high-contrast blue, e.g. `#2563eb` (`--goobs-light-primary`, ~5.2:1 on white)
   or `#1d4ed8` (`--goobs-light-primary-strong`, ~6.7:1).
 - `src/styles/global.css:336` — `--goobs-dark-focus-ring: rgba(96, 165, 250, 0.45);`
   is also marginal (~2.3:1 on the dark surfaces). **Suggested:** raise to an
-  opaque/lighter blue meeting ≥3:1 on `#1e293b`/`#111827` (e.g. `#93c5fd`).
+  opaque/lighter blue meeting ≥3:1 on `#1e293b`/`#111827` (e.g. `#60a5fa`
+  = `--goobs-dark-primary`, or `#93c5fd`).
 - No change needed for `--goobs-sacred-focus-ring` (gold-a60, ~5.6:1).
 
-These are shared tokens consumed by Card / ListItemCard / Chip; fixing them in
-`global.css` corrects every consumer at once. Once fixed, Chip's `--chip-focus`
-already tracks the token per-theme, so no Chip change is needed to inherit it.
-A Chip-local override was deliberately NOT applied to preserve cross-component
-focus-ring consistency (the reviewer's own framing: "a cross-cutting palette
-question, not a Chip-local defect").
+Once the shared tokens meet ≥3:1, the two Chip-local `--chip-focus` overrides in
+`Chip.module.css` (light/dark) can be reverted to inherit the shared token again
+with no loss of contrast — but they are correct to keep until then.
 
 Note (not a defect, no change needed): `resolveAriaLabel` returns `undefined`
 for a ReactNode `label` with no `ariaLabel`. Enforcing an accessible name for
