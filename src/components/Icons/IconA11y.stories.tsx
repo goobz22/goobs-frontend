@@ -39,12 +39,31 @@ const TitledCloseIcon = CloseIcon as React.FC<
   React.ComponentProps<typeof CloseIcon> & { title?: string }
 >
 
+// Same widening for ShowHideEye so the sacred glyph `title`-opt-in path (which
+// exposes `title` via `aria-label`, since a <div> has no <title> child) can be
+// exercised without an `any` cast.
+const TitledShowHideEyeIcon = ShowHideEyeIcon as React.FC<
+  React.ComponentProps<typeof ShowHideEyeIcon> & { title?: string }
+>
+
 const svgIn = (root: HTMLElement, testid: string): SVGSVGElement => {
   const el = root
     .querySelector(`[data-testid="${testid}"]`)
     ?.querySelector('svg')
   if (!el) throw new Error(`no <svg> found in "${testid}"`)
   return el as SVGSVGElement
+}
+
+// ShowHideEye's sacred theme renders its glyph on a <div> (a hieroglyph), NOT an
+// <svg>. That glyph <div> is the single element child of the `[data-theme]`
+// wrapper and carries the resolved a11y attributes, so this grabs it for the
+// sacred-branch assertions below.
+const glyphIn = (root: HTMLElement, testid: string): HTMLElement => {
+  const glyph = root
+    .querySelector(`[data-testid="${testid}"] [data-theme]`)
+    ?.firstElementChild
+  if (!glyph) throw new Error(`no glyph <div> found in "${testid}"`)
+  return glyph as HTMLElement
 }
 
 /**
@@ -183,5 +202,90 @@ export const MultiBranchIcon: Story = {
     await expect(labelled).toHaveAttribute('role', 'img')
     await expect(labelled).toHaveAttribute('aria-label', 'Show password')
     await expect(labelled).not.toHaveAttribute('aria-hidden')
+  },
+}
+
+/**
+ * ShowHideEyeIcon's **sacred** theme (`styles={{ theme: 'sacred' }}`) does not
+ * render an `<svg>` at all — it renders the accessible-icon contract on a
+ * hieroglyph `<div>` (`𓂀`, and `𓂀` + slash when hidden) through a hand-wired
+ * code path that is DISTINCT from every other icon's shared `{...svgA11y}`
+ * spread: a `<div>` cannot carry the SVG-only `focusable` attribute (nor does it
+ * need one — a `<div>` is not a tab stop), and it exposes the `title` opt-in via
+ * `aria-label` because a `<div>` has no child `<title>` naming mechanism.
+ *
+ * Because this wiring can regress independently of the `<svg>` resolver spread —
+ * and goobs' only regression tests are these play functions — both glyph
+ * branches (visible `𓂀` and hidden `𓂀`+slash) are pinned here in their
+ * decorative-default, `aria-label`, and `title` forms (WCAG 1.1.1 / 4.1.2).
+ */
+export const SacredGlyphBranches: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 24, padding: 24 }}>
+      {/* hidden glyph (visible=false, the default) — 𓂀 + slash */}
+      <span data-testid="sacred-hidden-decorative">
+        <ShowHideEyeIcon styles={{ theme: 'sacred' }} />
+      </span>
+      <span data-testid="sacred-hidden-labelled">
+        <ShowHideEyeIcon
+          styles={{ theme: 'sacred' }}
+          aria-label="Show password"
+        />
+      </span>
+      {/* visible glyph (visible=true) — 𓂀 */}
+      <span data-testid="sacred-visible-decorative">
+        <ShowHideEyeIcon styles={{ theme: 'sacred' }} visible />
+      </span>
+      <span data-testid="sacred-visible-labelled">
+        <ShowHideEyeIcon
+          styles={{ theme: 'sacred' }}
+          visible
+          aria-label="Hide password"
+        />
+      </span>
+      {/* title opt-in on the glyph div (exposed via aria-label on this path) */}
+      <span data-testid="sacred-titled">
+        <TitledShowHideEyeIcon
+          styles={{ theme: 'sacred' }}
+          title="Reveal password"
+        />
+      </span>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // DECORATIVE DEFAULT (hidden glyph) — aria-hidden on the glyph div, no
+    // role/name; the glyph is silent to AT, exactly like the <svg> default.
+    const hiddenDecorative = glyphIn(canvasElement, 'sacred-hidden-decorative')
+    await expect(hiddenDecorative).toHaveAttribute('aria-hidden', 'true')
+    await expect(hiddenDecorative).not.toHaveAttribute('role')
+    await expect(hiddenDecorative).not.toHaveAttribute('aria-label')
+
+    // NAMED via aria-label (hidden glyph) — role img + name, aria-hidden dropped.
+    const hiddenLabelled = glyphIn(canvasElement, 'sacred-hidden-labelled')
+    await expect(hiddenLabelled).toHaveAttribute('role', 'img')
+    await expect(hiddenLabelled).toHaveAttribute('aria-label', 'Show password')
+    await expect(hiddenLabelled).not.toHaveAttribute('aria-hidden')
+
+    // DECORATIVE DEFAULT (visible glyph) — same contract on the other branch.
+    const visibleDecorative = glyphIn(
+      canvasElement,
+      'sacred-visible-decorative'
+    )
+    await expect(visibleDecorative).toHaveAttribute('aria-hidden', 'true')
+    await expect(visibleDecorative).not.toHaveAttribute('role')
+    await expect(visibleDecorative).not.toHaveAttribute('aria-label')
+
+    // NAMED via aria-label (visible glyph) — role img + name, not hidden.
+    const visibleLabelled = glyphIn(canvasElement, 'sacred-visible-labelled')
+    await expect(visibleLabelled).toHaveAttribute('role', 'img')
+    await expect(visibleLabelled).toHaveAttribute('aria-label', 'Hide password')
+    await expect(visibleLabelled).not.toHaveAttribute('aria-hidden')
+
+    // NAMED via title — the sacred path routes `title` through `aria-label`
+    // (`aria-label ?? title`), flips to role img, and is not hidden.
+    const titled = glyphIn(canvasElement, 'sacred-titled')
+    await expect(titled).toHaveAttribute('role', 'img')
+    await expect(titled).toHaveAttribute('aria-label', 'Reveal password')
+    await expect(titled).not.toHaveAttribute('aria-hidden')
   },
 }
