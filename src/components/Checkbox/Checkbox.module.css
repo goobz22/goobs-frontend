@@ -40,8 +40,8 @@
   margin: var(--cb-margin);
   margin-top: var(--cb-margin-top);
   margin-bottom: var(--cb-margin-bottom);
-  margin-left: var(--cb-margin-left);
-  margin-right: var(--cb-margin-right);
+  margin-inline-start: var(--cb-margin-left);
+  margin-inline-end: var(--cb-margin-right);
 }
 
 .wrapper[data-disabled='true'] {
@@ -54,7 +54,7 @@
    matching the module's base-is-light convention; dark/sacred remap below.
    -------------------------------------------------------------------------- */
 .labelText {
-  margin-left: 8px;
+  margin-inline-start: 8px;
   color: var(--goobs-light-text);
   font-size: 0.875rem;
   line-height: 1.4;

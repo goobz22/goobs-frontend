@@ -122,7 +122,7 @@
   right: auto;
   top: var(--drawer-top);
   bottom: auto;
-  border-right: var(--drawer-border-width) solid var(--drawer-border-color);
+  border-right: var(--drawer-border-width) solid var(--drawer-border-color); /* rtl-keep: physical drawer edge, anchored by [data-anchor='left'] (see Drawer/index.tsx) — logicalizing would flip the border under RTL while the anchor prop stays physical */
   transform: translateX(-100%);
 }
 

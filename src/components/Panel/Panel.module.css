@@ -123,7 +123,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: clamp(8px, 1.5vw, 12px);
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 /* --------------------------------------------------------------------------
@@ -164,5 +164,5 @@
 }
 
 .footer.split > *:first-child {
-  margin-right: auto;
+  margin-inline-end: auto;
 }

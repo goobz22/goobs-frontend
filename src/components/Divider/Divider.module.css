@@ -81,8 +81,8 @@
   );
   margin-top: var(--divider-margin-top, var(--goobs-space-lg));
   margin-bottom: var(--divider-margin-bottom, var(--goobs-space-lg));
-  margin-left: var(--divider-margin-left, 0);
-  margin-right: var(--divider-margin-right, 0);
+  margin-inline-start: var(--divider-margin-left, 0);
+  margin-inline-end: var(--divider-margin-right, 0);
 }
 
 .vertical {
@@ -97,8 +97,8 @@
   );
   margin-top: var(--divider-margin-top, 0);
   margin-bottom: var(--divider-margin-bottom, 0);
-  margin-left: var(--divider-margin-left, var(--goobs-space-lg));
-  margin-right: var(--divider-margin-right, var(--goobs-space-lg));
+  margin-inline-start: var(--divider-margin-left, var(--goobs-space-lg));
+  margin-inline-end: var(--divider-margin-right, var(--goobs-space-lg));
 }
 
 /* --------------------------------------------------------------------------

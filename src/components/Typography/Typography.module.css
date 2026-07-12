@@ -74,7 +74,7 @@
   max-width: var(--typography-max-width);
   min-width: var(--typography-min-width);
   background-color: var(--typography-background-color);
-  border-left: var(--typography-border-left);
+  border-inline-start: var(--typography-border-left);
   flex: var(--typography-flex);
   align-self: var(--typography-align-self);
   width: var(--typography-width);

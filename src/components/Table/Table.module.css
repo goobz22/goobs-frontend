@@ -79,7 +79,7 @@
    -------------------------------------------------------------------------- */
 .caption {
   caption-side: top;
-  text-align: left;
+  text-align: start;
   padding: var(--goobs-space-sm) var(--goobs-space-md);
   color: var(--table-header-color, var(--goobs-gold));
   font-family: var(--table-font-family, var(--goobs-font-sacred));
@@ -214,7 +214,7 @@
   font-family: var(--table-font-family, 'Merriweather', serif);
   padding: var(--goobs-space-sm) var(--goobs-space-md);
   vertical-align: middle;
-  text-align: left;
+  text-align: start;
   border-bottom: 1px solid var(--table-cell-border, var(--goobs-gold-a20));
 }
 

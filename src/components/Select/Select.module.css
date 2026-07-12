@@ -76,7 +76,7 @@
   /* default (medium) padding; .small overrides */
   padding: 16.5px 32px 16.5px 14px;
   /* paddingRight overrides the shorthand's right value for arrow space */
-  padding-right: 32px;
+  padding-inline-end: 32px;
   font-size: var(--select-font-size, 1rem);
   line-height: 1.4375em;
   min-height: 1.4375em;
@@ -103,9 +103,9 @@
 /* --- Variant: outlined (default) — full 1px solid border, radius applies --- */
 .outlined {
   border-top: 1px solid var(--select-border-default);
-  border-right: 1px solid var(--select-border-default);
+  border-inline-end: 1px solid var(--select-border-default);
   border-bottom: 1px solid var(--select-border-default);
-  border-left: 1px solid var(--select-border-default);
+  border-inline-start: 1px solid var(--select-border-default);
   border-radius: var(--select-radius, var(--goobs-radius-sm));
 }
 
@@ -126,9 +126,9 @@
 
 .outlined:hover:not(:disabled) {
   border-top-color: var(--select-border-focused);
-  border-right-color: var(--select-border-focused);
+  border-inline-end-color: var(--select-border-focused);
   border-bottom-color: var(--select-border-focused);
-  border-left-color: var(--select-border-focused);
+  border-inline-start-color: var(--select-border-focused);
 }
 
 .standard:hover:not(:disabled) {
@@ -167,9 +167,9 @@
 .root[data-helper-error='true'] .outlined,
 .root[data-helper-error='true'] .outlined:hover:not(:disabled) {
   border-top-color: var(--goobs-danger);
-  border-right-color: var(--goobs-danger);
+  border-inline-end-color: var(--goobs-danger);
   border-bottom-color: var(--goobs-danger);
-  border-left-color: var(--goobs-danger);
+  border-inline-start-color: var(--goobs-danger);
 }
 
 .root[data-helper-error='true'] .standard,
@@ -192,9 +192,9 @@
 .root[data-error='true'] .outlined,
 .root[data-error='true'] .outlined:hover:not(:disabled) {
   border-top-color: var(--select-error);
-  border-right-color: var(--select-error);
+  border-inline-end-color: var(--select-error);
   border-bottom-color: var(--select-error);
-  border-left-color: var(--select-error);
+  border-inline-start-color: var(--select-error);
 }
 
 .root[data-error='true'] .standard,
@@ -225,7 +225,7 @@
 
 .small {
   padding: 8.5px 32px 8.5px 14px;
-  padding-right: 32px;
+  padding-inline-end: 32px;
   font-size: 0.875rem;
 }
 

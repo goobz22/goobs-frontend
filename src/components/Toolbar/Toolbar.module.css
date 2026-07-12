@@ -125,7 +125,7 @@
 
 .divider {
   height: 20px;
-  border-left: 2px solid var(--toolbar-divider-color);
+  border-inline-start: 2px solid var(--toolbar-divider-color);
   filter: var(--toolbar-divider-filter);
 }
 

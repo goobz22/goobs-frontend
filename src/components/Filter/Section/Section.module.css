@@ -85,7 +85,7 @@
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 18px);
   margin-bottom: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: var(--fs-toggle-font);
   font-size: clamp(0.85rem, 2.5vw, 1rem);
   color: var(--fs-toggle-color);
@@ -187,7 +187,7 @@
   display: flex;
   gap: clamp(6px, 1.5vw, 10px);
   flex-wrap: wrap;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 /* Slot below the search row (inside the surface) — e.g. a section sub-nav. */
@@ -237,8 +237,8 @@
 
 /* Visible vertical divider between adjacent chip groups on the same row. */
 .chipCluster:not(:first-child) {
-  padding-left: clamp(10px, 2.5vw, 16px);
-  border-left: 1px solid color-mix(in srgb, var(--fs-accent) 25%, transparent);
+  padding-inline-start: clamp(10px, 2.5vw, 16px);
+  border-inline-start: 1px solid color-mix(in srgb, var(--fs-accent) 25%, transparent);
 }
 
 .chipClusterLabel {

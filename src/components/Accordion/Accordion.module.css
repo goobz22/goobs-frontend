@@ -116,11 +116,11 @@
   margin: 0;
   width: 100%;
   box-sizing: border-box;
-  text-align: left;
+  text-align: start;
   padding: var(--accordion-padding);
   /* accordion type: 40px base; overridden to 16px base for menu type */
-  padding-left: calc(40px + var(--accordion-level-indent));
-  padding-right: var(--goobs-space-lg);
+  padding-inline-start: calc(40px + var(--accordion-level-indent));
+  padding-inline-end: var(--goobs-space-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -135,7 +135,7 @@
 }
 
 .summary[data-menu='true'] {
-  padding-left: calc(16px + var(--accordion-level-indent));
+  padding-inline-start: calc(16px + var(--accordion-level-indent));
 }
 
 /* hover — only when not disabled. Mirrors getSummaryBackgroundColor's
@@ -206,7 +206,7 @@
    -------------------------------------------------------------------------- */
 .details {
   padding: var(--accordion-padding);
-  padding-left: calc(24px + var(--accordion-level-indent));
+  padding-inline-start: calc(24px + var(--accordion-level-indent));
   color: var(--accordion-details-color);
   font-family: var(--accordion-details-font-family);
   font-size: var(--goobs-text-md);

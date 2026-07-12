@@ -73,7 +73,7 @@
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 18px);
   margin-bottom: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: var(--ma-toggle-font);
   font-size: clamp(0.85rem, 2.5vw, 1rem);
   color: var(--ma-toggle-color);

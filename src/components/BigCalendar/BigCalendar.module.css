@@ -239,13 +239,13 @@
 
 /* The "today" button carried inline marginLeft/marginRight: 6 */
 .navButtonToday {
-  margin-left: 6px;
-  margin-right: 6px;
+  margin-inline-start: 6px;
+  margin-inline-end: 6px;
 }
 
 /* View-switch ToggleButton labels (was inline marginLeft: 4 on each span) */
 .viewLabel {
-  margin-left: 4px;
+  margin-inline-start: 4px;
 }
 
 /* Accessible group wrapper around the view-switch ToggleButtonGroup. `display:
@@ -276,7 +276,7 @@
   width: 100%;
   background-color: var(--bc-header-bg);
   border-bottom: 1px solid var(--bc-cell-border);
-  border-left: 1px solid var(--bc-cell-border);
+  border-inline-start: 1px solid var(--bc-cell-border);
   height: auto;
   min-height: var(--bc-header-min-height);
 }
@@ -293,7 +293,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--goobs-space-xs);
-  border-right: 1px solid var(--bc-cell-border);
+  border-inline-end: 1px solid var(--bc-cell-border);
   box-sizing: border-box;
 }
 
@@ -307,7 +307,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   width: 100%;
-  border-left: 1px solid var(--bc-cell-border);
+  border-inline-start: 1px solid var(--bc-cell-border);
   grid-auto-rows: var(--bc-cell-min-height);
 }
 
@@ -333,7 +333,7 @@
    MONTH CELLS
    -------------------------------------------------------------------------- */
 .cell {
-  border-right: 1px solid var(--bc-cell-border);
+  border-inline-end: 1px solid var(--bc-cell-border);
   border-bottom: 1px solid var(--bc-cell-border);
   padding: var(--bc-cell-padding);
   position: relative;
@@ -417,7 +417,7 @@
   border: none;
   margin: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   color: inherit;
   font-family: inherit;
   box-sizing: border-box;
@@ -444,7 +444,7 @@
   cursor: pointer;
   color: inherit;
   font-family: inherit;
-  text-align: left;
+  text-align: start;
   display: block;
   width: 100%;
 }
@@ -456,7 +456,7 @@
   width: var(--bc-time-col-width);
   min-width: var(--bc-time-col-width);
   background-color: var(--bc-time-col-bg);
-  border-right: 1px solid var(--bc-time-col-border);
+  border-inline-end: 1px solid var(--bc-time-col-border);
 }
 
 .timeCell {
@@ -467,7 +467,7 @@
   border-bottom: 1px solid var(--bc-cell-border);
   color: var(--bc-time-cell-color);
   font-size: 0.7rem;
-  padding-right: 8px;
+  padding-inline-end: 8px;
   /* runtime hourHeight (height: `${hourHeight}px`) */
   height: var(--bc-hour-height);
 }
@@ -483,7 +483,7 @@
 .weekDayColumn {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--bc-cell-border);
+  border-inline-end: 1px solid var(--bc-cell-border);
   /* runtime cellWidth (width: `${100 / 7}%`) */
   width: var(--bc-week-col-width);
 }

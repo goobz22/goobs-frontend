@@ -35,8 +35,8 @@
   height: var(--tabs-height);
   margin-bottom: var(--goobs-space-md);
   border-bottom: var(--tabs-border-bottom);
-  border-left: var(--tabs-border-left);
-  border-right: var(--tabs-border-right);
+  border-inline-start: var(--tabs-border-left);
+  border-inline-end: var(--tabs-border-right);
   background-color: var(--tabs-background-color);
 }
 
@@ -56,9 +56,9 @@
   padding: var(--goobs-space-sm) var(--goobs-space-lg);
   background: transparent;
   border-top: none;
-  border-right: none;
+  border-inline-end: none;
   border-bottom: 2px solid transparent;
-  border-left: none;
+  border-inline-start: none;
   color: var(--goobs-sacred-text-secondary);
   font-family: var(--goobs-font-sacred);
   font-size: var(--goobs-text-md);
@@ -153,7 +153,7 @@
    LEADING ICON glyph
    -------------------------------------------------------------------------- */
 .icon {
-  margin-right: 6px;
+  margin-inline-end: 6px;
   display: inline-flex;
   align-items: center;
   /* Slight size bump so single-glyph icons (☰, ⚙) sit visually balanced
@@ -166,7 +166,7 @@
    COUNT badge
    -------------------------------------------------------------------------- */
 .count {
-  margin-left: var(--goobs-space-xs);
+  margin-inline-start: var(--goobs-space-xs);
   padding: 2px 8px;
   border-radius: var(--goobs-radius-pill);
   background-color: var(--goobs-gold-a12);

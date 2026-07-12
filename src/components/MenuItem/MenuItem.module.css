@@ -44,8 +44,8 @@
   min-height: 48px;
   padding-top: var(--goobs-space-xs);
   padding-bottom: var(--goobs-space-xs);
-  padding-left: var(--goobs-space-md);
-  padding-right: var(--goobs-space-md);
+  padding-inline-start: var(--goobs-space-md);
+  padding-inline-end: var(--goobs-space-md);
   box-sizing: border-box;
   white-space: nowrap;
   background-color: var(--menuitem-bg);

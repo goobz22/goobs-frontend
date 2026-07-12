@@ -61,8 +61,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 1rem;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
   border-bottom: 1px solid var(--goobs-dark-border);
   position: relative;
   z-index: 20;
@@ -203,7 +203,7 @@
    -------------------------------------------------------------------------- */
 .lineNumbers {
   background-color: var(--goobs-black-a50);
-  border-right: 1px solid var(--goobs-dark-border);
+  border-inline-end: 1px solid var(--goobs-dark-border);
   padding: 1rem 0.5rem;
   user-select: none;
   position: relative;
@@ -211,12 +211,12 @@
 
 .container[data-theme='light'] .lineNumbers {
   background-color: var(--goobs-black-a05);
-  border-right: 1px solid var(--goobs-light-border-strong);
+  border-inline-end: 1px solid var(--goobs-light-border-strong);
 }
 
 .container[data-theme='sacred'] .lineNumbers {
   background-color: var(--goobs-black-a50);
-  border-right: 1px solid var(--goobs-gold-a20);
+  border-inline-end: 1px solid var(--goobs-gold-a20);
 }
 
 /* lineNumber — base = DARK */
@@ -225,8 +225,8 @@
   font-size: 0.75rem;
   line-height: 1.5rem;
   font-family: var(--goobs-font-mono);
-  text-align: right;
-  padding-right: 0.5rem;
+  text-align: end;
+  padding-inline-end: 0.5rem;
 }
 
 .container[data-theme='light'] .lineNumber {

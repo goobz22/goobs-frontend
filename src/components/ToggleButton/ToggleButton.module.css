@@ -248,7 +248,7 @@
    old code were NOT flagged isFirst/isLast at all, so they kept their right
    border; we preserve that exact behaviour by scoping to [data-first]. */
 .button[data-first='true']:not([data-last='true']) {
-  border-right: none;
+  border-inline-end: none;
 }
 
 /* --------------------------------------------------------------------------

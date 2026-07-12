@@ -120,8 +120,8 @@
    BORDER ACCENT (optional left or full border in the accent color)
    -------------------------------------------------------------------------- */
 .root[data-card-accent-side='left'] {
-  border-left-width: 4px;
-  border-left-color: var(--card-accent-override, var(--card-accent));
+  border-inline-start-width: 4px;
+  border-inline-start-color: var(--card-accent-override, var(--card-accent));
 }
 
 .root[data-card-accent-side='full'] {
@@ -241,7 +241,7 @@
   padding: 0;
   font: inherit;
   color: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   /* Suppress the UA default ring; keyboard focus is drawn by the shared
      :focus-visible rule above (matching the anchor block-link treatment). */
@@ -260,7 +260,7 @@
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
-  margin-left: auto;
+  margin-inline-start: auto;
   position: relative;
   z-index: 1;
 }
@@ -425,7 +425,7 @@
 }
 
 .footer.split > [data-card-footer-side='left'] {
-  margin-right: auto;
+  margin-inline-end: auto;
 }
 
 .footerActions {
@@ -437,7 +437,7 @@
 .footerMeta {
   font-size: clamp(0.65rem, 1.5vw, 0.72rem);
   color: var(--card-meta);
-  margin-left: auto;
+  margin-inline-start: auto;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -550,7 +550,7 @@
 .headerMeta {
   font-size: clamp(0.65rem, 1.5vw, 0.72rem);
   color: var(--card-meta);
-  margin-left: auto;
+  margin-inline-start: auto;
   font-family: 'Inter', system-ui, sans-serif;
   white-space: nowrap;
   align-self: flex-start;
@@ -904,6 +904,6 @@
     grid-template-columns: 1fr;
   }
   .headerBadges {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 }

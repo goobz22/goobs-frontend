@@ -250,7 +250,7 @@
   border: var(--rg-radio-border-width-override, var(--rg-radio-border-width))
     solid var(--rg-radio-border-color-override, var(--rg-radio-border-color));
   border-radius: 50%;
-  margin-right: 0.75rem;
+  margin-inline-end: 0.75rem;
   transition: var(--rg-transition);
 }
 
@@ -344,7 +344,7 @@
    grade per theme so it's visually distinct from the heading text.
    -------------------------------------------------------------------------- */
 .requiredIndicator {
-  margin-left: 2px;
+  margin-inline-start: 2px;
   color: var(--rg-required-indicator-color);
   font-weight: 600;
 }

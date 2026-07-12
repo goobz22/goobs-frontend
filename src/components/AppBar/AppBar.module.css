@@ -62,8 +62,8 @@
   margin: var(--appbar-margin);
   margin-top: var(--appbar-margin-top);
   margin-bottom: var(--appbar-margin-bottom);
-  margin-left: var(--appbar-margin-left);
-  margin-right: var(--appbar-margin-right);
+  margin-inline-start: var(--appbar-margin-left);
+  margin-inline-end: var(--appbar-margin-right);
 
   background-color: var(--appbar-bg);
   background-image: var(--appbar-bg-image);

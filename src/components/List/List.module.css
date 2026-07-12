@@ -56,7 +56,7 @@
 .listItemIcon {
   display: flex;
   align-items: center;
-  margin-right: var(--goobs-space-md);
+  margin-inline-end: var(--goobs-space-md);
   color: inherit;
 }
 
@@ -70,7 +70,7 @@
 
 /* dense tightens the icon-to-text gutter (12px vs 16px) */
 .listItemIcon[data-dense='true'] {
-  margin-right: var(--goobs-space-sm);
+  margin-inline-end: var(--goobs-space-sm);
 }
 
 /* --------------------------------------------------------------------------

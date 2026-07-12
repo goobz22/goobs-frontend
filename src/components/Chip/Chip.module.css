@@ -407,8 +407,8 @@
    Delete button (X)
    -------------------------------------------------------------------------- */
 .closeButton {
-  margin-left: 2px;
-  margin-right: -2px;
+  margin-inline-start: 2px;
+  margin-inline-end: -2px;
   padding: 2px;
   border-radius: var(--goobs-radius-pill);
   border: none;

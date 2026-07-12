@@ -59,8 +59,8 @@
   margin: var(--alert-margin);
   margin-top: var(--alert-margin-top);
   margin-bottom: var(--alert-margin-bottom);
-  margin-left: var(--alert-margin-left);
-  margin-right: var(--alert-margin-right);
+  margin-inline-start: var(--alert-margin-left);
+  margin-inline-end: var(--alert-margin-right);
   width: var(--alert-width);
   max-width: var(--alert-max-width);
   min-width: var(--alert-min-width);

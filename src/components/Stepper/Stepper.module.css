@@ -265,7 +265,7 @@
   width: 2px;
   height: 30px;
   background-color: var(--stepper-connector);
-  margin-left: 20px;
+  margin-inline-start: 20px;
 }
 
 /* --------------------------------------------------------------------------

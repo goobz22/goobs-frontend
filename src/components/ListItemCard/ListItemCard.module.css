@@ -61,8 +61,8 @@
 
 /* Left accent bar when accentColor is supplied. */
 .root[data-accent='true'] {
-  border-left-width: 4px;
-  border-left-color: var(--list-item-accent, var(--list-accent));
+  border-inline-start-width: 4px;
+  border-inline-start-color: var(--list-item-accent, var(--list-accent));
 }
 
 /* Selectable rows show a pointer + hover background. The hover feedback is an

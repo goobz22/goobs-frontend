@@ -236,14 +236,14 @@
   left: 100%;
   top: var(--tooltip-arrow-pos, 50%);
   transform: translateY(-50%);
-  border-left-color: var(--tooltip-arrow-color);
+  border-left-color: var(--tooltip-arrow-color); /* rtl-keep: directional arrow tail for [data-placement='left'] — JS-computed placement geometry, must stay physical */
 }
 
 .tooltip[data-placement='right'] .arrow {
   right: 100%;
   top: var(--tooltip-arrow-pos, 50%);
   transform: translateY(-50%);
-  border-right-color: var(--tooltip-arrow-color);
+  border-right-color: var(--tooltip-arrow-color); /* rtl-keep: directional arrow tail for [data-placement='right'] — JS-computed placement geometry, must stay physical */
 }
 
 /* --------------------------------------------------------------------------

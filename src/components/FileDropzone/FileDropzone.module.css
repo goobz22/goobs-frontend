@@ -111,7 +111,7 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 0.8rem;
-  text-align: left;
+  text-align: start;
   transition:
     background-color 150ms ease,
     border-color 150ms ease;

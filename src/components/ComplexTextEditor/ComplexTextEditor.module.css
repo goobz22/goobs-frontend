@@ -468,7 +468,7 @@
 
 .markdownPreview {
   width: 50%;
-  border-left: 1px solid;
+  border-inline-start: 1px solid;
 }
 
 /* MEDIA / CODE-BLOCK REFLOW (WCAG 1.4.10). The preview renders `mdToHtml(value)`

@@ -171,8 +171,8 @@
 .container[data-theme='sacred'] .packageName {
   color: var(--goobs-gold);
   background-color: rgba(154, 132, 0, 0.1);
-  border-top-left-radius: 0.375rem;
-  border-top-right-radius: 0.375rem;
+  border-start-start-radius: 0.375rem;
+  border-start-end-radius: 0.375rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -255,7 +255,7 @@
 .checkCell {
   text-align: center;
   padding: 0.5rem 0;
-  border-right: 1px solid var(--goobs-black-a10);
+  border-inline-end: 1px solid var(--goobs-black-a10);
 }
 
 /* --------------------------------------------------------------------------
@@ -276,7 +276,7 @@
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
 }
 
 /* --------------------------------------------------------------------------

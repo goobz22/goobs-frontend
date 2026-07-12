@@ -311,15 +311,15 @@
 }
 
 .buttonGroup .button:not(:last-child) {
-  border-right: 1px solid var(--goobs-gold-a40);
+  border-inline-end: 1px solid var(--goobs-gold-a40);
 }
 
 .buttonGroup[data-theme='light'] .button:not(:last-child) {
-  border-right-color: var(--goobs-light-border);
+  border-inline-end-color: var(--goobs-light-border);
 }
 
 .buttonGroup[data-theme='dark'] .button:not(:last-child) {
-  border-right-color: var(--goobs-dark-border);
+  border-inline-end-color: var(--goobs-dark-border);
 }
 
 /* --------------------------------------------------------------------------

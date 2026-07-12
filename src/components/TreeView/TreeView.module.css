@@ -136,15 +136,15 @@
    between sacred and the light/dark default.
    -------------------------------------------------------------------------- */
 .childrenGroup {
-  padding-left: var(--tree-children-indent, var(--goobs-space-lg));
-  border-left: 1px solid var(--goobs-light-border);
-  margin-left: var(--goobs-space-sm);
+  padding-inline-start: var(--tree-children-indent, var(--goobs-space-lg));
+  border-inline-start: 1px solid var(--goobs-light-border);
+  margin-inline-start: var(--goobs-space-sm);
   position: relative;
   overflow: visible;
 }
 
 .childrenGroup[data-theme='sacred'] {
-  border-left: 2px solid var(--goobs-gold-a30);
+  border-inline-start: 2px solid var(--goobs-gold-a30);
 }
 
 /* --------------------------------------------------------------------------
@@ -170,7 +170,7 @@
   font-weight: var(--goobs-weight-medium);
   letter-spacing: 0.01em;
   padding: var(--goobs-space-xs) var(--goobs-space-sm);
-  padding-left: var(--tree-item-indent, var(--goobs-space-md));
+  padding-inline-start: var(--tree-item-indent, var(--goobs-space-md));
   min-height: 36px;
   margin: 1px 0;
   cursor: pointer;
@@ -295,7 +295,7 @@
   letter-spacing: 0.5px;
   text-shadow: 0 1px 2px var(--goobs-black-a80);
   padding: 6px 16px;
-  padding-left: var(--tree-item-indent, var(--goobs-space-md));
+  padding-inline-start: var(--tree-item-indent, var(--goobs-space-md));
   min-height: 32px;
   margin: 2px 0;
   transition: var(--goobs-transition-premium);
@@ -368,7 +368,7 @@
   width: 20px;
   height: 20px;
   min-width: 20px;
-  margin-right: var(--goobs-space-xs);
+  margin-inline-end: var(--goobs-space-xs);
   position: relative;
   cursor: pointer;
   transition: var(--goobs-transition-fast);
@@ -408,7 +408,7 @@
 .checkbox {
   width: 16px;
   height: 16px;
-  margin-right: var(--goobs-space-xs);
+  margin-inline-end: var(--goobs-space-xs);
   accent-color: var(--goobs-light-primary);
   cursor: pointer;
   transition: var(--goobs-transition-fast);
@@ -429,7 +429,7 @@
 .checkbox[data-theme='sacred'] {
   width: 18px;
   height: 18px;
-  margin-right: var(--goobs-space-sm);
+  margin-inline-end: var(--goobs-space-sm);
   accent-color: var(--goobs-gold);
   transition: var(--goobs-transition-premium);
   border-radius: 3px;
