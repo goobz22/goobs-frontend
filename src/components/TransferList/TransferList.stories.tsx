@@ -718,3 +718,216 @@ export const FocusRetainedAfterTransfer: Story = {
     await expect(document.body).not.toHaveFocus()
   },
 }
+
+/**
+ * 9) Multiple-selection variant — category combobox is NAMED, plus end-to-end
+ *    coverage for the previously-untested dropdown-driven path.
+ *
+ * The `multipleSelection` variant swaps the left column's heading for a category
+ * `Dropdown` (`role="combobox"`) that chooses which item set the two lists show.
+ * Field/Dropdown derives the combobox's accessible name from its `label`, so when
+ * a consumer omits `dropdownLabel`, TransferList must still supply a meaningful
+ * fallback — otherwise the combobox is left with only the weak content-derived
+ * "Select…" name (WCAG 4.1.2 Name, Role, Value). This renders WITHOUT
+ * `dropdownLabel` and asserts the combobox is findable by the "Category"
+ * fallback. It also exercises the whole variant end-to-end — the entire
+ * `multipleSelection` path had NO story/play coverage before — selecting a
+ * category, transferring an item, and confirming the polite status announcement.
+ */
+const MultipleSelectionRenderer = () => {
+  const [dataMap, setDataMap] =
+    React.useState<TransferListDropdownDataMap>(dropdownDataMap)
+  return (
+    <div style={{ width: '700px', padding: '24px' }}>
+      {/* No `dropdownLabel` — exercises the "Category" accessible-name fallback. */}
+      <TransferList
+        variant="multipleSelection"
+        dropdownOptions={dropdownOptions}
+        dropdownDataMap={dataMap}
+        onChange={(newLeft, newRight, dropdownValue) => {
+          if (dropdownValue) {
+            setDataMap(prev => ({
+              ...prev,
+              [dropdownValue]: { leftItems: newLeft, rightItems: newRight },
+            }))
+          }
+        }}
+      />
+    </div>
+  )
+}
+
+export const MultipleSelection: Story = {
+  render: () => <MultipleSelectionRenderer />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // With `dropdownLabel` omitted, the category combobox still has a real
+    // accessible name ("Category" fallback) rather than the weak content-derived
+    // "Select…" (WCAG 4.1.2). A regression to `label={dropdownLabel || ''}` would
+    // fail this lookup.
+    const combobox = canvas.getByRole('combobox', { name: 'Category' })
+    await expect(combobox).toBeInTheDocument()
+
+    // Open the category dropdown and choose a category…
+    await userEvent.click(combobox)
+    const option = await canvas.findByRole('option', { name: 'knowledgebase' })
+    await userEvent.click(option)
+
+    // …which populates the left (Available) list with that category's items. The
+    // list falls back to the "Available items" name in this headingless variant.
+    const availableList = canvas.getByRole('list', { name: 'Available items' })
+    await expect(
+      within(availableList).getByText('Solar Flares')
+    ).toBeInTheDocument()
+
+    // Select an item and move it to the Assigned list — exercises the
+    // multipleSelection transfer path end-to-end (the selected category value is
+    // threaded back through `onChange` so the correct data-map bucket updates).
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Solar Flares' }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'move selected to Assigned' })
+    )
+
+    // The Assigned list now contains the moved item…
+    const assignedList = canvas.getByRole('list', { name: 'Assigned' })
+    await expect(
+      within(assignedList).getByText('Solar Flares')
+    ).toBeInTheDocument()
+
+    // …and the transfer was announced to screen-reader users (WCAG 4.1.3).
+    await expect(canvas.getByRole('status')).toHaveTextContent(
+      /Moved 1 item to Assigned/
+    )
+  },
+}
+
+/**
+ * 10) Accessibility — forced colors / Windows High Contrast (WCAG 1.4.1, 2.4.7)
+ *
+ * Regression gate for the forced-colors fix. In forced-colors / Windows High
+ * Contrast Mode the UA drops every `box-shadow` and repaints backgrounds/borders
+ * from a small system palette. That erases the checked-row selection cue — the
+ * `data-checked` background tint + glow box-shadow vanish and the 4px accent left
+ * border is repainted to the same system colour as every other row — so a
+ * selected row no longer stands out at the row level (selection still reads via
+ * the native checkbox, the non-colour backstop). The fix adds a
+ * `@media (forced-colors: active)` block that restores a system-`Highlight`
+ * outline on the checked row and pins the transfer buttons' focus outline to the
+ * system focus colour. A play function cannot flip the OS forced-colors
+ * preference, so this asserts — via the CSSOM, scoped to THIS component's hashed
+ * CSS-module classes — that TransferList's own forced-colors block still exists
+ * and still restores BOTH the checked-row selection cue and the button focus
+ * indicator. If a future edit drops or weakens the block, this re-fails.
+ */
+const ForcedColorsRenderer = () => {
+  const [left, setLeft] = React.useState(singleLeftItems)
+  const [right, setRight] = React.useState(singleRightItems)
+  return (
+    <div
+      style={{
+        width: '700px',
+        padding: '24px',
+        // Sacred surfaces read correctly only on a dark backdrop.
+        background: '#0e0e0e',
+        borderRadius: '8px',
+      }}
+    >
+      <TransferList
+        leftItems={left}
+        rightItems={right}
+        styles={{ theme: 'sacred' }}
+        onChange={(newLeft, newRight) => {
+          setLeft(newLeft)
+          setRight(newRight)
+        }}
+      />
+    </div>
+  )
+}
+
+export const AccessibilityForcedColors: Story = {
+  name: 'Accessibility - Forced Colors (WCAG 1.4.1)',
+  render: () => <ForcedColorsRenderer />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Check a row so the checked-row selection styling is present in the DOM.
+    const itemACheckbox = canvas.getByRole('checkbox', { name: 'Item A' })
+    await userEvent.click(itemACheckbox)
+    await expect(itemACheckbox).toBeChecked()
+
+    // Collect this component's hashed CSS-module class tokens to scope the CSSOM
+    // search — so another component's forced-colors block can never false-green
+    // this gate.
+    const root = canvasElement.querySelector(
+      '[data-component="TransferList"]'
+    ) as HTMLElement
+    const scopeTokens = new Set<string>()
+    for (const element of [root, ...Array.from(root.querySelectorAll('*'))]) {
+      if (typeof element.className !== 'string') continue
+      for (const token of element.className.trim().split(/\s+/).filter(Boolean)) {
+        scopeTokens.add(token)
+      }
+    }
+    expect(scopeTokens.size).toBeGreaterThan(0)
+
+    // Collect every style rule inside a `forced-colors: active` media block from
+    // the same-origin injected stylesheets. Cross-origin sheets throw on
+    // `.cssRules` and are skipped.
+    const forcedColorsRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (/forced-colors/i.test(mediaText) && /active/i.test(mediaText)) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) forcedColorsRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    // Scope to TransferList's own forced-colors rules via its hashed class tokens.
+    const tlRules = forcedColorsRules.filter(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        Array.from(scopeTokens).some(token => rule.selectorText.includes(token))
+    )
+    expect(tlRules.length).toBeGreaterThan(0)
+
+    // The checked-row selection cue must be restored with a forced-colors-safe
+    // primitive (an outline / border) since the tint + box-shadow are dropped.
+    const restoresSelectionCue = tlRules.some(
+      rule =>
+        /checked/i.test(rule.selectorText) &&
+        (rule.style.getPropertyValue('outline').trim() !== '' ||
+          rule.style.getPropertyValue('outline-style').trim() !== '' ||
+          rule.style.getPropertyValue('border').trim() !== '' ||
+          rule.style.getPropertyValue('border-color').trim() !== '')
+    )
+    expect(restoresSelectionCue).toBe(true)
+
+    // Keyboard focus on the transfer buttons must stay visible (an outline
+    // survives forced-colors where box-shadow is dropped).
+    const restoresFocusOutline = tlRules.some(
+      rule =>
+        /focus-visible/i.test(rule.selectorText) &&
+        (rule.style.getPropertyValue('outline').trim() !== '' ||
+          rule.style.getPropertyValue('outline-style').trim() !== '')
+    )
+    expect(restoresFocusOutline).toBe(true)
+  },
+}
