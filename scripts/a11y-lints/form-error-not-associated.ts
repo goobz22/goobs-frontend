@@ -20,6 +20,16 @@ import type { A11yLint, LintFile, Violation } from '../lint-a11y'
  *  2. A MERGING value — an expression that references `inputAriaProps` (e.g.
  *     `[inputAriaProps['aria-describedby'], hintId].filter(Boolean).join(' ')`)
  *     preserves the error link and is the documented way to add a second id.
+ *  2b. The merge behind a VARIABLE — `aria-describedby={describedBy}` where the
+ *     local `const describedBy = […, inputAriaProps['aria-describedby']]…`
+ *     definition references the bag (the FileDropzone shape): resolved by
+ *     looking up the identifier's `const` initializer in the same file.
+ *  2c. A SIBLING-SHELL mirror — the value references a `*helperId*` identifier
+ *     (the shell's helper-region id naming): a composite range field whose end
+ *     input points at the START shell's helper region (DateRange/TimeRange).
+ *     The spread's own bag provably carries no association there (the end
+ *     shell gets no error prop), and the override IS an error-region link —
+ *     the exact association this class protects.
  *  3. Tags with no `...inputAriaProps` spread are out of scope — this class is
  *     specifically about dropping the SHELL's association.
  * Comments are blanked before scanning (apostrophes in comments desync naive
@@ -166,6 +176,22 @@ const lint: A11yLint = {
               ? tag.slice(valueStart + 1, tag.indexOf(valueChar, valueStart + 1))
               : ''
         if (/\binputAriaProps\b/.test(value)) continue
+        // Hatch 2c — sibling-shell mirror: the value targets a shell helper
+        // region id (an error-region link, not a clobber).
+        if (/helperId/i.test(value)) continue
+        // Hatch 2b — merge behind a variable: a bare identifier whose local
+        // `const` initializer references the bag (or a shell helper id).
+        const ident = value.trim()
+        if (/^[A-Za-z_$][\w$]*$/.test(ident)) {
+          const def = new RegExp(
+            `\\bconst\\s+${ident.replace(/\$/g, '\\$')}\\s*=`
+          ).exec(text)
+          if (def) {
+            const init = text.slice(def.index, def.index + 400)
+            if (/\binputAriaProps\b/.test(init) || /helperId/i.test(init))
+              continue
+          }
+        }
         violations.push({
           file: path,
           line: lineOf(text, m.index),
@@ -192,6 +218,10 @@ const lint: A11yLint = {
       '<input id={inputId} {...inputAriaProps} />',
       // Prose in a comment must not fabricate a tag or an attribute.
       "// spread {...inputAriaProps} then aria-describedby= would clobber the shell's link\nconst x = 1",
+      // Merge behind a variable (the FileDropzone shape).
+      "const describedBy = [hintId, inputAriaProps['aria-describedby']].filter(Boolean).join(' ') || undefined\nexport const Y = () => <input {...inputAriaProps} aria-describedby={describedBy} />",
+      // Sibling-shell mirror (the DateRange/TimeRange end-input shape).
+      '<input {...inputAriaProps} aria-describedby={startHelperRendered ? startHelperIdRef.current : undefined} />',
     ],
   },
 }
