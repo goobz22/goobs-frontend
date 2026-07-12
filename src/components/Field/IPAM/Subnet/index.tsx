@@ -45,6 +45,13 @@ export interface SubnetMaskIncrementFieldProps {
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   name?: string
   autoComplete?: string
@@ -95,6 +102,7 @@ const InternalIncrementNumberField: React.FC<
   onKeyDown,
   onClick,
   placeholder,
+  ariaLabel,
   id,
   name,
   autoComplete,
@@ -274,6 +282,7 @@ const InternalIncrementNumberField: React.FC<
     <div style={style} data-field={dataField}>
       <FieldShell
         id={id}
+        ariaLabel={ariaLabel}
         label={label}
         helperText={helperText}
         error={error}
@@ -388,6 +397,13 @@ export interface SubnetFieldProps {
    * `value`) this is inert and behaviour is byte-for-byte unchanged.
    */
   name?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded through the internal mask stepper to FieldShell, which sets it
+   * as the input's `aria-label` ONLY when `label` is absent (WCAG 2.5.3 Label
+   * in Name); ignored when a visible label is set.
+   */
+  ariaLabel?: string
   styles?: FieldStyleOverrides
 }
 
@@ -480,6 +496,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   dataField,
   dataFieldName,
   name,
+  ariaLabel,
   styles,
 }) => {
   // Tier-1 form binding: inside a <Form> with `name` and no explicit `value`,
@@ -668,6 +685,7 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
         {...(helperText !== undefined ? { helperText } : {})}
         {...(shellError !== undefined ? { error: shellError } : {})}
         {...(styles !== undefined ? { styles } : {})}
+        {...(ariaLabel !== undefined ? { ariaLabel } : {})}
       />
       {/* The readout sits outside FieldShell, so mirror the shell's theme
           resolution (styles.theme, sacred default) for the module's

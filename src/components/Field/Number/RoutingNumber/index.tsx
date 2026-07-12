@@ -18,6 +18,13 @@ export interface RoutingNumberProps {
   /** Field label (default 'Routing Number'). */
   label?: React.ReactNode
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
   name?: string
@@ -49,6 +56,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   isDefaultValue = false,
   label = 'Routing Number',
   placeholder,
+  ariaLabel,
   id,
   name,
   onFocus,
@@ -203,6 +211,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={error}

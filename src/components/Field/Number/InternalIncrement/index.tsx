@@ -29,6 +29,13 @@ export interface InternalIncrementNumberFieldProps {
   /** Controlled value as a string; drives the display verbatim when set. */
   value?: string
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
   name?: string
@@ -63,6 +70,7 @@ const InternalIncrementNumberField: React.FC<
   repeatInterval = 100,
   value: valueProp,
   placeholder,
+  ariaLabel,
   id,
   name,
   onFocus,
@@ -245,6 +253,7 @@ const InternalIncrementNumberField: React.FC<
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={error}

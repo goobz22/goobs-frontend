@@ -34,6 +34,13 @@ export interface VLANFieldProps {
   initialDelay?: number
   repeatInterval?: number
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /**
    * Form-engine binding key. Forwarded to the native input for submission and,
@@ -70,6 +77,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
   initialDelay = 500,
   repeatInterval = 100,
   placeholder = `${MIN_VLAN_ID}-${MAX_VLAN_ID}`,
+  ariaLabel,
   id,
   name,
   autoComplete,
@@ -285,6 +293,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={shellError}

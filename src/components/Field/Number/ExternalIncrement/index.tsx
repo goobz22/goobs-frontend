@@ -32,6 +32,13 @@ export interface ExternalIncrementNumberFieldProps {
   /** Stable test selector — emitted as `data-field-name` on the wrapper. */
   dataFieldName?: string
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /**
    * Form-engine binding key. Forwarded to the input as `name` for native form
@@ -62,6 +69,7 @@ const ExternalIncrementNumberField: React.FC<
   dataField,
   dataFieldName,
   placeholder,
+  ariaLabel,
   id,
   name,
   styles,
@@ -190,6 +198,7 @@ const ExternalIncrementNumberField: React.FC<
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={error}

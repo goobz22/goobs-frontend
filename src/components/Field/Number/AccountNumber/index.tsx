@@ -28,6 +28,13 @@ export interface AccountNumberProps {
   label?: React.ReactNode
   /** Placeholder text. Overridden to '1234567890' under the sacred theme. */
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
   name?: string
@@ -60,6 +67,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   isDefaultValue = false,
   label = 'Account Number',
   placeholder,
+  ariaLabel,
   id,
   name,
   onFocus,
@@ -210,6 +218,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={error}

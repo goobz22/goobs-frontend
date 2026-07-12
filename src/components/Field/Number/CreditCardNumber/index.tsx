@@ -82,6 +82,13 @@ export interface CreditCardNumberProps {
   label?: React.ReactNode
   /** Placeholder text (default '1234 5678 9012 3456'). */
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /** Forwarded to the input as `name` for native form submission. */
   name?: string
@@ -117,6 +124,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   enableFormatting = true,
   label = 'Card Number',
   placeholder = '1234 5678 9012 3456',
+  ariaLabel,
   id,
   name,
   onFocus,
@@ -320,6 +328,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
   return (
     <FieldShell
       id={id}
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={error}

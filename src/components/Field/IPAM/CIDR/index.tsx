@@ -37,6 +37,13 @@ export interface CIDRFieldProps {
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
   placeholder?: string
+  /**
+   * Programmatic accessible name applied when no visible label renders.
+   * Forwarded to FieldShell, which sets it as the input's `aria-label` ONLY
+   * when `label` is absent (WCAG 2.5.3 Label in Name); ignored when a visible
+   * label is set.
+   */
+  ariaLabel?: string
   id?: string
   /**
    * Form-engine binding key. Inside a `<Form>` with `name` set, the numeric
@@ -93,6 +100,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   onKeyDown,
   onClick,
   placeholder,
+  ariaLabel,
   id,
   name,
   autoComplete,
@@ -273,6 +281,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
     <div data-field={dataField}>
       <FieldShell
         id={id}
+        ariaLabel={ariaLabel}
         label={label}
         helperText={helperText}
         error={error}
