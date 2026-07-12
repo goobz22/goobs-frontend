@@ -199,3 +199,24 @@
     transition: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   FORCED COLORS / WINDOWS HIGH CONTRAST (WCAG 2.4.7 Focus Visible, 2.4.11 /
+   1.4.11 Non-text Contrast). The inner .input clears its native outline
+   (outline: none) and the wrapper's ONLY focus cue is a box-shadow ring
+   (--goobs-focus-*). In forced-colors mode the UA drops every box-shadow and
+   repaints all borders with the system palette, so the focus border becomes
+   indistinguishable from the resting border — keyboard focus disappears.
+   Restore it with the one primitive that survives forced-colors: an outline
+   (a transparent outline is promoted to the system focus colour by the UA).
+   This is the same outline-based repair the rest of the library uses for this
+   exact reason (Switch / SignatureField / SacredGlyphFrame). Error state does
+   NOT need a forced-colors repair: it is already conveyed non-visually by the
+   role="alert" error text + aria-invalid, not by border colour alone.
+   -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .inputWrapper:focus-within {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}

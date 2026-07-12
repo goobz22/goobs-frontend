@@ -725,6 +725,11 @@ export const InteractionTest: Story = {
     })
     expect(searchbox).toBe(input)
 
+    // enterKeyHint="search" labels the touch-keyboard Enter key as a search
+    // action (WCAG 3.3.2), independent of the UA's per-browser type="search"
+    // default. Assert it is emitted on the input.
+    expect(input).toHaveAttribute('enterkeyhint', 'search')
+
     // Focus and type
     await userEvent.click(input)
     await userEvent.type(input, 'testing search functionality', { delay: 50 })
@@ -764,6 +769,10 @@ export const AccessibleNameFallback: Story = {
         placeholder="Type a product name..."
         styles={{ theme: 'light' }}
       />
+      {/* Degenerate case: no label, no ariaLabel, AND a blanked placeholder.
+          There is no name source, so the field must NOT emit a broken
+          empty-string aria-label — the attribute is omitted entirely. */}
+      <SearchBarWithState placeholder="" styles={{ theme: 'light' }} />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -778,6 +787,19 @@ export const AccessibleNameFallback: Story = {
       name: 'Search products',
     })
     expect(byAriaLabel).toBeVisible()
+
+    // With every name source blank, the `||` fallback (not `??`) must leave
+    // aria-label OFF rather than emit aria-label="" (WCAG 4.1.2). Locate the
+    // third field as the searchbox that carries neither of the named
+    // accessible names above.
+    const searchboxes = canvas.getAllByRole('searchbox')
+    const blankField = searchboxes.find(
+      element =>
+        element !== byPlaceholder &&
+        element !== byAriaLabel
+    )
+    expect(blankField).toBeTruthy()
+    expect(blankField).not.toHaveAttribute('aria-label')
   },
   globals: { backgrounds: { value: 'light' } },
 }
@@ -847,6 +869,96 @@ export const PlaceholderContrastTest: Story = {
     const placeholderStyle = getComputedStyle(lightInput, '::placeholder')
     expect(placeholderStyle.color).toBe('rgb(75, 85, 99)')
     expect(placeholderStyle.opacity).toBe('1')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: FORCED COLORS / WINDOWS HIGH CONTRAST (WCAG 2.4.7)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression gate for the forced-colors focus fix. The inner input clears its
+ * native outline (`outline: none`) and the wrapper's only focus cue is a
+ * `box-shadow` ring. In forced-colors / Windows High Contrast Mode the UA
+ * drops every `box-shadow` and repaints all borders with the system palette,
+ * so the focus border stops being distinguishable from the resting border —
+ * keyboard focus disappears. The fix adds a `@media (forced-colors: active)`
+ * block that restores a system-colour-safe focus outline on the wrapper.
+ *
+ * A play function cannot flip the OS forced-colors preference, so this asserts
+ * — via the CSSOM, scoped to THIS component's hashed CSS-module class — that
+ * Search's own forced-colors block still exists and still restores a focus
+ * outline on `:focus-within`. If a future edit drops or weakens the block,
+ * this re-fails.
+ */
+export const AccessibilityForcedColors: Story = {
+  name: 'Accessibility - Forced Colors (WCAG 2.4.7)',
+  render: () => (
+    <SearchBarWithState
+      label="Forced-colors search"
+      placeholder="High-contrast search..."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Rendering the field loads the Search stylesheet under test and gives us
+    // the wrapper's hashed CSS-module class to scope the CSSOM search by, so
+    // another component's forced-colors block can never false-green this gate.
+    const input = canvas.getByRole('searchbox', {
+      name: 'Forced-colors search',
+    })
+    const wrapper = input.parentElement as HTMLElement
+    const scopeTokens = wrapper.className.trim().split(/\s+/).filter(Boolean)
+    expect(scopeTokens.length).toBeGreaterThan(0)
+
+    // Collect every style rule inside a `forced-colors: active` media block
+    // from the same-origin injected stylesheets. Cross-origin sheets throw on
+    // `.cssRules` and are skipped.
+    const forcedColorsRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (/forced-colors/i.test(mediaText) && /active/i.test(mediaText)) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) forcedColorsRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    // Scope to Search's own forced-colors rules via its hashed class token.
+    const searchRules = forcedColorsRules.filter(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        scopeTokens.some(token => rule.selectorText.includes(token))
+    )
+    expect(searchRules.length).toBeGreaterThan(0)
+
+    // Keyboard focus must stay visible — an outline survives forced-colors
+    // where the box-shadow ring is dropped.
+    const restoresFocusOutline = searchRules.some(
+      rule =>
+        /focus-within/i.test(rule.selectorText) &&
+        (rule.style.getPropertyValue('outline').trim() !== '' ||
+          rule.style.getPropertyValue('outline-style').trim() !== '')
+    )
+    expect(restoresFocusOutline).toBe(true)
   },
   globals: { backgrounds: { value: 'light' } },
 }
