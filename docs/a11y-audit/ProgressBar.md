@@ -164,7 +164,11 @@ label and the ARIA values are present on first render). No SEO-semantic issue.
    not announced a second time on top of `aria-valuetext` (with a JSDoc comment
    explaining the rationale and that `data-testid` is preserved). (Issue 2.)
 3. `ProgressBar.stories.tsx` — new `AccessibilityShowcase` story (default-motion
-   ARIA/contract baseline) and new `AccessibilityReducedMotion` story that forces
+   ARIA/contract baseline) carrying a **`play` function** that asserts the
+   DOM/ARIA contract under the Storybook test-runner (`role="progressbar"`,
+   determinate `aria-valuenow`/`min`/`max`/`valuetext`, indeterminate omission of
+   those numeric attrs, `aria-hidden` on every label — Issue 4), plus a new
+   `AccessibilityReducedMotion` story that forces
    `chromatic.prefersReducedMotion: 'reduce'` so the reduced-motion CSS is
    captured as a real Chromatic baseline (below).
 
@@ -191,9 +195,16 @@ this repo — goobs has no unit tests):
   `aria-valuetext`, with an explicit `aria-label="Upload progress"`), an
   **indeterminate** bar (`aria-valuenow` omitted, `aria-valuetext="Loading"`),
   and a **pulse + striped + animated** bar. Its JSDoc documents the ARIA
-  contract. This anchors the DOM/ARIA contract (roles/values, the aria-hidden
-  label) and the **default-motion** rendering of the animated states as a
-  Chromatic regression baseline.
+  contract. It anchors the contract **two ways, split by what each net can
+  observe**: (a) a **`play` function** (Storybook test-runner) asserts the
+  DOM/ARIA contract a pixel snapshot cannot see — `role="progressbar"`, the
+  determinate `aria-valuenow`/`min`/`max` + `aria-valuetext`, the indeterminate
+  **omission** of `aria-valuenow`/`min`/`max`, and `aria-hidden="true"` on every
+  visible label (Issue 2); and (b) **Chromatic** captures the **default-motion**
+  visual rendering of the animated states as a baseline. See Issue 4 — the
+  earlier version of this story claimed the DOM/ARIA contract was a "Chromatic
+  regression baseline," which was wrong (Chromatic sees pixels, not attributes);
+  the `play` function is now the real DOM/ARIA gate.
 - **`AccessibilityReducedMotion`** — new. Renders the reduced-motion-affected
   states (plain + striped indeterminate, striped+animated determinate, pulse
   determinate, pulse+striped+animated determinate) with
@@ -246,16 +257,46 @@ coverage; it is corrected here.
   animated stories cover the reduced-motion path automatically.
 - **Pattern:** `overstated-regression-coverage`
 
+### 4. DOM/ARIA contract had ZERO automated regression protection — MINOR — FIXED
+- **Finding:** the `AccessibilityShowcase` story (and this report) claimed to
+  anchor the DOM/ARIA contract "as a Chromatic regression baseline," but the
+  story had **no `play` function** and imported nothing from `storybook/test`. A
+  Chromatic visual snapshot observes *pixels*, not attributes — so the
+  `aria-hidden` label fix (Issue 2, `index.tsx:347`) and the
+  role/`aria-valuenow`/`aria-valuetext` contract had **no** automated guard:
+  deleting `aria-hidden` or breaking `aria-valuenow` would shift no baseline and
+  pass silently. This is the *same* `overstated-regression-coverage` class the
+  auditor caught for the reduced-motion CSS (Issue 3) but had not applied to the
+  DOM/ARIA half.
+- **Root-cause fix (within the owned file, established repo convention):** added
+  a `play` function to `AccessibilityShowcase` (`ProgressBar.stories.tsx`) using
+  `within` + `expect` from `storybook/test` — the same net 30+ story files
+  already use and that the repo's `test-storybook` script runs. It asserts:
+  `role="progressbar"` on the determinate and indeterminate bars; determinate
+  `aria-valuenow="65"` + `aria-valuemin="0"` + `aria-valuemax="100"` +
+  `aria-valuetext="65 percent"`; indeterminate **omission** of
+  `aria-valuenow`/`aria-valuemin`/`aria-valuemax` (`not.toHaveAttribute`) with
+  `aria-valuetext="Loading"`; and `aria-hidden="true"` on all three visible
+  labels (`getAllByTestId('progress-bar-label')`). Per-file gate green
+  (`bun lint:file` on `ProgressBar.stories.tsx`, 0 warnings).
+- **Also corrected** the `AccessibilityShowcase` JSDoc and the "Stories updated"
+  section to split the two regression nets by what each can observe: the `play`
+  function gates the DOM/ARIA contract (attributes), Chromatic gates the visual
+  default-motion rendering (pixels). No more "DOM/ARIA contract as a Chromatic
+  baseline" wording.
+- **Pattern:** `overstated-regression-coverage`
+
 ## Deferred
 
-None. All three issues (the two original + the review follow-up) were fixable
+None. All four issues (the two original + the two review follow-ups) were fixable
 entirely inside the owned ProgressBar directory (`index.tsx`,
 `ProgressBar.module.css`, `ProgressBar.stories.tsx`). No shared
 util / Field / Shell / `global.css` / barrel change was required — the
 reduced-motion CSS uses plain `none`/`transform` values and a local keyframe
 (matching the file's three existing local keyframes), the label fix is a
-single attribute, and the reduced-motion Chromatic baseline is a per-story
-`parameters.chromatic.prefersReducedMotion` opt-in that needs **no** edit to
-the shared `.storybook/*` config or `chromatic.config.json` (both of which are
-outside this component's ownership). No `--goobs-*` token addition in
-`global.css` (out of scope) was needed.
+single attribute, the reduced-motion Chromatic baseline is a per-story
+`parameters.chromatic.prefersReducedMotion` opt-in, and the DOM/ARIA `play`
+gate uses only the in-repo `storybook/test` net — none needs an edit to the
+shared `.storybook/*` config, `chromatic.config.json`, or any file outside this
+component's ownership. No `--goobs-*` token addition in `global.css` (out of
+scope) was needed.
