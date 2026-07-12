@@ -178,3 +178,68 @@ above.)
   - **Suggested change (Shell owner):** omit `aria-disabled` from `inputAriaProps` for elements
     that also receive the native `disabled` attribute (or document that consumers pass one or the
     other). Low priority — cosmetic only.
+
+---
+
+## Second audit pass (2026-07-11) — invalid state, forced-colors focus, decorative icons
+
+The pass above closed the label / focus-JS-dependency / motion / input-purpose gaps. This
+second pass re-audited the full checklist and found three remaining items, all fixed at
+root cause inside `Field/Text` (no Shell change). Ground truth for issue 1: TextField
+renders its **own** `.inputWrapper` frame in FieldShell's render slot rather than
+FieldShell's generic `.inputSlot`, so it never inherited FieldShell's `.inputSlot` error
+border (`Field/Shell/FieldShell.module.css:159-162`) — and `TextField.module.css` had
+focus + disabled rules but **no error selector at all**.
+
+| # | Severity | WCAG 2.2 | Where | Issue | Status |
+|---|----------|----------|-------|-------|--------|
+| 4 | Moderate | 1.4.1 Use of Color (A); 3.3.1 Error Identification (A) | `TextField.module.css` (frame had no error rule) vs `FieldShell.module.css:159-162` | On `error`, only the label + helper text (rendered by Shell, OUTSIDE the control) turned danger-colored; the input frame itself gave **no** error affordance. Error was carried by the message text + `aria-invalid` (so not a hard 1.4.1 failure) but the control under-signalled versus every sibling Field. | **FIXED** |
+| 5 | Moderate | 2.4.7 Focus Visible (AA); 1.4.11 Non-text Contrast (AA) | `TextField.module.css:68,97` (`outline:none`) + wrapper focus cue is box-shadow only (`:50-54`) | In `forced-colors: active` (Windows High Contrast) `box-shadow` is dropped and all borders collapse to one system color, so BOTH focus cues vanish — keyboard focus becomes invisible. | **FIXED** |
+| 6 | Minor | 1.1.1 Non-text Content (A) | `TextField.stories.tsx` decorative adornment SVGs (`AtIcon`/`SearchIcon`/`LockIcon`) | Decorative icons next to already-named fields (adornment slot is `pointer-events:none`, i.e. never interactive) had no `aria-hidden`, so a screen reader could surface a redundant "image". Consumer-supplied node, so the fix is demonstrative in the stories. | **FIXED** |
+
+### Fixes applied (second pass)
+
+- **#4 — `field-frame-missing-error-style`** (`TextField.module.css`, after the theme
+  blocks): added `[data-component='FieldShell'][data-state='error'] .inputWrapper,
+  [data-component='FieldShell'][aria-invalid='true'] .inputWrapper { border-color:
+  var(--field-border-error); }`. Reuses the exact variable FieldShell's `.inputSlot` uses
+  (defined per-theme on `.shell`, cascades in); a 3.76:1 danger border clears the 3.0:1
+  non-text-UI threshold (1.4.11). Placed after the theme blocks so it overrides their
+  default `border-color` on all three themes (equal specificity → source order); themed
+  `:focus-within` rules keep higher specificity so a focused invalid field still shows its
+  focus border, and the focus glow (box-shadow, untouched) keeps focus visible on sacred
+  where the error rule outranks focus. The state is now redundant (frame + message +
+  `aria-invalid`), never color-alone. Reduced-motion already collapses the frame transition,
+  so the new border also snaps under `prefers-reduced-motion`.
+
+- **#5 — `focus-invisible-in-forced-colors`** (`TextField.module.css`, new
+  `@media (forced-colors: active)` block): restores an `outline` on
+  `.inputWrapper.focused` / `:focus-within`; forced-colors overrides the outline color to a
+  system highlight, making keyboard focus visible again in every theme. The token value is
+  irrelevant (forced-colors replaces it) and is a real `--goobs-*` token only to stay
+  stylelint-clean.
+
+- **#6 — `icon-missing-aria-hidden`** (`TextField.stories.tsx`): `aria-hidden="true"` on
+  the three shared decorative adornment SVGs, modelling the decorative-adornment pattern.
+  No play assertion depends on the icons being in the a11y tree, so baselines are unaffected.
+
+### Stories updated (second pass)
+
+- **`ErrorStateOnControl`** (new) — renders an invalid + a valid field. The `play` test
+  asserts `aria-invalid="true"` + `aria-describedby` on the invalid input, `data-state="error"`
+  on its shell ancestor (the exact hooks the error CSS keys on), and walks the CSSOM to
+  confirm BOTH new rules exist keyed to the wrapper's hashed class — the error-border rule
+  and the `@media (forced-colors: active)` focus outline. Mirrors the `ReducedMotion`
+  structural-guard pattern (CSS `@media`/attribute rules can't be toggled from a play
+  function). Regression guard for fixes #4 and #5.
+
+### Deferred (second pass) — Shell-owned
+
+- **`role="alert"` + `aria-live="polite"` on the helper region** (`Field/Shell/index.tsx:412-413`).
+  `role="alert"` already implies an assertive live region; the explicit `aria-live="polite"`
+  downgrades it, producing an ambiguous alert-but-polite mapping (and, with the field's
+  `aria-describedby` link, the message can be announced twice). Root cause is in
+  `Field/Shell`, not editable here.
+  - **Suggested change (Shell owner):** drop the redundant `aria-live` and rely on
+    `role="alert"`, or use a non-alert region with `aria-live="polite"` if polite is the
+    intent. Low priority — the message still reaches AT via `aria-describedby`.

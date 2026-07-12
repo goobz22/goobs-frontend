@@ -212,6 +212,32 @@
 }
 
 /* --------------------------------------------------------------------------
+   Error State (WCAG 1.4.1 Use of Color / 3.3.1 Error Identification)
+
+   TextField draws its OWN frame (`.inputWrapper`) inside FieldShell's render
+   slot instead of using FieldShell's generic `.inputSlot`, so it never
+   inherited FieldShell's `.inputSlot` error border. The result: on error only
+   the label + helper text (both rendered by the shell, OUTSIDE the control)
+   turned danger-colored, while the input frame itself gave NO error affordance
+   — the error was signalled by the message text alone. This turns the control
+   frame danger-colored when the shell marks the field invalid, matching
+   FieldShell's own `.inputSlot` treatment and every sibling Field, so the
+   error is coded on the control too (redundant to the message + aria-invalid,
+   never color-alone). `--field-border-error` is defined per-theme on `.shell`
+   and cascades in; a 3.76:1 danger border clears the 3.0:1 non-text-UI
+   threshold (WCAG 1.4.11). Placed after the theme blocks so it overrides their
+   default `border-color` (equal specificity → source order); the themed
+   `:focus-within` rules keep higher specificity, so a focused invalid field
+   still shows its focus border, and the focus glow (box-shadow, untouched)
+   stays visible on the sacred theme where the error rule outranks focus.
+   -------------------------------------------------------------------------- */
+
+[data-component='FieldShell'][data-state='error'] .inputWrapper,
+[data-component='FieldShell'][aria-invalid='true'] .inputWrapper {
+  border-color: var(--field-border-error);
+}
+
+/* --------------------------------------------------------------------------
    Mobile Responsive
    -------------------------------------------------------------------------- */
 
@@ -253,5 +279,26 @@
 @media (prefers-reduced-motion: reduce) {
   .inputWrapper {
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Forced Colors / Windows High Contrast (WCAG 2.4.7 Focus Visible / 1.4.11)
+   The inner input/textarea carry `outline: none`, and the wrapper's focus cue
+   is a `box-shadow` glow plus a `border-color` change. In forced-colors mode
+   box-shadow is not rendered and every border collapses to a single system
+   color, so BOTH focus cues disappear — a keyboard user would have no visible
+   focus. Restore an explicit outline on focus: forced-colors overrides its
+   color to a system highlight, making focus visible again. The token value is
+   irrelevant here (forced-colors replaces it); it is a real `--goobs-*` token
+   only to stay stylelint-clean. Honoured in every theme because forced-colors
+   overrides all of them uniformly.
+   -------------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  .inputWrapper.focused,
+  .inputWrapper:focus-within {
+    outline: 2px solid var(--goobs-gold);
+    outline-offset: 1px;
   }
 }

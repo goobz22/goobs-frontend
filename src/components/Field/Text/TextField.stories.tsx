@@ -12,7 +12,12 @@ import TextField from './index'
 // in stories — they wedge interaction runners).
 const onValidSubmit = fn()
 
-// A simple icon for adornments
+// A simple icon for adornments. Adornment icons here are DECORATIVE (the field
+// already has a visible label or an aria-label), and the adornment slot is
+// `pointer-events: none`, so it can never be an interactive control. Marking
+// the SVGs `aria-hidden="true"` keeps them out of the accessibility tree so a
+// screen reader announces the labelled field, not a redundant/anonymous image
+// (WCAG 1.1.1 — decorative images take an empty text alternative).
 const AtIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -22,6 +27,7 @@ const AtIcon = () => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    aria-hidden="true"
   >
     <circle cx="12" cy="12" r="4" />
     <path d="M16 8v-2a4 4 0 00-4-4 4 4 0 00-4 4v2" />
@@ -38,6 +44,7 @@ const SearchIcon = () => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    aria-hidden="true"
   >
     <circle cx="11" cy="11" r="8" />
     <path d="M21 21l-4.35-4.35" />
@@ -53,6 +60,7 @@ const LockIcon = () => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
+    aria-hidden="true"
   >
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <circle cx="12" cy="16" r="1" />
@@ -1362,5 +1370,127 @@ export const IdentifyInputPurpose: Story = {
     const plain = canvas.getByRole('textbox', { name: /Full name/ })
     // (Full name has autoComplete but no inputMode → inputmode absent.)
     await expect(plain).not.toHaveAttribute('inputmode')
+  },
+}
+
+// --------------------------------------------------------------------------
+// ERROR STATE ON THE CONTROL (a11y — WCAG 1.4.1 / 3.3.1 / 2.4.7 / 1.4.11)
+// --------------------------------------------------------------------------
+
+/**
+ * When a TextField is invalid the error must be signalled on the CONTROL, not
+ * only in the message text below it. TextField renders its own `.inputWrapper`
+ * frame (rather than FieldShell's generic `.inputSlot`), so it did not inherit
+ * FieldShell's error border — on error only the label + helper text turned
+ * danger-colored while the input frame stayed neutral. TextField.module.css now
+ * carries an error rule (`[data-state='error'] .inputWrapper`) that turns the
+ * frame danger-colored, matching every sibling Field. It is redundant to the
+ * error message + `aria-invalid`, so the state is never conveyed by color
+ * alone.
+ *
+ * The `play` test verifies the end-to-end wiring (the input carries
+ * `aria-invalid="true"` and `aria-describedby`, and its shell ancestor carries
+ * `data-state="error"` — together these are exactly the hooks the error CSS
+ * keys on), then walks the CSSOM to assert BOTH new rules exist keyed to THIS
+ * wrapper's hashed class: the error-border rule and the
+ * `@media (forced-colors: active)` focus-outline fallback (a keyboard focus
+ * indicator that survives Windows High Contrast, where the box-shadow focus
+ * glow is stripped). CSS `@media`/attribute rules can't be toggled from a play
+ * function, so a structural CSSOM guard is how this repo pins such rules (see
+ * ReducedMotion) — it fails if either rule is deleted.
+ */
+export const ErrorStateOnControl: Story = {
+  name: 'Error state on the control (invalid frame + forced-colors focus)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <TextFieldWithState
+        label="Email Address"
+        initialValue="not-an-email"
+        error="Please enter a valid email address."
+        styles={{ theme: 'light' }}
+      />
+      <TextFieldWithState
+        label="Valid field"
+        initialValue="all good"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const invalid = canvas.getByRole('textbox', { name: /Email Address/ })
+    const valid = canvas.getByRole('textbox', { name: /Valid field/ })
+
+    // End-to-end error wiring: the invalid input is marked invalid AND points
+    // at its error message; the valid one carries neither.
+    await expect(invalid).toHaveAttribute('aria-invalid', 'true')
+    await expect(invalid).toHaveAttribute('aria-describedby')
+    await expect(valid).not.toHaveAttribute('aria-invalid')
+
+    // The shell ancestor exposes the `data-state="error"` hook the frame CSS
+    // keys on — proving the error-border selector actually matches this field.
+    const shell = invalid.closest('[data-component="FieldShell"]') as HTMLElement
+    await expect(shell).toHaveAttribute('data-state', 'error')
+
+    // The invalid input's wrapper (its parent — no adornments here) is the
+    // styled frame; grab its hashed CSS-module class to scope the CSSOM checks.
+    const wrapper = invalid.parentElement as HTMLElement
+    const wrapperClasses = wrapper.className.split(/\s+/).filter(Boolean)
+
+    // Guard 1 — the error-border rule exists, keyed to a `data-state="error"`
+    // (or aria-invalid) shell selector and this wrapper's class.
+    let errorRuleFound = false
+    // Guard 2 — the forced-colors focus-outline fallback exists for this
+    // wrapper's focus state.
+    let forcedColorsFocusFound = false
+
+    const inspectStyleRule = (rule: CSSStyleRule, forcedColors: boolean) => {
+      const selector = rule.selectorText ?? ''
+      const matchesWrapper = wrapperClasses.some(cls => selector.includes(cls))
+      if (!matchesWrapper) return
+      if (
+        !forcedColors &&
+        /\[data-state=['"]?error['"]?\]|\[aria-invalid=['"]?true['"]?\]/i.test(
+          selector
+        ) &&
+        (rule.style.borderColor !== '' ||
+          /border-color/i.test(rule.style.cssText))
+      ) {
+        errorRuleFound = true
+      }
+      if (
+        forcedColors &&
+        /focus-within|focused/i.test(selector) &&
+        (rule.style.outline !== '' ||
+          rule.style.outlineWidth !== '' ||
+          /outline/i.test(rule.style.cssText))
+      ) {
+        forcedColorsFocusFound = true
+      }
+    }
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        for (const rule of Array.from(sheet.cssRules)) {
+          if (rule instanceof CSSStyleRule) {
+            inspectStyleRule(rule, false)
+          } else if (
+            rule instanceof CSSMediaRule &&
+            /forced-colors/i.test(rule.media.mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) inspectStyleRule(inner, true)
+            }
+          }
+        }
+      } catch {
+        // Cross-origin stylesheet — reading cssRules throws; skip it.
+      }
+    }
+
+    await expect(errorRuleFound).toBe(true)
+    await expect(forcedColorsFocusFound).toBe(true)
   },
 }
