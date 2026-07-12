@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the ProjectBoard component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import ProjectBoard from '../index'
 import { ProjectBoardProvider } from '../context/ProjectBoardContext'
 import {
@@ -625,6 +625,60 @@ export const BoardAccessibility: Story = {
     await expect(
       await canvas.findByRole('navigation', { name: 'Breadcrumb' })
     ).toBeInTheDocument()
+  },
+}
+
+/**
+ * Pins the view-transition focus management (WCAG 2.4.3 Focus Order). The
+ * "Create Task" button lives in the board toolbar, which unmounts when the
+ * inline Add-Task view opens — leaving keyboard/AT focus stranded on `<body>`.
+ * Opening the view now moves focus INTO the revealed form (the AnimationWrapper
+ * content region that wraps the tablist); returning via "Cancel" moves focus
+ * back to the board region (which wraps the task lists). Neither transition
+ * leaves focus on `<body>`.
+ */
+export const BoardViewTransitionFocus: Story = {
+  render: args => (
+    <ProjectBoardProvider>
+      <div
+        style={{
+          backgroundColor: '#f8fafc',
+          minHeight: '100vh',
+          padding: '2rem',
+          margin: 0,
+          boxSizing: 'border-box',
+        }}
+      >
+        <ProjectBoard {...args} />
+      </div>
+    </ProjectBoardProvider>
+  ),
+  args: {
+    ...administratorArgs,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Opening the Add-Task view moves focus into the revealed form, not <body>.
+    await userEvent.click(canvas.getByRole('button', { name: 'Create Task' }))
+    const tablist = await canvas.findByRole('tablist', {
+      name: 'Task form sections',
+    })
+    await waitFor(() => {
+      expect(document.activeElement).not.toBe(document.body)
+      expect(document.activeElement?.contains(tablist)).toBe(true)
+    })
+
+    // Returning to the board moves focus to the board region (wraps the lists),
+    // never leaving it stranded on <body>.
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => {
+      const lists = canvas.getAllByRole('list', { name: /tasks/ })
+      expect(document.activeElement).not.toBe(document.body)
+      expect(document.activeElement?.contains(lists[0]!)).toBe(true)
+    })
   },
 }
 
