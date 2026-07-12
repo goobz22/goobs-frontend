@@ -12,6 +12,18 @@ operable button [moderate], and (b) focus was dropped to `<body>` after Remove
 [minor]. Both are now fixed at root cause in `index.tsx` + pinned by story play
 functions. Details folded into issues 3 and 6 below.
 
+**Second adversarial-review follow-up (2026-07-11):** a further review noted that
+the two SERIOUS fixes (issue 1 state-ARIA on the operable button; issue 2 the
+`role="status"` live region) were only *visually* rendered by `WithError` /
+`Uploading` — no `play()` asserted the ARIA, and Chromatic diffs pixels, not ARIA
+attributes, so a regression dropping `{...inputAriaProps}` or `role="status"`
+would ship silently. **Fixed:** `WithError` and `Uploading` now each carry a
+`play()` that pins the exact attributes (`aria-required`/`aria-invalid`/
+`aria-describedby`→error-region+hint-merge, and `role="status"`/`aria-live`/text/
+`aria-busy`/`disabled` respectively) and fail the old baseline. See "Stories
+updated". No source (`index.tsx`/CSS) change was needed — the runtime behavior was
+already correct; the gap was purely test coverage.
+
 **APG pattern:** No single APG widget pattern — this is a **custom file-upload
 control**: a native `<button>` drop target that opens a hidden
 `<input type="file">` and doubles as a drag-drop surface, wrapped by the shared
@@ -169,8 +181,25 @@ content. No SEO-semantic gaps.
 - `FileDropzone.stories.tsx` — see below.
 
 ## Stories updated
-- **`Uploading`** — `uploading: true` with a value/preview: exercises the
-  natively-disabled button, `aria-busy`, and the "Uploading image…" status region.
+- **`WithError`** (issues 1 + error-region link) — **now carries a `play`
+  function** (second adversarial-review follow-up, 2026-07-11): asserts the
+  operable `[data-file-dropzone-browse]` button has `aria-required="true"` and
+  `aria-invalid="true"` (spread from `inputAriaProps`), and that its
+  `aria-describedby` resolves to BOTH the FieldShell `role="alert"` error region
+  (whose id is one of the describedby targets and whose text is the failure
+  message) AND the in-button drag-drop hint span (pinning the describedby MERGE).
+  This FAILS the old baseline — a regression dropping `{...inputAriaProps}` from
+  the button loses `aria-required`/`aria-invalid`, and one collapsing the
+  describedby merge drops either the error-region or the hint id. (Chromatic is
+  visual-only and does not diff ARIA, so this executable assertion is the real
+  regression gate.)
+- **`Uploading`** — `uploading: true` with a value/preview. **Now carries a `play`
+  function** (second adversarial-review follow-up, 2026-07-11): asserts the
+  visually-hidden `[data-file-dropzone-status]` region is `role="status"`
+  `aria-live="polite"` with text "Uploading image…", and that the operable browse
+  button is natively `disabled` and `aria-busy="true"`. FAILS the old baseline — a
+  regression dropping `role="status"` (index.tsx) or `aria-busy` on the button
+  goes uncaught by Chromatic but fails this block.
 - **`WithValueRemovable`** — value present + `onRemove`. **Extended with a `play`
   function** (adversarial follow-up, issue 6): focuses the Remove control,
   activates it, and asserts focus lands on `[data-file-dropzone-browse]` (not
@@ -180,8 +209,6 @@ content. No SEO-semantic gaps.
   button's `aria-labelledby` resolves to two elements whose concatenated text is
   exactly "Product Image Upload image" (field label + visible action), pinning the
   label association + Label-in-Name. FAILS without the `aria-labelledby` wiring.
-- **`WithError`** (JSDoc) — documents that the operable button carries
-  `aria-required` / `aria-invalid` / `aria-describedby`→error.
 - Reduced-motion (issue 4) is a CSS media query and is not separately
   story-assertable (Chromatic does not drive the reduce-motion preference); it is
   visually inert under normal rendering.

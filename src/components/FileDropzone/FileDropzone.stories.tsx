@@ -162,6 +162,17 @@ export const WithError: Story = {
     // The error region's own id is one of the button's describedby targets —
     // this is the link a regression on the describedby merge (index.tsx) breaks.
     await expect(ids).toContain(errorRegion!.getAttribute('id'))
+
+    // The describedby MERGES the drag-drop hint with the shell error region
+    // (index.tsx) so the operable control announces BOTH the instruction and the
+    // failure text. The hint span lives inside the button — assert its id is a
+    // describedby target too, so a regression collapsing the merge to the shell's
+    // error id alone (silently dropping the hint) fails here as well.
+    const hintSpan = Array.from(browseButton!.querySelectorAll('span')).find(
+      span => (span.textContent ?? '').includes('Drag & drop')
+    )
+    await expect(hintSpan).toBeTruthy()
+    await expect(ids).toContain(hintSpan!.getAttribute('id'))
   },
 }
 
