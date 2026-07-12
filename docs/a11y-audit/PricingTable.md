@@ -1,6 +1,12 @@
 # PricingTable — a11y audit (2026-07-11)
 
-**Status:** PARTIAL — all in-directory issues FIXED (2 new this pass: keyboard-scrollable region + disambiguated CTA labels, on top of the earlier semantic-table pass); one standing keyboard gap DEFERRED to the shared `Tooltip` component (outside my directory)
+**Status:** PARTIAL — all in-directory issues FIXED. Latest (adversarial-review) pass fixed
+2 more: an explicit `:focus-visible` ring on the keyboard-focusable scroll region (R1) and a
+`play`-function DOM guard so the disambiguated-CTA `aria-label` is a real (non-visual) regression
+test (R3). Two items remain DEFERRED because their root cause lives outside this directory: the
+hover-only `Tooltip` keyboard gap, and crawlable `<a href>` CTA links (root cause: the `Button`
+component renders a `<button>` only — needs polymorphic `as`/`href` support before PricingTable can
+emit a real link without breaking the Button styling/diag/`data-*` contract).
 
 > **2026-07-11 second pass (this audit).** The component had already been through a thorough
 > semantic-table pass (issues 1–6 below, commit `1da86b96`). This pass re-verified those against the
@@ -39,6 +45,35 @@ Files:
 Pattern classes (cross-component): **7** = `scrollable-region-not-keyboard-focusable`,
 **8** = `ambiguous-duplicate-control-name`, **5/deferred** = `hover-only-tooltip-not-keyboard-accessible`.
 
+### Adversarial-review pass (findings on the fixes above)
+
+| # | Severity | WCAG 2.2 | Location | Issue | Status |
+|---|----------|----------|----------|-------|--------|
+| R1 | Moderate | 2.4.7 | index.tsx scroll region (was a bare `<div style={{overflowX:'auto'}}>` with `tabIndex={0}`) | Fix 7 made the scroll region a keyboard tab stop but attached NO class and NO `:focus-visible` style — it relied on the UA default outline, which disappears in consumer apps that reset `outline:none`, leaving the new tab stop invisible. The audit's Focus section also wrongly claimed "no new focus styling is required." | FIXED |
+| R2 | Moderate | (SEO / 2.4.4-adjacent) | index.tsx footer CTAs | CTAs render `<button>` + `router.push(buttonlinks[i])`, so plan destinations are not crawlable `<a href>` and require JS — an SSR/SEO gap. Root cause is the `Button` component (renders `<button>` only). | DEFERRED (root cause outside this directory — see Deferred #2) |
+| R3 | Minor | (test integrity) | PricingTable.stories.tsx `DisambiguatedButtonLabels` | The fix-8 story was visual-only; `aria-label` is not pixel-rendered, so a dropped disambiguating label would leave the Chromatic snapshot identical and pass — no true regression guard. | FIXED |
+
+**R1 fix** — added `.scrollRegion` + `.scrollRegion:focus-visible` (per-theme outline) to
+`PricingTable.module.css` and moved the wrapper onto that class; the region now paints an
+explicit keyboard-focus ring independent of any consumer `outline:none` reset.
+
+**R3 fix** — added a `play` function to `DisambiguatedButtonLabels` (`storybook/test`
+`within`/`expect`, the same interaction-test net the repo already uses in
+`Button.stories.tsx` / `IconA11y.stories.tsx`). It resolves each CTA by ACCESSIBLE NAME
+(`getByRole('button', { name: 'Learn More, ThothOS …' })`) and pins the count; if the
+`aria-label` regresses, all three collapse to "Learn More", the unique-name queries throw,
+and the story fails — a DOM assertion the visual snapshot cannot provide.
+
+**R2** — genuinely deferred, not fixed. The reviewer's own framing ("a reasonable scope call
+… status is correctly 'partial'") is accurate: the semantically correct element for a CTA that
+navigates to a URL is `<a href>`, but the CTAs are rendered by the shared `Button` component,
+which is strictly a `<button>` (`ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'>`
+— no `as`/`href`/`linkComponent`). Rendering a crawlable link at root cause therefore requires
+adding polymorphic link support to `Button` (outside this directory). Reproducing a link inside
+PricingTable by hand would forfeit the Button styling, the `action.invoke` diag beacon, and the
+`data-component="Button"`/`data-action="select"` selector contract ThothOS Playwright keys on —
+i.e. a forbidden wrapper/contract regression. Recorded with an exact fix shape in Deferred #2.
+
 ---
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
@@ -63,10 +98,18 @@ the component or its subcomponents. Nothing conveyed by sound. **No hearing-rela
 - **Info text (issue 5).** Each `infopopuptext` is now also rendered as visually-hidden text
   inside the feature's `<th>`, so AT reads it even though the visual tooltip is mouse-only. The
   `InfoIcon` inside the tooltip is marked `aria-hidden` (the srOnly text carries the meaning).
-- **Focus.** The only focusable elements are the CTA `<button>`s, supplied by the `Button`
-  component, which already carries a `:focus-visible` treatment in `Button.module.css`. No
-  custom focusable elements were added, so no new focus styling is required. No overlay/dialog
-  is owned here (nothing to focus-trap/Escape/restore).
+- **Focus.** Two focusable surfaces: (a) the CTA `<button>`s, supplied by the `Button`
+  component, which already carries a `:focus-visible` treatment in `Button.module.css`; and
+  (b) the horizontal-scroll region, which issue 7 made a keyboard tab stop (`tabIndex={0}`).
+  Because (b) is a *newly added* focusable, it gets its OWN explicit `:focus-visible` ring —
+  `.scrollRegion:focus-visible` in `PricingTable.module.css`, mirroring the Button convention
+  (`outline: 2px solid var(--goobs-<theme>-primary); outline-offset: 2px`, coloured per the
+  container's `data-theme`, `:focus-visible` only). This is deliberate: relying on the UA
+  default outline would leave the tab stop INVISIBLE in the many consumer apps that ship a
+  global `*{outline:none}` reset (WCAG 2.4.7). (The earlier draft of this section wrongly said
+  "no custom focusable elements were added, so no new focus styling is required" — it predated
+  and contradicted issue 7; corrected here.) No overlay/dialog is owned here (nothing to
+  focus-trap/Escape/restore).
 - **Not color-alone (issue 6).** Featured column = gold highlight **and** a "Popular" text badge
   in the header; disabled state = reduced opacity **and** `data-state="disabled"` **and** the
   native `disabled` attribute on every CTA button. Verified.
@@ -131,6 +174,17 @@ the component or its subcomponents. Nothing conveyed by sound. **No hearing-rela
 9. **Saved in-flight `.srOnly` deprecation fix (this pass)** — preserved + committed the
    `clip: rect()` → `clip-path: inset(50%)` migration in `PricingTable.module.css` (shared-tree save;
    keeps the text in the accessibility tree).
+10. **Focus-visible ring on the scroll region (adversarial-review R1)** — new `.scrollRegion`
+    class (carries `overflow-x:auto`) + `.scrollRegion:focus-visible` outline, coloured per the
+    container's `data-theme` via `--goobs-{sacred,light,dark}-primary`, `:focus-visible` only
+    (no ring on a pointer scroll-grab). Mirrors `Button.module.css`; guarantees a visible focus
+    ring even under a consumer `outline:none` reset. The wrapper's inline `style={{overflowX:'auto'}}`
+    was replaced by this class. **Markup change** — the scroll `<div>` gained a `className` and lost
+    its inline style; no `data-*`/`role`/`aria` attribute changed. (WCAG 2.4.7)
+11. **Play-function regression guard for the disambiguated CTA labels (adversarial-review R3)** —
+    `DisambiguatedButtonLabels` gained a `play` function (imports `within`, `expect` from
+    `storybook/test`) that asserts each CTA resolves by its distinct accessible name and pins the
+    count. Converts fix 8 from a visual-only (ineffective) guard into a real DOM regression test.
 
 **Preserved contract (unchanged):** `data-component="PricingTable"`, `data-subject`,
 `data-state` on the root; the `Button` `data-action`/`data-subject` selectors; the `emitDiag`
@@ -150,9 +204,11 @@ retype, or removal).
 - `KeyboardScrollableOverflow` ("Keyboard-scrollable Overflow (no buttons)") — **new this pass** — 6
   columns in a 420px container force horizontal overflow with **no** `buttoncolumns`, so the
   focusable scroll region is the only keyboard path to the far columns (exercises issue 7).
-- `DisambiguatedButtonLabels` ("Disambiguated CTA labels (identical text)") — **new this pass** —
-  three identical "Learn More" buttons; each rendered `<button>` carries a distinct `aria-label`
-  including the plan name while showing the same visible text (exercises issue 8).
+- `DisambiguatedButtonLabels` ("Disambiguated CTA labels (identical text)") — three identical
+  "Learn More" buttons; each rendered `<button>` carries a distinct `aria-label` including the
+  plan name while showing the same visible text (exercises issue 8). **Now carries a `play`
+  function** (adversarial-review R3) that asserts each CTA by accessible name via `getByRole` and
+  pins the count — a real DOM regression guard for the `aria-label`, not just a visual snapshot.
 - Existing stories (`PremiumTheme`, `SacredTheme`, `DarkTheme`, `InteractiveDemo`, `BothPrices`)
   retained; all now render the semantic-table markup.
 
@@ -168,14 +224,26 @@ retype, or removal).
    loss* in-scope by rendering `infopopuptext` as visually-hidden text, but the tooltip itself
    remains mouse-only until fixed at the source.
 
-2. **CTA columns are JS-navigation buttons, not crawlable links.**
+2. **CTA columns are JS-navigation buttons, not crawlable links** (adversarial-review R2).
    `src/components/PricingTable/index.tsx` CTA cells use `Button` + `router.push(buttonlinks[i])`.
-   For SEO/crawlability the destinations would ideally be real `<a href>`. This is a public-API
-   shape decision: `PricingProps` models targets as `buttonlinks: string[]` + a `router`.
-   *Suggested change (additive, future):* accept an optional `linkComponent`/`as="a"` render path
-   (mirroring the library's existing `linkComponent` pattern in Accordion/Breadcrumb) so consumers
-   can render crawlable anchors while keeping the current button+router behaviour as default.
-   Left as a deferred API proposal rather than a silent behavioural change.
+   For SEO/crawlability the destinations should be real `<a href>` present in SSR output.
+   **Root cause (outside this directory):** the shared `Button` component renders a `<button>`
+   ONLY — `ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'style'>`
+   (`src/components/Button/index.tsx:324-327`) with no `as`/`href`/`linkComponent`, and the JSX
+   is a hardcoded `<button …>` (`src/components/Button/index.tsx:645-664`). PricingTable cannot
+   emit a crawlable link without either (a) Button gaining polymorphic link support, or (b)
+   hand-rolling an anchor inside PricingTable — which would forfeit Button's styling, its
+   `action.invoke` diag beacon, and the `data-component="Button"`/`data-action="select"` selector
+   contract ThothOS Playwright keys on (a forbidden wrapper/contract regression). So this is
+   correctly deferred, keeping the component at status **partial**.
+   *Suggested change (root cause, in `src/components/Button/index.tsx`):* add an optional
+   polymorphic render — e.g. an `href?: string` (and/or `as`/`linkComponent`, mirroring the
+   library's existing `linkComponent` pattern in Accordion/Breadcrumb) that, when set, renders
+   `<a href …>` carrying the same `className`/`data-*`/diag wiring as the `<button>` branch.
+   *Then, in PricingTable* (in this directory, additive): thread the existing `buttonlinks[i]`
+   through as that `href` so each CTA is a crawlable anchor while `router` still intercepts the
+   click for SPA nav. Left as a deferred proposal rather than a silent behavioural change or a
+   contract-breaking hand-rolled anchor.
 
 ## Note (not actionable by me)
 
