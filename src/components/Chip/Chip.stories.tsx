@@ -313,10 +313,13 @@ export const FocusRingContrast: Story = {
   play: async ({ canvasElement }) => {
     type Rgb = { r: number; g: number; b: number; a: number }
     const parseRgb = (value: string): Rgb => {
-      const match = value.match(/rgba?\(([^)]+)\)/)
-      if (!match) throw new Error(`unparseable color: ${value}`)
-      const parts = match[1].split(',').map(part => parseFloat(part.trim()))
-      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 }
+      const nums = value.match(/[\d.]+/g)?.map(parseFloat) ?? []
+      return {
+        r: nums[0] ?? 0,
+        g: nums[1] ?? 0,
+        b: nums[2] ?? 0,
+        a: nums[3] ?? 1,
+      }
     }
     const relLum = ({ r, g, b }: Rgb): number => {
       const channel = (c: number) => {

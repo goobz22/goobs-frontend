@@ -155,9 +155,12 @@ export interface ChipProps {
   style?: ChipStyles
   /**
    * Forwarded ref to the root chip `<div>` (React 19 ref-as-prop). For a
-   * clickable chip this root IS the `role="button"` control (consumers focus /
-   * measure / position it); the optional `onDelete` affordance is a secondary
-   * internal `<button>`, so the ref lands on the chip root.
+   * clickable-only chip this root IS the `role="button"` control (consumers
+   * focus / measure / position it). For a chip that is BOTH clickable and
+   * deletable the root is instead a `role="group"` wrapping two sibling
+   * `<button>`s (the primary action + the delete control), so the primary
+   * control is the inner action button, not the root — but the ref still lands
+   * on the chip root for measuring / positioning.
    */
   ref?: React.Ref<HTMLDivElement>
 }
@@ -194,20 +197,37 @@ function buildCssVarOverrides(styles?: ChipStyles): React.CSSProperties {
 /**
  * Resolve the chip's effective ARIA role:
  *   - explicit `role` prop wins
- *   - has `onClick`    → button (kept even when disabled, so the disabled
- *                        state is announced as a dimmed button, not a bare div)
- *   - pill, read-only  → status (announces value changes for screen readers)
- *   - chip,  read-only → no role (decorative)
+ *   - clickable AND deletable → group. A composite of two sibling buttons (the
+ *     primary action + the delete control): a `role="button"` must NOT wrap the
+ *     focusable delete `<button>` — that is an ARIA presentational-children
+ *     conflict and yields inconsistent AT announcement (WCAG 4.1.2). The button
+ *     semantics move onto a real inner `<button>` instead.
+ *   - clickable only → button (kept even when disabled, so the disabled state
+ *     is announced as a dimmed button, not a bare div)
+ *   - pill, read-only → status (announces value changes for screen readers)
+ *   - deletable-only + an explicit `ariaLabel` → group. The chip holds a real
+ *     delete `<button>`; a name needs a role that supports it, and `group`
+ *     keeps that button in the accessibility tree (unlike `img`, and unlike a
+ *     generic element, on which `aria-label` is prohibited by ARIA 1.2).
+ *   - decorative chip + an explicit `ariaLabel` → img. A single named token —
+ *     safe because there are no interactive descendants for `img`'s
+ *     presentational children to hide, and generic can't carry `aria-label`.
+ *   - decorative chip, unnamed → no role (the visible text is the name).
  */
 function resolveRole(
   explicitRole: string | undefined,
   hasButtonIntent: boolean,
-  variant: ChipVariant
+  isComposite: boolean,
+  hasDelete: boolean,
+  variant: ChipVariant,
+  hasExplicitName: boolean
 ): string | undefined {
   if (explicitRole) return explicitRole
+  if (isComposite) return 'group'
   if (hasButtonIntent) return 'button'
   if (variant === 'pill') return 'status'
-  return undefined
+  if (hasDelete) return hasExplicitName ? 'group' : undefined
+  return hasExplicitName ? 'img' : undefined
 }
 
 /**
@@ -267,10 +287,19 @@ const Chip: React.FC<ChipProps> = ({
   const isDisabled = Boolean(resolvedStyles?.disabled)
   const isClickable = Boolean(onClick) && !isDisabled
   // A chip that carries `onClick` is semantically a button even while
-  // disabled — keep the `button` role + pressed state so screen readers
-  // announce a "dimmed button" (via aria-disabled) rather than a bare,
-  // roleless <div>. Activation/focusability stay gated on `isClickable`.
+  // disabled — keep the button semantics + pressed state so screen readers
+  // announce a "dimmed button" rather than a bare, roleless <div>.
+  // Activation/focusability stay gated on `isClickable`.
   const hasButtonIntent = Boolean(onClick)
+  const hasDelete = Boolean(onDelete)
+  // Clickable AND deletable is the one combination that can't put the button
+  // semantics on the root: the root would then be a `role="button"` wrapping
+  // the focusable delete `<button>` (an ARIA presentational-children conflict,
+  // WCAG 4.1.2). That case becomes a `role="group"` whose primary action is a
+  // real inner `<button>` sibling to the delete `<button>`. The root keeps the
+  // button semantics only when clickable-but-not-deletable.
+  const isComposite = hasButtonIntent && hasDelete
+  const rootIsButton = hasButtonIntent && !hasDelete
   const theme = resolvedStyles?.theme ?? 'sacred'
 
   const rootClassName = [cssStyles.root, cssStyles[variant]]
@@ -292,13 +321,50 @@ const Chip: React.FC<ChipProps> = ({
   }
 
   const dotColor = typeof dot === 'string' ? dot : undefined
-  const resolvedRole = resolveRole(role, hasButtonIntent, variant)
+  const resolvedRole = resolveRole(
+    role,
+    hasButtonIntent,
+    isComposite,
+    hasDelete,
+    variant,
+    Boolean(ariaLabel)
+  )
   const resolvedAriaLabel = resolveAriaLabel(ariaLabel, label)
+  // `aria-label` is only valid on a role that supports an accessible name —
+  // never on a generic (roleless) element (ARIA 1.2). `resolveRole` already
+  // promotes an explicitly-named decorative/deletable chip to a name-bearing
+  // role (img / group), so gate the emitted root name on a role being present:
+  // a roleless decorative chip drops the (redundant) label and lets its visible
+  // text be the accessible name.
+  const rootAriaLabel =
+    resolvedRole !== undefined ? resolvedAriaLabel : undefined
   // Accessible-name-for-the-delete-button incorporates the chip label
   // so screen readers say "Remove Status" instead of just "Remove".
   const deleteButtonLabel = resolvedAriaLabel
     ? `Remove ${resolvedAriaLabel}`
     : 'Remove'
+
+  // Rendered once; wrapped in the primary-action `<button>` for the composite
+  // (clickable + deletable) chip, or placed bare inside the root otherwise.
+  const labelContent = (
+    <span className={cssStyles.label}>
+      {dot && (
+        <span
+          className={cssStyles.dot}
+          aria-hidden="true"
+          {...(dotColor !== undefined && {
+            style: { backgroundColor: dotColor },
+          })}
+        />
+      )}
+      {icon && !dot && (
+        <span className={cssStyles.icon} aria-hidden="true">
+          {icon}
+        </span>
+      )}
+      {label}
+    </span>
+  )
 
   return (
     <div
@@ -318,36 +384,41 @@ const Chip: React.FC<ChipProps> = ({
       {...(isClickable && { 'data-chip-clickable': 'true' })}
       {...(isDisabled && { 'data-chip-disabled': 'true' })}
       {...(resolvedRole !== undefined && { role: resolvedRole })}
-      {...(resolvedAriaLabel !== undefined && {
-        'aria-label': resolvedAriaLabel,
+      {...(rootAriaLabel !== undefined && {
+        'aria-label': rootAriaLabel,
       })}
       {...(resolvedRole === 'status' &&
         ariaLive !== undefined && { 'aria-live': ariaLive })}
-      tabIndex={isClickable ? 0 : undefined}
+      tabIndex={rootIsButton && isClickable ? 0 : undefined}
       aria-pressed={
-        hasButtonIntent && active !== undefined ? active : undefined
+        rootIsButton && active !== undefined ? active : undefined
       }
-      aria-disabled={isDisabled || undefined}
-      onClick={isClickable ? handleClick : undefined}
-      onKeyDown={isClickable ? handleKeyDown : undefined}
+      aria-disabled={(!isComposite && isDisabled) || undefined}
+      onClick={rootIsButton && isClickable ? handleClick : undefined}
+      onKeyDown={rootIsButton && isClickable ? handleKeyDown : undefined}
     >
-      <span className={cssStyles.label}>
-        {dot && (
-          <span
-            className={cssStyles.dot}
-            aria-hidden="true"
-            {...(dotColor !== undefined && {
-              style: { backgroundColor: dotColor },
-            })}
-          />
-        )}
-        {icon && !dot && (
-          <span className={cssStyles.icon} aria-hidden="true">
-            {icon}
-          </span>
-        )}
-        {label}
-      </span>
+      {isComposite ? (
+        // Composite (clickable + deletable): the primary action is a real
+        // `<button>` sibling to the delete `<button>`, never nested inside a
+        // `role="button"`. Native button semantics give Enter/Space activation
+        // for free; `disabled` removes it from the tab order and inerts it, and
+        // `aria-pressed` carries the toggle state.
+        <button
+          type="button"
+          className={cssStyles.actionButton}
+          data-chip-action="true"
+          onClick={handleClick}
+          disabled={isDisabled}
+          aria-pressed={active !== undefined ? active : undefined}
+          {...(resolvedAriaLabel !== undefined && {
+            'aria-label': resolvedAriaLabel,
+          })}
+        >
+          {labelContent}
+        </button>
+      ) : (
+        labelContent
+      )}
 
       {onDelete && (
         <button
