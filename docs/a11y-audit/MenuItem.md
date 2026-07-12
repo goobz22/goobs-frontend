@@ -36,6 +36,17 @@ Accessible name is present: it comes from the option's text content (`children`)
 | R1 | Moderate | `src/components/MenuItem/index.tsx:106` | The first-pass fix mirrored the `selected` prop into `aria-selected="true"` on the native `<option>`. Premise was wrong (native `<select value>` **already** exposes the selected option to AT) and it introduced a **decoupling hazard**: MenuItem can't see the parent's `value`, so `selected` on option A while `value` selects option B would emit a FALSE/conflicting second "selected" announcement. | **FIXED** |
 | R2 | Minor | `src/components/MenuItem/MenuItem.stories.tsx:154` | The regression story only exercised the aligned/safe path (`selected` == value), so it never guarded the decoupled case where the false announcement occurs. | **FIXED** |
 
+### Adversarial-review round 2 (2026-07-11) — both fixed
+
+| # | Severity | Location | Finding | Status |
+|---|----------|----------|---------|--------|
+| R3 | Minor | `src/components/MenuItem/MenuItem.stories.tsx` | The `prefers-reduced-motion` fix (`MenuItem.module.css` `@media` block) shipped with **zero regression coverage** — goobs has no unit tests, so the Storybook story (+ Chromatic baseline) IS the regression test, and no story exercised the reduced-motion behavior. | **FIXED** |
+| R4 | Minor | `src/components/MenuItem/index.tsx` | The decoupled `selected` visual state was a **color-only affordance** (tinted bg + accent text via `.root[data-selected='true']`, WCAG 1.4.1) — distinguishable by color alone, with nothing preserving the state for grayscale / color-vision-deficiency users, especially in the decoupled (`selected` != value) misuse case. | **FIXED** |
+
+**R3 resolution — the story that was missing.** Added **`ReducedMotionGuard`** (`A11y — Reduced-Motion Guard`). It renders a MenuItem, reads the option's hashed CSS-module root class, and walks the CSSOM (`document.styleSheets` → `CSSMediaRule` with `prefers-reduced-motion` + `reduce` → `CSSStyleRule` on the root class with `transition: none`) asserting the guard rule exists — so a rebuild that ever drops the `@media (prefers-reduced-motion: reduce)` block fails the play regardless of the runner's OS motion setting. A behavioral gate (`window.matchMedia(...).matches` → `transitionProperty === 'none'`) also fires when the runner emulates reduced motion. This is the repo's established reduced-motion regression pattern (mirrors `Fade`/`PercentageField`/`ToggleButton`). (The auditor's aside that native `<option>` CSS transitions are largely ignored by Chrome/Safari is correct — the guard is defensive/near-no-op in rendering, but the convention requires a story for every state/fix and the guard is harmless + free.)
+
+**R4 resolution — root cause, not a defer.** The "color-only" nature is eliminated at its source: `.root[data-selected='true']` now applies `font-weight: var(--goobs-weight-semibold)` in addition to the tint/accent color, so the selected item is distinguishable from its siblings **independent of hue/luminance** (WCAG 1.4.1) — in the aligned use AND the decoupled misuse case. Two plays pin it via `getComputedStyle(...).fontWeight` (the cascade applies the weight even though a native `<option>`'s painting is OS-controlled, so the assertion is deterministic): `SelectedStateAnnounced` asserts the selected option is `≥ 600` while an unselected sibling is `< 600`; `SelectedDecoupledFromValue` asserts the decoupled/highlighted option is `≥ 600`, directly proving the misuse-case affordance is no longer color-only. The **programmatic-AT** exposure of a *decoupled* highlight remains a consumer responsibility — MenuItem cannot see the parent `<select value>`, so emitting `aria-selected` off the visual prop would be a FALSE announcement (R1); the review's "no lint/type guard preventing it" cannot be satisfied inside MenuItem without either seeing the parent value (not available) or a false ARIA assertion, so the residual is by-design, and the 1.4.1 (Use of Color) concern the finding cited is now fully closed by the non-color affordance.
+
 **R1 resolution — root cause, not a patch.** Removed the decoupled `aria-selected` entirely. The
 correct programmatic exposure of "which option is selected" is the parent Select's native
 `<select value>` binding (`Select/index.tsx:182`): the browser maps that native selection into the
@@ -114,7 +125,14 @@ landmark, heading, link, or table, so those checklist items do not apply. No `he
    attribute renamed/removed/retyped.
 2. **`prefers-reduced-motion` guard** — `src/components/MenuItem/MenuItem.module.css`: added an
    `@media (prefers-reduced-motion: reduce)` block that sets `transition: none; animation: none`
-   on `.root`, so users requesting reduced motion get instant state changes.
+   on `.root`, so users requesting reduced motion get instant state changes. **(round 2, R3)** Now
+   covered by the `ReducedMotionGuard` story below.
+3. **Non-color selected affordance (WCAG 1.4.1)** — `src/components/MenuItem/MenuItem.module.css`
+   **(round 2, R4)**: `.root[data-selected='true']` now adds `font-weight: var(--goobs-weight-semibold)`
+   alongside the tint/accent color, so the selected state is conveyed by weight (shape), not color
+   alone — in the aligned use and the decoupled misuse case. `index.tsx` carries a co-located comment
+   next to `data-selected` recording the 1.4.1 rationale. No DOM element change; no attribute
+   renamed/removed/retyped; `--goobs-weight-semibold` is a defined global token (no token leak).
 
 ## Stories updated
 
@@ -127,13 +145,36 @@ landmark, heading, link, or table, so those checklist items do not apply. No `he
   `javascript`, the highlighted item exposes only `data-selected`, and **no** option emits
   `aria-selected` — the regression guard that the false-announcement hazard stays fixed.
 
-(The `prefers-reduced-motion` fix #2 is a media-query CSS change not exercisable via a play assertion;
-it is verified structurally in the module.css.)
+- **`ReducedMotionGuard`** (new, round 2 / R3) — the reduced-motion regression net the review flagged
+  as missing. Its play reads the option's hashed root class and walks the CSSOM to assert an
+  `@media (prefers-reduced-motion: reduce)` rule sets `transition: none` on that class (fails if the
+  guard is ever dropped, independent of the runner's OS motion setting), plus a behavioral gate when
+  the runner emulates reduced motion. Mirrors the repo's `Fade`/`PercentageField`/`ToggleButton` pattern.
+- **`SelectedStateAnnounced`** + **`SelectedDecoupledFromValue`** (extended, round 2 / R4) — both plays
+  now assert the non-color affordance via `getComputedStyle(...).fontWeight`: the selected/highlighted
+  option is `≥ 600` (an unselected sibling is `< 600` in the aligned story), proving the selected state
+  is not conveyed by color alone — including in the decoupled misuse case.
+
+(The earlier note that the `prefers-reduced-motion` fix was "not exercisable via a play assertion" is
+superseded — the `ReducedMotionGuard` story now exercises it structurally via the CSSOM.)
 
 ## Deferred
 
-None. Both original findings and both adversarial-review findings (R1/R2) were fixable at root cause
-inside the MenuItem directory. No changes were required in files outside my ownership. Note for
-context (not a defect / not an action item): the actual programmatic selected-state exposure lives in
-the parent Select's native `<select value>` binding (`src/components/Select/index.tsx:182`) — it is
-already correct and needs no change.
+None. All four adversarial-review findings (R1/R2, and R3/R4 from round 2) were fixable at root cause
+inside the MenuItem directory. No changes were required in files outside my ownership.
+
+Two by-design residuals (documented, not action items — they are structurally impossible to "fix"
+inside MenuItem without regressing correctness, so they are NOT deferred to another owner):
+
+- **Programmatic AT exposure of a *decoupled* `selected` highlight.** MenuItem cannot see the parent
+  `<select value>`, so it cannot know whether the visual `selected` prop equals the real selection;
+  emitting `aria-selected` off the decoupled prop would be a FALSE second announcement (R1). The
+  intended (aligned) use is announced natively by the parent Select's `<select value>` binding
+  (`src/components/Select/index.tsx:182`, already correct). The review's "no lint/type guard preventing
+  the misuse" cannot be satisfied here without seeing the parent value or asserting false ARIA — a
+  caller who owns the alignment can still pass their own `aria-selected` via `{...props}`. The **1.4.1
+  Use-of-Color** half of the finding IS now closed for all cases by the non-color font-weight affordance.
+- Native `<option>` painting is OS-controlled, so both the `transition` and the `font-weight` above may
+  be visually ignored by some browsers on a closed native `<select>` — the CSSOM cascade still applies
+  them (which is why the plays assert via `getComputedStyle` / CSSOM walk, and why the design-system
+  affordance is correct for any listbox rendering of the component).
