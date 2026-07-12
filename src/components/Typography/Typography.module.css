@@ -117,12 +117,21 @@
    This restores one, keyed per theme for non-text contrast (WCAG 1.4.11).
    Higher specificity than `.root` (0,1,1 vs 0,1,0) and than `.outlined`
    (0,1,0), so the keyboard ring wins over a decorative/string outline WHILE
-   focused, then yields it back on blur. Mirrors the Button convention: opaque
-   per-theme ring colours because the translucent --goobs-*-focus-ring tokens
-   composite below the 3:1 floor on their surfaces. :focus-visible (not :focus)
-   so pointer clicks never show the ring. */
+   focused, then yields it back on blur. :focus-visible (not :focus) so pointer
+   clicks never show the ring.
+
+   Mirrors the Button convention EXACTLY (Button.module.css:83-95): sacred is
+   the component-wide DEFAULT theme, so the base ring uses the SOLID, opaque
+   --goobs-sacred-primary (= --goobs-gold, #ffd700) — NOT the translucent
+   --goobs-sacred-focus-ring (gold-a60, 0.6 alpha). A 60%-alpha ring composites
+   against whatever sits behind it, so it is backdrop-DEPENDENT: fine over the
+   theme's dark surfaces (~5.5:1) but dropping to ~1.2-1.5:1 over a light page
+   or a translucent sacred surface (WCAG 1.4.11, 3:1 non-text floor). The opaque
+   primary holds its contrast backdrop-independently, exactly as the light/dark
+   overrides below use their opaque --goobs-*-primary tokens (never the
+   translucent --goobs-*-focus-ring ones). */
 .root:focus-visible {
-  outline: 2px solid var(--goobs-sacred-focus-ring);
+  outline: 2px solid var(--goobs-sacred-primary);
   outline-offset: 2px;
 }
 

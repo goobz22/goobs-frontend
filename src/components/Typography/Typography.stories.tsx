@@ -628,3 +628,117 @@ export const AttributePassThroughPreservesContract: Story = {
     await expect(heading).toHaveAttribute('data-theme', 'light')
   },
 }
+
+/**
+ * Focus ring on the SACRED / default theme — the component-wide default path the
+ * light-theme `FocusVisibleIndicator` story never exercises. Regression baseline
+ * (WCAG 1.4.11 Non-text Contrast): the base `.root:focus-visible` ring used to be
+ * the TRANSLUCENT `--goobs-sacred-focus-ring` (gold-a60 = rgba(255,215,0,0.6)),
+ * whose contrast is backdrop-DEPENDENT — only the canonical dark sacred surface
+ * clears the 3:1 non-text floor; over a light page or a translucent sacred
+ * surface it drops to ~1.2-1.5:1. It now uses the OPAQUE `--goobs-sacred-primary`
+ * (= --goobs-gold = #ffd700 = rgb(255,215,0)), matching the Button convention, so
+ * the ring's contrast is backdrop-independent. This story pins the resolved
+ * outline-color to the opaque gold — it fails against the pre-fix CSS (which
+ * resolves to rgba(255,215,0,0.6)).
+ */
+export const SacredFocusVisibleIndicator: Story = {
+  name: 'A11y/Keyboard Focus Indicator (Sacred default theme)',
+  // Sacred is gold-on-near-black; pin the sacred canvas (#0e0e0e).
+  globals: { backgrounds: { value: 'sacred' } },
+  render: () => (
+    <Typography
+      tabIndex={0}
+      role="button"
+      text="Focusable Sacred Typography"
+      styles={{ theme: 'sacred', variant: 'cinzelparagraph' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const el = canvas.getByText('Focusable Sacred Typography')
+    // No visible outline before keyboard focus.
+    await expect(window.getComputedStyle(el).outlineStyle).toBe('none')
+    // Tab (keyboard modality) engages :focus-visible.
+    await userEvent.tab()
+    await expect(el).toHaveFocus()
+    const focused = window.getComputedStyle(el)
+    await expect(focused.outlineStyle).toBe('solid')
+    await expect(focused.outlineWidth).toBe('2px')
+    // Finding lock: the sacred/default ring is the OPAQUE gold primary
+    // (--goobs-sacred-primary = #ffd700 = rgb(255, 215, 0)), NOT the translucent
+    // --goobs-sacred-focus-ring (gold-a60 = rgba(255, 215, 0, 0.6)) whose
+    // contrast is backdrop-dependent and fails the 3:1 floor off dark surfaces.
+    await expect(focused.outlineColor).toBe('rgb(255, 215, 0)')
+  },
+}
+
+/**
+ * Typography is polymorphic and forwards element-SPECIFIC attributes: rendered as
+ * `component="a"` it is a real, TYPE-SAFE link carrying `href`/`target`/`rel`.
+ * Regression baseline (type-level): before `TypographyProps` extended
+ * `React.AllHTMLAttributes<HTMLElement>` — it extended only `HTMLAttributes`,
+ * which omits `href`/`target`/`type`/`name`/`value`/`download` — this exact usage
+ * (the documented motivating scenario for the focus-visible fix,
+ * `<Typography component="a" href="…" text="Read more" />`) was a TypeScript
+ * excess-property error and did not COMPILE, forcing callers to cast. This story
+ * makes that scenario a regression test: it only builds when the interactive
+ * polymorphic API is properly typed. At runtime it is a real `<a>` exposed to AT
+ * as a link, and Tab engages the keyboard focus ring (WCAG 2.4.7).
+ */
+export const InteractiveLinkElement: Story = {
+  name: 'Semantics/Interactive Link (href typechecks)',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <Typography
+      component="a"
+      href="#read-more"
+      rel="noopener"
+      text="Read more"
+      styles={{ theme: 'light', variant: 'merriparagraph' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The href rode through to a real <a>, exposed to AT as a link by role.
+    const link = canvas.getByRole('link', { name: 'Read more' })
+    await expect(link.tagName).toBe('A')
+    await expect(link).toHaveAttribute('href', '#read-more')
+    await expect(link).toHaveAttribute('rel', 'noopener')
+    await expect(link).toHaveAttribute('data-component', 'Typography')
+    // Interactive → Tab focuses it and engages the keyboard focus ring.
+    await userEvent.tab()
+    await expect(link).toHaveFocus()
+    await expect(window.getComputedStyle(link).outlineStyle).toBe('solid')
+  },
+}
+
+/**
+ * The button/input half of the polymorphic-interactive typing: `component="button"`
+ * renders a real `<button>` carrying element-specific `type`/`name`/`value`, which
+ * — like the anchor `href` above — only typecheck because `TypographyProps` extends
+ * `React.AllHTMLAttributes<HTMLElement>`. Guards the `type`/`name`/`value` class the
+ * review cited alongside the anchor `href`.
+ */
+export const InteractiveButtonElement: Story = {
+  name: 'Semantics/Interactive Button (type/name typecheck)',
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <Typography
+      component="button"
+      type="button"
+      name="save"
+      value="1"
+      text="Save"
+      styles={{ theme: 'light', variant: 'merriparagraph' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Save' })
+    await expect(button.tagName).toBe('BUTTON')
+    await expect(button).toHaveAttribute('type', 'button')
+    await expect(button).toHaveAttribute('name', 'save')
+    await expect(button).toHaveAttribute('data-component', 'Typography')
+  },
+}

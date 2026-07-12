@@ -9,19 +9,29 @@ import cssStyles from './Typography.module.css'
  * always WINS over its top-level twin (e.g. `styles.fontSize` over
  * `fontSize`).
  *
- * Extends `React.HTMLAttributes<HTMLElement>` so standard DOM attributes —
- * `id`, `role`, `tabIndex`, `title`, `aria-*`, event handlers, `className`,
- * `style`, … — pass through to the rendered element. This is what makes the
- * polymorphic `component` genuinely usable in accessibility patterns:
+ * Extends `React.AllHTMLAttributes<HTMLElement>` — the element-agnostic superset
+ * of `HTMLAttributes` — so BOTH the standard DOM attributes (`id`, `role`,
+ * `tabIndex`, `title`, `aria-*`, event handlers, `className`, `style`, …) AND
+ * the element-SPECIFIC attributes a polymorphic `component` legitimately needs
+ * (`href`/`target`/`download` for `component="a"`, `type`/`name`/`value` for
+ * `component="button"`, etc.) pass through to the rendered element AND typecheck.
+ * This is what makes the polymorphic `component` genuinely usable in
+ * accessibility patterns: `component="a" href="…"` is a real, type-safe link;
  * `component="h2" id="…"` can serve as an `aria-labelledby`/`aria-describedby`
  * target (a heading that supplies the accessible name of a dialog/landmark/
- * region), and `component="label" htmlFor="…"` can be programmatically
- * associated with a form control. Pass-through attributes NEVER override the
- * component's own contract attributes (`data-component`, `data-theme`) or its
- * resolved `className`/`style` — those always win; a caller `className`/`style`
- * is MERGED (resolved classes/vars keep precedence).
+ * region); and `component="label" htmlFor="…"` can be programmatically
+ * associated with a form control.
+ *
+ * Widening to `AllHTMLAttributes` is purely ADDITIVE — it is a strict superset
+ * of `HTMLAttributes`, so every previously valid prop stays valid. It is NOT a
+ * per-element generic (`component` stays `React.ElementType`): a given HTML
+ * attribute is accepted regardless of which element `component` names, and the
+ * runtime `{...rest}` spread forwards it verbatim. Pass-through attributes NEVER
+ * override the component's own contract attributes (`data-component`,
+ * `data-theme`) or its resolved `className`/`style` — those always win; a caller
+ * `className`/`style` is MERGED (resolved classes/vars keep precedence).
  */
-export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
+export interface TypographyProps extends React.AllHTMLAttributes<HTMLElement> {
   /** Text content. Wins over `children` when both are set (a falsy `''` falls back to `children`). */
   text?: string
   /** Content rendered when `text` is absent. */
@@ -68,12 +78,13 @@ export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
   component?: React.ElementType
   /**
    * Associates a `component="label"` Typography with a form control by the
-   * control's `id` (renders as the `for` attribute). Not part of
-   * `React.HTMLAttributes`, so it is declared explicitly to make the advertised
-   * `component="label"` affordance functional (WCAG 1.3.1, 3.3.2 Labels or
-   * Instructions). Ignored by non-`label` elements. Prefer a real `<label>`
-   * wrapping the control when the label text and control are adjacent; use
-   * `htmlFor` when they are not co-located in the markup.
+   * control's `id` (renders as the `for` attribute). Also present on the
+   * inherited `React.AllHTMLAttributes<HTMLElement>` base, but declared
+   * explicitly here to keep the advertised `component="label"` affordance
+   * discoverable in the prop surface (WCAG 1.3.1, 3.3.2 Labels or Instructions).
+   * Ignored by non-`label` elements. Prefer a real `<label>` wrapping the
+   * control when the label text and control are adjacent; use `htmlFor` when
+   * they are not co-located in the markup.
    */
   htmlFor?: string
   /** Text color. Unset → the per-theme CSS fallback (near-white base, gold on sacred, dark-on-light on light). The merri helper/footer variants pin their own color, which wins over this. */
