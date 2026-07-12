@@ -53,7 +53,15 @@
  *   of that button — never nested inside it — so the button holds no focusable
  *   descendants (ARIA button-role contract) and a `<ul>` of these rows keeps
  *   valid `listitem` children. `selected` drives `data-selected` + the accent
- *   ring.
+ *   ring. The button names itself from the `<ListItemCard.Content>` title (via
+ *   `aria-labelledby`); a Content-less selectable row should pass `selectLabel`
+ *   so the button is never announced with an empty name (WCAG 4.1.2).
+ *   `aria-pressed` is a TOGGLE-button state (each row reports its OWN pressed
+ *   state) — suited to independent / multi-select rows; mutually-exclusive
+ *   single-select grouping (radiogroup / listbox) is the container's concern,
+ *   not this single-`<li>` primitive's (a lone `role="radio"`/`option` without
+ *   its group ancestor would be invalid ARIA — a toggle button is the correct,
+ *   valid choice for a standalone selectable row).
  *
  * =============================================================================
  */
@@ -107,6 +115,37 @@ function mergeClassNames(...names: Array<string | undefined | false>): string {
   return names.filter(Boolean).join(' ')
 }
 
+/**
+ * Dev-only accessible-name probe for the selectable row's `<button>`: does the
+ * button contain any NON-`aria-hidden` visible text (which the browser folds into
+ * the button's accessible name)? The order badge and leading icon are
+ * `aria-hidden`, so a selectable row whose only descendants are those glyphs
+ * returns `false` — the nameless case the guard below warns about. Subtrees under
+ * an `aria-hidden="true"` ancestor are skipped, matching the accessible-name text
+ * step. Only ever called inside a dev-gated effect (compiled out of prod).
+ */
+function hasNonHiddenText(root: HTMLElement): boolean {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  for (
+    let textNode = walker.nextNode();
+    textNode !== null;
+    textNode = walker.nextNode()
+  ) {
+    if ((textNode.textContent ?? '').trim() === '') continue
+    let ancestor = textNode.parentElement
+    let hidden = false
+    while (ancestor !== null && ancestor !== root) {
+      if (ancestor.getAttribute('aria-hidden') === 'true') {
+        hidden = true
+        break
+      }
+      ancestor = ancestor.parentElement
+    }
+    if (!hidden) return true
+  }
+  return false
+}
+
 // -----------------------------------------------------------------------------
 // ROOT
 // -----------------------------------------------------------------------------
@@ -118,8 +157,13 @@ export interface ListItemCardProps extends Omit<
   /** Selection state — emits `data-selected` + accent ring. */
   selected?: boolean
   /**
-   * Selection handler. When set the whole row becomes a click/Enter/Space
-   * target (`role="button"`). Omit for non-selectable rows.
+   * Selection handler. When set, the row's non-interactive naming content
+   * (order / icon / content) is wrapped in a native `<button>` select target —
+   * Enter/Space activate it natively and `aria-pressed` reflects `selected` (a
+   * TOGGLE button, so independent / multi-select rows each report their own
+   * pressed state). The `<li>` keeps its implicit `listitem` role and the
+   * reorder / remove / `Actions` controls render as siblings of the button.
+   * Omit for non-selectable rows.
    */
   onSelect?: () => void
   /**
@@ -143,6 +187,17 @@ export interface ListItemCardProps extends Omit<
   reorderLabel?: string
   /** Accessible label for the remove button. Default `'Remove'`. */
   removeLabel?: string
+  /**
+   * Explicit accessible name for the SELECTABLE row's `<button>` select target,
+   * applied as `aria-label`. A selectable row normally names itself from its
+   * `<ListItemCard.Content>` title/subtitle (via `aria-labelledby`); provide
+   * `selectLabel` for a selectable row that has NO `Content` to name it (e.g. an
+   * icon-only swatch row whose only descendants are the `aria-hidden` order badge
+   * / leading icon) so the button is never announced with an EMPTY name
+   * (WCAG 4.1.2). Ignored when a `Content` title is present — `aria-labelledby`
+   * wins. No-op on non-selectable rows.
+   */
+  selectLabel?: string
   /** Theming. Default `'sacred'`. */
   styles?: { theme?: ListItemCardTheme }
   /** Slot children — `ListItemCard.Order` / `.Icon` / `.Content` / `.Actions`. */
@@ -171,6 +226,7 @@ function ListItemCardInner({
   accentColor,
   reorderLabel = 'Reorder item',
   removeLabel = 'Remove',
+  selectLabel,
   styles,
   className,
   style,
@@ -249,11 +305,56 @@ function ListItemCardInner({
       id => document.getElementById(id) !== null
     )
     if (resolvedIds.length > 0) {
+      // A Content title resolved — name the button from it. `aria-labelledby`
+      // wins over `aria-label`, so clear any `selectLabel` fallback we may have
+      // stamped in the SSR markup to avoid a stale/shadowed label.
       node.setAttribute('aria-labelledby', resolvedIds.join(' '))
+      node.removeAttribute('aria-label')
     } else {
+      // No nameable Content resolved — drop the (now-dangling) idref and fall
+      // back to the explicit `selectLabel` when the caller supplied one, so a
+      // Content-less selectable row still has an accessible name.
       node.removeAttribute('aria-labelledby')
+      if (selectLabel !== undefined) {
+        node.setAttribute('aria-label', selectLabel)
+      } else {
+        node.removeAttribute('aria-label')
+      }
     }
-  }, [selectable, titleId, subtitleId, children])
+  }, [selectable, selectLabel, titleId, subtitleId, children])
+
+  // Dev-only: a selectable row renders a `<button>` select target that MUST
+  // expose an accessible name (WCAG 4.1.2). Its name normally comes from the
+  // `<ListItemCard.Content>` title (via `aria-labelledby`), else from `selectLabel`
+  // (aria-label) or wrapped non-hidden text. Warn at author time when a selectable
+  // row would ship a NAMELESS button — the misuse of an `onSelect` row with no
+  // Content and no `selectLabel`, whose only descendants are the aria-hidden order
+  // badge / leading icon — so it surfaces in development instead of silently
+  // announcing an empty toggle button to screen-reader users. Declared AFTER the
+  // reconciliation effect so it reads the button's final naming attributes;
+  // compiles out of production bundles. Mirrors the goobs Panel / IconButton nudge.
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    if (!selectable) return
+    const node = selectButtonRef.current
+    if (node === null) return
+    const labelledby = node.getAttribute('aria-labelledby')
+    const ariaLabel = node.getAttribute('aria-label')
+    const named =
+      Boolean(labelledby?.trim()) ||
+      Boolean(ariaLabel?.trim()) ||
+      hasNonHiddenText(node)
+    if (!named) {
+      console.warn(
+        'goobs ListItemCard: a selectable row (`onSelect` set) renders a ' +
+          '<button> select target with no accessible name. Compose a ' +
+          '<ListItemCard.Content title=…/> (the row names itself from the title) ' +
+          'or pass `selectLabel` so screen readers announce the row instead of ' +
+          'an empty toggle button (WCAG 4.1.2). The order badge and leading icon ' +
+          'are aria-hidden and cannot name the row.'
+      )
+    }
+  }, [selectable, selectLabel, titleId, subtitleId, children])
 
   const handleSelect = (): void => {
     onSelect?.()
@@ -337,7 +438,11 @@ function ListItemCardInner({
               data-list-item-select="true"
               data-action="select"
               aria-pressed={selected}
-              {...(nameIds !== undefined && { 'aria-labelledby': nameIds })}
+              {...(nameIds !== undefined
+                ? { 'aria-labelledby': nameIds }
+                : selectLabel !== undefined
+                  ? { 'aria-label': selectLabel }
+                  : {})}
               onClick={handleSelect}
             >
               {labelChildren}

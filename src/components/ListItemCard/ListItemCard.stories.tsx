@@ -110,15 +110,17 @@ export const SelectedDark: Story = {
 /**
  * Accessible name of a SELECTABLE row.
  *
- * Each `onSelect` row is a `role="button"` widget (Enter/Space activate,
- * `aria-pressed` reflects `selected`). Its accessible NAME comes from
- * `aria-labelledby` pointed at the Content title + subtitle spans — so a
- * screen reader announces "Draft proposal, Pricing + scope, toggle button,
- * pressed" rather than a concatenation of the order badge, leading icon, and
- * every nested control's label. Selecting a row here reads as its title, and
- * the selected state is conveyed non-visually via `aria-pressed` (never by the
- * accent ring alone). The order badge and leading icon stay `aria-hidden` so
- * they don't pollute that name.
+ * Each `onSelect` row wraps its naming content in a native `<button>` toggle
+ * target (Enter/Space activate; `aria-pressed` reflects `selected`). Its
+ * accessible NAME comes from `aria-labelledby` pointed at the Content title +
+ * subtitle spans — so a screen reader announces "Draft proposal, Pricing +
+ * scope, toggle button, pressed" rather than a concatenation of the order badge,
+ * leading icon, and every nested control's label. This story keeps a single
+ * `selectedId` (a single-select PRESENTATION), but the underlying widgets are
+ * INDEPENDENT toggle buttons — `aria-pressed` conveys each row's own pressed
+ * state, not mutual exclusivity (see `MultiSelectToggle`). The selected state is
+ * conveyed non-visually via `aria-pressed` (never by the accent ring alone); the
+ * order badge and leading icon stay `aria-hidden` so they don't pollute the name.
  */
 function SelectableList() {
   const [selectedId, setSelectedId] = useState<string>('b')
@@ -142,5 +144,87 @@ function SelectableList() {
 
 export const SelectableAccessibleName: Story = {
   render: () => <SelectableList />,
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * MULTI-SELECT toggle semantics.
+ *
+ * The selectable row is a toggle `<button>` (`aria-pressed`), so a list of them
+ * models INDEPENDENT / multi-select: several rows can be pressed at once and each
+ * reports its OWN `aria-pressed` state (a screen reader announces "…, toggle
+ * button, pressed" per selected row). This is exactly what `aria-pressed`
+ * conveys — it does NOT imply the mutual exclusivity of a radiogroup/listbox.
+ * The single-select `SelectableAccessibleName` story above is the SAME toggle
+ * buttons with one id kept; true single-select grouping (radiogroup / listbox
+ * roles) belongs on the container, not on this single-`<li>` primitive, so the
+ * row correctly ships the valid toggle-button semantics instead of an orphan
+ * `role="radio"`.
+ */
+function MultiSelectList() {
+  const [selectedIds, setSelectedIds] = useState<string[]>(['a', 'c'])
+  const toggle = (id: string) =>
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  return (
+    <ul role="list" style={{ display: 'grid', gap: 8, padding: 0, margin: 0 }}>
+      {initialSteps.map((step, index) => (
+        <ListItemCard
+          key={step.id}
+          selected={selectedIds.includes(step.id)}
+          onSelect={() => toggle(step.id)}
+          styles={{ theme: 'light' }}
+        >
+          <ListItemCard.Order>{index + 1}</ListItemCard.Order>
+          <ListItemCard.Content title={step.name} subtitle={step.description} />
+        </ListItemCard>
+      ))}
+    </ul>
+  )
+}
+
+export const MultiSelectToggle: Story = {
+  render: () => <MultiSelectList />,
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Content-less selectable row named via `selectLabel`.
+ *
+ * A selectable row (`onSelect`) whose only visible descendants are the
+ * `aria-hidden` leading icon has no `<ListItemCard.Content>` text to name its
+ * `<button>`. Passing `selectLabel` sets an explicit `aria-label`, so the toggle
+ * button announces e.g. "Sun, toggle button" instead of an EMPTY name
+ * (WCAG 4.1.2). Without `selectLabel` here the component would `console.warn` in
+ * development about a nameless select target — this story exercises that guarded
+ * escape hatch (and must NOT warn).
+ */
+function IconOnlySelectableList() {
+  const swatches = [
+    { id: 'sun', glyph: '☀️', label: 'Sun' },
+    { id: 'moon', glyph: '🌙', label: 'Moon' },
+    { id: 'star', glyph: '⭐', label: 'Star' },
+  ]
+  const [selectedId, setSelectedId] = useState<string>('sun')
+  return (
+    <ul role="list" style={{ display: 'grid', gap: 8, padding: 0, margin: 0 }}>
+      {swatches.map(swatch => (
+        <ListItemCard
+          key={swatch.id}
+          selected={selectedId === swatch.id}
+          onSelect={() => setSelectedId(swatch.id)}
+          selectLabel={swatch.label}
+          styles={{ theme: 'light' }}
+        >
+          <ListItemCard.Icon>{swatch.glyph}</ListItemCard.Icon>
+        </ListItemCard>
+      ))}
+    </ul>
+  )
+}
+
+export const SelectableWithSelectLabel: Story = {
+  render: () => <IconOnlySelectableList />,
   globals: { backgrounds: { value: 'light' } },
 }
