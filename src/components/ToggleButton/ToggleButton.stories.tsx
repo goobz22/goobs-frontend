@@ -755,3 +755,108 @@ export const LabelledGroupAndFocus: Story = {
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true')
   },
 }
+
+const UnnamedGroupExample = () => {
+  const [value, setValue] = React.useState<string | null>('option1')
+  return (
+    <ToggleButtonGroup
+      value={value}
+      exclusive={true}
+      onChange={(_, newValue) => setValue(newValue)}
+      styles={{ theme: 'light' }}
+    >
+      <ToggleButton value="option1">Option 1</ToggleButton>
+      <ToggleButton value="option2">Option 2</ToggleButton>
+    </ToggleButtonGroup>
+  )
+}
+
+/**
+ * `role="group"` is gated on an accessible name: a ToggleButtonGroup with
+ * NEITHER `aria-label` nor `aria-labelledby` must NOT emit a nameless
+ * `role="group"` (a contextless "group" announcement is AT noise). This
+ * renders an unlabelled group and asserts no `group` role is exposed while the
+ * member buttons remain present and individually announced (WCAG 1.3.1 /
+ * 4.1.2). Reverting the gate (emitting `role="group"` unconditionally) makes
+ * `queryByRole('group')` resolve and fails this story. Mirrors the sibling
+ * `ButtonGroup`'s `UnnamedGroupHasNoRole`.
+ */
+export const UnnamedGroupHasNoRole: Story = {
+  name: 'A11y/Unnamed Group Has No Role',
+  render: () => <UnnamedGroupExample />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // No accessible name supplied → no group boundary in the a11y tree.
+    await expect(canvas.queryByRole('group')).toBeNull()
+    // The buttons themselves are still present and reachable.
+    await expect(canvas.getByRole('button', { name: 'Option 1' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Option 2' })).toBeVisible()
+  },
+}
+
+/**
+ * Pins the reduced-motion guard (WCAG 2.3.3): the
+ * `@media (prefers-reduced-motion: reduce)` block in ToggleButton.module.css
+ * zeroes the button's `transition` and the sacred pressed `transform`
+ * (`translateY(1px)` on `:active`). A play function can't force the media
+ * query, so this reads the stylesheet directly — it finds the reduced-motion
+ * `@media` rule and asserts it carries a rule zeroing `transition` for the
+ * button class and an `:active` rule zeroing `transform`. Removing (or
+ * un-zeroing) the guard block fails this story. Mirrors the sibling `Button`'s
+ * `ReducedMotionZeroesTransition`.
+ */
+export const ReducedMotionZeroesTransition: Story = {
+  name: 'A11y/Reduced Motion Zeroes Transition',
+  args: {
+    value: 'motion-safe',
+    children: 'Motion-safe',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: 'Motion-safe' })
+    // The base CSS-module class for `.button` (first className token).
+    const buttonClass = button.className.split(' ')[0]
+    if (!buttonClass) throw new Error('button has no class')
+
+    let mediaBlockFound = false
+    let transitionZeroed = false
+    let activeTransformZeroed = false
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList | null = null
+      try {
+        rules = sheet.cssRules
+      } catch {
+        // Cross-origin stylesheet — cssRules is inaccessible; skip it.
+        continue
+      }
+      if (!rules) continue
+      for (const rule of Array.from(rules)) {
+        if (
+          !(rule instanceof CSSMediaRule) ||
+          !rule.media.mediaText.includes('prefers-reduced-motion')
+        ) {
+          continue
+        }
+        mediaBlockFound = true
+        for (const inner of Array.from(rule.cssRules)) {
+          if (!(inner instanceof CSSStyleRule)) continue
+          if (!inner.selectorText.includes(buttonClass)) continue
+          if (inner.style.transition === 'none') transitionZeroed = true
+          if (
+            inner.selectorText.includes(':active') &&
+            inner.style.transform === 'none'
+          ) {
+            activeTransformZeroed = true
+          }
+        }
+      }
+    }
+
+    await expect(mediaBlockFound).toBe(true)
+    await expect(transitionZeroed).toBe(true)
+    await expect(activeTransformZeroed).toBe(true)
+  },
+}

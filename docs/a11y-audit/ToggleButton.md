@@ -36,11 +36,22 @@ per-theme outline (`--goobs-light-primary` / `--goobs-dark-primary` / `--goobs-g
 no way to know the toggle buttons form one related set, and there was no way to name
 the set (no label prop existed). `pattern: missing-accessible-name`
 
-**Fix:** added `role="group"` to the container plus additive, API-safe
-`'aria-label'` / `'aria-labelledby'` props (identical shape to
-`ButtonGroup`), wired onto the container. Every existing prop/attribute is
-untouched, so it is a purely additive change. (`index.tsx` group interface +
-destructure + container element.)
+**Fix:** added additive, API-safe `'aria-label'` / `'aria-labelledby'` props
+(identical shape to `ButtonGroup`), wired onto the container. `role="group"` is
+**gated on an accessible name** (`hasAccessibleName = Boolean(ariaLabel ||
+ariaLabelledby)`) — the container emits `role="group"` ONLY when a name is
+supplied; an unlabelled group stays a plain `<div>` so assistive tech never
+gets a contextless nameless "group" announcement. This mirrors the sibling
+`ButtonGroup` gate (`Button/index.tsx:91-97`) exactly. Every existing
+prop/attribute (`data-component`, `data-field-name`, `data-filled`,
+`data-theme`) is untouched, so it is a purely additive change. (`index.tsx`
+group interface + destructure + `hasAccessibleName` gate + container element.)
+
+**Review follow-up (2026-07-11):** the initial fix emitted `role="group"`
+UNCONDITIONALLY, which diverged from the `ButtonGroup` convention it claimed to
+mirror and would have exposed a nameless `role="group"` to every existing
+callsite (the name prop is new, so none pass one). Gated it identically and
+added the guarding `UnnamedGroupHasNoRole` story.
 
 ### 3. No reduced-motion handling — MINOR (WCAG 2.3.3 Animation from Interactions) — FIXED
 `.button` animates via `transition: var(--goobs-transition-medium)` (`:50`) and the
@@ -104,6 +115,14 @@ baseline):
 - `A11y/Labelled Group + Grouped Focus` — asserts the group is queryable by
   `getByRole('group', { name: 'Text alignment' })`, tabs onto the first grouped button
   (drives the inset ring), and asserts the selected member's `aria-pressed="true"`.
+- `A11y/Unnamed Group Has No Role` (added 2026-07-11) — renders a group with NO
+  `aria-label`/`aria-labelledby` and asserts `queryByRole('group')` is `null` while both
+  member buttons stay individually reachable. Guards the `hasAccessibleName` gate — reverting
+  it (unconditional `role="group"`) makes `queryByRole('group')` resolve and fails this story.
+- `A11y/Reduced Motion Zeroes Transition` (added 2026-07-11) — reads `document.styleSheets`,
+  finds the `@media (prefers-reduced-motion: reduce)` block, and asserts it zeroes `transition`
+  on the button class and `transform` on the sacred `:active` rule. Guards fix #3 — removing or
+  un-zeroing the reduced-motion block fails this story. Mirrors `Button`'s equivalent.
 
 ## Deferred
 

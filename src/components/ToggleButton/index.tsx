@@ -101,11 +101,13 @@ export interface ToggleButtonGroupProps {
    */
   dataFieldName?: string
   /**
-   * Accessible name for the group, applied to the container's `role="group"`.
-   * Strongly recommended so assistive tech announces the set (e.g. "View
-   * mode, group") before its toggle buttons (WCAG 1.3.1 / 4.1.2). Prefer this
-   * or `aria-labelledby` on every group — without one the button cluster has
-   * no programmatic label.
+   * Accessible name for the group. Supplying this (or `aria-labelledby`) is
+   * what promotes the container to `role="group"`, so assistive tech announces
+   * the set (e.g. "View mode, group") before its toggle buttons (WCAG 1.3.1 /
+   * 4.1.2). Strongly recommended on every group. Without a name the container
+   * stays a plain `<div>` (no nameless `role="group"`, which would be a
+   * contextless "group" announcement) and its buttons are announced
+   * individually — mirrors the sibling `ButtonGroup`.
    */
   'aria-label'?: string
   /**
@@ -218,6 +220,16 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
   })
   const effectiveValue = boundValue ?? null
 
+  // A group boundary is only meaningful with an accessible NAME. An unnamed
+  // `role="group"` adds a contextless "group" announcement in assistive tech
+  // without telling the user what the set is — noise, and exactly the
+  // unlabelled pattern the audit warned against. So emit `role="group"` ONLY
+  // when the caller supplies a name (`aria-label` or `aria-labelledby`); an
+  // unlabelled group stays a plain `<div>` and its buttons are announced
+  // individually (WCAG 1.3.1 / 4.1.2). A named group still resolves
+  // `getByRole('group', {name})`. Mirrors the sibling ButtonGroup gate.
+  const hasAccessibleName = Boolean(ariaLabel || ariaLabelledby)
+
   const enhancedChildren = React.Children.map(children, (child, index) => {
     if (React.isValidElement<ToggleButtonProps>(child)) {
       const isFirst = index === 0
@@ -260,7 +272,7 @@ export const ToggleButtonGroup: React.FC<ToggleButtonGroupProps> = ({
       data-field-name={dataFieldName ?? name}
       data-filled={effectiveValue !== null && effectiveValue !== ''}
       data-theme={theme}
-      role="group"
+      {...(hasAccessibleName ? { role: 'group' } : {})}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >
