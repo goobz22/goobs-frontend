@@ -1,6 +1,7 @@
 # Markdown — a11y audit (2026-07-11)
 
-**Status: FIXED** (incl. adversarial-review follow-up — see "Adversarial-review fixes" below)
+**Status: FIXED** (incl. TWO adversarial-review follow-up passes — see
+"Adversarial-review fixes" and "Adversarial-review fixes — pass 2" below)
 
 ## APG pattern
 
@@ -97,10 +98,62 @@ touched, no DOM/API/`data-*` change):
   focus-visible rule would have passed silently. The play fn also asserts the
   second/third links' `href`s to confirm all three are keyboard-reachable.
 
+## Adversarial-review fixes — pass 2 (2026-07-11, second follow-up)
+
+A second adversarial review found two more issues; both fixed at root cause. Both
+fixes are pure post-processing of the `mdToHtml` output string inside the owned
+`index.tsx` (no `conversion.ts` / un-owned file touched, no element removed, no
+existing `data-*`/role/aria attribute removed or renamed — the machine-test
+selector contract is untouched):
+
+- **Issue 7 (Moderate, WCAG 2.1.1 Keyboard) — keyboard-inaccessible code-block
+  scroll region.** The pass-1 reflow fix `.root pre { overflow-x: auto }`
+  (`Markdown.module.css:98-101`) turns a long code line into a horizontally
+  *scrollable* region, but the `<pre>` `mdToHtml` emits
+  (`conversion.ts:91` → `<pre><code>…`) has **no `tabindex`, no `role`, and no
+  focusable children**. In a browser that does not auto-focus scroll containers
+  (Safari; older Chromium) a keyboard-only user cannot scroll it to read the
+  clipped code — the exact failure axe flags as `scrollable-region-focusable`
+  (Serious). *This is the pass-1 auditor's own blind spot: its `ReflowSafeMedia`
+  story rendered a keyboard-inaccessible scroll container as the demonstration.*
+  **Fixed** by a `makeCodeBlocksAccessible` post-process in `index.tsx:44-53`
+  that rewrites each converter-emitted `<pre>` to
+  `<pre tabindex="0" role="region" aria-label="Code block">`:
+  - `tabindex="0"` makes the box focusable so it is reachable and arrow-key
+    scrollable — the actual WCAG 2.1.1 / `scrollable-region-focusable` fix.
+  - `role="region"` + `aria-label` exposes it as a labelled, navigable region.
+    The label is **numbered** (`Code block`, `Code block 2`, …) when one block
+    emits multiple `<pre>`s so axe `landmark-unique` stays clean *within* the
+    instance. A component cannot dedupe labels ACROSS sibling `Markdown`
+    instances on a host page; that residual is a best-practice flag (not a WCAG
+    failure) and is strictly better than the Serious keyboard failure it
+    replaces. Kept `role="region"` per the reviewer's recommendation with this
+    caveat documented.
+  - Safe by construction: `mdToHtml` HTML-escapes the source, so a literal source
+    `<pre>` arrives as `&lt;pre&gt;` and the `/<pre>/g` replace only ever matches
+    the converter's own tags.
+- **Issue 8 (Minor, document outline / SEO) — embedded-block heading offset.**
+  `mdToHtml` maps a leading `#` to a literal `<h1>` (`conversion.ts:114-124`), so
+  multiple Markdown blocks on one page each emit their own `<h1>` and a consumer
+  had no way to demote a block's headings to slot it under an existing page
+  heading. Pass 1 deferred this as a `headingOffset` enhancement citing
+  `conversion.ts` is not owned — but a level-shifting regex over the `mdToHtml`
+  *output* is feasible inside the owned `index.tsx` without touching
+  `conversion.ts`, so the deferral was not fully forced. **Fixed** with an
+  additive, backward-compatible `headingOffset?: number` prop
+  (`index.tsx:88-96`, default `0` = no change) consumed by a `shiftHeadingLevels`
+  post-process (`index.tsx:70-79`) that shifts every `<h1>`–`<h6>` down by
+  `offset`, clamped to the legal `<h1>`–`<h6>` range (a source `#` renders `<h3>`
+  at `headingOffset={2}`). The level digit lives in both the open and close tag,
+  so one pass over `<hN>`/`</hN>` shifts both consistently; escaping again
+  guarantees only real heading tags match (never `<hr>`/`<header>`/escaped
+  literals). Heading level was already controllable via markdown syntax, so this
+  is an outline/SEO refinement, not a blocker — now fully addressed.
+
 ## Stories updated
 
 Stories are this repo's only regression tests. `Markdown.stories.tsx` now carries
-three a11y stories (matching the file's JSDoc-per-story convention):
+FIVE a11y stories (matching the file's JSDoc-per-story convention):
 
 - **`A11y/Reflow-safe media`** (`ReflowSafeMedia`) — renders a deliberately
   1200px-wide inline-SVG data-URI image (self-contained, renders offline) plus a
@@ -118,6 +171,17 @@ three a11y stories (matching the file's JSDoc-per-story convention):
   onto the first link so the `currentcolor` `:focus-visible` ring paints and is
   captured; exercises `.root a:focus-visible` on the exact surface where a
   UA-default dark outline would disappear.
+- **`A11y/Keyboard-scrollable code`** (`KeyboardScrollableCode`, added in review
+  pass 2) — a fenced block with one very long line in a narrow 360px frame, with
+  a `play` function that asserts the injected `<pre>` carries `tabindex="0"` +
+  `role="region"` (via `getByRole('region', { name: 'Code block' })`) and that a
+  single `Tab` moves keyboard focus onto it. Regression-gates issue 7 (WCAG
+  2.1.1); deleting the `index.tsx` post-process fails both assertions.
+- **`A11y/Heading offset`** (`HeadingOffset`, added in review pass 2) — renders
+  `#`/`##` headings with `headingOffset={2}` and a `play` function that asserts
+  the demoted levels (`<h3>`/`<h4>`) and that **no `<h1>`** is emitted
+  (`queryByRole('heading', { level: 1 })` is null). Regression-gates issue 8;
+  removing the level-shift post-process re-emits an `<h1>` and fails the story.
 
 The existing `LightTheme` / `DarkTheme` / `SacredTheme` stories already render
 links, headings, lists, code, and emphasis across all three surfaces and remain
@@ -136,14 +200,9 @@ touching a file this agent does not own; recorded for the owner of that file.
   language-announcement. *Suggested change: capture the fence info-string in the
   code-block branch and emit it as a class on the `<code>`.* **File not owned —
   deferred.**
-- **Heading-outline offset for embedded blocks** — a Markdown block whose source
-  starts with `#` produces an `<h1>` (`conversion.ts:114-124`). Embedded mid-page
-  this can create multiple `<h1>`s / a broken document outline. Headings **are**
-  real and consumer-controllable via markdown syntax today (so the SEO-semantics
-  checklist item is satisfied), but a purely additive `headingOffset?: number`
-  prop on `Markdown` that demotes levels would let a consumer slot a block under an
-  existing page heading. Implementing it correctly means rewriting heading tags in
-  the converter output, which is fragile string-surgery on `mdToHtml` HTML this
-  agent does not own — recorded as an **enhancement idea**, not a defect. *If
-  pursued, the cleanest home is a `headingOffset` option on `mdToHtml` in
-  `conversion.ts` (not owned), consumed by an additive `Markdown` prop.*
+
+> **Previously-deferred "heading-outline offset for embedded blocks" is now
+> RESOLVED**, not deferred. Review pass 2 established that a level-shift over the
+> `mdToHtml` *output* is feasible in the owned `index.tsx` without touching
+> `conversion.ts`; implemented as the additive `headingOffset` prop (issue 8
+> above). No un-owned file was required.
