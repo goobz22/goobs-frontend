@@ -308,6 +308,22 @@ const Popover: React.FC<PopoverProps> = ({
       const last = items[items.length - 1]
       if (!first || !last) return
       const active = document.activeElement
+      // Focus sits on the CONTAINER itself. The surface carries tabIndex={-1},
+      // so a mouse click on dialog dead-space (or a programmatic move) can land
+      // focus here — and the container is neither `first` nor `last`, so the
+      // boundary checks below would miss it. Without this branch a Shift+Tab
+      // from the container falls through to native handling and moves focus
+      // BACKWARD out of the portalled surface into the still-tab-focusable
+      // aria-hidden background (aria-hidden hides from AT but does NOT remove
+      // from the tab order — the trap's one leak). Re-enter the surface at the
+      // correct boundary instead: Shift+Tab → last child, Tab → first child.
+      // WCAG 2.4.3 Focus Order / the aria-modal containment promise.
+      if (active === popover) {
+        event.preventDefault()
+        if (event.shiftKey) last.focus()
+        else first.focus()
+        return
+      }
       // Cycle ONLY at the boundaries. Deliberately NO "active outside surface →
       // recapture" branch: goobs overlays (SearchableSimple, MultiSelect, a
       // nested Popover, …) portal their menus to document.body, so a dropdown
@@ -500,8 +516,16 @@ const Popover: React.FC<PopoverProps> = ({
     ...(styles?.position !== undefined && {
       position: styles.position as CSSProperties['position'],
     }),
+    // Caller transition override is written as the `--popover-transition` CUSTOM
+    // PROPERTY (not an inline `transition` shorthand) so the stylesheet's
+    // `@media (prefers-reduced-motion: reduce) { transition: none }` rule can
+    // still neutralise it. An inline `transition` property beats every stylesheet
+    // rule — including one inside an @media block — so writing it inline would
+    // re-animate the enter/exit for a motion-sensitive user on this override path
+    // (WCAG 2.3.3). Popover.module.css reads this var: `transition:
+    // var(--popover-transition)`.
     ...(styles?.transitionDuration !== undefined && {
-      transition: `all ${styles.transitionDuration} ${styles.transitionEasing ?? 'cubic-bezier(0.4, 0, 0.2, 1)'}`,
+      ['--popover-transition' as string]: `all ${styles.transitionDuration} ${styles.transitionEasing ?? 'cubic-bezier(0.4, 0, 0.2, 1)'}`,
     }),
     // Layout and sizing — caller-supplied only (unchanged from old generator).
     ...(styles?.maxWidth !== undefined && { maxWidth: styles.maxWidth }),

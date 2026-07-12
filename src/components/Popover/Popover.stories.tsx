@@ -862,3 +862,207 @@ export const TooltipDescription: Story = {
     await expect(trigger).not.toHaveAttribute('aria-describedby')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — CONTAINER-FOCUS + SHIFT+TAB TRAP (the trap's last leak)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression story for the container-focus focus-trap leak (WCAG 2.4.3 Focus
+ * Order / the `aria-modal="true"` containment promise). The dialog surface
+ * carries `tabIndex={-1}`, so a mouse click on dialog dead-space — or any
+ * programmatic move — can land focus on the CONTAINER itself, which is neither
+ * the first nor the last focusable child. Background isolation uses
+ * `aria-hidden` (not `inert`, to preserve outside-click dismissal), and
+ * `aria-hidden` hides from assistive tech WITHOUT removing elements from the tab
+ * order. So before the fix, a Shift+Tab from the container fell through to native
+ * handling and moved focus BACKWARD out of the portalled surface into the
+ * still-tab-focusable background — the trap's one leak.
+ *
+ * A focusable button is placed in the background BEFORE the trigger: it is
+ * exactly where a leaked Shift+Tab would escape to. The play step focuses the
+ * container directly (simulating the dead-space click), then asserts Shift+Tab
+ * re-enters at the LAST child and forward Tab re-enters at the FIRST child — and
+ * that focus never escapes to the background button. Fails first if the
+ * container-focus branch of the Tab handler is reverted.
+ */
+const ContainerFocusTrapComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      {/* Focusable control in the background, BEFORE the trigger in tab order.
+          aria-hidden (applied to the background on open) does NOT remove it from
+          the tab order, so it is the element a leaked Shift+Tab escapes to. */}
+      <button
+        type="button"
+        data-testid="cft-background-button"
+        style={{ padding: '8px 16px' }}
+      >
+        Background button
+      </button>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Open Dialog
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        ariaLabelledBy="cft-dialog-title"
+        styles={{ theme: 'light' }}
+      >
+        <div style={{ padding: '16px', minWidth: '220px' }}>
+          <h3 id="cft-dialog-title" style={{ margin: '0 0 12px 0' }}>
+            Dead-space dialog
+          </h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button type="button" style={{ padding: '6px 12px' }}>
+              First action
+            </button>
+            <button type="button" style={{ padding: '6px 12px' }}>
+              Last action
+            </button>
+          </div>
+        </div>
+      </Popover>
+    </div>
+  )
+}
+
+export const ContainerFocusTrap: Story = {
+  name: 'A11y/Container-Focus Shift+Tab Trap',
+  render: () => <ContainerFocusTrapComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Open Dialog' })
+    // Captured before open: the story root becomes aria-hidden on open, but
+    // aria-hidden does NOT remove this button from the tab order — it is exactly
+    // the element a leaked Shift+Tab would escape to.
+    const backgroundButton = canvas.getByTestId('cft-background-button')
+
+    await userEvent.click(trigger)
+
+    const dialog = (await body.findByRole('dialog')) as HTMLElement
+    const firstAction = body.getByRole('button', { name: 'First action' })
+    const lastAction = body.getByRole('button', { name: 'Last action' })
+    await waitFor(() => expect(firstAction).toHaveFocus())
+
+    // Simulate a mouse click on dialog dead-space: the tabIndex={-1} container is
+    // click/programmatically focusable, so focus legitimately lands on it.
+    dialog.focus()
+    await waitFor(() => expect(dialog).toHaveFocus())
+
+    // Shift+Tab from the CONTAINER re-enters the surface at the last focusable
+    // child — it must NOT escape backward into the aria-hidden (but still
+    // tab-focusable) background.
+    await userEvent.tab({ shift: true })
+    await waitFor(() => expect(lastAction).toHaveFocus())
+    await expect(backgroundButton).not.toHaveFocus()
+
+    // Forward Tab from the container re-enters at the first focusable child.
+    dialog.focus()
+    await waitFor(() => expect(dialog).toHaveFocus())
+    await userEvent.tab()
+    await waitFor(() => expect(firstAction).toHaveFocus())
+    await expect(backgroundButton).not.toHaveFocus()
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y — REDUCED-MOTION-SAFE CALLER TRANSITION OVERRIDE
+// --------------------------------------------------------------------------
+
+/**
+ * Regression story for the `prefers-reduced-motion` leak on the caller
+ * transition-override path (WCAG 2.3.3 Animation from Interactions). The
+ * reduced-motion fix neutralises the enter/exit transition via a stylesheet
+ * `@media (prefers-reduced-motion: reduce) { transition: none }` rule. But a
+ * consumer-supplied `styles.transitionDuration` used to be written as an INLINE
+ * `transition` shorthand, and inline styles beat ANY stylesheet rule — including
+ * one inside @media — so a motion-sensitive user still got the animation on that
+ * override path.
+ *
+ * The fix writes the override as the `--popover-transition` CUSTOM PROPERTY;
+ * `Popover.module.css` reads `transition: var(--popover-transition)`, so the
+ * @media `transition: none` rule can still win. This play step asserts the DOM
+ * consequence a media query cannot be asserted from directly: the open surface
+ * carries NO inline `transition` property (so the @media rule is free to win)
+ * and the override lives on the custom property. Fails first if the override
+ * reverts to an inline `transition` shorthand.
+ */
+const ReducedMotionOverrideComponent: React.FC = () => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const anchorRefCallback = useCallback((el: HTMLButtonElement | null) => {
+    setAnchorEl(el)
+  }, [])
+
+  return (
+    <div style={{ padding: '120px' }}>
+      <button
+        ref={anchorRefCallback}
+        type="button"
+        onClick={() => setOpen(previous => !previous)}
+        style={{ padding: '8px 16px' }}
+      >
+        Open Dialog
+      </button>
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={anchorEl}
+        ariaLabelledBy="rmo-dialog-title"
+        styles={{
+          theme: 'light',
+          transitionDuration: '3s',
+          transitionEasing: 'linear',
+        }}
+      >
+        <div style={{ padding: '16px', minWidth: '220px' }}>
+          <h3 id="rmo-dialog-title" style={{ margin: '0 0 12px 0' }}>
+            Overridden transition
+          </h3>
+          <button type="button" style={{ padding: '6px 12px' }}>
+            Action
+          </button>
+        </div>
+      </Popover>
+    </div>
+  )
+}
+
+export const ReducedMotionOverride: Story = {
+  name: 'A11y/Reduced-Motion-Safe Transition Override',
+  render: () => <ReducedMotionOverrideComponent />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Open Dialog' })
+    await userEvent.click(trigger)
+
+    const surface = (await body.findByRole('dialog')) as HTMLElement
+
+    // No inline `transition` property is written — so the stylesheet's
+    // reduced-motion @media rule is free to win. An inline `transition` here
+    // would beat that rule and re-animate the surface (WCAG 2.3.3).
+    await expect(surface.style.transition).toBe('')
+    // The caller override is applied via the custom property the CSS reads.
+    await expect(
+      surface.style.getPropertyValue('--popover-transition')
+    ).toBe('all 3s linear')
+  },
+}

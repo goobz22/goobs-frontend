@@ -36,8 +36,14 @@
   border: 1px solid var(--goobs-light-border);
   backdrop-filter: blur(8px);
 
-  /* TRANSITIONS.medium */
-  transition: var(--goobs-transition-medium);
+  /* TRANSITIONS.medium — declared ONCE here reading `--popover-transition`. A
+     caller override (index.tsx) and the theme blocks below only change that
+     VARIABLE, never the `transition` property itself, so the reduced-motion
+     @media rule at the bottom can always win with `transition: none`. Writing
+     the override as an inline `transition` shorthand would beat that @media rule
+     and re-animate the surface for motion-sensitive users (WCAG 2.3.3). */
+  --popover-transition: var(--goobs-transition-medium);
+  transition: var(--popover-transition);
 }
 
 /* --------------------------------------------------------------------------
@@ -49,8 +55,9 @@
   box-shadow: var(--goobs-shadow-dark-md);
   border: 1px solid var(--goobs-dark-border-strong);
   backdrop-filter: blur(8px);
-  /* TRANSITIONS.medium */
-  transition: var(--goobs-transition-medium);
+  /* TRANSITIONS.medium — override the VARIABLE only; the `transition` property
+     is declared once on `.popover` so reduced-motion can neutralise it. */
+  --popover-transition: var(--goobs-transition-medium);
 }
 
 /* --------------------------------------------------------------------------
@@ -64,8 +71,9 @@
   border: 2px solid var(--goobs-gold-a40);
   backdrop-filter: blur(4px);
   background-image: var(--goobs-sacred-ambient);
-  /* TRANSITIONS.premium */
-  transition: var(--goobs-transition-premium);
+  /* TRANSITIONS.premium — override the VARIABLE only; the `transition` property
+     is declared once on `.popover` so reduced-motion can neutralise it. */
+  --popover-transition: var(--goobs-transition-premium);
 }
 
 /* --------------------------------------------------------------------------
@@ -94,9 +102,13 @@
 /* --------------------------------------------------------------------------
    REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
    Users who ask for reduced motion get no enter/exit transition — the surface
-   simply appears in place. Every theme sets its own `transition` (the dark and
-   sacred [data-theme] overrides are more specific than `.popover`), so each is
-   neutralised explicitly to win the cascade under the media query.
+   simply appears in place. The `transition` property is declared once on
+   `.popover` reading `--popover-transition`; the theme blocks and a caller
+   override (index.tsx) only change that VARIABLE, never the property, so setting
+   `transition: none` here beats them ALL — including a caller override, which is
+   a custom property, NOT a cascade-winning inline `transition` shorthand. All
+   three theme selectors are still named explicitly so this wins even if a theme
+   later re-adds its own `transition` declaration.
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .popover,
