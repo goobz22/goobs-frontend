@@ -88,15 +88,16 @@ have a report (`Field-Shell.md` was the one hole — now created). `src/app` (a 
 `<html lang="en">` layout) and `src/utils` (pure formatter/alpha/diag/keyframe helpers, no rendered
 output) carry no component surface and need no report. Index: `README.md`.
 
-**Genuinely unresolved (agent-fixable, additive):**
-1. `Field/IPAM/Address` (`IPAddressFieldProps`) — add `ariaLabel?: string`, render as
-   `aria-label={ariaLabel}` on the input (mirror `Field/IPAM/CIDR`). WCAG 4.1.2.
-2. `Field/IPAM/Supernet` (`SupernetFieldProps`) — add `ariaLabel?: string`, forward into the wrapped
-   `SubnetField`. WCAG 4.1.2.
-3. Once (1)/(2) land, adopt `ariaLabel={column.headerName || column.field}` (EditableCell) /
-   `ariaLabel={fieldConfig.label || fieldConfig.field}` (CreationRow / CompositeFieldEditModal) in
-   DataGrid's `ipAddress` + `supernet` `case` branches → flips `DataGrid.md` from PARTIAL to FIXED.
-4. Build `scripts/a11y-lints/form-error-not-associated.ts` — the recurring class with no gate module.
+**Genuinely unresolved: NONE (closed 2026-07-12, commit d26e6357).** The critic's final four
+items all landed: IPAM Address + Supernet `ariaLabel` props, all 6 DataGrid ipAddress/supernet
+editor branches adopt `ariaLabel` (DataGrid PARTIAL -> FIXED), and `form-error-not-associated`
+is gate module #28 (its 3 initial hits were legitimate mirror/merge shapes — encoded as hatches).
+The `accessible-name-prop-spelling` drift ratchet was recalibrated to count only the
+non-canonical quoted-kebab population (17 / 11 files) so canonical `ariaLabel` additions never
+fail the build. ALSO SHIPPED: the systematic-drift wall (12 ratchets, `lint:drift` in `lint:all`,
+report `docs/audits/drift-audit-2026-07-12.md`) and the enterprise gates (`lint:circular`,
+`lint:rtl` — 204 declarations converted across 56 css files, `lint:package`, `lint:budget`,
+`lint:api`, listener-cleanup + dSIH-provenance modules).
 
 **Owner-gated (design/API decisions — NOT interrupted refixes; correctly deferred):**
 - `ProjectBoard` — keyboard drag-alternative for column/card reorder (`missing-keyboard-drag-alternative`)
