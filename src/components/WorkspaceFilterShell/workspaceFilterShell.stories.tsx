@@ -68,18 +68,23 @@ const PaginationOnly = ({
   pageSize,
   totalItems,
   background,
+  paginationLabel,
 }: {
   theme: 'sacred' | 'light' | 'dark'
   initialPage: number
   pageSize: number
   totalItems: number
   background: string
+  /** Optional override for the pagination `<nav>` landmark's accessible name.
+   *  Omit to exercise the default `'Pagination'`. */
+  paginationLabel?: string
 }): React.JSX.Element => {
   const [page, setPage] = React.useState(initialPage)
   return (
     <div style={{ padding: '24px', background, minHeight: '100vh' }}>
       <WorkspaceFilterShell
         styles={{ theme }}
+        paginationLabel={paginationLabel}
         pagination={{ page, pageSize, totalItems, onPageChange: setPage }}
       >
         <CardsPlaceholder color={theme === 'light' ? '#1e40af' : '#d4af37'} />
@@ -557,5 +562,63 @@ export const PaginationReducedMotion: Story = {
       }
     })
     await expect(guardTargetsPageBtn).toBe(true)
+  },
+}
+
+/**
+ * 8) Custom pagination landmark label — the `paginationLabel` prop overrides the
+ * default `aria-label="Pagination"` on the built-in pagination `<nav>` landmark.
+ * When more than one paginated `<nav>` shares a page (e.g. two
+ * WorkspaceFilterShells), EVERY navigation landmark of the same type must carry a
+ * UNIQUE accessible name (ARIA landmark uniqueness / WCAG technique ARIA11) or
+ * assistive-tech landmark navigation cannot tell them apart. This renders two
+ * paginated shells on one page with distinct labels and asserts each `<nav>`
+ * resolves by its OWN unique name — and that the shared default `"Pagination"`
+ * name is no longer present. FAILS against the pre-fix hardcoded `aria-label`.
+ */
+export const PaginationCustomLabel: Story = {
+  render: () => (
+    <div style={{ background: '#000000' }}>
+      <PaginationOnly
+        theme="sacred"
+        initialPage={1}
+        pageSize={10}
+        totalItems={100}
+        background="#000000"
+        paginationLabel="Invoices pagination"
+      />
+      <PaginationOnly
+        theme="sacred"
+        initialPage={1}
+        pageSize={10}
+        totalItems={100}
+        background="#000000"
+        paginationLabel="Customers pagination"
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'dark' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Each paginated shell's <nav> landmark resolves by its OWN unique accessible
+    // name (the overridden aria-label), so landmark navigation can distinguish the
+    // two — the whole point of the paginationLabel prop.
+    const invoicesNav = canvas.getByRole('navigation', {
+      name: 'Invoices pagination',
+    })
+    await expect(invoicesNav.tagName).toBe('NAV')
+    const customersNav = canvas.getByRole('navigation', {
+      name: 'Customers pagination',
+    })
+    await expect(customersNav.tagName).toBe('NAV')
+    await expect(invoicesNav).not.toBe(customersNav)
+
+    // Neither <nav> keeps the shared default "Pagination" name — the override took
+    // effect for both (pre-fix, both were hardcoded "Pagination", a duplicate
+    // landmark name).
+    await expect(
+      canvas.queryByRole('navigation', { name: 'Pagination' })
+    ).toBeNull()
   },
 }

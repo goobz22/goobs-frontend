@@ -70,9 +70,12 @@ function pageSequence(
   return pages
 }
 
-const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> = ({
-  pagination,
-}) => {
+const ShellPagination: React.FC<{
+  pagination: WorkspaceFilterShellPagination
+  /** Accessible name for the pagination `<nav>` landmark (consumer-overridable
+   *  via the shell's `paginationLabel` prop; defaults to `'Pagination'`). */
+  label: string
+}> = ({ pagination, label }) => {
   const { page, pageSize, totalItems, onPageChange } = pagination
   const totalPages = Math.ceil(totalItems / Math.max(1, pageSize))
   if (totalPages <= 1) return null
@@ -129,7 +132,7 @@ const ShellPagination: React.FC<{ pagination: WorkspaceFilterShellPagination }> 
     <nav
       className={cssStyles.pagination}
       data-shell-zone="pagination"
-      aria-label="Pagination"
+      aria-label={label}
     >
       {/* The page controls are a REAL list, mirroring the library's Breadcrumb
           <ol>/<li>: Prev + the numbered controls + Next are one related set, so
@@ -221,6 +224,18 @@ export interface WorkspaceFilterShellProps {
    *  (`items.slice((page - 1) * pageSize, page * pageSize)`) — the shell owns
    *  the control, you own the data. */
   pagination?: WorkspaceFilterShellPagination
+  /**
+   * Accessible name for the built-in pagination `<nav>` landmark — surfaced as
+   * its `aria-label`. Defaults to `'Pagination'`. Override it to keep landmark
+   * names UNIQUE when more than one paginated `<nav>` (e.g. two
+   * `WorkspaceFilterShell`s, or a shell plus a `Breadcrumb`) appears on the same
+   * page: same-type ARIA landmarks that share an identical accessible name are a
+   * landmark-uniqueness violation (WAI-ARIA / WCAG technique ARIA11), so assistive
+   * tech landmark navigation can't tell them apart — give each a distinct label
+   * (e.g. `"Invoices pagination"` / `"Customers pagination"`). Only takes effect
+   * when `pagination` is provided; mirrors `Breadcrumb`'s `aria-label` prop.
+   */
+  paginationLabel?: string
   /** Visual theme — surfaced as `data-theme` for CSS overrides. Default
    *  `'sacred'`. (The shell has no themed chrome of its own today; the attribute
    *  is forwarded so future themed containment can hook in without an API change.) */
@@ -248,6 +263,7 @@ export const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
   filter,
   children,
   pagination,
+  paginationLabel = 'Pagination',
   styles: propStyles,
   className,
   style,
@@ -290,7 +306,9 @@ export const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
         <div className={cssStyles.content} data-shell-zone="content">
           {children}
         </div>
-        {pagination != null && <ShellPagination pagination={pagination} />}
+        {pagination != null && (
+          <ShellPagination pagination={pagination} label={paginationLabel} />
+        )}
       </div>
     </div>
   )

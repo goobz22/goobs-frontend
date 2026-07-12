@@ -192,9 +192,40 @@ former flat markup, so the list semantics cannot silently regress.
 in `index.tsx`; per the shared-tree model it was save-committed first (`c37affa1`) so it could not be lost,
 then the a11y fix landed on top. It is not part of this a11y finding.
 
+## Landmark-uniqueness follow-up (2026-07-11, adversarial-review pass)
+
+A fresh adversarial review of the shipped state above found one real remaining issue, fixed at root cause
+inside the component directory.
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| U1 | minor | ARIA11 landmark uniqueness (best practice) | `index.tsx` `ShellPagination` `<nav aria-label="Pagination">` | The pagination landmark's accessible name was HARDCODED as `aria-label="Pagination"` with no override prop (`WorkspaceFilterShellProps` exposed no `paginationLabel`/`ariaLabel`). Rendering more than one `WorkspaceFilterShell` with pagination on a single page — or a shell alongside any other paginated `<nav>` — produces multiple same-type navigation landmarks sharing the IDENTICAL accessible name, so assistive-tech landmark navigation cannot distinguish them (WAI-ARIA / WCAG technique ARIA11). Inconsistent with the library's own `Breadcrumb` (`Breadcrumb/index.tsx:52-53,73`) which the pagination code claims to mirror and which DOES accept a customizable `aria-label` prop. Minor: one paginated shell per page is the common case. | FIXED |
+
+**Fix (`index.tsx`):** added an additive, optional `paginationLabel?: string` prop to
+`WorkspaceFilterShellProps`, defaulting to `'Pagination'` (so existing consumers are byte-for-byte
+unchanged). It is threaded to the internal `ShellPagination`'s new required `label` prop and rendered as
+the `<nav aria-label={label}>`. Consumers put a distinct name on each paginated shell on a shared page
+(e.g. `paginationLabel="Invoices pagination"` / `"Customers pagination"`) to restore landmark uniqueness.
+This mirrors `Breadcrumb`'s `aria-label` prop; `paginationLabel` (not a bare `aria-label`) is the chosen
+name because the shell ROOT is a plain `<div>`, not a landmark — the label targets specifically the
+pagination `<nav>`, so a generic `aria-label` on the shell would be ambiguous.
+
+**Markup change (noted per contract):** none — the `<nav>` still emits an `aria-label`; only its VALUE is
+now consumer-overridable (default preserved). No DOM element, `data-*`, `role`, `aria-current`,
+`aria-disabled`, `data-action`, or `data-shell-zone` selector changed. No existing prop or export was
+renamed, removed, or retyped — the sole change is the ADDED optional `paginationLabel` prop (public API
+grows additively).
+
+**Story:** new `PaginationCustomLabel` (`workspaceFilterShell.stories.tsx`, story 8) renders TWO paginated
+shells on one page with `paginationLabel="Invoices pagination"` and `"Customers pagination"`, then its
+`play` asserts each `<nav>` resolves by its OWN unique accessible name AND that the shared default
+`"Pagination"` name is no longer present. This FAILS against the pre-fix hardcoded `aria-label` (both navs
+would have shared `"Pagination"`), so the regression is pinned. The `PaginationOnly` harness gained an
+optional `paginationLabel` passthrough to back the story.
+
 ## Deferred
 
-None. Every issue — original, review follow-up, and this list-semantics pass — was fixable at root cause
-inside the component directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel change was
-required; the CSS fixes only *reference* the existing `--goobs-*-focus-ring` tokens already defined in
-`src/styles/global.css` (not edited).
+None. Every issue — original, review follow-up, list-semantics pass, and this landmark-uniqueness pass — was
+fixable at root cause inside the component directory. No shared util, Field/Shell, `src/styles/global.css`,
+or barrel change was required; the CSS fixes only *reference* the existing `--goobs-*-focus-ring` tokens
+already defined in `src/styles/global.css` (not edited).
