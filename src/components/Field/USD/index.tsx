@@ -328,20 +328,25 @@ const USDField: React.FC<USDFieldProps> = ({
       styles={styles}
     >
       {({ inputId, inputAriaProps }) => {
-        // Merge the range-description id into aria-describedby WITHOUT dropping
-        // the Shell-provided helper/error id (inputAriaProps) or any
-        // consumer-supplied describedby (rest). Emitted only when a range is
-        // set, so the no-range path is byte-for-byte unchanged.
+        // Compose aria-describedby from every source that names a description
+        // node: the Shell-provided helper/error id (inputAriaProps), any
+        // consumer-supplied describedby (rest), and — when a min/max range is
+        // set — the visually-hidden range node. This is applied AFTER `{...rest}`
+        // so it wins: without it, a consumer who spreads their own
+        // `aria-describedby` onto <USDField> would OVERRIDE (and silently drop)
+        // the Shell's error/helper association, un-linking the validation
+        // message from the input. Merging keeps all descriptions linked. Falls
+        // back to undefined (attribute omitted) when nothing describes the field.
+        // WCAG 1.3.1 / 3.3.1 / 4.1.2.
         const rangeDescId = `${inputId}-range`
-        const describedBy = hasRange
-          ? [
-              inputAriaProps['aria-describedby'],
-              rest['aria-describedby'],
-              rangeDescId,
-            ]
-              .filter(Boolean)
-              .join(' ')
-          : undefined
+        const describedBy =
+          [
+            inputAriaProps['aria-describedby'],
+            rest['aria-describedby'],
+            hasRange ? rangeDescId : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
         return (
           <div
             className={cssStyles.inputWrapper}
@@ -377,7 +382,7 @@ const USDField: React.FC<USDFieldProps> = ({
               className={cssStyles.input}
               {...inputAriaProps}
               {...rest}
-              {...(hasRange ? { 'aria-describedby': describedBy } : {})}
+              {...(describedBy ? { 'aria-describedby': describedBy } : {})}
             />
             {enableIncrement && (
               <div

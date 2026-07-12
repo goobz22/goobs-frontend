@@ -703,3 +703,55 @@ export const RangeExposedToAT: Story = {
     await expect(referencedText).toMatch(/between \$0 and \$1000/i)
   },
 }
+
+/**
+ * aria-describedby composition. A consumer can spread their own
+ * `aria-describedby` onto `<USDField>` (e.g. to reference an external
+ * instructions block). The field MERGES that reference with the Shell's
+ * error/helper description instead of letting one clobber the other, so the
+ * validation message stays programmatically linked to the input even when the
+ * consumer adds a description of their own. The play function asserts the input
+ * references BOTH the error text and the external hint (pre-fix: `{...rest}`
+ * overrode the Shell's describedby in the no-range path, dropping the error
+ * link). WCAG 1.3.1 / 3.3.1 / 4.1.2.
+ */
+export const DescribedByComposition: Story = {
+  name: 'aria-describedby merge (error + external)',
+  render: args => (
+    <A11yFrame>
+      <p id="usd-external-hint" style={{ fontSize: 12, color: '#475569' }}>
+        Enter the amount from your invoice.
+      </p>
+      <USDField {...args} aria-describedby="usd-external-hint" />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Amount',
+    initialValue: '0.00',
+    error: 'Amount must be greater than $0.00',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText(/amount/i) as HTMLInputElement
+
+    const describedBy = input.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+
+    // The consumer's own reference must survive the merge…
+    await expect(describedBy).toContain('usd-external-hint')
+
+    // …AND every referenced node together must still surface the error message
+    // (the Shell's helper/error id must not have been clobbered by `{...rest}`).
+    const referencedText = (describedBy ?? '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(
+        refId =>
+          canvasElement.ownerDocument.getElementById(refId)?.textContent ?? ''
+      )
+      .join(' ')
+    await expect(referencedText).toMatch(/greater than \$0\.00/i)
+    await expect(referencedText).toMatch(/from your invoice/i)
+  },
+}
