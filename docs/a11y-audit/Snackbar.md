@@ -111,7 +111,7 @@ or transcript affordance is required.
 ## Reading & screen reader (1.1.1, 1.3.1, 1.4.1, 2.1.x, 2.4.x, 3.2.x, 4.1.2, 4.1.3)
 - **Announcement (4.1.3 Status Messages):** handled — the inner Alert renders `role="alert"`
   (assertive live region) containing the message, so mounting the snackbar announces it without
-  moving focus (`src/components/Alert/index.tsx:466`). Snackbar deliberately adds NO `aria-live`
+  moving focus (`src/components/Alert/index.tsx:475`). Snackbar deliberately adds NO `aria-live`
   of its own; doing so would double-announce.
 - **Accessible name on the Close button:** handled by Alert (`aria-label="Close"`).
 - **Color-alone severity (1.4.1):** handled by Alert's visually-hidden severity prefix.
@@ -175,7 +175,7 @@ handling).
 - Added `waitFor` to the `storybook/test` imports.
 
 ## Deferred
-- **Alert `role="alert"` (assertive) for non-urgent severities** — `src/components/Alert/index.tsx:466`
+- **Alert `role="alert"` (assertive) for non-urgent severities** — `src/components/Alert/index.tsx:475`
   applies `role="alert"` (implicit `aria-live="assertive"`) to ALL severities, so a success/info
   toast interrupts whatever the screen reader is currently announcing; `role="status"` (polite) is
   the conventional choice for non-error/warning toasts. This is owned by the shared **Alert**
@@ -184,4 +184,4 @@ handling).
   deliberate convention-backed choice. Suggested change (Alert-side): derive
   `role = severity === 'error' || severity === 'warning' ? 'alert' : 'status'` and set the matching
   `aria-live` (`assertive` vs `polite`) on the container `<div>` at `src/components/Alert/index.tsx`
-  (the `role="alert"` on line 466 and the fallback on line 450). Not a Snackbar-side blocker.
+  (the `role="alert"` on line 475 and the fallback on line 459). Not a Snackbar-side blocker.
