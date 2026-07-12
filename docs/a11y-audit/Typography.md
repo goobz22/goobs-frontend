@@ -118,10 +118,84 @@ interactive element.
   outline *while focused* and yields it back on blur; `:focus-visible` (not `:focus`)
   keeps pointer clicks ring-free. Opaque per-theme colours mirror the **Button**
   convention because the translucent `--goobs-*-focus-ring` tokens composite below the
-  3:1 non-text floor on the light/dark surfaces (1.4.11); the sacred/no-theme base
-  reuses `--goobs-sacred-focus-ring` (gold-a60 on the near-black sacred surface, the
-  same base Button uses). No shared-file change — all tokens already exist in
-  `global.css`.
+  3:1 non-text floor on their surfaces (1.4.11): light → `--goobs-light-primary`,
+  dark → `--goobs-dark-primary`, and the sacred/no-theme base → **`--goobs-sacred-primary`
+  (#ffd700, opaque)** — see Review-follow-up A below, which corrected the base ring from
+  the translucent `--goobs-sacred-focus-ring` it originally (incorrectly) used. No
+  shared-file change — all tokens already exist in `global.css`.
+
+## Review follow-up (2026-07-11 adversarial re-review)
+
+A second adversarial pass on the completed a11y work found two remaining issues; both
+fixed in-directory (commit `498df82b`).
+
+### A. Base focus ring used the TRANSLUCENT sacred token — MODERATE (fixes Issue 3 regression)
+
+- **WCAG:** 1.4.11 Non-text Contrast (AA).
+- **Pattern class:** `focus-ring-translucent-default-theme`
+- **Location:** `src/components/Typography/Typography.module.css:124-127` (the base
+  `.root:focus-visible`).
+- **Status:** FIXED.
+- **Detail:** The Issue-3 fix keyed the base `.root:focus-visible` to
+  `var(--goobs-sacred-focus-ring)` = `--goobs-gold-a60` (0.6 alpha; `global.css:75,251`),
+  while its own comment and this report claimed it "mirrors the Button convention: opaque
+  per-theme ring colours." Button — the cited reference — does the OPPOSITE for its default
+  (`Button.module.css:83-95`): it rings with the **opaque** `--goobs-sacred-primary`
+  (#ffd700) precisely because gold-a60 is backdrop-DEPENDENT — ~5.5:1 only over the
+  canonical dark sacred surface, dropping to ~1.2-1.5:1 over a light page or a translucent
+  sacred surface, i.e. below the 3:1 non-text floor. Because `sacred` is the component-wide
+  DEFAULT theme, Typography reintroduced for its default path exactly the sub-3:1
+  backdrop-dependence Button was fixed to avoid. The light/dark overrides were already
+  correct (opaque `--goobs-*-primary`); only the base was wrong.
+- **Fix:** base `.root:focus-visible` now uses `outline: 2px solid var(--goobs-sacred-primary)`
+  (opaque #ffd700), matching Button. Comment rewritten to describe the convention accurately
+  (opaque primary is backdrop-independent; the translucent `--goobs-*-focus-ring` tokens are
+  deliberately NOT used). No shared-file change — `--goobs-sacred-primary` already exists in
+  `global.css:247`.
+- **Coverage gap it closed:** the only pre-existing focus story (`FocusVisibleIndicator`)
+  rendered `theme='light'` (opaque, passing) and never exercised the weaker default/sacred
+  path. New story `SacredFocusVisibleIndicator` pins the resolved `outline-color` to the
+  opaque gold `rgb(255, 215, 0)` on the sacred path — it fails against the pre-fix CSS
+  (which resolves to `rgba(255, 215, 0, 0.6)`).
+
+### B. Polymorphic-interactive API was not type-safe (`href`/`type`/… rejected) — MINOR
+
+- **WCAG:** supports 2.4.7 / 4.1.2 (typing the interactive polymorphic surface the
+  focus-visible + semantic-element fixes are premised on).
+- **Pattern class:** `polymorphic-props-too-narrow`
+- **Location:** `src/components/Typography/index.tsx` — `TypographyProps` base clause.
+- **Status:** FIXED.
+- **Detail:** `TypographyProps extends React.HTMLAttributes<HTMLElement>`, which does NOT
+  include element-specific attributes — `href`/`target`/`download` (anchor), `type`/`name`/
+  `value` (button/input). So the report's own motivating scenario for the focus-visible fix,
+  `<Typography component="a" href="…" text="Read more" />`, was a TypeScript excess-property
+  error and did not compile; the advertised `component="a"`/`component="button"` usages were
+  not type-safe (callers had to cast). The runtime CSS/spread already worked; only the typing
+  was too narrow. (Note: `rel`/`color`/`content` were already covered — they live on
+  `HTMLAttributes` itself, not just the element-specific interfaces.)
+- **Fix (additive):** widened the base to `React.AllHTMLAttributes<HTMLElement>` — React's
+  element-agnostic superset of `HTMLAttributes`. This adds `href`/`target`/`download`/`type`/
+  `name`/`value`/… so all polymorphic-interactive usages typecheck, while remaining strictly
+  additive (every prop valid before is still valid; verified compatible with the repo's
+  `exactOptionalPropertyTypes: true` — the redeclared `color`/`width`/`htmlFor` all narrow to
+  a subtype of the inherited type, which interface-extends permits). No public prop/export was
+  renamed, removed, or retyped: `TypographyProps` stays an `interface`, `Typography` stays a
+  `React.FC`. The explicit `htmlFor?: string` is retained for discoverability (now also
+  inherited).
+- **Chosen over a generic `OverridableComponent`/`TypographyProps<C>` pattern deliberately:**
+  a per-element generic would tie props to the named element (`href` only for `component="a"`),
+  but it would RETYPE the public `interface` export into a generic type alias and RETYPE
+  `Typography` off `React.FC` into a generic function — exactly the "never retype an existing
+  export" the additive-only public-API contract forbids, and unverifiable here (per-file lint
+  only, no repo typecheck/build). `AllHTMLAttributes` resolves the concrete documented failure
+  (the props typecheck) with zero retype risk. **Tradeoff, documented in the prop JSDoc:** an
+  HTML attribute is now accepted regardless of which element `component` names (not
+  element-narrowed); the runtime `{...rest}` spread forwards it verbatim, as before.
+- **Markup change:** none. Only the accepted-prop TYPE surface widened; no change to the
+  rendered element or emitted attributes.
+- **Coverage:** new stories `InteractiveLinkElement` (`component="a" href` — the documented
+  scenario, a type-level lock that won't build against the old `HTMLAttributes` base) and
+  `InteractiveButtonElement` (`component="button" type`/`name`/`value`).
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
@@ -191,6 +265,15 @@ and no audio-only status.
   outline-colour overrides to `Typography.module.css` — a visible 2px per-theme keyboard
   focus ring for interactive (polymorphic/`tabIndex`) usage, overriding the `.root`
   `outline: none` that was suppressing the UA ring. Stylelint (token-leak) + ESLint clean.
+- **(2026-07-11, Review-follow-up A)** Corrected the base `.root:focus-visible` ring from the
+  translucent `--goobs-sacred-focus-ring` (gold-a60, backdrop-dependent, sub-3:1 off dark
+  surfaces) to the opaque `--goobs-sacred-primary` (#ffd700), matching Button; comment
+  rewritten to describe the convention accurately. Stylelint + ESLint clean.
+- **(2026-07-11, Review-follow-up B)** Widened `TypographyProps` base from
+  `React.HTMLAttributes<HTMLElement>` to `React.AllHTMLAttributes<HTMLElement>` so the
+  polymorphic-interactive attributes (`href`/`target`/`type`/`name`/`value`/`download`)
+  typecheck. Purely additive — no prop/export renamed/removed/retyped; `interface`+`React.FC`
+  shape preserved. JSDoc updated. ESLint clean.
 
 ## Stories updated
 
@@ -228,6 +311,20 @@ regression tests) cover the a11y behaviors, each with a `play` assertion:
   engages `:focus-visible`) and asserts the focused element shows a `solid` `2px`
   outline. Fails against the pre-fix CSS (no `:focus-visible` rule → outline stays
   `none`), so it locks the regression.
+- **(New, Review-follow-up A) `A11y/Keyboard Focus Indicator (Sacred default theme)`**
+  (`SacredFocusVisibleIndicator`) — exercises the DEFAULT/sacred focus path the light-theme
+  story never touched; Tabs onto a `theme='sacred'` focusable Typography and asserts the
+  focused `outline-color` is the OPAQUE gold `rgb(255, 215, 0)` (`--goobs-sacred-primary`).
+  Fails against the pre-fix CSS, which resolves to the translucent `rgba(255, 215, 0, 0.6)`.
+- **(New, Review-follow-up B) `Semantics/Interactive Link (href typechecks)`**
+  (`InteractiveLinkElement`) — `component="a" href="#read-more" rel="noopener"`; a type-level
+  lock that will NOT compile against the old `HTMLAttributes` base (href excess-property error).
+  At runtime asserts a real `<a>` resolves via `getByRole('link')`, carries `href`/`rel`/
+  `data-component`, and Tab engages the focus ring.
+- **(New, Review-follow-up B) `Semantics/Interactive Button (type/name typecheck)`**
+  (`InteractiveButtonElement`) — `component="button" type="button" name="save" value="1"`;
+  covers the button/input attribute class alongside the anchor `href`. Asserts a real
+  `<button>` with `type`/`name` + `data-component` preserved.
 
 ## Deferred
 
