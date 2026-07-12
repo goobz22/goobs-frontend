@@ -14,6 +14,20 @@
 > `label={null}` field. All three fixed in-directory (additive, API-preserving) with new
 > play-function regression stories.
 
+> **Update 2026-07-11 (owner verification pass):** independently re-audited the full checklist and
+> re-grounded every finding against the live committed source. **All 7 in-directory fixes are
+> present and committed** — verified: `required` prop `index.tsx:54` + resolve `index.tsx:164`;
+> `disabled` prop `index.tsx:62` + resolve `index.tsx:163`; `ariaLabel`/`ariaLabelledby`
+> `index.tsx:70,76` forwarded `index.tsx:301,302`; `autoComplete ?? 'tel'` `index.tsx:300`;
+> `inputAriaProps` spread `index.tsx:304`; focus ring `PhoneNumber.module.css:42`; `::placeholder`
+> `PhoneNumber.module.css:157,162,166`; reduced-motion `PhoneNumber.module.css:177`. Issue 4 stays
+> DEFERRED — re-confirmed `Field/Shell/index.tsx` exposes no `id` prop (grep empty) so `inputId`
+> `Shell:291` + `htmlFor={inputId}` `Shell:395` cannot pick up a consumer id without a Shell change.
+> No new/missed issues; the `+1` prefix remains correctly plain-text (matches `Field/USD:343`
+> where the `$` is likewise a non-hidden `<span>`; only USD's decorative sacred glyph is
+> `aria-hidden`). This pass **corrected several stale line anchors** in the tables/bodies below
+> that had drifted as the files grew (no substantive change to any finding).
+
 **Component:** `src/components/Field/PhoneNumber` — a US phone-number text input built on
 `FieldShell` with a fixed, non-interactive `+1` prefix glued to the left of a `type="tel"`
 input. Typing is masked to `NNN-NNN-NNNN`; `onChange` emits `'+1 555-123-4567'`.
@@ -31,17 +45,17 @@ interactive control.
 
 | # | Severity | WCAG 2.2 | Location | Status |
 |---|----------|----------|----------|--------|
-| 1 | Serious  | 2.4.7 Focus Visible (AA); 1.4.11 Non-text Contrast (AA) | `PhoneNumber.module.css:97` (`outline: none`) + no focus rule on `.inputWrapper` | **FIXED** |
-| 2 | Moderate | 1.3.5 Identify Input Purpose (AA) | `index.tsx:251` (`autoComplete={autoComplete}` — undefined by default) | **FIXED** |
+| 1 | Serious  | 2.4.7 Focus Visible (AA); 1.4.11 Non-text Contrast (AA) | `PhoneNumber.module.css:112` (`outline: none`) + no focus rule on `.inputWrapper` | **FIXED** |
+| 2 | Moderate | 1.3.5 Identify Input Purpose (AA) | `index.tsx:300` (`autoComplete={autoComplete}` — undefined by default) | **FIXED** |
 | 3 | Minor    | 2.3.3 Animation from Interactions (AAA) | `PhoneNumber.module.css:24` (`transition: var(--goobs-transition-slow)`) | **FIXED** |
-| 4 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A); 3.3.2 Labels or Instructions (A) | `index.tsx:241` (`id={id ?? inputId}`) — root cause `Field/Shell/index.tsx:291,395` | **DEFERRED** |
+| 4 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A); 3.3.2 Labels or Instructions (A) | `index.tsx:290` (`id={id ?? inputId}`) — root cause `Field/Shell/index.tsx:291,395` | **DEFERRED** |
 | 5 | Minor    | 1.4.3 Contrast — Minimum (AA) | `PhoneNumber.module.css` (no `::placeholder` rule → UA-default gray) | **FIXED** |
 | 6 | Serious  | 1.3.1 Info & Relationships (A); 3.3.2 Labels or Instructions (A); 4.1.2 Name, Role, Value (A) | `index.tsx` — no top-level `required` prop; only `styles.required` honored | **FIXED** |
 | 7 | Serious  | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A) | `index.tsx` — no top-level `disabled` prop; only `styles.disabled` honored | **FIXED** |
 | 8 | Moderate | 4.1.2 Name, Role, Value (A) | `index.tsx` — no `ariaLabel`/`ariaLabelledby` for a `label={null}` field | **FIXED** |
 
 ### 1 — No visible keyboard focus indicator (Serious) — FIXED
-`.input` sets `outline: none` (`PhoneNumber.module.css:97`), removing the UA focus ring. Unlike
+`.input` sets `outline: none` (`PhoneNumber.module.css:112`), removing the UA focus ring. Unlike
 `Field/Text` (which nests its input in FieldShell's `.inputSlot`, whose `:focus-within` rule
 supplies the ring), PhoneNumber renders its **own** `.inputWrapper`, which had **no**
 `:focus-within` / `:focus-visible` treatment. Result: a keyboard user Tab-focusing the field
@@ -70,7 +84,7 @@ animates the new focus ring's box-shadow) with no reduced-motion guard.
 ### 4 — Label association breaks when a consumer passes a custom `id` (Moderate) — DEFERRED
 FieldShell renders `<label htmlFor={inputId}>` where `inputId` is its own `useId()` value
 (`Field/Shell/index.tsx:291,395`) and hands that same `inputId` to the slot. PhoneNumber sets
-`id={id ?? inputId}` (`index.tsx:241`). In the **default** path (no `id`) the label is correctly
+`id={id ?? inputId}` (`index.tsx:290`). In the **default** path (no `id`) the label is correctly
 associated. But when a consumer passes a custom `id`, the input's id becomes that value while the
 label's `htmlFor` still points at Shell's `inputId` — the two diverge, so the `<label>` is no
 longer programmatically associated with the input (no accessible name on focus; `getByLabelText`
@@ -80,7 +94,7 @@ fails). The default is accessible; only the opt-in custom-`id` path is broken.
 the `<label>` and provides no way for a consumer id to reach both the label and the slot; nothing
 in PhoneNumber's directory can keep them in sync without either (a) silently dropping the public
 `id` prop's effect on the input (a runtime API regression) or (b) editing Shell. The identical
-shape exists in every wrapper field that forwards an `id` (e.g. `Field/USD:268`).
+shape exists in every wrapper field that forwards an `id` (e.g. `Field/USD:366`).
 
 **Suggested fix (in `Field/Shell/index.tsx`):** add an optional `id?: string` prop to
 `FieldShellProps`; compute `const inputId = idProp ?? \`field-${reactId}\`` (line ~291) so the
@@ -92,7 +106,7 @@ its own `id ?? inputId` override. This fixes the whole class in one place.
 deferred: `FieldShellProps` exposes no `id` prop (grep of `Field/Shell/index.tsx` returns none),
 so it cannot be resolved inside this directory without either dropping the public `id` prop's
 effect on the input (a runtime API regression) or editing Shell (owned by a later serial pass).
-Same class in the peer `Field/USD:302`.
+Same class in the peer `Field/USD:366`.
 
 ### 5 — Placeholder contrast not addressed (Minor) — FIXED
 There was no `::placeholder` color rule in `PhoneNumber.module.css` (nor in FieldShell/global.css),
@@ -166,7 +180,7 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
   name (issue 8).
 - **Error text:** linked via `aria-describedby` + `aria-invalid` and announced through Shell's
   `role="alert"` + `aria-live="polite"` region. Good (spread of `inputAriaProps` verified at
-  `index.tsx:253`).
+  `index.tsx:304`).
 - **Color-alone (1.4.1):** error state also carries text + `aria-invalid`; disabled carries native
   `disabled` + `aria-disabled` + dimming. Not color-only. Good.
 - **Keyboard (2.1.1):** single native input, fully Tab-reachable and typeable; now with a visible
@@ -219,4 +233,4 @@ component. No information is conveyed by sound. **Clean — nothing to fix.**
 - **Issue 4** (label association breaks with a custom `id`) → `Field/Shell/index.tsx:291,395`.
   Suggested change above: add `id?: string` to `FieldShellProps` and derive `inputId` from it so
   the label `htmlFor` and the slot id stay in sync. Fixes the whole wrapper-field class (also
-  `Field/USD:268` and any other field forwarding `id ?? inputId`).
+  `Field/USD:366` and any other field forwarding `id ?? inputId`).
