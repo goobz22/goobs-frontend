@@ -1,10 +1,12 @@
 # DataGrid — a11y audit (2026-07-11)
 
 **Status: PARTIAL** (round 1 in-directory issues fixed; round 2 adversarial-review
-findings D2–D6 + the footer-menu keyboard model + WCAG 4.1.3 status messages are now
-FIXED at root cause; **only D1 remains deferred** — its root cause is `FieldShell`, a
-shared component outside DataGrid ownership, recorded below with an exact recommendation.
-See "Review round 2" for the per-finding resolution.)
+findings D2–D6 + the footer-menu keyboard model + WCAG 4.1.3 status messages FIXED at root
+cause; round 3 adversarial-review findings — **mobile card-grid ownership (R1)** and
+**aria-rowindex (R2)** FIXED at root cause, and **D1 (R3) PARTIALLY fixed** in-directory:
+the `text`/`phoneNumber` inline editors now get accessible names via the leaf-Field
+`ariaLabel` prop, and the remaining specialized field types are precisely deferred to the
+Field-layer owner. See "Review round 3" for the per-finding resolution and "Deferred".)
 
 ## APG pattern
 
@@ -157,6 +159,58 @@ noted explicitly. Every new behaviour is exercised by a new play story (see "Sto
   CSS (issues 4–5, via a DataGrid-specific stylesheet scan), the column-visibility checkbox
   names (issue 7), and every new keyboard behaviour above.
 
+## Review round 3 (adversarial) — fixes
+
+Three findings from the round-3 adversarial review. Markup changes noted explicitly; every
+new behaviour is pinned by an extended play story (see "Stories updated").
+
+- **R1 — mobile card grid had invalid ARIA ownership** — moderate — WCAG 1.3.1 — **FIXED at
+  root cause.** The D3 relocation put `role="grid"` on the mobile `.cardsContainer` and
+  `role="row"` on each `Card`, but the cards' field children carried no `role="gridcell"`, so
+  every card owned zero cells (axe `aria-required-children`), and the grid also directly owned
+  two non-row elements (AddCard's `role="form"`, the empty-state's `role="status"`). Because
+  the ownership rule forbids removing the existing `role="grid"`/`role="row"` (a story keys on
+  `[role="grid"][aria-label="Data grid (card view)"]` and on the `role="row"` card), the fix
+  makes the card view a **valid** grid rather than dropping the roles:
+  - `MobileCardView/CardField.tsx` — the field wrapper `<div data-field>` gains
+    `role="gridcell"`, so each card (row) owns real cells. The intervening `.fields` div is a
+    roleless generic container and is transparent to grid ownership.
+  - `MobileCardView/index.tsx` — the AddCard (still `role="form"`) is wrapped in a
+    `role="row"` → `role="gridcell"` (a gridcell may contain a form); the empty state is
+    wrapped the same way with `role="status"` moved onto an inner `<span>` (mirroring the
+    desktop empty row), so the grid's only direct children are rows. **Markup:** added
+    `role="gridcell"` on CardField; added two `role="row"`/`role="gridcell"` wrappers in the
+    card view; the empty-state `role="status"` moved from the `.mobileEmpty` div to a child
+    span (role preserved, not removed).
+- **R2 — aria-rowcount without aria-rowindex** — minor — WCAG 1.3.1 — **FIXED at root cause.**
+  `aria-rowcount` was the full filtered count on both the desktop `<table role="grid">` and the
+  mobile card grid, but only the current page is in the DOM and no row carried
+  `aria-rowindex`, so a screen reader announced a wrong position on later pages. Now:
+  - Desktop: a new `rowIndexOffset` prop (`= page * pageSize`) threads `index.tsx` → `Table`
+    → `Rows`; each data `<tr>` emits `aria-rowindex={rowIndexOffset + localIndex + 2}`, the
+    column-header `<tr>` emits `aria-rowindex={1}`, and `aria-rowcount` becomes
+    `filteredRows.length + 1` (it counts the header row, which is index 1). **Markup:**
+    `aria-rowindex` added to the header row and every data row; `gridRowCount` +1.
+  - Mobile: each `Card` takes an `ariaRowIndex` prop and emits `aria-rowindex` computed as
+    `currentPage * itemsPerPage + pageIndex + 1` (the card grid has no header row, so it is
+    1-based data-only; `aria-rowcount` stays the data count). **Markup:** `aria-rowindex`
+    added to each card.
+- **R3 — desktop inline editors have no accessible name (D1)** — serious — WCAG 1.3.1 / 4.1.2
+  — **PARTIALLY FIXED in-directory; remainder DEFERRED (Field-layer).** Re-verifying the round-2
+  claim surfaced that it is now *partly* fixable from the DataGrid side: `FieldShell` still has
+  **no** `aria-label` passthrough (`src/components/Field/Shell/index.tsx:345-349` builds
+  `inputAriaProps` with only required/disabled/invalid/describedby), **but** two leaf Field
+  components — `Field/Text` (`ariaLabel`/`ariaLabelledby` → the input, index.tsx:44-54,340) and
+  `Field/PhoneNumber` (index.tsx:70,301) — now forward an `ariaLabel` prop straight onto the
+  `<input>`, bypassing FieldShell. So the DataGrid callers were updated to pass
+  `ariaLabel={column.headerName || fieldConfig.label || field}` to every `TextField` and
+  `PhoneNumberField` usage in `EditableCell`, `CreationRow`, `CompositeFieldEditModal`, and
+  `MobileCardView/AddCard` (all in this directory, all using the public prop). This names the
+  **default and most common** inline editor (`text`) plus `phoneNumber`. **Still deferred:** the
+  other ~15 field types (`usd`, `date`, `searchableDropdown`/`dropdown`, `multiselect`,
+  `internalIncrement`, `cvv`, `creditCardNumber`, `accountNumber`, `routingNumber`, and every
+  IPAM field) whose leaf Field components do **not** yet accept `ariaLabel` — see "Deferred".
+
 ## Hearing
 
 Grepped the whole directory for `Audio`/`AudioContext`/`<audio>`/`<video>`/
@@ -233,6 +287,15 @@ Round 2 added six more, one per fix cluster:
   DataGrid `.cell:focus-visible` rule (issue 4) and the `prefers-reduced-motion` block (issue 5)
   so those CSS-only fixes can't silently regress.
 
+Round 3 extended two existing stories (no new story needed — the states live inside grids the
+existing stories already mount):
+
+- **`A11y — Mobile Card Semantics`** now also asserts each card owns `[role="gridcell"]`
+  children (R1) and carries `aria-rowindex="1"` (R2).
+- **`A11y — Grid Keyboard Navigation`** now also asserts the header row is `aria-rowindex="1"`,
+  data rows 1 and 2 are `aria-rowindex` 2 and 3 (R2), and the inline editor opened via the
+  keyboard exposes the accessible name "Name" via its column header (R3, text editor).
+
 ## Files touched (round 2)
 
 `index.tsx`, `Table/index.tsx`, `Table/ColumnHeaderRow/index.tsx`, `Table/Rows/index.tsx`,
@@ -241,11 +304,43 @@ Round 2 added six more, one per fix cluster:
 `DataGrid.stories.tsx`, and this report. All in `src/components/DataGrid/**`. Each edited
 `.ts/.tsx` passes `bun lint:file` (0/0).
 
+## Files touched (round 3)
+
+`MobileCardView/CardField.tsx` (gridcell), `MobileCardView/Card.tsx` (aria-rowindex),
+`MobileCardView/index.tsx` (AddCard/empty grid wrappers + card aria-rowindex),
+`MobileCardView/AddCard.tsx` (text/phone ariaLabel), `types/index.ts` (`rowIndexOffset`),
+`Table/index.tsx` + `Table/Rows/index.tsx` + `Table/ColumnHeaderRow/index.tsx` (aria-rowindex),
+`Table/EditableCell/index.tsx` + `Table/CreationRow/index.tsx` + `CompositeFieldEditModal/index.tsx`
+(text/phone ariaLabel), `index.tsx` (`rowIndexOffset` + header-counted `aria-rowcount`),
+`DataGrid.stories.tsx`, and this report. All in `src/components/DataGrid/**`; each edited
+`.ts/.tsx` passes `bun lint:file` (0/0).
+
 ## Deferred
 
-Only **D1** remains — its root cause is `FieldShell` (a shared component outside DataGrid
-ownership). Recommendation recorded above and in the structured `deferred` result: add an
-`ariaLabel` prop to `FieldShell` (mapped into `inputAriaProps['aria-label']`) + forward it from
-the leaf Field components onto the input, then thread
-`ariaLabel={column.headerName || fieldConfig.label}` from `EditableCell`, `CreationRow`,
-`CompositeFieldEditModal`, and `MobileCardView/AddCard` (all in this directory, ready to adopt).
+Only the **specialized-field-type half of D1 (R3)** remains, and its root cause is in the
+leaf Field components / `FieldShell` — shared components **outside DataGrid ownership**. The
+DataGrid callers already pass `ariaLabel` to every `TextField`/`PhoneNumberField` they render;
+the remaining editor types cannot receive a name because their leaf Field component has no
+`ariaLabel` prop.
+
+**Precise remaining fix (Field-layer owner), pick either:**
+
+1. **Per-leaf (matches the pattern `Field/Text` + `Field/PhoneNumber` already use):** add an
+   `ariaLabel?: string` (+ optional `ariaLabelledby?: string`) prop to each of these leaf Field
+   components and render it as `aria-label={ariaLabel}` on the underlying input, exactly as
+   `src/components/Field/Text/index.tsx:44-54,340-341` does:
+   `Field/USD`, `Field/Date/DateField`, `Field/Dropdown/SearchableSimple`,
+   `Field/Dropdown/MultiSelect`, `Field/Number/InternalIncrement`, `Field/Number/CVV`,
+   `Field/Number/CreditCardNumber`, `Field/Number/AccountNumber`, `Field/Number/RoutingNumber`,
+   `Field/IPAM/Address`, `Field/IPAM/Subnet`, `Field/IPAM/VLAN`, `Field/IPAM/CIDR`,
+   `Field/IPAM/Supernet`, `Field/IPAM/MACAddress`.
+2. **Central (one change, names every field):** add an `ariaLabel?: string` prop to
+   `FieldShell` (`src/components/Field/Shell/index.tsx`), map it into `inputAriaProps` at
+   line ~345 (`if (ariaLabel && no visible label) inputAriaProps['aria-label'] = ariaLabel`),
+   and spread `inputAriaProps` (already the pattern) onto the input in every leaf Field.
+
+Once either lands, the four DataGrid callers are **already** threading
+`ariaLabel={column.headerName || fieldConfig.label || field}` into `TextField`/`PhoneNumber`
+and only need the same one-liner added to the remaining field-type branches (all in this
+directory, in `EditableCell`, `CreationRow`, `CompositeFieldEditModal`, `MobileCardView/AddCard`).
+See the structured `deferred` result for the exact file:line anchors.
