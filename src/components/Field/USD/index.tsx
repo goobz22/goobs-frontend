@@ -203,6 +203,23 @@ const USDField: React.FC<USDFieldProps> = ({
       }
     }
 
+  // Activation for the stepper buttons via a `click` event. A real pointer
+  // press already stepped through `onMouseDown` (which also starts the
+  // hold-to-repeat), so those clicks (detail >= 1) are skipped here to avoid
+  // double-stepping. A click with `detail === 0` is a SYNTHETIC activation with
+  // no preceding mousedown — assistive tech, voice control (e.g. "click
+  // increment"), a mobile screen-reader double-tap, or a programmatic
+  // `.click()` — which `onMouseDown` never sees. Those users could otherwise
+  // focus the button but never step it. Keyboard Enter/Space is handled in
+  // `handleButtonKeyDown` (which preventDefaults the synthesized click, so it
+  // never reaches here). WCAG 2.1.1 / 4.1.2.
+  const handleButtonClick =
+    (handler: () => void) =>
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (disabled) return
+      if (event.detail === 0) handler()
+    }
+
   useEffect(() => clearTimers, [clearTimers])
 
   const handleChange = useCallback(
@@ -370,6 +387,7 @@ const USDField: React.FC<USDFieldProps> = ({
                   <button
                     type="button"
                     onMouseDown={() => handleMouseDown(handleIncrement)}
+                    onClick={handleButtonClick(handleIncrement)}
                     onKeyDown={handleButtonKeyDown(handleIncrement)}
                     aria-label="increment"
                     disabled={disabled}
@@ -387,6 +405,7 @@ const USDField: React.FC<USDFieldProps> = ({
                   <button
                     type="button"
                     onMouseDown={() => handleMouseDown(handleDecrement)}
+                    onClick={handleButtonClick(handleDecrement)}
                     onKeyDown={handleButtonKeyDown(handleDecrement)}
                     aria-label="decrement"
                     disabled={disabled}

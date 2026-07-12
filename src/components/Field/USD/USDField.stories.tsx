@@ -3,7 +3,7 @@
  */
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect, waitFor } from 'storybook/test'
+import { userEvent, within, expect, waitFor, fireEvent } from 'storybook/test'
 import USDField from './index'
 
 const meta: Meta<typeof USDField> = {
@@ -604,6 +604,53 @@ export const KeyboardOperableSteppers: Story = {
     await waitFor(() => expect(input).toHaveValue('12.00'))
 
     await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(input).toHaveValue('11.00'))
+  },
+}
+
+/**
+ * Assistive-tech / voice-control / mobile-double-tap operability. Those methods
+ * dispatch a bare `click` event with **no** preceding `mousedown` (a synthetic
+ * activation, `detail === 0`), so a stepper wired to `onMouseDown` alone would
+ * be inoperable for them even though it looks like a button. The field now also
+ * handles `onClick`, gated on `detail === 0` so a real mouse click (which
+ * already stepped through `onMouseDown`, `detail >= 1`) does not double-step.
+ * The play function drives BOTH paths: a bare `fireEvent.click` (the AT path —
+ * must step) and a full `userEvent.click` (a real pointer press — must step
+ * exactly once, never twice). WCAG 2.1.1 / 4.1.2.
+ */
+export const ClickOperableSteppers: Story = {
+  name: 'Click-operable steppers (AT / voice)',
+  render: args => (
+    <A11yFrame>
+      <USDField {...args} />
+    </A11yFrame>
+  ),
+  args: {
+    label: 'Amount',
+    initialValue: '10.00',
+    enableIncrement: true,
+    incrementStep: 1,
+    helperText: 'Operable by a synthetic click, not only a pointer press',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText(/amount/i) as HTMLInputElement
+    const incrementButton = canvas.getByRole('button', { name: 'increment' })
+    const decrementButton = canvas.getByRole('button', { name: 'decrement' })
+
+    // AT / voice-control / mobile screen-reader double-tap: a bare click with
+    // detail === 0 and no preceding mousedown MUST still step the value.
+    fireEvent.click(incrementButton)
+    await waitFor(() => expect(input).toHaveValue('11.00'))
+
+    fireEvent.click(decrementButton)
+    await waitFor(() => expect(input).toHaveValue('10.00'))
+
+    // A real mouse click (mousedown + mouseup + click, detail >= 1) steps
+    // EXACTLY once — the click path must not double-count the pointer press.
+    await userEvent.click(incrementButton)
     await waitFor(() => expect(input).toHaveValue('11.00'))
   },
 }
