@@ -205,9 +205,13 @@ const PricingTable: FC<PricingProps> = props => {
           (e.g. no buttoncolumns) — otherwise the off-screen package columns are
           unreachable by keyboard (WCAG 2.1.1 Keyboard; axe
           `scrollable-region-focusable`). The name reuses the table's own so the
-          focus stop announces what it is. */}
+          focus stop announces what it is. The `.scrollRegion` class carries
+          `overflow-x:auto` AND an explicit `:focus-visible` ring (per theme, via
+          the container's data-theme) so this new keyboard tab stop stays VISIBLE
+          even in consumer apps that globally reset `outline:none` — the UA
+          default outline alone would silently disappear there (WCAG 2.4.7). */}
       <div
-        style={{ overflowX: 'auto' }}
+        className={cssStyles.scrollRegion}
         tabIndex={0}
         role="group"
         aria-labelledby={tabletitle ? headingId : undefined}

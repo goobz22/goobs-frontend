@@ -1,6 +1,7 @@
 // src/components/PricingTable/pricingtable.stories.tsx
 
 import { Meta, StoryObj } from '@storybook/nextjs'
+import { within, expect } from 'storybook/test'
 import PricingTable, { PricingProps } from './index'
 import React from 'react'
 
@@ -404,6 +405,30 @@ export const DisambiguatedButtonLabels: Story = {
     },
   },
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Each CTA is reachable by a DISTINCT accessible name that folds in its
+    // package (packagenames = ['ThothOS', 'ThothOS Pro', 'ThothOS Enterprise']).
+    // getByRole matches the full accessible name, so a regression that dropped
+    // the aria-label — leaving all three named just "Learn More" — makes each of
+    // these throw (0 matches). This is the guard the visual snapshot cannot be:
+    // goobs' Chromatic net is pixel-only and aria-label is not rendered, so the
+    // dropped-label diff would be pixel-identical and pass.
+    await expect(
+      canvas.getByRole('button', { name: 'Learn More, ThothOS' })
+    ).toBeVisible()
+    await expect(
+      canvas.getByRole('button', { name: 'Learn More, ThothOS Pro' })
+    ).toBeVisible()
+    await expect(
+      canvas.getByRole('button', { name: 'Learn More, ThothOS Enterprise' })
+    ).toBeVisible()
+    // The three CTAs share the same visible text but each accessible name is
+    // unique — pin the count so an accidental extra/missing CTA is caught too.
+    await expect(
+      canvas.getAllByRole('button', { name: /Learn More/ })
+    ).toHaveLength(3)
+  },
 }
 
 /**

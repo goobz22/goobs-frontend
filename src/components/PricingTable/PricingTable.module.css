@@ -37,6 +37,35 @@
 }
 
 /* --------------------------------------------------------------------------
+   SCROLL REGION — the horizontal-overflow wrapper around the <table>.
+   It is a keyboard-focusable group (tabIndex={0} in the TSX) so a keyboard-only
+   user can reach and scroll off-screen package columns even when the table has
+   no focusable control inside it. Because it is now a real tab stop it needs an
+   EXPLICIT focus indicator: goobs' convention gives every focusable a
+   :focus-visible treatment (see Button.module.css), and consumer apps commonly
+   ship a global `*{outline:none}` reset that would erase the UA default outline
+   and leave this new tab stop invisible. Mirrors the Button focus ring —
+   `outline` (not box-shadow, so it never fights a surface shadow) at 2px with a
+   2px offset, coloured by the container's theme via data-theme, and :focus-visible
+   only so a pointer click that focuses the region to scroll it draws no ring
+   (WCAG 2.4.7 Focus Visible).
+   -------------------------------------------------------------------------- */
+.scrollRegion {
+  overflow-x: auto;
+}
+.scrollRegion:focus-visible {
+  outline: 2px solid var(--goobs-sacred-primary);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+.container[data-theme='light'] .scrollRegion:focus-visible {
+  outline-color: var(--goobs-light-primary);
+}
+.container[data-theme='dark'] .scrollRegion:focus-visible {
+  outline-color: var(--goobs-dark-primary);
+}
+
+/* --------------------------------------------------------------------------
    CONTAINER — theme-independent structure + per-theme surface.
    The --pt-check-color custom property (set per theme) themes the included-cell
    check icon (fill: currentColor) without a JS color literal.
