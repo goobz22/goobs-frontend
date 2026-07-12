@@ -1,12 +1,20 @@
-# a11y campaign — live status (updated 2026-07-11 8:45pm)
+# a11y campaign — live status (updated 2026-07-11 10:00pm)
 
-**GATES NOW GREEN (verified runs):** `bun run typecheck` ✅ · `bun run lint:a11y` ✅
-(all 24 class-lint modules, selftests OK, 0 violations / 464 files) · `bun run lint:css` ✅.
-Wave-2 discovery gates 7/7 COMPLETE: data-component roots, **data-action on 108 controls
-across 33 files** (canonical verb vocabulary in the module header; load-bearing values
-untouched), overridable testids, SSR hydration (locale formatting + useId), theme-literal
-token swaps (PricingTable 30), public-ref lint, 3 cheap walls. Remaining: batch resumes
-(verifies/re-fixes/class-lint stragglers), then the final Field/Shell + full-gates wave.
+**⭐ EVERY REPO GATE GREEN (verified runs, not agent claims):** `bun run typecheck` ✅ ·
+**`bun run lint:all`** ✅ (eslint · stylelint · lint:stories · lint:styles-props ·
+lint:coverage · **lint:a11y with all 24 class-lint modules, selftests OK, 0 violations /
+464 files**) · **`bun run build`** ✅ (1391 modules, dist rebuilt) — i.e. the full
+`prepublishOnly` chain passes. All 71 batch items are through audit → adversarial verify
+(→ re-fix where the verifier objected). Wave-2 discovery gates 7/7 COMPLETE: data-component
+roots, **data-action on 108 controls across 33 files**, overridable testids, SSR hydration
+(locale formatting + useId), theme-literal token swaps, public-ref lint, 3 walls.
+
+**Remaining (final wave, queued for subagent quota ~1am):** Field/Shell serial audit
+(Form's auditor already verified its error/label ARIA correct read-only), the handful of
+still-open cross-component deferred items (Tabs route-tab product decision, ListItemCard
+composition restructure behind the Chromatic gate, Dropdown ariaLabel prop, shared
+focus-ring token contrast), completeness critic vs the 59-dir matrix, npm version
+bump + publish (operator-gated).
 
 Rolling status of the full-repo accessibility retrofit (hearing / reading-screen-reader /
 SEO-semantic) + class-first lint gating. Per-component detail: the sibling
