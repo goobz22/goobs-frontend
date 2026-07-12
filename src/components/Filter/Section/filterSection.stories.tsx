@@ -304,6 +304,29 @@ const FilterSectionDemo = ({
   )
 }
 
+/**
+ * A single EXCLUSIVE (single-select) Status cluster, wired to its own state so
+ * the radio-group behaviour (checked state moving on selection) is exercised by
+ * the ExclusiveRadioGroup story's play function.
+ */
+const ExclusiveRadioDemo = (): React.JSX.Element => {
+  const [status, setStatus] = React.useState<string[]>(['published'])
+  return (
+    <FilterSection
+      chipClusters={[
+        {
+          label: 'Status',
+          options: STATUS_CHIPS,
+          selectedValues: status,
+          onChange: setStatus,
+          exclusive: true,
+        },
+      ]}
+      styles={{ theme: 'light' }}
+    />
+  )
+}
+
 // --------------------------------------------------------------------------
 // DEFAULT
 // --------------------------------------------------------------------------
@@ -497,13 +520,13 @@ export const AccessibleHeading: Story = {
 }
 
 /**
- * A11y — chip-cluster grouping. Each labelled chip cluster is exposed as a
- * `role="group"` whose accessible name comes from the visible dimension label
- * via `aria-labelledby` (WCAG 1.3.1 / 4.1.2). A screen-reader user hears
- * "Status, group" / "Level, group" / "Tags, group" and traverses each set of
- * `aria-pressed` toggle chips as one named dimension. Inspect the three chip
- * rows: each `.chipRow` carries `role="group"` + `aria-labelledby` pointing at
- * its `Status:` / `Level:` / `Tags:` label.
+ * A11y — chip-cluster grouping. Each labelled chip cluster is exposed as a named
+ * group tied to its visible dimension label via `aria-labelledby` (WCAG 1.3.1 /
+ * 4.1.2). The ROLE depends on selection mode: EXCLUSIVE (single-select) clusters
+ * compose `role="radiogroup"` with `role="radio"` chips (Status), while
+ * MULTI-SELECT clusters stay `role="group"` with `aria-pressed` toggle-button
+ * chips (Level / Tags). A screen-reader user hears "Status, radio group" /
+ * "Level, group" / "Tags, group" and traverses each set as one named dimension.
  */
 export const AccessibleChipGroups: Story = {
   name: 'A11y/Chip Groups',
@@ -512,23 +535,65 @@ export const AccessibleChipGroups: Story = {
   ),
   globals: { backgrounds: { value: 'light' } },
   // goobs has no unit tests — the play fn IS the regression test. The grouping
-  // (role="group" + aria-labelledby on each chip row) is INVISIBLE to Chromatic
-  // (ARIA roles/labelledby aren't screenshot); assert it programmatically so a
-  // regression that drops the group role or its label association fails here.
-  // Pin: each labelled cluster is exposed as a role="group" named by its visible
-  // dimension label, and the group wraps the cluster's aria-pressed toggle chips.
+  // (radiogroup/group role + aria-labelledby on each chip row) is INVISIBLE to
+  // Chromatic (ARIA roles/labelledby aren't screenshot); assert it
+  // programmatically so a regression that drops the role or its label
+  // association fails here. Pin: the exclusive Status cluster is a radiogroup of
+  // radios; the multi-select Level/Tags clusters are groups of toggle buttons.
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const statusGroup = canvas.getByRole('group', { name: /Status/ })
+    // Status is exclusive (single-select) → a radiogroup of radios.
+    const statusGroup = canvas.getByRole('radiogroup', { name: /Status/ })
+    await expect(statusGroup).toBeInTheDocument()
+    await expect(within(statusGroup).getAllByRole('radio')).toHaveLength(4)
+    // Level + Tags are multi-select → plain groups of aria-pressed toggle chips.
     const levelGroup = canvas.getByRole('group', { name: /Level/ })
     const tagsGroup = canvas.getByRole('group', { name: /Tags/ })
-    await expect(statusGroup).toBeInTheDocument()
     await expect(levelGroup).toBeInTheDocument()
     await expect(tagsGroup).toBeInTheDocument()
-    // The Status cluster has four toggle chips (All / Published / Draft /
-    // Archived), each exposed as a button — confirming the group wraps the
-    // real chips rather than being an empty labelled container.
-    await expect(within(statusGroup).getAllByRole('button')).toHaveLength(4)
+    // The multi-select clusters wrap real toggle buttons (not radios).
+    await expect(within(levelGroup).getAllByRole('button')).toHaveLength(3)
+    await expect(within(tagsGroup).getAllByRole('button')).toHaveLength(4)
+  },
+}
+
+/**
+ * A11y — exclusive chip cluster as a true radio group. When a cluster is
+ * `exclusive: true` (single-select — clicking a chip REPLACES the selection),
+ * the labelled chip row composes `role="radiogroup"` and each chip renders as a
+ * `role="radio"` reporting its selected state as `aria-checked` (via Chip's
+ * additive `chipRole="radio"`) — the semantically-correct ARIA for a
+ * mutually-exclusive filter, upgrading the plain `role="group"` used for
+ * multi-select clusters. The existing `data-chip-*` selector contract
+ * (`data-chip-active`, `data-chip-field`, `data-chip-value`) is preserved.
+ */
+export const ExclusiveRadioGroup: Story = {
+  name: 'A11y/Exclusive Radio Group',
+  render: () => <ExclusiveRadioDemo />,
+  globals: { backgrounds: { value: 'light' } },
+  // goobs has no unit tests — the play fn IS the regression test. radiogroup /
+  // radio / aria-checked are invisible to Chromatic, so assert them here.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole('radiogroup', { name: /Status/ })
+    await expect(within(group).getAllByRole('radio')).toHaveLength(4)
+
+    const published = canvas.getByRole('radio', { name: 'Published' })
+    const draft = canvas.getByRole('radio', { name: 'Draft' })
+    // The initially-selected value is the checked radio; the rest unchecked.
+    await expect(published).toHaveAttribute('aria-checked', 'true')
+    await expect(draft).toHaveAttribute('aria-checked', 'false')
+    // Radios report aria-checked, NOT aria-pressed (they are not toggle buttons).
+    await expect(published).not.toHaveAttribute('aria-pressed')
+
+    // Single-select: choosing another radio moves the checked state.
+    await userEvent.click(draft)
+    await expect(draft).toHaveAttribute('aria-checked', 'true')
+    await expect(published).toHaveAttribute('aria-checked', 'false')
+
+    // The data-* selector contract is preserved through the radio upgrade.
+    await expect(draft).toHaveAttribute('data-chip-active', 'true')
+    await expect(published).toHaveAttribute('data-chip-active', 'false')
   },
 }
 

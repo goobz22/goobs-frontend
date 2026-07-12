@@ -413,7 +413,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const renderChip = (
     cluster: FilterChipClusterDef,
     opt: FilterChipOption,
-    isActive: boolean
+    isActive: boolean,
+    asRadio: boolean
   ) => {
     // Per-option color theming. When `opt.color` is set, the active
     // state uses a translucent fill + the color text. Inactive chips
@@ -434,6 +435,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         key={opt.value}
         label={opt.label}
         active={isActive}
+        // Exclusive (single-select) clusters compose a radiogroup, so each chip
+        // is a role="radio" reporting aria-checked; multi-select clusters stay
+        // aria-pressed toggle buttons (chipRole defaults to button).
+        {...(asRadio && { chipRole: 'radio' as const })}
         dataField={
           cluster.dataField ?? (cluster.label ? kebab(cluster.label) : 'filter')
         }
@@ -560,18 +565,25 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         <div className={styles.chipClusters}>
           {chipClusters!.map((cluster, ci) => {
             // Programmatic group labelling (WCAG 1.3.1 / 4.1.2). A labelled
-            // cluster is a NAMED group of related filter chips — each Chip
-            // renders as a toggle button (role="button" + aria-pressed), so
-            // the row is exposed as role="group" tied to its visible dimension
-            // label via aria-labelledby. Screen-reader users then hear e.g.
-            // "Status, group" and traverse the chips as one set instead of a
-            // string of context-free buttons. (role="radiogroup" is NOT used:
-            // that requires role="radio" children, which the shared Chip does
-            // not emit — see Deferred.) An UNLABELLED cluster stays a plain
-            // container: an unnamed group only adds AT verbosity.
+            // cluster is a NAMED set of related filter chips tied to its visible
+            // dimension label via aria-labelledby, so a screen-reader user hears
+            // e.g. "Status, radio group" and traverses the chips as one set
+            // instead of a string of context-free controls.
+            //
+            // EXCLUSIVE (single-select) clusters are radio-like — clicking a chip
+            // REPLACES the selection — so a labelled exclusive cluster composes a
+            // true role="radiogroup" whose chips are role="radio" carrying
+            // aria-checked (Chip's chipRole="radio"). MULTI-SELECT clusters stay
+            // role="group" with aria-pressed toggle-button chips. A radio needs a
+            // radiogroup parent, so the radio upgrade applies only to LABELLED
+            // clusters; an UNLABELLED cluster stays a plain container (an unnamed
+            // group only adds AT verbosity).
             const clusterLabelId = cluster.label
               ? `filter-cluster-label-${reactId}-${ci}`
               : undefined
+            const isExclusive = cluster.exclusive !== false
+            const chipsAsRadio = isExclusive && clusterLabelId !== undefined
+            const groupRole = isExclusive ? 'radiogroup' : 'group'
             return (
               <div
                 key={`cluster-${ci}-${cluster.label ?? 'unlabelled'}`}
@@ -592,7 +604,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <div
                   className={styles.chipRow}
                   {...(clusterLabelId !== undefined && {
-                    role: 'group',
+                    role: groupRole,
                     'aria-labelledby': clusterLabelId,
                   })}
                 >
@@ -600,7 +612,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     renderChip(
                       cluster,
                       opt,
-                      cluster.selectedValues.includes(opt.value)
+                      cluster.selectedValues.includes(opt.value),
+                      chipsAsRadio
                     )
                   )}
                 </div>
