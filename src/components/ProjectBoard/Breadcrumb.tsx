@@ -10,11 +10,15 @@ interface BreadcrumbProps {
   styles?: ProjectBoardStyles
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({
-  viewState,
-  onBack,
-  styles,
-}) => {
+// forwardRef so the parent can move keyboard focus onto the "Board" back
+// control when it swaps the board for an inline form view (WCAG 2.4.3 Focus
+// Order — otherwise focus is stranded on <body> when the triggering button
+// unmounts). The ref targets the back <button>, the stable first interactive
+// element of the new view.
+export const Breadcrumb = React.forwardRef<
+  HTMLButtonElement,
+  BreadcrumbProps
+>(function Breadcrumb({ viewState, onBack, styles }, ref) {
   // Old code's isSacred/isDark checks fell through to light when no theme was
   // given; preserve that exact default.
   const theme = styles?.theme ?? 'light'

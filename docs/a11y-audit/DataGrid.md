@@ -1,7 +1,10 @@
 # DataGrid — a11y audit (2026-07-11)
 
-**Status: PARTIAL** (all in-directory issues fixed; several root-cause fixes live in
-shared components outside DataGrid ownership and are deferred with exact recommendations)
+**Status: PARTIAL** (round 1 in-directory issues fixed; round 2 adversarial-review
+findings D2–D6 + the footer-menu keyboard model + WCAG 4.1.3 status messages are now
+FIXED at root cause; **only D1 remains deferred** — its root cause is `FieldShell`, a
+shared component outside DataGrid ownership, recorded below with an exact recommendation.
+See "Review round 2" for the per-finding resolution.)
 
 ## APG pattern
 
@@ -76,47 +79,83 @@ Severity · WCAG · file:line · status
     `aria-hidden` on the `▼` glyph; the selection indicator (redundant with row
     `aria-selected`) is now `aria-hidden`. (pattern: `nonsemantic-state-toggle`)
 
-### Deferred (root cause is outside DataGrid ownership, or needs a coordinated redesign)
+### Deferred (root cause is outside DataGrid ownership)
 
 - **D1 — Inline/creation/composite/AddCard field inputs have no accessible name** — serious —
-  WCAG 1.3.1 / 4.1.2. `EditableCell`, `CreationRow`, `CompositeFieldEditModal`, and
-  `MobileCardView/AddCard` render every goobs Field component with `label=""` and paint their
-  own visual label separately, so the underlying `<input>` gets no programmatic name.
-  `FieldShell` only renders an associated `<label htmlFor>` when a non-empty `label` is passed
-  and exposes **no `aria-label` passthrough** (`inputAriaProps` in
-  `src/components/Field/Shell/index.tsx:345` only sets required/disabled/invalid/describedby).
-  **Recommended fix (Field/Shell owner):** add an `ariaLabel` prop to `FieldShell` +
-  `FieldStyleOverrides` that maps to `inputAriaProps['aria-label']` when no visible label is
-  rendered; then thread `ariaLabel={column.headerName || fieldConfig.label}` from the four
-  DataGrid callers above. All four callers are in my directory and can adopt it immediately
-  once the Shell prop exists.
-- **D2 — Full keyboard grid pattern (roving tabindex, Arrow/Home/End/PageUp-Down cell nav,
-  Enter/F2 to edit, Escape to exit edit)** — moderate — WCAG 2.1.1. The grid is mouse/tap
-  driven; cell selection/edit is only reachable by pointer. Implementing the APG Grid keyboard
-  model requires a roving `tabindex` scheme across `Rows`/`ColumnHeaderRow` and coordination
-  with the ThothOS Playwright selector contract, so it is out of scope for an additive audit
-  pass. Owner-visible today only because the native table is still readable/announced.
-- **D3 — `role="grid"` on the root wrapper vs. the inner real `<table>`** — moderate — WCAG
-  1.3.1. `index.tsx` puts `role="grid"` + `aria-rowcount`/`aria-colcount` on the outer
-  container that wraps *both* the mobile card view and the desktop `<table>`; the real table
-  keeps its implicit `role="table"`, so the grid's `role="row"`/`role="gridcell"` descendants
-  are not "owned" by a grid per spec. The rule forbids removing existing role/aria attributes,
-  so the correct resolution (move grid semantics onto the `<table>` element, or drop the
-  wrapper `role="grid"`) needs owner sign-off + a test-contract review. Recommend: relocate
-  `role="grid"`/`aria-rowcount`/`aria-colcount` onto the `<table>` and mark `<thead>/<tbody>`
-  `role="rowgroup"`, once the Playwright keying is confirmed to tolerate it.
-- **D4 — Keyboard column resize + keyboard column reorder** — minor — WCAG 2.1.1. The resize
-  handle (`ColumnHeaderRow` `.resizeHandle` div) and the `draggable` header reorder are
-  pointer-only. A `:focus-visible` rule is pre-staged for `.resizeHandle`; making it operable
-  needs a `role="separator"` + arrow-key handler (new interaction design). Deferred.
-- **D5 — Column-actions popover has no arrow-key roving among `menuitem`s** — minor — WCAG
-  2.1.1. The menu has correct `role="menu"`/`menuitem` but arrow-key navigation lives in the
-  shared `src/components/Popover` component (not owned). Recommend the Popover owner add the
-  Menu keyboard model.
-- **D6 — Mobile card tap/long-press not keyboard operable** — minor — WCAG 2.1.1. The card is
-  a `role="row"` clickable `<div>` (`MobileCardView/Card.tsx`) with pointer/touch handlers
-  only. Keyboard operability conflicts with the `role="row"` test contract; deferred pending
-  the D2/D3 grid-keyboard redesign.
+  WCAG 1.3.1 / 4.1.2 — **STILL DEFERRED (root cause outside ownership).** `EditableCell`,
+  `CreationRow`, `CompositeFieldEditModal`, and `MobileCardView/AddCard` render every goobs
+  Field component with `label=""` and paint their own visual label separately, so the
+  underlying `<input>` gets no programmatic name. Verified in round 2 that there is **no
+  in-directory fix**: `FieldShell` (`src/components/Field/Shell/index.tsx:345`) builds
+  `inputAriaProps` with only required/disabled/invalid/describedby — **no `aria-label`
+  passthrough** — and the leaf Field components (e.g. `Field/Text/index.tsx`) render a fixed
+  prop list onto the input and do **not** spread arbitrary DOM props, so a caller-supplied
+  `aria-label` cannot reach the input from the DataGrid side. An implicit `<label>`-wrapping
+  hack was rejected: it would break the combobox/dropdown test contract (button + portalled
+  listbox) and mis-associate composite IPAM fields. **Recommended fix (Field/Shell owner):**
+  add an `ariaLabel` prop to `FieldShell` + `FieldStyleOverrides` mapping to
+  `inputAriaProps['aria-label']` when no visible label is rendered, and forward it from the
+  leaf Field components onto the input. Then thread
+  `ariaLabel={column.headerName || fieldConfig.label}` from the four DataGrid callers (all in
+  this directory, ready to adopt immediately once the Shell prop exists). See `deferred` in the
+  structured result for the exact file:line + change.
+
+_(D2–D6 from round 1 are now FIXED — see "Review round 2" below.)_
+
+## Review round 2 (adversarial) — fixes
+
+Each finding from the adversarial review, with its root-cause resolution. Markup changes are
+noted explicitly. Every new behaviour is exercised by a new play story (see "Stories updated").
+
+- **D1 — field editors have no accessible name** — serious — WCAG 1.3.1 / 4.1.2 — **DEFERRED**
+  (root cause `FieldShell`, outside ownership; see "Deferred" above + the structured `deferred`).
+- **D2 — no APG Grid keyboard model** — moderate — WCAG 2.1.1 — **FIXED.** New
+  `utils/useGridKeyboardNav.tsx` gives the data cells a roving-tabindex model wired into
+  `Table/Rows`: exactly one cell is tabbable, Arrow/Home/End/PageUp/PageDown move focus
+  (Ctrl+Home/End jump to the grid corners), **Space** selects the row and **Enter/F2** edits
+  an editable cell of a selected row (mirroring the click contract: select-then-edit); focus
+  returns to the cell when an inline editor closes. `.cell:focus-visible` ring added.
+  **Markup:** data `<td>`s gain `tabindex` (0/-1), `onKeyDown`, `onFocus`; no attribute removed.
+- **D3 — invalid grid ownership (role=grid on the outer wrapper)** — moderate — WCAG 1.3.1 —
+  **FIXED.** Relocated `role="grid"` + `aria-rowcount`/`aria-colcount` off the outer wrapper
+  (which also wrapped the mobile view, toolbar, filters and footer — an invalid grid) **onto
+  the real `<table>`** (`Table/index.tsx`), with `role="rowgroup"` on `<thead>`/`<tbody>`, so
+  the grid → rowgroup → row → cell ownership chain is valid. The mobile `cardsContainer` gained
+  `role="grid"` + counts so its `role="row"` cards are owned too. **Markup:** `role="grid"` and
+  the two aria-count attributes MOVED elements (not deleted); `role="rowgroup"` added.
+  Test-contract review flagged: no ThothOS selector in the stated contract keys on the outer
+  `role="grid"`; the `[role="grid"]`/`th[scope]`/`aria-sort` story assertions still pass
+  (the first `[role="grid"]` in the DOM is now the mobile card grid, which carries the counts).
+- **D4 — keyboard column resize + reorder** — moderate — WCAG 2.1.1 — **FIXED.** Resize handle
+  is now a focusable `role="separator"` (`aria-orientation="vertical"`, `aria-label`) whose
+  ←/→ nudge width 10px (50px with Shift) via a new `useColumnResize.resizeColumnBy`. Reorder
+  is now keyboard-operable via **"Move column left/right"** items in the column-actions menu
+  (`handleColumnMove` in `index.tsx`, additive `onColumnMove` prop through Table →
+  ColumnHeaderRow). **Markup:** resize `<div>` gains separator role + tabindex + keydown; two
+  new `data-action="move-left|move-right"` menu items.
+- **D5 — column menu has no arrow-key roving** — minor — WCAG 2.1.1 — **FIXED in-directory.**
+  The Popover (role="dialog") already handles focus-in / Tab-trap / focus-restore; added
+  APG-Menu Up/Down/Home/End roving among the menuitems in `ColumnHeaderRow.handleMenuKeyDown`
+  (no edit to the shared Popover needed — the menu content is DataGrid-owned). Also named the
+  Popover surface via `ariaLabel` (WCAG 4.1.2, silences its dev "nameless dialog" warning).
+- **D6 — mobile card not keyboard operable** — minor — WCAG 2.1.1 — **FIXED.** The `role="row"`
+  card `<div>` is now `tabIndex={0}` with an `onKeyDown` (Enter/Space select it — the keyboard
+  equivalent of a tap); `.card:focus-visible` ring added. **Markup:** `tabindex` + `onKeyDown`
+  added; `role="row"`/`data-*` unchanged.
+- **Footer export menu keyboard model** (undisclosed) — moderate — WCAG 2.1.1 — **FIXED.** On
+  open, focus moves INTO the portalled menu (first item); Arrow Up/Down roving (wrapping),
+  Home/End, first-letter typeahead, and Tab closes the menu + returns focus to the trigger
+  (menu-button pattern). Previously the portalled `menuitem`s fell to the end of the page tab
+  order with no keyboard model — now consistent with the (previously disclosed) column menu.
+- **WCAG 4.1.3 Status Messages** (undisclosed) — minor — **FIXED.** `role="status"` +
+  `aria-live="polite"` on the desktop pagination count (`Footer`), the mobile pagination count
+  and the mobile empty state (`MobileCardView`), and a `role="status"` span on the desktop
+  empty state (`Rows`) — so a search/filter that changes or empties the result set is announced
+  rather than passing silently. (`data-grid-status` remains a test hook, not an announced region.)
+- **Test-coverage gap** (undisclosed) — minor — **FIXED.** Added six `play` stories (below)
+  covering the mobile-card a11y (issues 10–12), the `:focus-visible` + `prefers-reduced-motion`
+  CSS (issues 4–5, via a DataGrid-specific stylesheet scan), the column-visibility checkbox
+  names (issue 7), and every new keyboard behaviour above.
 
 ## Hearing
 
@@ -167,19 +206,46 @@ All edited `.ts/.tsx` pass `bun lint:file` (eslint `--fix --max-warnings=0`, exi
 
 ## Stories updated
 
-`DataGrid.stories.tsx` gained two regression stories with `play` assertions (goobs has no unit
-tests — stories are the regression net):
+`DataGrid.stories.tsx` — goobs has no unit tests, so these `play` stories ARE the regression
+net. Round 1 added two (still passing after D3; the `[role="grid"]`/count assertions now resolve
+against the mobile card grid, which carries the counts):
 
-- **`A11y — Header Semantics & Sort`** — asserts `role="grid"` + `aria-rowcount`/`aria-colcount`
-  on the root, `scope="col"` + `role="columnheader"` on headers, the select-all checkbox
-  accessible name, `aria-haspopup` on the header menu trigger, and that sorting via the header
-  menu emits `aria-sort="ascending"` on the sorted header.
-- **`A11y — Dialog & Menu Overlays`** — opens Manage Columns via the header menu and asserts
-  `role="dialog"` + `aria-modal` + `aria-labelledby`→"Manage Columns", that Escape closes it,
-  and that the export cog button toggles `aria-expanded` and opens a `role="menu"`.
+- **`A11y — Header Semantics & Sort`** — `role="grid"` + `aria-rowcount`/`aria-colcount`,
+  `scope="col"` + `role="columnheader"` headers, select-all name, header-menu `aria-haspopup`,
+  and `aria-sort="ascending"` after sorting.
+- **`A11y — Dialog & Menu Overlays`** — Manage Columns `role="dialog"` + `aria-modal` +
+  `aria-labelledby`, Escape closes, export cog toggles `aria-expanded` and opens `role="menu"`.
+
+Round 2 added six more, one per fix cluster:
+
+- **`A11y — Grid Keyboard Navigation`** — grid role/aria on the `<table>` + rowgroups, single
+  roving tab stop, Arrow nav, Space-select + Enter-edit, `role="status"` pagination (D2/D3/4.1.3).
+- **`A11y — Column Keyboard (Resize / Reorder / Menu)`** — `role="separator"` resize via Arrow
+  (asserts width grows via `onColumnResize`), menu Arrow roving, keyboard reorder via
+  "Move column right" (first header becomes `age`) (D4/D5).
+- **`A11y — Footer Menu Keyboard`** — focus moves into the menu on open, Arrow roving between
+  the portalled menuitems.
+- **`A11y — Column Visibility Labels`** — the Manage Columns toggles expose
+  `Show <col> column` names (issue 7).
+- **`A11y — Mobile Card Semantics`** — card `role="row"` + `tabindex` (D6), field label
+  `htmlFor` (10), expand `aria-expanded` (12), card-grid owner (D3), mobile `role="status"`.
+- **`A11y — Focus-Visible & Reduced-Motion CSS`** — scans the injected stylesheet for the
+  DataGrid `.cell:focus-visible` rule (issue 4) and the `prefers-reduced-motion` block (issue 5)
+  so those CSS-only fixes can't silently regress.
+
+## Files touched (round 2)
+
+`index.tsx`, `Table/index.tsx`, `Table/ColumnHeaderRow/index.tsx`, `Table/Rows/index.tsx`,
+`utils/useColumnResize.tsx`, `utils/useGridKeyboardNav.tsx` (new), `types/index.ts`,
+`DataGrid.module.css`, `Footer/index.tsx`, `MobileCardView/index.tsx`, `MobileCardView/Card.tsx`,
+`DataGrid.stories.tsx`, and this report. All in `src/components/DataGrid/**`. Each edited
+`.ts/.tsx` passes `bun lint:file` (0/0).
 
 ## Deferred
 
-See D1–D6 under "Issues found". The single highest-value follow-up is **D1** (add an
-`ariaLabel` passthrough to `FieldShell`), which unblocks accessible names for every inline /
-creation / composite / mobile field editor from the DataGrid side in one small follow-up.
+Only **D1** remains — its root cause is `FieldShell` (a shared component outside DataGrid
+ownership). Recommendation recorded above and in the structured `deferred` result: add an
+`ariaLabel` prop to `FieldShell` (mapped into `inputAriaProps['aria-label']`) + forward it from
+the leaf Field components onto the input, then thread
+`ariaLabel={column.headerName || fieldConfig.label}` from `EditableCell`, `CreationRow`,
+`CompositeFieldEditModal`, and `MobileCardView/AddCard` (all in this directory, ready to adopt).

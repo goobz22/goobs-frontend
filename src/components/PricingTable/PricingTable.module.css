@@ -1,11 +1,15 @@
 /* --------------------------------------------------------------------------
-   PricingTable — accessibility-only CSS module.
+   PricingTable — CSS module (theming + accessibility).
 
-   The component's theming stays as inline style objects (getThemeStyles),
-   consistent with this file's long-standing pattern. This module carries ONLY
-   the pieces that cannot be expressed inline: a visually-hidden text utility
-   (screen-reader alternatives for icon-only cells) and reduced-motion-guarded
-   keyframes for the purely decorative sacred glyphs.
+   Theming moved out of the old getThemeStyles() JS helper — a sanctioned-pattern
+   violation per .claude/rules/goobs.md ("Never reintroduce a getXStyles-style JS
+   theming module"). The root carries data-theme={'light'|'dark'|'sacred'} and the
+   per-theme descendant blocks below set colors/backgrounds, authored against the
+   shared --goobs-* design tokens (src/styles/global.css) wherever a token value
+   matches, with faithful raw literals only where no token exists (same convention
+   as Alert.module.css). Runtime scalars (the per-glyph float duration) pass
+   through as CSS custom properties. This module also carries the visually-hidden
+   text utility and the reduced-motion-guarded decorative-glyph keyframes.
    -------------------------------------------------------------------------- */
 
 /* --------------------------------------------------------------------------
@@ -33,6 +37,248 @@
 }
 
 /* --------------------------------------------------------------------------
+   CONTAINER — theme-independent structure + per-theme surface.
+   The --pt-check-color custom property (set per theme) themes the included-cell
+   check icon (fill: currentColor) without a JS color literal.
+   -------------------------------------------------------------------------- */
+.container {
+  padding: 1.5rem;
+  border-radius: 0.375rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+.container[data-state='disabled'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.container[data-theme='light'] {
+  --pt-check-color: var(--goobs-success);
+
+  background-color: var(--goobs-white-a95);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 6px var(--goobs-black-a10);
+}
+.container[data-theme='dark'] {
+  --pt-check-color: var(--goobs-dark-success-text);
+
+  background-color: var(--goobs-slate-a95);
+  border: 1px solid rgba(75, 85, 99, 0.8);
+  box-shadow: 0 4px 12px var(--goobs-black-a40);
+}
+.container[data-theme='sacred'] {
+  --pt-check-color: var(--goobs-gold);
+
+  background-color: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(154, 132, 0, 0.3);
+  box-shadow: 0 0 20px var(--goobs-gold-a30);
+}
+
+/* --------------------------------------------------------------------------
+   CORNER GLYPH — rendered on the sacred theme only (aria-hidden ornament).
+   Rotation lives in .sacredGlyph below (reduced-motion aware).
+   -------------------------------------------------------------------------- */
+.glyph {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  color: var(--goobs-gold-a20);
+}
+
+/* --------------------------------------------------------------------------
+   TITLE HEADING
+   -------------------------------------------------------------------------- */
+.header {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.container[data-theme='light'] .header {
+  color: var(--goobs-light-text);
+}
+.container[data-theme='dark'] .header {
+  color: #f3f4f6;
+}
+.container[data-theme='sacred'] .header {
+  color: var(--goobs-gold);
+  font-family: serif;
+  text-shadow: 0 0 5px var(--goobs-gold-a50);
+}
+
+/* --------------------------------------------------------------------------
+   PRICE LABEL (row header — "Monthly Price" / "Annual Price")
+   -------------------------------------------------------------------------- */
+.priceLabel {
+  font-size: 1rem;
+  font-style: italic;
+}
+.container[data-theme='light'] .priceLabel {
+  color: #6b7280;
+}
+.container[data-theme='dark'] .priceLabel {
+  color: #9ca3af;
+}
+.container[data-theme='sacred'] .priceLabel {
+  color: var(--goobs-gold-a80);
+}
+
+/* --------------------------------------------------------------------------
+   PACKAGE NAME (column header)
+   -------------------------------------------------------------------------- */
+.packageName {
+  font-weight: bold;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.container[data-theme='light'] .packageName {
+  color: var(--goobs-light-text);
+  background-color: #f3f4f6;
+}
+.container[data-theme='dark'] .packageName {
+  color: #f9fafb;
+  background-color: rgba(55, 65, 81, 0.5);
+}
+.container[data-theme='sacred'] .packageName {
+  color: var(--goobs-gold);
+  background-color: rgba(154, 132, 0, 0.1);
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+}
+
+/* --------------------------------------------------------------------------
+   PRICE
+   -------------------------------------------------------------------------- */
+.price {
+  text-align: center;
+  padding: 0.25rem 0;
+  font-weight: 600;
+}
+.container[data-theme='light'] .price {
+  color: var(--goobs-light-text);
+}
+.container[data-theme='dark'] .price {
+  color: #e5e7eb;
+}
+.container[data-theme='sacred'] .price {
+  color: var(--goobs-gold);
+}
+
+/* --------------------------------------------------------------------------
+   ANNUAL PRICE
+   -------------------------------------------------------------------------- */
+.annualPrice {
+  text-align: center;
+  padding: 0.25rem 0;
+  font-style: italic;
+}
+.container[data-theme='light'] .annualPrice {
+  color: #6b7280;
+}
+.container[data-theme='dark'] .annualPrice {
+  color: #9ca3af;
+}
+.container[data-theme='sacred'] .annualPrice {
+  color: var(--goobs-gold-a70);
+}
+
+/* --------------------------------------------------------------------------
+   FEATURE TITLE (row header)
+   -------------------------------------------------------------------------- */
+.featureTitle {
+  font-weight: 500;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+}
+.container[data-theme='light'] .featureTitle {
+  color: var(--goobs-light-text-secondary);
+  background-color: #f9fafb;
+}
+.container[data-theme='dark'] .featureTitle {
+  color: #d1d5db;
+  background-color: rgba(55, 65, 81, 0.2);
+}
+.container[data-theme='sacred'] .featureTitle {
+  color: var(--goobs-gold);
+  background-color: rgba(154, 132, 0, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   SUBFEATURE TITLE (row header, indented)
+   -------------------------------------------------------------------------- */
+.subFeatureTitle {
+  font-weight: 400;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+}
+.container[data-theme='light'] .subFeatureTitle {
+  color: var(--goobs-light-text-muted);
+}
+.container[data-theme='dark'] .subFeatureTitle {
+  color: #9ca3af;
+}
+.container[data-theme='sacred'] .subFeatureTitle {
+  color: var(--goobs-gold-a90);
+}
+
+/* --------------------------------------------------------------------------
+   CHECK CELL (feature × package data cell). The cell border is theme-independent
+   (the old inline render override forced it to black-a10 on every theme).
+   -------------------------------------------------------------------------- */
+.checkCell {
+  text-align: center;
+  padding: 0.5rem 0;
+  border-right: 1px solid var(--goobs-black-a10);
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER BUTTON CELL
+   -------------------------------------------------------------------------- */
+.buttonSection {
+  margin-top: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   "POPULAR" BADGE (theme-independent — the old `common` value)
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   SACRED FOOTER GLYPH ROW (rendered on the sacred theme only)
+   -------------------------------------------------------------------------- */
+.sacredFooter {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   ZEBRA + HIGHLIGHT MODIFIERS
+   These must WIN over the per-theme element backgrounds above, and .highlighted
+   must win over .rowEven — replicating the old inline spread precedence
+   (...base, ...rowEven, ...highlighted → last wins). All three tiers sit at the
+   same (0,3,0) specificity, so SOURCE ORDER decides: the element bases are
+   authored first, then .rowEven, then .highlighted. (stylelint's
+   no-descending-specificity / no-duplicate-selectors are intentionally disabled
+   for exactly these theme-cascade blocks.)
+   -------------------------------------------------------------------------- */
+.container[data-theme] .rowEven {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+.container[data-theme] .highlighted {
+  background-color: var(--goobs-gold-a05);
+  box-shadow: inset 0 0 10px var(--goobs-gold-a30);
+}
+
+/* --------------------------------------------------------------------------
    DECORATIVE SACRED GLYPHS
    The corner mark slowly rotates and the footer marks gently drift. They are
    pure ornament (aria-hidden in the TSX) and carry no information. The
@@ -47,6 +293,8 @@
 }
 
 .sacredFooterGlyph {
+  color: var(--goobs-gold-a30);
+  font-size: 0.75rem;
   animation: pricingFloat var(--pt-float-duration, 3s) ease-in-out infinite;
 }
 

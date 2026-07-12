@@ -240,6 +240,15 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     >
       {({ inputId, inputAriaProps }) => {
         const listboxId = `${inputId}-listbox`
+        // Stable per-option DOM ids so the combobox trigger can point
+        // aria-activedescendant at the arrow-key-highlighted option, exposing
+        // the roving highlight to assistive tech (WCAG 4.1.2 / 2.1.1).
+        const optionDomId = (index: number): string =>
+          `${listboxId}-option-${index}`
+        const activeOptionId =
+          activeIndex >= 0 && options[activeIndex]
+            ? optionDomId(activeIndex)
+            : undefined
         return (
           <div className={cssStyles.wrapper} ref={containerRef}>
             <div

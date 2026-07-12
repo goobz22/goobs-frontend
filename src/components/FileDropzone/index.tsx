@@ -154,8 +154,16 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   variant = 'image',
   onRemove,
   styles,
+  ref,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Merge the internal file-input ref with the public consumer `ref` so a
+  // single DOM `ref` slot feeds both.
+  const setFileInputRef = (el: HTMLInputElement | null) => {
+    fileInputRef.current = el
+    if (typeof ref === 'function') ref(el)
+    else if (ref) (ref as React.RefObject<HTMLInputElement | null>).current = el
+  }
   // The operable control is the browse button; keep a ref so focus can be
   // restored to it when the conditionally-rendered Remove control unmounts.
   const browseButtonRef = useRef<HTMLButtonElement>(null)
@@ -300,7 +308,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
 
             <div className={cssStyles.controls}>
               <input
-                ref={fileInputRef}
+                ref={setFileInputRef}
                 id={inputId}
                 type="file"
                 className={cssStyles.hiddenInput}

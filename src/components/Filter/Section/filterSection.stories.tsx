@@ -406,6 +406,25 @@ export const CollapsibleOpen: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+  // goobs has no unit tests — the play fn IS the regression test. Keyboard-focus
+  // the toggle so its :focus-visible ring is exercised + captured in the
+  // Chromatic baseline. Also pin the OPEN Disclosure contract: aria-expanded=
+  // "true" AND aria-controls now present, resolving to the live role="region"
+  // panel whose id it references (mount-on-open → the IDREF exists only while
+  // expanded, so it is never dangling).
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const toggle = canvas.getByTestId('filter-section-toggle')
+    await userEvent.tab()
+    await expect(toggle).toHaveFocus()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const panelId = toggle.getAttribute('aria-controls')
+    await expect(panelId).toBeTruthy()
+    const panel = canvas.getByTestId('filter-section-panel')
+    await expect(panel).toHaveAttribute('id', panelId as string)
+    await expect(panel).toHaveAttribute('role', 'region')
+    await expect(panel).toHaveAttribute('aria-label', 'Course Filters')
+  },
 }
 
 /** Collapsible shell that starts collapsed — only the toggle header renders
@@ -421,6 +440,21 @@ export const CollapsibleClosed: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+  // goobs has no unit tests — the play fn IS the regression test. Keyboard-focus
+  // the toggle so its :focus-visible ring (Section.module.css
+  // `.toggle:focus-visible`) is actually rendered AND captured in the Chromatic
+  // baseline (a static render alone never focuses it). Also pin the COLLAPSED
+  // Disclosure contract: aria-expanded="false" and NO aria-controls — the panel
+  // is mount-on-open, so a fixed IDREF would dangle at a non-existent node.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const toggle = canvas.getByTestId('filter-section-toggle')
+    await userEvent.tab()
+    await expect(toggle).toHaveFocus()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(toggle).toHaveAttribute('data-state', 'closed')
+    await expect(toggle).not.toHaveAttribute('aria-controls')
+  },
 }
 
 /**

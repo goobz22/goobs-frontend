@@ -144,6 +144,20 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   // exposed as a named role="group" so assistive tech announces the two inputs
   // as one range (WCAG 1.3.1).
   const hasError = Boolean(error)
+  // The start FieldShell renders the ONE helper/error region for the pair
+  // (below). Capture the id it generates (via useId, exposed only through its
+  // render-prop slot) so the END input can point its aria-describedby at that
+  // SAME region — the start input already does, via inputAriaProps. A
+  // cross-field range error/helper describes BOTH controls, so a screenreader
+  // that lands on the end input can read the reason instead of hearing an
+  // unexplained "invalid" (WCAG 1.3.1 / 3.3.1). React evaluates the start
+  // shell's render-prop before the end shell's (document order) in the same
+  // render, and useId is stable across renders, so the ref holds the correct
+  // id by the time the end input renders. Only used as a describedby target
+  // when the region actually renders (error OR helperText present), so a
+  // dangling aria-describedby is never emitted.
+  const startHelperIdRef = useRef<string | undefined>(undefined)
+  const startHelperRendered = hasError || helperText != null
 
   return (
     <div
@@ -164,19 +178,24 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
             filled={value != null && (value.start != null || value.end != null)}
             styles={styles}
           >
-            {({ inputId, inputAriaProps }) => (
-              <input
-                ref={startInputRef}
-                id={inputId}
-                type="time"
-                className={cssStyles.input}
-                value={formatTimeForInput(value?.start || null)}
-                onChange={handleStartChange}
-                disabled={disabled}
-                required={required}
-                {...inputAriaProps}
-              />
-            )}
+            {({ inputId, inputAriaProps, helperId }) => {
+              // Stash the shared helper-region id so the end input can be
+              // described by the same message (see startHelperIdRef above).
+              startHelperIdRef.current = helperId
+              return (
+                <input
+                  ref={startInputRef}
+                  id={inputId}
+                  type="time"
+                  className={cssStyles.input}
+                  value={formatTimeForInput(value?.start || null)}
+                  onChange={handleStartChange}
+                  disabled={disabled}
+                  required={required}
+                  {...inputAriaProps}
+                />
+              )
+            }}
           </FieldShell>
         </div>
 
@@ -205,6 +224,14 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
                 // when there's no error so aria-invalid="false" is never
                 // emitted, preserving the test-selector contract.
                 aria-invalid={hasError || undefined}
+                // Point at the SAME helper/error region the start input is
+                // described by, so the reason is programmatically available on
+                // this control too — not just an unexplained "invalid" (WCAG
+                // 1.3.1 / 3.3.1). Undefined when the region isn't rendered so
+                // no dangling aria-describedby is emitted.
+                aria-describedby={
+                  startHelperRendered ? startHelperIdRef.current : undefined
+                }
               />
             )}
           </FieldShell>

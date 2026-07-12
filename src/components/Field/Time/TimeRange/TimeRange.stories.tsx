@@ -353,6 +353,12 @@ export const GroupSemanticsAndError: Story = {
       'End time cannot be before start time.'
     )
     await expect(startInput).toHaveAttribute('aria-describedby', alert.id)
+
+    // The END input must be described by that SAME region — a cross-field
+    // range error describes both controls, so a screenreader landing on the
+    // end input reads the reason instead of an unexplained "invalid" (WCAG
+    // 1.3.1 / 3.3.1). Regression guard for the shared-helper-id wiring.
+    await expect(endInput).toHaveAttribute('aria-describedby', alert.id)
   },
 }
 

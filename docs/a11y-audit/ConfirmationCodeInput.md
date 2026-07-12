@@ -10,6 +10,13 @@
 > in the component itself (a linked `role="alert"` error region), so the header no
 > longer overclaims.
 
+> **Adversarial-review follow-ups (2026-07-11, 3rd pass).** A further review found
+> two remaining issues — a **focus-order** gap (focus lost to `<body>` on the
+> input→success transition, WCAG 2.4.3) and a **missing regression test** for the
+> F1 success-announcement transition. Both are now fixed at root cause within this
+> directory (a focus-move effect + the new `SuccessTransition` behavioural story).
+> See ["3rd-pass follow-ups"](#third-pass-follow-ups).
+
 **APG pattern:** There is no dedicated WAI-ARIA APG pattern for a segmented
 one-time-code / PIN entry. The component is a **labelled group of single-character
 text inputs** (`role="group"` + accessible name) with auto-advance keyboard behaviour,
@@ -67,6 +74,10 @@ pulse animation and every transition. The findings below are the gaps that remai
     unreliable (NVDA/JAWS miss it). Replaced by a **persistent, always-mounted** live
     region shared across both branches; the container's `role="status"` was **removed**
     (follow-up F1). `pattern: status-not-announced`.
+  - **3rd-pass update:** the "focus drops to `<body>`" half called out here was only
+    ever addressed for the SR announcement, not for focus itself. It is now fixed —
+    a focus-move effect sends focus to the "Disable Verification" button on the
+    transition (follow-up G1, WCAG 2.4.3). `pattern: focus-lost-on-view-swap`.
 
 ### 4. Decorative success icon not hidden from assistive tech — FIXED
 - **Severity:** minor · **WCAG:** 1.1.1 Non-text Content (A)

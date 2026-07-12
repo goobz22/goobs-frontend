@@ -132,6 +132,37 @@ export const WithError: Story = {
       onFileSelect={() => {}}
     />
   ),
+  play: async ({ canvasElement }) => {
+    const browseButton = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-file-dropzone-browse="true"]'
+    )
+    await expect(browseButton).not.toBeNull()
+
+    // The state ARIA (aria-required / aria-invalid) rides the operable browse
+    // button — NOT the display:none file input the shell wires by default — so
+    // a screen reader on the control it actually operates hears "required,
+    // invalid". A regression dropping {...inputAriaProps} from the button
+    // (index.tsx) fails these two assertions.
+    await expect(browseButton!.getAttribute('aria-required')).toBe('true')
+    await expect(browseButton!.getAttribute('aria-invalid')).toBe('true')
+
+    // aria-describedby links the button to the FieldShell error region so the
+    // failure text is announced with the control (merged with the drag-drop
+    // hint). useId() ids contain colons → resolve via getElementById rather
+    // than a CSS attribute selector.
+    const describedBy = browseButton!.getAttribute('aria-describedby')
+    await expect(describedBy).toBeTruthy()
+    const ids = (describedBy ?? '').split(' ')
+
+    const errorRegion = canvasElement.querySelector('[role="alert"]')
+    await expect(errorRegion).not.toBeNull()
+    await expect(errorRegion!.textContent).toContain(
+      'Upload failed — file exceeds 5 MB'
+    )
+    // The error region's own id is one of the button's describedby targets —
+    // this is the link a regression on the describedby merge (index.tsx) breaks.
+    await expect(ids).toContain(errorRegion!.getAttribute('id'))
+  },
 }
 
 /**
@@ -164,6 +195,28 @@ export const Uploading: Story = {
         logo.png
       </div>
     ),
+  },
+  play: async ({ canvasElement }) => {
+    // The visually-hidden role="status" live region carries the uploading
+    // transition to assistive tech (WCAG 4.1.3) regardless of focus — a disabled
+    // button's label change and a drag-drop pick would both otherwise be silent.
+    // A regression dropping role="status" (index.tsx) fails this block.
+    const statusRegion = canvasElement.querySelector(
+      '[data-file-dropzone-status="true"]'
+    )
+    await expect(statusRegion).not.toBeNull()
+    await expect(statusRegion!.getAttribute('role')).toBe('status')
+    await expect(statusRegion!.getAttribute('aria-live')).toBe('polite')
+    await expect(statusRegion!.textContent).toContain('Uploading image')
+
+    // The drop-target button is natively disabled and marked aria-busy so AT
+    // announces the in-flight state on the operable control itself.
+    const browseButton = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-file-dropzone-browse="true"]'
+    )
+    await expect(browseButton).not.toBeNull()
+    await expect(browseButton!.getAttribute('aria-busy')).toBe('true')
+    await expect(browseButton!.disabled).toBe(true)
   },
 }
 
