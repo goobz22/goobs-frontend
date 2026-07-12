@@ -66,6 +66,20 @@ export const LightTheme: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Base APG slider semantics. The native range exposes the implicit `slider`
+    // role with value/min/max in the a11y tree. These attributes are non-visual
+    // (a Chromatic snapshot can't see them), so pin them here. With no
+    // `formatValueText`, `aria-valuetext` stays UNSET so AT falls back to the
+    // numeric `aria-valuenow` — the documented back-compat branch.
+    // (WCAG 4.1.2 Name, Role, Value.)
+    const slider = canvas.getByRole('slider', { name: 'Volume' })
+    await expect(slider).toHaveAttribute('aria-valuemin', '0')
+    await expect(slider).toHaveAttribute('aria-valuemax', '100')
+    await expect(slider).toHaveAttribute('aria-valuenow', '50')
+    await expect(slider).not.toHaveAttribute('aria-valuetext')
+  },
 }
 
 export const DarkTheme: Story = {
@@ -198,6 +212,27 @@ export const WithError: Story = {
       </div>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The programmatic error association is INVISIBLE: Chromatic captures the
+    // red error text, but not `aria-invalid` nor the `aria-describedby` link to
+    // the role="alert" region. Pin the wiring so a regression that stops
+    // spreading `{...inputAriaProps}` on the input, or drops the error linkage,
+    // fails the story. (WCAG 3.3.1 Error Identification / 4.1.2 Name, Role,
+    // Value / 1.4.1 Use of Color — error is not conveyed by color alone.)
+    const sliders = canvas.getAllByRole('slider', { name: 'Threshold' })
+    expect(sliders).toHaveLength(2)
+    for (const slider of sliders) {
+      await expect(slider).toHaveAttribute('aria-invalid', 'true')
+      const describedById = slider.getAttribute('aria-describedby')
+      expect(describedById).toBeTruthy()
+      const region = canvasElement.querySelector(
+        `#${CSS.escape(describedById as string)}`
+      )
+      await expect(region).toHaveAttribute('role', 'alert')
+      await expect(region).toHaveTextContent('Value must be at least 25')
+    }
+  },
 }
 
 // --------------------------------------------------------------------------
@@ -230,6 +265,17 @@ export const DisabledStates: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Disabled must be conveyed by the native `disabled` attribute (removed
+    // from tab order + not operable), not by dimming/color alone. `disabled` is
+    // programmatic, not visual — pin it. (WCAG 1.4.1 Use of Color / 4.1.2.)
+    const sliders = canvas.getAllByRole('slider')
+    expect(sliders).toHaveLength(3)
+    for (const slider of sliders) {
+      await expect(slider).toBeDisabled()
+    }
+  },
 }
 
 // --------------------------------------------------------------------------
@@ -247,6 +293,15 @@ export const Required: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Required is conveyed programmatically via `aria-required`, not by the
+    // visual asterisk indicator alone. `aria-required` is non-visual — pin it
+    // so a regression that stops forwarding required into the input's ARIA bag
+    // fails the story. (WCAG 3.3.2 Labels or Instructions / 1.4.1 / 4.1.2.)
+    const slider = canvas.getByRole('slider', { name: 'Confidence Level' })
+    await expect(slider).toHaveAttribute('aria-required', 'true')
+  },
 }
 
 // --------------------------------------------------------------------------
@@ -296,6 +351,22 @@ export const WithValueText: Story = {
     </div>
   ),
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // `aria-valuetext` is the ONE value-semantics attribute a native range
+    // cannot derive on its own — and it is INVISIBLE, so a Chromatic snapshot
+    // cannot guard it (removing `aria-valuetext={valueText}` would render an
+    // identical picture). These assertions pin the formatter → attribute path
+    // so a regression fails the story. (WCAG 1.3.1 / 4.1.2; APG slider.)
+    const temp = canvas.getByRole('slider', { name: 'Temperature' })
+    await expect(temp).toHaveAttribute('aria-valuetext', '20 degrees Celsius')
+    await expect(temp).toHaveAttribute('aria-valuenow', '20')
+    const rating = canvas.getByRole('slider', { name: 'Rating' })
+    await expect(rating).toHaveAttribute('aria-valuetext', '3 of 5')
+    const opacity = canvas.getByRole('slider', { name: 'Opacity' })
+    await expect(opacity).toHaveAttribute('aria-valuetext', '50 percent')
+    await expect(opacity).toHaveAttribute('aria-valuenow', '0.5')
+  },
 }
 
 // --------------------------------------------------------------------------

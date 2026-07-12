@@ -120,18 +120,42 @@ static outline with no motion. No `prefers-reduced-motion` guard is required.
 ## Fixes applied
 
 1. `formatValueText` prop → `aria-valuetext` (index.tsx) — WCAG 1.3.1 / 4.1.2.
+   (commit `ced6ed21`)
 2. `.input:focus-visible` outline (Slider.module.css) — WCAG 2.4.7 / 2.4.11.
+   (commit `ced6ed21`)
+3. `:focus-visible` ring baseline-guarded via keyboard-focus `play` fns
+   (`KeyboardFocusRing` + new `KeyboardFocusRingSacred`) — R1. (commit `92cd9136`)
+4. **This pass** — non-visual ARIA state pinned by `play` assertions across
+   `LightTheme` / `WithValueText` / `WithError` / `Required` / `DisabledStates`
+   (R2) — WCAG 4.1.2 (+ 1.3.1 / 3.3.1 / 1.4.1). Stories-only; runtime unchanged.
 
-Both landed in commit `ced6ed21`. `bun lint:file` clean on `index.tsx` and
-`Slider.stories.tsx`; `stylelint` clean on `Slider.module.css`.
+`bun lint:file` clean on `index.tsx` and `Slider.stories.tsx`; `stylelint`
+clean on `Slider.module.css`. No runtime WCAG defect remained at the start of
+this pass — the component was already compliant (fixes 1–3); this pass closed
+the invisible-attribute regression-coverage gap.
 
 ## Stories updated
 
 - **`WithValueText`** — exercises `formatValueText` → `aria-valuetext` for
   Temperature ("20 degrees Celsius"), Rating ("3 of 5"), and Opacity
-  ("50 percent"), each with a helper explaining the announced string. This is
-  the regression baseline for the new aria-valuetext path (the formatted string
-  is rendered into the DOM attribute).
+  ("50 percent"), each with a helper explaining the announced string. **Now
+  carries a `play` fn** that asserts each slider's `aria-valuetext`
+  (+ `aria-valuenow`) equals the formatted string. See finding R2: rendering the
+  string into a *non-visual* attribute does **not** make it a Chromatic
+  regression test — an explicit `play` assertion does.
+- **`LightTheme`** — **now carries a `play` fn** pinning the base APG semantics
+  (`aria-valuemin`/`valuemax`/`valuenow`) and the *fallback* branch
+  (`aria-valuetext` **absent** when no `formatValueText`), guarding the
+  back-compat path a snapshot can't see.
+- **`WithError`** — **now carries a `play` fn** asserting the invisible error
+  association on both threshold sliders: `aria-invalid="true"` plus
+  `aria-describedby` resolving to the `role="alert"` region whose text is the
+  error message. Guards WCAG 3.3.1 / 4.1.2 wiring a snapshot can't capture.
+- **`Required`** — **now carries a `play` fn** asserting `aria-required="true"`
+  (required conveyed programmatically, not by the visual asterisk alone).
+- **`DisabledStates`** — **now carries a `play` fn** asserting all three sliders
+  are natively `disabled` (removed from the tab order / not operable), not merely
+  dimmed by color.
 - **`KeyboardFocusRing`** — renders the slider on light and sacred surfaces
   with instructions to Tab to it, documenting the new `:focus-visible` ring and
   the native keyboard operability. **Now carries a `play` fn** that moves real
@@ -180,6 +204,41 @@ Both landed in commit `ced6ed21`. `bun lint:file` clean on `index.tsx` and
   table is native-UA-guaranteed (documented above) and does not need — and cannot
   soundly get — a synthetic-event regression test. The `play`'s sole job is to
   establish the keyboard-focus modality so `:focus-visible` renders.
+  (Re-verified this pass: the claim holds — dispatched key events are
+  `isTrusted:false`, and DOM default actions like range increment fire only for
+  trusted events; asserting `aria-valuenow` changed after `userEvent.keyboard`
+  would fail. Left correctly unasserted.)
+
+### R2. Non-visual ARIA state (`aria-valuetext`, error linkage, `aria-required`, disabled) not regression-guarded — FIXED
+- **Severity:** minor · **WCAG:** 4.1.2 Name, Role, Value (A) [+ 1.3.1 / 3.3.1 /
+  1.4.1 for the specific attributes] · **Pattern:**
+  `a11y-attribute-not-regression-tested`
+- **Where:** `src/components/Field/Slider/Slider.stories.tsx` — `WithValueText`,
+  `WithError`, `Required`, `DisabledStates`, and the base `LightTheme` story all
+  rendered the correct ARIA but had **no `play`-fn assertions**.
+- **Root cause:** identical in shape to R1, one level deeper. In this repo the
+  regression net is the Storybook story **+ Chromatic visual baseline + `play`
+  assertions**. Chromatic can only guard what is **visible**. `aria-valuetext`,
+  `aria-invalid`, the `aria-describedby`→alert link, and `aria-required` are all
+  **invisible** — a snapshot is byte-identical whether they are present or not.
+  So the prior pass's statement that `WithValueText` guarded the aria-valuetext
+  path *"because it renders the formatted string into the DOM attribute"* was
+  **incorrect**: rendering into a non-visual attribute is not a visual regression.
+  Dropping `aria-valuetext={valueText}`, or the `{...inputAriaProps}` spread that
+  carries `aria-invalid`/`aria-describedby`/`aria-required`, would have passed
+  every story silently.
+- **Fix:** added `play` assertions (no component/CSS change — the runtime was
+  already compliant; only the guards were missing):
+  - `LightTheme` → base `aria-valuemin`/`valuemax`/`valuenow` + `aria-valuetext`
+    **absent** on the no-formatter fallback branch.
+  - `WithValueText` → each slider's `aria-valuetext` (+ `aria-valuenow`) equals
+    the formatted string.
+  - `WithError` → `aria-invalid="true"` + `aria-describedby` resolving to the
+    `role="alert"` region containing the message, on both threshold sliders.
+  - `Required` → `aria-required="true"`.
+  - `DisabledStates` → all three sliders natively `disabled`.
+  All assertions are static-attribute / DOM-query reads (no synthetic-keyboard
+  default-action dependence — sound per the R1 note). `bun lint:file` clean.
 
 ## Deferred (root cause outside my directory — Field/Shell, owned by a later serial pass)
 
