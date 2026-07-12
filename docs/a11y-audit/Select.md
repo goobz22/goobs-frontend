@@ -85,6 +85,20 @@ existing Storybook `InteractionTest` already keys on via `getByRole('combobox')`
   State changes still apply instantly; only the animation is dropped for users who opt out.
 - **Pattern:** `missing-reduced-motion`
 
+### 4. Decorative arrow `aria-hidden` documented but not regression-tested — MINOR (WCAG 1.1.1 Non-text Content, 4.1.2 Name/Role/Value) — FIXED (2026-07-11, ownership follow-up)
+- **File:** `src/components/Select/index.tsx:213` — the custom `▼` dropdown-affordance glyph is a
+  presentational sibling `<div aria-hidden="true">` of the native `<select>` (the browser paints
+  its own real popup). The source was **already correct**, but nothing in the story suite gated
+  it: a future change swapping the glyph for an icon component and forgetting `aria-hidden` would
+  leak the U+25BC "black down-pointing triangle" into the accessibility tree as stray text beside
+  the combobox, and would ship silently (stories are this repo's only regression tests). This is
+  the same shape as the repo-wide `icon-missing-aria-hidden` class (`_lint-icon-missing-aria-hidden.md`).
+- **Fix:** Added the `DecorativeArrowHidden` story (`Select.stories.tsx`) whose `play` fn asserts
+  the arrow element carries `aria-hidden="true"` + the `▼` glyph AND that the combobox's accessible
+  name resolves to exactly its `aria-label` (no glyph bleed). No source/API change — this converts
+  the "decorative arrow is hidden" prose claim into a regression gate.
+- **Pattern:** `icon-missing-aria-hidden`
+
 ## Hearing
 
 No audio, `<audio>`/`<video>`, `AudioContext`, `new Audio`, or `navigator.vibrate` usage
@@ -112,7 +126,10 @@ N/A for this component.
   this primitive never emits `aria-disabled="false"`).
 - **Decorative arrow:** the custom `▼` arrow `<div>` is correctly `aria-hidden="true"`
   (`index.tsx:213`) and `pointer-events: none` (`Select.module.css:241`), so it is not announced
-  and does not intercept clicks. **No action.**
+  and does not intercept clicks. Source was already correct; **now regression-gated** by the new
+  `DecorativeArrowHidden` story (see *Stories updated*, Issue 4) so a future change that drops
+  `aria-hidden` (e.g. swapping the glyph for an icon component) fails a test instead of silently
+  leaking the U+25BC glyph into the a11y tree.
 - **Error state:** now announced via `aria-invalid` for **both** invalid paths — the boolean/engine
   `hasError` (Issue 2) and the `helperTextType:'error'` styling path (Issue 2b).
 - **Focus visibility:** now provided via `:focus-visible` (Issue 1).
@@ -167,6 +184,13 @@ Added to `Select.stories.tsx` (Storybook stories are this repo's only regression
   This regression-gates the labelability contract the report documents (WCAG 4.1.2 / 3.3.2) — it
   fails if a future change stops threading `aria-label`/`id` through `{...props}` to the native
   `<select>` (Issue 3b — ownership follow-up).
+- **`DecorativeArrowHidden` ("Decorative Arrow Hidden (a11y)")** — `play` fn asserts the arrow
+  element off the component root carries `aria-hidden="true"` and the `▼` glyph
+  (`toHaveTextContent('▼')`), and that the combobox's accessible name resolves to exactly its
+  supplied `aria-label` (`getByRole('combobox', { name: 'Country' })`) — proving the glyph is
+  excluded from the a11y tree and does not bleed into the control's name (WCAG 1.1.1 / 4.1.2).
+  Added this session (2026-07-11, ownership follow-up); it fails if `aria-hidden` is ever dropped
+  from the arrow. Class: `icon-missing-aria-hidden`.
 
 Existing `InteractionTest` (native combobox role + controlled value) remains green and
 continues to validate the native semantics.
