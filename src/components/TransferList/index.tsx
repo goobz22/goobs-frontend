@@ -467,8 +467,16 @@ const TransferList: React.FC<TransferListProps> = ({
     }
     return (
       <div className={cssStyles.column}>
+        {/* The category Dropdown is a `role="combobox"` whose accessible name is
+            derived from `label` (Field/Dropdown maps `label` → both the visible
+            FieldShell label AND the trigger's `aria-label`). Falling back to
+            `''` when the consumer omits `dropdownLabel` left the combobox with
+            only a weak content-derived name ("Select…") — a WCAG 4.1.2 gap that
+            mirrors the (already-fixed) list fallback below. Supply a meaningful
+            default ("Category") so the control is always named, exactly as the
+            paired list falls back to "Available items". */}
         <Dropdown
-          label={dropdownLabel || ''}
+          label={dropdownLabel || 'Category'}
           options={dropdownOptions}
           value={selectedDropdownValue}
           onChange={value => setSelectedDropdownValue(value)}
@@ -523,10 +531,20 @@ const TransferList: React.FC<TransferListProps> = ({
       <div className={cssStyles.row}>
         <div className={cssStyles.column}>{renderLeftColumn()}</div>
         <div className={cssStyles.buttonGroup} ref={buttonGroupRef}>
+          {/* Transfer-button accessible names identify the DESTINATION LIST by
+              its title, not the spatial direction (WCAG 1.3.3 Sensory
+              Characteristics / 2.4.6 Headings & Labels): a screen-reader user
+              with no visual left/right mapping cannot tell that "right" = the
+              Assigned list. Building the name from `rightTitle`/`leftTitle` also
+              keeps it consistent with the group's own name ("Transfer items
+              between {leftTitle} and {rightTitle}") and adapts to any
+              consumer-supplied titles, so the group name and the control names
+              can never disagree. The data-action selector stays direction-keyed
+              (see TransferButton) — only the human-facing name changes. */}
           <TransferButton
             onClick={handleAllRight}
             disabled={currentLeft.length === 0}
-            aria-label="move all right"
+            aria-label={`move all to ${rightTitle}`}
             name="all-right"
           >
             ≫
@@ -534,7 +552,7 @@ const TransferList: React.FC<TransferListProps> = ({
           <TransferButton
             onClick={handleCheckedRight}
             disabled={leftChecked.length === 0}
-            aria-label="move selected right"
+            aria-label={`move selected to ${rightTitle}`}
             name="checked-right"
           >
             &gt;
@@ -542,7 +560,7 @@ const TransferList: React.FC<TransferListProps> = ({
           <TransferButton
             onClick={handleCheckedLeft}
             disabled={rightChecked.length === 0}
-            aria-label="move selected left"
+            aria-label={`move selected to ${leftTitle}`}
             name="checked-left"
           >
             &lt;
@@ -550,7 +568,7 @@ const TransferList: React.FC<TransferListProps> = ({
           <TransferButton
             onClick={handleAllLeft}
             disabled={currentRight.length === 0}
-            aria-label="move all left"
+            aria-label={`move all to ${leftTitle}`}
             name="all-left"
           >
             ≪

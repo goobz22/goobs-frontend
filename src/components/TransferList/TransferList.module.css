@@ -498,7 +498,7 @@
    out at the row level. Selection is still conveyed by the native checkbox
    (which forced-colors renders natively) — this is the non-colour backstop — but
    restore the ROW-level cue with the one selection-semantics system colour that
-   survives forced-colors: a `Highlight` outline (the system colour that denotes
+   survives forced-colors: a `highlight` outline (the system colour that denotes
    a selected item, so it carries the right meaning, not merely a focus ring).
    The transfer buttons' `:focus-visible` outline already survives forced-colors
    (the UA forces its colour), but pin it to the system focus colour here too so
@@ -508,12 +508,12 @@
    -------------------------------------------------------------------------- */
 @media (forced-colors: active) {
   .listItem[data-checked='true'] {
-    outline: 2px solid Highlight;
+    outline: 2px solid highlight;
     outline-offset: -2px;
   }
 
   .button:focus-visible {
-    outline: 2px solid Highlight;
+    outline: 2px solid highlight;
     outline-offset: 2px;
   }
 }
