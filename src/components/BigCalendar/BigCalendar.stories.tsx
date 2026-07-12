@@ -355,8 +355,10 @@ export const A11yEventButtons: Story = {
 }
 
 /**
- * Week/day hour cells are keyboard-operable buttons: full date + hour
- * accessible name, `aria-pressed` for the toggle selection, and Enter to
+ * Week/day hour cells are keyboard-operable `gridcell`s inside a `role="grid"`
+ * (a cell — not a `role="button"` — so it can legally contain a clickable event
+ * `<button>` without invalid nested-interactive markup): full date + hour
+ * accessible name, `aria-selected` for the toggle selection, and Enter to
  * activate (WCAG 2.1.1, 4.1.2, 1.4.1).
  */
 export const A11yHourCellKeyboard: Story = {
@@ -373,24 +375,25 @@ export const A11yHourCellKeyboard: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    const hourCell = canvas.getByRole('button', {
+    const hourCell = canvas.getByRole('gridcell', {
       name: /Monday, June 15, 2026, 9 AM/,
     })
-    expect(hourCell).toHaveAttribute('aria-pressed', 'false')
+    expect(hourCell).toHaveAttribute('aria-selected', 'false')
 
     hourCell.focus()
     await userEvent.keyboard('{Enter}')
     await waitFor(() =>
-      expect(hourCell).toHaveAttribute('aria-pressed', 'true')
+      expect(hourCell).toHaveAttribute('aria-selected', 'true')
     )
   },
 }
 
 /**
- * Week-view hour cells share ONE roving tab stop advertised by a `role="toolbar"`
- * container (a bare group does not advertise arrow-key navigation). Left/Right
- * move the focused cell by day, Up/Down by hour, and Home/End jump to the first
- * / last hour of the day (WCAG 2.1.1; `handleTimeCellKeyDown` day-nav branch).
+ * Week-view hour cells are a 2-D ARIA `grid` (row = day, cell = hour) sharing
+ * ONE roving tab stop. Left/Right move the focused cell by day, Up/Down by hour,
+ * and Home/End jump to the first / last hour of the day (WCAG 2.1.1;
+ * `handleTimeCellKeyDown` day-nav branch). The grid role (not toolbar) is what
+ * lets an hour `gridcell` legally contain a clickable event `<button>`.
  */
 export const A11yWeekDayNavigation: Story = {
   name: 'A11y/Week Day Navigation',
@@ -406,13 +409,13 @@ export const A11yWeekDayNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // The hour cells live inside a labelled toolbar (composite keyboard model).
-    expect(canvas.getByRole('toolbar')).toHaveAttribute(
+    // The hour cells live inside a labelled grid (2-D composite keyboard model).
+    expect(canvas.getByRole('grid')).toHaveAttribute(
       'aria-label',
       expect.stringContaining('week of June 14, 2026')
     )
 
-    const start = canvas.getByRole('button', {
+    const start = canvas.getByRole('gridcell', {
       name: /Monday, June 15, 2026, 9 AM/,
     })
     start.focus()
@@ -422,7 +425,7 @@ export const A11yWeekDayNavigation: Story = {
     await userEvent.keyboard('{ArrowRight}')
     await waitFor(() =>
       expect(
-        canvas.getByRole('button', { name: /Tuesday, June 16, 2026, 9 AM/ })
+        canvas.getByRole('gridcell', { name: /Tuesday, June 16, 2026, 9 AM/ })
       ).toHaveFocus()
     )
 
@@ -434,7 +437,7 @@ export const A11yWeekDayNavigation: Story = {
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() =>
       expect(
-        canvas.getByRole('button', { name: /Monday, June 15, 2026, 10 AM/ })
+        canvas.getByRole('gridcell', { name: /Monday, June 15, 2026, 10 AM/ })
       ).toHaveFocus()
     )
 
@@ -442,7 +445,7 @@ export const A11yWeekDayNavigation: Story = {
     await userEvent.keyboard('{Home}')
     await waitFor(() =>
       expect(
-        canvas.getByRole('button', { name: /Monday, June 15, 2026, 7 AM/ })
+        canvas.getByRole('gridcell', { name: /Monday, June 15, 2026, 7 AM/ })
       ).toHaveFocus()
     )
 
@@ -450,7 +453,7 @@ export const A11yWeekDayNavigation: Story = {
     await userEvent.keyboard('{End}')
     await waitFor(() =>
       expect(
-        canvas.getByRole('button', { name: /Monday, June 15, 2026, 6 PM/ })
+        canvas.getByRole('gridcell', { name: /Monday, June 15, 2026, 6 PM/ })
       ).toHaveFocus()
     )
   },
@@ -584,7 +587,7 @@ export const A11yCurrentHour: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement }) => {
     const currentHour = canvasElement.querySelector(
-      '[role="button"][aria-current="time"]'
+      '[role="gridcell"][aria-current="time"]'
     )
     expect(currentHour).not.toBeNull()
   },
@@ -686,7 +689,9 @@ export const A11yRegionAndHeading: Story = {
 /**
  * The filter panel's "Clear all filters" control is a real, labelled `<button>`
  * (keyboard-operable, named) and resets the filters to empty (WCAG 2.1.1,
- * 4.1.2, 1.1.1). Seeded with one active filter so the control renders.
+ * 4.1.2, 1.1.1). It lives in the expanded panel, NOT the Accordion summary, so
+ * it is never nested inside the disclosure `<button>` (invalid nested-interactive
+ * markup). Seeded with one active filter so the control renders.
  */
 export const A11yClearFilters: Story = {
   name: 'A11y/Clear Filters Button',
@@ -708,6 +713,12 @@ export const A11yClearFilters: Story = {
       name: 'Clear all filters',
     })
     expect(clearButton).toBeInTheDocument()
+
+    // Regression guard for the nested-interactive bug: the clear control must NOT
+    // be a descendant of the Accordion disclosure toggle <button>
+    // (data-action="toggle"). A <button> inside a <button> is invalid HTML and
+    // keyboard-inoperable in some browsers.
+    expect(clearButton.closest('[data-action="toggle"]')).toBeNull()
 
     await userEvent.click(clearButton)
     await waitFor(() =>
