@@ -387,8 +387,11 @@ export const InteractiveDemo: Story = {
     await userEvent.click(itemToMove)
     await expect(itemACheckbox).toBeChecked()
 
+    // The transfer button is named by its DESTINATION LIST (WCAG 1.3.3 / 2.4.6),
+    // not by spatial direction: with the default titles the "move selected"
+    // button reads "move selected to Assigned", never "move selected right".
     const moveRightButton = await canvas.findByRole('button', {
-      name: 'move selected right',
+      name: 'move selected to Assigned',
     })
     await userEvent.click(moveRightButton)
 
@@ -418,9 +421,12 @@ export const InteractiveDemo: Story = {
  * Also pins the review-fix invariants: each list carries an EXPLICIT
  * `role="list"` and each row an EXPLICIT `role="listitem"` (Safari strips the
  * implicit roles when `list-style: none`, so the attributes must be present —
- * `getByRole('list')` alone would false-pass in jsdom), and the composite
+ * `getByRole('list')` alone would false-pass in jsdom), the composite
  * `role="group"` is NAMED (`aria-label` from the column titles) rather than an
- * anonymous, context-free "group".
+ * anonymous, context-free "group", AND every transfer button names its
+ * destination LIST by the consumer's title ("move all to On team", not the
+ * spatial "move all right") so the button names agree with the group name and
+ * adapt to `leftTitle`/`rightTitle` (WCAG 1.3.3 / 2.4.6).
  */
 const AccessibleStructureRenderer = () => {
   const [left, setLeft] = React.useState(singleLeftItems)
@@ -492,6 +498,35 @@ export const AccessibleStructure: Story = {
         name: 'Transfer items between Available and On team',
       })
     ).toBeInTheDocument()
+
+    // Every transfer button names its DESTINATION LIST by the consumer's title
+    // (WCAG 1.3.3 Sensory Characteristics / 2.4.6 Headings & Labels), so the
+    // button names AGREE with the group name above rather than contradicting it:
+    // before the fix the group said "…between Available and On team" while the
+    // buttons said the spatial "move all right / left". A screen-reader user with
+    // no visual left/right mapping can now tell which list each button targets.
+    // The four buttons must be findable by these destination-derived names — a
+    // regression to hardcoded "right"/"left" labels fails here.
+    await expect(
+      canvas.getByRole('button', { name: 'move all to On team' })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('button', { name: 'move selected to On team' })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('button', { name: 'move selected to Available' })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole('button', { name: 'move all to Available' })
+    ).toBeInTheDocument()
+
+    // And the removed spatial names no longer exist anywhere.
+    await expect(
+      canvas.queryByRole('button', { name: 'move all right' })
+    ).toBeNull()
+    await expect(
+      canvas.queryByRole('button', { name: 'move all left' })
+    ).toBeNull()
   },
 }
 
@@ -655,8 +690,15 @@ export const FocusRetainedAfterTransfer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    const moveAllRight = canvas.getByRole('button', { name: 'move all right' })
-    const moveAllLeft = canvas.getByRole('button', { name: 'move all left' })
+    // Buttons are named by destination list (WCAG 1.3.3 / 2.4.6): with default
+    // titles, "move all to Assigned" / "move all to Unassigned" — not
+    // "move all right" / "move all left".
+    const moveAllRight = canvas.getByRole('button', {
+      name: 'move all to Assigned',
+    })
+    const moveAllLeft = canvas.getByRole('button', {
+      name: 'move all to Unassigned',
+    })
 
     // Before the transfer: the left list has items so "move all right" is
     // enabled, and "move all left" is disabled (the right list is empty).
