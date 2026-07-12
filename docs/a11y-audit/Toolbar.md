@@ -4,8 +4,12 @@
 
 **APG pattern:** [Toolbar](https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/) — a
 container that groups a set of controls (here: action Buttons, a filter Dropdown
-combobox, and a Searchbar) and lets a keyboard user move between them with the
-Arrow keys while the group occupies a single Tab stop.
+combobox, and a Searchbar) and lets a keyboard user move between the
+button/combobox controls with the Arrow keys. Those controls share ONE roving
+Tab stop; the Searchbar text field is intentionally kept OUT of the roving set —
+a text input needs Arrow/Home/End for its own caret motion (a recommended APG
+exception) — so it retains its own default `tabindex=0`. The toolbar therefore
+exposes **two** Tab stops (the roving control group + the searchbar), not one.
 
 The component is `src/components/Toolbar/index.tsx` — a horizontal action bar that
 composes `Button`, `Field/Dropdown/Regular`, and `Field/Search`. Those child
@@ -59,9 +63,13 @@ channel to mirror visually. Verified by grep (no matches).
 - **APG Toolbar keyboard interaction / roving tabindex (Issue 2, WCAG 2.1.1).**
   Implemented to match the in-repo precedent
   (`ComplexTextEditor/Toolbars/Editor/index.tsx:446-541`):
-  - The enabled controls (`<button>` elements — the action buttons AND the filter
-    combobox; `role="option"` excluded) share ONE Tab stop: exactly one has
-    `tabindex="0"`, the rest `tabindex="-1"`.
+  - The enabled `<button>` controls (the action buttons AND the filter combobox;
+    `role="option"` excluded) share ONE roving Tab stop: exactly one has
+    `tabindex="0"`, the rest `tabindex="-1"`. The searchbar `<input type=search>`
+    is deliberately NOT in this set (`getToolbarControls` selects only `<button>`,
+    `index.tsx:205`), so it keeps its default `tabindex=0` and forms a SEPARATE,
+    intentional second Tab stop — two Tab stops total, which is the recommended
+    APG treatment for a toolbar that contains a text field.
   - **Left/Right Arrow** move between controls (wrapping), **Home/End** jump to the
     first/last (`handleToolbarKeyDown`).
   - The tab stop follows mouse focus (`handleToolbarFocus`) so Shift+Tab returns to
@@ -112,6 +120,10 @@ no `<nav>`/`<header>`/`<aside>` wrapper applies. No SEO-semantic issues.
 3. **`aria-hidden="true"`** on the decorative sacred glyph span (`index.tsx`).
 4. **`prefers-reduced-motion: reduce`** now also sets `.root { transition: none }`
    (`Toolbar.module.css`).
+5. **Removed the perpetual decorative-glyph auto-spin** (`animation: glyphRotate
+   10s linear infinite` + its `@keyframes`) so no auto-starting motion runs
+   indefinitely — WCAG 2.2.2 Pause/Stop/Hide (Level A). The glyph is now static
+   (`Toolbar.module.css`). See the round-2 follow-up below.
 
 All additive — no prop renamed/removed/retyped, no existing `data-*`/`role`/`aria`
 attribute removed, no new dependency, no wrapper component, styling still via the
@@ -137,8 +149,10 @@ these fixes silently regress. The play functions mirror the in-repo precedent
   `ArrowRight`/`ArrowLeft`/`Home`/`End` move focus AND the tab stop between the two
   action buttons and the `Status` filter combobox (Arrow keys do not open the
   combobox); the searchbar `<input>` KEEPS Arrow/Home/End (focus stays in the field —
-  the toolbar does not hijack caret keys); and the decorative sacred `𓊗` glyph span
-  is `aria-hidden="true"`.
+  the toolbar does not hijack caret keys); the decorative sacred `𓊗` glyph span
+  is `aria-hidden="true"`; and the glyph is STATIC — `getComputedStyle(glyph)
+  .animationName === 'none'` guards against re-introducing a perpetual auto-spin
+  (WCAG 2.2.2, Level A).
 
 The existing `FilterDropdown` story already exercises the combobox-inside-toolbar
 branch that the roving set now includes.
@@ -153,6 +167,39 @@ branch that the roving set now includes.
   asserting the full role/name/orientation, roving-tabindex movement (one tabindex=0,
   Arrow/Home/End), the searchbar-keeps-arrows guard, and the `aria-hidden` glyph
   (commit `1198e683`).
+
+### Adversarial-review follow-up, round 2 (2026-07-11)
+
+- **Minor — WCAG 2.2.2 Pause/Stop/Hide (Level A): the decorative glyph auto-spun
+  forever.** The CSS-module migration had DEFINED the previously-dangling
+  `glyphRotate` keyframe and applied `animation: glyphRotate 10s linear infinite`
+  to `.glyph` (`Toolbar.module.css`, pre-fix). That is moving content which (1)
+  starts automatically, (2) lasts >5s, and (3) runs in parallel with the toolbar
+  controls, so SC 2.2.2 (Level A) requires a pause/stop/hide mechanism for ALL
+  users — the existing `prefers-reduced-motion` guard only satisfies the AAA
+  2.3.3 case, not this one. The original Issue-4 motion analysis addressed only
+  2.3.3. A pause control on a tiny (0.875rem), faint, `aria-hidden` decorative
+  mark is inappropriate UI, so the root-cause fix is to **not auto-animate at
+  all** — which also restores the original (never-animated) behavior (the old
+  keyframe was undefined, so nothing ever spun in the shipped product). The
+  perpetual `animation` and the now-moot `@keyframes glyphRotate` are removed;
+  the `prefers-reduced-motion` block keeps only its `.root { transition: none }`
+  (Issue 4). Regression-guarded by the `KeyboardRovingTabIndex` play function
+  (`getComputedStyle(glyph).animationName === 'none'`). **FIXED** (commit
+  `6f988311`).
+
+- **Minor (report accuracy) — the audit doc overstated a "single Tab stop".**
+  This document said the contained controls "share a single Tab stop" / the group
+  "occupies a single Tab stop". That is inaccurate for the searchbar:
+  `getToolbarControls` selects only `<button>` elements (`index.tsx:205`), so the
+  `<input type=search>` is NOT in the roving set and retains its default
+  `tabindex=0`, forming a SECOND Tab stop. Excluding a text field from arrow
+  navigation is the recommended APG treatment (arrows are needed for caret
+  motion), so **no code change is warranted**; the doc language is corrected to
+  "the button/combobox controls share one roving Tab stop; the searchbar is a
+  separate, intentional second Tab stop — two total." The same imprecise phrasing
+  in the `index.tsx` component JSDoc was tightened to match (commit `6f988311`).
+  **FIXED** (this doc).
 
 ## Deferred
 
