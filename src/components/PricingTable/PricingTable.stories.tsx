@@ -118,7 +118,9 @@ export const SacredTheme: Story = {
  * The dark theme (`theme="dark"`) on the dark canvas: the table container is
  * a near-opaque slate surface (rgba(31,41,55,0.95)) with a gray-600 border,
  * headers in near-white gray-100, price labels in gray-400, and the sacred
- * corner glyphs hidden — the `case 'dark'` palette in getThemeStyles.
+ * corner glyphs hidden — the `.container[data-theme='dark']` palette in
+ * PricingTable.module.css (theming is CSS-module + data-theme driven; the old
+ * getThemeStyles JS helper was removed).
  */
 export const DarkTheme: Story = {
   render: args => (
@@ -400,6 +402,39 @@ export const DisambiguatedButtonLabels: Story = {
       buttontexts: ['Learn More', 'Learn More', 'Learn More'],
       buttonlinks: ['#free', '#pro', '#enterprise'],
     },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Disabled state (`disabled`). The whole table is dimmed and made
+ * non-interactive. This state is now applied purely from the CSS module —
+ * `.container[data-state='disabled']` sets `opacity: 0.5; pointer-events: none`
+ * — after the theming refactor moved every color/opacity out of the old
+ * getThemeStyles JS helper. The root still emits `data-state="disabled"` (and
+ * each footer CTA is `disabled`), so this story is the regression guard for the
+ * CSS-driven disabled path. Inspect the root `<div data-component="PricingTable"
+ * data-state="disabled">`.
+ */
+export const Disabled: Story = {
+  name: 'Disabled (CSS data-state)',
+  render: args => (
+    <div
+      style={{
+        width: '800px',
+        padding: '24px',
+        background: '#f9fafb',
+        borderRadius: '8px',
+      }}
+    >
+      <PricingTable {...args} />
+    </div>
+  ),
+  args: {
+    ...defaultConfig,
+    theme: 'light',
+    disabled: true,
+    highlightedPackageIndex: 1,
   },
   globals: { backgrounds: { value: 'light' } },
 }
