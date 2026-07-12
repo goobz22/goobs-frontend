@@ -77,12 +77,23 @@ existing Storybook `InteractionTest` already keys on via `getByRole('combobox')`
   forwarded these props correctly; this converts the prose claim into a regression gate.
 - **Pattern:** `missing-accessible-name`
 
-### 3. Animated transition ignores reduced-motion preference — MINOR (WCAG 2.3.3 Animation from Interactions) — FIXED
+### 3. Animated transition ignores reduced-motion preference — MINOR (WCAG 2.3.3 Animation from Interactions) — FIXED (story-gated 2026-07-11, adversarial-review follow-up)
 - **File:** `src/components/Select/Select.module.css:88` — `.select` carries
   `transition: all 0.2s ease;` (animates the hover/focus border-colour shift) with no
   `@media (prefers-reduced-motion: reduce)` guard.
-- **Fix:** Added a `@media (prefers-reduced-motion: reduce)` block setting `.select { transition: none; }`.
-  State changes still apply instantly; only the animation is dropped for users who opt out.
+- **Fix:** Added a `@media (prefers-reduced-motion: reduce)` block setting `.select { transition: none; }`
+  (`Select.module.css:257-261`). State changes still apply instantly; only the animation is dropped
+  for users who opt out.
+- **Regression gate (added 2026-07-11):** the CSS fix was the ONLY one of the five Select a11y fixes
+  with no story gate — in a repo where **stories are the only regression tests**, the `@media` block
+  could be silently deleted and ship undetected. Added the `ReducedMotion` story
+  (`Select.stories.tsx`) mirroring the established `TextField`/`Switch` CSSOM technique
+  (`TextField.stories.tsx:1249`, `Switch.stories.tsx:1768`): a `play` fn cannot flip the OS media
+  preference (mocking `window.matchMedia` does not change `getComputedStyle`), so it walks the CSSOM
+  and asserts a `@media (prefers-reduced-motion: reduce)` rule that sets `transition: none` exists,
+  **scoped to the combobox's own hashed `.select` CSS-module class** so another component's
+  reduced-motion block can never false-green the gate. It re-fails if the block is deleted or a
+  transition is re-added under reduced motion.
 - **Pattern:** `missing-reduced-motion`
 
 ### 4. Decorative arrow `aria-hidden` documented but not regression-tested — MINOR (WCAG 1.1.1 Non-text Content, 4.1.2 Name/Role/Value) — FIXED (2026-07-11, ownership follow-up)
@@ -191,6 +202,14 @@ Added to `Select.stories.tsx` (Storybook stories are this repo's only regression
   excluded from the a11y tree and does not bleed into the control's name (WCAG 1.1.1 / 4.1.2).
   Added this session (2026-07-11, ownership follow-up); it fails if `aria-hidden` is ever dropped
   from the arrow. Class: `icon-missing-aria-hidden`.
+- **`ReducedMotion` ("Reduced Motion (a11y)")** — `play` fn walks the CSSOM and asserts a
+  `@media (prefers-reduced-motion: reduce)` rule setting `transition: none` exists, **scoped to the
+  combobox's own hashed `.select` CSS-module class** (a `play` fn cannot flip the OS media
+  preference, so this is a structural CSSOM guard, mirroring `TextField.stories.tsx:1249` /
+  `Switch.stories.tsx:1768`). This closes the one Select a11y fix (Issue 3) that previously had no
+  story gate; it fails if the reduced-motion block is deleted or a transition is re-added under
+  reduced motion (WCAG 2.3.3). Added 2026-07-11 (adversarial-review follow-up). Class:
+  `missing-reduced-motion`.
 
 Existing `InteractionTest` (native combobox role + controlled value) remains green and
 continues to validate the native semantics.

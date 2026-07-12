@@ -529,3 +529,84 @@ export const DecorativeArrowHidden: Story = {
     ).toBeVisible()
   },
 }
+
+// --------------------------------------------------------------------------
+// REDUCED MOTION (a11y — WCAG 2.3.3 Animation from Interactions)
+// --------------------------------------------------------------------------
+
+/**
+ * The `.select` carries a `transition: all 0.2s ease` that animates the
+ * hover/focus border-colour shift. A `@media (prefers-reduced-motion: reduce)`
+ * block in Select.module.css collapses that transition to `none` for users who
+ * request reduced motion — the state changes (border colour, focus ring) still
+ * apply, they just snap instead of animating. Toggle your OS "reduce motion"
+ * setting (or the browser devtools emulation) while focusing this control to see
+ * the transition disappear; the Chromatic baseline captures the rendered result.
+ *
+ * The `play` test is a STRUCTURAL guard rather than a computed-style check: CSS
+ * `@media` queries are evaluated by the rendering engine from the OS/browser
+ * setting and CANNOT be toggled from a play function (mocking
+ * `window.matchMedia` does not change `getComputedStyle` — matchMedia is a
+ * separate JS API), so the test walks the CSSOM and asserts the reduced-motion
+ * rule that sets the `<select>`'s `transition: none` actually exists, scoped to
+ * THIS component's hashed `.select` CSS-module class so another component's
+ * reduced-motion block can never false-green the gate. It re-fails if the guard
+ * block is deleted or a transition is re-added under reduced motion.
+ */
+export const ReducedMotion: Story = {
+  name: 'Reduced Motion (a11y)',
+  render: () => (
+    <SelectWithState styles={{ theme: 'light' }}>
+      <MenuItem value="javascript">JavaScript</MenuItem>
+      <MenuItem value="typescript">TypeScript</MenuItem>
+      <MenuItem value="react">React</MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Rendering the control loads the Select stylesheet under test. The native
+    // <select> (implicit `combobox` role) carries the hashed `.select` class we
+    // scope the CSSOM search by, so another component's reduced-motion block can
+    // never false-green this gate.
+    const select = canvas.getByRole('combobox')
+    const selectClasses = select.className.split(/\s+/).filter(Boolean)
+    expect(selectClasses.length).toBeGreaterThan(0)
+
+    // Assert the reduced-motion guard rule exists in the CSSOM:
+    //   @media (prefers-reduced-motion: reduce) { .select { transition: none } }
+    // keyed to THIS control's hashed CSS-module class so we match Select's own
+    // rule, not another component's. Cross-origin sheets throw on `.cssRules`
+    // and are skipped.
+    let found = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        for (const rule of Array.from(sheet.cssRules)) {
+          if (
+            rule instanceof CSSMediaRule &&
+            /prefers-reduced-motion/i.test(rule.media.mediaText) &&
+            /reduce/i.test(rule.media.mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (!(inner instanceof CSSStyleRule)) continue
+              const setsTransitionNone =
+                inner.style.transition === 'none' ||
+                inner.style.transitionProperty === 'none' ||
+                /transition:\s*none/i.test(inner.cssText)
+              if (
+                setsTransitionNone &&
+                selectClasses.some(cls => inner.selectorText.includes(cls))
+              ) {
+                found = true
+              }
+            }
+          }
+        }
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    expect(found).toBe(true)
+  },
+}
