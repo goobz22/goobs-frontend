@@ -1,0 +1,18 @@
+{
+ "src/components/BigCalendar/BigCalendar.module.css": 2,
+ "src/components/CodeCopy/CodeCopy.module.css": 1,
+ "src/components/DataGrid/DataGrid.module.css": 6,
+ "src/components/Dialog/Dialog.module.css": 1,
+ "src/components/Drawer/Drawer.module.css": 2,
+ "src/components/Field/Dropdown/MultiSelect/MultiSelect.module.css": 1,
+ "src/components/Field/Dropdown/Regular/Dropdown.module.css": 1,
+ "src/components/Field/Dropdown/SearchableHistory/SearchableHistory.module.css": 1,
+ "src/components/Field/Dropdown/SearchableSimple/SearchableSimple.module.css": 1,
+ "src/components/Panel/Panel.module.css": 1,
+ "src/components/PricingTable/PricingTable.module.css": 1,
+ "src/components/ProjectBoard/forms/AddTask/AddTask.module.css": 2,
+ "src/components/ProjectBoard/forms/ShowTask/ShowTask.module.css": 2,
+ "src/components/ProjectBoard/ProjectBoard.module.css": 3,
+ "src/components/Table/Table.module.css": 1,
+ "src/components/TransferList/TransferList.module.css": 1
+}

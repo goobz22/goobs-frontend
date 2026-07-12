@@ -190,8 +190,9 @@ const lint: DriftLint = {
       const ruleRe = /([^{}]+)\{([^{}]*)\}/g
       let m: RegExpExecArray | null
       while ((m = ruleRe.exec(text))) {
-        const [, selectorText, block] = m
+        const block = m[2] ?? ''
         if (!OVERFLOW_SCROLL.test(block)) continue
+        const selectorText = m[1] ?? ''
         for (const segment of splitSelectorList(selectorText)) {
           const base = baseCompound(subjectCompound(segment))
           // Container-class subject only — a bare-element subject (`pre`, `img`)
