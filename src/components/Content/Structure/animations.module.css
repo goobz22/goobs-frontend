@@ -124,7 +124,7 @@
    Users who request reduced motion should not be shown the translate-based
    entrance slides or the timed fades. Disable the animations and jump each
    variant straight to its stable end state:
-     - slide*/fadeIn  -> fully visible, no transform (content still appears)
+     - slide variants + fadeIn -> fully visible, no transform (content still appears)
      - fadeOut        -> fully hidden (its intended end state)
    This removes all vestibular-triggering movement while never leaving
    intended content invisible.

@@ -161,7 +161,6 @@
    is already possible from the keyboard. */
 .input::-webkit-search-cancel-button,
 .input::-webkit-search-decoration {
-  -webkit-appearance: none;
   appearance: none;
 }
 
