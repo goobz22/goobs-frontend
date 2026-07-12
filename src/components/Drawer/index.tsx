@@ -533,6 +533,21 @@ const Drawer: FC<DrawerProps> = ({
   // hydration consistency. Permanent drawers are always open.
   const safeOpen = variant === 'permanent' ? true : isMounted ? open : false
 
+  // A closed `persistent` drawer stays MOUNTED — unlike `temporary`, which
+  // unmounts (the null-render guard below), `persistent` slides off-screen via
+  // its `translateX(-100%)` transform and keeps its slot. Without intervention
+  // its focusable children would remain in the tab order and its `role="dialog"`
+  // would linger in the accessibility tree while it sits invisible off-screen:
+  // keyboard users would Tab into unseen controls and screen-reader users would
+  // meet a permanent, invisible off-screen dialog (WCAG 2.4.3 Focus Order,
+  // 2.4.7 Focus Visible, 4.1.2 Name/Role/Value). Marking the panel `inert` while
+  // a persistent drawer is closed removes the whole subtree from BOTH the tab
+  // order and the accessibility tree, so it is unreachable until opened. Then
+  // opening it lifts `inert` and the content becomes reachable again. `temporary`
+  // unmounts when closed and `permanent` is always open, so neither needs this.
+  // All `data-*` selectors are unchanged.
+  const isPersistentClosed = variant === 'persistent' && !safeOpen
+
   // Resolve effective anchor honoring force overrides (old getDrawerStyles).
   const effectiveAnchor = styles.forceLeft
     ? 'left'
@@ -656,6 +671,13 @@ const Drawer: FC<DrawerProps> = ({
       aria-labelledby={ariaLabelledBy}
       aria-describedby={ariaDescribedBy}
       aria-label={!ariaLabelledBy ? ariaLabel : undefined}
+      // A closed `persistent` drawer stays mounted but off-screen; `inert`
+      // removes it (and its `role="dialog"`) from the tab order AND the
+      // accessibility tree so keyboard/AT users can't reach the invisible panel
+      // until it opens (WCAG 2.4.3 / 4.1.2). `undefined` when not closed so the
+      // attribute is fully absent. `temporary` unmounts and `permanent` is
+      // always open, so both leave this off.
+      inert={isPersistentClosed || undefined}
       {...other}
     >
       {/* Sacred background */}
