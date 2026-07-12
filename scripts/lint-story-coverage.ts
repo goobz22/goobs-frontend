@@ -31,7 +31,6 @@ const allowlist = new Map<string, string>([
   ['keyframes', 'runtime keyframe injector; executed via SacredGlyphFrame stories'],
   // Hooks/utilities executed INSIDE component stories (audit §4.1 weak-indirect):
   ['useEscape', 'runs in every Dropdown/MultiSelect/Searchable* story (menu dismissal)'],
-  ['useArrowKeyNav', 'runs in every dropdown story (option keyboard nav)'],
   ['useOptionalFormContext', 'runs in FieldShell on every field story render'],
   ['useTreeViewContext', 'runs on every TreeView story render (item context)'],
   ['getRequiredProps', 'FieldShell required-marker logic; every required-field story'],
