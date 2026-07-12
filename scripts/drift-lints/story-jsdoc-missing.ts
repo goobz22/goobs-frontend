@@ -31,36 +31,50 @@ import type { DriftFile, DriftInstance, DriftLint } from '../lint-drift'
  * "contentless" (the `1) Light Theme Variants` numbered labels the audit flags
  * in Tabs/Toolbar/TransferList) is scored as documented here — judging a bare
  * number vs a real sentence is a semantic call left to review, not this gate.
- * The scan is string- and comment-aware (a single char pass blanks string and
- * comment CONTENT so an `export const … : Story` written inside a JSDoc example
- * or a template-literal demo is never a phantom hit, and apostrophes in comment
- * prose can't desync quote tracking — the pattern of
- * scripts/a11y-lints/label-input-id-divergence.ts, extended to also record where
- * each JSDoc block closes so "documented" can be decided). Template-literal
- * `${…}` interpolation is treated as opaque string content (a `` ` `` inside an
- * interpolation could mis-close) — acceptable: no real story export or JSDoc
- * lives inside an interpolation in this tree.
+ * The scan is comment- and template-literal-aware (a single char pass blanks
+ * comment and template CONTENT so an `export const … : Story` written inside a
+ * JSDoc example or a template-literal demo is never a phantom hit, and also
+ * records where each JSDoc block closes so "documented" can be decided — the
+ * pattern of scripts/a11y-lints/label-input-id-divergence.ts). Unlike a naive
+ * quote tracker it does NOT treat `'`/`"` as string delimiters: story files are
+ * JSX-heavy and a bare apostrophe in JSX text (`Don't`) would otherwise desync
+ * the scan and blank the rest of the file (a real bug caught here during the
+ * census). See scanStories for why ignoring single/double quotes is safe.
+ * Template-literal `${…}` interpolation is treated as opaque content (a `` ` ``
+ * inside an interpolation could mis-close) — acceptable: no real story export or
+ * JSDoc lives inside an interpolation in this tree.
  */
 
 interface StoryScan {
-  /** source with string + comment CONTENT blanked, newlines preserved */
+  /** source with comment + template-literal CONTENT blanked, newlines preserved */
   code: string
   /** 1-based line numbers on which a JSDoc block closes */
   jsdocEndLines: Set<number>
 }
 
 /**
- * Single char-scan that (a) blanks string + comment content so `export const`
- * text inside a comment/template-literal is never matched, and (b) records the
- * line each JSDoc block closes on, so a story export can be checked for a JSDoc
- * block on the line directly above it.
+ * Single char-scan that (a) blanks line-comment, block-comment, and
+ * template-literal CONTENT so an `export const … : Story` written inside a
+ * comment/JSDoc example or a template-literal demo is never matched, and (b)
+ * records the line each JSDoc block closes on, so a story export can be checked
+ * for a JSDoc block on the line directly above it.
+ *
+ * ⚠️ Single/double-quote strings are DELIBERATELY NOT tracked. Story files are
+ * JSX-heavy and JSX TEXT routinely contains bare apostrophes (`Don't`, `you're`)
+ * — a naive quote tracker treats that `'` as a string open and desyncs, blanking
+ * the rest of the file (a real bug caught during this module's census: an
+ * apostrophe swallowed every story below it). Because story exports are always
+ * col-0 on their own line, the only cost of ignoring `'`/`"` is that a `//` or
+ * a JSDoc-opening `/*` sequence appearing INSIDE a quoted string literal would
+ * be read as a comment; both are exceedingly rare in this tree and would only
+ * mis-blank content, never fabricate a story export. Template literals ARE
+ * tracked (backtick, with `\\` escape) because col-0 demo code lives in them.
  */
 function scanStories(text: string): StoryScan {
   const out = text.split('')
   const jsdocEndLines = new Set<number>()
   let line = 1
-  let mode: 'code' | 'line' | 'block' | 'string' = 'code'
-  let quote = ''
+  let mode: 'code' | 'line' | 'block' | 'template' = 'code'
   let blockIsJsDoc = false
   let i = 0
   const n = text.length
@@ -91,18 +105,18 @@ function scanStories(text: string): StoryScan {
       i++
       continue
     }
-    if (mode === 'string') {
+    if (mode === 'template') {
       if (c === '\\') {
+        // Escaped char inside a template literal (e.g. an escaped backtick):
+        // consume both so it can't close the template. Preserve a newline's
+        // line count.
         out[i] = ' '
-        if (text[i + 1] === '\n') {
-          line++
-        } else if (text[i + 1] !== undefined) {
-          out[i + 1] = ' '
-        }
+        if (text[i + 1] === '\n') line++
+        else if (text[i + 1] !== undefined) out[i + 1] = ' '
         i += 2
         continue
       }
-      if (c === quote) {
+      if (c === '`') {
         mode = 'code'
         out[i] = ' '
         i++
@@ -128,9 +142,8 @@ function scanStories(text: string): StoryScan {
       i += 2
       continue
     }
-    if (c === "'" || c === '"' || c === '`') {
-      mode = 'string'
-      quote = c
+    if (c === '`') {
+      mode = 'template'
       out[i] = ' '
       i++
       continue
