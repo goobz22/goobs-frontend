@@ -299,6 +299,23 @@ export const MultiSelection: Story = {
   name: 'Selection/Multi Selection',
   render: () => <MultiSelectionExample />,
   globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // Multi-select: `aria-selected` is announced on EVERY selectable node —
+    // `true` on the selected ones and `false` on the rest — so both
+    // selectability and the selected COUNT are conveyed (APG multi-select
+    // rule). This pins the contrast with single-select (below), which omits the
+    // attribute on unselected rows.
+    const work = canvasElement.querySelector('[data-testid="tree-item-work"]')
+    const personal = canvasElement.querySelector(
+      '[data-testid="tree-item-personal"]'
+    )
+    const documents = canvasElement.querySelector(
+      '[data-testid="tree-item-documents"]'
+    )
+    await expect(work).toHaveAttribute('aria-selected', 'true')
+    await expect(personal).toHaveAttribute('aria-selected', 'true')
+    await expect(documents).toHaveAttribute('aria-selected', 'false')
+  },
 }
 
 const CheckboxSelectionExample = () => {
@@ -1102,6 +1119,169 @@ export const TypeaheadAndExpandSiblings: Story = {
     )
     await expect(downloads).toHaveAttribute('aria-expanded', 'true')
     await expect(desktop).toHaveAttribute('aria-expanded', 'true')
+  },
+}
+
+/**
+ * Single-select `aria-selected` exposure (APG Tree View). In a single-select
+ * tree only the selected node carries `aria-selected="true"`; every other node
+ * OMITS the attribute rather than announcing a redundant "not selected" on each
+ * of many rows. (Contrast the multi-select tree, which announces true/false on
+ * all selectable nodes so the count is conveyed — see 'Selection/Multi
+ * Selection'.) Pinned observable state: exactly the selected node exposes
+ * `aria-selected`, and no unselected node does.
+ */
+export const SingleSelectAriaSelected: Story = {
+  name: 'Accessibility/Single-Select ARIA Selected',
+  args: {
+    items: sampleTreeData,
+    // multiSelect defaults false and selection is enabled → single-select.
+    defaultExpandedItems: ['documents'],
+    defaultSelectedItems: ['work'],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // The one selected node announces its selected state.
+    const selected = canvasElement.querySelector(
+      '[data-testid="tree-item-work"]'
+    )
+    await expect(selected).toHaveAttribute('aria-selected', 'true')
+
+    // Every unselected node OMITS aria-selected entirely (no "aria-selected"
+    // attribute at all — not aria-selected="false").
+    for (const id of ['documents', 'personal', 'downloads', 'desktop']) {
+      const node = canvasElement.querySelector(`[data-testid="tree-item-${id}"]`)
+      await expect(node).not.toHaveAttribute('aria-selected')
+    }
+  },
+}
+
+/**
+ * Focus preservation when a subtree collapses via the CHEVRON (pointer) path.
+ * Collapsing an ancestor unmounts the child `role="group"` (and every
+ * descendant row inside it); if the focused row is inside that subtree it must
+ * NOT drop to `<body>` — focus moves to the collapsing ancestor row, which
+ * stays visible (WCAG 2.4.3 Focus Order). Pinned observable state: with a
+ * descendant focused, collapsing the ancestor by its chevron leaves focus on
+ * the (now collapsed) ancestor, never on the body.
+ */
+export const ChevronCollapsePreservesFocus: Story = {
+  name: 'Accessibility/Chevron Collapse Preserves Focus',
+  args: {
+    items: sampleTreeData,
+    // 'documents' → 'work' → ('presentation', …) all expanded so a grandchild
+    // row is on screen and focusable.
+    defaultExpandedItems: ['documents', 'work'],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // Focus a DESCENDANT deep inside the 'documents' subtree ('presentation' is
+    // a grandchild via 'work').
+    const descendant = canvasElement.querySelector(
+      '[data-testid="tree-item-presentation"]'
+    ) as HTMLElement
+    descendant.focus()
+    await expect(descendant).toHaveFocus()
+
+    // Collapse the ANCESTOR via its chevron. A programmatic `.click()`
+    // dispatches the click WITHOUT the browser's pointer focus-fixup, so focus
+    // genuinely starts on the descendant that is about to unmount — the exact
+    // case the fix must handle. The chevron is the ancestor row's first child.
+    const documentsRow = canvasElement.querySelector(
+      '[data-testid="tree-item-documents"]'
+    ) as HTMLElement
+    const chevron = documentsRow.firstElementChild as HTMLElement
+    chevron.click()
+
+    await waitFor(async () => {
+      await expect(documentsRow).toHaveAttribute('aria-expanded', 'false')
+    })
+    // Focus landed on the collapsed ancestor, not the body.
+    await expect(documentsRow).toHaveFocus()
+    await expect(document.body).not.toHaveFocus()
+  },
+}
+
+const ProgrammaticCollapseFocusExample = () => {
+  const apiRef = useTreeViewApiRef()
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([
+    'documents',
+    'work',
+  ])
+
+  return (
+    <div>
+      <button
+        data-testid="collapse-documents"
+        // Do NOT let clicking the button steal focus from the tree — the whole
+        // point is that focus is still on the tree descendant when the collapse
+        // fires. preventDefault on mousedown keeps focus where it is.
+        onMouseDown={e => e.preventDefault()}
+        onClick={() =>
+          apiRef.current?.setItemExpansion({
+            itemId: 'documents',
+            isExpanded: false,
+          })
+        }
+        style={{ padding: '4px 8px', fontSize: '12px' }}
+      >
+        Collapse Documents
+      </button>
+      <TreeView
+        items={sampleTreeData}
+        expandedItems={expandedItems}
+        apiRef={apiRef}
+        onExpandedItemsChange={(
+          event: React.SyntheticEvent,
+          itemIds: string[]
+        ) => {
+          setExpandedItems(itemIds)
+        }}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
+/**
+ * Focus preservation when a subtree collapses PROGRAMMATICALLY
+ * (`apiRef.setItemExpansion({ isExpanded: false })`). Unlike a pointer/keyboard
+ * collapse, nothing moves focus for us here, so a focused descendant would drop
+ * to `<body>` when its subtree unmounts. The fix moves focus to the collapsing
+ * ancestor first (WCAG 2.4.3). Pinned observable state: with a descendant
+ * focused, a programmatic collapse of the ancestor leaves focus on the ancestor
+ * row, never on the body.
+ */
+export const ProgrammaticCollapsePreservesFocus: Story = {
+  name: 'Accessibility/Programmatic Collapse Preserves Focus',
+  render: () => <ProgrammaticCollapseFocusExample />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // Focus a DESCENDANT deep inside the 'documents' subtree.
+    const descendant = canvasElement.querySelector(
+      '[data-testid="tree-item-presentation"]'
+    ) as HTMLElement
+    descendant.focus()
+    await expect(descendant).toHaveFocus()
+
+    // Collapse the ANCESTOR programmatically. The button preventDefaults its
+    // mousedown, so focus is still on the descendant when setItemExpansion runs.
+    const collapseBtn = canvasElement.querySelector(
+      '[data-testid="collapse-documents"]'
+    ) as HTMLElement
+    await userEvent.click(collapseBtn)
+
+    const documentsRow = canvasElement.querySelector(
+      '[data-testid="tree-item-documents"]'
+    ) as HTMLElement
+    await waitFor(async () => {
+      await expect(documentsRow).toHaveAttribute('aria-expanded', 'false')
+    })
+    // The unmounted descendant is gone; focus moved to the ancestor, not <body>.
+    await expect(documentsRow).toHaveFocus()
+    await expect(document.body).not.toHaveFocus()
   },
 }
 

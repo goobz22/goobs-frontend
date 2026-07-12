@@ -449,6 +449,45 @@ const useTreeViewContext = () => {
 }
 
 // --------------------------------------------------------------------------
+// FOCUS HELPERS
+// --------------------------------------------------------------------------
+
+/**
+ * Preserve DOM focus when a subtree is about to be collapsed.
+ *
+ * When a parent node collapses, its child `role="group"` (and every descendant
+ * row inside it) is removed from the DOM. If the currently focused element lives
+ * inside that subtree — e.g. a grandchild row the user navigated to — the
+ * unmount drops focus to `<body>`, losing the user's position (a WCAG 2.4.3
+ * Focus Order regression). The keyboard ArrowLeft collapse path never hits this
+ * (focus is on the parent being collapsed, which stays visible), but a chevron
+ * pointer-click and the programmatic `apiRef.setItemExpansion({isExpanded:false})`
+ * path can collapse an ancestor while a descendant holds focus.
+ *
+ * This moves focus to the collapsing node's own row BEFORE the collapse mutates
+ * state. Because the row stays visible after the collapse (only its descendants
+ * unmount), focusing it first means it retains focus through the re-render, and
+ * the row's `onFocus` handler keeps roving tabindex + `focusedItem` in sync.
+ *
+ * It is a no-op unless a descendant of `itemId` currently holds DOM focus:
+ * the child group only exists in the DOM while the node is expanded, and its
+ * row is the group's immediately-preceding sibling (scope-safe even with
+ * multiple `<TreeView>`s sharing item ids on one page).
+ *
+ * @param itemId - The node about to be collapsed.
+ */
+const preserveFocusOnCollapse = (itemId: TreeViewItemId): void => {
+  if (typeof document === 'undefined') return
+  const group = document.getElementById(`tree-group-${itemId}`)
+  if (!group || !group.contains(document.activeElement)) return
+  // The treeitem row is rendered as the group's preceding sibling (same
+  // Fragment: row first, then its child group), so this resolves to THIS
+  // node's row without a global id lookup that could collide across trees.
+  const row = group.previousElementSibling
+  if (row instanceof HTMLElement) row.focus()
+}
+
+// --------------------------------------------------------------------------
 // HOOKS
 // --------------------------------------------------------------------------
 
@@ -606,6 +645,11 @@ const useTreeViewExpansion = (
       const wasExpanded = newExpansion.has(itemId)
 
       if (wasExpanded) {
+        // Collapsing this node unmounts its child group. If DOM focus lives on a
+        // descendant inside that group (e.g. a chevron pointer-click while a
+        // grandchild row is focused), move focus to this node first so it is not
+        // dropped to <body> when the subtree unmounts (WCAG 2.4.3).
+        preserveFocusOnCollapse(itemId)
         newExpansion.delete(itemId)
       } else {
         newExpansion.add(itemId)
@@ -1398,12 +1442,23 @@ const TreeItem: FC<TreeItemProps> = ({
           : -1
       }
       role="treeitem"
-      // APG Tree View: `aria-selected` reflects selection state ONLY on a tree
-      // whose nodes are selectable. When selection is turned off entirely
-      // (`disableSelection`) no node can be selected, so the attribute is
-      // omitted rather than announcing a permanent, unchangeable
-      // "not selected" on every row (WCAG 4.1.2 Name, Role, Value).
-      aria-selected={context.disableSelection ? undefined : isSelected}
+      // APG Tree View: `aria-selected` is exposed according to what the tree's
+      // selection model supports (WCAG 4.1.2 Name, Role, Value):
+      //  - `disableSelection` → no node is selectable, so the attribute is
+      //    omitted entirely (never a permanent, unchangeable "not selected").
+      //  - MULTI-select (or checkbox selection, which shows a per-row checkable
+      //    control) → every selectable node announces `aria-selected` as
+      //    true/false so its selectability and the selected count are conveyed.
+      //  - SINGLE-select → only the selected node carries `aria-selected="true"`;
+      //    it is omitted on the others (the APG single-select rule) so a screen
+      //    reader is not told "not selected" on every one of many rows.
+      aria-selected={
+        context.disableSelection
+          ? undefined
+          : context.multiSelect || context.checkboxSelection
+            ? isSelected
+            : isSelected || undefined
+      }
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-disabled={isDisabled}
       aria-level={level + 1}
@@ -1642,6 +1697,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
           isExpanded?: boolean
           event?: React.SyntheticEvent
         }) => {
+          const wasExpanded = expandedItems.has(itemId)
           const newExpansion = new Set(expandedItems)
           if (isExpanded === undefined) {
             // Toggle
@@ -1654,6 +1710,14 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
             newExpansion.add(itemId)
           } else {
             newExpansion.delete(itemId)
+          }
+          // Programmatic collapse has no pointer/keyboard focus move of its own,
+          // so if a descendant of this node currently holds DOM focus it would
+          // drop to <body> when the subtree unmounts. Move focus to this node
+          // first, but only when this operation actually collapses it (WCAG
+          // 2.4.3).
+          if (wasExpanded && !newExpansion.has(itemId)) {
+            preserveFocusOnCollapse(itemId)
           }
           const syntheticEvent = event || (new Event('programmatic') as any)
           setExpandedItems(
