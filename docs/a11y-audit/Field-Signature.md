@@ -34,6 +34,7 @@ that image self-describing and reachable.
 | 7 | minor | 1.4.11 / 2.4.11 (AA) | `SignatureField.module.css` (`.canvas:focus-visible`) | The canvas focus ring used the gold token `--field-border-focus` (~#d4af37) over the default white surface (`--signature-bg` #ffffff) ≈ **2.2:1**, below the 3:1 non-text / focus-appearance threshold — a weak indicator on an empty/required pad. | **FIXED** |
 | 8 | minor | 4.1.3 (A) — test coverage | `SignatureField.stories.tsx` | The `role="status"` region only populates on a real `endStroke`/Clear interaction; none of the visual stories drove an interaction, so the populated `"Signature captured."`/`"Signature cleared."` state had **zero story coverage** (stories are the only regression test in this repo) — the announcement wiring could be deleted with every baseline still green. | **FIXED** |
 | 9 | moderate | 1.4.3 Contrast (Minimum) (AA); 1.4.11 Non-text Contrast (AA) | `SignatureField.module.css:62` (pre-fix `.placeholder`) | **[Found in the 2026-07-11 owner pass, missed by passes 1–2.]** The `"Sign here"` placeholder used `color: var(--signature-placeholder, rgba(0,0,0,0.35))`. No `--signature-placeholder` token is defined in `src/styles/**` (verified by grep), so the fallback ships, and it sits on the always-white default signing surface (`--signature-bg` #ffffff, no `[data-theme]` override). `rgba(0,0,0,0.35)` over white ≈ `#a6a6a6` = **2.43:1** (computed) — below the 4.5:1 text minimum for this meaningful, visible instruction text. | **FIXED** |
+| 10 | minor | 2.4.6 Headings and Labels (AA); 2.5.3 Label in Name (A) | `index.tsx` (Clear `<button>`) | **[Found in the 2026-07-11 re-audit pass, missed by passes 1–2.]** The Clear button's accessible name was the bare visible text **`"Clear"`** (default `clearText`). Out of visual context — e.g. a screen-reader button/rotor list, where several fields could each surface a "Clear" — the label does not identify *what* it clears. The sibling `PasswordField` toggle sets the repo's descriptive-name bar (`aria-label="Show password"`, not "Show"). Fixed in-component: `aria-label={\`${clearText}, ${baseLabel}\`}` → e.g. **"Clear, Signature"**, folding the field identity into the name while keeping `clearText` as the leading substring so the visible text remains part of the accessible name (2.5.3) even when a consumer customizes `clearText`. Visible text, `data-action="clear"`, and the machine-test contract are unchanged (additive attribute only). | **FIXED** |
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
 
@@ -67,6 +68,11 @@ audio-only.
 - **Decorative duplication removed.** The `"Sign here"` placeholder overlay is now
   `aria-hidden="true"` — the same "draw to sign" instruction is in the canvas name, so the
   overlay is no longer read as a redundant second node.
+- **Clear control is self-describing.** The Clear `<button>` now carries a contextual accessible
+  name (`"Clear, Signature"`) so it is unambiguous when read out of context in a rotor/button
+  list (#10), matching the `PasswordField` "Show password" precedent. Visible text stays "Clear"
+  and remains a substring of the accessible name (WCAG 2.5.3), so voice-control "click Clear"
+  still targets it.
 - **Required.** Conveyed programmatically through the accessible name (see #2/#6); the visible
   FieldShell `*` indicator remains `aria-hidden` (unchanged, Shell-owned).
 
@@ -125,6 +131,18 @@ All in-directory, additive, no public-API prop removed/renamed/retyped; no exist
     the deprecated `clip: rect(0,0,0,0)` (stylelint `property-no-deprecated` error) — replaced with
     the modern `clip-path: inset(50%)`. Same visual/AT behavior; clears the `lint:css` gate.
 
+### Re-audit fixes (2026-07-11, pass 3)
+
+12. **Contextual accessible name on the Clear button** (`index.tsx`, #10): added
+    `aria-label={\`${clearText}, ${baseLabel}\`}` so the control reads "Clear, Signature" rather than
+    a bare "Clear" (WCAG 2.4.6 / 2.5.3). Additive — visible text, `data-action="clear"`, and every
+    existing `getByRole('button', { name: /clear/i })` story query are unaffected; the `RequiredEmpty`
+    play was tightened to `{ name: /clear,\s*signature/i }` to lock the contextual name as a
+    regression. Verified the `required` forwarding (`requiredProp ?? styles?.required ?? false` →
+    `FieldShell required={…}`) matches the identical pattern in `Field/Text` — the schema-derived
+    `required` path is a library-wide convention, not a Signature defect, so it was intentionally
+    left unchanged (see Deferred).
+
 ## Stories updated
 
 New stories in `SignatureField.stories.tsx`, each exercising a new a11y state (stories are the
@@ -141,6 +159,9 @@ only regression tests in this repo):
   the `role="status"` region reads `"Signature captured."` and Clear becomes enabled.
 - **`ClearAnnouncement`** (pass 2) — `play` clicks Clear on a prefilled pad and asserts the region
   reads `"Signature cleared."` and Clear becomes disabled.
+- **`RequiredEmpty`** (pass 3, extended) — its `play` now queries the Clear button by
+  `{ name: /clear,\s*signature/i }`, locking the contextual accessible name (#10) alongside the
+  disabled-when-empty assertion.
 
 ## Deferred (root cause outside my directory)
 
@@ -154,3 +175,24 @@ only regression tests in this repo):
   would either expose the pieces individually (e.g. a `required` boolean on the slot) or accept a
   hint for non-widget roles and omit `aria-required` itself. Suggested, not blocking — the in-component
   strip fully resolves the Signature case.
+- **LIBRARY-WIDE, not a Signature defect — schema-derived `required` is defeated by the field's own
+  coalescing (deferred, no in-scope fix).** `FieldShell` (`src/components/Field/Shell/index.tsx:314–317`)
+  can auto-derive `required` from the `<Form>` zod schema — but ONLY when the consumer passes a
+  *nullish* `required`. `SignatureField` (like `Field/Text/index.tsx:169`, `Field/*` generally)
+  resolves `const required = requiredProp ?? styles?.required ?? false` and forwards the concrete
+  `required={false}`; since `false ?? …` is `false`, the Shell's schema-derivation never runs for a
+  field that is required *only* via the schema (e.g. the `InForm` story's `signatureImage:
+  z.string().min(1)` with no explicit `required` prop → no visible `*`, no `aria-required`, and the
+  canvas name omits ", required"). This is **consistent** between Shell and the canvas name (both use
+  the same prop-only value, so no divergence within Signature) and is identical across every Field
+  component, so it is an intentional library convention / a Shell-level design question — NOT fixable
+  in this directory without diverging from the rest of the field system. Suggested Shell/field-family
+  fix: have fields forward the raw `requiredProp` (or `requiredProp ?? styles?.required`, left
+  `undefined` when unset) so the Shell's schema fallback can fire.
+- **LIBRARY-WIDE — signing-surface border contrast (deferred to shared token / Shell).** `.surface`
+  (`SignatureField.module.css:10`) draws its boundary with `1px solid var(--field-border-default,
+  rgba(212,175,55,0.3))` — the same shared field-border token every Field uses. On the default white
+  signing surface the gold-at-0.3α border is ≈1.2:1, below the 3:1 UI-component-boundary minimum
+  (WCAG 1.4.11). Root cause is the shared `--field-border-default` token (owned by `src/styles/**` /
+  Shell, not this directory); bumping it only for Signature would diverge from the field family.
+  Deferred to the field-border/contrast owner.

@@ -166,8 +166,11 @@ export const RequiredEmpty: Story = {
     // single query asserts the name carries BOTH required-ness and empty-state.
     canvas.getByRole('img', { name: /required, no signature, draw to sign/i })
     // Nothing to clear yet → the keyboard-reachable Clear control is disabled.
+    // The `name` pattern also locks the contextual accessible name (WCAG 2.4.6 /
+    // 2.5.3): the button reads "Clear, Signature" — the visible "Clear" text plus
+    // the field identity — not a bare, out-of-context "Clear".
     await expect(
-      canvas.getByRole('button', { name: /clear/i })
+      canvas.getByRole('button', { name: /clear,\s*signature/i })
     ).toBeDisabled()
   },
 }

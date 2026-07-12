@@ -333,6 +333,15 @@ const SignatureField: React.FC<SignatureFieldProps> = ({
               onClick={handleClear}
               disabled={disabled || !hasInk}
               data-action="clear"
+              // The visible text ("Clear") names the button, but on its own it
+              // is ambiguous in a screen-reader element/rotor list where buttons
+              // are read out of their visual context (WCAG 2.4.6 Headings and
+              // Labels) — several fields could each expose a bare "Clear". Fold
+              // the field identity into the accessible name so it reads e.g.
+              // "Clear, Signature". Built from `clearText` first so the visible
+              // label text is always a substring of the accessible name (WCAG
+              // 2.5.3 Label in Name) even when a consumer customizes `clearText`.
+              aria-label={`${clearText}, ${baseLabel}`}
             >
               {clearText}
             </button>
