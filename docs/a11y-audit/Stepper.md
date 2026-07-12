@@ -27,6 +27,7 @@ readers.
 | 7 | Minor | 2.3.3 Animation from Interactions (AAA) | `Stepper.module.css:139, 182` | `.iconContainer` and `.stepButton` use `transition: all 0.3s ease` with **no `prefers-reduced-motion` guard**. | FIXED (`@media (prefers-reduced-motion: reduce)` drops both transitions) |
 | 8 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx:227-229` | The wizard's **"All steps completed!"** pane appears (conditionally mounted) with **no live region**, so a screen-reader user gets no announcement that the wizard finished. | FIXED (announcement now via a **persistent, initially-empty** `role="status"` region at the component root; the visible title carries no role — hardened in the 2026-07-11 review follow-up, see below) |
 | 9 | Moderate | 4.1.3 Status Messages (AA) | `index.tsx` wizard-mode step transition (Continue/Back) | **Wizard step transitions were not announced.** Advancing (Continue) or retreating (Back) swaps the rendered `content` and moves the active step **without moving focus** (focus stays on the Continue/Back button), so a screen-reader user got no signal they had navigated to a new step — only the terminal completion was announced (Issue 8), never the intermediate step moves. | FIXED (RF-3 — a **persistent, initially-silent** `aria-live="polite"` region announces the compact position "Step X of N: <label>" on each change; see the 2026-07-11 follow-up below) |
+| 10 | Serious | 2.4.3 Focus Order (A) | `index.tsx:255` (completion branch of `renderWizardNavigation`) | **Keyboard focus was lost on wizard completion.** Activating **Finish** advances into the completion pane, which renders **instead of** the nav row holding the Finish button — so the focused Finish button **unmounts** and the browser drops focus to `<body>`. A keyboard user is stranded at the top of the document with no focus path to the pane's "Start Over"/`finalActions` buttons except tabbing from scratch. (Found in the 2026-07-11 second pass — distinct from the step-content focus nuance the original pass left to consumers: here the library's OWN control that held focus disappears.) | FIXED (focus is moved to the completion pane on the not-completed → completed transition; see the second-pass section below) |
 
 No hearing/media issues: a grep of the component for `new Audio`/`AudioContext`/`<audio>`/
 `<video>`/`navigator.vibrate`/`.play(` returned nothing — Stepper conveys no information by sound.
@@ -75,6 +76,12 @@ applicable.
   of links/buttons) — Tab/Shift+Tab move between the real `<a>`/`<button>` step controls and the
   wizard Back/Continue/Finish/Start-Over `<button>`s; Enter (and Space on buttons) activate them
   natively. No keyboard trap; wizard mode is inline (no overlay/focus-trap surface).
+- **Completion focus (Issue 10):** activating Finish unmounts the focused Finish button, so focus is
+  moved to the completion pane (`role="group"` labelled "All steps completed!", `tabIndex={-1}`) on
+  the not-completed → completed transition, instead of being dropped to `<body>` (WCAG 2.4.3). It fires
+  only on that transition — never on initial mount — so a Stepper that renders already-completed does
+  not steal focus on load (WCAG 3.2.1). `.wizardCompleted:focus-visible` shows the ring for keyboard
+  completion only.
 
 ## SEO semantics
 
@@ -141,7 +148,10 @@ no existing `data-*`/`role`/`aria` selector removed):
   **persistent, initially-empty `role="status"` region** (RF-2): the region exists and is empty
   before completion, is populated with "All steps completed!" after, and exactly two nodes carry
   the text (sr-only region + visible heading) — plus the "Start Over" reset. Fails if the
-  completion live region regresses to a conditionally-mounted / already-populated form.
+  completion live region regresses to a conditionally-mounted / already-populated form. **Extended in
+  the second pass (Issue 10):** it now also `waitFor`-asserts that the completion pane
+  (`getByRole('group', { name: 'All steps completed!' })`) `toHaveFocus()` after Finish — the
+  regression that re-fails if focus falls back to `<body>` instead of the pane.
 - **`WizardMode`** (extended in the 2026-07-11 RF-3 follow-up) — its `play` function now also pins
   the step-transition announcement (Issue 9 / RF-3): the polite `aria-live` region reads
   "Step 1 of 3: Plan" on mount, "Step 2 of 3: Build" after Continue (and no longer "Step 1 of 3:
@@ -229,6 +239,54 @@ mount, "Step 2 of 3: Build" after Continue, and "Step 1 of 3: Plan" again after 
 string gone at each step), matching the full "Step X of N: <label>" string — unique to the live
 region, so it can't accidentally match the bare step-control label.
 
+## Second-pass follow-up (2026-07-11) — completion focus loss
+
+A fresh audit pass over the (already strong) committed work above re-verified every prior claim
+against the source and the icon subsystem — all correct — and found **one** remaining gap, now
+fixed at root cause, additive-only, inside `src/components/Stepper/`.
+
+### Issue 10 (serious) — keyboard focus lost on wizard completion (WCAG 2.4.3)
+
+The wizard completion branch (`renderWizardNavigation`, `index.tsx:255`) renders the completion pane
+**instead of** the nav row that holds the Continue/**Finish** button. So when a keyboard user
+activates Finish, the button that held focus is unmounted and the browser drops focus to `<body>` —
+the user is stranded at the top of the document, and the pane's `finalActions` / "Start Over" buttons
+are only reachable by tabbing from scratch. This is the classic "the control I just activated
+disappeared, and focus went nowhere sensible" Focus-Order failure. It is **distinct** from the
+step-content focus nuance the original pass deferred to consumers (below): that concerns focusing the
+consumer's arbitrary step `content` on ordinary transitions; this concerns the library's OWN
+navigation button vanishing.
+
+**Fix (`index.tsx`):** a component-level `showCompletionPane` boolean
+(`isWizardMode && activeStep >= steps.length && Boolean(finalActions)`) drives a `useEffect` that
+calls `.focus()` on the completion pane. It fires **only on the not-completed → completed
+transition** — `prevShowCompletionRef` seeds to the first render's value, so the effect no-ops on
+initial mount and a Stepper that renders already-completed does **not** steal focus on load (guards
+WCAG 3.2.1 On Focus). The completion pane gained `ref`, `tabIndex={-1}` (programmatic-only focus
+target, never a Tab stop), `role="group"`, and `aria-labelledby` → the completion title (which gained
+a `useId`-based `id`), so the pane has the accessible name "All steps completed!" when focus lands.
+The persistent `role="status"` announcer (RF-2) is **kept**, not replaced: the live region announces
+regardless of focus, and the focus move restores keyboard operability. A same-tick focus change tends
+to supersede the queued polite announcement, so real-world double-speak is minimal.
+
+**Fix (`Stepper.module.css`):** added `.wizardCompleted:focus-visible` (2px outline) with per-theme
+override rules (`--goobs-{sacred,light,dark}-focus-ring`), matching the existing
+`.stepButton:focus-visible` pattern. `:focus-visible` (not `:focus`) keeps the ring off when the
+wizard is completed by mouse/touch.
+
+**Markup changes:** the completion pane `<div>` **gains** `role="group"`, `aria-labelledby`, and
+`tabIndex={-1}`; its title `<div>` **gains** an `id`. All additive — nothing removed or renamed, and
+no machine-test selector (`data-component`/`data-theme`/`data-orientation`/`data-status`/`data-action`)
+is touched (those live on the root, list, and step controls, none of which changed).
+
+**Regression pin:** `WizardCompletionAnnouncement`'s `play` now `waitFor`-asserts
+`getByRole('group', { name: 'All steps completed!' }).toHaveFocus()` after Finish (imported `waitFor`
+from `storybook/test`). It re-fails if the completion pane stops receiving focus (i.e. focus falls to
+`<body>`). All prior assertions in that story (empty-then-populated `role="status"`, exactly-two "All
+steps completed!" nodes, "Start Over" visible) still pass unchanged with the additive markup.
+
+**Commit:** `283f7e0d` — `a11y(Stepper): move focus to completion pane on wizard finish (WCAG 2.4.3)`.
+
 ## Deferred
 
 - **Breadcrumb (cross-component — same list-role class as RF-1).** `src/components/Breadcrumb/index.tsx:246`
@@ -240,11 +298,36 @@ region, so it can't accidentally match the bare step-control label.
   story assertion. Not fixed here because `src/components/Breadcrumb/` is outside this fix-owner's
   directory.
 
-Nothing else deferred — every Stepper fix (original pass + this review follow-up) lived inside
-`src/components/Stepper/`. No shared-file change (Icons, Button, `global.css`, barrel) was
-required: the status icons were already correctly decorative via the shared `resolveIconA11y`
-contract, and the focus-ring/`.srOnly` conventions reuse existing `--goobs-*` tokens and the
-repo-standard pattern.
+- **`"← Back"` glyph in the wizard Back button (Minor, shared file — NOT owned).** The Back button's
+  text is `"← Back"`; the U+2190 arrow is decorative but part of the button's text string, so some AT
+  may voice "left arrow, Back". The arrow is a useful visual affordance; aria-hiding *just* the glyph
+  would require an icon/text split in the shared **Button** component (`src/components/Button/`) —
+  outside this fix-owner's directory. **Suggested change:** give `CustomButton` a way to render a
+  leading decorative icon marked `aria-hidden`, or pass `"Back"` as the accessible name with the arrow
+  as a separate hidden node. Deferred (shared file).
+
+The remaining Stepper fixes (original pass + both follow-ups) lived inside `src/components/Stepper/`.
+No shared-file change (Icons, Button, `global.css`, barrel) was required for any FIXED issue: the
+status icons were already correctly decorative via the shared `resolveIconA11y` contract, and the
+focus-ring/`.srOnly` conventions reuse existing `--goobs-*` tokens and the repo-standard pattern.
+
+### Non-blocking observations (not WCAG failures — left as-is)
+
+- **Wizard-completion title is not a real heading (SEO/semantics).** `.wizardCompletedTitle` ("All
+  steps completed!") is a `<div>`. Making it an `<h1>`–`<h6>` would aid heading navigation, but it is
+  transient client-only wizard state (not crawled primary content), is already announced via
+  `role="status"` and now reachable via the completion focus move + `aria-labelledby`, and the correct
+  level depends on the consumer's outline — the additive fix would be a `headingLevel` prop, a broader
+  API decision beyond hardcoding a possibly-mis-nested level. Left as a `<div>`; a `headingLevel` prop
+  is the recommended future add.
+- **Nav-mode dynamic status changes are not announced.** Navigation mode has no live region, so a
+  consumer that flips a step to `error`/`completed` *in place* (as `InteractiveDemo` does) gets no SR
+  announcement. Nav mode's model is page-navigation-based (statuses set by the server render per route,
+  announced on load via `aria-current`/status text), so a live region here risks noise for little gain.
+- **"Locked" wording for not-yet-reached wizard steps.** A wizard future step derives status
+  `inactive` → SR-only word "Locked", which reads slightly stronger than "upcoming/not completed" for a
+  step you simply haven't reached. The state (disabled, unreachable) is conveyed correctly, satisfying
+  WCAG; the wording is a copy nuance, left as-is.
 
 **Superseded observation (now RF-3, fixed):** the original pass left wizard step changes
 unannounced, reasoning that wrapping the arbitrary consumer `content` in `aria-live` would
