@@ -198,6 +198,13 @@ test — Storybook + Chromatic):
   asserts every digit cell flips `aria-invalid="true"`, a linked `role="alert"` message
   appears with the schema text, and each cell's `aria-describedby` points at that alert's
   `id`. Pins the whole engine-error → linked-error contract (follow-up #2/#3).
+- **SuccessTransition** (3rd pass) — a stateful wrapper that starts in the INPUT state and
+  flips `showSuccessState` true when Verify is clicked (the real input→success flow, which no
+  other success story exercises because they mount already-successful). Its **play function**
+  asserts the persistent `role="status" aria-live="polite"` region is empty in the input state
+  then announces "Verification Successful" as a content mutation (4.1.3), AND that focus moves
+  to the "Disable Verification" button rather than dropping to `<body>` (2.4.3). The behavioural
+  regression test for the F1 announcement fix and the G1 focus-order fix (follow-up G1/G2).
 
 ## Deferred
 _None as WCAG gaps._ The initial-pass Deferred item (visible form-error text +
@@ -276,3 +283,53 @@ All five review findings fixed at root cause, within this component's directory.
   replacements, not regressions, and neither is part of the Playwright selector contract.
 - **Added** the `role="alert"` error region + per-cell `aria-describedby` (F2). No
   public prop was added, renamed, removed, or retyped.
+
+<a id="third-pass-follow-ups"></a>
+## Adversarial review follow-ups (2026-07-11, 3rd pass)
+
+A further review found two remaining issues; both are now fixed at root cause within this
+directory. Verified: `bun lint:file` clean on both files; Button forwards its ref to the
+native `<button>` (`forwardRef<HTMLButtonElement>` → `<button ref={ref}>`), so the focus
+target resolves; `Partial<ButtonProps>` cannot type-supply a `ref` (`ButtonProps extends
+Omit<ButtonHTMLAttributes, 'style'>`, which excludes `ref`), so the internal `disableButtonRef`
+placed after the `{...disableVerificationButtonProps}` spread can never collide.
+
+### G1. Focus lost to `<body>` on the input→success transition — FIXED (moderate, 2.4.3)
+- When `showSuccessState` flipped true the input branch unmounted — taking the just-activated
+  Verify button (or the focused last digit cell) with it — and the success branch mounted.
+  Nothing moved focus onto the success view, so a keyboard/AT user was dumped at the top of
+  the document with only the "Disable Verification" button left to Tab to. The 2nd pass
+  addressed only the SR announcement half of finding 3, never focus itself.
+- **Fix:** a `disableButtonRef` (`useRef<HTMLButtonElement>`) is passed to the success view's
+  sole control (placed AFTER the props spread so the a11y focus guarantee owns the ref), and a
+  focus-move `useEffect` keyed on `showSuccessState` calls `disableButtonRef.current?.focus()`
+  the moment the button mounts. It is gated to the input→success TRANSITION only via a
+  `prevSuccessForFocus` ref, so a component that MOUNTS already in the success state does not
+  steal focus and a success→input transition does not fire. `index.tsx` focus-restoration
+  effect + `disableButtonRef`. Commit `47f30e20`. `pattern: focus-lost-on-view-swap`.
+
+### G2. F1 success-announcement transition had no regression test — FIXED (minor, 4.1.3 / 2.4.3)
+- Every success story (`LightSuccessState`/`DarkSuccessState`/`SacredSuccessState`/
+  `CustomHeadingLevel`) mounts directly with `showSuccessState: true`, so the transition code
+  path (`setSuccessAnnouncement` during render) and the persistent live region's content
+  mutation were never exercised — and live regions do not announce initial content, so those
+  stories didn't cover the announce path at all. No story drove an input→success transition.
+- **Fix:** added the **SuccessTransition** story — a stateful wrapper that starts in the INPUT
+  state (`value="123456"`, Verify enabled) and flips `showSuccessState` true when Verify is
+  activated (the real user flow). Its play function pins BOTH transition-only behaviours:
+  (1) the persistent `role="status" aria-live="polite"` region is SILENT in the input state and
+  receives "Verification Successful" as a CONTENT MUTATION on the transition (4.1.3), and
+  (2) focus lands on the "Disable Verification" button, not `<body>`, after the input branch
+  unmounts (2.4.3). This is the behavioural regression test for both the F1 announcement fix
+  and G1 — a future edit that reverts either fails this story first. Commit `8c93401c`.
+
+### Verification note (3rd-pass adversarial re-check)
+Both fixes were already present and committed at review time; this pass re-verified their
+CORRECTNESS (not merely their presence): the ref genuinely reaches the native button so
+`.focus()` is not a silent no-op; the adjust-state-during-render announcement path (previous
+`showSuccessState` in state, no effect) writes the message into the pre-existing region on
+the transition render before commit; and the mount auto-focus timer cannot steal focus back
+(it only fires once on mount, guarded by `!inputRefs.current[0].value`, and the first cell is
+unmounted by the time the success view is shown). No further code change was required; the
+only gap was this documentation section (the header linked to a `#third-pass-follow-ups`
+anchor that did not yet exist) — now added.
