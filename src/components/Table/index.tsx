@@ -66,6 +66,10 @@ const TableSectionContext = React.createContext<'head' | 'body' | undefined>(
 const resolveTheme = (styles?: TableStyles): 'sacred' | 'light' | 'dark' =>
   styles?.theme ?? 'sacred'
 
+/** Compose class names, dropping falsy entries (the library's no-clsx pattern). */
+const joinClasses = (...names: Array<string | undefined>): string =>
+  names.filter(Boolean).join(' ')
+
 /**
  * `data-theme` for the SUBCOMPONENTS (head/row/cell). Unlike the container,
  * these emit the attribute ONLY when the caller explicitly themed THIS element.
@@ -221,8 +225,10 @@ export interface TableCellProps {
    * Cell content. A cell resolves to a header `<th>` automatically when it
    * sits inside a `TableHead`; passing a raw `<th>` child (the legacy pattern)
    * is unwrapped to the same real `<th>` rather than emitting invalid
-   * `<td><th>` markup. Header cells are flagged `data-header-cell="true"` so
-   * the CSS module styles them as header cells.
+   * `<td><th>` markup — and the raw `<th>`'s own attributes
+   * (`colSpan`/`rowSpan`/`scope`/`id`/`className`/`style`/…) are forwarded onto
+   * that `<th>`, so the unwrap is lossless. Header cells are flagged
+   * `data-header-cell="true"` so the CSS module styles them as header cells.
    */
   children: React.ReactNode
   /** Horizontal text alignment, applied as an inline `text-align`. Default 'left'. */
@@ -236,8 +242,11 @@ export interface TableCellProps {
   component?: 'td' | 'th'
   /**
    * `scope` for a header cell — only emitted when the cell renders as `<th>`.
-   * Defaults to `'col'` for header cells (column headers in a `TableHead`);
-   * set `'row'` on a leading body cell to make it that row's header.
+   * Defaults BY SECTION: `'col'` for a header cell in a `TableHead` (a column
+   * header, associating down its column) and `'row'` for a header cell in a
+   * body row (`component="th"`, or an unwrapped raw `<th>` — a row header,
+   * associating across its row). Pass it explicitly to override — e.g. a
+   * `'col'` header rendered outside a `TableHead`.
    */
   scope?: 'col' | 'row' | 'colgroup' | 'rowgroup'
   /**
@@ -372,14 +381,16 @@ export const TableRow: React.FC<TableRowProps> = ({
  * `'td'` a plain data cell (the escape hatch for a non-header corner cell inside
  * a `<thead>`). With `component` omitted the element auto-resolves to a semantic
  * header `<th scope="col">` when the cell sits inside a `TableHead` or a raw
- * `<th>` child is passed (that child is unwrapped so we never emit invalid
- * `<td><th>` nesting); otherwise a body `<td>` is rendered. Header cells are
- * flagged `data-header-cell="true"`
- * and styled as header cells, honoring the header background/color overrides;
- * body cells honor the color/border/font overrides. `scope` (default `'col'`
- * for header cells) associates the header with its column — or set `'row'` on a
- * leading body cell (`component="th"`) for a row header. `data-theme` is stamped
- * only when explicitly themed.
+ * `<th>` child is passed (that child is unwrapped — its content AND its other
+ * attributes, colSpan/rowSpan/scope/id/className/style, are carried onto the
+ * `<th>` — so we never emit invalid `<td><th>` nesting nor drop the caller's
+ * attributes); otherwise a body `<td>` is rendered. Header cells are flagged
+ * `data-header-cell="true"` and styled as header cells, honoring the header
+ * background/color overrides; body cells honor the color/border/font overrides.
+ * `scope` defaults BY SECTION — `'col'` for a header cell in a `TableHead`
+ * (column header) and `'row'` for a header cell in a body row (`component="th"`
+ * or an unwrapped raw `<th>`); pass it explicitly to override. `data-theme` is
+ * stamped only when explicitly themed.
  */
 export const TableCell: React.FC<TableCellProps> = ({
   children,
@@ -393,6 +404,21 @@ export const TableCell: React.FC<TableCellProps> = ({
     React.isValidElement(children) &&
     (children as React.ReactElement).type === 'th'
 
+  // The full props of a legacy raw <th> child (the deprecated
+  // `<TableCell><th …>…</th></TableCell>` pattern). We unwrap the child — a
+  // <th>/<td> can't contain another <th> — but we forward its attributes
+  // (colSpan/rowSpan/scope/id/className/style/…) onto the real <th> we render,
+  // so the unwrap is LOSSLESS instead of hoisting only the text and silently
+  // dropping every other attribute the caller put on the raw <th>.
+  const rawThProps: React.ThHTMLAttributes<HTMLTableCellElement> | undefined =
+    childIsRawTh
+      ? (
+          children as React.ReactElement<
+            React.ThHTMLAttributes<HTMLTableCellElement>
+          >
+        ).props
+      : undefined
+
   // An explicit `component` prop is authoritative in BOTH directions: `'th'`
   // forces a header cell, `'td'` forces a plain data cell (the escape hatch for
   // a non-header corner cell inside a `<thead>` — a standard cross-tab layout).
@@ -401,24 +427,31 @@ export const TableCell: React.FC<TableCellProps> = ({
   const renderAsHeader =
     component != null ? component === 'th' : section === 'head' || childIsRawTh
 
-  // Unwrap a legacy raw <th> child to its content — a <th>/<td> can't contain
-  // another <th>, so we hoist the text onto the header cell we render.
-  const content = childIsRawTh
-    ? (children as React.ReactElement<{ children?: React.ReactNode }>).props
-        .children
-    : children
+  const content = rawThProps ? rawThProps.children : children
 
   const overrides = cellVars(styles)
-  const resolvedScope = scope ?? (renderAsHeader ? 'col' : undefined)
+  // Default `scope` by the cell's SECTION, not merely by header-ness: a header
+  // cell in the `<thead>` is a COLUMN header (`scope="col"`, associates down);
+  // a header cell in a body row (`component="th"`, or an unwrapped raw <th>) is
+  // a ROW header (`scope="row"`, associates across). Gating the default on
+  // `renderAsHeader` alone wrongly stamped `scope="col"` on a body-row `<th>`,
+  // making a screen reader associate it down a phantom column instead of across
+  // its row. Precedence: an explicit `scope` prop wins, then a `scope` on the
+  // raw <th> child, then this section-derived default.
+  const resolvedScope =
+    scope ??
+    rawThProps?.scope ??
+    (renderAsHeader ? (section === 'head' ? 'col' : 'row') : undefined)
   const style = { textAlign: align, ...(overrides ?? {}) }
 
   return renderAsHeader ? (
     <th
-      className={cssStyles.cell}
+      {...rawThProps}
+      className={joinClasses(cssStyles.cell, rawThProps?.className)}
       {...subThemeAttr(styles)}
       data-header-cell="true"
       {...(resolvedScope && { scope: resolvedScope })}
-      style={style}
+      style={{ ...style, ...rawThProps?.style }}
     >
       {content}
     </th>

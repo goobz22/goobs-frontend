@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import {
   Table,
   TableContainer,
@@ -270,10 +271,12 @@ export const SemanticDataTable: Story = {
 
 /**
  * Legacy raw-`<th>`-child pattern — pins that `<TableCell><th>…</th></TableCell>`
- * now renders a single valid `<th scope="col">` (the child `<th>` is unwrapped
- * to the header cell's content) instead of the previously-invalid `<td><th>`
- * nesting. Rendered outside a `TableHead` to prove the unwrap path is what
- * produces the header cell here.
+ * now renders a single valid `<th>` (the child `<th>` is unwrapped to the header
+ * cell's content) instead of the previously-invalid `<td><th>` nesting. Rendered
+ * as the leading cell of a body row (outside a `TableHead`) so the unwrap path is
+ * what produces the header cell — and, being a body-row header, it resolves to
+ * the section-correct `<th scope="row">` (associating across the row), not
+ * `scope="col"`.
  */
 export const LegacyHeaderChild: Story = {
   globals: { backgrounds: { value: 'sacred' } },
@@ -339,4 +342,216 @@ export const CrossTabCornerCell: Story = {
       </Table>
     </TableContainer>
   ),
+}
+
+/**
+ * Section-derived `scope` defaults (WCAG 1.3.1) — pins that a header cell's
+ * default `scope` follows its SECTION, not merely its header-ness. A cell inside
+ * `TableHead` defaults to `scope="col"` (column header). A body-row header cell
+ * written `component="th"` WITHOUT an explicit scope defaults to `scope="row"`
+ * (row header, associating across its row) — NOT `scope="col"`, which would make
+ * a screen reader associate it down a phantom column. The `play` assertions fail
+ * the pre-fix baseline, where the default was gated on header-ness and stamped
+ * `scope="col"` on the body `<th>`.
+ */
+export const HeaderScopeDefaults: Story = {
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <TableContainer styles={{ theme: 'light' }}>
+      <Table styles={{ theme: 'light' }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Report</TableCell>
+            <TableCell>Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow hover>
+            {/* Body-row header, no explicit scope → must default to scope="row". */}
+            <TableCell component="th">Sacred Temple Report</TableCell>
+            <TableCell>Active</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Column header inside the <thead> → <th scope="col">.
+    const colHeader = canvas.getByText('Report')
+    await expect(colHeader.tagName).toBe('TH')
+    await expect(colHeader).toHaveAttribute('scope', 'col')
+
+    // Body-row header (component="th", NO explicit scope) → <th scope="row">,
+    // and it lives in the <tbody> — the section-derived default, not "col".
+    const rowHeader = canvas.getByText('Sacred Temple Report')
+    await expect(rowHeader.tagName).toBe('TH')
+    await expect(rowHeader).toHaveAttribute('scope', 'row')
+    await expect(rowHeader.closest('tbody')).not.toBeNull()
+  },
+}
+
+/**
+ * Legacy raw-`<th>`-child attribute preservation (WCAG 1.3.1 / 4.1.1) — pins
+ * that unwrapping a raw `<th>` child is LOSSLESS: its `colSpan`, `id`, `scope`,
+ * `className`, and inline `style` are all carried onto the real `<th>` we
+ * render, not silently dropped (the pre-fix unwrap hoisted only `.props.children`).
+ * The raw `<th>` sets an explicit `scope="col"` while sitting in a body row —
+ * whose section-derived default would be `scope="row"` — so the assertion also
+ * proves the caller's explicit scope wins over the default.
+ */
+export const LegacyHeaderChildAttributes: Story = {
+  globals: { backgrounds: { value: 'light' } },
+  render: () => (
+    <TableContainer styles={{ theme: 'light' }}>
+      <Table styles={{ theme: 'light' }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Metric</TableCell>
+            <TableCell>Value</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <th
+                colSpan={2}
+                id="raw-th-id"
+                className="raw-th-extra"
+                scope="col"
+                style={{ textAlign: 'center' }}
+              >
+                Spanning raw header (attributes preserved)
+              </th>
+            </TableCell>
+          </TableRow>
+          <TableRow hover>
+            <TableCell>Uptime</TableCell>
+            <TableCell>99.9%</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  ),
+  play: async ({ canvasElement }) => {
+    const raw = canvasElement.querySelector('#raw-th-id')
+    await expect(raw).not.toBeNull()
+    await expect(raw?.tagName).toBe('TH')
+    // colSpan forwarded (the text-only unwrap dropped it).
+    await expect(raw).toHaveAttribute('colspan', '2')
+    // Consumer className MERGED with the cell class, not replaced.
+    await expect(raw).toHaveClass('raw-th-extra')
+    // Inline style forwarded.
+    await expect(raw).toHaveStyle({ textAlign: 'center' })
+    // The raw <th>'s explicit scope="col" wins over the body-row default "row".
+    await expect(raw).toHaveAttribute('scope', 'col')
+    // And it is still flagged/styled as a header cell.
+    await expect(raw).toHaveAttribute('data-header-cell', 'true')
+  },
+}
+
+/**
+ * Keyboard-scrollable region + reduced-motion guard — pins the two a11y CSS
+ * states that a static snapshot alone can't verify, via a `play` regression
+ * assertion (goobs' "the story IS the test" model):
+ *  - (Issue 3, WCAG 2.1.1/2.4.7) The overflow-x scroll region is keyboard-
+ *    reachable: `role="region"` (from `ariaLabel`), a tab stop (`tabIndex=0`),
+ *    and it takes focus on Tab — which also triggers the `:focus-visible` ring
+ *    the snapshot captures. Removing `tabIndex`/the region role fails this.
+ *  - (Issue 5, WCAG 2.3.3) The row hover transition is disabled under
+ *    `prefers-reduced-motion: reduce`. A play fn can't force the media feature,
+ *    so it asserts the guard RULE exists in the stylesheet (the hashed `.row`
+ *    class gets `transition: none` inside a `prefers-reduced-motion` block).
+ *    Deleting the guard fails this.
+ */
+export const KeyboardScrollAndReducedMotion: Story = {
+  globals: { backgrounds: { value: 'dark' } },
+  render: () => (
+    <div style={{ maxWidth: '320px' }}>
+      <TableContainer
+        ariaLabel="Wide metrics (keyboard-scrollable)"
+        styles={{ theme: 'dark' }}
+      >
+        <Table styles={{ theme: 'dark' }}>
+          <TableHead>
+            <TableRow>
+              {['Region', 'Q1', 'Q2', 'Q3', 'Q4', 'Total'].map(head => (
+                <TableCell key={head}>
+                  <span style={{ whiteSpace: 'nowrap' }}>{head} revenue</span>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {[
+              { region: 'North', vals: [120, 138, 151, 162, 571] },
+              { region: 'South', vals: [98, 104, 119, 130, 451] },
+            ].map(row => (
+              <TableRow key={row.region} hover>
+                <TableCell component="th" scope="row">
+                  <span style={{ whiteSpace: 'nowrap' }}>{row.region}</span>
+                </TableCell>
+                {row.vals.map((value, index) => (
+                  <TableCell key={index}>
+                    <span style={{ whiteSpace: 'nowrap' }}>${value}k</span>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // (Issue 3) Keyboard-reachable scroll region.
+    const region = canvas.getByRole('region', {
+      name: 'Wide metrics (keyboard-scrollable)',
+    })
+    await expect(region).toHaveAttribute('tabindex', '0')
+    await userEvent.tab()
+    await expect(region).toHaveFocus()
+
+    // (Issue 5) The reduced-motion guard exists in the stylesheet. Derive the
+    // hashed `.row` class from a live row, then confirm a prefers-reduced-motion
+    // media block zeroes its transition.
+    const rowEl = canvasElement.querySelector('tbody tr')
+    await expect(rowEl).not.toBeNull()
+    const rowClass = rowEl?.classList[0] ?? ''
+    await expect(rowClass).not.toBe('')
+
+    const readRules = (sheet: CSSStyleSheet): CSSRule[] => {
+      try {
+        return Array.from(sheet.cssRules)
+      } catch {
+        return []
+      }
+    }
+
+    let guarded = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      for (const rule of readRules(sheet)) {
+        if (
+          rule instanceof CSSMediaRule &&
+          `${rule.conditionText} ${rule.media?.mediaText ?? ''}`.includes(
+            'prefers-reduced-motion'
+          )
+        ) {
+          for (const inner of Array.from(rule.cssRules)) {
+            if (
+              inner instanceof CSSStyleRule &&
+              inner.selectorText.includes(rowClass) &&
+              inner.style.getPropertyValue('transition') === 'none'
+            ) {
+              guarded = true
+            }
+          }
+        }
+      }
+    }
+    await expect(guarded).toBe(true)
+  },
 }
