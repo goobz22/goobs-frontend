@@ -9,12 +9,26 @@ lint:coverage · **lint:a11y with all 24 class-lint modules, selftests OK, 0 vio
 roots, **data-action on 108 controls across 33 files**, overridable testids, SSR hydration
 (locale formatting + useId), theme-literal token swaps, public-ref lint, 3 walls.
 
-**Remaining (final wave, queued for subagent quota ~1am):** Field/Shell serial audit
-(Form's auditor already verified its error/label ARIA correct read-only), the handful of
-still-open cross-component deferred items (Tabs route-tab product decision, ListItemCard
-composition restructure behind the Chromatic gate, Dropdown ariaLabel prop, shared
-focus-ring token contrast), completeness critic vs the 59-dir matrix, npm version
-bump + publish (operator-gated).
+**Field/Shell SERIAL PASS DONE (in-context, 96486d1c):** Shell gained the additive
+`ariaLabel` (label-less naming, gated off visible labels per 2.5.3), consumer-`id`
+threading (label↔input association can no longer diverge), and `describedById` seams;
+the **label-input-id-divergence class was fixed at all 13 leaf instances and gated as
+lint module #25**; the 3 shared `--goobs-*-focus-ring` tokens went opaque (WCAG 1.4.11 —
+promoted from Button/Typography's per-component workarounds); Button now defaults
+`type="button"` (accidental-submit class; ThothOS verified explicit: 104 `type="submit"`
++ 99 SaveButton files). Gates re-verified green after all of it (typecheck · lint:all
+with 25 modules · build).
+
+**Remaining (final wave, one-shot scheduled 1:07am for quota reset):**
+- ariaLabel leaf-forwarding sweep (~13 Shell-based leaves + DataGrid's 4 editor callsites) + stories
+- TreeView focus-on-collapse follow-up (pointer-chevron / '*' / apiRef paths)
+- Completeness critic vs the 59+14-dir matrix + deferred-list re-verify + gates + push
+
+**OWNER decisions (not agent-executable):** Tabs route-tab semantics (crawlable `<a href>`
+vs button-tab that navigates on arrow-key — WCAG 3.2.2/SEO); ListItemCard composition
+restructure (needs the Chromatic visual gate); Chromatic run over the whole campaign
+(~300 fixes shipped without visual-parity verification); npm version bump + publish +
+ThothOS pin update so consumers get the accessible build.
 
 Rolling status of the full-repo accessibility retrofit (hearing / reading-screen-reader /
 SEO-semantic) + class-first lint gating. Per-component detail: the sibling
