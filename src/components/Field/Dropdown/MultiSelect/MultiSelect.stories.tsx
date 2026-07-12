@@ -572,3 +572,71 @@ export const KeyboardArrowNavigation: Story = {
     expect(options[1]).toHaveAttribute('aria-selected', 'true')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Printable-character type-ahead
+// --------------------------------------------------------------------------
+
+// P-heavy so the play proves BOTH "jump to the FIRST match" and "repeat the key
+// to cycle". Indices: 0 Apple, 1 Apricot, 2 Peach, 3 Pear, 4 Plum, 5 Quince.
+const TYPEAHEAD_OPTIONS = [
+  { value: 'Apple' },
+  { value: 'Apricot' },
+  { value: 'Peach' },
+  { value: 'Pear' },
+  { value: 'Plum' },
+  { value: 'Quince' },
+]
+
+/**
+ * Regression guard for the printable-character type-ahead (WAI-ARIA APG
+ * select-only combobox — APG-recommended). While the portalled menu is open,
+ * typing a printable character roves the highlight to the next option whose
+ * value starts with it (case-insensitive); pressing the same character again
+ * cycles to the next match (wrapping). This chip multi-select has no filter
+ * input, so type-ahead is its only jump-to-option affordance. The buffer lives
+ * in the additive `Shell/keyboard.ts` `useTypeahead` helper; the listbox +
+ * `role="option"` rows portal into `document.body`.
+ */
+export const PrintableTypeahead: Story = {
+  name: 'A11y: printable-character type-ahead',
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <MultiSelectChip {...args} />
+    </div>
+  ),
+  args: {
+    label: 'Type-ahead',
+    options: TYPEAHEAD_OPTIONS,
+    defaultSelected: [],
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Open via the keyboard (combobox 1.2 open-on-ArrowDown); nothing is
+    // highlighted yet.
+    combobox.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    expect(combobox).not.toHaveAttribute('aria-activedescendant')
+
+    // The listbox + its role="option" rows portal into document.body.
+    const body = within(document.body)
+    const options = await body.findAllByRole('option')
+
+    // Typing "p" jumps the highlight to the FIRST option starting with "p"
+    // (Peach, index 2), skipping Apple/Apricot. data-active mirrors to the
+    // option and aria-activedescendant points the combobox at its id.
+    await userEvent.keyboard('p')
+    expect(options[2]).toHaveAttribute('data-active', 'true')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[2]!.id)
+
+    // Pressing "p" again cycles to the NEXT "p" option (Pear, index 3).
+    await userEvent.keyboard('p')
+    expect(options[3]).toHaveAttribute('data-active', 'true')
+    expect(options[2]).not.toHaveAttribute('data-active')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[3]!.id)
+  },
+}

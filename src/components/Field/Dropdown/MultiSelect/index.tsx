@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import ReactDOM from 'react-dom'
 import Chip from '../../../Chip'
 import cssStyles from './MultiSelect.module.css'
@@ -8,6 +8,7 @@ import FieldShell, {
   type FieldStyleOverrides,
   useEscape,
   useArrowKeyNav,
+  useTypeahead,
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -194,6 +195,21 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     },
   })
 
+  // APG type-ahead: while the menu is open, typing a printable character roves
+  // the highlight to the next option whose value starts with it. This chip
+  // multi-select has no filter input, so this is its only jump-to-option
+  // affordance; the labels match the visible option text, index-aligned with
+  // the option list `useArrowKeyNav` roves over.
+  const typeaheadLabels = useMemo(
+    () => options.map(option => option.value),
+    [options]
+  )
+  const handleTypeahead = useTypeahead({
+    labels: typeaheadLabels,
+    activeIndex,
+    onMatch: setActiveIndex,
+  })
+
   const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return
     if (
@@ -207,7 +223,13 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
       openMenu()
       return
     }
-    if (isOpen) handleKeyDown(event)
+    if (isOpen) {
+      // Arrow-nav first: it preventDefaults every key it consumes, and
+      // useTypeahead early-returns on defaultPrevented, so the two never fight
+      // over the same key.
+      handleKeyDown(event)
+      handleTypeahead(event)
+    }
   }
 
   const arrowClassNames = [cssStyles.arrow, isOpen && cssStyles.open]
