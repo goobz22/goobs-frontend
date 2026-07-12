@@ -56,7 +56,7 @@
      <div>. The original 2px bottom gap is preserved explicitly. */
   margin: 0 0 2px;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: Merriweather, serif;
   font-size: clamp(1.25rem, 4vw, 1.5rem);
   font-weight: normal;
@@ -84,7 +84,7 @@
   /* Reset the native <p> margin — the description is now a real paragraph. */
   margin: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: Merriweather, serif;
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: normal;

@@ -57,7 +57,7 @@
      vs. the former <div>. */
   margin: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: Merriweather, serif;
   font-size: clamp(1.25rem, 4vw, 1.75rem);
   font-weight: 700;
@@ -79,7 +79,7 @@
   /* Reset the native <p> margin — the description is now a real paragraph. */
   margin: 0;
   width: 100%;
-  text-align: left;
+  text-align: start;
   font-family: Merriweather, serif;
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 400;
