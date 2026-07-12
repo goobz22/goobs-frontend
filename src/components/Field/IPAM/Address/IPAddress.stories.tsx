@@ -2,7 +2,7 @@
  * @fileoverview Storybook stories for the IPAddressField component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect } from 'storybook/test'
+import { within, expect, userEvent } from 'storybook/test'
 import IPAddressField from './index'
 
 const meta: Meta<typeof IPAddressField> = {
@@ -363,5 +363,70 @@ export const RangeModeAccessibleNames: Story = {
     const end = canvas.getByRole('textbox', { name: 'IP Address range end' })
     await expect(start).toBeInTheDocument()
     await expect(end).toBeInTheDocument()
+  },
+}
+
+/**
+ * Keyboard caret navigation (WCAG 2.1.1). The field intercepts keystrokes to
+ * keep only IPv4 characters, but the caret-navigation keys (Home / End /
+ * ArrowUp / ArrowDown) must still move the cursor so a keyboard user can jump
+ * to the start / end of the address to fix an octet — they are no longer
+ * preventDefault-ed. The play test parks the caret mid-string, then confirms
+ * Home jumps it to the very start and End to the very end.
+ */
+export const KeyboardCaretNavigation: Story = {
+  name: 'Keyboard Caret Navigation (a11y)',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Keyboard Caret Navigation:</strong> Home and End move the
+          cursor to the start and end of the address; only invalid characters
+          are blocked.
+        </div>
+        <IPAddressField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    initialValue: '192.168.1.100',
+    styles: {
+      theme: 'light',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox', {
+      name: 'IP Address',
+    }) as HTMLInputElement
+
+    input.focus()
+    await expect(input).toHaveFocus()
+
+    // Park the caret in the middle so the Home/End jumps are unambiguous.
+    input.setSelectionRange(3, 3)
+    await expect(input.selectionStart).toBe(3)
+
+    // Home is honoured (not preventDefault-ed): caret jumps to the very start.
+    await userEvent.keyboard('{Home}')
+    await expect(input.selectionStart).toBe(0)
+
+    // End is honoured: caret jumps to the very end of the address.
+    await userEvent.keyboard('{End}')
+    await expect(input.selectionStart).toBe(input.value.length)
   },
 }

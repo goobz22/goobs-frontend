@@ -534,11 +534,22 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (!e.ctrlKey && !e.altKey && !e.metaKey) {
         const allowed = /^[0-9.]$/
+        // Keys that must pass through so the field stays keyboard-navigable
+        // (WCAG 2.1.1 Keyboard). Beyond the edit/erase keys, this includes the
+        // caret-navigation keys Home / End / ArrowUp / ArrowDown — a text input
+        // is expected to honour them (and Shift+Home/End range-selection), so
+        // preventDefault-ing them trapped keyboard users who couldn't jump to
+        // the start/end of the address to fix an octet. Only genuinely invalid
+        // character keys are still blocked; the formatter sanitises the rest.
         const controlKeys = [
           'Backspace',
           'Delete',
           'ArrowLeft',
           'ArrowRight',
+          'ArrowUp',
+          'ArrowDown',
+          'Home',
+          'End',
           'Tab',
           'Enter',
         ]
