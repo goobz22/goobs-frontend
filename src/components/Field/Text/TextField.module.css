@@ -79,11 +79,11 @@
 }
 
 .input.hasStartAdornment {
-  padding-left: 48px;
+  padding-inline-start: 48px;
 }
 
 .input.hasEndAdornment {
-  padding-right: 48px;
+  padding-inline-end: 48px;
 }
 
 .input:disabled {
@@ -253,11 +253,11 @@
   }
 
   .input.hasStartAdornment {
-    padding-left: 40px;
+    padding-inline-start: 40px;
   }
 
   .input.hasEndAdornment {
-    padding-right: 40px;
+    padding-inline-end: 40px;
   }
 
   .adornmentStart {

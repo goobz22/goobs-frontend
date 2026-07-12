@@ -29,7 +29,7 @@
 
 .requiredIndicator {
   color: var(--goobs-gold);
-  margin-left: var(--goobs-space-2xs);
+  margin-inline-start: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -45,7 +45,7 @@
   color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
   font-size: var(--goobs-text-xl);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -85,7 +85,7 @@
    -------------------------------------------------------------------------- */
 
 .arrow {
-  margin-left: var(--goobs-space-xs);
+  margin-inline-start: var(--goobs-space-xs);
   width: 0;
   height: 0;
   border-left: 5px solid transparent;
@@ -161,7 +161,7 @@
   color: var(--goobs-sacred-text);
   font-family: 'Crimson Text', serif;
   font-size: var(--goobs-text-md);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: var(--goobs-transition-medium);
   outline: none;

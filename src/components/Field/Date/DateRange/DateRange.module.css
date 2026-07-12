@@ -53,7 +53,7 @@
 
 .requiredIndicator {
   color: var(--goobs-gold);
-  margin-left: var(--goobs-space-2xs);
+  margin-inline-start: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------

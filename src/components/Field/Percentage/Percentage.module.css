@@ -28,8 +28,8 @@
   outline: none;
   border: none;
   padding: var(--percentage-padding, 8px 60px 8px 16px);
-  padding-left: var(--percentage-padding-left, 16px);
-  padding-right: var(--percentage-padding-right, 60px);
+  padding-inline-start: var(--percentage-padding-left, 16px);
+  padding-inline-end: var(--percentage-padding-right, 60px);
   padding-top: var(--percentage-padding-top, 8px);
   padding-bottom: var(--percentage-padding-bottom, 8px);
   font-size: var(--percentage-font-size, 16px);

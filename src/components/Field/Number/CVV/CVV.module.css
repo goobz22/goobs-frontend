@@ -26,8 +26,8 @@
   outline: none;
   border: none;
   padding: 8px 16px;
-  padding-left: 48px;
-  padding-right: 16px;
+  padding-inline-start: 48px;
+  padding-inline-end: 16px;
   font-size: 16px;
   color: inherit;
   box-sizing: border-box;

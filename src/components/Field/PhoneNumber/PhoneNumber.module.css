@@ -47,7 +47,7 @@
 .prefix {
   display: flex;
   align-items: center;
-  padding-left: 16px;
+  padding-inline-start: 16px;
   color: var(--field-text, var(--goobs-sacred-text));
   font-size: var(--phone-font-size, 16px);
   font-family: var(--goobs-font-sacred);
@@ -111,8 +111,8 @@
   background-color: transparent;
   outline: none;
   border: none;
-  padding-left: 8px;
-  padding-right: 16px;
+  padding-inline-start: 8px;
+  padding-inline-end: 16px;
   font-size: var(--phone-font-size, 16px);
   font-weight: var(--phone-font-weight);
   line-height: var(--phone-line-height);

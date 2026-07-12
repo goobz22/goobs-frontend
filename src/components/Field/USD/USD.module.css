@@ -45,9 +45,9 @@
   outline: none;
   border: none;
   padding: var(--usd-padding, 8px 16px);
-  padding-left: var(--usd-padding-left, 40px);
+  padding-inline-start: var(--usd-padding-left, 40px);
   /* Reserve room for the +/- buttons only when increment is enabled. */
-  padding-right: var(--usd-padding-right, 16px);
+  padding-inline-end: var(--usd-padding-right, 16px);
   font-size: var(--usd-font-size, 16px);
   font-weight: var(--usd-font-weight);
   line-height: var(--usd-line-height);
@@ -57,7 +57,7 @@
 }
 
 .inputWrapper[data-increment='true'] .input {
-  padding-right: var(--usd-padding-right, 48px);
+  padding-inline-end: var(--usd-padding-right, 48px);
 }
 
 .adornment {

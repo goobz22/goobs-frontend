@@ -88,7 +88,7 @@
 
 .requiredIndicator {
   color: var(--sh-required);
-  margin-left: 2px;
+  margin-inline-start: 2px;
   font-weight: var(--goobs-weight-semibold);
 }
 

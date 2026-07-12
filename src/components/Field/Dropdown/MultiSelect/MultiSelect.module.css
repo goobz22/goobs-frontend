@@ -29,7 +29,7 @@
 
 .requiredIndicator {
   color: var(--goobs-gold);
-  margin-left: var(--goobs-space-2xs);
+  margin-inline-start: var(--goobs-space-2xs);
 }
 
 /* --------------------------------------------------------------------------
@@ -173,7 +173,7 @@
 }
 
 .option input[type='checkbox'] {
-  margin-right: var(--goobs-space-xs);
+  margin-inline-end: var(--goobs-space-xs);
   accent-color: var(--goobs-gold);
 }
 
