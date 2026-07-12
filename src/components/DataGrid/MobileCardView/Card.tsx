@@ -18,6 +18,14 @@ interface CardProps {
   onCellSave?: (rowId: string, field: string, value: string) => void
   onCellCancel: () => void
   onEditingValueChange: (value: string) => void
+  /**
+   * 1-based absolute position of this card within the FULL filtered result set
+   * (not just the current page). Emitted as `aria-rowindex` so assistive tech
+   * announces the true position ("row 12 of 87") even though only one page of
+   * cards is in the DOM — required whenever the grid uses `aria-rowcount` and
+   * not all rows are present (WCAG 1.3.1).
+   */
+  ariaRowIndex?: number
   styles?: {
     theme?: 'light' | 'dark' | 'sacred'
     backgroundColor?: string
@@ -44,6 +52,7 @@ function Card({
   onCellSave,
   onCellCancel,
   onEditingValueChange,
+  ariaRowIndex,
   styles,
   permissions,
 }: CardProps) {
@@ -162,6 +171,9 @@ function Card({
       data-card="true"
       aria-selected={isSelected || undefined}
       role="row"
+      // Absolute 1-based position in the full filtered set (only a page of
+      // cards is in the DOM; aria-rowcount is the full count) — WCAG 1.3.1.
+      {...(ariaRowIndex != null ? { 'aria-rowindex': ariaRowIndex } : {})}
       // Keyboard-operable (WCAG 2.1.1): focusable + Enter/Space selects it.
       tabIndex={0}
       onKeyDown={handleKeyDown}

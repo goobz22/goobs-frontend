@@ -117,6 +117,7 @@ function Table({
   permissions,
   gridRowCount,
   gridColCount,
+  rowIndexOffset = 0,
 }: TableProps) {
   /** Current theme for styling */
   const theme = styles?.theme || 'light'
@@ -306,6 +307,7 @@ function Table({
               rows={rows}
               columns={updatedColumns}
               selectedRowIds={selectedRowIds}
+              rowIndexOffset={rowIndexOffset}
               {...(onRowClick ? { onRowClick } : {})}
               {...(styles ? { styles } : {})}
               {...(editingCell ? { editingCell } : {})}

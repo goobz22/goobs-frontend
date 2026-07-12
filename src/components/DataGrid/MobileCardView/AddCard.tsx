@@ -336,6 +336,10 @@ function AddCard({
           onChange={phoneValue => {
             handleFieldChange(fieldDef.field, phoneValue)
           }}
+          // The field's visible <label> names the wrapping role="group" but not
+          // the input itself; give the input its own programmatic name (WCAG
+          // 1.3.1 / 4.1.2). PhoneNumberField forwards ariaLabel to the <input>.
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -371,6 +375,10 @@ function AddCard({
           fieldDef.helperText ||
           `Enter ${fieldDef.label}`
         }
+        // Name the input itself (the visible <label> names the wrapping
+        // role="group", not the control) — WCAG 1.3.1 / 4.1.2. TextField
+        // forwards ariaLabel to the <input>.
+        ariaLabel={fieldDef.label}
         styles={fieldStyles}
       />
     )

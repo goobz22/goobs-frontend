@@ -951,6 +951,14 @@ interface RowsProps {
   columns: ColumnDef[]
   /** Array of currently selected row IDs */
   selectedRowIds: string[]
+  /**
+   * 0-based absolute index of the first rendered row within the full filtered
+   * set (`page * pageSize`). Each `<tr>` derives its `aria-rowindex` from this
+   * so the true position is announced even though only the current page is in
+   * the DOM (WCAG 1.3.1). The header row is index 1, so a data row's index is
+   * `rowIndexOffset + localIndex + 2`. Defaults to 0.
+   */
+  rowIndexOffset?: number
   /** Handler for row click (toggles selection) */
   onRowClick?: (row: RowData) => void
   /** Theme and style configuration */
@@ -1005,6 +1013,7 @@ const Rows: React.FC<RowsProps> = ({
   rows,
   columns,
   selectedRowIds,
+  rowIndexOffset = 0,
   onRowClick,
   styles,
   editingCell,
@@ -1199,6 +1208,10 @@ const Rows: React.FC<RowsProps> = ({
             }
             aria-selected={selectedRowIds.includes(rowId) || undefined}
             role="row"
+            // Absolute 1-based position in the full filtered set. The header
+            // row is aria-rowindex 1, so data rows start at 2 (WCAG 1.3.1);
+            // only the current page's rows are in the DOM.
+            aria-rowindex={rowIndexOffset + rowIndex + 2}
             style={
               hasEditingMultiselect
                 ? { height: 'auto', minHeight: '120px' }

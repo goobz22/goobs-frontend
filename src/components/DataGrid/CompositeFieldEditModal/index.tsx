@@ -284,6 +284,11 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 handleFieldChange(fieldConfig.field, newValue)
               }
               placeholder={fieldConfig.placeholder}
+              // The visible field label is a sibling <Typography>, not an
+              // associated <label>, so name the input programmatically from the
+              // field config (WCAG 1.3.1 / 4.1.2). TextField forwards ariaLabel
+              // to the <input>.
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -454,6 +459,9 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              // Name the input from the field config since the visible label is
+              // an unassociated sibling (WCAG 1.3.1 / 4.1.2).
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -617,6 +625,11 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 handleFieldChange(fieldConfig.field, newValue)
               }
               placeholder={fieldConfig.placeholder}
+              // The visible field label is a sibling <Typography>, not an
+              // associated <label>, so name the input programmatically from the
+              // field config (WCAG 1.3.1 / 4.1.2). TextField forwards ariaLabel
+              // to the <input>.
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )

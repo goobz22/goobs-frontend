@@ -1454,8 +1454,14 @@ function DataGridContent({
           // Grid semantics moved off the outer wrapper onto the real <table>
           // (a11y fix D3). Total row/column counts are surfaced there as
           // aria-rowcount/aria-colcount (+1 col for the leading selection cell).
-          gridRowCount={filteredRows.length}
+          // aria-rowcount counts EVERY row including the column-header row
+          // (aria-rowindex 1), so it is filteredRows.length + 1; data rows are
+          // indexed from the page offset below (WCAG 1.3.1).
+          gridRowCount={filteredRows.length + 1}
           gridColCount={visibleColumns.length + 1}
+          // 0-based absolute index of the first row on this page, so each
+          // rendered <tr> can emit its true aria-rowindex despite pagination.
+          rowIndexOffset={startIndex}
         />
 
         {/* ─────────────────────────────────────────────────────────────────

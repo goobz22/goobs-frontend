@@ -712,6 +712,15 @@ export interface TableProps {
    * `aria-colcount` on the `<table role="grid">`.
    */
   gridColCount?: number
+  /**
+   * 0-based absolute index of the first rendered row within the full filtered
+   * result set (i.e. `page * pageSize`). Only the current page's rows are in
+   * the DOM, so each data `<tr>` derives its `aria-rowindex` from this offset
+   * (header row is index 1, so a data row's index is `offset + localIndex + 2`)
+   * — required whenever `aria-rowcount` is set and not all rows are present
+   * (WCAG 1.3.1). Defaults to 0.
+   */
+  rowIndexOffset?: number
 
   // ─────────────────────────────────────────────────────────────────────────────
   // COLUMN DRAG AND DROP PROPS

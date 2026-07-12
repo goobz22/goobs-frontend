@@ -153,6 +153,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onKeyDown={handleKeyDown}
+            // Inline editors render no visible <label> (label=""), so the
+            // input needs a programmatic name — the column header (WCAG
+            // 1.3.1 / 4.1.2). TextField forwards ariaLabel to the <input>.
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -364,6 +368,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
+            // No visible label on inline editors — name the input via the
+            // column header (WCAG 1.3.1 / 4.1.2). PhoneNumberField forwards
+            // ariaLabel to the underlying <input>.
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -703,6 +711,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onKeyDown={handleKeyDown}
+            // Inline editors render no visible <label> (label=""), so the
+            // input needs a programmatic name — the column header (WCAG
+            // 1.3.1 / 4.1.2). TextField forwards ariaLabel to the <input>.
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>

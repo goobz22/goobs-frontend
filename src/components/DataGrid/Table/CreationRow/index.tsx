@@ -190,6 +190,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            // The creation form paints its label separately, so the input has
+            // no programmatic name — supply one from the field config (WCAG
+            // 1.3.1 / 4.1.2). TextField forwards ariaLabel to the <input>.
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -365,6 +369,9 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            // Name the input from the field config since no visible label is
+            // associated (WCAG 1.3.1 / 4.1.2).
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -631,6 +638,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            // The creation form paints its label separately, so the input has
+            // no programmatic name — supply one from the field config (WCAG
+            // 1.3.1 / 4.1.2). TextField forwards ariaLabel to the <input>.
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )

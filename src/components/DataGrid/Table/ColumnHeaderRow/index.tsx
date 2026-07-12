@@ -127,7 +127,11 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   }
 
   return (
-    <tr className={cssStyles.headerRow} data-theme={theme}>
+    // aria-rowindex={1}: the column-header row is the first row of the grid, so
+    // the data rows (which carry aria-rowindex from the page offset) start at 2.
+    // Required for a consistent position announcement when aria-rowcount counts
+    // every row including this header (WCAG 1.3.1).
+    <tr className={cssStyles.headerRow} data-theme={theme} aria-rowindex={1}>
       {/* Header checkbox for select all */}
       <th
         scope="col"

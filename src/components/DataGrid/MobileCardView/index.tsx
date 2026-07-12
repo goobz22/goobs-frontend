@@ -386,21 +386,28 @@ function MobileCardView({
         aria-rowcount={filteredRows.length}
         aria-colcount={columns.length}
       >
-        {/* Add Card */}
+        {/* Add Card. The grid may only own rows/rowgroups, so the AddCard
+            (role="form") is wrapped in a role="row" → role="gridcell" instead
+            of sitting directly inside role="grid" — keeping the card grid a
+            valid grid owner (WCAG 1.3.1). A gridcell may contain a form. */}
         {isAddingCard && (
-          <AddCard
-            columns={columns}
-            creationRowData={creationRowData}
-            creationRowErrors={creationRowErrors}
-            onCreationFieldChange={handleCreationFieldChange}
-            onSave={handleCreateRowSave}
-            onCancel={handleCreateRowCancel}
-            {...(styles && { styles })}
-          />
+          <div role="row">
+            <div role="gridcell">
+              <AddCard
+                columns={columns}
+                creationRowData={creationRowData}
+                creationRowErrors={creationRowErrors}
+                onCreationFieldChange={handleCreationFieldChange}
+                onSave={handleCreateRowSave}
+                onCancel={handleCreateRowCancel}
+                {...(styles && { styles })}
+              />
+            </div>
+          </div>
         )}
 
         {/* Data Cards - Use paginated rows */}
-        {paginatedRows.map(row => {
+        {paginatedRows.map((row, pageIndex) => {
           const rowId = String(row._id ?? row.id)
           return (
             <Card
@@ -417,17 +424,27 @@ function MobileCardView({
               {...(onCellSave && { onCellSave })}
               onCellCancel={onCellCancel}
               onEditingValueChange={onEditingValueChange}
+              // Absolute 1-based index across the full filtered set. Cards are
+              // the only rows in the card grid (no header row), so the count is
+              // data-only and the index is 1-based from the page offset.
+              ariaRowIndex={currentPage * itemsPerPage + pageIndex + 1}
               {...(styles && { styles })}
               permissions={permissions}
             />
           )
         })}
 
-        {/* Empty State. role="status" (WCAG 4.1.3) so a search/filter that
-            empties the list is announced to assistive tech, not silent. */}
+        {/* Empty State. Wrapped as a role="row" → role="gridcell" so it is a
+            valid child of the role="grid" container (like the desktop empty
+            row); the inner span keeps role="status" (WCAG 4.1.3) so a
+            search/filter that empties the list is announced, not silent. */}
         {paginatedRows.length === 0 && !isAddingCard && (
-          <div className={cssStyles.mobileEmpty} role="status">
-            {searchQuery ? 'No results found' : 'No data available'}
+          <div role="row">
+            <div className={cssStyles.mobileEmpty} role="gridcell">
+              <span role="status">
+                {searchQuery ? 'No results found' : 'No data available'}
+              </span>
+            </div>
           </div>
         )}
       </div>

@@ -230,7 +230,13 @@ function CardField({
   }
 
   return (
-    <div className={cssStyles.field} data-field={column.field}>
+    // role="gridcell": each field is a cell of its owning card row so the
+    // mobile card grid has a valid grid → row → gridcell ownership chain
+    // (WCAG 1.3.1). Without it every role="row" card owned zero cells
+    // (axe aria-required-children). The intervening `.fields` wrapper is a
+    // roleless generic container, so the card (role="row") still owns these
+    // gridcells.
+    <div className={cssStyles.field} data-field={column.field} role="gridcell">
       <label className={cssStyles.fieldLabel} htmlFor={inputId}>
         {column.headerName}
       </label>
