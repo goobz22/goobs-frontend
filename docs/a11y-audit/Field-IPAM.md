@@ -178,6 +178,30 @@ play-tests keep passing. `Address`/`MACAddress` are plain text fields (no steppe
 and were untouched. This lands the arrow-stepping half of what issue #-Deferred had
 recorded as the optional spinbutton enhancement — done the safe way (no role change).
 
+## Re-audit 2026-07-11 (round 2) — one further gap
+
+### 9. IPAddress field trapped caret-navigation keys — MINOR, WCAG 2.1.1 Keyboard (A) — FIXED
+`pattern: keyboard-key-trapping`
+
+`Address`'s `handleKeyDown` (`Address/index.tsx:533-553`) allow-listed only
+`Backspace/Delete/ArrowLeft/ArrowRight/Tab/Enter` plus `[0-9.]`; **every other
+un-modified key was `preventDefault`-ed.** That silently swallowed **Home, End,
+ArrowUp, ArrowDown** — the standard text-input caret-navigation keys (and
+`Shift+Home` / `Shift+End` range-selection). A keyboard-only user could not jump
+to the start/end of the address to correct an octet; they were forced to
+`ArrowLeft`/`ArrowRight` one character at a time.
+
+This shape was **unique to `Address`** — CIDR/Subnet/VLAN sanitise via `.replace()`
+in their change handlers and only `preventDefault` ArrowUp/ArrowDown to *step*
+(they never trap Home/End); MAC's only `preventDefault` is on paste. So no sibling
+shared the defect and no cross-field script was warranted.
+
+**Fix:** added `Home`, `End`, `ArrowUp`, `ArrowDown` to the `controlKeys`
+allow-list (`Address/index.tsx`). Invalid character keys are still blocked and the
+formatter still sanitises the native-input/paste path, so the IPv4 constraint is
+unchanged. No DOM/markup change; `role="textbox"` + accessible-name contract
+untouched. Commit `d456211a`.
+
 ## Hearing
 
 No `Audio`/`AudioContext`/`<audio>`/`<video>`/`navigator.vibrate`/
@@ -221,9 +245,11 @@ primary content. **Clean.**
 | 6 | `@media (prefers-reduced-motion: reduce)` on `.button` | CIDR / Subnet / VLAN `*.module.css` |
 | 7 | rest border → theme-aware `--field-border-default` (1.4.11) | all 5 `*.module.css` |
 | 8 | ArrowUp/ArrowDown spinbutton stepping on the input (2.1.1) | CIDR / VLAN / Subnet `index.tsx` |
+| 9 | Un-trap Home/End/ArrowUp/ArrowDown caret navigation (2.1.1) | Address `index.tsx` |
 
 Per-file gate `bun lint:file` passed (exit 0) on every edited `.tsx`. Re-audit
-commits: `c8968ef8` (border contrast) and `ccee34e8` (arrow-key stepping + stories).
+commits: `c8968ef8` (border contrast), `ccee34e8` (arrow-key stepping + stories),
+and `d456211a` (round 2 — Home/End caret navigation + story).
 
 ## Stories updated
 
@@ -262,6 +288,16 @@ is proven intact:
 The issue-#7 border change is a rest-state visual shift covered by every existing
 Light/Dark/Sacred theme story (their Chromatic baseline shifts once, as expected
 for a contrast fix).
+
+**Re-audit (2026-07-11) round 2** — a new interaction test locks in issue #9:
+
+- `Address/IPAddress.stories.tsx` → **Keyboard Caret Navigation (a11y)**: focuses
+  the `initialValue='192.168.1.100'` input, parks the caret mid-string via
+  `setSelectionRange(3,3)`, then asserts `{Home}` moves `selectionStart` to `0`
+  and `{End}` moves it to `value.length`. It **fails on the pre-fix code**
+  (Home/End were `preventDefault`-ed, so the caret never moved) and passes after.
+  It resolves the control via `getByRole('textbox', { name: 'IP Address' })`, so
+  the selector contract is proven intact.
 
 ## Deferred
 
