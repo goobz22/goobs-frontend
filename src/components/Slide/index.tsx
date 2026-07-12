@@ -66,6 +66,48 @@ function mergeClassNames(...names: Array<string | false | undefined>): string {
 }
 
 // --------------------------------------------------------------------------
+// TIMING HELPERS
+// --------------------------------------------------------------------------
+
+/**
+ * Best-effort extraction of a CSS `transition` shorthand's longest running time
+ * — duration + delay, summed per comma-separated segment — in milliseconds.
+ *
+ * Slide defers its `visibility: hidden` swap (which drops slid-out content from
+ * the accessibility tree and tab order) until the slide-OUT visually completes.
+ * That delay (`--slide-visibility-delay`) is composed in CSS from `--slide-duration`.
+ * When a caller supplies the full `transition` shorthand override, the real slide
+ * duration lives INSIDE that string and is otherwise invisible to the CSS, so
+ * `--slide-duration` would keep its theme default (0.3s) and the visibility swap
+ * would fire early — chopping the slide and, worse, dropping content from the a11y
+ * tree before it is actually gone. Parsing the longest segment time here and feeding
+ * it into `--slide-duration` keeps the deferral in lockstep with the real animation
+ * for arbitrary, even multi-segment, transitions.
+ *
+ * Errs LONG on purpose (sums duration + delay, takes the max across segments):
+ * deferring the a11y-tree drop slightly past the slide is harmless, dropping it
+ * early is the actual defect. Returns `undefined` when no `<time>` token is present,
+ * so the caller falls back to the theme-default `--slide-duration`.
+ */
+function transitionRuntimeMs(transition: string): number | undefined {
+  let max: number | undefined
+  for (const segment of transition.split(',')) {
+    // Unsigned <time> tokens only (a negative delay would shorten the sum and
+    // risk an early drop — ignoring it keeps us on the safe, longer side).
+    const times = segment.match(/\d*\.?\d+(?:ms|s)\b/gi)
+    if (!times || times.length === 0) continue
+    // Per the shorthand grammar the first <time> is the duration and the second
+    // (if any) the delay; sum them so the deferral spans duration + delay.
+    const totalMs = times.slice(0, 2).reduce((sum, token) => {
+      const value = parseFloat(token)
+      return sum + (/ms$/i.test(token) ? value : value * 1000)
+    }, 0)
+    if (max === undefined || totalMs > max) max = totalMs
+  }
+  return max
+}
+
+// --------------------------------------------------------------------------
 // MAIN SLIDE COMPONENT
 // --------------------------------------------------------------------------
 
@@ -100,7 +142,9 @@ const Slide = forwardRef<HTMLDivElement, SlideProps>(
     // would replace the whole property and strip that visibility delay, cutting the
     // exit animation short; routing through --slide-transition / --slide-delay keeps
     // the stylesheet in control of the visibility transition. A full `transition`
-    // shorthand → --slide-transition (replaces the transform half verbatim); otherwise
+    // shorthand → --slide-transition (replaces the transform half verbatim) AND its
+    // parsed running time → --slide-duration, so the CSS-composed visibility-inert delay
+    // tracks the shorthand's real duration+delay (not the theme default); otherwise
     // timeout / transitionDuration / transitionTimingFunction feed --slide-duration /
     // --slide-timing and transitionDelay feeds --slide-delay. Disabled forces
     // `transition: none` via [data-disabled], so no timing vars are emitted in that case.
@@ -109,6 +153,21 @@ const Slide = forwardRef<HTMLDivElement, SlideProps>(
       if (styles?.transition !== undefined) {
         ;(dynamicStyle as Record<string, string>)['--slide-transition'] =
           styles.transition
+        // The full shorthand REPLACES the transform half of the transition and
+        // carries its OWN duration/delay INSIDE the string, which the stylesheet
+        // cannot read back. --slide-visibility-delay (the delayed-inert exit) is
+        // composed in CSS from --slide-duration, so without this it would keep the
+        // theme default (0.3s) and the slid-out content would leave the a11y tree +
+        // tab order while STILL visibly sliding (the Issue-#4 mismatch, on the
+        // escape-hatch path). Parse the shorthand's longest running time (duration +
+        // delay, per segment) and feed it into --slide-duration so the visibility
+        // half tracks the ACTUAL animation for the full-shorthand path too — the
+        // per-token path already tracks exactly. (mirrors Fade's transitionRuntimeMs.)
+        const shorthandRuntime = transitionRuntimeMs(styles.transition)
+        if (shorthandRuntime !== undefined) {
+          ;(dynamicStyle as Record<string, string>)['--slide-duration'] =
+            `${shorthandRuntime}ms`
+        }
       } else {
         if (styles?.timeout !== undefined) {
           ;(dynamicStyle as Record<string, string>)['--slide-duration'] =

@@ -39,10 +39,11 @@
      transform timing — whether per-token via --slide-duration/--slide-timing/--slide-delay
      OR wholesale via a full `transition` shorthand (routed from JS as --slide-transition,
      never as an inline `transition` property that would strip this visibility half). NOTE:
-     a full --slide-transition shorthand carries its own opaque duration/delay that CSS
-     cannot read back, so for that escape-hatch path the inert timing falls back to the
-     theme-default duration; the per-token path (timeout/transitionDuration/transitionDelay)
-     tracks exactly. */
+     a full --slide-transition shorthand carries its own duration/delay INSIDE the string
+     that CSS cannot read back — so index.tsx parses that shorthand's longest running time
+     (duration + delay) in JS and feeds it into --slide-duration, keeping this visibility
+     delay in lockstep with the shorthand's real animation. Both override paths — per-token
+     (timeout/transitionDuration/transitionDelay) AND the full shorthand — now track exactly. */
   --slide-visibility-delay: calc(var(--slide-duration) + var(--slide-delay, 0s));
 
   /* Hidden by default; the .in class resets the transform to the resting
