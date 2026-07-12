@@ -57,6 +57,10 @@
     );
 
   --switch-track-focus-shadow: var(--goobs-focus-sacred);
+  /* Full-opacity solid colour for the GUARANTEED keyboard-focus outline (WCAG
+     2.4.7 / 2.4.11). Distinct from the faint decorative --switch-track-focus-
+     shadow glow above. */
+  --switch-focus-outline-color: var(--goobs-gold);
 
   --switch-track-disabled-bg: rgba(10, 10, 10, 0.6);
   --switch-track-disabled-border: var(--goobs-gold-a10);
@@ -141,6 +145,7 @@
   --switch-track-checked-image: none;
 
   --switch-track-focus-shadow: var(--goobs-focus-light);
+  --switch-focus-outline-color: var(--goobs-light-primary);
 
   --switch-track-disabled-bg: rgba(156, 163, 175, 0.2);
   --switch-track-disabled-border: rgba(156, 163, 175, 0.1);
@@ -193,6 +198,7 @@
   --switch-track-checked-image: none;
 
   --switch-track-focus-shadow: var(--goobs-focus-dark);
+  --switch-focus-outline-color: var(--goobs-dark-primary);
 
   --switch-track-disabled-bg: rgba(75, 85, 99, 0.2);
   --switch-track-disabled-border: rgba(75, 85, 99, 0.1);
@@ -256,7 +262,26 @@
   background-image: var(--switch-track-checked-image);
 }
 
-/* focus — only when focusEffects !== false (runtime-only, so :has() it is) */
+/* focus (WCAG 2.4.7 Focus Visible / 2.4.11 Focus Appearance)
+   TWO layers, by design:
+   1. A solid, full-opacity OUTLINE is the GUARANTEED keyboard-focus indicator.
+      It is deliberately NOT gated by [data-focus-effects] — focusEffects=false
+      only suppresses the decorative glow below, never the baseline accessible
+      indicator. `outline` (not box-shadow) matches the library's Checkbox focus
+      treatment: it never collides with the state-dependent track box-shadow
+      (checked glow) and survives Windows forced-colors mode. Before this, the
+      ONLY focus cue was the box-shadow below, which (a) was suppressible via
+      focusEffects=false, leaving keyboard users with no indicator, and (b) as a
+      ~0.2-alpha ring was too faint to clear the 3:1 focus-appearance floor. The
+      native <input> sits at opacity:0, so its UA outline is invisible — the
+      outline must live on the track.
+   2. The soft box-shadow glow is a DECORATIVE enhancement layered behind the
+      outline, still opt-out via focusEffects=false. */
+.track:has(.input:focus-visible) {
+  outline: 2px solid var(--switch-focus-outline-color);
+  outline-offset: 2px;
+}
+
 .container:not([data-focus-effects='false']) .track:has(.input:focus-visible) {
   box-shadow: var(--switch-track-focus-shadow);
 }

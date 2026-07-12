@@ -1989,3 +1989,127 @@ export const AccessibilityForcedColors: Story = {
     expect(restoresThumbBoundary).toBe(true)
   },
 }
+
+/**
+ * 12) Accessibility — keyboard focus indicator survives focusEffects=false
+ *     (WCAG 2.4.7 Focus Visible, 2.4.11 Focus Appearance)
+ *
+ * Regression gate for the focus-indicator fix. The switch's decorative focus
+ * GLOW (`--switch-track-focus-shadow` box-shadow) is opt-out via
+ * `focusEffects=false`. Previously that box-shadow was the ONLY focus cue, so
+ * `focusEffects=false` left keyboard users with NO visible focus indicator at
+ * all (a 2.4.7 failure), and even when enabled the ~0.2-alpha glow was too faint
+ * to clear the 3:1 focus-appearance floor (2.4.11). The fix adds an UNGATED
+ * solid `:focus-visible` outline on the track — the guaranteed baseline
+ * indicator, matching the library's Checkbox focus treatment — that is NOT
+ * suppressed by focusEffects. This story renders a switch with
+ * `focusEffects: false` and asserts — via the CSSOM, scoped to THIS component's
+ * hashed track class and to BASE (non-`@media`) rules only — that a solid,
+ * non-transparent `:focus-visible` outline rule still exists. If a future edit
+ * re-gates or drops the outline, this re-fails. The native <input> is at
+ * opacity:0 (its UA outline is invisible), so the outline must live on the
+ * track — which is what this verifies.
+ */
+export const AccessibilityFocusVisible: Story = {
+  name: 'Accessibility - Focus Indicator (WCAG 2.4.7)',
+  render: args => {
+    const Component = () => {
+      const [on, setOn] = useState(false)
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            padding: '24px',
+            background: '#ffffff',
+            borderRadius: '12px',
+          }}
+        >
+          <Switch
+            {...args}
+            aria-label="Focus outline toggle"
+            checked={on}
+            onChange={e => setOn(e.target.checked)}
+            // Decorative glow suppressed — the baseline outline must remain.
+            styles={{ theme: 'light', outline: true, focusEffects: false }}
+          />
+        </div>
+      )
+    }
+    return <Component />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const control = canvas.getByRole('switch', { name: 'Focus outline toggle' })
+
+    // The decorative glow is opted OUT on the wrapping <label>…
+    const container = control.closest('label') as HTMLElement
+    expect(container).toHaveAttribute('data-focus-effects', 'false')
+
+    // …yet the control is still keyboard-focusable.
+    control.focus()
+    expect(control).toHaveFocus()
+
+    // The track is the <input>'s parent <div>; its hashed CSS-module class scopes
+    // the CSSOM search so another component can never false-green this gate.
+    const track = control.parentElement as HTMLElement
+    const trackClass = track.className.trim().split(/\s+/).find(Boolean) ?? ''
+    expect(trackClass).not.toBe('')
+
+    // Collect BASE (non-`@media`) style rules only — the forced-colors block
+    // also carries a `:focus-visible` outline, but it is a *transparent*,
+    // media-gated fallback and must NOT be what satisfies this gate.
+    const baseRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList, inMedia: boolean) => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          visit(rule.cssRules, true)
+          continue
+        }
+        if (rule instanceof CSSStyleRule) {
+          if (!inMedia) baseRules.push(rule)
+          continue
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules, inMedia)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules, false)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+
+    // Switch's own base `:focus-visible` rules, scoped by the hashed track class.
+    const focusRules = baseRules.filter(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        rule.selectorText.includes(trackClass) &&
+        /focus-visible/i.test(rule.selectorText)
+    )
+    expect(focusRules.length).toBeGreaterThan(0)
+
+    // At least one must declare a real, NON-transparent outline — the always-on
+    // accessible focus indicator that focusEffects=false cannot remove.
+    const hasSolidOutline = focusRules.some(rule => {
+      const outline = rule.style.getPropertyValue('outline').trim()
+      const outlineStyle = rule.style.getPropertyValue('outline-style').trim()
+      const outlineWidth = rule.style.getPropertyValue('outline-width').trim()
+      const outlineColor = rule.style.getPropertyValue('outline-color').trim()
+
+      const declaresOutline =
+        (outline !== '' && outline !== 'none') ||
+        (outlineStyle !== '' && outlineStyle !== 'none') ||
+        (outlineWidth !== '' && outlineWidth !== '0px')
+      const isTransparent =
+        /transparent/i.test(outline) || outlineColor === 'transparent'
+
+      return declaresOutline && !isTransparent
+    })
+    expect(hasSolidOutline).toBe(true)
+  },
+}
