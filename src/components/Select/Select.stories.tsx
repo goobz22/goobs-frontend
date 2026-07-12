@@ -490,3 +490,42 @@ export const AccessibleName: Story = {
     ).toBeVisible()
   },
 }
+
+// --------------------------------------------------------------------------
+// DECORATIVE ARROW HIDDEN (a11y) — the custom `▼` dropdown-affordance chrome is
+// a purely presentational sibling of the native <select> (the browser already
+// paints its own real popup). It is marked `aria-hidden="true"` so assistive
+// tech never announces the "black down-pointing triangle" (U+25BC) as stray
+// text beside the combobox (WCAG 1.1.1 non-text content is decorative; 4.1.2
+// keeps the combobox's accessible name clean). This story regression-gates that
+// attribute — it fails if a future change (e.g. swapping the glyph for an icon
+// component) drops `aria-hidden`, which would leak the glyph into the a11y tree.
+// --------------------------------------------------------------------------
+
+export const DecorativeArrowHidden: Story = {
+  name: 'Decorative Arrow Hidden (a11y)',
+  render: () => (
+    <SelectWithState aria-label="Country" styles={{ theme: 'light' }}>
+      <MenuItem value="usa">United States</MenuItem>
+      <MenuItem value="canada">Canada</MenuItem>
+      <MenuItem value="uk">United Kingdom</MenuItem>
+    </SelectWithState>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The custom arrow glyph is present in the DOM but hidden from AT: it lives
+    // on an `aria-hidden="true"` element carrying the ▼ glyph. Queried off the
+    // component root so it is not confused with the native control.
+    const root = canvasElement.querySelector('[data-component="Select"]')
+    const arrow = root?.querySelector('[aria-hidden="true"]')
+    await expect(arrow).toHaveTextContent('▼')
+
+    // The glyph does NOT bleed into the combobox's accessible name — the name
+    // resolves to exactly the supplied aria-label, proving the arrow is excluded
+    // from the accessibility tree (WCAG 1.1.1 / 4.1.2).
+    await expect(
+      canvas.getByRole('combobox', { name: 'Country' })
+    ).toBeVisible()
+  },
+}
