@@ -4,8 +4,9 @@
  * permanent variants, and each anchor edge. Interactive variants use a small
  * stateful wrapper so the drawer can be opened and closed.
  */
-import React, { useState } from 'react'
+import React, { useState, useId } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import Drawer from './index'
 import Button from '../Button'
 
@@ -50,14 +51,23 @@ type Story = StoryObj<typeof Drawer>
 
 const DrawerMenu = ({
   theme,
+  headingId,
 }: {
   theme: 'light' | 'dark' | 'sacred'
+  /**
+   * Optional id placed on the `<h3>` so the surrounding `Drawer` can reference
+   * it via `ariaLabelledBy` — a `role="dialog"` surface MUST expose an
+   * accessible name, so every interactive story wires one (WCAG 4.1.2).
+   */
+  headingId?: string
 }): React.JSX.Element => {
   const color =
     theme === 'sacred' ? '#FFD700' : theme === 'dark' ? '#F9FAFB' : '#1F2937'
   return (
     <div style={{ padding: '24px', minWidth: '240px', color }}>
-      <h3 style={{ margin: '0 0 16px 0', fontSize: '1.25rem' }}>Navigation</h3>
+      <h3 id={headingId} style={{ margin: '0 0 16px 0', fontSize: '1.25rem' }}>
+        Navigation
+      </h3>
       <nav
         style={{
           display: 'flex',
@@ -140,6 +150,11 @@ const InteractiveDrawer = ({
   variant?: 'permanent' | 'persistent' | 'temporary'
 }): React.JSX.Element => {
   const [open, setOpen] = useState(false)
+  // The dismissible variants render `role="dialog"`, which must carry an
+  // accessible name — point `ariaLabelledBy` at the menu's `<h3>` so none of
+  // these stories ships a nameless dialog (WCAG 4.1.2). `useId` keeps the
+  // heading id unique per instance.
+  const headingId = useId()
   return (
     <div style={{ padding: '24px', minHeight: '420px' }}>
       <Button
@@ -153,8 +168,9 @@ const InteractiveDrawer = ({
         anchor={anchor}
         variant={variant}
         styles={{ theme }}
+        ariaLabelledBy={headingId}
       >
-        <DrawerMenu theme={theme} />
+        <DrawerMenu theme={theme} headingId={headingId} />
       </Drawer>
     </div>
   )
@@ -384,4 +400,203 @@ export const ModalBackgroundIsolation: Story = {
   name: 'Accessibility/Modal Background Isolation',
   render: () => <ModalIsolationDrawer />,
   globals: { backgrounds: { value: 'light' } },
+}
+
+// Wrapper for the persistent-variant inerting behaviour. A `persistent` drawer
+// stays MOUNTED when closed (it slides off-screen rather than unmounting like
+// `temporary`), so while closed its panel is marked `inert` — its links leave
+// the tab order and its `role="dialog"` leaves the accessibility tree until it
+// is opened. Starts closed so the snapshot captures the inert closed state; the
+// toggle button drives the open/close transition the play function verifies.
+const PersistentInertDrawer = (): React.JSX.Element => {
+  const [open, setOpen] = useState(false)
+  const headingId = 'persistent-inert-heading'
+  return (
+    <div style={{ display: 'flex', minHeight: '420px' }}>
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        variant="persistent"
+        styles={{ theme: 'light' }}
+        ariaLabelledBy={headingId}
+      >
+        <AccessibleDrawerMenu
+          theme="light"
+          headingId={headingId}
+          onClose={() => setOpen(false)}
+        />
+      </Drawer>
+      <div style={{ flex: 1, padding: '24px', color: '#1F2937' }}>
+        <Button
+          text="Toggle Drawer"
+          styles={{ theme: 'light' }}
+          onClick={() => setOpen(o => !o)}
+        />
+        <h2 style={{ marginTop: '16px' }}>Main Content</h2>
+        <p style={{ maxWidth: '520px' }}>
+          A persistent drawer stays mounted when closed (it slides off-screen
+          rather than unmounting). While closed it is marked <code>inert</code>,
+          so its links are removed from the tab order and the accessibility tree
+          until it is opened.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Persistent variant, closed → inert (WCAG 2.4.3 Focus Order / 4.1.2). A closed
+ * `persistent` drawer stays mounted off-screen, so — unlike `temporary`, which
+ * unmounts — its focusable content would otherwise remain tabbable and its
+ * `role="dialog"` would linger in the accessibility tree. The panel is now
+ * marked `inert` while closed; opening it lifts `inert`, closing re-applies it.
+ * The play function is the deterministic regression net for that behaviour: it
+ * fails the instant the `inert` guard is removed.
+ */
+export const PersistentInertWhenClosed: Story = {
+  name: 'Accessibility/Persistent Inert When Closed',
+  render: () => <PersistentInertDrawer />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const panel = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Drawer"]'
+    )
+    expect(panel).not.toBeNull()
+    if (!panel) return
+
+    // Closed by default → the mounted-but-off-screen persistent panel must be
+    // inert so keyboard and AT users cannot reach its content.
+    expect(panel.getAttribute('data-state')).toBe('closed')
+    expect(panel.hasAttribute('inert')).toBe(true)
+
+    // Opening it must LIFT inert so the content becomes reachable again.
+    await userEvent.click(canvas.getByRole('button', { name: /toggle drawer/i }))
+    await waitFor(() =>
+      expect(panel.getAttribute('data-state')).toBe('open')
+    )
+    expect(panel.hasAttribute('inert')).toBe(false)
+
+    // Closing it must RE-APPLY inert.
+    await userEvent.click(canvas.getByRole('button', { name: /toggle drawer/i }))
+    await waitFor(() =>
+      expect(panel.getAttribute('data-state')).toBe('closed')
+    )
+    expect(panel.hasAttribute('inert')).toBe(true)
+  },
+}
+
+// Wrapper for the reduced-motion regression. Renders a sacred temporary (modal)
+// drawer OPEN by default so both motion sources are exercised in one snapshot:
+// the CSS `.paper` slide transition and the JS `SacredBackground` glyph canvas.
+// Under `prefers-reduced-motion: reduce` the slide transition is removed (CSS)
+// and the canvas is cleared once instead of running `requestAnimationFrame`
+// forever (JS, index.tsx).
+const ReducedMotionDrawer = (): React.JSX.Element => {
+  const headingId = 'drawer-reduced-motion-heading'
+  return (
+    <div style={{ padding: '24px', minHeight: '420px' }}>
+      <Drawer
+        open
+        variant="temporary"
+        styles={{ theme: 'sacred' }}
+        ariaLabelledBy={headingId}
+      >
+        <AccessibleDrawerMenu theme="sacred" headingId={headingId} />
+      </Drawer>
+    </div>
+  )
+}
+
+/**
+ * Reduced motion (WCAG 2.3.3 Animation from Interactions). The Drawer honours
+ * `prefers-reduced-motion: reduce` two ways: the module CSS removes the
+ * `.paper` slide transition, and `SacredBackground` skips its perpetual
+ * `requestAnimationFrame` glyph loop (clearing the decorative, `aria-hidden`
+ * canvas once). Because the media feature is OFF by default a plain render
+ * would not re-fail if either guard were deleted, so this story is guarded two
+ * ways (matching the repo's `Content` reduced-motion pattern):
+ *   1. `parameters.chromatic.prefersReducedMotion: 'reduce'` makes Chromatic
+ *      emulate the OS "Reduce motion" setting for THIS snapshot, so the
+ *      reduced-motion rendering is captured as the real visual baseline.
+ *   2. The `play` function asserts, via the CSSOM and scoped to the panel's own
+ *      hashed CSS-module class, that the `@media (prefers-reduced-motion:
+ *      reduce)` block still neutralises the slide transition — failing
+ *      deterministically (with or without Chromatic) the instant it is removed.
+ */
+export const ReducedMotion: Story = {
+  name: 'Accessibility/Reduced Motion',
+  render: () => <ReducedMotionDrawer />,
+  globals: { backgrounds: { value: 'sacred' } },
+  parameters: {
+    // Force the media feature ONLY for this snapshot so Chromatic captures the
+    // reduced-motion path; the `play` gate below makes it deterministic even
+    // without Chromatic.
+    chromatic: { prefersReducedMotion: 'reduce' },
+  },
+  play: async ({ canvasElement }) => {
+    const panel = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Drawer"]'
+    )
+    expect(panel).not.toBeNull()
+    if (!panel) return
+
+    // The panel labels itself with a single hashed CSS-module class (`.paper`).
+    const paperClass = panel.className.trim().split(/\s+/).find(Boolean) ?? ''
+    expect(paperClass).not.toBe('')
+
+    // The decorative sacred glyph canvas must be present and hidden from AT.
+    const glyphCanvas = panel.querySelector('canvas')
+    expect(glyphCanvas).not.toBeNull()
+    expect(glyphCanvas?.getAttribute('aria-hidden')).toBe('true')
+
+    // Collect every style rule inside a `@media (prefers-reduced-motion:
+    // reduce)` block from the same-origin stylesheets (cross-origin sheets
+    // throw on `.cssRules` and are skipped).
+    const reducedMotionRules: CSSStyleRule[] = []
+    const visit = (rules: CSSRuleList): void => {
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaText = rule.media.mediaText
+          if (
+            /prefers-reduced-motion/i.test(mediaText) &&
+            /reduce/i.test(mediaText)
+          ) {
+            for (const inner of Array.from(rule.cssRules)) {
+              if (inner instanceof CSSStyleRule) reducedMotionRules.push(inner)
+            }
+            continue
+          }
+        }
+        if ('cssRules' in rule) {
+          visit((rule as CSSGroupingRule).cssRules)
+        }
+      }
+    }
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        visit(sheet.cssRules)
+      } catch {
+        // Cross-origin / non-inspectable stylesheet — ignore.
+      }
+    }
+    expect(reducedMotionRules.length).toBeGreaterThan(0)
+
+    // The panel's slide transition must be neutralised (`transition: none`)
+    // under reduced motion.
+    const panelGuarded = reducedMotionRules.some(
+      rule =>
+        typeof rule.selectorText === 'string' &&
+        rule.selectorText.includes(paperClass) &&
+        /transition:\s*none/i.test(rule.cssText)
+    )
+    expect(panelGuarded).toBe(true)
+
+    // Behavioural gate when the environment actually requests reduced motion
+    // (Chromatic capturing with `prefersReducedMotion: 'reduce'`): the panel's
+    // resolved transition must actually be off, not merely declared off.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      expect(getComputedStyle(panel).transitionDuration).toBe('0s')
+    }
+  },
 }
