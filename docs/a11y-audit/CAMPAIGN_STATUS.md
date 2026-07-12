@@ -19,10 +19,28 @@ promoted from Button/Typography's per-component workarounds); Button now default
 + 99 SaveButton files). Gates re-verified green after all of it (typecheck · lint:all
 with 25 modules · build).
 
-**Remaining (final wave, one-shot scheduled 1:07am for quota reset):**
-- ariaLabel leaf-forwarding sweep (~13 Shell-based leaves + DataGrid's 4 editor callsites) + stories
-- TreeView focus-on-collapse follow-up (pointer-chevron / '*' / apiRef paths)
-- Completeness critic vs the 59+14-dir matrix + deferred-list re-verify + gates + push
+**Remaining (verified by the completeness critic, 2026-07-12 — EXACT truth):**
+- **`Field/IPAM/Address` + `Field/IPAM/Supernet` never got the `ariaLabel` prop** the serial pass
+  added to their 4 sibling IPAM leaves — the ONLY genuinely-unlanded refix. Blocks label-less
+  naming (WCAG 4.1.2) on those two fields AND keeps `DataGrid.md` PARTIAL (its `ipAddress` /
+  `supernet` editor branches stay unnamed). Fix: add `ariaLabel?: string` + forward it exactly as
+  `Field/IPAM/{CIDR,Subnet,VLAN,MACAddress}` do (Supernet forwards into the wrapped `SubnetField`),
+  then adopt the one-liner in the two DataGrid `case` branches.
+- **Gate gap: `form-error-not-associated` has NO lint module** despite being a recurring class
+  (`Field-USD.md` issue 10 + `ConfirmationCodeInput.md` follow-up #2; listed as "(3)" in Top
+  recurring classes). Shape to detect: a consumer `{...rest}`/`aria-describedby` spread AFTER
+  `{...inputAriaProps}` that drops the shell's error link, or an error region with no id referenced
+  by the input's `aria-describedby`.
+- **VERIFIED DONE (were listed remaining, confirmed landed in code):** ariaLabel leaf-forwarding
+  sweep — done for all leaves + DataGrid's `CompositeFieldEditModal` callsites *except* the two IPAM
+  leaves above; TreeView focus-on-collapse (`preserveFocusOnCollapse`, `index.tsx:479,652,1720` —
+  chevron + apiRef paths fixed, `*` proven a non-issue); Dropdown type-ahead (`useTypeahead` in
+  `Shell/keyboard.ts`, consumed by Regular + MultiSelect); Field/Shell serial pass
+  (`ariaLabel`/`id`/`describedById`/opaque focus-ring tokens) — now documented in `Field-Shell.md`.
+- **STALE cross-reference (already fixed):** `PricingTable.md` Deferred item 1 (Tooltip trigger
+  keyboard-inaccessible at `Tooltip/index.tsx:308-315`) — the Tooltip pass self-heals the trigger
+  into `tabIndex:0, role:"button", aria-label` (`index.tsx:425,438-439`); PricingTable's line
+  numbers are stale.
 
 **OWNER decisions (not agent-executable):** Tabs route-tab semantics (crawlable `<a href>`
 vs button-tab that navigates on arrow-key — WCAG 3.2.2/SEO); ListItemCard composition
@@ -63,13 +81,33 @@ color-only-state (12) · clickable-noninteractive-element (6+) · missing-keyboa
 form-error-not-associated (3) · toggle-missing-aria-pressed (3) — each is/becomes a permanent
 self-testing module in `scripts/a11y-lints/`, wired into `lint:all` via `lint:a11y`.
 
-## Remaining (in order)
+## Remaining (in order) — verified 2026-07-12
 
-1. Re-runs in flight: 6 audits, ~10 re-fixes, ~13 class-lint builders, 3×3 gate rounds, 4 wave-2 gates.
-2. Final wave (shared files, serialized on purpose): Field/Shell audit + the 67 deferred
-   cross-component items (Typography `as` prop, ToggleButtonGroup label, Tooltip focus-open,
-   Button default `type`, Icons aria-hidden default…), global reduced-motion reset in
-   `global.css`, full `typecheck` + `lint:all` + `build` green-loop, completeness critic
-   (every dir has a report, every pattern has a lint), final push.
-3. Known repo nit queued for the final wave: `bun typecheck:file` is broken (TS5112 — tsc
-   won't load tsconfig with a file arg); agents fell back to `lint:file` + batch typecheck.
+**Matrix coverage: COMPLETE.** All 58 non-Field top-level component dirs + all 14 Field subdirs
+have a report (`Field-Shell.md` was the one hole — now created). `src/app` (a trivial
+`<html lang="en">` layout) and `src/utils` (pure formatter/alpha/diag/keyframe helpers, no rendered
+output) carry no component surface and need no report. Index: `README.md`.
+
+**Genuinely unresolved (agent-fixable, additive):**
+1. `Field/IPAM/Address` (`IPAddressFieldProps`) — add `ariaLabel?: string`, render as
+   `aria-label={ariaLabel}` on the input (mirror `Field/IPAM/CIDR`). WCAG 4.1.2.
+2. `Field/IPAM/Supernet` (`SupernetFieldProps`) — add `ariaLabel?: string`, forward into the wrapped
+   `SubnetField`. WCAG 4.1.2.
+3. Once (1)/(2) land, adopt `ariaLabel={column.headerName || column.field}` (EditableCell) /
+   `ariaLabel={fieldConfig.label || fieldConfig.field}` (CreationRow / CompositeFieldEditModal) in
+   DataGrid's `ipAddress` + `supernet` `case` branches → flips `DataGrid.md` from PARTIAL to FIXED.
+4. Build `scripts/a11y-lints/form-error-not-associated.ts` — the recurring class with no gate module.
+
+**Owner-gated (design/API decisions — NOT interrupted refixes; correctly deferred):**
+- `ProjectBoard` — keyboard drag-alternative for column/card reorder (`missing-keyboard-drag-alternative`)
+  + breadcrumb occluded during form views (visible affordance + Chromatic churn = design call).
+- `PricingTable` / cross-component — `Button` has no polymorphic `as`/`href`, so CTA columns are
+  JS-nav buttons not crawlable `<a href>` (SEO). Shared-`Button` API decision.
+- `Field-Dropdown` D2 — filter input / tabs nested inside `role="listbox"`
+  (`invalid-listbox-owned-element`); the DOM restructure changes the mandated ThothOS
+  `[role="listbox"]`/`[role="option"]` selector contract — owner decision.
+- `ListItemCard` composition restructure; `Tabs` route-tab (`<a href>` vs button-tab) semantics.
+- Chromatic visual-parity run over the whole campaign; npm version bump + publish + ThothOS pin.
+
+**Known repo nit:** `bun typecheck:file` is broken (TS5112 — tsc won't load tsconfig with a file
+arg); agents fall back to `lint:file` + batch typecheck.
