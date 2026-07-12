@@ -767,6 +767,46 @@ export const AccessibleNameAndPurpose: Story = {
 }
 
 /**
+ * When the field is disabled the eye toggle must itself be inert: the native
+ * `<button disabled>` drops it from the tab order and blocks activation, and
+ * the (decorative) eye icon dims via its `data-disabled` wrapper so the
+ * control doesn't read as actionable to low-vision/cognitive users. Toggling
+ * has no effect. WCAG 1.4.1 (Use of Color) + 4.1.2 (Name, Role, Value).
+ */
+export const DisabledToggleState: Story = {
+  name: 'A11y: disabled toggle is inert + dimmed',
+  render: () => (
+    <PasswordFieldWithState
+      label="Password"
+      initialValue="cannot-edit"
+      disabled
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText('Password')
+    const toggle = canvas.getByRole('button', { name: 'Show password' })
+
+    // Both controls are natively disabled.
+    expect(input).toBeDisabled()
+    expect(toggle).toBeDisabled()
+    expect(input).toHaveAttribute('type', 'password')
+
+    // The decorative eye icon dims via its own data-disabled wrapper so the
+    // toggle doesn't look actionable on a disabled field.
+    const dimmed = toggle.querySelector('[data-disabled="true"]')
+    expect(dimmed).not.toBeNull()
+
+    // A click on a disabled button is a no-op — visibility never flips.
+    await userEvent.click(toggle, { pointerEventsCheck: 0 })
+    expect(input).toHaveAttribute('type', 'password')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  },
+}
+
+/**
  * The focus/border transition is dropped under `prefers-reduced-motion`
  * (WCAG 2.3.3). The `@media` query is engine-evaluated from the OS setting and
  * can't be toggled from a play fn, so this asserts the guard STRUCTURALLY: a
