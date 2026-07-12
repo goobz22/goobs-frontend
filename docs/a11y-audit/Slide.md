@@ -2,6 +2,11 @@
 
 **Status: FIXED**
 
+> Re-audit (2026-07-11, owner pass): re-verified the full checklist against the prior fixes
+> (Issues #1–#3, all confirmed holding). Found and fixed one residual timing gap in the
+> delayed-inert exit (Issue #4). Hearing / SEO-semantics / accessible-name / focus-visible /
+> APG-pattern surfaces re-confirmed clean (see "Non-issues"). No deferred items.
+
 ## Component summary
 
 `Slide` (`src/components/Slide/index.tsx`) is a purely presentational transform-based
@@ -84,6 +89,31 @@ finishes — for the base path, the per-token override path, AND the full-`trans
 override paths. The `ExitAnimationSurvivesTimingOverride` story pins both override paths against
 a real focusable `<a>`.
 
+### 4. Delayed-inert exit went inert `delay` ms EARLY — content left the a11y tree while still visibly sliding — MINOR — WCAG 1.3.1, 4.1.2 — FIXED
+The Issue-#2/#3 "delayed-inert" exit keeps slid-out content perceivable/announced until the exit
+animation finishes by delaying the `visibility:hidden` flip via `--slide-visibility-delay`. That
+delay was defined as `var(--slide-duration)` — the slide **duration** only. But the transform half
+is `transform var(--slide-duration) var(--slide-timing) var(--slide-delay, 0s)`, so when a caller
+supplies a `transitionDelay` the exit slide does not *complete* until `delay + duration`. With the
+visibility flip pinned to `duration` alone, the content went `visibility:hidden` — i.e. left the
+accessibility tree AND the keyboard tab order — `delay` ms **before** the slide visually finished.
+For that window the content was still on-screen and mid-slide for sighted users but already gone
+for screen-reader / keyboard users (a transient perceivability mismatch), and the
+`ExitAnimationSurvivesTimingOverride` RIGHT panel (`timeout: 600, transitionDelay: '150ms'`, slide
+completes at 750ms) flipped inert at 600ms — 150ms early — so its documented "animates fully before
+the inner link leaves the tab order" claim was not actually met. Pattern: `hidden-content-inert-timing`
+(a cross-component class: any animated-hide primitive — Drawer/Grow/Fade/Collapse/Zoom — whose
+inert-flip must track the FULL transform completion time, not just its duration).
+**Fix:** `--slide-visibility-delay` now equals `calc(var(--slide-duration) + var(--slide-delay, 0s))`,
+so the inert flip tracks the full `delay + duration` completion. The RIGHT panel now goes inert at
+exactly 750ms. The `.root.in` entrance override (`--slide-visibility-delay: 0s`) is unaffected
+(content is exposed instantly on the way IN). No regression for the common no-delay case
+(`calc(duration + 0s) === duration`). **Escape-hatch limitation (documented, not a defect):** a full
+`transition` shorthand routed via `--slide-transition` carries its own opaque duration/delay that CSS
+cannot read back, so for that path the inert timing falls back to the theme-default duration (the
+delay still *survives* — Issue #3 — it just isn't the caller's exact value). The recommended per-token
+override path (`timeout` / `transitionDuration` / `transitionDelay`) tracks exactly.
+
 ## Non-issues considered and dismissed
 
 - **Disabled state uses `opacity: 0.6`** (`Slide.module.css`). This is a purely decorative
@@ -115,8 +145,11 @@ All within `src/components/Slide/` (owned):
   - split the transition into a caller-overridable transform half
     (`var(--slide-transition, transform var(--slide-duration) var(--slide-timing) var(--slide-delay,0s))`)
     and a stylesheet-owned visibility half (`visibility 0s linear var(--slide-visibility-delay)`),
-    with `--slide-visibility-delay` defaulting to `--slide-duration` and flipping to `0s` in
-    `.root.in`, so no caller timing override can strip the delayed-inert exit (Issue #3).
+    with `--slide-visibility-delay` and flipping to `0s` in `.root.in`, so no caller timing
+    override can strip the delayed-inert exit (Issue #3);
+  - changed `--slide-visibility-delay` from `var(--slide-duration)` to
+    `calc(var(--slide-duration) + var(--slide-delay, 0s))` so the inert flip tracks the FULL
+    transform completion (delay + duration) instead of going inert `delay` ms early (Issue #4).
 - `index.tsx` — caller timing overrides now emit CSS custom properties only: a full `transition`
   shorthand → `--slide-transition`; `transitionDelay` → `--slide-delay` (Issue #3). Previously
   these were emitted as inline `transition` / `transition-delay` properties.
@@ -136,8 +169,12 @@ All within `src/components/Slide/` (owned):
   documents the `prefers-reduced-motion` neutralization (Issue #1).
 - **`ExitAnimationSurvivesTimingOverride`** — two panels, each wrapping a real focusable `<a>`:
   the left overrides the full `transition` shorthand (800ms), the right overrides `transitionDelay`.
-  Both keep their delayed-inert exit (animate fully before the inner link leaves the tab order),
-  pinning that a caller timing override no longer strips the visibility delay (Issue #3).
+  Both keep their delayed-inert exit (a caller timing override no longer strips the visibility
+  delay — Issue #3). Extended for Issue #4: its JSDoc + footer now pin that the per-token RIGHT
+  panel (`timeout: 600, transitionDelay: '150ms'`) goes inert at **exactly** 750ms (its full
+  `delay + duration` completion) rather than 150ms early at 600ms, and document that the
+  full-`transition`-shorthand LEFT panel keeps a surviving delay at the theme default (the
+  escape-hatch limitation). The RIGHT panel is the regression exercise for Issue #4.
 
 ## Deferred
 
