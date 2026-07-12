@@ -477,6 +477,23 @@ export const AccessibleHeading: Story = {
     />
   ),
   globals: { backgrounds: { value: 'light' } },
+  // goobs has no unit tests — the play fn IS the regression test. The heading
+  // wrapper is visually INVISIBLE (`.heading { font: inherit; margin: 0 }`, so
+  // the <h2>-wrapped toggle is pixel-identical to a bare button) and therefore
+  // NOT protected by the Chromatic visual diff; assert it programmatically so a
+  // regression that drops the heading wrapper fails here. Pin: a real level-2
+  // heading named "Course Filters" wraps the disclosure toggle.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const heading = canvas.getByRole('heading', {
+      level: 2,
+      name: /Course Filters/,
+    })
+    await expect(heading).toBeInTheDocument()
+    const toggle = canvas.getByTestId('filter-section-toggle')
+    await expect(heading).toContainElement(toggle)
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  },
 }
 
 /**
@@ -494,6 +511,25 @@ export const AccessibleChipGroups: Story = {
     <FilterSectionDemo withButtons={false} withDropdowns={false} />
   ),
   globals: { backgrounds: { value: 'light' } },
+  // goobs has no unit tests — the play fn IS the regression test. The grouping
+  // (role="group" + aria-labelledby on each chip row) is INVISIBLE to Chromatic
+  // (ARIA roles/labelledby aren't screenshot); assert it programmatically so a
+  // regression that drops the group role or its label association fails here.
+  // Pin: each labelled cluster is exposed as a role="group" named by its visible
+  // dimension label, and the group wraps the cluster's aria-pressed toggle chips.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const statusGroup = canvas.getByRole('group', { name: /Status/ })
+    const levelGroup = canvas.getByRole('group', { name: /Level/ })
+    const tagsGroup = canvas.getByRole('group', { name: /Tags/ })
+    await expect(statusGroup).toBeInTheDocument()
+    await expect(levelGroup).toBeInTheDocument()
+    await expect(tagsGroup).toBeInTheDocument()
+    // The Status cluster has four toggle chips (All / Published / Draft /
+    // Archived), each exposed as a button — confirming the group wraps the
+    // real chips rather than being an empty labelled container.
+    await expect(within(statusGroup).getAllByRole('button')).toHaveLength(4)
+  },
 }
 
 /**

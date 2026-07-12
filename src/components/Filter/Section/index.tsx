@@ -209,17 +209,19 @@ export interface FilterSectionProps {
 
   // Misc ----------------------------------------------------------
   /**
-   * Accessible name for the search/filter landmark. In non-collapsible mode a
-   * FilterSection that includes a search box is a *search facility* (a search
-   * box plus its filter controls), so its root is exposed as a `role="search"`
-   * landmark (WAI-ARIA landmark best practice / WCAG 1.3.1) — this lets
-   * screen-reader users jump straight to the filters via landmark navigation.
-   * The landmark is given an accessible name (this prop → falls back to
-   * `title`, default `"Filters"`); pass a UNIQUE label to disambiguate when
-   * several filter sections share one page, so their landmarks don't all
-   * announce as the same name. Collapsible mode already exposes its panel as a
-   * named `role="region"` landmark, so this prop applies to non-collapsible
-   * mode only. No search box → no landmark (nothing to name).
+   * Accessible name for the search landmark. In non-collapsible mode a
+   * FilterSection that includes a search box exposes that *search box* as a
+   * named `role="search"` landmark (WAI-ARIA landmark best practice /
+   * WCAG 1.3.1) — this lets screen-reader users jump straight to the search via
+   * landmark navigation. The landmark is scoped to the search box specifically
+   * so the right-aligned action button(s) (e.g. a "+ Create" CTA), which are
+   * not part of a search facility, are NOT enclosed in it. The landmark is
+   * given an accessible name (this prop → falls back to `title`, default
+   * `"Filters"`); pass a UNIQUE label to disambiguate when several filter
+   * sections share one page, so their landmarks don't all announce as the same
+   * name. Collapsible mode already exposes its panel as a named `role="region"`
+   * landmark, so this prop applies to non-collapsible mode only. No search box
+   * → no landmark (nothing to name).
    */
   landmarkLabel?: string
   styles?: { theme?: 'sacred' | 'light' | 'dark' }
@@ -251,7 +253,7 @@ export interface FilterSectionProps {
   'data-testid'?: string
   /**
    * Forwarded ref to the section root `<div>` (React 19 ref-as-prop), threaded
-   * to whichever root renders (the `role="search"` landmark in the default
+   * to whichever root renders (the search-facility container in the default
    * non-collapsible mode, or the accordion wrapper in collapsible mode). The
    * section is a composite search/filter facility — search box, dropdowns,
    * chips, and an optional disclosure toggle — so the root is the meaningful
@@ -460,7 +462,25 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
       {hasSearchRow && (
         <div className={styles.searchRow}>
           {hasSearch && (
-            <div className={styles.searchCell}>
+            <div
+              className={styles.searchCell}
+              // A search box + its filter controls form a "search facility". In
+              // non-collapsible mode expose the SEARCH BOX as a named
+              // `role="search"` landmark (WAI-ARIA landmarks / WCAG 1.3.1) so
+              // screen-reader users can jump straight to it via landmark
+              // navigation. The landmark is scoped to the search box itself —
+              // NOT the whole row — so the right-aligned action button(s) (e.g.
+              // a "+ Create Course" CTA) rendered in the same `.searchRow`, which
+              // are not part of a search facility, are excluded from it. Named
+              // via `landmarkLabel` (→ `title`, default "Filters") to
+              // disambiguate multiple filter rows on a page. Collapsible mode
+              // already exposes its panel as a named `role="region"`, so the
+              // search landmark applies to non-collapsible mode only.
+              {...(!collapsible && {
+                role: 'search',
+                'aria-label': landmarkLabel ?? title,
+              })}
+            >
               <Searchbar
                 value={searchValue ?? ''}
                 onChange={onSearchChange!}
@@ -600,16 +620,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         data-theme={theme}
         data-component="FilterSection"
         data-filter-section="true"
-        // A search box + its filter controls form a "search facility", so when
-        // a search box is present expose the section as a named `role="search"`
-        // landmark (WAI-ARIA landmarks / WCAG 1.3.1) for landmark navigation.
-        // Named via `landmarkLabel` (→ `title`, default "Filters") so multiple
-        // filter rows on a page can be disambiguated. Filter-only rows (no
-        // search box) get no landmark — an unnamed/ambiguous one adds noise.
-        {...(hasSearch && {
-          role: 'search',
-          'aria-label': landmarkLabel ?? title,
-        })}
+        // The `role="search"` landmark lives on the SEARCH BOX itself (see the
+        // searchCell in `filterContent`), NOT on this root — so the
+        // right-aligned action button(s) rendered in the same search row are
+        // excluded from the search facility (a "+ Create" CTA is not part of a
+        // search facility). This root stays a plain grouping container carrying
+        // the component's test/theme attributes.
         {...(surface && { 'data-surface': 'true' })}
         {...(dataField !== undefined && {
           'data-subject': dataField,
