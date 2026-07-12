@@ -210,10 +210,11 @@ const lint: DriftLint = {
         const openLine = lineOf(body.open)
         const closeLine = lineOf(body.close)
         // Depth relative to the body: 0 == this interface's own member level.
+        // Start AFTER the opening `{` so top-level members sit at depth 0.
         let depth = 0
         let atLineStart = false
         let curLine = openLine
-        for (let i = body.open; i < body.close; i++) {
+        for (let i = body.open + 1; i < body.close; i++) {
           const c = masked[i]
           if (c === '\n') {
             curLine++
@@ -281,14 +282,18 @@ const lint: DriftLint = {
       'export interface FooProps extends Omit<\n  React.HTMLAttributes<HTMLDivElement>,\n  "color"\n> {\n  /** Accessible label. */\n  label: string\n}',
       // index signature is skipped (no prop name to document)
       'export interface MapProps {\n  [key: string]: string\n}',
-      // nested object members are one level deep — the documented top-level\n      // member is fine, and the nested undocumented one is NOT this class.
+      // nested object members are one level deeper; the top-level styles member
+      // is documented and the nested member is not counted as this class
       'export interface BazProps {\n  /** Styling. */\n  styles?: {\n    theme?: string\n  }\n}',
-      // non-object type alias has no directly-declared members\n      'export type UnionProps = AProps | BProps',
-      // an interface NOT ending in Props/Styles is out of scope
+      // a non-object type alias has no directly-declared members to scan
+      'export type UnionProps = AProps | BProps',
+      // an interface NOT ending in Props/Styles is entirely out of scope
       'export interface TaskMeeting {\n  id: string\n}',
       // the broken shape described inside a JSDoc is documentation, not code
       'export interface FooProps {\n  /** historically `value: string` was undocumented; now fixed */\n  value: string\n}',
-      // a member whose type is a template-literal (brace-bearing) string\n      // literal — braces are blanked, depth stays sane, member is documented\n      'export interface SizeProps {\n  /** CSS length. */\n  width?: `${number}px`\n}',
+      // a template-literal type carries braces; blanking keeps depth sane and
+      // the documented member yields no instance
+      'export interface SizeProps {\n  /** CSS length. */\n  width?: `${number}px`\n}',
     ],
   },
 }
