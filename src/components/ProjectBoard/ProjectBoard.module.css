@@ -75,8 +75,8 @@
   margin: var(--pb-margin);
   margin-top: var(--pb-margin-top);
   margin-bottom: var(--pb-margin-bottom);
-  margin-left: var(--pb-margin-left);
-  margin-right: var(--pb-margin-right);
+  margin-inline-start: var(--pb-margin-left);
+  margin-inline-end: var(--pb-margin-right);
   background: var(--pb-bg);
   background-image: var(--pb-bg-image);
   border: var(--pb-border);

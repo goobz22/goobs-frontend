@@ -61,7 +61,7 @@
 .sidebar {
   width: 280px;
   background-color: var(--at-sidebar-bg);
-  border-right: 1px solid var(--at-border);
+  border-inline-end: 1px solid var(--at-border);
   padding: 1.5rem;
   overflow-y: auto;
   flex-shrink: 0;
@@ -80,7 +80,7 @@
 .requiredList {
   font-size: 0.875rem;
   color: var(--at-secondary);
-  padding-left: 1.25rem;
+  padding-inline-start: 1.25rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -417,7 +417,7 @@
   margin: 0;
   font: inherit;
   color: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 
@@ -490,7 +490,7 @@
 .articleCardCheck {
   color: var(--goobs-gold);
   font-size: 1.25rem;
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
 }
 
 .root[data-theme='light'] .articleCardCheck,

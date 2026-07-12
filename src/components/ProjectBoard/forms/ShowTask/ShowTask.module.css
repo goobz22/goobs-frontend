@@ -72,7 +72,7 @@
   flex-direction: column;
   height: auto;
   overflow: visible;
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -81,7 +81,7 @@
 .sidebar {
   width: 280px;
   background-color: var(--st-sidebar-bg);
-  border-right: 1px solid var(--st-border);
+  border-inline-end: 1px solid var(--st-border);
   padding: 1.5rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -100,7 +100,7 @@
 
 .sidebar[data-mobile='true'] {
   width: 100%;
-  border-right: none;
+  border-inline-end: none;
   border-bottom: 1px solid var(--st-border);
   padding: 1rem 1.5rem 1rem 1rem;
   overflow-y: visible;
@@ -267,7 +267,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.35rem;
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 .fieldLabel {
@@ -280,14 +280,14 @@
   font-size: 0.875rem;
   color: var(--st-text);
   font-weight: 500;
-  text-align: right;
+  text-align: end;
   max-width: 60%;
   width: auto;
   overflow-wrap: break-word;
 }
 
 .root[data-mobile='true'] .fieldValue {
-  text-align: left;
+  text-align: start;
   max-width: 100%;
   width: 100%;
 }
@@ -358,7 +358,7 @@
 
 .root[data-mobile='true'] .actionButtons {
   flex-direction: column;
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 .actionButtonsSpacedTop {
@@ -454,7 +454,7 @@
 
 .notesHeaderSuffix {
   font-weight: 400;
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
 }
 
 /* Small "Edit Note / + Add Note" button (gold-tinted) */
@@ -482,11 +482,11 @@
   padding: 0.75rem;
   background-color: #fef3c7;
   border-radius: var(--goobs-radius-md);
-  border-left: 3px solid var(--goobs-warn);
+  border-inline-start: 3px solid var(--goobs-warn);
 }
 .root[data-theme='sacred'] .notesHelpText {
   background-color: rgba(255, 152, 0, 0.05);
-  border-left-color: #ff9800;
+  border-inline-start-color: #ff9800;
 }
 .root[data-theme='dark'] .notesHelpText {
   background-color: var(--goobs-dark-surface);
@@ -566,12 +566,12 @@
   background-color: #fef9c3;
   border-radius: var(--goobs-radius-lg);
   border: 1px solid #fcd34d;
-  border-left: 4px solid var(--goobs-warn);
+  border-inline-start: 4px solid var(--goobs-warn);
 }
 .root[data-theme='sacred'] .notesDisplay {
   background-color: rgba(255, 193, 7, 0.1);
   border-color: rgba(255, 193, 7, 0.3);
-  border-left-color: #ffc107;
+  border-inline-start-color: #ffc107;
 }
 .root[data-theme='dark'] .notesDisplay {
   background-color: var(--goobs-dark-surface-raised);
@@ -663,7 +663,7 @@
   padding: 0.75rem;
   background-color: var(--goobs-light-surface-raised);
   border-radius: var(--goobs-radius-md);
-  border-left: 3px solid var(--st-accent, var(--goobs-info));
+  border-inline-start: 3px solid var(--st-accent, var(--goobs-info));
 }
 .root[data-theme='sacred'] .sectionDescription {
   background-color: var(--goobs-gold-a05);
@@ -722,7 +722,7 @@
   border-radius: var(--goobs-radius-md);
 }
 .commentCard[data-internal='true'] {
-  border-left: 3px solid var(--st-comment-accent, var(--goobs-warn));
+  border-inline-start: 3px solid var(--st-comment-accent, var(--goobs-warn));
 }
 
 .commentCardHeader {
@@ -856,7 +856,7 @@
   padding: 0.5rem;
   background-color: var(--st-revision-bg, transparent);
   border-radius: var(--goobs-radius-sm);
-  border-left: 3px solid var(--st-revision-accent, var(--st-border));
+  border-inline-start: 3px solid var(--st-revision-accent, var(--st-border));
 }
 
 .revisionMeta {
@@ -866,7 +866,7 @@
 }
 
 .revisionMetaTime {
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
 }
 
 .revisionText {
@@ -883,7 +883,7 @@
   background-color: var(--st-bg);
   border: 1px solid var(--st-border);
   border-radius: var(--goobs-radius-md);
-  border-left: 4px solid var(--st-update-accent, var(--st-border));
+  border-inline-start: 4px solid var(--st-update-accent, var(--st-border));
 }
 
 .caseUpdateHeader {
@@ -1226,19 +1226,19 @@
   padding: 14px 16px;
   background-color: rgba(59, 130, 246, 0.04);
   border: 1px solid var(--goobs-blue-a25);
-  border-left: 3px solid var(--goobs-info);
+  border-inline-start: 3px solid var(--goobs-info);
   border-radius: var(--goobs-radius-lg);
   margin-bottom: 8px;
 }
 .root[data-theme='sacred'] .bookingCard {
   background-color: var(--goobs-gold-a05);
   border-color: var(--goobs-gold-a40);
-  border-left-color: var(--goobs-gold);
+  border-inline-start-color: var(--goobs-gold);
 }
 .root[data-theme='dark'] .bookingCard {
   background-color: rgba(96, 165, 250, 0.06);
   border-color: var(--goobs-blue-light-a30);
-  border-left-color: var(--goobs-dark-primary);
+  border-inline-start-color: var(--goobs-dark-primary);
 }
 
 .bookingCardRow {
@@ -1266,7 +1266,7 @@
 }
 
 .bookingCardAttendeeEmail {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   opacity: 0.75;
 }
 
@@ -1601,7 +1601,7 @@
   font-size: 1rem;
 }
 .kbCardCheckSpaced {
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
 }
 .root[data-theme='sacred'] .kbCardCheck {
   color: var(--goobs-gold);
