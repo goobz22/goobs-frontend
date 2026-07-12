@@ -1357,7 +1357,14 @@ export const SacredTheme: Story = {
  *    secondary description via `aria-describedby` (WCAG 1.3.1);
  *  - each step's status (completed / locked) is exposed as visually-hidden
  *    text, not conveyed by icon + colour alone (WCAG 1.1.1 / 1.4.1);
- *  - the locked (inactive) step is a disabled `<button>`.
+ *  - the locked (inactive) step is a disabled `<button>`;
+ *  - the pointer target for a step is the `data-action="goto-step"` CONTROL,
+ *    which clears the WCAG 2.5.8 (AA 2.2) 24x24 CSS-px target-size floor via
+ *    its padding + line-height — while the status graphic renders at 20px but
+ *    is a non-interactive `data-status` container, so the undersized icon can
+ *    never silently become the target (the drift ratchet
+ *    scripts/drift-lints/small-interactive-target.ts freezes this at the CSS
+ *    level; this play pins it at the rendered-DOM level).
  */
 export const NavigationSemantics: Story = {
   name: 'A11y/Navigation Semantics',
@@ -1397,6 +1404,31 @@ export const NavigationSemantics: Story = {
     const locked = canvas.getByRole('button', { name: /Preferences/i })
     await expect(locked).toBeDisabled()
     await expect(locked).toHaveTextContent(/Locked/)
+
+    // WCAG 2.5.8 Target Size (Minimum), AA in WCAG 2.2 — the pointer target for
+    // a step is the `[data-action="goto-step"]` CONTROL (link/button), NOT the
+    // decorative status graphic. The control carries the goto-step selector and
+    // clears the 24px floor through its padding + line-height (a 14px label in a
+    // ~1.2 line box + 2×4px vertical padding ≈ 25px); the built-in status icon
+    // renders at 20px but sits inside a non-interactive `data-status` container,
+    // so the undersized graphic can never become the click target. Pinning both
+    // the ≥24px control height AND the icon container's inertness stops a
+    // refactor from moving the affordance onto the 20px icon (which the
+    // CSS-level drift ratchet cannot see).
+    await expect(completed).toHaveAttribute('data-action', 'goto-step')
+    await expect(completed.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+      24
+    )
+
+    // The status graphic is a decorative <div> (carries data-status; never
+    // data-action / href / a focusable tabindex) — never the pointer target.
+    const statusGraphic =
+      canvasElement.querySelector<HTMLElement>('[data-status]')
+    if (!statusGraphic) throw new Error('Step status graphic did not render')
+    await expect(statusGraphic.tagName).toBe('DIV')
+    await expect(statusGraphic).not.toHaveAttribute('data-action')
+    await expect(statusGraphic).not.toHaveAttribute('href')
+    await expect(statusGraphic).not.toHaveAttribute('tabindex')
   },
   render: () => {
     const navSteps: StepperProps['steps'] = [
