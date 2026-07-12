@@ -27,6 +27,13 @@ verifies the sub-field's *use* of Shell and fixes what lives in the Search direc
 | 5 | Minor | 1.4.1 Use of Color (A) — robustness | `Search.module.css` — error state gave the field no visual border feedback | FIXED |
 | 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `Search.module.css:24` wrapper `transition` had no reduced-motion guard | FIXED |
 | 7 | Moderate | 1.4.3 Contrast (Minimum) (AA) | `Search.module.css` `.input` set no `::placeholder` color → UA-default gray | FIXED |
+| 8 | Serious | 2.4.7 Focus Visible (AA); 1.4.11 Non-text Contrast (AA) | `Search.module.css` — `.input { outline: none }` + box-shadow-only `:focus-within` ring; no forced-colors fallback | FIXED |
+| 9 | Minor | 3.3.2 Labels or Instructions (A) | `index.tsx` input — comment claimed a "search" enter-key hint but `enterKeyHint` was never emitted | FIXED |
+| 10 | Minor | 4.1.2 Name, Role, Value (A) | `index.tsx` — `ariaLabel ?? placeholder` could emit `aria-label=""` when the placeholder is blanked | FIXED |
+
+> Issues 1–7 were closed by prior a11y passes and are documented in full below.
+> **Issues 8–10 are the 2026-07-11 follow-up audit** (commit `e8400fc9`) and are
+> detailed after Issue 7.
 
 ### 1. No visible focus indicator (Serious, 2.4.7)
 
@@ -94,6 +101,39 @@ library uses — sacred `--goobs-sacred-text-muted` (rgba(255,255,255,0.5) ≈ 5
 light `--goobs-light-text-muted` (#4b5563 ≈ 6.17:1), dark `--goobs-dark-text-muted`
 (#94a3b8 ≈ 4.76:1) — all ≥ 4.5:1, with `opacity: 1` to reset Firefox's placeholder dimming so
 the proven ratio isn't silently eroded. The hint stays visibly lighter than entered text.
+
+### 8. Focus indicator disappears in forced-colors / Windows High Contrast (Serious, 2.4.7 / 1.4.11)
+
+`pattern: missing-forced-colors-focus`. Issue 1 restored a visible focus ring — but it is
+implemented purely as a `box-shadow` (`--goobs-focus-*`) on `.inputWrapper:focus-within`, while
+the inner `.input` still clears its native outline (`outline: none`). In **forced-colors mode**
+(Windows High Contrast) the UA drops every `box-shadow` and repaints all borders with the system
+palette, so the focused border becomes indistinguishable from the resting border — keyboard focus
+vanishes for exactly the low-vision users who depend on that mode. This is the same class the
+library already repaired on Switch / SignatureField / SacredGlyphFrame. FIXED by adding a
+`@media (forced-colors: active)` block that restores a system-colour-safe focus outline on
+`.inputWrapper:focus-within` (a transparent outline is promoted to the system focus colour by the
+UA). Error state needs no forced-colors repair — it is already conveyed non-visually by the
+`role="alert"` error text + `aria-invalid`, not by border colour alone.
+
+### 9. Documented "search" enter-key hint was never emitted (Minor, 3.3.2)
+
+`pattern: missing-enterkeyhint`. The input's comment claimed a "'search' mobile enter-key hint",
+but no `enterKeyHint` attribute was ever set — the field relied on each browser's per-UA default
+for `type="search"`, which is inconsistent across mobile browsers. FIXED by adding
+`enterKeyHint="search"`, so the on-screen keyboard's Enter key is explicitly labelled as a search
+action at the point of input (WCAG 3.3.2), and by correcting the comment to match reality.
+
+### 10. Blank placeholder could emit an empty `aria-label=""` (Minor, 4.1.2)
+
+`pattern: empty-accessible-name-fallback`. The label-less accessible-name fallback used
+`ariaLabel ?? placeholder`. If a consumer blanks the placeholder (`placeholder=""`) with no
+`label` and no `ariaLabel`, `??` resolves to the empty string and the input renders
+`aria-label=""` — a broken, empty accessible name that some assistive tech announces as an
+unlabelled control. FIXED by switching to a `||` chain (`ariaLabel || placeholder || undefined`)
+so empty strings are skipped: the field emits a real name or omits the attribute entirely, never
+an empty one. (The default `placeholder='Search...'` means this only triggers when a consumer
+deliberately blanks every name source; the guard makes that degenerate case fail safe.)
 
 ## Hearing
 
@@ -184,3 +224,35 @@ the repo stylelint report (the only failures are pre-existing debt in other comp
   prop (e.g. `landmarkLabel?: string`) could wrap the field in `<search aria-label={…}>`.
   Left out by default to avoid redundant landmarks on filter-style usages; can be added
   additively later if a consumer needs it.
+
+## 2026-07-11 follow-up (Issues 8–10) — fixes, stories, commit
+
+**Fixes applied** (all in `src/components/Field/Search`, commit `e8400fc9`):
+
+- `Search.module.css`: added a `@media (forced-colors: active)` block restoring an outline
+  on `.inputWrapper:focus-within` (Issue 8).
+- `index.tsx`: added `enterKeyHint="search"` on the input and corrected the misleading
+  comment (Issue 9); changed the label-less accessible-name fallback from `ariaLabel ??
+  placeholder` to `ariaLabel || placeholder || undefined` to prevent `aria-label=""`
+  (Issue 10).
+
+Per-file gates: `bun lint:file` exits 0 on `index.tsx` and `SearchBar.stories.tsx`;
+scoped `stylelint` exits 0 on `Search.module.css`.
+
+**Stories updated** (`SearchBar.stories.tsx`):
+
+- **`AccessibilityForcedColors`** (new, "Accessibility - Forced Colors (WCAG 2.4.7)"):
+  CSSOM regression gate mirroring the Switch pattern — scoped to Search's own hashed
+  CSS-module class, it asserts a `forced-colors: active` block exists and restores an
+  `outline` on `:focus-within`. Re-fails if a future edit drops the block (Issue 8).
+- **`InteractionTest`** (extended): now also asserts the input carries
+  `enterkeyhint="search"` (Issue 9).
+- **`AccessibleNameFallback`** (extended): added a third field with every name source
+  blank (`placeholder=""`, no label, no `ariaLabel`) and asserts it emits **no**
+  `aria-label` attribute — never `aria-label=""` (Issue 10).
+
+**Deferred (follow-up):** none — all three root causes lived inside the Search directory.
+
+## Commits
+
+- `e8400fc9` — a11y(Field/Search): forced-colors focus, enterKeyHint, empty aria-label guard
