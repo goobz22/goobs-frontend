@@ -34,6 +34,12 @@ import type { DriftFile, DriftInstance, DriftLint } from '../lint-drift'
 const DECL =
   /(--[a-z0-9-]*transition[a-z0-9-]*|transition-property|transition)\s*:\s*all\b/gi
 
+/** `var(--x, all …)` FALLBACK — a fallback has no definition site, so the
+ *  token-definition rationale above does NOT cover it: when the token is
+ *  unset (Drawer's default render), the fallback IS the computed value and
+ *  the element live-ships `transition: all`. Push-review-proven miss. */
+const VAR_FALLBACK_ALL = /var\(\s*--[\w-]+\s*,\s*all\b/gi
+
 /**
  * Blank CSS `/* … *​/` block comments (string-aware, newline-preserving) so a
  * rule spelled out in prose is never itself a hit. CSS-adapted from the TS a11y
@@ -89,6 +95,15 @@ const lint: DriftLint = {
     const instances: DriftInstance[] = []
     for (const { path, text: raw } of files) {
       const text = blankComments(raw)
+      VAR_FALLBACK_ALL.lastIndex = 0
+      let vf: RegExpExecArray | null
+      while ((vf = VAR_FALLBACK_ALL.exec(text))) {
+        instances.push({
+          file: path,
+          line: text.slice(0, vf.index).split('\n').length,
+          token: 'var() fallback all',
+        })
+      }
       DECL.lastIndex = 0
       let m: RegExpExecArray | null
       while ((m = DECL.exec(text))) {
@@ -105,6 +120,9 @@ const lint: DriftLint = {
   },
   selftest: {
     bad: [
+      // var() FALLBACK carrying `all` — live wherever the token is unset
+      // (the Drawer default-render shape).
+      '.panel { transition: var(--drawer-transition, all 200ms ease); }',
       // raw shorthand literal
       '.x {\n  transition: all 0.3s ease;\n}',
       // transition-property longhand
@@ -115,6 +133,8 @@ const lint: DriftLint = {
       ':root {\n  --goobs-transition-premium: all var(--goobs-duration-premium)\n    var(--goobs-ease);\n}',
     ],
     good: [
+      // var() usage with a NON-all fallback — not a hit.
+      '.panel { transition: var(--drawer-transition, transform 200ms ease); }',
       // THE CANON — explicit property list
       '.x {\n  transition: background-color 0.2s ease, box-shadow 0.2s ease;\n}',
       '.y {\n  transition-property: background-color, box-shadow;\n}',

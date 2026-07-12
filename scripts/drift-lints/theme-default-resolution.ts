@@ -104,6 +104,15 @@ function blankComments(text: string): string {
 /** `<obj>?.theme ||/?? '<lit>'` — the resolution core. Group 1 = object name
  *  (styles / propStyles / resolvedStyles / dataGridStyles / …), group 2 = the
  *  default literal. */
+/** `theme = '<lit>'` as a DESTRUCTURING-PARAM default (the shape the
+ *  push-review proved invisible to CORE: PricingTable:89, DetailField:95/182,
+ *  Tab:462 resolve their default via `({ theme = 'light' }) =>` with no
+ *  `.theme` member access anywhere in the file). Preceded by `{`, `,` or `(`
+ *  so an object-literal `theme: 'x'`, a JSX `data-theme={theme}`, and a
+ *  comparison never match. */
+const DESTRUCTURE_DEFAULT =
+  /[{,(]\s*theme\s*=\s*['"](light|sacred|dark)['"]/g
+
 const CORE =
   /([A-Za-z_$][\w$]*)\s*\??\.\s*theme\s*(?:\|\||\?\?)\s*['"](light|sacred|dark)['"]/g
 
@@ -141,6 +150,17 @@ const lint: DriftLint = {
       // keeps the census on the ~even light/sacred surface split that is the drift.
       if (path.includes('/components/Icons/')) continue
       const text = blankComments(raw)
+      DESTRUCTURE_DEFAULT.lastIndex = 0
+      let dd: RegExpExecArray | null
+      while ((dd = DESTRUCTURE_DEFAULT.exec(text))) {
+        instances.push({
+          // same per-literal key convention as CORE below: a default FLIP
+          // shrinks the old key and grows the new one.
+          file: `${path}::${dd[1]}`,
+          line: text.slice(0, dd.index).split('\n').length,
+          token: `destructure-default '${dd[1]}'`,
+        })
+      }
       CORE.lastIndex = 0
       let m: RegExpExecArray | null
       while ((m = CORE.exec(text))) {
@@ -162,6 +182,9 @@ const lint: DriftLint = {
   },
   selftest: {
     bad: [
+      // Destructuring-param default — the blind spot the push-review proved
+      // (PricingTable/DetailField/Tab shape): no `.theme` access anywhere.
+      "const PricingTable = ({ theme = 'light' }: Props) => <div data-theme={theme} />",
       // assignment root defaulting light (Alert / Badge / Avatar form)
       "const theme = styles?.theme || 'light'",
       // assignment root defaulting sacred via ?? (Chip / Card / Field/Shell form)
@@ -172,6 +195,9 @@ const lint: DriftLint = {
       "return <div data-theme={styles?.theme || 'sacred'}>x</div>",
     ],
     good: [
+      // Object-literal property and JSX attr are not resolution roots.
+      "const styleDefaults = { theme: 'light' }",
+      'const El = () => <div data-theme={theme} />',
       // pass-through: forwarding a default to a CHILD is not a root.
       "<Icon styles={{ theme: styles?.theme || 'sacred', size: 16 }} />",
       // ternary branch: which literal is "the default" is ambiguous (Field/USD).

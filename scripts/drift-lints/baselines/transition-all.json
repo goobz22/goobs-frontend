@@ -1,6 +1,7 @@
 {
  "src/components/ComplexTextEditor/ComplexTextEditor.module.css": 2,
  "src/components/DataGrid/DataGrid.module.css": 6,
+ "src/components/Drawer/Drawer.module.css": 1,
  "src/components/Field/Date/DateRange/DateRange.module.css": 1,
  "src/components/Field/Dropdown/SearchableHistory/SearchableHistory.module.css": 4,
  "src/components/Field/IPAM/CIDR/CIDR.module.css": 1,
