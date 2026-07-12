@@ -716,6 +716,10 @@ export const ColorVariantsSacred: Story = {
     // Gold (#FFD700) text on an OPAQUE, dark-enough fill clears WCAG AA 1.4.3
     // (4.5:1) for every sacred severity tile. A revert to a translucent
     // rgba(...,0.9) fill (the old ~1.7–3.44:1 demo) re-fails these assertions.
+    // A contrast ratio is a function of BOTH colors, so each tile pins the full
+    // pair — the gold text AND the opaque fill — so a regression to a
+    // low-contrast text color is caught too, not just a fill change.
+    const gold = 'rgb(255, 215, 0)' // #FFD700 text on every sacred tile
     const expectedFills = [
       'rgb(153, 27, 27)', // Error   #991b1b — 5.92:1
       'rgb(20, 83, 45)', //  Success #14532d — 6.50:1
@@ -725,9 +729,9 @@ export const ColorVariantsSacred: Story = {
     for (let index = 0; index < expectedFills.length; index++) {
       const chip = chips[index]
       if (!chip) throw new Error(`missing severity chip ${index}`)
-      await expect(getComputedStyle(chip).backgroundColor).toBe(
-        expectedFills[index]
-      )
+      const computed = getComputedStyle(chip)
+      await expect(computed.backgroundColor).toBe(expectedFills[index])
+      await expect(computed.color).toBe(gold)
     }
   },
 }

@@ -161,6 +161,18 @@ status semantics the pattern requires.
   low-contrast fill re-fails the story. No component/CSS change was needed — the
   defect was entirely in the demo. `styles.backgroundColor` remains a fully
   additive public override; only the demo's chosen values changed.
+- **Re-review confirmation (this pass):** re-verified with the WCAG
+  relative-luminance formula in a script — the four opaque fills compute to
+  5.92 / 6.50 / 6.47 / 6.22:1 against gold `#FFD700` (all PASS), and the two
+  fills the finding named (`rgba(220,38,38,0.9)` 3.44:1 solid / 3.07:1 over
+  white; `rgba(245,158,11,0.9)` 1.53:1 solid) genuinely FAIL — so the finding
+  was a valid observation against the pre-fix snapshot and is now resolved.
+  **Hardened the regression test:** a 1.4.3 ratio depends on BOTH colors, but
+  the play function pinned only the fill — a revert that kept an opaque fill yet
+  changed the gold text to a low-contrast color would have slipped through. The
+  play function now also asserts each chip's computed `color` is
+  `rgb(255, 215, 0)` (gold `#FFD700`), so the full contrast PAIR is
+  regression-locked. No component/CSS change.
 
 ## Hearing
 
@@ -297,7 +309,10 @@ Second adversarial-review pass:
   amber-900/blue-800 (all ≥5.9:1 against gold text); JSDoc now explains why
   sacred (gold-text) fills must be opaque + dark; NEW play function pins each
   computed `background-color` so a revert to the translucent ~1.7–3.44:1 demo
-  re-fails. Pins Issue 5.
+  re-fails. Pins Issue 5. **Re-review pass:** the play function now also pins
+  each chip's computed `color` (`rgb(255, 215, 0)`), so both halves of the
+  contrast pair are locked — a low-contrast text-color regression re-fails too,
+  not just a fill change.
 
 ## Deferred
 
