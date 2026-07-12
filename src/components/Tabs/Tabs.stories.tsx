@@ -477,6 +477,84 @@ export const AriaControlsRequiresPanel: Story = {
   },
 }
 
+const routeNavTabs: TabsItem[] = [
+  { title: 'Home', id: 'home', route: '/home', trigger: 'route' },
+  { title: 'Docs', id: 'docs', route: '/docs', trigger: 'route' },
+  { title: 'Pricing', id: 'pricing', route: '/pricing', trigger: 'route' },
+]
+
+const RouteTabsRenderer = () => {
+  const [activeTab, setActiveTab] = React.useState(0)
+  return (
+    <div style={{ background: '#ffffff', padding: '16px' }}>
+      <Tabs
+        items={routeNavTabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        alignment="left"
+        ariaLabel="Route navigation demo"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  )
+}
+
+/**
+ * 5c) Route tabs are real links + manual activation (a11y + SEO regression)
+ *
+ * The 2026-07-11 adversarial review flagged the last deferred item: a
+ * `trigger: 'route'` tab was a `<button role="tab">` that did a full page
+ * navigation via `window.location.assign`, which is (a) not crawlable as a
+ * link (SEO), (b) a role/behaviour mismatch, and (c) — under automatic
+ * activation — navigated away the instant an ArrowLeft/Right moved onto it (a
+ * context change, WCAG 3.2.2). This pins the root-cause fix:
+ *   - Route tabs now render as a real `<a href={route}>` (still `role="tab"`
+ *     for the tablist + machine-test contract) → crawlable + native link
+ *     affordances.
+ *   - MANUAL activation: an arrow key moves the roving focus/tabindex only and
+ *     does NOT navigate or change selection; navigation happens on
+ *     Enter/Space/click. onClick (panel) tabs keep automatic activation
+ *     (pinned by `KeyboardNavigation`).
+ * (No click is dispatched here — a real navigation would abort the test
+ * environment; presence of the `href` is what makes Enter/Space/click navigate
+ * natively.)
+ */
+export const RouteTabsAreLinks: Story = {
+  render: () => <RouteTabsRenderer />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const home = canvas.getByRole('tab', { name: 'Home' })
+    const docs = canvas.getByRole('tab', { name: 'Docs' })
+    const pricing = canvas.getByRole('tab', { name: 'Pricing' })
+
+    // (a)+(b) Route tabs are real crawlable anchors, not <button>s, while
+    // keeping role="tab" (so the tablist semantics + data-* test contract hold).
+    await expect(home.tagName).toBe('A')
+    await expect(home).toHaveAttribute('href', '/home')
+    await expect(docs).toHaveAttribute('href', '/docs')
+    await expect(pricing).toHaveAttribute('href', '/pricing')
+    await expect(home).toHaveAttribute('role', 'tab')
+
+    // Roving tabindex starts on the selected tab.
+    await expect(home).toHaveAttribute('tabindex', '0')
+    await expect(docs).toHaveAttribute('tabindex', '-1')
+
+    // (c) Manual activation: ArrowRight MOVES focus + roving tabindex to the
+    // next tab but does NOT activate it — no navigation / context change
+    // (WCAG 3.2.2). Selection (aria-selected) stays on Home.
+    home.focus()
+    await expect(home).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => expect(docs).toHaveFocus())
+    await expect(docs).toHaveAttribute('tabindex', '0')
+    await expect(home).toHaveAttribute('tabindex', '-1')
+    // Focused but NOT selected — the arrow key did not activate/navigate.
+    await expect(docs).toHaveAttribute('aria-selected', 'false')
+    await expect(home).toHaveAttribute('aria-selected', 'true')
+  },
+}
+
 /**
  * 6) Chip Appearance (regression)
  *

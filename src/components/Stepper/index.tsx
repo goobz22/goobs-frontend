@@ -125,21 +125,35 @@ const Stepper: React.FC<StepperProps> = ({
   const showCompletionPane =
     isWizardMode && activeStep >= steps.length && Boolean(finalActions)
 
-  // Focus management for wizard completion (WCAG 2.4.3 Focus Order). Advancing
-  // into the completed pane UNMOUNTS the Continue/Finish button that held
-  // keyboard focus, so the browser drops focus to <body> and a keyboard user is
-  // stranded at the top of the document with no way back to the pane's actions
-  // except tabbing from scratch. Move focus to the completion pane (labelled by
-  // its title) on the not-completed → completed transition. It fires ONLY on
-  // that transition — never on initial mount (prevShowCompletionRef seeds to the
-  // first render's value, so a Stepper that renders already-completed does not
-  // steal focus on load, WCAG 3.2.1 On Focus). The persistent role="status"
-  // region below still carries the announcement independently.
+  // Focus management for wizard completion — SYMMETRIC (WCAG 2.4.3 Focus Order).
+  // BOTH directions unmount the library-rendered control that held keyboard
+  // focus, dropping focus to <body> and stranding a keyboard user at the top of
+  // the document:
+  //   • FORWARD (Continue/Finish → completed): the Finish button unmounts as the
+  //     completion pane replaces the nav row → move focus to the completion pane
+  //     (labelled by its title).
+  //   • REVERSE (Start Over → restarted): activating the library-rendered
+  //     "Start Over" button fires onReset, which moves activeStep back and
+  //     UNMOUNTS the completion pane that held that focused button → move focus
+  //     to the wizard's primary control (Continue) at the restarted step.
+  // Each branch fires ONLY on its transition — never on initial mount
+  // (prevShowCompletionRef seeds to the first render's value, so a Stepper that
+  // renders already-completed does not steal focus on load, WCAG 3.2.1 On Focus).
+  // The reverse move is additionally gated on focus having genuinely been dropped
+  // to <body>, so a consumer that moves activeStep back from a control OUTSIDE
+  // the pane keeps its own focus rather than having it yanked (WCAG 3.2.1). The
+  // persistent live regions below carry the announcements independently of focus.
   const completedPaneRef = React.useRef<HTMLDivElement>(null)
+  const continueButtonRef = React.useRef<HTMLButtonElement>(null)
   const prevShowCompletionRef = React.useRef(showCompletionPane)
   React.useEffect(() => {
     if (showCompletionPane && !prevShowCompletionRef.current) {
       completedPaneRef.current?.focus()
+    } else if (!showCompletionPane && prevShowCompletionRef.current) {
+      const active = document.activeElement
+      if (active === document.body || active === null) {
+        continueButtonRef.current?.focus()
+      }
     }
     prevShowCompletionRef.current = showCompletionPane
   }, [showCompletionPane])

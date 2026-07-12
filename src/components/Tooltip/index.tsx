@@ -88,6 +88,48 @@ export interface TooltipProps {
 const getDefaultArrowSize = (theme: 'light' | 'dark' | 'sacred'): number =>
   theme === 'sacred' ? 6 : 5
 
+/** Intrinsic tags that are keyboard-focusable by default (`<a>` only with an href). */
+const FOCUSABLE_TAGS = new Set(['button', 'input', 'select', 'textarea', 'summary'])
+
+/**
+ * Best-effort test for whether the tooltip's child is itself the
+ * keyboard-focusable trigger (so it can both receive focus and carry the
+ * injected `aria-describedby`). When it IS, the child owns focus and the
+ * wrapper stays an inert positioning `<div>` — the existing behavior. When it is
+ * NOT — a decorative / `aria-hidden` icon, a plain `<span>`, or a `tabIndex={-1}`
+ * node, which is the single most common tooltip use case — the wrapper must
+ * self-heal into the focusable, labelled trigger (see `wrapperTriggerProps`),
+ * otherwise `onFocus`/`onKeyDown` never fire and the injected `aria-describedby`
+ * lands on a node AT ignores, leaving the a11y wiring inert (WCAG 2.1.1 / 4.1.2).
+ *
+ * Custom (function/class) components — e.g. the library's own `Button` — are
+ * assumed to render a focusable element and forward `aria-*`, so focus is NOT
+ * hijacked from them; only *clearly* non-focusable children self-heal.
+ */
+const isFocusableChild = (child: React.ReactElement): boolean => {
+  const props = child.props as {
+    tabIndex?: number
+    'aria-hidden'?: boolean | string
+    href?: string
+    disabled?: boolean
+  }
+  // Explicitly removed from the a11y tree or the tab order → not a focus target.
+  if (props['aria-hidden'] === true || props['aria-hidden'] === 'true') return false
+  if (props.tabIndex !== undefined && props.tabIndex < 0) return false
+  // Explicitly made focusable via a non-negative tabIndex.
+  if (props.tabIndex !== undefined && props.tabIndex >= 0) return true
+  const type = child.type
+  if (typeof type === 'string') {
+    // Native anchors are only focusable with an href.
+    if (type === 'a') return typeof props.href === 'string'
+    if (FOCUSABLE_TAGS.has(type)) return props.disabled !== true
+    // Any other intrinsic tag (span, div, i, svg, img, …) is not focusable.
+    return false
+  }
+  // Custom component — assume it renders a focusable element (do not hijack).
+  return true
+}
+
 const StyledTooltip: React.FC<TooltipProps> = ({
   children,
   title,
@@ -322,6 +364,15 @@ const StyledTooltip: React.FC<TooltipProps> = ({
       data-placement={tooltipplacement}
       data-state="open"
       aria-hidden="true"
+      // WCAG 1.4.13 (Hoverable): moving the pointer off the trigger and onto the
+      // bubble keeps it open — the enter handler clears the pending leave-close,
+      // the leave handler re-arms it. Paired with `pointer-events: auto` on the
+      // visible bubble + the transparent CSS bridge that spans the trigger↔bubble
+      // arrow gap (Tooltip.module.css) so there is no dead zone. Only wired in
+      // uncontrolled mode — in controlled mode the parent owns visibility, so
+      // bubble hover must not fire spurious onOpen/onClose.
+      onMouseEnter={isControlled ? undefined : handleMouseEnter}
+      onMouseLeave={isControlled ? undefined : handleMouseLeave}
       style={tooltipVars}
     >
       <div className={cssStyles.content}>
@@ -331,13 +382,21 @@ const StyledTooltip: React.FC<TooltipProps> = ({
     </div>
   )
 
+  // Is the child itself the focusable trigger? Drives whether the wrapper stays
+  // inert (focusable interactive child) or self-heals into the trigger below.
+  const childIsFocusable =
+    React.isValidElement(children) && isFocusableChild(children)
+
   // Inject aria-describedby onto the trigger's child so the interactive element
   // (button/link/etc.) is programmatically described by the tooltip text
   // (WCAG 1.3.1 / 4.1.2). Any caller-supplied aria-describedby is preserved.
-  // When children is not a single element the association is skipped gracefully
-  // — a focusable element child is required for full screen-reader support.
+  // Skipped when the child is NOT focusable — a describedby on an aria-hidden /
+  // non-focusable node is ignored by AT; that case instead names the focusable
+  // wrapper via `wrapperTriggerProps` below.
   const describedChildren =
-    title && React.isValidElement<{ 'aria-describedby'?: string }>(children)
+    title &&
+    childIsFocusable &&
+    React.isValidElement<{ 'aria-describedby'?: string }>(children)
       ? React.cloneElement(children, {
           // tooltipId (useId) is always present, so the join is never empty —
           // the value stays `string` under exactOptionalPropertyTypes.
@@ -347,6 +406,25 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         })
       : children
 
+  // Self-heal for a non-focusable child (a decorative/aria-hidden icon, a plain
+  // <span>, a tabIndex={-1} node — the most common tooltip case). Without this,
+  // the wrapper's focus/keydown handlers are inert (nothing forwards focus to
+  // it) and the tooltip is unreachable by keyboard. Making the WRAPPER the
+  // focusable trigger fixes keyboard open (WCAG 2.1.1) and, since the child is
+  // hidden from AT, supplies the accessible name from the title so screen
+  // readers announce the tooltip text on focus (WCAG 4.1.2). role="button" gives
+  // it a recognised trigger identity; the visual bubble stays aria-hidden and
+  // the separate role="tooltip" description is only rendered for the
+  // focusable-child path, so there is exactly one announcement.
+  const wrapperTriggerProps: {
+    tabIndex?: number
+    role?: 'button'
+    'aria-label'?: string
+  } =
+    title && !childIsFocusable
+      ? { tabIndex: 0, role: 'button', 'aria-label': title }
+      : {}
+
   return (
     <>
       <div
@@ -355,18 +433,22 @@ const StyledTooltip: React.FC<TooltipProps> = ({
         onMouseLeave={handleMouseLeave}
         // Keyboard/AT parity with hover (WCAG 2.1.1): focus/blur bubble up from
         // the interactive child, so tabbing to it opens the tooltip just like a
-        // pointer hover, and blurring closes it.
+        // pointer hover, and blurring closes it. When the child is not focusable
+        // the wrapper itself is focusable (wrapperTriggerProps) so these fire.
         onFocus={handleMouseEnter}
         onBlur={handleMouseLeave}
         onKeyDown={handleKeyDown}
         className={cssStyles.container}
+        {...wrapperTriggerProps}
       >
         {describedChildren}
         {/* Persistent, visually hidden description — the single element screen
-            readers announce via aria-describedby. Present whenever a title is
-            set (even while the visual bubble is closed), so the description is
-            available immediately on focus regardless of the enter delay. */}
-        {title && (
+            readers announce via aria-describedby, rendered only for the
+            focusable-child path (the non-focusable path is named directly via
+            wrapperTriggerProps). Present whenever a title is set (even while the
+            visual bubble is closed), so the description is available immediately
+            on focus regardless of the enter delay. */}
+        {title && childIsFocusable && (
           <span id={tooltipId} role="tooltip" className={cssStyles.srDescription}>
             {title}
           </span>

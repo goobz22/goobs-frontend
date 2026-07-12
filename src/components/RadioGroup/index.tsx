@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 import cssStyles from './RadioGroup.module.css'
 import { useFieldBinding } from '../Field/Shell/useFieldBinding'
+import { useOptionalFormContext } from '../Form/context'
+import { deriveRequiredFromSchema } from '../Form/schema'
 
 /**
  * Interface representing a single radio option
@@ -101,6 +103,30 @@ export interface RadioGroupProps {
    * back to `name` when not provided.
    */
   dataFieldName?: string
+  /**
+   * Marks the group required. Renders a required indicator (` *`) after the
+   * group heading and sets `aria-required` on the `role="radiogroup"` element.
+   * Inside a `<Form>` this is auto-derived from the schema for this `name` when
+   * omitted (an explicit prop always wins). WCAG 3.3.2 Labels or Instructions.
+   */
+  required?: boolean
+  /**
+   * Validation state for the whole group. A string renders the message in the
+   * error region (`role="alert"` + `aria-live="polite"`, linked to the group
+   * via `aria-describedby`) and sets `aria-invalid` on the radiogroup; `true`
+   * sets the invalid state/styling without a message. Inside a `<Form>` this is
+   * auto-derived from the form engine for this `name` when omitted (an explicit
+   * prop — including `false`/`''` — always wins). This is the per-field feedback
+   * a bound, required group needs on a failed submit (WCAG 3.3.1 Error
+   * Identification / 4.1.2 Name, Role, Value).
+   */
+  error?: string | boolean
+  /**
+   * Persistent helper text shown below the group (e.g. an instruction). It is
+   * replaced by `error` while an error is present and is linked to the
+   * radiogroup via `aria-describedby` so assistive tech announces it.
+   */
+  helperText?: React.ReactNode
   /** Change handler */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   /** Custom styles to apply using the theme system */
@@ -190,6 +216,9 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   name,
   labelText,
   dataFieldName,
+  required: requiredProp,
+  error: errorProp,
+  helperText,
   onChange,
   styles,
   ref,
@@ -219,6 +248,36 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
   // element would leave the group with no accessible name (WCAG 4.1.2).
   const groupLabel = labelText || label
   const labelId = `${name}-label`
+  const helperId = `${name}-helper`
+
+  // Validation affordance. RadioGroup binds directly (it is not wrapped in
+  // FieldShell — a single `<label htmlFor>` can't front a multi-input group),
+  // so it derives its own error/required exactly as FieldShell does: an
+  // explicit prop always wins (even `false`/`''`); otherwise, when bound inside
+  // a `<Form>` with a `name`, it reads the engine error and schema-required for
+  // this field. Outside a form (or without a name) both fall back to false.
+  const formCtx = useOptionalFormContext()
+  const resolvedError =
+    errorProp !== undefined
+      ? errorProp
+      : formCtx && name
+        ? formCtx.engine.getError(name)
+        : undefined
+  const hasError = Boolean(resolvedError)
+  const errorMessage =
+    typeof resolvedError === 'string' ? resolvedError : null
+  const required =
+    requiredProp ??
+    (formCtx && name ? deriveRequiredFromSchema(formCtx.schema, name) : false)
+
+  // Single region below the group: the error message when invalid, else the
+  // persistent helper text. Linked to the radiogroup via `aria-describedby` and
+  // announced with `role="alert"` while it carries an error.
+  const helperContent = errorMessage ?? helperText
+  const showHelper =
+    helperContent !== undefined &&
+    helperContent !== null &&
+    helperContent !== ''
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Keep internal state in sync for the uncontrolled path; harmless when
@@ -238,17 +297,29 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
       data-field-name={dataFieldName ?? name}
       data-filled={effectiveValue !== undefined && effectiveValue !== ''}
       data-inner-dot={styles?.radioInnerColor ? 'true' : undefined}
+      data-state={hasError ? 'error' : undefined}
       data-theme={theme}
       style={overrideVars}
     >
       {groupLabel ? (
         <span id={labelId} className={cssStyles.formLabel}>
           {groupLabel}
+          {/* Required indicator — decorative `*` beside the heading. It is
+              aria-hidden so it never leaks into the group's accessible name
+              (aria-required already conveys the state programmatically). */}
+          {required ? (
+            <span aria-hidden="true" className={cssStyles.requiredIndicator}>
+              {' *'}
+            </span>
+          ) : null}
         </span>
       ) : null}
       <div
         role="radiogroup"
         aria-labelledby={groupLabel ? labelId : undefined}
+        aria-required={required || undefined}
+        aria-invalid={hasError || undefined}
+        aria-describedby={showHelper ? helperId : undefined}
       >
         {options.map((option, index) => {
           const isChecked = effectiveValue === option.label
@@ -290,6 +361,20 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
           )
         })}
       </div>
+      {/* Error / helper region. Announced with role="alert" + aria-live while
+          it carries a validation error; referenced by the radiogroup's
+          aria-describedby so screen readers tie the message to the group. */}
+      {showHelper ? (
+        <div
+          id={helperId}
+          className={cssStyles.helper}
+          data-helper-type={hasError ? 'error' : undefined}
+          role={hasError ? 'alert' : undefined}
+          aria-live={hasError ? 'polite' : undefined}
+        >
+          {helperContent}
+        </div>
+      ) : null}
     </div>
   )
 }

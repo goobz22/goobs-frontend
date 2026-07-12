@@ -283,6 +283,126 @@ export const KeyboardFocusAndEscape: Story = {
   },
 }
 
+/**
+ * WCAG 1.4.13 (Content on Hover or Focus — *Hoverable*): the shown bubble is
+ * pointer-interactive (`pointer-events: auto`) and a transparent bridge spans
+ * the trigger↔bubble arrow gap, so a pointer user can move onto the bubble to
+ * read it without it closing. The play hovers the trigger to open the bubble,
+ * asserts it is now pointer-interactive (a pre-fix `pointer-events: none` bubble
+ * reports `'none'` here), then moves the pointer off the trigger and onto the
+ * bubble and confirms it stays open.
+ */
+export const Hoverable: Story = {
+  name: 'A11y/Hoverable Bubble',
+  render: args => (
+    <div style={{ padding: '5rem', display: 'flex', justifyContent: 'center' }}>
+      <StyledTooltip {...args}>
+        <Button>Hover me</Button>
+      </StyledTooltip>
+    </div>
+  ),
+  args: {
+    ...defaultArgs,
+    title: 'Hover onto me to keep me open',
+    enterDelay: 0,
+    // A non-zero leave delay bridges the pointer's transit from trigger to
+    // bubble; the fix is what lets the pointer LAND on the bubble at all.
+    leaveDelay: 150,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByRole('button')
+    const getBubble = () =>
+      canvasElement.querySelector('[data-component="Tooltip"]')
+
+    // Hover the trigger → the visual bubble opens.
+    await userEvent.hover(trigger)
+    const bubble = await waitFor(() => {
+      const found = getBubble()
+      if (!found) throw new Error('tooltip bubble did not open on hover')
+      return found as HTMLElement
+    })
+
+    // The shown bubble is pointer-interactive — the core of the Hoverable fix.
+    // A pre-fix `pointer-events: none` bubble would report 'none' here.
+    const view = canvasElement.ownerDocument.defaultView
+    await expect(view?.getComputedStyle(bubble).pointerEvents).toBe('auto')
+
+    // Leaving the trigger arms the close; moving onto the bubble cancels it, so
+    // the tooltip stays open while the pointer rests on the bubble (Hoverable).
+    await userEvent.unhover(trigger)
+    await userEvent.hover(bubble)
+    await expect(getBubble()).not.toBeNull()
+
+    // Leaving the bubble finally dismisses it.
+    await userEvent.unhover(bubble)
+    await waitFor(() => expect(getBubble()).toBeNull())
+  },
+}
+
+/**
+ * WCAG 2.1.1 / 4.1.2 (non-focusable trigger self-heal): when the child is a
+ * decorative, `aria-hidden` element (an info icon — the single most common
+ * tooltip case) it can neither receive keyboard focus nor carry a useful
+ * `aria-describedby`. The wrapper self-heals into a focusable, labelled
+ * `role="button"` trigger, so a keyboard user can open the tooltip and a screen
+ * reader announces the text on focus. The play asserts the wrapper became the
+ * named button, that keyboard focus opens the bubble, and that Escape dismisses
+ * it without moving focus.
+ */
+export const NonFocusableTrigger: Story = {
+  name: 'A11y/Non-focusable (icon) Trigger',
+  render: args => (
+    <div style={{ padding: '5rem', display: 'flex', justifyContent: 'center' }}>
+      <StyledTooltip {...args}>
+        {/* Decorative, non-interactive icon — hidden from AT, not focusable. */}
+        <span aria-hidden="true" style={{ fontSize: '1.25rem', cursor: 'help' }}>
+          {'ⓘ'}
+        </span>
+      </StyledTooltip>
+    </div>
+  ),
+  args: {
+    ...defaultArgs,
+    title: 'More information about this feature',
+    enterDelay: 0,
+    leaveDelay: 0,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const getBubble = () =>
+      canvasElement.querySelector('[data-component="Tooltip"]')
+
+    // The wrapper self-healed into the focusable, labelled trigger: a pre-fix
+    // plain <div> wrapper has no button role, so getByRole would throw here.
+    const trigger = canvas.getByRole('button')
+    await expect(trigger).toHaveAttribute('tabindex', '0')
+    await expect(trigger).toHaveAccessibleName(
+      'More information about this feature'
+    )
+
+    // The decorative child is NOT given aria-describedby (AT would ignore it);
+    // the description is carried by the focusable wrapper's name instead.
+    const icon = trigger.querySelector('[aria-hidden="true"]')
+    await expect(icon).not.toBeNull()
+    await expect(icon).not.toHaveAttribute('aria-describedby')
+
+    // Closed initially.
+    await expect(getBubble()).toBeNull()
+
+    // Keyboard focus on the self-healed wrapper opens the visual bubble
+    // (WCAG 2.1.1) — impossible when the wrapper was a non-focusable <div>.
+    trigger.focus()
+    await expect(trigger).toHaveFocus()
+    await waitFor(() => expect(getBubble()).not.toBeNull())
+
+    // Escape dismisses without moving focus (WCAG 1.4.13 Dismissable).
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(getBubble()).toBeNull())
+    await expect(trigger).toHaveFocus()
+  },
+}
+
 // With and without arrow
 export const ArrowVariants: Story = {
   render: () => (

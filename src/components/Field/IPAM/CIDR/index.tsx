@@ -192,8 +192,10 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   // only keyboard path to a step is Tab-ing away to the separate +/- buttons.
   // ArrowUp/ArrowDown reuse the existing clamped increment/decrement handlers.
   // The caller's onKeyDown still runs first and can preventDefault to opt out.
-  // The element stays role="textbox" (free-typed CIDR) so the machine-test
-  // `getByRole('textbox', { name: 'CIDR' })` selector contract is preserved.
+  // The input carries role="spinbutton" + aria-valuemin/max/now/valuetext (see
+  // the JSX below) so assistive tech announces the current CIDR and its bounds
+  // as a spinner; the stable `data-field-name` machine-test selector on the same
+  // element is unchanged, so `[data-field-name="…"]` locators keep resolving it.
   const handleInputKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(event)
@@ -263,6 +265,10 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   const hasValue =
     currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
 
+  // Numeric CIDR backing the spinbutton `aria-valuenow` (the displayed value is
+  // the formatted `/N` string, exposed via `aria-valuetext`).
+  const cidrValueNow = parseInt(currentValue, 10)
+
   return (
     <div data-field={dataField}>
       <FieldShell
@@ -297,6 +303,19 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
               placeholder={placeholder}
               type="text"
               inputMode="numeric"
+              // Spinbutton value semantics (WCAG 4.1.2). This is functionally a
+              // spinner (numeric CIDR + press-and-hold steppers + arrow-key
+              // stepping), so it exposes role="spinbutton" and its value/bounds.
+              // aria-valuetext carries the formatted `/N` string the user sees;
+              // aria-valuenow carries the raw number. The element stays a text
+              // input (typeable, inputMode numeric) and keeps its data-field-name.
+              role="spinbutton"
+              aria-valuemin={minCidr}
+              aria-valuemax={maxCidr}
+              aria-valuenow={
+                Number.isNaN(cidrValueNow) ? undefined : cidrValueNow
+              }
+              aria-valuetext={`/${currentValue}`}
               className={cssStyles.input}
               {...inputAriaProps}
             />

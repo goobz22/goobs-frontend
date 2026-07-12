@@ -1,6 +1,8 @@
 # Tooltip — a11y audit (2026-07-11)
 
-**Status: FIXED** (one moderate sub-criterion documented as a known limitation — see Deferred)
+**Status: FIXED** (adversarial-review follow-up: the two remaining moderate gaps — WCAG 1.4.13
+*Hoverable* and the non-focusable/`aria-hidden` trigger — are now fixed at root cause; no deferred
+a11y items remain in-directory)
 
 **Component:** `src/components/Tooltip/index.tsx` (`StyledTooltip`)
 **APG pattern:** [Tooltip](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/) — a contextual
@@ -21,7 +23,8 @@ reader or keyboard-only user the tooltip effectively did not exist.
 | 1 | Serious | 2.1.1 Keyboard (A) | `index.tsx:353-354` (old) trigger wrapper had only `onMouseEnter`/`onMouseLeave` | Tooltip opened on pointer hover only — a keyboard user tabbing to the trigger never saw it. | **FIXED** |
 | 2 | Serious | 1.3.1 Info & Relationships (A), 4.1.2 Name/Role/Value (A) | `index.tsx` bubble `<div>` + trigger child | Bubble had no `role="tooltip"` and the trigger had no `aria-describedby` — zero programmatic relationship, so AT never announced the tooltip text. | **FIXED** |
 | 3 | Serious | 1.4.13 Content on Hover or Focus — *Dismissable* (AA) | `index.tsx` trigger wrapper (no key handling) | No way to dismiss the tooltip from the keyboard without moving focus. | **FIXED** |
-| 4 | Moderate | 1.4.13 Content on Hover or Focus — *Hoverable* (AA) | `Tooltip.module.css:44` `pointer-events: none` on `.tooltip` | Pointer cannot move onto the bubble without it closing (deliberate design so the bubble never intercepts clicks on content beneath it). | **DEFERRED** (documented; content fully available to AT via the always-present description — see Deferred) |
+| 4 | Moderate | 1.4.13 Content on Hover or Focus — *Hoverable* (AA) | `Tooltip.module.css` `pointer-events: none` on `.tooltip` | Pointer could not move onto the bubble without it closing. | **FIXED** — the *shown* bubble is now `pointer-events: auto`, a transparent `::before` bridges the trigger↔bubble arrow gap, and JS keep-open handlers on the bubble cancel the pending close (uncontrolled mode). |
+| 5 | Moderate | 2.1.1 Keyboard (A), 4.1.2 Name/Role/Value (A) | `index.tsx` trigger wrapper (no `tabIndex`/`role`) with a non-interactive child | When the child is a decorative/`aria-hidden` icon (the most common case, e.g. PricingTable's `<InfoIcon aria-hidden>`), the wrapper was not focusable so `onFocus`/`onKeyDown` never fired (no keyboard open) and the injected `aria-describedby` landed on a node AT ignores — the whole a11y wiring was inert. | **FIXED** — the wrapper self-heals into a focusable, labelled `role="button"` trigger when the child is not itself focusable. |
 
 ### Audited and already compliant (no change needed)
 - **Reduced motion (2.3.3):** `@media (prefers-reduced-motion: reduce)` already removes the
@@ -54,15 +57,33 @@ The core of this audit. The APG Tooltip pattern is now fully implemented:
   wrapper (`index.tsx:358-359`); React normalizes these to bubbling `focusin`/`focusout`, so
   focus on the interactive child opens the visual bubble exactly like a pointer hover, reusing
   the existing enter/leave delay + controlled-mode logic.
-- **Escape dismisses (Issue 3).** A new `handleKeyDown` (`index.tsx:155-170`) hides the tooltip
+- **Escape dismisses (Issue 3).** A new `handleKeyDown` (`index.tsx`) hides the tooltip
   on `Escape` **without moving focus** (WCAG 1.4.13 Dismissable); keydown bubbles from the
-  focused child to the wrapper. Works in both controlled and uncontrolled modes.
+  focused child (or the self-healed wrapper) to the handler. Works in both controlled and
+  uncontrolled modes.
+- **Hoverable bubble (Issue 4, 1.4.13 *Hoverable*).** The *shown* bubble is now
+  `pointer-events: auto` (`.tooltip.visible` in `Tooltip.module.css`), a transparent `::before`
+  pseudo-element bridges the trigger↔bubble arrow gap so the pointer never crosses a dead zone,
+  and the bubble carries `onMouseEnter`/`onMouseLeave` (`index.tsx`) that clear the pending
+  leave-close so moving the pointer onto the bubble keeps it open. Only the *visible* bubble is
+  interactive — `pointer-events` is inherited, so the closed/entering bubble and the bridge never
+  intercept clicks on content beneath, and the bubble handlers are wired only in uncontrolled mode
+  (controlled visibility stays the parent's responsibility, no spurious `onOpen`/`onClose`).
+- **Non-focusable trigger self-heal (Issue 5, 2.1.1 / 4.1.2).** `isFocusableChild` (`index.tsx`)
+  classifies the child; when it is *not* itself focusable (an `aria-hidden` icon, a plain `<span>`,
+  a `tabIndex={-1}` node, or a non-element), the wrapper takes `tabIndex={0}` + `role="button"` +
+  `aria-label={title}` so a keyboard user can focus it to open the tooltip and a screen reader
+  announces the text. In that case the child does **not** get `aria-describedby` (AT would ignore
+  it) and the persistent `role="tooltip"` span is not rendered (the wrapper's name carries the
+  text — exactly one announcement). Custom components (e.g. the library's `Button`) are assumed
+  focusable and are **not** hijacked, preserving the existing interactive-child behavior.
 
-**Dependency (noted):** the `aria-describedby` association requires the tooltip's child to be a
-single React element that forwards `aria-*` props to its DOM node. Verified for the library's
-own `Button` (spreads `{...filteredProps}` onto its native `<button>`,
-`src/components/Button/index.tsx:645`). When `children` is not a single element the association
-is skipped gracefully (`React.isValidElement` guard) rather than throwing.
+**Dependency (now self-healing):** the `aria-describedby` association still uses the tooltip's
+child when it is a focusable element that forwards `aria-*` (verified for the library's own
+`Button`, which spreads `{...filteredProps}` onto its native `<button>`). When the child is
+**not** focusable the wrapper self-heals (above) so keyboard + SR support no longer depends on the
+caller supplying a focusable, aria-forwarding child — the previously documented dependency is
+resolved for the common icon-trigger case.
 
 ## SEO semantics (SSR'd markup)
 No heading/landmark/list/table/link semantics apply to a tooltip. One net improvement: because

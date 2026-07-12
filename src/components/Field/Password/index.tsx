@@ -116,6 +116,23 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   const disabled = styles?.disabled || false
   const required = styles?.required || false
 
+  // Accessible-name safety net for the custom-`id` path (WCAG 1.3.1 Info &
+  // Relationships / 4.1.2 Name, Role, Value). FieldShell renders
+  // `<label htmlFor={inputId}>` anchored to its OWN useId-generated id; when a
+  // consumer passes an explicit `id`, the input's id no longer matches that
+  // htmlFor, so the visible `<label>` stops NAMING the input — and, with no
+  // `ariaLabel`/`ariaLabelledby`, the input would be left UNNAMED. Threading a
+  // consumer id through to Shell's `<label>` (which would also restore
+  // click-to-focus) is the full fix and is Shell-owned — deferred (see
+  // docs/a11y-audit/Field-Password.md D3). Here we guarantee the input is never
+  // unnamed by falling the accessible name back to the visible label text.
+  // Only fires when a custom `id` detaches the label AND the consumer hasn't
+  // already named the input via `ariaLabel`/`ariaLabelledby`; an empty
+  // `label=""` (no visible label to borrow) correctly yields no fallback.
+  const effectiveAriaLabel =
+    ariaLabel ??
+    (id !== undefined && !ariaLabelledby && label ? label : undefined)
+
   // Listen for native 'input' events to support browser automation
   // tools that set `input.value` directly and dispatch a native input
   // event, bypassing React's synthetic event system.
@@ -210,7 +227,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             required={required}
             placeholder={placeholder}
             autoComplete={autoComplete}
-            aria-label={ariaLabel}
+            aria-label={effectiveAriaLabel}
             aria-labelledby={ariaLabelledby}
             className={cssStyles.input}
             {...inputAriaProps}

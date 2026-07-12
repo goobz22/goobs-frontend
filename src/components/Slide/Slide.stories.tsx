@@ -1,9 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import React, { useState } from 'react'
+import { userEvent, within, expect, waitFor } from 'storybook/test'
 import Slide from './index'
 import CustomButton from '../Button'
 import Typography from '../Typography'
 import Paper from '../Paper'
+
+// --------------------------------------------------------------------------
+// PLAY-TEST HELPERS (behavioral regression gates run in @storybook/test-runner,
+// a real browser — the ONLY regression tests in this repo)
+// --------------------------------------------------------------------------
+
+/**
+ * Longest `transition-delay` on an element, in ms. Slide's delayed-inert exit
+ * flips `visibility: hidden` after `visibility 0s linear var(--slide-visibility-delay)`,
+ * where `--slide-visibility-delay = calc(--slide-duration + --slide-delay)`. Reading
+ * the resolved `transitionDelay` longhand and taking the max across its comma-separated
+ * segments yields exactly that visibility-inert time (the transform half's delay is
+ * always <= it). Robust to whether the browser resolves the `calc()` to a single time
+ * or leaves it as `calc(600ms + 150ms)` — both forms sum to the same value here.
+ */
+function maxTransitionDelayMs(el: HTMLElement): number {
+  const raw = getComputedStyle(el).transitionDelay // e.g. "150ms, 750ms"
+  const segments = raw.split(',')
+  let max = 0
+  for (const segment of segments) {
+    const times = segment.match(/-?\d*\.?\d+(?:ms|s)\b/gi) || []
+    // Sum tokens within a segment so an unresolved `calc(600ms + 150ms)` and a
+    // resolved `750ms` both come out to 750.
+    const segmentMs = times.reduce((sum, token) => {
+      const value = parseFloat(token)
+      return sum + (/ms$/i.test(token) ? value : value * 1000)
+    }, 0)
+    if (segmentMs > max) max = segmentMs
+  }
+  return max
+}
 
 const meta: Meta<typeof Slide> = {
   title: 'Components/Slide',

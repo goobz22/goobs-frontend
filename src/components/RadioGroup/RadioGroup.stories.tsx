@@ -4,8 +4,11 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { within, expect, userEvent } from 'storybook/test'
+import { within, expect, fn, userEvent } from 'storybook/test'
+import { z } from 'zod'
 import RadioGroup, { RadioOption } from './index'
+import Form from '../Form'
+import Button from '../Button'
 
 const meta: Meta<typeof RadioGroup> = {
   title: 'Components/RadioGroup',
@@ -635,5 +638,139 @@ export const KeyboardA11y: Story = {
     const radio2 = canvas.getByRole('radio', { name: 'Option 2' })
     await expect(radio2).toBeChecked()
     await expect(radio1).not.toBeChecked()
+  },
+}
+
+// --------------------------------------------------------------------------
+// VALIDATION AFFORDANCE (required + error) STORIES
+// --------------------------------------------------------------------------
+
+/**
+ * Standalone validation affordance driven by the additive `required` + `error`
+ * props (no `<Form>`). This is the per-field feedback a required RadioGroup must
+ * render when its value fails validation — before this pass the component
+ * emitted NONE of it (no `aria-required`, no `aria-invalid`, no error region, no
+ * required indicator). The `play` test fails against that pre-fix markup:
+ *
+ *  - the heading shows the required indicator (`Choose a plan *`),
+ *  - the `role="radiogroup"` exposes `aria-required` AND `aria-invalid` (state
+ *    is programmatic, not colour-only — WCAG 1.4.1 / 4.1.2),
+ *  - the error text is announced by a `role="alert"` region that the group
+ *    points at via `aria-describedby` (WCAG 3.3.1 Error Identification), and
+ *  - the root advertises `data-state="error"` for the machine-test contract.
+ */
+export const RequiredWithError: Story = {
+  name: 'A11y/Required + Error',
+  args: {
+    name: 'plan',
+    label: 'Choose a plan',
+    options: planOptions,
+    required: true,
+    error: 'Please select a plan to continue',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The group advertises required + invalid programmatically to assistive
+    // tech (the accessible name excludes the aria-hidden required indicator).
+    const group = canvas.getByRole('radiogroup', { name: /choose a plan/i })
+    await expect(group).toHaveAttribute('aria-required', 'true')
+    await expect(group).toHaveAttribute('aria-invalid', 'true')
+
+    // The error message is announced and tied back to the group.
+    const alert = canvas.getByRole('alert')
+    await expect(alert).toHaveTextContent('Please select a plan to continue')
+    await expect(group).toHaveAttribute('aria-describedby', alert.id)
+
+    // The visible required indicator sits on the heading (aria-hidden, so it is
+    // NOT part of the accessible name matched above).
+    const heading = canvasElement.querySelector('#plan-label')
+    await expect(heading).toHaveTextContent('Choose a plan *')
+
+    // Root reflects the error state for the Playwright selector contract.
+    const root = canvasElement.querySelector('[data-component="RadioGroup"]')
+    await expect(root).toHaveAttribute('data-state', 'error')
+  },
+}
+
+// The bound-path schema: a required single-choice field. `.min(1)` makes the
+// empty initial value invalid until an option is chosen.
+const shippingSchema = z.object({
+  shippingSpeed: z.string().min(1, 'Choose a shipping speed'),
+})
+
+const shippingOptions: RadioOption[] = [
+  { label: 'Standard' },
+  { label: 'Express' },
+  { label: 'Overnight' },
+]
+
+// Inert submit spy — onSubmit only fires on a VALID submit, which this story
+// never reaches (it asserts the blocked path), so no parallel React state.
+const onShippingSubmit = fn()
+
+/**
+ * The bound path the review flagged: a required RadioGroup inside a `<Form>`,
+ * deriving BOTH its required marker (from the zod schema) and its error (from
+ * the form engine) with zero per-field wiring — just `name`. Submitting with
+ * nothing selected marks the field touched, validates, and surfaces the error
+ * ON THIS FIELD; selecting an option clears it. Pristine (untouched) the group
+ * is required but not yet invalid, matching the engine's touched-gated error
+ * suppression. The field's own `role="alert"` region is targeted by id, since
+ * `<Form>` also renders a form-level status alert.
+ */
+export const FormValidationError: Story = {
+  name: 'A11y/Form Validation Error',
+  render: () => (
+    <Form
+      schema={shippingSchema}
+      initialValues={{ shippingSpeed: '' }}
+      id="shipping-form"
+      subject="shipping"
+      onSubmit={onShippingSubmit}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <RadioGroup
+          name="shippingSpeed"
+          label="Shipping speed"
+          options={shippingOptions}
+          styles={{ theme: 'light' }}
+        />
+        <Button
+          type="submit"
+          action="save"
+          text="Save"
+          styles={{ theme: 'light' }}
+        />
+      </div>
+    </Form>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const group = canvas.getByRole('radiogroup', { name: /shipping speed/i })
+
+    // Schema-derived required is exposed immediately; the error is touched-gated,
+    // so the pristine group is required but NOT yet invalid.
+    await expect(group).toHaveAttribute('aria-required', 'true')
+    await expect(group).not.toHaveAttribute('aria-invalid')
+
+    // Submit with nothing selected → engine validates → per-field error surfaces.
+    await userEvent.click(canvas.getByRole('button', { name: /save/i }))
+    await expect(group).toHaveAttribute('aria-invalid', 'true')
+    await expect(group).toHaveAttribute('aria-describedby', 'shippingSpeed-helper')
+
+    // Target the FIELD's error region by id (the Form renders a separate
+    // form-level status alert, so role="alert" alone is ambiguous).
+    const fieldError = canvasElement.querySelector('#shippingSpeed-helper')
+    await expect(fieldError).toHaveAttribute('role', 'alert')
+    await expect(fieldError).toHaveTextContent('Choose a shipping speed')
+
+    // Choosing an option writes through the engine and clears the error.
+    await userEvent.click(canvas.getByRole('radio', { name: 'Overnight' }))
+    await expect(group).not.toHaveAttribute('aria-invalid')
   },
 }

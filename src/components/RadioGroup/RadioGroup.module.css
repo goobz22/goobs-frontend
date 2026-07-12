@@ -63,6 +63,12 @@
   --rg-text-font-family: var(--goobs-font-standard);
   --rg-text-font-size: 0.875rem;
 
+  /* Validation affordance — required indicator + error message (light).
+     Danger-text grade (#b91c1c, 6.47:1 on white) matches the audited FieldShell
+     error/required tokens; the checked/focus primary is the boundary colour. */
+  --rg-required-indicator-color: var(--goobs-light-danger-text);
+  --rg-error-color: var(--goobs-light-danger-text);
+
   position: relative;
 }
 
@@ -95,6 +101,11 @@
   --rg-text-hover-shadow: 0 0 3px var(--goobs-gold-a50);
   --rg-text-font-family: var(--goobs-font-sacred);
   --rg-text-font-size: 0.875rem;
+
+  /* Validation affordance — sacred danger-text grade (#ef4444, 5.13:1 on the
+     near-black sacred canvas), matching FieldShell's sacred error tokens. */
+  --rg-required-indicator-color: var(--goobs-sacred-danger-text);
+  --rg-error-color: var(--goobs-sacred-danger-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -125,6 +136,11 @@
   --rg-text-hover-shadow: none;
   --rg-text-font-family: var(--goobs-font-standard);
   --rg-text-font-size: 0.875rem;
+
+  /* Validation affordance — dark danger-text grade (#f87171, lifted 400-scale
+     so it reads on the dark surface), matching FieldShell's dark error tokens. */
+  --rg-required-indicator-color: var(--goobs-dark-danger-text);
+  --rg-error-color: var(--goobs-dark-danger-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -320,6 +336,36 @@
 .optionLabel:hover .text:not([data-has-color='true']) {
   color: var(--rg-text-hover-color-override, var(--rg-text-hover-color));
   text-shadow: var(--rg-text-hover-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   REQUIRED INDICATOR — the decorative `*` next to the group heading (the
+   markup marks it aria-hidden; aria-required carries the state for AT). Danger
+   grade per theme so it's visually distinct from the heading text.
+   -------------------------------------------------------------------------- */
+.requiredIndicator {
+  margin-left: 2px;
+  color: var(--rg-required-indicator-color);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   ERROR / HELPER REGION — the single region below the group. Default (helper
+   text) uses the theme option-text colour; the error variant switches to the
+   theme danger grade (all matching FieldShell's audited danger-text tokens, so
+   the message clears 4.5:1 on its theme surface). Rendered with role="alert"
+   in the markup when it carries an error.
+   -------------------------------------------------------------------------- */
+.helper {
+  margin-top: 0.375rem;
+  color: var(--rg-text-color-override, var(--rg-text-color));
+  font-family: var(--rg-text-font-family-override, var(--rg-text-font-family));
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.helper[data-helper-type='error'] {
+  color: var(--rg-error-color);
 }
 
 /* --------------------------------------------------------------------------

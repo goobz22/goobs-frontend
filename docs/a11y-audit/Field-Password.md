@@ -1,11 +1,28 @@
 # Field/Password — a11y audit (2026-07-11)
 
-**Status:** PARTIAL — every issue inside this directory is FIXED (issues #1–#6 from the first
-pass plus the disabled-toggle perceivability fix #8 from the re-audit). One newly-found issue
-(#7, a consumer-supplied `id` breaking the visible-label association) has its **root cause in
-`Field/Shell`** (owned by a later serial pass) and is DEFERRED with an exact fix suggestion —
-identical to the finding the sibling `Field/USD` and `Field/Percentage` owners deferred for the
-same shared `id ?? inputId` pattern.
+**Status:** FIXED — every issue inside this directory is FIXED (issues #1–#6 from the first
+pass, the disabled-toggle perceivability fix #8 from the re-audit, and the third-pass review
+fixes below). Issue #7 (a consumer-supplied `id` breaking the visible-label association) is now
+**MITIGATED in this directory** — the input is guaranteed an accessible name on the custom-`id`
+path — while the FULL fix (restoring the `<label htmlFor>` association + click-to-focus) has its
+**root cause in `Field/Shell`** (owned by a later serial pass) and stays DEFERRED with an exact
+fix suggestion, identical to the finding the sibling `Field/USD` and `Field/Percentage` owners
+deferred for the same shared `id ?? inputId` pattern.
+
+### Third-pass adversarial review (2026-07-11) — fixed
+An adversarial review of the second pass found that the **disabled stories never actually
+disabled the field**: they passed `disabled` as a TOP-LEVEL prop, but `PasswordField` has no
+top-level `disabled` prop and derives it solely from `styles.disabled` (`index.tsx:116`), so
+`disabled` silently resolved to `false`.
+- **`DisabledToggleState`** (the play-test that PINS issue #8) rendered a LIVE field, so every
+  assertion — `toBeDisabled()`, the `[data-disabled="true"]` dim check, and the post-click
+  `type`/`aria-pressed` no-op checks — would have FAILED in the Chromatic/play gate. FIXED:
+  `styles={{ theme: 'light', disabled: true }}`, dropped the no-op top-level `disabled`.
+- **`DisabledStates`** (the visual story, 3 themed instances) rendered fully editable, non-dimmed
+  fields under "Disabled Light/Dark/Sacred" labels. FIXED: `disabled: true` moved into `styles`
+  for all three.
+- Issue #7 also got an **in-directory mitigation** (below) so the input is never left unnamed;
+  new pinning story `CustomIdAccessibleName`.
 
 **Scope:** the `Field/Password` sub-field — `src/components/Field/Password/index.tsx`, a
 masked `<input>` with an overlaid show/hide **eye toggle button**, rendered through the shared
@@ -42,7 +59,7 @@ Two combined patterns:
 | 4 | Moderate | 1.3.5 Identify Input Purpose (AA) | `index.tsx` `<input>` | No `autoComplete` seam existed, so the field could not advertise `current-password` / `new-password` to browsers and password managers — the single biggest usability aid for cognitive and motor-impaired users on a password field. | **FIXED** |
 | 5 | Minor | 4.1.2 Name, Role, Value (A); 3.3.2 Labels or Instructions (A) | `index.tsx` `<input>` | A label-less usage (`label=""`, e.g. a compact/table context) had **no way to supply an accessible name** — no `aria-label` / `aria-labelledby` passthrough. Edge case since `label` defaults to `'Password'`, but impossible to name otherwise. | **FIXED** |
 | 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `Password.module.css` `.input` | The focus/border transition added for #1 needed a `prefers-reduced-motion` guard to match the Field family convention (USD/Percentage/Text all ship it). | **FIXED** |
-| 7 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A) | `index.tsx:200` (`id={id ?? inputId}`) + `Field/Shell/index.tsx:395` (`<label htmlFor={inputId}>`) | A consumer-supplied `id` breaks the visible-label association: the input renders `id={id ?? inputId}` but Shell's `<label htmlFor>` always points at Shell's own `useId`-generated `inputId`. When `id` is passed the `<label>` no longer references the input, and (absent `ariaLabel`/`ariaLabelledby`) the input becomes **unnamed**. Root cause is in Shell (no consumer-id passthrough to the label). Default path (no `id`) is fully associated. Same shared shape found & deferred in `Field/USD` and `Field/Percentage`. | **DEFERRED** (Shell) |
+| 7 | Moderate | 1.3.1 Info & Relationships (A); 4.1.2 Name, Role, Value (A) | `index.tsx` (`id={id ?? inputId}` / new `effectiveAriaLabel`) + `Field/Shell/index.tsx:395` (`<label htmlFor={inputId}>`) | A consumer-supplied `id` breaks the visible-label association: the input renders `id={id ?? inputId}` but Shell's `<label htmlFor>` always points at Shell's own `useId`-generated `inputId`. When `id` is passed the `<label>` no longer references the input, and (absent `ariaLabel`/`ariaLabelledby`) the input became **unnamed**. **In-directory MITIGATION applied:** on the custom-`id` path (and only there, when no `ariaLabel`/`ariaLabelledby` is set) the visible label text is mirrored onto the input's `aria-label`, so the input is never unnamed (WCAG 4.1.2 / 1.3.1 name presence satisfied). The FULL fix — restoring `<label htmlFor>` ↔ input association + click-to-focus — needs a consumer-id passthrough in Shell and stays deferred. Default path (no `id`) is unchanged and fully associated. Same shared shape in `Field/USD` and `Field/Percentage`. | **MITIGATED (in-dir) + Shell-DEFERRED (full)** |
 | 8 | Minor | 1.4.1 Use of Color (A); 4.1.2 Name, Role, Value (A) | `index.tsx` (eye `<button>` / `ShowHideEyeIcon`) + `Password.module.css` `.eyeButton` | When the field is disabled the eye toggle was natively `disabled` (correctly un-clickable + out of tab order) but did **not** convey that visually: the (decorative) eye icon stayed full-opacity because `disabled` was never forwarded to `ShowHideEyeIcon`, and the button kept `cursor: pointer`. A disabled field's toggle read as actionable to low-vision/cognitive users. | **FIXED** |
 
 ## Hearing (WCAG 1.2.x, 1.4.2)
@@ -129,6 +146,22 @@ transition: none } }`.
 - `Password.module.css` adds `.eyeButton:disabled { cursor: not-allowed }` so the pointer no longer
   invites clicking a disabled toggle. No token leak (stylelint clean).
 
+**Custom-`id` accessible-name mitigation (#7, third pass)** — `index.tsx`:
+- Added a derived `effectiveAriaLabel`: `ariaLabel ?? (id !== undefined && !ariaLabelledby && label
+  ? label : undefined)`, forwarded as the input's `aria-label` (was the raw `ariaLabel`). When a
+  consumer passes a custom `id` — which detaches the input from Shell's `<label htmlFor={inputId}>`
+  — and has not otherwise named the input, the visible label text becomes the accessible name, so
+  the input is never left unnamed. Additive and inert on every prior path: no `id` → no fallback;
+  `ariaLabel`/`ariaLabelledby` set → they win; `label=""` → no fallback (nothing to borrow). The
+  full `<label>`↔input re-association (and click-to-focus) remains Shell-deferred (D3).
+
+**Disabled-story reachability fixes (third-pass review)** — `PasswordField.stories.tsx`:
+- `DisabledToggleState` and the three `DisabledStates` instances moved `disabled` from a no-op
+  top-level prop into `styles.disabled: true`, so the field is actually disabled (`PasswordField`
+  reads `styles.disabled`, `index.tsx:116`). Without this the disabled path was unreachable from
+  these stories — the play assertions in `DisabledToggleState` would have failed in the play/Chromatic
+  gate and the visual "Disabled" states documented an editable field.
+
 **Markup changes (all additive; no existing DOM element type / prop / export / `data-*` / role /
 aria attribute renamed or removed — the Playwright selector contract `data-component` /
 `data-field-name` / `data-action="toggle-password"` is intact):**
@@ -157,28 +190,40 @@ each with a `play` assertion matching the file's `storybook/test` style:
   engine-evaluated and can't be toggled from a `play` fn, so it walks `document.styleSheets`, finds
   the reduced-motion block, and asserts it sets `transition: none` on this field's hashed `.input`
   class. Guard for #6.
-- **`DisabledToggleState`** (re-audit) — a disabled field: asserts both the input and the toggle are
-  natively `disabled`, that the eye icon carries its dimming `[data-disabled="true"]` wrapper, and
-  that clicking the disabled toggle (with `pointerEventsCheck: 0`) is a no-op — `type` stays
-  `password` and `aria-pressed` stays `false`. Guard for #8.
+- **`DisabledToggleState`** (re-audit; reachability FIXED third pass) — a disabled field (now via
+  `styles.disabled: true`, previously a no-op top-level `disabled`): asserts both the input and the
+  toggle are natively `disabled`, that the eye icon carries its dimming `[data-disabled="true"]`
+  wrapper, and that clicking the disabled toggle (with `pointerEventsCheck: 0`) is a no-op — `type`
+  stays `password` and `aria-pressed` stays `false`. Guard for #8.
+- **`CustomIdAccessibleName`** (third pass) — a field with a custom `id="login-password"` and a
+  visible `label="Password"`: asserts the input carries the consumer id, that it still exposes an
+  accessible name (`aria-label="Password"` / `toHaveAccessibleName('Password')`) despite the
+  detached `<label htmlFor>`, and that `getByLabelText('Password')` resolves to it. Guard for #7's
+  in-directory mitigation.
 
 ## Deferred (Shell-owned — root cause outside `Field/Password`)
 
 Three items in `Field/Shell` (owned by a later serial pass). D3 is a real (if edge-case) naming
 failure; D1/D2 are low-priority hardening. None is a functional gap for the common (no-`id`) case.
 
-- **D3 [moderate] A consumer-supplied `id` breaks the visible-label association (issue #7).** The
-  input renders `id={id ?? inputId}` (`src/components/Field/Password/index.tsx:200`), but Shell's
-  label is `<label htmlFor={inputId}>` (`src/components/Field/Shell/index.tsx:395`) anchored to
-  Shell's own `useId`-generated `inputId` with no way to accept a custom id. When a consumer passes
-  `id`, the label's `htmlFor` no longer matches the input's `id`, silently **breaking** programmatic
-  label association (WCAG 1.3.1 / 4.1.2); with no `ariaLabel`/`ariaLabelledby` the input is then
-  unnamed. Not fixable from this directory without diverging from the two sibling fields
-  (`Field/USD`, `Field/Percentage`) that share this exact `id ?? inputId` pattern and deferred the
-  same finding — the correct fix is a single Shell change that fixes all three at once.
+- **D3 [moderate] A consumer-supplied `id` breaks the visible-label association (issue #7) —
+  MITIGATED in-directory; full association fix still Shell-deferred.** The input renders
+  `id={id ?? inputId}` (`src/components/Field/Password/index.tsx`), but Shell's label is
+  `<label htmlFor={inputId}>` (`src/components/Field/Shell/index.tsx:395`) anchored to Shell's own
+  `useId`-generated `inputId` with no way to accept a custom id. When a consumer passes `id`, the
+  label's `htmlFor` no longer matches the input's `id`, **breaking** programmatic label association
+  (WCAG 1.3.1 / 4.1.2). **What is fixed here:** the input is now guaranteed an accessible NAME on
+  the custom-`id` path — `effectiveAriaLabel` mirrors the visible label text onto `aria-label` when
+  a custom `id` is set and no `ariaLabel`/`ariaLabelledby` is provided (pinned by
+  `CustomIdAccessibleName`). **What is still deferred:** restoring the actual `<label htmlFor>` ↔
+  input association (which also gives back click-the-label-to-focus and avoids the redundant
+  aria-label) requires a consumer-id passthrough in Shell so all three sibling fields (`Field/USD`,
+  `Field/Percentage`, `Field/Password`) are fixed at once.
   - **Suggested change (Shell owner):** add an optional `inputId?: string` (or `htmlFor?: string`)
     to `FieldShellProps`; when set, use it for both the render-prop `inputId` slot **and** the
-    `<label htmlFor>` so a consumer-supplied id keeps the label associated. Additive, back-compatible;
+    `<label htmlFor>` so a consumer-supplied id keeps the label associated. Each sub-field then
+    passes its `id` down (`<FieldShell inputId={id} …>`) and renders `id={inputId}` unconditionally,
+    letting the sub-fields drop the local `aria-label` fallback. Additive, back-compatible;
     consumers passing no `id` are unaffected.
 
 - **D1 [minor] `aria-disabled` is redundant with native `disabled` on the input.** Shell's
@@ -216,3 +261,14 @@ against the current code and found two more items: the shared **custom-`id` labe
 owners, deferred to Shell — and the in-directory **disabled-toggle perceivability gap (#8)**, fixed
 here (commit `72728ec3`) with a pinning `DisabledToggleState` story. No audio/media, heading,
 landmark, list, link, or table concerns exist in this control (re-verified).
+
+## Third-pass note (2026-07-11, adversarial review)
+
+An adversarial review of the second pass found that the disabled stories never actually disabled
+the field (top-level `disabled` is a no-op — `PasswordField` reads `styles.disabled`), so
+`DisabledToggleState`'s play assertions would have FAILED in the play/Chromatic gate and
+`DisabledStates` documented an editable field. Both fixed by moving `disabled` into `styles`.
+Additionally, issue #7 was upgraded from pure Shell-deferral to an in-directory **mitigation**
+(`effectiveAriaLabel`) so the input can never be left unnamed on the custom-`id` path, pinned by
+the new `CustomIdAccessibleName` story; the full `<label htmlFor>` re-association remains
+Shell-deferred (D3). All edits are within `src/components/Field/Password/`; lint clean.

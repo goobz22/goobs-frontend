@@ -75,6 +75,55 @@
 .tooltip.visible {
   opacity: 1;
   transform: scale(var(--tooltip-visible-scale, 1));
+  /* WCAG 1.4.13 (Content on Hover or Focus — Hoverable): the SHOWN bubble is
+     interactive so a pointer user can move onto it to read / keep it open.
+     pointer-events is inherited, so the base .tooltip (pointer-events:none) —
+     which is the closed/entering state and the transparent bridge below — never
+     intercepts clicks on content beneath; only the open bubble does, and only
+     while it is open. */
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   HOVER BRIDGE — a transparent pseudo-element that spans the trigger↔bubble
+   arrow gap so the pointer can travel from the trigger onto the bubble without
+   crossing a dead zone that would fire mouseleave and close the tooltip (the
+   other half of WCAG 1.4.13 Hoverable; the JS keeps-open handlers do the rest).
+   It sits on the trigger-facing edge per placement and extends across the arrow
+   offset (arrow size + a few px). Interactive only when the bubble is visible
+   (pointer-events inherited from .tooltip / .tooltip.visible above).
+   -------------------------------------------------------------------------- */
+.tooltip::before {
+  content: '';
+  position: absolute;
+}
+
+.tooltip[data-placement='top']::before {
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: calc(var(--tooltip-arrow-size, 6px) + 5px);
+}
+
+.tooltip[data-placement='bottom']::before {
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: calc(var(--tooltip-arrow-size, 6px) + 5px);
+}
+
+.tooltip[data-placement='left']::before {
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: calc(var(--tooltip-arrow-size, 6px) + 5px);
+}
+
+.tooltip[data-placement='right']::before {
+  top: 0;
+  right: 100%;
+  bottom: 0;
+  width: calc(var(--tooltip-arrow-size, 6px) + 5px);
 }
 
 /* --------------------------------------------------------------------------

@@ -395,6 +395,7 @@ const USDField: React.FC<USDFieldProps> = ({
                     onClick={handleButtonClick(handleIncrement)}
                     onKeyDown={handleButtonKeyDown(handleIncrement)}
                     aria-label="increment"
+                    data-action="increment"
                     disabled={disabled}
                     className={cssStyles.button}
                   >
@@ -413,6 +414,7 @@ const USDField: React.FC<USDFieldProps> = ({
                     onClick={handleButtonClick(handleDecrement)}
                     onKeyDown={handleButtonKeyDown(handleDecrement)}
                     aria-label="decrement"
+                    data-action="decrement"
                     disabled={disabled}
                     className={`${cssStyles.button} ${cssStyles.buttonDecrement}`}
                   >

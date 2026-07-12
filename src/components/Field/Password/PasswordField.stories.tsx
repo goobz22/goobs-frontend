@@ -483,28 +483,29 @@ export const ComprehensiveShowcase: Story = {
 export const DisabledStates: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* `disabled` lives on `styles` — PasswordField derives the disabled
+          state solely from `styles.disabled` (there is no top-level `disabled`
+          prop), so a top-level `disabled` would be a silent no-op and render a
+          fully editable, non-dimmed field. */}
       <div style={demoSurface.light}>
         <PasswordFieldWithState
           label="Disabled Light"
           initialValue="cannot-edit"
-          disabled
-          styles={{ theme: 'light' }}
+          styles={{ theme: 'light', disabled: true }}
         />
       </div>
       <div style={demoSurface.dark}>
         <PasswordFieldWithState
           label="Disabled Dark"
           initialValue="locked-password"
-          disabled
-          styles={{ theme: 'dark' }}
+          styles={{ theme: 'dark', disabled: true }}
         />
       </div>
       <div style={demoSurface.sacred}>
         <PasswordFieldWithState
           label="Disabled Sacred"
           initialValue="sealed-key"
-          disabled
-          styles={{ theme: 'sacred' }}
+          styles={{ theme: 'sacred', disabled: true }}
         />
       </div>
     </div>
@@ -776,11 +777,14 @@ export const AccessibleNameAndPurpose: Story = {
 export const DisabledToggleState: Story = {
   name: 'A11y: disabled toggle is inert + dimmed',
   render: () => (
+    // `disabled` is a `styles` key, NOT a top-level prop — PasswordField
+    // derives the disabled state from `styles.disabled` only, so a top-level
+    // `disabled` never reaches the input/toggle and this story would exercise
+    // a LIVE field (every assertion below would fail).
     <PasswordFieldWithState
       label="Password"
       initialValue="cannot-edit"
-      disabled
-      styles={{ theme: 'light' }}
+      styles={{ theme: 'light', disabled: true }}
     />
   ),
   globals: { backgrounds: { value: 'light' } },
@@ -848,5 +852,44 @@ export const ReducedMotion: Story = {
       }
     }
     expect(guarded).toBe(true)
+  },
+}
+
+/**
+ * A consumer-supplied `id` detaches the input from FieldShell's
+ * `<label htmlFor={inputId}>` — Shell anchors that `htmlFor` to its own
+ * `useId`-generated id, so a custom `id` on the input no longer matches it and
+ * the visible `<label>` stops naming the control. The full association fix
+ * (thread the consumer id through Shell's label, restoring click-to-focus too)
+ * is Shell-owned and deferred, but the input must NEVER be left unnamed: on the
+ * custom-`id` path the visible label text is mirrored onto the input's
+ * `aria-label`, so it keeps an accessible name. WCAG 1.3.1 (Info &
+ * Relationships) + 4.1.2 (Name, Role, Value).
+ */
+export const CustomIdAccessibleName: Story = {
+  name: 'A11y: custom id keeps an accessible name',
+  render: () => (
+    <PasswordFieldWithState
+      label="Password"
+      id="login-password"
+      placeholder="Enter password"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The input honours the consumer-supplied id...
+    const input = canvasElement.querySelector<HTMLInputElement>('#login-password')
+    expect(input).not.toBeNull()
+
+    // ...and is still NAMED even though Shell's <label htmlFor> no longer
+    // matches that id — the visible label text falls back onto aria-label.
+    expect(input).toHaveAttribute('aria-label', 'Password')
+    expect(input).toHaveAccessibleName('Password')
+
+    // Resolvable by its accessible name (via the fallback, not the <label>).
+    expect(canvas.getByLabelText('Password')).toBe(input)
   },
 }

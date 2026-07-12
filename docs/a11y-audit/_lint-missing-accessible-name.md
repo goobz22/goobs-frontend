@@ -68,7 +68,7 @@ is deliberately NOT flagged here.
 Comments (JSDoc `@example` included) are blanked before scanning, so an example
 glyph button is never flagged. String-/brace-aware tag reading means a `>` inside
 `onClick={() => f()}` is not mistaken for the tag terminator. Selftest:
-**7 bad / 16 good** (all pass).
+**7 bad / 15 good** (all pass).
 
 ## Instances (the audited class, across the repo)
 
@@ -128,7 +128,7 @@ name contract is enforced by the dev warn + stories, not this source lint.
 ## Verification
 
 - `bun scripts/lint-a11y.ts --only missing-accessible-name` → **clean, 464 files**;
-  selftest 7 bad / 16 good all pass.
+  selftest 7 bad / 15 good all pass.
 - Both static shapes confirmed fixed in source: Alert (`aria-label="Close"` +
   `aria-hidden` glyph) and QRCode (`role="img"` + `aria-label`).
 - The detection module is under `scripts/` (outside the app eslint scope, like

@@ -1,6 +1,7 @@
 # TreeView — a11y audit (2026-07-11)
 
-**Status:** FIXED (incl. adversarial-review follow-ups + second ownership pass, 2026-07-11)
+**Status:** FIXED (incl. adversarial-review follow-ups, second ownership pass, and
+third adversarial-review round — focus-on-collapse + single-select aria-selected, 2026-07-11)
 
 **APG pattern:** [WAI-ARIA APG — Tree View](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/)
 (single-select / multi-select tree, with optional checkbox selection). The
@@ -59,6 +60,58 @@ off entirely — so a tree that supports no selection still announced a permanen
 a tree whose nodes are not selectable. **Fix:** `aria-selected` is now omitted (`undefined`)
 when `context.disableSelection` is set, and reflects `isSelected` otherwise (`index.tsx:1405`).
 Pattern class `aria-state-when-unsupported`. Pinned by a new `play` test on `DisabledSelection`.
+(Extended in the third review round, AR-F2 below, to also omit it on unselected nodes in
+single-select mode.)
+
+### Third adversarial-review round (2026-07-11, commit `43779c98`)
+
+| # | Severity | WCAG / kind | Area | Location | Status |
+|---|----------|-------------|------|----------|--------|
+| AR-F1 | Moderate | 2.4.3 Focus Order | keyboard | `index.tsx` `toggleItemExpansion` + `apiRef.setItemExpansion` | FIXED |
+| AR-F2 | Minor | 4.1.2 Name, Role, Value | aria | `index.tsx` treeitem `aria-selected` | FIXED |
+
+**AR-F1 — Focus lost when a collapsed subtree unmounts (MODERATE, WCAG 2.4.3) — FIXED.**
+When an ancestor of the currently DOM-focused node is collapsed via a **chevron pointer-click**
+(`handleIconClick` → `toggleItemExpansion`) or **programmatically**
+(`apiRef.setItemExpansion({ isExpanded: false })`), the focused descendant's row (inside the
+collapsed `role="group"`) is removed from the DOM and focus dropped to `<body>` with no
+restoration. The keyboard `ArrowLeft` collapse path was already safe (focus is on the parent
+being collapsed, which stays visible), and the roving-tabindex fallback guarantees Tab can
+re-enter — but a real user who collapses a folder while a child row is focused lost their focus
+position. **Fix:** a module-level `preserveFocusOnCollapse(itemId)` helper — called from BOTH
+collapse choke points (`toggleItemExpansion` for chevron/content-click collapse, and the
+imperative `setItemExpansion` for the programmatic path) **before** the collapse mutates state —
+detects whether DOM focus currently lives inside the node's child group
+(`#tree-group-<itemId>`) and, if so, moves focus to that node's own row (the group's
+`previousElementSibling`, scope-safe across multiple trees). Because the ancestor row stays
+visible after the collapse, focusing it first means it retains focus through the re-render, and
+its existing `onFocus` handler keeps roving tabindex + `focusedItem` in sync. Pattern class
+`focus-lost-on-unmount`. Pinned by two new `play` tests: `ChevronCollapsePreservesFocus`
+(collapses via a programmatic `.click()` on the chevron, which — unlike a real pointer event —
+does NOT run the browser's focus-fixup, so focus genuinely starts on the descendant) and
+`ProgrammaticCollapsePreservesFocus` (collapses via `apiRef.setItemExpansion`, using a
+`mousedown`-preventDefault button so the click never steals focus from the tree). Both assert
+focus lands on the collapsed ancestor and **not** on `<body>`.
+
+*Note on the earlier deferred wording:* the previous "Deferred" entry also listed the `*`
+(expand-siblings) command as a focus-loss path. That was inaccurate — `expandSiblings` only ever
+**adds** to the expansion set (`index.tsx` provider `expandSiblings`); it never collapses a node,
+so it can never unmount a focused subtree. No fix is owed there. Only the chevron and programmatic
+collapse paths were real, and both are now fixed.
+
+**AR-F2 — Single-select over-announcement of `aria-selected` (MINOR, WCAG 4.1.2) — FIXED.**
+The P2 fix handled the `disableSelection` case but a single-select tree (`multiSelect=false`,
+selection enabled) still emitted `aria-selected="false"` on every unselected `treeitem`. The APG
+Tree View pattern specifies that a single-select tree expose `aria-selected` **only on the
+selected node** and omit it on the others (multi-select trees, by contrast, announce true/false
+on every selectable node so selectability and the selected count are conveyed). **Fix:** the
+`aria-selected` expression (`index.tsx`) is now three-way: omitted when `disableSelection`;
+reflects `isSelected` (true/false) when `multiSelect` **or** `checkboxSelection` (a checkbox tree
+shows a per-row checkable control, so every selectable row should announce its state); otherwise
+(pure single-select) it is `isSelected || undefined` — present only on the selected node. Pattern
+class `aria-state-single-select-redundant`. Pinned by the new `SingleSelectAriaSelected` play test
+(only the selected node has `aria-selected`; all others omit it) and an extended `MultiSelection`
+play test (all selectable nodes announce true/false) that pins the contrast.
 
 ### 1 — No arrow-key navigation (SERIOUS, WCAG 2.1.1) — FIXED
 The old `handleKeyDown` only handled `Enter`, `Space`, `ArrowRight` (expand),

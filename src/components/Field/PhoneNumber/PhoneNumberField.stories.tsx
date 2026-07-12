@@ -939,3 +939,115 @@ export const AriaLabelWhenLabelless: Story = {
     expect(input).toHaveAttribute('aria-label', 'Mobile phone')
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y: ACCESSIBLE NAME VIA AN EXTERNAL ELEMENT (WCAG 4.1.2)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `ariaLabelledby` prop. When a label-less field's
+ * accessible name lives in a *separate visible element* (a shared column
+ * header in a table, a heading above a group of inputs) rather than in the
+ * `label` prop, `ariaLabelledby` forwards `aria-labelledby` so the input is
+ * named by that element (WCAG 4.1.2) — the id-reference counterpart of
+ * `ariaLabel`, and takes precedence over it. The play fn renders an external
+ * `<span id>` naming element, passes its id, and asserts the input is
+ * reachable by that accessible name with `aria-labelledby` wired to it.
+ */
+export const AriaLabelledbyExternalElement: Story = {
+  name: 'A11y: ariaLabelledby (external naming element)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <span id="phone-external-label" style={{ color: '#111827' }}>
+        Work phone
+      </span>
+      <PhoneNumberFieldWithState
+        label={null}
+        ariaLabelledby="phone-external-label"
+        placeholder="555-555-5555"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // No visible <label> is rendered; the accessible name is computed from the
+    // external element referenced by aria-labelledby — findable by that name.
+    const input = canvas.getByRole('textbox', { name: 'Work phone' })
+    expect(input).toHaveAttribute('aria-labelledby', 'phone-external-label')
+  },
+}
+
+// --------------------------------------------------------------------------
+// A11Y: REDUCED-MOTION GUARD (WCAG 2.3.3 Animation from Interactions)
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the prefers-reduced-motion guard. The `.inputWrapper`
+ * animates an `all` transition (which also animates the focus ring's
+ * box-shadow); a `@media (prefers-reduced-motion: reduce)` block drops that
+ * transition for users who opt out of motion (WCAG 2.3.3). The OS "reduce
+ * motion" preference can't be toggled from a play fn, so rather than emulating
+ * it this fn asserts the CSS rule itself exists: it reads the wrapper's hashed
+ * CSS-module class, then walks the CSSOM for a
+ * `@media (prefers-reduced-motion: reduce)` block that sets `transition: none`
+ * on that class. Media rules are always present in `cssRules` regardless of
+ * whether the query currently matches, so this pins the guard's existence —
+ * deleting the media block fails the story.
+ */
+export const ReducedMotionGuard: Story = {
+  name: 'A11y: reduced-motion guard',
+  render: () => (
+    <PhoneNumberFieldWithState
+      label="Reduced motion"
+      placeholder="555-555-5555"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByPlaceholderText('555-555-5555')
+    // The input's direct parent is the .inputWrapper (prefix + input siblings);
+    // grab its hashed CSS-module class(es) to match against the rule selector.
+    const wrapper = input.parentElement as HTMLElement
+    const wrapperClasses = Array.from(wrapper.classList)
+    expect(wrapperClasses.length).toBeGreaterThan(0)
+
+    // Walk the CSSOM for the reduced-motion block that zeroes the wrapper
+    // transition.
+    let zeroedUnderReducedMotion = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList | null = null
+      try {
+        rules = sheet.cssRules
+      } catch {
+        // Cross-origin stylesheet — cssRules throws; skip it.
+        continue
+      }
+      if (!rules) continue
+      for (const rule of Array.from(rules)) {
+        if (
+          !(rule instanceof CSSMediaRule) ||
+          !/prefers-reduced-motion/.test(rule.media.mediaText) ||
+          !/reduce/.test(rule.media.mediaText)
+        ) {
+          continue
+        }
+        for (const inner of Array.from(rule.cssRules)) {
+          if (
+            inner instanceof CSSStyleRule &&
+            wrapperClasses.some(cls => inner.selectorText.includes(cls)) &&
+            inner.style.transition === 'none'
+          ) {
+            zeroedUnderReducedMotion = true
+          }
+        }
+      }
+    }
+
+    expect(zeroedUnderReducedMotion).toBe(true)
+  },
+}

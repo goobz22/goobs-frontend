@@ -19,10 +19,13 @@ the accessibility tree**, which was the dominant defect here.
 | 3 | Moderate | 1.3.1 Info & Relationships (A), 4.1.2 Name/Role/Value (A) | `index.tsx` — `aria-labelledby` always pointed at a `<label>` that is empty when neither `label` nor `labelText` is set (was line 241) | `missing-accessible-name` | **FIXED** |
 | 4 | Minor | 1.3.1 Info & Relationships (A) | `index.tsx` — group heading rendered as an orphan `<label>` with no `htmlFor` (was line 238) | `orphan-label-element` | **FIXED** |
 | 5 | Serious | 1.4.11 Non-text Contrast (AA) | `RadioGroup.module.css:46` — light `--rg-radio-border-color` was `var(--goobs-light-border-strong)` (#cbd5e1) | `low-contrast-control-boundary` | **FIXED** |
+| 6 | Moderate | 3.3.1 Error Identification (A), 4.1.2 Name/Role/Value (A), 3.3.2 Labels or Instructions (A) | `index.tsx` — Tier-1 bound field rendered NO validation affordance: no `aria-invalid` / `aria-required` on `role="radiogroup"`, no error region, no required indicator | `bound-field-no-validation-affordance` | **FIXED** |
 
 > **2026-07-11 re-audit (this pass):** issues 1–4 were fixed by prior commit `3f4be98f`
-> and re-verified here (all pass). This re-audit found and fixed the remaining **issue 5**
-> below (commit `25a01498`).
+> and re-verified here (all pass). A first re-audit pass found and fixed **issue 5** (commit
+> `25a01498`). This adversarial re-review found and fixed **issue 6** — the missing validation
+> affordance that the prior pass had wrongly parked as "Deferred / needs edits outside the
+> directory." The fix lives entirely in `index.tsx` (in-directory) and is now closed.
 
 ### Issue 5 — Unchecked radio ring below 3:1 in light theme (Serious)
 
@@ -43,6 +46,37 @@ Dark (`--goobs-dark-text-muted` #94a3b8) and sacred (gold) unchecked rings alrea
 as did the checked fill, hover border, and all focus outlines — only the **light** default was
 non-compliant. Fix: point the light default `--rg-radio-border-color` at `--goobs-light-text-muted`
 (#4b5563, 7.56:1). No change to dark/sacred or to any caller-override path.
+
+### Issue 6 — Bound field renders no validation affordance (Moderate)
+
+RadioGroup is a **Tier-1 bound form field**: inside a `<Form>` it auto-binds its value by
+`name` via `useFieldBinding` (`index.tsx`). But unlike every sibling bound input that routes
+through `Field/Shell` (which wires `aria-required` / `aria-invalid` / a `role="alert"` error
+region / a required indicator from the form engine + schema), RadioGroup rendered a bare
+`role="radiogroup"` with **none** of that. Consequences inside a `<Form>`:
+
+- **Error Identification (3.3.1) / Name-Role-Value (4.1.2):** a required group that fails
+  validation on submit gave the user **zero per-field feedback** — no `aria-invalid`, no error
+  text, nothing announced. The engine knew the field was invalid; the field never surfaced it.
+- **Labels or Instructions (3.3.2):** a required group had no required indicator and no
+  `aria-required`, so neither sighted nor AT users could tell a selection was mandatory before
+  submitting.
+
+**Why not just wrap it in `Field/Shell`?** `FieldShell` renders a single `<label htmlFor={inputId}>`
+that fronts ONE control — semantically wrong for a radiogroup, whose heading must be an
+`aria-labelledby` target over *many* radios, and it would also emit a second, conflicting
+`data-component`/`data-field-name` selector pair. So the affordance was built **directly into
+RadioGroup**, deriving error/required the same way FieldShell does (explicit prop wins; else the
+engine error + schema-required for this `name` when bound), and attaching them to the
+semantically correct `role="radiogroup"` element.
+
+**Root cause:** the component bound its *value* to the form engine but never bound its
+*validation state*. Fix (all in-directory, `index.tsx` + `RadioGroup.module.css`): additive
+`required` / `error` / `helperText` props; `aria-required` + `aria-invalid` +
+`aria-describedby` on the radiogroup; an aria-hidden required indicator on the heading; and a
+single error/helper region (`role="alert"` + `aria-live="polite"` while invalid) linked via
+`aria-describedby`. The prior pass had parked this as "Deferred — needs edits outside the
+directory," which was wrong: the fix is entirely in-directory.
 
 ### Issue 1 — `display: none` removes the radios from the a11y tree and keyboard order (Critical)
 
@@ -114,6 +148,12 @@ usage anywhere in the component (grep clean). No information is conveyed by soun
 - **State never color-alone (1.4.1):** the checked option is conveyed by the native radio's
   programmatic `checked` state (now exposed to AT) **plus** the filled ring / inner dot —
   not color-only.
+- **Validation (3.3.1 / 3.3.2 / 4.1.2):** **Fixed** (Issue 6) — when bound inside a `<Form>`
+  (or given explicit `required`/`error` props), the `role="radiogroup"` exposes `aria-required`
+  and `aria-invalid`, the heading shows a required indicator, and the validation message renders
+  in a `role="alert"` + `aria-live="polite"` region the group references via `aria-describedby`.
+  The invalid state is programmatic, not color-only. Verified by the two new bound/standalone
+  stories.
 - **Motion:** `@media (prefers-reduced-motion: reduce)` was already present and remains;
   the new focus treatment uses a static `outline` (not animated), so reduced-motion is
   unaffected. WCAG 2.3.3 satisfied.
@@ -157,12 +197,32 @@ client-only injection of primary content. **No issues.**
    `--rg-radio-border-color` changed from `var(--goobs-light-border-strong)` (#cbd5e1, 1.48:1)
    to `var(--goobs-light-text-muted)` (#4b5563, 7.56:1). Dark/sacred unchanged (already ≥3:1);
    checked/hover/focus already use primary. No public API or markup change.
+7. **Validation affordance (Issue 6, 2026-07-11)** — three ADDITIVE optional props on
+   `RadioGroupProps`: `required?: boolean`, `error?: string | boolean`, `helperText?: ReactNode`.
+   `index.tsx` now reads the optional form context (`useOptionalFormContext`) and derives
+   `error` (from `engine.getError(name)`) and `required` (from `deriveRequiredFromSchema`) when
+   bound and the prop is omitted — an explicit prop, including `false`/`''`, always wins,
+   mirroring FieldShell's precedence exactly. Rendered additions: an aria-hidden
+   `.requiredIndicator` (` *`) on the heading; `aria-required` / `aria-invalid` /
+   `aria-describedby` on the `role="radiogroup"` (all emitted only when truthy — never
+   `aria-*="false"`, matching the FieldShell selector discipline); `data-state="error"` on the
+   root; and a single `.helper` region (`role="alert"` + `aria-live="polite"` while invalid,
+   `data-helper-type="error"`) below the group. New CSS tokens `--rg-required-indicator-color`
+   / `--rg-error-color` per theme point at the same audited `--goobs-{light,dark,sacred}-danger-text`
+   grades FieldShell uses (light #b91c1c 6.47:1 on white; dark #f87171; sacred #ef4444 5.13:1 on
+   near-black — all ≥4.5:1 as text on their theme surface).
 
-No public API change: no prop renamed/removed/retyped, no export changed. The only rendered
-markup changes are the group heading element (`<label>` → `<span>`, both structural) and an
-additive `aria-hidden` — every existing `data-*` test selector (`data-component`,
+No public API change (only additive props): no prop renamed/removed/retyped, no export changed.
+The rendered markup changes are the group heading element (`<label>` → `<span>`, both
+structural), an additive `aria-hidden` decorative span, the additive `aria-required` /
+`aria-invalid` / `aria-describedby` (radiogroup) + `data-state` (root) attributes, and the new
+error/helper region — every existing `data-*` test selector (`data-component`,
 `data-field-name`, `data-filled`, `data-inner-dot`, `data-theme`, per-option `data-has-color`),
-the `role="radiogroup"`, and the forwarded first-input `ref` are all preserved.
+the `role="radiogroup"`, and the forwarded first-input `ref` are all preserved. **Note:** the
+existing `Components/Form/BoundFields` stories (owned by `Form/`, not this directory) bind a
+`contactMethod: z.string().min(1)` RadioGroup — with this fix that group now correctly renders a
+required indicator + `aria-required`, a correct additive visual change to a story I do not own
+(Chromatic re-baseline expected).
 
 ## Stories updated
 
@@ -185,6 +245,21 @@ unchecked-ring contrast fix. Its `play` test asserts the radiogroup still expose
 name, all three options are reachable unchecked `radio` roles, and the root reports
 `data-filled="false"`.
 
+**2026-07-11 adversarial re-review added (Issue 6):** two `play`-backed stories exercising the
+new validation affordance (both fail against the pre-fix markup, which emitted none of it):
+
+- **`A11y/Required + Error`** (`RequiredWithError`) — standalone, explicit `required` + `error`
+  props. Asserts the radiogroup exposes `aria-required` AND `aria-invalid`, a `role="alert"`
+  region carries the message and is referenced by the group's `aria-describedby`, the heading
+  shows the ` *` indicator (excluded from the accessible name because it is aria-hidden), and the
+  root reports `data-state="error"`. This is the Chromatic baseline for the affordance.
+- **`A11y/Form Validation Error`** (`FormValidationError`) — the real bound path: a required
+  RadioGroup inside a `<Form schema>` deriving required (from the schema) and error (from the
+  engine) with only `name`. Asserts the pristine group is `aria-required` but not yet invalid
+  (engine touched-gating), that submitting empty surfaces the field's own `role="alert"` error
+  (targeted by `#shippingSpeed-helper` id, since `<Form>` also renders a form-level status
+  alert), and that selecting an option clears `aria-invalid`.
+
 Gates run per-file and passing: `bun lint:file` on `index.tsx` + `RadioGroup.stories.tsx`
 (exit 0), `stylelint` on `RadioGroup.module.css` (exit 0).
 
@@ -200,17 +275,18 @@ Gates run per-file and passing: `bun lint:file` on `index.tsx` + `RadioGroup.sto
 - **The prior (issues 1–4) root-cause fixes lived entirely inside the RadioGroup directory.**
   Issue 5's fix is likewise fully in-directory (RadioGroup now points its own light default at a
   compliant token).
-- **Shared control-border token fails 1.4.11 library-wide (found during the 2026-07-11 re-audit).**
-  `src/styles/global.css:283` / `:304` define `--goobs-light-border-strong` **and**
-  `--goobs-light-control-border` both as `#cbd5e1` (1.48:1 on white). Any component that borders
-  an *enabled* control with these tokens on a white surface has the same 1.4.11 failure RadioGroup
-  had. Suggested change (owned by the `src/styles` owner, NOT RadioGroup): raise the
-  control-boundary token(s) to a ≥3:1 grey — e.g. `#767676` (≈4.54:1) or reuse
-  `--goobs-light-text-muted` (#4b5563). RadioGroup is now insulated regardless.
-- **No error / required / invalid rendering.** RadioGroup binds via `useFieldBinding` directly
-  and does not wrap in `Field/Shell`, so inside a `<Form>` a validation error / required marker /
-  `aria-invalid` for this field is neither shown nor exposed. This is an *absent feature*, not a
-  live WCAG failure (no error text is rendered at all, so nothing is mis-associated). Adding it
-  would require additive props + integration with `src/components/Field/Shell/` (not this
-  directory). Suggested: route RadioGroup through `Field/Shell` like the other bound inputs so the
-  shared error region + `aria-invalid` + required indicator apply uniformly.
+- **Shared control-border token fails 1.4.11 library-wide (cross-cutting; out of this directory).**
+  `src/styles/global.css:283` (`--goobs-light-border-strong`) **and** `:304`
+  (`--goobs-light-control-border`) are both `#cbd5e1` = **1.48:1 on white**, below the 3:1 WCAG
+  2.2 1.4.11 threshold for a control's visual boundary. Any component that borders an *enabled*
+  control with either token on a white surface has the same failure RadioGroup had (RadioGroup
+  itself is now insulated — it points its own light ring token at `--goobs-light-text-muted`).
+  **Not fixable in this directory** (owned by the `src/styles` owner). Suggested change: raise the
+  control-boundary token(s) to a ≥3:1 grey — e.g. `#767676` (≈4.54:1 on white) or reuse
+  `--goobs-light-text-muted` (#4b5563, 7.56:1) — after sweeping consumers so nothing relied on the
+  lighter hairline for a purely decorative (non-boundary) divider.
+- **Group name when neither `label` nor `labelText` is supplied — unchanged from the prior pass.**
+  After Issue 3's fix an unlabelled group emits no `aria-labelledby` rather than a broken empty
+  one, but then has no accessible name. Not fixable in-component (no human text to derive from;
+  the library must not fabricate a name from the machine-key `name`). Consumer responsibility;
+  accessible-by-default is met whenever `label`/`labelText` is provided (every story does).

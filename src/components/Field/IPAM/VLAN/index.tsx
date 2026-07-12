@@ -214,9 +214,11 @@ const VLANField: React.FC<VLANFieldProps> = ({
   // focuses the input expects Up/Down arrows to step the value — otherwise the
   // only keyboard path to a step is Tab-ing away to the separate +/- buttons.
   // ArrowUp/ArrowDown reuse the existing clamp + skip-reserved increment
-  // handlers. The element stays role="textbox" (free-typed VLAN ID) so the
-  // machine-test `getByRole('textbox', { name: 'VLAN ID' })` selector contract
-  // is preserved.
+  // handlers. The input carries role="spinbutton" + aria-valuemin/max/now (see
+  // the JSX below) so assistive tech announces the current VLAN ID and its
+  // bounds as a spinner; the stable `data-field-name` machine-test selector on
+  // the same element is unchanged, so `[data-field-name="…"]` locators keep
+  // resolving it.
   const handleInputKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'ArrowUp') {
@@ -273,6 +275,12 @@ const VLANField: React.FC<VLANFieldProps> = ({
   // Filled when a numeric VLAN ID is present in the input.
   const hasValue =
     currentValue !== '' && !Number.isNaN(parseInt(currentValue, 10))
+
+  // Numeric VLAN ID backing the spinbutton `aria-valuenow`; omitted while the
+  // input is empty (a spinbutton with no current value). The display value is
+  // the plain number itself, so no `aria-valuetext` is needed (APG: only supply
+  // valuetext when the number alone doesn't convey the value).
+  const vlanValueNow = parseInt(currentValue, 10)
 
   return (
     <FieldShell
