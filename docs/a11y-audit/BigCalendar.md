@@ -1,7 +1,9 @@
 # BigCalendar — a11y audit (2026-07-11)
 
-**Status:** FIXED (in-component) — the original 11 ownership issues plus the
-adversarial-review follow-ups are resolved **without touching any unowned component**.
+**Status:** FIXED (in-component) — the original 11 ownership issues plus BOTH
+adversarial-review follow-ups (the first five Rev items, and the second five R2.x items —
+see "Adversarial-review follow-up #2") are resolved **without touching any unowned
+component**.
 Two of the three former "deferred" items were reclassified as in-component fixes and DONE:
 **#12 view-switcher group name** and **#13 real heading + region landmark** are now built in
 BigCalendar itself. Only **#14 (Tooltip-on-focus)** remains genuinely unowned (the visual
@@ -61,6 +63,27 @@ row-per-hour layout), so their interactive hour cells are exposed as a **keyboar
 for selection) rather than a mis-described grid. Secondary patterns: the toolbar nav
 buttons, and the view switcher (goobs `ToggleButtonGroup`, `aria-pressed` toggle buttons —
 owned by that component).
+
+## Adversarial-review follow-up #2 (2026-07-11)
+
+A second adversarial review of the first follow-up raised five findings — all now
+resolved at root cause (no unowned component touched):
+
+| Rev # | Severity | Finding | Resolution |
+|---|----------|---------|------------|
+| R2.1 | Moderate | **Nested interactive INTRODUCED by the first pass**: the "Clear all filters" control was turned into a `<button>`, but it is rendered as the Accordion `summary`, which the Accordion wraps in its own disclosure `<button>` → a `<button>` inside a `<button>` (invalid, keyboard-inoperable in Firefox, pollutes the disclosure button's accessible name). | **FIXED** — the clear control moved OUT of the summary into the Accordion **details region** (a real `role="region"`, not a button): `CalendarFilters.tsx`. The summary now holds only non-interactive content (icon, "Filters", active-count chip). Story `A11y/Clear Filters Button` asserts the button is NOT a descendant of `[data-action="toggle"]` (the disclosure button). |
+| R2.2 | Moderate | **Nested interactive INTRODUCED, mischaracterized as pre-existing**: week/day hour cells became `role="button"`+`aria-pressed` and a clickable event inside became a native `<button>` → a `<button>` nested inside a `role="button"` (invalid; the inner event button not reliably focusable/announced). | **FIXED** — week/day hour cells are now a real ARIA **grid** (`role="grid"` > `role="row"` > `role="gridcell"`), `aria-pressed`→`aria-selected`. A `gridcell` legitimately CONTAINS interactive widgets (the event `<button>`), so the nesting is valid. Origin corrected: this WAS introduced by the first pass (both were role-less `<div onClick>` before). `index.tsx` week `renderWeekView`, day `renderDayView`. Stories `A11y/Week Event No Nesting`, updated `A11y/Week Day Navigation` + `A11y/Hour Cell Keyboard`. |
+| R2.3 | Minor | Week hour-cell container was `role="toolbar"` with no `aria-orientation` yet bound BOTH axes (Left/Right = day, Up/Down = hour) — a toolbar advertises only a 1-D horizontal model. | **FIXED (subsumed by R2.2)** — converting the week container to `role="grid"` (inherently 2-D) removes the need for `aria-orientation` and correctly advertises the 2-D navigation model. |
+| R2.4 | Minor | Month grid implemented PageUp/PageDown (month) but omitted **Shift+PageUp/PageDown (previous/next YEAR)** from the cited APG date-picker grid pattern. | **FIXED** — `handleMonthCellKeyDown` now pages the year on `event.shiftKey` (`addYears`/`subYears`), focus following to the same day of the new year. Story `A11y/Month Year Navigation`. |
+| R2.5 | Minor | Month-cell "+N more" overflow was a non-interactive `Typography` span — events past the first three were unreachable by keyboard / AT. | **FIXED** — "+N more" is now a real `<button>` (`data-action="view-more"`, `aria-label="View all N events on <date>"`) that opens the day view for that date, where every event on the day is rendered. `index.tsx` `renderMonthView`. Story `A11y/Month Overflow Button`. |
+
+**Markup changes in this follow-up (all additive to semantics; no prop/export changed, no existing `data-*`/`role`/`aria` removed):**
+- `CalendarFilters.tsx`: clear-all `<button>` relocated from the Accordion `summary` into the `details` region (adds a visible "Clear all" text label alongside the icon; `aria-label="Clear all filters"` and `data-action="clear"` preserved).
+- `index.tsx` week view: hour-cell container `role="toolbar"` → `role="grid"`; each day column gains `role="row"` + a day-name `aria-label`; each hour cell `role="button"` → `role="gridcell"` and `aria-pressed` → `aria-selected`.
+- `index.tsx` day view: hour-cell container `role="toolbar" aria-orientation="vertical"` → `role="grid"`; each hour cell wrapped in a `role="row"` (`display:contents` via `.gridRow`, layout unchanged) and `role="button"`→`role="gridcell"`, `aria-pressed`→`aria-selected`.
+- `index.tsx` month view: "+N more" span → `<button>` (new `.moreEventsButton` reset class + `:focus-visible` ring in the CSS module).
+
+The `role="button"`/`aria-pressed` hour-cell attributes were introduced by the first pass and never shipped, so changing them to the grid model breaks no published contract; ThothOS Playwright keys on `data-component`/`data-field-name`/`data-action`/`data-state` and the dropdown combobox pattern — none of which touch these hour-cell roles.
 
 ## Issues found
 
@@ -132,17 +155,20 @@ No information is conveyed by sound, so WCAG 1.2.x / 1.4.2 do not apply. **No is
 ## Reading & screen reader
 
 - **Keyboard (2.1.1):** month grid — `Arrow`s move by day/week, `Home`/`End` jump to the
-  week edge, `PageUp`/`PageDown` change month (focus follows to the equivalent day),
-  `Enter`/`Space` select (`handleMonthCellKeyDown`, `index.tsx:635`). Week/day hour cells —
+  week edge, `PageUp`/`PageDown` change month and `Shift`+`PageUp`/`PageDown` change year
+  (focus follows to the equivalent day), `Enter`/`Space` select
+  (`handleMonthCellKeyDown`). The "+N more" overflow control is a `<button>` that opens the
+  day view so events past the first three are keyboard/AT-reachable. Week/day hour cells —
   `Left`/`Right` change day, `Up`/`Down` change hour, `Home`/`End` first/last hour,
   `Enter`/`Space` toggle (`handleTimeCellKeyDown`, `index.tsx:695`). Roving tabindex keeps a
   single tab stop per grid; a `event.target === event.currentTarget` guard stops a focused
   in-cell event `<button>` from hijacking grid navigation.
 - **Roles/states (4.1.2):** month `grid`/`row`/`columnheader`/`rowgroup`/`gridcell` with
   `aria-multiselectable`, `aria-selected`, `aria-current="date"`, and a full-date +
-  event-count `aria-label` per cell; week/day hour cells are `role="button"` toggles inside
-  a labelled `role="toolbar"` composite (day view: `aria-orientation="vertical"`), each with
-  `aria-pressed`, `aria-current="time"`, and a full date-+-hour `aria-label`.
+  event-count `aria-label` per cell; week/day hour cells are `role="gridcell"` toggles inside
+  a labelled `role="grid"` (week: rows are day columns; day: one row per hour), each with
+  `aria-selected`, `aria-current="time"`, and a full date-+-hour `aria-label` — a grid so the
+  cell can legally contain the clickable event `<button>` (no nested-interactive).
   Column-header `aria-label`s use full weekday names ("Sunday" not "Sun").
 - **Accessible names:** every interactive element now has one — nav buttons (labelled),
   event buttons/chips (`aria-label` / `.srOnly`), cells (`aria-label`), clear-filters
@@ -200,9 +226,11 @@ pattern untouched).
    with `tabIndex`/`data-focus-key`/`aria-selected`/`aria-current`/`aria-label`/`onKeyDown`
    (`index.tsx:848-935`).
 7. Week & day: outer `role="group"` + period `aria-label`; the hour-cell container is a
-   labelled `role="toolbar"` composite (day: `aria-orientation="vertical"` — Rev #1);
-   `aria-hidden` on the redundant time column; hour cells as `role="button"` toggles with
-   roving tabindex + aria + keydown.
+   labelled `role="grid"` (follow-up #2 / R2.2 — was `role="toolbar"`) with `role="row"`
+   wrappers (week: day columns; day: one per hour, `display:contents`); `aria-hidden` on the
+   redundant time column; hour cells as `role="gridcell"` toggles (`aria-selected`,
+   `aria-current="time"`) with roving tabindex + aria + keydown, legally containing the event
+   `<button>`.
 8. Live region; nav buttons `type="button"` + unit-aware `aria-label`s
    (`Previous {view}` / `Go to today` / `Next {view}`) + `aria-hidden` icons; view-toggle
    icons `aria-hidden`.
@@ -217,9 +245,10 @@ pattern untouched).
    `:focus-visible` rings (`:528-537`); `prefers-reduced-motion` block (`:542`).
 
 **`CalendarFilters.tsx`**
-10. Clear-all `<div onClick>` → `<button type="button" aria-label="Clear all filters">`
-    (`:143-176`); `aria-hidden` on the decorative filter icon (`:112-115`) and the close
-    icon (`:173`).
+10. Clear-all `<div onClick>` → `<button type="button" aria-label="Clear all filters">`,
+    relocated from the Accordion **summary** into the **details region** (follow-up #2 / R2.1)
+    so it is never nested inside the Accordion's disclosure `<button>`; `aria-hidden` on the
+    decorative filter icon and the close icon.
 
 Per-file gates green: `bun lint:file` on `index.tsx`, `CalendarFilters.tsx`,
 `BigCalendar.stories.tsx` (all exit 0).
@@ -262,7 +291,25 @@ regresses:
 - **`A11y/Region + Heading`** — the root is a `region` named by the period, and a real
   `<h2>` carries the period (Rev #2).
 - **`A11y/Clear Filters Button`** — seeds one active filter, resolves the labelled
-  "Clear all filters" `<button>`, clicks it, and asserts `onFiltersChange({})`.
+  "Clear all filters" `<button>`, asserts it is NOT inside the Accordion disclosure button
+  (`[data-action="toggle"]` — the nested-interactive regression guard, R2.1), clicks it, and
+  asserts `onFiltersChange({})`.
+
+Adversarial-review follow-up #2 stories (2026-07-11):
+
+- **`A11y/Week Event No Nesting`** (R2.2) — week view with `onEventClick`; asserts a clickable
+  event `<button>` sits inside a `role="gridcell"` and has NO `role="button"` ancestor (fails
+  if the hour cell regresses to `role="button"`, re-introducing the nested-interactive bug).
+- **`A11y/Month Year Navigation`** (R2.4) — `Shift`+`PageDown` June 15 2026 → June 15 2027
+  (year change + focus follow + grid label "June 2027"), `Shift`+`PageUp` back.
+- **`A11y/Month Overflow Button`** (R2.5) — a day with five events; resolves the labelled
+  "View all 5 events on …" `<button>`, clicks it, asserts `onViewChange('day')` +
+  `onDateChange` fire (the reachability path to the hidden events).
+- **Updated `A11y/Week Day Navigation`** (R2.2/R2.3) — now asserts the hour cells live in a
+  `role="grid"` and resolves them as `gridcell`s.
+- **Updated `A11y/Hour Cell Keyboard`** (R2.2) — day-view hour cell resolved as a `gridcell`;
+  `Enter` flips `aria-selected` false→true (was `aria-pressed`).
+- **Updated `A11y/Current Hour`** — selects `[role="gridcell"][aria-current="time"]`.
 
 ## Deferred / unowned
 
@@ -274,22 +321,21 @@ regresses:
   detail is on the interactive element's `aria-label`, so no information is keyboard/AT
   inaccessible — the Tooltip is now purely a sighted-pointer enhancement.
 
-**Note on scope of the grid model:** week/day hour cells are individually keyboard-operable
-buttons with roving tabindex inside a labelled **`role="toolbar"`** composite container
-(fully WCAG-conformant, and the toolbar role advertises the arrow-key model — Rev #1), rather
-than a full `role="grid"` — a deliberate call because the DOM is column-major (transposed from
-the visual hour-rows) and forcing a grid role (which requires `row`/`gridcell`, incompatible
-with keeping the hour cells as `role="button"` toggles) would mis-describe the structure to
-AT. Upgrading week/day to a true transposed grid (row=hour, column=day) with
-`columnheader`/`rowheader` would be a larger DOM refactor; recorded here as a possible future
-enhancement, not a defect.
+**Note on the week/day grid model (updated by follow-up #2):** week/day hour cells are now a
+real ARIA **grid** — `role="grid"` > `role="row"` > `role="gridcell"` — with a single roving
+tab stop and arrow-key navigation (Left/Right = day, Up/Down = hour). The row axis is the day
+column (week) or the hour (day); the DOM being visually column-major does not conflict with the
+ARIA tree, since a grid's rows need not be visual rows and each cell carries a full date+hour
+`aria-label`. This model was chosen (over the earlier `role="toolbar"` composite) specifically
+so an hour `gridcell` can legally CONTAIN the clickable event `<button>` without invalid
+nested-interactive markup (R2.2). It is fully WCAG-conformant and needs no `aria-orientation`
+(a grid is inherently 2-D). A future enhancement could add `columnheader`/`rowheader` +
+`aria-rowindex`/`aria-colindex` for richer position announcement; not a defect.
 
-**Newly-found (queued, pre-existing, low severity):** in week/day view a *clickable* event
-(when `onEventClick` is set) renders as a native `<button>` nested inside a `role="button"`
-hour cell (`index.tsx` `renderEvent` inside the hour-cell `<div role="button">`) — a
-nested-interactive pattern. It is pre-existing (not introduced by this pass) and only occurs
-when a consumer both sets `onEventClick` AND uses week/day view with events landing in an
-hour cell. A clean fix would move the hour-cell selection off `role="button"` (e.g. a
-`gridcell`/`option` model) so it no longer nests interactives — but that would change the
-established `role="button"`+`aria-pressed` machine-test/AT contract and is out of scope for
-this review; recorded for a future dedicated pass.
+**RESOLVED (was "newly-found, queued"):** the week/day nested-interactive pattern — a
+clickable event `<button>` inside a `role="button"` hour cell — is **FIXED** in
+adversarial-review follow-up #2 (R2.2 above). The hour cells are now `role="gridcell"` inside
+a `role="grid"`, which legitimately contain interactive widgets, so the invalid nesting is
+gone. The earlier characterization of this as "pre-existing, not introduced by this pass" was
+**incorrect** and is corrected in R2.2: both the hour cell and the event were role-less
+`<div onClick>` before the first pass, so the nesting was introduced there.
