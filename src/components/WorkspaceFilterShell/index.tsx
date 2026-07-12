@@ -235,7 +235,7 @@ export interface WorkspaceFilterShellProps {
    * (e.g. `"Invoices pagination"` / `"Customers pagination"`). Only takes effect
    * when `pagination` is provided; mirrors `Breadcrumb`'s `aria-label` prop.
    */
-  paginationLabel?: string
+  paginationLabel?: string | undefined
   /** Visual theme — surfaced as `data-theme` for CSS overrides. Default
    *  `'sacred'`. (The shell has no themed chrome of its own today; the attribute
    *  is forwarded so future themed containment can hook in without an API change.) */

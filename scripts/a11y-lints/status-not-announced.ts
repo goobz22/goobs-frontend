@@ -182,7 +182,10 @@ function hasAriaHiddenTrue(tag: string): boolean {
  * only need to know whether the FIRST real thing after the tag is the close tag.
  */
 const TRIVIAL_BODY =
-  /^(?:\s+|\{\s*\/\*[\s\S]*?\*\/\s*\}|\{\s*(?:''|""|'\s*'|"\s*"|`\s*`|null|false|undefined)\s*\})+/
+  // `\{\s*\}` covers both a literal empty expression and a JSX comment after
+  // blankComments() reduces it to whitespace inside braces — renders nothing
+  // either way.
+  /^(?:\s+|\{\s*\/\*[\s\S]*?\*\/\s*\}|\{\s*\}|\{\s*(?:''|""|'\s*'|"\s*"|`\s*`|null|false|undefined)\s*\})+/
 
 function hasEmptyBody(text: string, bodyStart: number): boolean {
   const rest = text.slice(bodyStart).replace(TRIVIAL_BODY, '')

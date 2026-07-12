@@ -312,6 +312,13 @@ const VLANField: React.FC<VLANFieldProps> = ({
             placeholder={placeholder}
             type="text"
             inputMode="numeric"
+            // Semantically a spinbutton (numeric ID + steppers + ArrowUp/Down
+            // stepping) — mirrors the CIDR field; aria-valuenow is omitted
+            // while empty (a spinbutton with no current value).
+            role="spinbutton"
+            aria-valuemin={MIN_VLAN_ID}
+            aria-valuemax={MAX_VLAN_ID}
+            {...(hasValue && { 'aria-valuenow': vlanValueNow })}
             className={cssStyles.input}
             {...inputAriaProps}
           />

@@ -407,6 +407,7 @@ const Chip: React.FC<ChipProps> = ({
           type="button"
           className={cssStyles.actionButton}
           data-chip-action="true"
+          data-action="toggle"
           onClick={handleClick}
           disabled={isDisabled}
           aria-pressed={active !== undefined ? active : undefined}

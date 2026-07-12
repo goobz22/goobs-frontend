@@ -351,6 +351,37 @@ export const HiddenContentIsInert: Story = {
       </div>
     )
   },
+  // Behavioral regression gate for the delayed-inert exit: hidden content must
+  // actually leave the tab order/AT tree (visibility:hidden lands only after
+  // the slide-out transition completes — measured, not hardcoded).
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const slideRoot = canvasElement.querySelector<HTMLElement>(
+      '[data-component="Slide"]'
+    )
+    if (!slideRoot) throw new Error('Slide root not found')
+    const innerLink = canvas.getByText('Focusable link inside the panel')
+
+    // Starts slid OUT: the inner link is hidden (inert to Tab/AT).
+    await waitFor(() =>
+      expect(getComputedStyle(innerLink).visibility).toBe('hidden')
+    )
+
+    // Slide IN -> the link becomes visible and joins the tab order.
+    await userEvent.click(canvas.getByRole('button', { name: /slide in/i }))
+    await waitFor(() =>
+      expect(getComputedStyle(innerLink).visibility).toBe('visible')
+    )
+
+    // Slide OUT -> after the full transition (duration + delay, read from the
+    // resolved transition-delay longhand) visibility flips back to hidden.
+    await userEvent.click(canvas.getByRole('button', { name: /slide out/i }))
+    const inertAfterMs = maxTransitionDelayMs(slideRoot) + 250
+    await waitFor(
+      () => expect(getComputedStyle(innerLink).visibility).toBe('hidden'),
+      { timeout: inertAfterMs + 1000 }
+    )
+  },
 }
 
 /**

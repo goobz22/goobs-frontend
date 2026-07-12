@@ -366,8 +366,11 @@ function checkFile(path: string, rawText: string): Violation[] {
   let m: RegExpExecArray | null
   while ((m = tagRe.exec(tsx))) {
     const before = tsx[m.index - 1]
-    // Skip a `<pre`/`<img` that is really inside a string literal.
-    if (before === '"' || before === "'" || before === '`') continue
+    // Skip a `<pre`/`<img` that is really inside a string literal, or inside a
+    // regex literal (`html.match(/<pre>/g)` — Markdown's converter scans its
+    // OWN output for `<pre>` tokens; those are patterns, not rendered elements).
+    if (before === '"' || before === "'" || before === '`' || before === '/')
+      continue
     const name = m[1]
     const end = readTagEnd(tsx, tagRe.lastIndex)
     const attrText = tsx.slice(tagRe.lastIndex, end)
@@ -497,6 +500,12 @@ const lint: A11yLint = {
       "const codeTag = execCmd('formatBlock', '<pre>')\n" +
         COMPANION_CSS +
         '\n.editor { padding: 8px; }',
+      // A <pre> inside a REGEX literal is a pattern, not a rendered element
+      // (the Markdown makeCodeBlocksAccessible shape).
+      'const total = (html.match(/<pre>/g) ?? []).length\n' +
+        'return html.replace(/<pre>/g, () => `<pre tabindex="0">`)\n' +
+        COMPANION_CSS +
+        '\n.root pre { overflow-x: auto; }',
       // JSDoc mentioning a plain <img> is a comment, not a trigger.
       '/** Framework-agnostic: renders a plain `<img>` by default. */\n' +
         'export const X = () => <div className={s.wrap}>hi</div>\n' +

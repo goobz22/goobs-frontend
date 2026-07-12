@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { userEvent, within, expect, fn, fireEvent } from 'storybook/test'
+import { userEvent, within, expect, fn } from 'storybook/test'
 import PercentageField from './index'
 
 // Wrapper component for state management

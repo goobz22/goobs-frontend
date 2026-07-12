@@ -349,6 +349,7 @@ export const FocusRingContrast: Story = {
     const [lightChip, darkChip] = Array.from(
       canvasElement.querySelectorAll('[data-component="Chip"]')
     ) as HTMLElement[]
+    if (!lightChip || !darkChip) throw new Error('expected two themed chips')
 
     // Light theme: the ring sits over a white / near-white page surface.
     const lightRing = resolveFocus(lightChip)
