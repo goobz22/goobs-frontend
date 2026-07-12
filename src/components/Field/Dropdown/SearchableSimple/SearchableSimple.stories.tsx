@@ -794,3 +794,33 @@ export const KeyboardArrowNavigation: Story = {
     expect(combobox).toHaveAttribute('aria-expanded', 'false')
   },
 }
+
+/**
+ * A LABEL-LESS searchable select (`label=""` — a bare selector in a filter bar
+ * or toolbar) leaves its `role="combobox"` trigger anonymous to screen readers.
+ * Passing `ariaLabel` forwards through FieldShell, which merges it into the
+ * trigger's spread `inputAriaProps` as `aria-label` when no visible `<label>`
+ * renders, so the combobox is still named (WCAG 4.1.2). The play function
+ * renders WITHOUT a label and asserts the trigger's accessible name.
+ */
+export const AriaLabelWhenLabelless: Story = {
+  name: 'A11y: aria-label (label-less)',
+  render: args => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SearchableSimple {...args} />
+    </div>
+  ),
+  args: {
+    label: '',
+    options: sampleOptions,
+    ariaLabel: 'Choose country',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger is a button[role="combobox"]; its accessible name comes from
+    // the forwarded aria-label since no visible <label> is rendered.
+    const combobox = canvas.getByRole('combobox', { name: 'Choose country' })
+    await expect(combobox).toHaveAttribute('aria-label', 'Choose country')
+  },
+}

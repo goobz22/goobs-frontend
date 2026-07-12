@@ -351,3 +351,26 @@ export const ComprehensiveShowcase: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// a11y regression: a LABEL-LESS time field (a toolbar or table cell with no
+// visible `label`) is anonymous to screen readers. Passing `ariaLabel` forwards
+// through FieldShell, which applies it as `aria-label` on the input when no
+// visible <label> renders, so the field is still named (WCAG 4.1.2). The play
+// function renders WITHOUT a visible label (`label=""`) and asserts the name.
+export const AriaLabelWhenLabelless: Story = {
+  name: 'Aria-label (label-less)',
+  render: args => <TimeField {...args} />,
+  args: {
+    label: '',
+    ariaLabel: 'Start time',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // getByLabelText resolves the accessible name from `aria-label` when no
+    // visible <label> is present — proving the seam forwarded the name.
+    const input = canvas.getByLabelText('Start time')
+    await expect(input).toHaveAttribute('aria-label', 'Start time')
+  },
+}

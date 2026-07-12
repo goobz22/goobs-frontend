@@ -875,3 +875,27 @@ export const FocusVisibleAndReducedMotion: Story = {
     expect(hasReducedMotionRule).toBe(true)
   },
 }
+
+/**
+ * Accessible name for a LABEL-LESS field. A bare percentage spinbutton (a
+ * compact filter or table cell rendered with no visible `label`) is anonymous
+ * to screen readers. Passing `ariaLabel` forwards through FieldShell, which
+ * applies it as `aria-label` on the input when no visible `<label>` renders, so
+ * the field is still named (WCAG 4.1.2). The play function renders WITHOUT a
+ * label and asserts the spinbutton carries the programmatic name.
+ */
+export const AriaLabelWhenLabelless: Story = {
+  name: 'Aria-label (label-less)',
+  render: args => <PercentageField {...args} />,
+  args: {
+    ariaLabel: 'Discount rate',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The input has role="spinbutton"; its accessible name comes from the
+    // forwarded aria-label since no visible <label> is rendered.
+    const input = canvas.getByRole('spinbutton', { name: 'Discount rate' })
+    await expect(input).toHaveAttribute('aria-label', 'Discount rate')
+  },
+}

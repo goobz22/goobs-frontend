@@ -873,3 +873,34 @@ export const Interactive: Story = {
     layout: 'centered',
   },
 }
+
+/**
+ * A LABEL-LESS Dropdown (`label=""` — e.g. TransferList's category selector)
+ * leaves its `button[role="combobox"]` trigger anonymous to screen readers.
+ * Passing `ariaLabel` names the trigger directly via
+ * `aria-label={ariaLabel ?? label}`, falling back to the visible `label` when
+ * unset (WCAG 4.1.2). The play function renders WITHOUT a visible label and
+ * asserts the trigger's accessible name comes from `ariaLabel` (pre-change: the
+ * trigger's aria-label was the empty `label`, leaving it unnamed).
+ */
+export const AriaLabelWhenLabelless: Story = {
+  name: 'A11y: aria-label (label-less)',
+  render: args => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Dropdown {...args} />
+    </div>
+  ),
+  args: {
+    label: '',
+    options: sampleOptions,
+    ariaLabel: 'Choose category',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger is a button[role="combobox"]; its accessible name resolves to
+    // the `ariaLabel` (which wins over the empty visible label).
+    const combobox = canvas.getByRole('combobox', { name: 'Choose category' })
+    await expect(combobox).toHaveAttribute('aria-label', 'Choose category')
+  },
+}

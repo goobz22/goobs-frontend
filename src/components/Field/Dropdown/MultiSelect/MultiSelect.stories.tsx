@@ -640,3 +640,37 @@ export const PrintableTypeahead: Story = {
     expect(combobox).toHaveAttribute('aria-activedescendant', options[3]!.id)
   },
 }
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — accessible name for a label-less multi-select
+// --------------------------------------------------------------------------
+
+/**
+ * A LABEL-LESS multi-select (`label=""`, the default — a bare selector in a
+ * filter bar or toolbar) leaves its `role="combobox"` trigger anonymous to
+ * screen readers. Passing `ariaLabel` forwards through FieldShell, which merges
+ * it into the trigger's spread `inputAriaProps` as `aria-label` when no visible
+ * `<label>` renders, so the combobox is still named (WCAG 4.1.2). The play
+ * function renders WITHOUT a label and asserts the trigger's accessible name.
+ */
+export const AriaLabelWhenLabelless: Story = {
+  name: 'A11y: aria-label (label-less)',
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <MultiSelectChip {...args} />
+    </div>
+  ),
+  args: {
+    options: SIMPLE_OPTIONS,
+    defaultSelected: [],
+    ariaLabel: 'Filter fruits',
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger is a role="combobox" div; its accessible name comes from the
+    // forwarded aria-label since no visible <label> is rendered.
+    const combobox = canvas.getByRole('combobox', { name: 'Filter fruits' })
+    await expect(combobox).toHaveAttribute('aria-label', 'Filter fruits')
+  },
+}
