@@ -47,7 +47,9 @@ export interface PasswordFieldProps {
    * on a sign-in form or `'new-password'` on a change-password / signup form.
    * Lets browsers and password managers recognise the field's purpose, which
    * matters most for cognitive/motor users (WCAG 1.3.5 Identify Input Purpose).
-   * Additive; omitted when unset.
+   * DEFAULTS to `'current-password'` so the purpose is always declared; pass
+   * `'new-password'` (or any token, including `'off'`) to override — the
+   * consumer value always wins.
    */
   autoComplete?: string
   /** Per-instance style overrides. */
@@ -227,7 +229,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             disabled={disabled}
             required={required}
             placeholder={placeholder}
-            autoComplete={autoComplete}
+            autoComplete={autoComplete ?? 'current-password'}
             aria-label={effectiveAriaLabel}
             aria-labelledby={ariaLabelledby}
             className={cssStyles.input}

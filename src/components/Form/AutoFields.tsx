@@ -196,6 +196,7 @@ const AutoField: React.FC<AutoFieldProps> = ({
           name={name}
           label={label}
           type="email"
+          autoComplete="email"
           value={asString(value)}
           onChange={next => onChange(next)}
           onBlur={onBlur}

@@ -2176,6 +2176,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               <input
                 id="meeting-attendee-email"
                 type="email"
+                autoComplete="email"
                 aria-required="true"
                 value={meetingAttendeeEmail}
                 onChange={e => setMeetingAttendeeEmail(e.target.value)}

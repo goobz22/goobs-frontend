@@ -768,6 +768,45 @@ export const AccessibleNameAndPurpose: Story = {
 }
 
 /**
+ * Regression guard for input-purpose identification (WCAG 1.3.5). The password
+ * field defaults its native `autocomplete` to `'current-password'` so browsers
+ * and password managers can identify the field's purpose and offer the stored
+ * credential even when the consumer passes NO token. A caller-supplied token
+ * (e.g. `'new-password'` on a signup / change-password form, or `'off'`) still
+ * overrides the default.
+ */
+export const AutocompleteDefault: Story = {
+  name: 'A11y: autocomplete default (current-password) + override',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <PasswordFieldWithState
+        label="Default (current-password)"
+        placeholder="Default purpose"
+        styles={{ theme: 'light' }}
+      />
+      <PasswordFieldWithState
+        label="Override (new-password)"
+        placeholder="New password"
+        autoComplete="new-password"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const defaultInput = canvas.getByPlaceholderText('Default purpose')
+    const overrideInput = canvas.getByPlaceholderText('New password')
+
+    // Accessible-by-default: purpose identified as the current password, so a
+    // password manager can offer the stored credential with no consumer opt-in.
+    expect(defaultInput).toHaveAttribute('autocomplete', 'current-password')
+    // Caller override still wins (e.g. a signup / change-password form).
+    expect(overrideInput).toHaveAttribute('autocomplete', 'new-password')
+  },
+}
+
+/**
  * When the field is disabled the eye toggle must itself be inert: the native
  * `<button disabled>` drops it from the tab order and blocks activation, and
  * the (decorative) eye icon dims via its `data-disabled` wrapper so the
