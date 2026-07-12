@@ -79,6 +79,20 @@ const hasDynamicName = (body: string) =>
 const hasHandler = (body: string) => /\bon[A-Z][A-Za-z]+\s*=/.test(body)
 const hasRole = (body: string) => /\brole\s*=/.test(body)
 
+// Roles that CANNOT carry the paired selection state — ARIA forbids
+// aria-selected/aria-checked/aria-pressed on listitem/presentation/none, so a
+// wrapper with one of these roles legitimately leaves the state on a descendant
+// native control (escape hatch #7). role="option"/"row"/"tab" support
+// aria-selected and are deliberately NOT here — they must carry it themselves.
+const STATE_FORBIDDEN_ROLE_RE = /\brole\s*=\s*['"](listitem|presentation|none)['"]/
+
+// A descendant native state control inside the element's forward window: a raw
+// checkbox/radio input, a *Checkbox/*Radio/*Switch component (goobs
+// CustomCheckbox renders a native input), or an element carrying its own
+// aria-checked/aria-selected.
+const DESCENDANT_STATE_CONTROL_RE =
+  /<input\b[^>]*type\s*=\s*['"](?:checkbox|radio)['"]|<[A-Z][\w]*(?:Checkbox|Radio|Switch)\b|\baria-(?:checked|selected)\s*=/
+
 // Non-interactive host elements that legitimately style a child control's state
 // (escape hatch #6, only when they carry neither a handler nor a role).
 const PASSIVE_TAGS = new Set([
@@ -255,6 +269,21 @@ const lint: A11yLint = {
         // child native control it wraps.
         if (PASSIVE_TAGS.has(tagName) && !hasHandler(body) && !hasRole(body))
           continue
+        // #7 structural wrapper whose role FORBIDS the paired state
+        // (listitem/presentation/none can't take aria-selected/checked/pressed)
+        // delegating to a descendant native state control (the TransferList
+        // row: <li role="listitem" data-checked> wrapping a native checkbox —
+        // a row onClick is a pointer convenience over the accessible control).
+        if (
+          PASSIVE_TAGS.has(tagName) &&
+          STATE_FORBIDDEN_ROLE_RE.test(body)
+        ) {
+          const closeIdx = text.indexOf(`</${tagName}>`, tag.end)
+          const windowEnd =
+            closeIdx >= 0 ? closeIdx : Math.min(text.length, tag.end + 2500)
+          if (DESCENDANT_STATE_CONTROL_RE.test(text.slice(tag.end, windowEnd)))
+            continue
+        }
 
         // Anchor the violation at the state-colour token for a precise fix site.
         const tokenMatch = STATE_TOKEN_RE.exec(body)
@@ -289,6 +318,9 @@ const lint: A11yLint = {
           Opt
         </button>
       )`,
+      // role="listitem" with state but NO descendant native control — the #7
+      // hatch requires a real delegation target, not just the structural role
+      "export const F2 = () => <li role='listitem' data-selected={s} onClick={pick}>text</li>",
     ],
     good: [
       // paired aria-pressed
@@ -309,6 +341,11 @@ const lint: A11yLint = {
       'export const N = () => <label data-selected={sel}><input type="radio" checked={sel} /></label>',
       // passive <li> wrapper delegating to a child native checkbox
       "export const O = () => <li data-checked={c}><input type='checkbox' checked={c} /></li>",
+      // #7 structural role forbidding the paired state + row-click delegation to
+      // a descendant native checkbox (the TransferList row shape)
+      "export const R = () => <li role='listitem' data-checked={c} onClick={e => { if (e.target === e.currentTarget) toggle() }}><input type='checkbox' checked={c} /></li>",
+      // #7 with a *Checkbox component (goobs CustomCheckbox renders native input)
+      "export const S = () => <li role='listitem' data-checked={c} onClick={h}><CustomCheckbox checked={c} onChange={h} /></li>",
       // no state-colour token at all (data-selection-mode is not data-selected)
       'export const P = () => <div data-selection-mode="multi" data-selectable="true">x</div>',
       // compound COUNT attribute on a toolbar — data-selected-count is not the

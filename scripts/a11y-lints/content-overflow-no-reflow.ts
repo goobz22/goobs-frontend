@@ -77,12 +77,55 @@ function esc(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-/** Blank every `/* … *\/` block comment, preserving newlines (offsets stay
- *  aligned so reported line numbers still match the source). Handles JSDoc
- *  and JSX `{/* … *\/}` comments — the only places stray `<img>`/`<pre>`
- *  mentions live in this codebase. */
+/** Blank the CONTENT of `//` line comments AND `/* … *\/` block comments
+ *  (JSDoc / JSX included), preserving every newline so offsets and reported
+ *  line numbers still match the source. String- and template-literal-aware so
+ *  a `//` inside a string (`https://…`) is never treated as a comment — a
+ *  stray `<pre>`/`<img>` mention in ANY comment form must not read as a
+ *  rendered element (CodeCopy's `// The <pre> becomes …` prose was a false
+ *  positive under the old block-only stripper). */
 function stripBlockComments(text: string): string {
-  return text.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  const out = text.split('')
+  let str: string | null = null
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (str) {
+      if (c === '\\') {
+        i++
+        continue
+      }
+      if (c === str) str = null
+      continue
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      str = c
+      continue
+    }
+    if (c === '/' && text[i + 1] === '/') {
+      let j = i
+      while (j < text.length && text[j] !== '\n') {
+        out[j] = ' '
+        j++
+      }
+      i = j - 1
+      continue
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      let j = i
+      while (j < text.length && !(text[j] === '*' && text[j + 1] === '/')) {
+        if (text[j] !== '\n') out[j] = ' '
+        j++
+      }
+      if (j < text.length) {
+        out[j] = ' '
+        out[j + 1] = ' '
+        j += 1
+      }
+      i = j
+      continue
+    }
+  }
+  return out.join('')
 }
 
 /** 1-based line number of a character offset. */
@@ -459,6 +502,13 @@ const lint: A11yLint = {
         'export const X = () => <div className={s.wrap}>hi</div>\n' +
         COMPANION_CSS +
         '\n.wrap { padding: 4px; }',
+      // `//` line comments mentioning <pre>/<img> are prose, not rendered
+      // elements (the CodeCopy false-positive shape).
+      '// The <pre> becomes a keyboard-focusable scroll region when it overflows\n' +
+        '// and a wide <img> would be capped by the container.\n' +
+        'const measured = useState(false)\n' +
+        COMPANION_CSS +
+        '\n.pre { overflow: auto; max-width: 100%; }',
       // A non-trigger element with no injected/raw-media content.
       '<div className={s.card}>text</div>\n' +
         COMPANION_CSS +

@@ -108,6 +108,16 @@ const COMPOSITE_CHILD_ROLES = new Set([
   'option', 'menuitem', 'menuitemradio', 'menuitemcheckbox', 'tab', 'treeitem',
 ])
 
+// Native LANDMARK tags (hatch #4 by construction): <header>/<footer>/<nav>/
+// <main>/<aside> carry a landmark container role natively (banner/contentinfo/
+// navigation/main/complementary). An onClick on a landmark is container
+// delegation — React click handlers fire for BUBBLED clicks from descendants,
+// and a native <button> child synthesizes a click on Enter/Space, so the
+// handler IS keyboard-reachable through any interactive descendant. Making the
+// landmark itself a tab stop is the anti-pattern (AppBar's banner finding).
+// <li>/<div>/<span>/<td> stay OUT — those are the class's true positives.
+const LANDMARK_TAGS = new Set(['header', 'footer', 'nav', 'main', 'aside'])
+
 // Calls that do NOT constitute a real activation (escape hatch #1).
 const NONACTIVATING_CALLS = new Set([
   'stopPropagation', 'preventDefault', 'focus', 'blur', 'select',
@@ -277,6 +287,26 @@ const staticRole = (body: string): string | null => {
   const m = /\brole\s*=\s*['"]([a-z]+)['"]/.exec(body)
   return m ? m[1]! : null
 }
+/**
+ * A DYNAMIC role expression (`role={cond ? undefined : 'banner'}`) whose every
+ * string literal is a non-widget / composite-child role. `undefined` falls back
+ * to the element's native role — also non-widget for the tags in this lint's
+ * set — so when ALL possible declared values are container/managed roles the
+ * element is a passthrough (hatch #4 for the dynamic-role form). Zero literals
+ * (`role={roleVar}`) proves nothing → NOT exempt.
+ */
+const dynamicRoleAllNonWidget = (body: string): boolean => {
+  const attr = /\brole\s*=\s*\{/.exec(body)
+  if (!attr) return false
+  const expr = extractBraces(body, attr.index + attr[0].length - 1)
+  const literals = [...expr.matchAll(/['"]([a-z]+)['"]/g)].map((m) => m[1]!)
+  return (
+    literals.length > 0 &&
+    literals.every(
+      (r) => NON_WIDGET_ROLES.has(r) || COMPOSITE_CHILD_ROLES.has(r)
+    )
+  )
+}
 const isBackdrop = (body: string): boolean =>
   /class[nN]ame\s*=\s*[{"'][^}"']*(?:backdrop|overlay|scrim)/i.test(body) ||
   /data-[a-z-]*(?:backdrop|overlay|scrim)/i.test(body)
@@ -315,6 +345,11 @@ const lint: A11yLint = {
         const role = staticRole(body)
         if (role && (NON_WIDGET_ROLES.has(role) || COMPOSITE_CHILD_ROLES.has(role)))
           continue
+        // Hatch 4 (dynamic form) — role={…} whose every literal is non-widget.
+        if (!role && dynamicRoleAllNonWidget(body)) continue
+        // Hatch 4 (native form) — landmark tags are container passthroughs;
+        // their onClick receives bubbled (keyboard-synthesized) child clicks.
+        if (LANDMARK_TAGS.has(m[1]!)) continue
         // Hatch 5 — self-declared backdrop / overlay / scrim (Escape dismiss).
         if (isBackdrop(body)) continue
 
@@ -342,6 +377,8 @@ const lint: A11yLint = {
       'export const D = () => <div tabIndex={0} onClick={() => pick()}>opt</div>',
       // onKeyPress does NOT count (deprecated; never prevents Space-scroll)
       'export const E = () => <div role="button" tabIndex={0} onKeyPress={k} onClick={go}>x</div>',
+      // dynamic role containing a WIDGET literal — must be keyboard-operable
+      "export const E2 = () => <div role={link ? 'link' : 'button'} onClick={go}>x</div>",
     ],
     good: [
       // native button — keyboard-operable by construction
@@ -368,6 +405,11 @@ const lint: A11yLint = {
       'export const P = () => <div role="option" aria-selected={sel} onClick={() => pick(item)}>opt</div>',
       // role="menuitem" — managed leaf of a menu
       'export const Q = () => <li role="menuitem" onClick={run}>Run</li>',
+      // native landmark tag — container delegation; keyboard reaches the
+      // handler via bubbled child-button clicks (the AppBar banner shape)
+      'export const R = () => <header className={s.bar} onClick={handleBarClick}>{children}</header>',
+      // dynamic role whose every literal is non-widget (AppBar landmark opt-out)
+      "export const S = () => <div role={plain ? undefined : 'banner'} onClick={h}>{children}</div>",
     ],
   },
 }
