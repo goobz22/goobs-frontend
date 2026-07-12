@@ -301,3 +301,85 @@ export const ReflowSafeInlineText: Story = {
   ],
   globals: { backgrounds: { value: 'light' } },
 }
+
+/**
+ * Keyboard-scrollable code block (WCAG 2.1.1 Keyboard). `.root pre` is
+ * `overflow-x: auto`, so a long code line scrolls INSIDE its own box — but a
+ * scroll container with no `tabindex` and no focusable children is unreachable
+ * by keyboard in browsers that do not auto-focus scroll regions (axe
+ * `scrollable-region-focusable`, Serious). `index.tsx` post-processes the
+ * injected HTML so the `<pre>` carries `tabindex="0"` + `role="region"` + an
+ * `aria-label`, making it focusable (scroll with the arrow keys) and exposing it
+ * as a labelled region. The play fn Tabs onto the block and asserts it holds
+ * focus and exposes the region role/label; deleting the post-process fails here.
+ */
+export const KeyboardScrollableCode: Story = {
+  name: 'A11y/Keyboard-scrollable code',
+  args: {
+    children: [
+      '```',
+      "const wide = 'a-single-unbroken-line-of-code-far-wider-than-any-narrow-viewport-that-must-scroll-inside-its-own-box-not-widen-the-page-1234567890'",
+      '```',
+    ].join('\n'),
+    maxWidth: 0,
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '360px', padding: '1rem', color: '#1a1a1a' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'light' } },
+  // Regression-gate the keyboard operability of the scroll container (WCAG
+  // 2.1.1). Without the `index.tsx` post-process the `<pre>` has no `tabindex`,
+  // so it is not exposed as a region and no Tab can reach it — both assertions
+  // below fail.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const region = canvas.getByRole('region', { name: 'Code block' })
+    await expect(region).toHaveAttribute('tabindex', '0')
+    // A single Tab from the body reaches the scroll container because it is the
+    // first (and only) focusable node in the block — proving keyboard access.
+    await userEvent.tab()
+    await expect(region).toHaveFocus()
+  },
+}
+
+/**
+ * Heading-level offset for embedded blocks (document outline / SEO). `mdToHtml`
+ * maps a leading `#` to a literal `<h1>`, so a block dropped mid-page emits a
+ * second `<h1>` and breaks the page's heading order. The additive
+ * `headingOffset` prop demotes every heading by N levels (clamped to `<h6>`) so
+ * the block slots beneath an existing page heading. Here `headingOffset={2}`
+ * turns a source `#`/`##` into `<h3>`/`<h4>`; the play fn asserts the demoted
+ * levels and that no `<h1>` escapes to clash with the host outline. Removing the
+ * level-shift post-process re-emits an `<h1>` and fails the story.
+ */
+export const HeadingOffset: Story = {
+  name: 'A11y/Heading offset',
+  args: {
+    children: '# Section title\n\nBody copy.\n\n## Subsection\n\nMore copy.',
+    headingOffset: 2,
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '640px', padding: '1.5rem', color: '#1a1a1a' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Source `#` (a bare <h1>) is demoted to <h3>, `##` to <h4>. `getByRole`
+    // with an explicit `level` throws unless the found heading is exactly that
+    // level, so these lookups ARE the level assertions.
+    const top = canvas.getByRole('heading', { level: 3, name: 'Section title' })
+    await expect(top.tagName).toBe('H3')
+    const sub = canvas.getByRole('heading', { level: 4, name: 'Subsection' })
+    await expect(sub.tagName).toBe('H4')
+    // No <h1> escapes to collide with the host page's document outline.
+    await expect(canvas.queryByRole('heading', { level: 1 })).toBeNull()
+  },
+}
