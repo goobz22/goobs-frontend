@@ -56,6 +56,37 @@ interface SafeParseLike {
   }
 }
 
+/**
+ * Move keyboard focus to the first invalid field after a validation-blocked
+ * submit (WCAG 3.3.1 Error Identification / 2.4.3 Focus Order). The engine's
+ * submit handler marks every field touched and re-renders, so FieldShell sets
+ * `aria-invalid="true"` on the invalid fields (on BOTH the field wrapper and the
+ * inner control). We query by `aria-invalid` — resilient, with no coupling to
+ * FieldShell's internal markup/classnames — and focus the first focusable
+ * control (input / select / textarea / combobox button) at or inside the first
+ * invalid field, so a keyboard/AT user lands ON the problem rather than only
+ * hearing the summary announcement. Runs on the next animation frame so the
+ * aria-invalid attributes committed by that re-render are present when we query.
+ */
+function focusFirstInvalidField(formElement: HTMLElement): void {
+  const FOCUSABLE =
+    'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button[role="combobox"], [role="combobox"]'
+  const invalidNodes = Array.from(
+    formElement.querySelectorAll<HTMLElement>('[aria-invalid="true"]')
+  )
+  for (const node of invalidNodes) {
+    // The aria-invalid node may itself be the focusable control, or a wrapper
+    // whose focusable control is the first matching descendant.
+    const control = node.matches(FOCUSABLE)
+      ? node
+      : node.querySelector<HTMLElement>(FOCUSABLE)
+    if (control) {
+      control.focus()
+      return
+    }
+  }
+}
+
 export interface FormProps<
   TValues extends Record<string, unknown> = Record<string, unknown>,
 > {
@@ -135,6 +166,9 @@ function FormInner<TValues extends Record<string, unknown>>({
 
   const handleFormSubmit = useCallback(
     (event: FormEvent): void => {
+      // Capture the <form> element now — React nulls `event.currentTarget` after
+      // the handler returns, and the focus move below runs on a later frame.
+      const formElement = event.currentTarget as HTMLElement
       const parsed = schema.safeParse(engine.values) as unknown as SafeParseLike
       if (parsed.success) {
         setSubmitStatus('')
@@ -160,6 +194,11 @@ function FormInner<TValues extends Record<string, unknown>>({
         // must be conveyed each time it occurs.)
         flushSync(() => setSubmitStatus(''))
         setSubmitStatus(message)
+        // Move keyboard focus to the first invalid field so a keyboard/AT user
+        // lands ON the problem, not just hears the summary. Deferred to the next
+        // frame: engine.handleSubmit (below) marks fields touched and re-renders,
+        // so aria-invalid only exists after that commit. (WCAG 3.3.1 / 2.4.3.)
+        requestAnimationFrame(() => focusFirstInvalidField(formElement))
       }
       engine.handleSubmit(event)
     },

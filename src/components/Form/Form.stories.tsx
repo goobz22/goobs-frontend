@@ -474,6 +474,41 @@ export const SubmitStatusAnnouncement: Story = {
 }
 
 /**
+ * Regression for focus-first-invalid on a validation-blocked submit (WCAG 3.3.1
+ * Error Identification / 2.4.3 Focus Order). Submitting the pristine (empty)
+ * contact form blocks on validation — `fullName` and `email` are both required,
+ * so the FIRST invalid field is `fullName`. Beyond announcing the summary, the
+ * Form moves keyboard focus onto that first invalid control so a keyboard/AT user
+ * is placed ON the problem instead of left on the submit button. The play submits
+ * the empty form and asserts focus lands on the `fullName` input (queried by its
+ * stable `data-field-name`, not label text). A regression that drops the
+ * requestAnimationFrame focus move fails here.
+ */
+export const FocusFirstInvalidOnSubmit: Story = {
+  name: 'Focus first invalid on submit (WCAG 3.3.1/2.4.3)',
+  render: () => <ThemedContactForm theme="light" />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Submit the empty form → validation blocks it (fullName + email required),
+    // so fullName is the first invalid field in DOM order.
+    const submit = canvas.getByRole('button', { name: /submit/i })
+    await userEvent.click(submit)
+
+    // The first invalid field's control receives focus (queried by the stable
+    // data-field-name so the assertion survives label-text changes). The move is
+    // deferred to the next frame (aria-invalid appears only after the engine's
+    // touch-all re-render), so poll for it.
+    const fullNameInput = canvasElement.querySelector<HTMLInputElement>(
+      '[data-field-name="fullName"] input'
+    )
+    if (!fullNameInput) throw new Error('fullName input is missing')
+    await waitFor(() => expect(fullNameInput).toHaveFocus())
+  },
+}
+
+/**
  * Regression for the form landmark's accessible name (ARIA landmark hygiene). A
  * native `<form>` is exposed as a `form` LANDMARK only when it has an accessible
  * name; emitting an explicit `role="form"` with no name creates a nameless
