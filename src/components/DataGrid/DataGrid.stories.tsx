@@ -2237,6 +2237,21 @@ export const AccessibleGridKeyboard: Story = {
       'rowgroup'
     )
 
+    // Review fix (aria-rowindex): every row carries its absolute 1-based index
+    // even though only the current page is in the DOM (aria-rowcount is the full
+    // count). The column-header row is index 1, so page-1 data rows are 2, 3, …
+    // (WCAG 1.3.1).
+    await expect(table.querySelector('thead tr')).toHaveAttribute(
+      'aria-rowindex',
+      '1'
+    )
+    await expect(
+      table.querySelector('tr[data-row-id="1"]')
+    ).toHaveAttribute('aria-rowindex', '2')
+    await expect(
+      table.querySelector('tr[data-row-id="2"]')
+    ).toHaveAttribute('aria-rowindex', '3')
+
     // 2. Exactly one data cell is in the tab order (roving tabindex).
     await expect(
       table.querySelectorAll('td[role="gridcell"][tabindex="0"]').length
@@ -2276,6 +2291,15 @@ export const AccessibleGridKeyboard: Story = {
     await userEvent.keyboard('{Enter}')
     await waitFor(() =>
       expect(nameCell2).toHaveAttribute('data-cell-state', 'editing')
+    )
+
+    // Review fix (D1 — text/phone editors): the inline editor input now has a
+    // programmatic accessible name from the column header ("Name"), not the
+    // empty label="" it used to render with (WCAG 1.3.1 / 4.1.2).
+    await waitFor(() =>
+      expect(
+        within(nameCell2!).getByRole('textbox', { name: 'Name' })
+      ).toBeInTheDocument()
     )
 
     // 5. The pagination count is an announced status region (WCAG 4.1.3).
@@ -2516,6 +2540,17 @@ export const AccessibleMobileCard: Story = {
     if (!card) throw new Error('Mobile card did not render')
     await expect(card).toHaveAttribute('role', 'row')
     await expect(card).toHaveAttribute('tabindex', '0')
+
+    // Review fix (mobile grid ownership): the card (role="row") now owns
+    // role="gridcell" field cells, so the grid → row → gridcell chain is valid.
+    // Previously every card owned zero cells (axe aria-required-children).
+    await expect(
+      card.querySelectorAll('[role="gridcell"]').length
+    ).toBeGreaterThan(0)
+    // Review fix (aria-rowindex): the first card is absolute row 1 of the full
+    // filtered set — only a page of cards is in the DOM, so aria-rowindex pins
+    // the true position (WCAG 1.3.1).
+    await expect(card).toHaveAttribute('aria-rowindex', '1')
 
     // Issue 10: field labels are associated with their inputs via htmlFor.
     const label = card.querySelector<HTMLLabelElement>('label[for]')
