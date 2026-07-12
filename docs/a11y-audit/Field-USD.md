@@ -1,14 +1,25 @@
 # Field/USD — a11y audit (2026-07-11)
 
-**Status: PARTIAL** — every issue inside this directory is FIXED (including the
-adversarial-review range-exposure finding, issue 8); one finding (issue 7) has
-its root cause in `Field/Shell` and is DEFERRED to that serial pass.
+**Status: PARTIAL** — every issue inside this directory is FIXED (issues 1–6, 8,
+and the two second-pass findings 9–10 below); one finding (issue 7) has its root
+cause in `Field/Shell` and is DEFERRED to that serial pass.
 
 **Adversarial-review pass (2026-07-11):** two findings raised — (a) the
 consumer-`id` label-association break (already tracked as issue 7, root cause in
 Shell, remains DEFERRED with a precise suggested change below) and (b) the
 min/max range not being exposed to assistive tech (now tracked + FIXED as issue
 8, entirely within this directory via `aria-describedby`).
+
+**Second audit pass (2026-07-11, fresh review):** two additional findings the
+earlier passes missed, both FIXED within this directory — **(9)** the stepper
++/- buttons were operable by pointer (`onMouseDown`) and keyboard (`onKeyDown`)
+but **not by a synthetic `click`**, so assistive-tech activation, voice control,
+a mobile screen-reader double-tap, and programmatic `.click()` never stepped the
+value (issue 1's keyboard fix covered Enter/Space but not the AT-click path);
+and **(10)** in the no-range configuration a consumer-supplied `aria-describedby`
+spread through `{...rest}` **clobbered** the Shell's error/helper `aria-describedby`,
+silently un-linking the validation message from the input (the `hasRange` path
+already merged correctly; the no-range path did not).
 
 Scope: `src/components/Field/USD/` — the editable `<USDField>` (`index.tsx`,
 `USD.module.css`, `USDField.stories.tsx`), its read-only sibling `<MoneyText>`
@@ -40,6 +51,8 @@ formatted `<span>` (no interactive pattern; just non-text-alternative concerns).
 | 6 | Minor | 2.3.3 Animation from Interactions (AAA) | `.inputWrapper` and `.button` carry `transition: all 0.3s ease` with no `@media (prefers-reduced-motion: reduce)` fallback. | USD.module.css:21, :85 | FIXED |
 | 7 | Moderate | 1.3.1 / 4.1.2 (A) | A consumer-supplied `id` breaks label association: the input renders `id={id ?? inputId}` but Shell's `<label htmlFor={inputId}>` always points at Shell's own generated `inputId`. When `id` is passed the `<label>` no longer references the input. Root cause is in Shell (no custom-id passthrough). | index.tsx:349 (`id={id ?? inputId}`) + Shell/index.tsx:395 | DEFERRED |
 | 8 | Minor | 1.3.1 / 4.1.2 (A) | min/max range was not exposed to assistive tech. The field is a free-form currency text input (`type="text"` + `inputMode="decimal"`, deliberately NOT `role="spinbutton"`), so it carries no `aria-valuemin`/`aria-valuemax`/`aria-valuenow`; when `min`/`max` were set a screen-reader user had **no programmatic knowledge of the allowed range** unless the consumer manually wrote helperText. (Adversarial-review finding — the value-CHANGE announcement (issue 3) was addressed but the range-EXPOSURE gap was not.) | index.tsx (input had no range wiring) | FIXED |
+| 9 | Moderate | 2.1.1 (A) / 4.1.2 (A) | Stepper +/- buttons responded to `onMouseDown` (pointer) and `onKeyDown` (Enter/Space) but had **no `onClick`**. Assistive-tech activation, voice control ("click increment"), a mobile screen-reader double-tap, and programmatic `.click()` all dispatch a bare `click` event (no `mousedown`), so those users could focus the buttons but never step the value. Pattern class `activation-mousedown-not-click`. | index.tsx:372 / :390 (buttons, `onMouseDown` only) | FIXED |
+| 10 | Moderate | 1.3.1 / 3.3.1 / 4.1.2 (A) | In the no-range path a consumer-supplied `aria-describedby` (spread via `{...rest}` **after** `{...inputAriaProps}`) **overrode** the Shell's error/helper `aria-describedby`, dropping the programmatic link between the validation message and the input. The `hasRange` path already merged all three sources; the no-range path did not. Pattern class `form-error-not-associated`. | index.tsx (describedby applied only when `hasRange`) | FIXED |
 
 No hearing/media issues, no color-only state defects, and no SEO/heading issues
 were found (details below).
@@ -88,6 +101,25 @@ surface is needed.
   range bounds are both announced. Exposed on both the stepper and no-stepper
   configurations; the range BOUNDS (describedby, read on focus) and the value
   CHANGES (issue-3 live region, read on step) are complementary, not redundant.
+- **Stepper click-operability (issue 9, second pass).** Added `onClick` to both
+  stepper buttons via a `handleButtonClick` factory. It is gated on
+  `event.detail === 0`: a real pointer click (`detail >= 1`) already stepped
+  through `onMouseDown` and is skipped to avoid double-stepping, while a
+  `detail === 0` click — the signature of a synthetic activation from assistive
+  tech, voice control, a mobile screen-reader double-tap, or a programmatic
+  `.click()`, which has no preceding `mousedown` — performs one step. Keyboard
+  Enter/Space still runs through `handleButtonKeyDown` (which `preventDefault`s
+  the synthesized click, so it never reaches `onClick`). Net effect: every
+  activation method (pointer, keyboard, touch, AT, voice, programmatic) steps
+  exactly once; the mouse press-and-hold repeat is untouched. WCAG 2.1.1 / 4.1.2.
+- **aria-describedby merge (issue 10, second pass).** The describedby derivation
+  is now computed **unconditionally** as the union of the Shell helper/error id
+  (`inputAriaProps['aria-describedby']`), any consumer `aria-describedby` (from
+  `rest`), and the range id when a range is set — falling back to `undefined`
+  (attribute omitted) when nothing describes the field. It is applied after
+  `{...rest}` so it wins, meaning a consumer who adds their own `aria-describedby`
+  no longer clobbers the Shell's error/helper link (both are kept). No behaviour
+  change in the common no-describedby case. WCAG 1.3.1 / 3.3.1 / 4.1.2.
 - **The `$` currency adornment (kept, by design).** The `$` renders as a plain
   `<span>` (not `aria-hidden`), so it stays in the accessibility tree as static
   text immediately before the input — a screen-reader user browsing the form
@@ -131,10 +163,18 @@ primary content is client-injected. No SEO fixes required.
   - Visually-hidden `role="status" aria-live="polite"` live region.
   - **Range exposure (issue 8):** a `hasRange`/`rangeDescription` derivation
     plus a visually-hidden `<span id={`${inputId}-range`}>` describing the
-    min/max bounds, its id merged into the input's `aria-describedby` (union of
-    Shell's helper id + any consumer `aria-describedby` + the range id, emitted
-    only when a range is set so the no-range path is byte-for-byte unchanged).
+    min/max bounds, its id merged into the input's `aria-describedby`.
     No `role`/`type` change — the field stays a currency textbox.
+  - **Stepper click-operability (issue 9):** a `handleButtonClick(handler)`
+    factory wired as `onClick` on both stepper buttons, gated on
+    `event.detail === 0` so synthetic AT/voice/touch/programmatic clicks step
+    once and real mouse clicks (already handled by `onMouseDown`) do not
+    double-step. Additive — `onMouseDown`/`onKeyDown` paths unchanged.
+  - **aria-describedby merge (issue 10):** the describedby union is now computed
+    unconditionally (Shell helper/error id + consumer `aria-describedby` + range
+    id when set, else `undefined`) and applied after `{...rest}`, so a consumer
+    `aria-describedby` can no longer drop the Shell error/helper link. The
+    `{...(hasRange ? …)}` conditional became `{...(describedBy ? …)}`.
 - **USD.module.css**
   - `.inputWrapper:focus-within` focus ring (themed via the `--goobs-focus-*`
     tokens, with `[data-theme='light'/'dark']` overrides driven by the ancestor
@@ -168,6 +208,21 @@ attribute removed, and the mouse press-and-hold behaviour is preserved.
   text matches `/between $0 and $1000/`. Failing-first for issue 8: against the
   pre-fix component `aria-describedby` is `undefined` (no helper/error, no range
   wiring), so the `toBeTruthy()` assertion fails.
+- **`ClickOperableSteppers`** (name "Click-operable steppers (AT / voice)",
+  second pass) — a `play` function that drives BOTH activation paths: a bare
+  `fireEvent.click` on each button (the AT/voice/mobile path, `detail === 0`,
+  must step `10 → 11 → 10`) and a full `userEvent.click` (a real pointer press,
+  `detail >= 1`, must step exactly once `10 → 11`, never twice). Failing-first
+  for issue 9: against the pre-fix `onMouseDown`/`onKeyDown`-only buttons the
+  bare `fireEvent.click` produces no step, so the first assertion fails.
+- **`DescribedByComposition`** (name "aria-describedby merge (error + external)",
+  second pass) — renders `error` plus a consumer `aria-describedby="usd-external-hint"`
+  and an external `<p id="usd-external-hint">`. The `play` function asserts the
+  input's `aria-describedby` both contains the consumer id AND (resolving every
+  referenced node) still surfaces the error text. Failing-first for issue 10:
+  against the pre-fix no-range path `{...rest}` overrode the Shell describedby,
+  so the error message was no longer referenced and the error-text assertion
+  fails.
 
 `MoneyText.stories.tsx` unchanged — no `<MoneyText>` defects found.
 
