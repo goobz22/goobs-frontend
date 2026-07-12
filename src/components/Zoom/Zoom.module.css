@@ -22,8 +22,21 @@
   --zoom-scale-enter: 1;
   --zoom-scale-exit: 0.8;
   --zoom-transform-origin: center center;
-  --zoom-transition: transform 0.3s ease, opacity 0.3s ease;
   --zoom-transition-delay: 0s;
+  /*
+   * The transform/opacity segments carry the caller delay INLINE (not via a
+   * separate, position-mapped `transition-delay` longhand). A single-value
+   * `transition-delay` longhand OVERRIDES every segment's delay via the cascade,
+   * so a caller-supplied full `transition` override with its OWN embedded
+   * per-segment delays (e.g. `transform 300ms ease 200ms, opacity 300ms ease
+   * 200ms`) would have those 200ms delays silently clobbered to 0. Baking the
+   * delay inline here keeps a full override verbatim and matches the sibling
+   * Fade pattern (a full override owns its own delays; the TSX bakes the same
+   * token into its computed override).
+   */
+  --zoom-transition:
+    transform 0.3s ease var(--zoom-transition-delay),
+    opacity 0.3s ease var(--zoom-transition-delay);
   /*
    * Governs the DEFERRED visibility swap below (the visibility segment on the
    * transition + the [data-state='hidden'] block). Kept in lockstep with the
@@ -48,19 +61,24 @@
    * visible->hidden transition holds `visible` for the WHOLE duration and flips
    * to `hidden` only at the very end, while hidden->visible becomes `visible`
    * immediately. Running it over the SAME --zoom-duration as the scale/opacity
-   * therefore keeps the node present for exactly the length of the zoom-OUT
-   * (then drops it the instant it is fully hidden) and re-adds it instantly on
-   * zoom-IN — with no separate, position-fragile transition-delay list.
+   * (and sharing the same INLINE --zoom-transition-delay) therefore keeps the
+   * node present for exactly the length of the zoom-OUT (then drops it the
+   * instant it is fully hidden) and re-adds it instantly on zoom-IN — with the
+   * delay carried inline PER SEGMENT, NOT via a separate, position-fragile
+   * `transition-delay` list that a full caller override could defeat.
    */
-  transition: var(--zoom-transition), visibility var(--zoom-duration) linear;
-  transition-delay: var(--zoom-transition-delay);
+  transition:
+    var(--zoom-transition),
+    visibility var(--zoom-duration) linear var(--zoom-transition-delay);
   transform-origin: var(--zoom-transform-origin);
 }
 
 /* Dark theme — identical timing/scale to light in the legacy theme. */
 .zoomRoot[data-theme='dark'] {
   --zoom-scale-exit: 0.8;
-  --zoom-transition: transform 0.3s ease, opacity 0.3s ease;
+  --zoom-transition:
+    transform 0.3s ease var(--zoom-transition-delay),
+    opacity 0.3s ease var(--zoom-transition-delay);
 }
 
 /* Sacred theme — slower premium easing and a deeper hidden scale. */
@@ -68,7 +86,8 @@
   --zoom-scale-exit: 0.7;
   --zoom-duration: 0.5s;
   --zoom-transition:
-    transform 0.5s var(--goobs-ease), opacity 0.5s var(--goobs-ease);
+    transform 0.5s var(--goobs-ease) var(--zoom-transition-delay),
+    opacity 0.5s var(--goobs-ease) var(--zoom-transition-delay);
 }
 
 /* --------------------------------------------------------------------------

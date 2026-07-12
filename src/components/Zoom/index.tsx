@@ -175,8 +175,13 @@ const Zoom = forwardRef<HTMLDivElement, ZoomProps>(
             ? `${styles.timeout}ms`
             : (styles.transitionDuration ?? '0.3s')
         const timingFunction = styles.transitionTimingFunction ?? 'ease'
+        // Bake the delay token INLINE into each segment (mirrors the CSS default
+        // and the sibling Fade pattern) so the caller delay rides WITH the
+        // transform/opacity segments instead of as a separate, position-fragile
+        // `transition-delay` longhand that would clobber a full override's own
+        // embedded per-segment delays.
         dynamicStyle['--zoom-transition'] =
-          `transform ${duration} ${timingFunction}, opacity ${duration} ${timingFunction}`
+          `transform ${duration} ${timingFunction} var(--zoom-transition-delay), opacity ${duration} ${timingFunction} var(--zoom-transition-delay)`
         // Keep the deferred visibility swap in lockstep with the transform/
         // opacity duration so the a11y-tree drop lands exactly at the end of
         // the zoom-OUT.

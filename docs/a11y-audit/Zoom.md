@@ -9,7 +9,10 @@ deliberately imposes no role — it spreads `...restProps` (`React.HTMLAttribute
 so a consumer can add whatever `role`/`aria-*` the wrapped content needs. The applicable
 guidance is therefore the visibility-utility a11y contract (WCAG 1.3.1 / 2.4.3 / 4.1.2 for the
 hidden state) plus the motion criterion (WCAG 2.3.3). This mirrors the sibling `Fade` component,
-Zoom's structural twin, which already carries the identical treatment.
+Zoom's structural twin: the same reduced-motion guard, the same deferred discrete-`visibility`
+swap, and — after the review fix below (Issue 3) — the same inline-per-segment transition-delay
+mechanism (Zoom previously used a separate `transition-delay` longhand, so the treatments were
+functionally close but not identical).
 
 ## Issues found
 
@@ -38,6 +41,36 @@ still shows its documented dimmed treatment.
 **Pattern:** `hidden-content-still-focusable` (the cross-component class shared with
 `Fade`/`Slide` — a visually-hidden-but-focusable subtree; not opacity-specific, so the
 general slug is used to cluster it with the sibling transition components).
+
+### 3. Separate `transition-delay` longhand clobbered a full override's embedded delays — MINOR — robustness/parity (a11y-lockstep) — FIXED
+`Zoom.module.css:56` (pre-fix) applied the caller delay via a SEPARATE
+`transition-delay: var(--zoom-transition-delay)` longhand — the exact "separate,
+position-fragile transition-delay list" the base-rule comment (`Zoom.module.css:53`, pre-fix)
+claimed the component avoided, so the comment contradicted the code. Functional impact was
+limited: for the documented single-value `transitionDelay` API the delay repeated uniformly
+across all segments and the a11y-critical visibility deferral stayed in lockstep, so the
+hidden-content fix (Issue 2) was NOT broken. The latent gap: a caller passing a full
+`transition` override with its OWN embedded per-segment delay (e.g.
+`transition: 'transform 300ms ease 200ms, opacity 300ms ease 200ms'`) had that 200ms delay
+silently clobbered to `0s` by the longhand (later declaration wins the cascade) — even though
+`transitionRuntimeMs` in `index.tsx` explicitly parses embedded delays for `--zoom-duration`,
+so the JS respected a delay the CSS then nullified. That desynced the deferred `visibility`
+swap (`--zoom-duration` = duration + delay = 500ms) from the visual zoom (delay lost, ends at
+300ms) — errs LONG here (harmless for a11y) but is a real robustness defect and a parity gap.
+**Fix:** ported Fade's inline-per-segment delay mechanism. Removed the `transition-delay`
+longhand; the transform/opacity segments now carry `var(--zoom-transition-delay)` inline (in
+the CSS default for all three themes and in the TSX-computed override), and the discrete
+`visibility` segment carries it inline too (`Zoom.module.css` base/dark/sacred + `index.tsx`
+computed branch). A caller's full `transition` override is now used VERBATIM, so its embedded
+delays survive; the base-rule comment was rewritten to describe the inline mechanism.
+**Markup/behavior change (noted per additive-API contract):** no DOM element, `data-*`, `role`,
+or `aria-*` attribute changed, and no prop was renamed/removed/retyped. The one behavioral
+change — matching Fade exactly — is that `transitionDelay` combined with a FULL `transition`
+override now applies only to the deferred `visibility` segment, not stacked on top of the
+override's visual segments (a caller supplying a full shorthand owns the delay within it). The
+common `transitionDelay`-without-a-full-override path is unchanged (delay still applies to
+transform/opacity/visibility uniformly), preserving exact visual parity.
+**Pattern:** `position-fragile-transition-delay-longhand`.
 
 ## Hearing
 CLEAN. Grepped the component for `new Audio` / `AudioContext` / `<audio>` / `<video>` /
@@ -77,6 +110,14 @@ additive-prop guidance does not apply here.
    the same duration baked into `--zoom-transition`). The existing `--zoom-transition` computation
    (including the legacy "any styles object → 0.3s ease default" quirk) is untouched, so the
    animation itself keeps exact visual parity.
+3. **(Review fix — Issue 3)** `Zoom.module.css` — removed the separate
+   `transition-delay: var(--zoom-transition-delay)` longhand and inlined `var(--zoom-transition-delay)`
+   into each transform/opacity segment (base + dark + sacred `--zoom-transition`) and into the
+   discrete `visibility` segment, mirroring `Fade`'s inline-per-segment delay pattern; rewrote the
+   contradictory base-rule comment. `index.tsx` — the computed transition branch now bakes
+   `var(--zoom-transition-delay)` inline into each segment it emits, and the full-`transition`-override
+   branch (already verbatim) is now no longer clobbered by any longhand, so a caller's embedded
+   per-segment delays survive.
 
 ## Stories updated
 Both new stories carry a `play` test (runs in `@storybook/test-runner`, a real browser) — the only
@@ -89,6 +130,12 @@ pixel-identical, and reduced-motion cannot be emulated in a snapshot).
 - `ReducedMotion` — Issue 1 guard: walks the CSSOM to assert an
   `@media (prefers-reduced-motion: reduce)` rule zeroes the transition on `.zoomRoot`, plus a
   behavioral `transitionProperty === 'none'` check when the runner requests reduced motion.
+- `CustomTransitionDelay` — **(Review fix — Issue 3)** renders a Zoom with a full `transition`
+  override carrying its OWN 200ms embedded per-segment delay and asserts the computed
+  `transition-delay` still contains `0.2s` (the pre-fix `transition-delay: 0s` longhand would have
+  zeroed it → the assertion FAILS against the old component) and that `--zoom-duration` resolves to
+  `500ms` (duration + delay, in lockstep with the deferred visibility swap). Chromatic cannot see a
+  transition delay, so a pixel diff can't protect this.
 
 ## Deferred
 - **`data-disabled` conveys nothing to AT (minor).** The `disabled` treatment is a purely-visual

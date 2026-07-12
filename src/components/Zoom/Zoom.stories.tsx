@@ -464,3 +464,71 @@ export const ReducedMotion: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// A11y/robustness regression — a caller-supplied FULL `transition` override with
+// its OWN embedded per-segment delays is honored VERBATIM. The delay rides inline
+// on each segment (no separate `transition-delay` longhand), so it can never be
+// clobbered to 0. This matters for the hidden-state a11y fix: the deferred
+// `visibility` swap keys off `--zoom-duration` (= duration + delay, 300 + 200 =
+// 500ms here), so if the embedded delay were dropped the visual zoom would finish
+// 200ms before `--zoom-duration` expired and, worse, if the swap fired early it
+// would drop content from the a11y tree before it is actually gone.
+export const CustomTransitionDelay: Story = {
+  render: function CustomTransitionDelayStory() {
+    const [isVisible, setIsVisible] = useState(true)
+
+    return (
+      <div style={{ width: '460px' }}>
+        <CustomButton
+          onClick={() => setIsVisible(v => !v)}
+          styles={{ theme: 'light' }}
+        >
+          Toggle Zoom
+        </CustomButton>
+        <div style={{ marginTop: '16px', height: '150px' }}>
+          <Zoom
+            styles={{
+              in: isVisible,
+              theme: 'light',
+              // Full override carrying its OWN 200ms embedded per-segment delay.
+              transition: 'transform 300ms ease 200ms, opacity 300ms ease 200ms',
+            }}
+          >
+            <Paper styles={{ theme: 'light', padding: '20px' }}>
+              <Typography styles={{ variant: 'merrih6', theme: 'light' }}>
+                Custom transition delay
+              </Typography>
+              <Typography styles={{ variant: 'merriparagraph', theme: 'light' }}>
+                A full `transition` override with its own 200ms embedded delay is
+                honored verbatim — the delay is not clobbered to 0.
+              </Typography>
+            </Paper>
+          </Zoom>
+        </div>
+      </div>
+    )
+  },
+  // Regression gate (runs in @storybook/test-runner, a real browser): the
+  // embedded per-segment delay survives. The pre-fix Zoom applied a separate
+  // `transition-delay: var(--zoom-transition-delay)` (0s) longhand that overrode
+  // the shorthand's delay, so the computed transition-delay was `0s` and this
+  // assertion FAILS against it. Chromatic cannot see a transition delay, so a
+  // pixel diff can't protect this.
+  play: async ({ canvasElement }) => {
+    const zoom = canvasElement.querySelector(
+      '[data-component="Zoom"]'
+    ) as HTMLElement
+    expect(zoom).toBeInTheDocument()
+
+    // The transform/opacity segments keep their embedded 200ms delay; a pre-fix
+    // longhand would have zeroed every segment's delay to `0s`.
+    expect(getComputedStyle(zoom).transitionDelay).toContain('0.2s')
+
+    // And the deferred visibility swap tracks duration + delay (300 + 200 =
+    // 500ms), so it stays in lockstep with the real zoom length.
+    expect(
+      getComputedStyle(zoom).getPropertyValue('--zoom-duration').trim()
+    ).toBe('500ms')
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
