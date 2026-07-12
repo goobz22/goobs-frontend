@@ -370,6 +370,64 @@ export const WithValueText: Story = {
 }
 
 // --------------------------------------------------------------------------
+// LABEL-LESS ACCESSIBLE NAME (aria-label fallback)
+// --------------------------------------------------------------------------
+
+/**
+ * A slider with no visible `label` still needs an accessible name. Pass
+ * `ariaLabel` and it is applied as `aria-label` on the range input, so screen
+ * readers announce a name even for a bare control (a slider in a data-table
+ * row or a compact toolbar). When a visible `label` IS present it always wins
+ * and `aria-label` is intentionally NOT set, so the visible name can never be
+ * silently overridden. (WCAG 4.1.2 Name, Role, Value / 2.5.3 Label in Name.)
+ */
+export const LabelLessAccessibleName: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* No visible label — `ariaLabel` is the ONLY accessible name. */}
+      <SliderWithState
+        ariaLabel="Zoom level"
+        min={0}
+        max={100}
+        step={1}
+        initialValue={40}
+        helperText="No visible label — named only via ariaLabel"
+        styles={{ theme: 'light' }}
+      />
+      {/* Visible label present: it wins; `ariaLabel` is ignored (not applied). */}
+      <SliderWithState
+        label="Volume"
+        ariaLabel="Should be ignored"
+        min={0}
+        max={100}
+        step={1}
+        initialValue={60}
+        helperText="Visible label wins; aria-label is not set"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The accessible name is INVISIBLE to a Chromatic snapshot: a label-less
+    // slider with NO accessible name is a WCAG 4.1.2 failure a picture cannot
+    // catch. Pin the name here so dropping the `aria-label` passthrough (or the
+    // `ariaLabel` prop) fails the story. Resolving by role+name proves the
+    // slider is discoverable to AT by its `ariaLabel`.
+    const named = canvas.getByRole('slider', { name: 'Zoom level' })
+    await expect(named).toHaveAttribute('aria-label', 'Zoom level')
+
+    // When a visible <label> exists it is the accessible name and `aria-label`
+    // is deliberately absent, so the `ariaLabel` prop can never override the
+    // visible text (WCAG 2.5.3 Label in Name). The slider resolves by its
+    // visible label and carries no `aria-label`.
+    const labelled = canvas.getByRole('slider', { name: 'Volume' })
+    await expect(labelled).not.toHaveAttribute('aria-label')
+  },
+}
+
+// --------------------------------------------------------------------------
 // KEYBOARD FOCUS RING (:focus-visible)
 // --------------------------------------------------------------------------
 

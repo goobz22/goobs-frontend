@@ -28,6 +28,20 @@ export interface SliderProps {
    */
   formatValueText?: (value: number) => string
   label?: string
+  /**
+   * Accessible name for screen readers when no visible `label` is supplied.
+   * FieldShell renders a real `<label htmlFor>` when `label` is set (the
+   * preferred, visible-name path); but a label-less slider — a bare control in
+   * a data table or a compact toolbar — would otherwise have NO accessible
+   * name at all. Passing `ariaLabel` sets `aria-label` directly on the range
+   * input so assistive tech can announce it. It is applied ONLY when `label`
+   * is absent: a visible `<label>` always wins, so a consumer can never
+   * accidentally override the visible name (WCAG 2.5.3 Label in Name). When
+   * both `label` and `ariaLabel` are omitted the slider is unnamed exactly as
+   * before — purely additive, zero back-compat impact.
+   * (WCAG 4.1.2 Name, Role, Value; WAI-ARIA APG slider pattern.)
+   */
+  ariaLabel?: string
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
   error?: string | boolean
@@ -52,6 +66,7 @@ const Slider: React.FC<SliderProps> = ({
   step = 1,
   formatValueText,
   label,
+  ariaLabel,
   helperText,
   error,
   dataField,
@@ -78,6 +93,14 @@ const Slider: React.FC<SliderProps> = ({
   const valueText = formatValueText
     ? formatValueText(currentValue)
     : undefined
+
+  // Accessible name fallback. When FieldShell renders a visible `<label>` (any
+  // non-empty `label`) that label is the accessible name, so `aria-label` is
+  // left unset — a redundant/conflicting aria-label would override the visible
+  // text (WCAG 2.5.3). Only a label-less slider gets `ariaLabel` applied, so a
+  // bare control still has a name for AT. Mirrors FieldShell's own
+  // "render a label only when label is truthy" condition (Shell/index.tsx:389).
+  const accessibleName = label ? undefined : ariaLabel
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -142,6 +165,7 @@ const Slider: React.FC<SliderProps> = ({
           aria-valuenow={currentValue}
           aria-valuetext={valueText}
           aria-orientation="horizontal"
+          aria-label={accessibleName}
           className={cssStyles.input}
           {...inputAriaProps}
         />
