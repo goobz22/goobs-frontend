@@ -384,3 +384,51 @@ export const DefaultGroupLabel: Story = {
     ).toBeInTheDocument()
   },
 }
+
+// --------------------------------------------------------------------------
+// A11y: BOOLEAN ERROR — NO DANGLING aria-describedby (WCAG 1.3.1 / 4.1.2)
+//
+// A boolean `error` (i.e. `error={true}`) marks the pair invalid for STYLING
+// only, with no message — so FieldShell renders NO helper/error region. The
+// end input must therefore NOT point `aria-describedby` at the (absent) shared
+// region: a reference to an id that isn't in the DOM is an assistive-tech
+// defect (screenreaders announce nothing / behave erratically on that control).
+// Both inputs still read as invalid (a range error is a property of the pair).
+// Regression guard for the shared-helper-id wiring's render-vs-hasError gate —
+// before the gate keyed off "a message renders" it keyed off `hasError`, which
+// is true for a boolean error, so the end input emitted a dangling reference.
+// --------------------------------------------------------------------------
+
+export const BooleanErrorNoDanglingDescribedby: Story = {
+  name: 'A11y: Boolean Error (no dangling describedby)',
+  render: () => (
+    <div style={{ padding: '2rem', maxWidth: '600px' }}>
+      <TimeRangeComponent
+        startLabel="Start Time"
+        endLabel="End Time"
+        // Boolean error: invalid styling with no message → no helper region.
+        error
+        value={{ start: new Date(), end: new Date() }}
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const startInput = canvas.getByLabelText('Start Time')
+    const endInput = canvas.getByLabelText('End Time')
+
+    // Both controls read as invalid.
+    await expect(startInput).toHaveAttribute('aria-invalid', 'true')
+    await expect(endInput).toHaveAttribute('aria-invalid', 'true')
+
+    // A boolean error carries no message, so no helper/error region renders…
+    await expect(canvas.queryByRole('alert')).toBeNull()
+
+    // …and NEITHER input may carry an aria-describedby pointing at a region
+    // that isn't in the DOM (WCAG 1.3.1 / 4.1.2).
+    await expect(startInput).not.toHaveAttribute('aria-describedby')
+    await expect(endInput).not.toHaveAttribute('aria-describedby')
+  },
+}

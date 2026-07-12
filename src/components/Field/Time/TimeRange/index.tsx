@@ -153,11 +153,18 @@ const TimeRangeComponent: React.FC<TimeRangeProps> = ({
   // unexplained "invalid" (WCAG 1.3.1 / 3.3.1). React evaluates the start
   // shell's render-prop before the end shell's (document order) in the same
   // render, and useId is stable across renders, so the ref holds the correct
-  // id by the time the end input renders. Only used as a describedby target
-  // when the region actually renders (error OR helperText present), so a
-  // dangling aria-describedby is never emitted.
+  // id by the time the end input renders.
   const startHelperIdRef = useRef<string | undefined>(undefined)
-  const startHelperRendered = hasError || helperText != null
+  // The end input may only point aria-describedby at the shared region when
+  // that region ACTUALLY RENDERS — otherwise the reference dangles at an
+  // element that isn't in the DOM (WCAG 1.3.1 / 4.1.2). FieldShell renders the
+  // region iff a MESSAGE exists: a string `error`, or `helperText` — NOT merely
+  // `hasError`. A boolean `error={true}` (styling-only invalid, no message)
+  // marks the pair invalid but renders NO region, so the describedby must be
+  // omitted in that case. Mirror Shell's own `showHelper` logic exactly
+  // (helperContent = errorMessage ?? helperText) so the two can never disagree.
+  const startErrorMessage = typeof error === 'string' ? error : null
+  const startHelperRendered = (startErrorMessage ?? helperText) != null
 
   return (
     <div
