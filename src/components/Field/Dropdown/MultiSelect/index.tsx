@@ -258,6 +258,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
               aria-haspopup="listbox"
               aria-expanded={isOpen}
               aria-controls={listboxId}
+              aria-activedescendant={activeOptionId}
               aria-label={label === '' ? undefined : (label as string)}
               data-action={isOpen ? 'close' : 'open'}
               data-subject={dataField}
@@ -355,9 +356,11 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                     return (
                       <button
                         key={optionId}
+                        id={optionDomId(index)}
                         type="button"
                         role="option"
                         aria-selected={isSelected}
+                        {...(isActive && { 'data-active': 'true' })}
                         data-value={optionId}
                         data-option-id={option._id}
                         className={optionClassNames}

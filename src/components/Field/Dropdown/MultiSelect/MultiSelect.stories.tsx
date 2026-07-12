@@ -3,6 +3,7 @@
  */
 import React, { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { userEvent, within, expect } from 'storybook/test'
 import MultiSelectChip from './index'
 
 const meta: Meta<typeof MultiSelectChip> = {
@@ -503,4 +504,71 @@ export const ArrowPositionTest: Story = {
 export const Interactive: Story = {
   name: 'Interactive Demo',
   render: () => <InteractiveDemo />,
+}
+
+// --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Arrow-key navigation over the portalled listbox
+// --------------------------------------------------------------------------
+
+/**
+ * Regression guard for the `missing-keyboard-arrow-nav` class (WCAG 2.1.1 /
+ * 2.4.7 / 4.1.2). The trigger is a `role="combobox"` div that keeps DOM focus
+ * while the Arrow keys rove a highlight through the portalled `role="option"`
+ * list. Previously the roving highlight was completely unwired: the trigger
+ * carried NO `aria-activedescendant`, the options had NO `id` and NO
+ * `data-active` attribute, and the `.option.active` CSS rule did not exist — so
+ * the highlight was invisible to BOTH assistive tech and sighted keyboard users
+ * (the `activeOptionId`/`optionDomId` values were even dead code that failed
+ * lint). This play function proves the fix: ArrowDown opens the menu, the next
+ * ArrowDown roves the highlight (mirrored to `data-active` on the option and
+ * `aria-activedescendant` on the combobox), and Enter toggles the active
+ * option's selection while the multi-select menu stays open.
+ */
+export const KeyboardArrowNavigation: Story = {
+  name: 'A11y: keyboard arrow navigation',
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <MultiSelectChip {...args} />
+    </div>
+  ),
+  args: {
+    label: 'Keyboard Nav',
+    options: SIMPLE_OPTIONS,
+    defaultSelected: [],
+    styles: { theme: 'light' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Open via the keyboard (combobox 1.2 open-on-ArrowDown). The first
+    // ArrowDown only opens — nothing is highlighted yet.
+    combobox.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    expect(combobox).not.toHaveAttribute('aria-activedescendant')
+
+    // The listbox + its role="option" rows portal into document.body.
+    const body = within(document.body)
+    const options = await body.findAllByRole('option')
+    expect(options.length).toBeGreaterThan(1)
+
+    // ArrowDown highlights the first option: it gets data-active and the
+    // combobox points aria-activedescendant at its id (announced by AT).
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[0]).toHaveAttribute('data-active', 'true')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[0]!.id)
+
+    // A second ArrowDown advances the roving highlight to the next option.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(options[1]).toHaveAttribute('data-active', 'true')
+    expect(options[0]).not.toHaveAttribute('data-active')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[1]!.id)
+
+    // Enter toggles the highlighted option ON; the multi-select menu stays open
+    // so more options can be picked, and the option's selected state flips.
+    await userEvent.keyboard('{Enter}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    expect(options[1]).toHaveAttribute('aria-selected', 'true')
+  },
 }
