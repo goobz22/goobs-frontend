@@ -340,3 +340,33 @@ export const AccessibleErrorState: Story = {
     await expect(alert).toHaveTextContent('Account number is invalid')
   },
 }
+
+/**
+ * Label-less named field (WCAG 2.5.3 Label in Name / 4.1.2 Name, Role, Value).
+ * With no visible `<label>` (`label={null}`), the new `ariaLabel` prop is
+ * forwarded to FieldShell and becomes the input's accessible name, so
+ * assistive tech and `getByRole(name)` still resolve the field. Pins the
+ * ariaLabel seam for the Number Shell-based leaves.
+ */
+export const LabelLessNamed: Story = {
+  args: {
+    ...commonArgs,
+    label: null,
+    ariaLabel: 'Primary account number',
+    styles: { theme: 'light' },
+  },
+  render: args => (
+    <div style={{ padding: '2rem', maxWidth: '400px' }}>
+      <AccountNumber {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // With no visible <label>, the forwarded ariaLabel is the input's
+    // accessible name, so getByRole(name) still resolves the textbox.
+    const input = canvas.getByRole('textbox', {
+      name: 'Primary account number',
+    })
+    await expect(input).toHaveAttribute('aria-label', 'Primary account number')
+  },
+}

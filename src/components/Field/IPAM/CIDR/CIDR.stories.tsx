@@ -377,3 +377,52 @@ export const KeyboardSteppersAndLiveReadout: Story = {
     await expect(input).toHaveValue('/25')
   },
 }
+
+/**
+ * Label-less named field (WCAG 2.5.3 Label in Name / 4.1.2 Name, Role, Value).
+ * With no visible `<label>` (`label={null}`), the new `ariaLabel` prop is
+ * forwarded to FieldShell and becomes the input's accessible name, so
+ * assistive tech and `getByRole(name)` still resolve the field. Pins the
+ * ariaLabel seam for the IPAM Shell-based leaves.
+ */
+export const LabelLessNamed: Story = {
+  name: 'Label-less Named (a11y)',
+  render: args => (
+    <div
+      style={{
+        backgroundColor: '#f8fafc',
+        minHeight: '100vh',
+        padding: '2rem',
+        margin: 0,
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <div
+          style={{ marginBottom: '1rem', fontSize: '14px', color: '#475569' }}
+        >
+          <strong>Label-less Named:</strong> No visible label; the field names
+          itself for assistive tech via <code>ariaLabel</code>.
+        </div>
+        <CIDRField {...args} />
+      </div>
+    </div>
+  ),
+  args: {
+    ...commonArgs,
+    label: null,
+    ariaLabel: 'Network CIDR range',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // With no visible <label>, the forwarded ariaLabel is the input's
+    // accessible name, so getByRole(name) still resolves the spinbutton.
+    const input = canvas.getByRole('spinbutton', {
+      name: 'Network CIDR range',
+    })
+    await expect(input).toHaveAttribute('aria-label', 'Network CIDR range')
+  },
+}
