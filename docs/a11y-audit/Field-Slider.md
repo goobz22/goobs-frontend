@@ -83,8 +83,12 @@ visual + programmatic. Nothing to fix.
 
 - **Accessible name:** the label renders as a real `<label htmlFor={inputId}>`
   in FieldShell (`Shell/index.tsx:395`), linked to the input via
-  `id={inputId}` (`index.tsx:110`). `getByLabelText` and SR announcement both
-  work. (Label-less usage caveat → Deferred.)
+  `id={inputId}`. `getByLabelText` and SR announcement both work. **Label-less
+  usage is now covered locally** (finding R3): a new optional `ariaLabel` prop
+  is applied as `aria-label` on the range input when no visible `label` is
+  present, so a bare slider still has an accessible name. A visible `<label>`
+  always wins (`aria-label` is only set when `label` is falsy), so the prop can
+  never override the visible name (WCAG 2.5.3 Label in Name).
 - **Semantic HTML:** native `<input type="range">` — the correct primitive, not
   a `role="slider"` div.
 - **APG slider states/props:** role (implicit), valuemin/valuemax/valuenow
@@ -125,9 +129,14 @@ static outline with no motion. No `prefers-reduced-motion` guard is required.
    (commit `ced6ed21`)
 3. `:focus-visible` ring baseline-guarded via keyboard-focus `play` fns
    (`KeyboardFocusRing` + new `KeyboardFocusRingSacred`) — R1. (commit `92cd9136`)
-4. **This pass** — non-visual ARIA state pinned by `play` assertions across
+4. **Prior pass** — non-visual ARIA state pinned by `play` assertions across
    `LightTheme` / `WithValueText` / `WithError` / `Required` / `DisabledStates`
    (R2) — WCAG 4.1.2 (+ 1.3.1 / 3.3.1 / 1.4.1). Stories-only; runtime unchanged.
+5. **This pass (R3)** — local `ariaLabel` prop → `aria-label` on the range
+   input for label-less sliders (`index.tsx`), closing the accessible-name gap
+   that was previously only deferred to a shared-Shell pass. New
+   `LabelLessAccessibleName` story with a `play` fn pinning both the fallback
+   name and the visible-label-wins guard — WCAG 4.1.2 / 2.5.3.
 
 `bun lint:file` clean on `index.tsx` and `Slider.stories.tsx`; `stylelint`
 clean on `Slider.module.css`. No runtime WCAG defect remained at the start of
@@ -156,6 +165,13 @@ the invisible-attribute regression-coverage gap.
 - **`DisabledStates`** — **now carries a `play` fn** asserting all three sliders
   are natively `disabled` (removed from the tab order / not operable), not merely
   dimmed by color.
+- **`LabelLessAccessibleName`** *(new)* — exercises finding R3. Renders a
+  label-less slider named only by `ariaLabel` and a labelled slider that also
+  passes `ariaLabel`. The `play` fn asserts (1) the label-less slider resolves
+  by `getByRole('slider', { name: 'Zoom level' })` and carries
+  `aria-label="Zoom level"` — the invisible accessible name a snapshot can't
+  see; and (2) the labelled slider resolves by its visible label and carries
+  **no** `aria-label`, proving the visible `<label>` always wins (WCAG 2.5.3).
 - **`KeyboardFocusRing`** — renders the slider on light and sacred surfaces
   with instructions to Tab to it, documenting the new `:focus-visible` ring and
   the native keyboard operability. **Now carries a `play` fn** that moves real
@@ -240,19 +256,48 @@ the invisible-attribute regression-coverage gap.
   All assertions are static-attribute / DOM-query reads (no synthetic-keyboard
   default-action dependence — sound per the R1 note). `bun lint:file` clean.
 
+### R3. Label-less accessible name — FIXED LOCALLY (previously deferred)
+
+- **Severity:** moderate · **WCAG:** 4.1.2 Name, Role, Value (A) [+ 2.5.3 Label
+  in Name (A) for the visible-label-wins guard] · **Pattern:**
+  `missing-accessible-name`
+- **Where:** `src/components/Field/Slider/index.tsx:126` (the range `<input>`
+  Slider owns) — the accessible-name gap when a consumer omits `label`, which
+  FieldShell renders no `<label>` for (`Shell/index.tsx:389-403`).
+- **Root cause / re-assessment:** the prior pass deferred this entirely to a
+  shared-Shell pass, calling it *"not fixable inside `Field/Slider`."* The
+  adversarial review correctly refuted that phrasing: **Slider renders its own
+  `<input>`** (`index.tsx:126-147`), and FieldShell's `inputAriaProps` bag
+  contains only `aria-required`/`aria-disabled`/`aria-invalid`/
+  `aria-describedby` (`Shell/index.tsx:345-349`) — **never `aria-label`** — so a
+  local `aria-label` passthrough is possible with **zero** Shell edits and **no**
+  conflict with the spread bag.
+- **Fix (in my directory):** added an additive optional prop
+  `ariaLabel?: string` (`index.tsx`, JSDoc'd) applied as `aria-label` on the
+  input **only when `label` is falsy** (`const accessibleName = label ?
+  undefined : ariaLabel`; mirrors FieldShell's own render-label condition at
+  `Shell/index.tsx:389`). A visible `<label>` always wins, so `ariaLabel` can
+  never override the visible name (WCAG 2.5.3). Purely additive — a slider with
+  neither `label` nor `ariaLabel` is unnamed exactly as before. New
+  `LabelLessAccessibleName` story + `play` fn regression-guards both the
+  fallback name and the visible-label-wins branch (invisible to Chromatic, so it
+  needs a `play` assertion, not a snapshot).
+
 ## Deferred (root cause outside my directory — Field/Shell, owned by a later serial pass)
 
-- **Label-less accessible name.** When a consumer omits `label`, FieldShell
-  renders no `<label>` (`Shell/index.tsx:389-403`) and there is no
-  `aria-label` passthrough, so a label-less slider would have **no accessible
-  name** (WCAG 4.1.2). This affects *every* field, not just Slider, and the fix
-  belongs in the shared shell.
+- **Shared-Shell `ariaLabel` passthrough (optional consolidation, NOT a
+  remaining Slider gap).** The Slider accessible-name gap is now closed locally
+  (R3). The *general* fix — so **every** field (Text, Dropdown, Date, …), not
+  just Slider, gets a label-less accessible name from one place — still belongs
+  in the shared shell. This is an optional consolidation, not an open defect for
+  Slider.
   - **Suggested change:** add an optional `ariaLabel?: string` to
     `FieldShellProps` (`src/components/Field/Shell/index.tsx:77`) that, when
-    `label` is absent, is merged into the `inputAriaProps` bag as
-    `'aria-label'` (build alongside the existing bag at
-    `Shell/index.tsx:345-349`). Field sub-components (Slider included) would
-    then forward a new optional `ariaLabel` prop into FieldShell. Additive,
-    back-compat.
-  - Pattern: `missing-accessible-name`. Not fixable inside `Field/Slider`
-    without duplicating shell wiring, so deferred rather than worked around.
+    `label` is absent, is merged into the `inputAriaProps` bag as `'aria-label'`
+    (build alongside the existing bag at `Shell/index.tsx:345-349`). Field
+    sub-components would then forward `ariaLabel` into FieldShell instead of
+    (Slider) applying it directly. Additive, back-compat. **If/when this lands,
+    Slider should forward `ariaLabel` into FieldShell and drop its local
+    `aria-label` line** to avoid a double source — but until then the local fix
+    is correct and self-contained.
+  - Pattern: `missing-accessible-name`.
