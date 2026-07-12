@@ -181,9 +181,10 @@ information is conveyed by sound. **Nothing to fix** for WCAG 1.2.x / 1.4.2. Sta
 All in `src/components/Field/Search`:
 
 - `index.tsx`: added additive `ariaLabel` prop (JSDoc'd); compute `resolvedAriaLabel`
-  (label-less → `ariaLabel ?? placeholder`, else undefined); `aria-label` on the input;
-  `type="text"` → `type="search"`; `aria-hidden="true"` + `focusable="false"` on the
-  magnifier svg.
+  (label-less → `ariaLabel || placeholder || undefined`, else undefined — the `||` chain,
+  not `??`, so a blanked `placeholder=""` can never emit `aria-label=""`; see Issue 10);
+  `aria-label` on the input; `type="text"` → `type="search"`; `aria-hidden="true"` +
+  `focusable="false"` on the magnifier svg.
 - `Search.module.css`: `.inputWrapper:focus-within` themed focus border + per-theme focus-ring
   box-shadow (`--goobs-focus-{sacred,light,dark}`); wrapper error-border keyed on the shell's
   error state; `::-webkit-search-cancel-button`/`-decoration` reset; `@media
