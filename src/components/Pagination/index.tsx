@@ -131,10 +131,30 @@ const PaginationButton: FC<{
   /** Canonical action verb emitted as `data-action` (first/prev/next/last). */
   action: string
 }> = ({ onClick, disabled, children, 'aria-label': ariaLabel, action }) => {
+  // A boundary-/globally-disabled direction button stays FOCUSABLE via
+  // `aria-disabled` rather than the native `disabled` attribute. Native
+  // `disabled` drops the element from the focus order, so a keyboard user who
+  // presses Enter on "Next"/"Last" to reach the final page (or "Prev"/"First"
+  // to reach page 1) has focus fall to <body> the instant the just-activated
+  // control disables on the re-render — the disabled-focused-element
+  // anti-pattern (WCAG 2.4.3 Focus Order). aria-disabled keeps focus ON the
+  // control (still exposing the unavailable state to assistive tech) while the
+  // handler is neutralised so an aria-disabled button never navigates — it can
+  // never step past a boundary to page 0 / count+1. Matches the library's
+  // aria-disabled contract: emit "true" when disabled, OMIT it when enabled
+  // (never "false").
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled) {
+      event.preventDefault()
+      return
+    }
+    onClick(event)
+  }
+
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
+      onClick={handleClick}
+      aria-disabled={disabled || undefined}
       aria-label={ariaLabel}
       data-action={action}
       className={mergeClassNames(cssStyles.button, cssStyles.navButton)}
@@ -189,7 +209,13 @@ const PaginationItem: FC<{
       onClick={handleClick}
       className={mergeClassNames(cssStyles.button, cssStyles.pageButton)}
       aria-current={isSelected ? 'page' : undefined}
-      aria-label={`Go to page ${item}`}
+      // Differentiate the accessible name once a page is active: the current
+      // page reads "page N" (it already carries aria-current="page", so the
+      // "Go to" call-to-action verb would be a mild contradiction — "Go to
+      // page 5, current page"), while every other page keeps the "Go to page N"
+      // action name (mirrors the MUI reference pattern). WCAG 2.5.3 Label in
+      // Name still holds either way — the visible "N" is contained in both.
+      aria-label={isSelected ? `page ${item}` : `Go to page ${item}`}
       data-action="goto-page"
       data-pagination-page={item}
       data-pagination-selected={isSelected ? 'true' : 'false'}

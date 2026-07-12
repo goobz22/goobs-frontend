@@ -211,11 +211,13 @@ export const Disabled: Story = {
 // Exercises the accessible structure: the items render inside a real
 // <nav aria-label> landmark as a <ul>/<li> list (screen readers announce the
 // item count + step through pages); the selected page carries aria-current
-// ="page"; every control has an accessible name (numbered buttons
-// "Go to page N", the direction buttons "Go to first/previous/next/last
-// page" with their icons aria-hidden); Tab moves between the buttons and the
-// keyboard focus ring is visible via :focus-visible. Tab into the row to see
-// the focus indicator; boundary buttons are disabled at page 1 / last page.
+// ="page"; every control has an accessible name (numbered buttons "Go to page
+// N", or "page N" once that page is the current one so the "Go to" verb does
+// not contradict aria-current; the direction buttons "Go to first/previous/
+// next/last page" with their icons aria-hidden); Tab moves between the buttons
+// and the keyboard focus ring is visible via :focus-visible. Tab into the row
+// to see the focus indicator; boundary buttons are aria-disabled at page 1 /
+// last page yet stay focusable so keyboard focus is never dropped.
 
 export const AccessibleStructure: Story = {
   name: 'Accessibility/Keyboard & Semantics',
@@ -247,6 +249,47 @@ export const PageChangeAnnouncement: Story = {
       showFirstButton
       showLastButton
     />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+}
+
+// Exercises boundary FOCUS RETENTION (WCAG 2.4.3 Focus Order). The direction
+// buttons (first/prev/next/last) are disabled at a boundary via
+// `aria-disabled="true"` — NOT the native `disabled` attribute — so they stay
+// focusable: a keyboard user who presses Enter on "Next"/"Last" to land on the
+// final page (or "Prev"/"First" to land on page 1) keeps focus ON that control
+// instead of having it dropped to <body>. The two rows render the two boundary
+// ends simultaneously: the TOP pager sits at page 1 (first + prev show the
+// dimmed aria-disabled styling and their focus ring is still reachable); the
+// BOTTOM pager sits at the last page (next + last are aria-disabled). Tab onto
+// a dimmed boundary button to confirm it still accepts and holds focus, and
+// activating it is a no-op (never navigates past the boundary).
+export const BoundaryFocusRetention: Story = {
+  name: 'Accessibility/Boundary Focus Retention',
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        alignItems: 'center',
+      }}
+    >
+      {/* At page 1: first + prev are aria-disabled but remain focusable. */}
+      <InteractivePagination
+        count={10}
+        initialPage={1}
+        showFirstButton
+        showLastButton
+      />
+      {/* At the last page: next + last are aria-disabled but remain focusable. */}
+      <InteractivePagination
+        count={10}
+        initialPage={10}
+        showFirstButton
+        showLastButton
+      />
+    </div>
   ),
   globals: { backgrounds: { value: 'light' } },
 }

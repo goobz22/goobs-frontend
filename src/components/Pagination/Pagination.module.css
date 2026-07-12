@@ -137,13 +137,18 @@
   opacity: 1;
 }
 
-.navButton:hover:not(:disabled) {
+.navButton:hover:not([aria-disabled='true']) {
   border-color: var(--goobs-black-a23);
   background-color: var(--goobs-black-a04);
 }
 
-.navButton:disabled {
-  /* disabled bg/color/opacity are theme-independent in the original. */
+/* Boundary/globally-disabled direction buttons carry aria-disabled='true'
+   (NOT the native `disabled` attribute — see PaginationButton: native disabled
+   drops keyboard focus to <body> on boundary activation, WCAG 2.4.3), so the
+   disabled visuals key off the attribute selector. Same rendered output as the
+   old `:disabled` rule; disabled bg/color/opacity are theme-independent in the
+   original. */
+.navButton[aria-disabled='true'] {
   border-color: var(--goobs-black-a23);
   background-color: var(--goobs-black-a20);
   color: var(--goobs-white-a30);
@@ -162,12 +167,12 @@
   font-family: var(--goobs-font-sacred);
 }
 
-.root[data-theme='sacred'] .navButton:hover:not(:disabled) {
+.root[data-theme='sacred'] .navButton:hover:not([aria-disabled='true']) {
   border-color: var(--goobs-gold-a60);
   background-color: var(--goobs-gold-a10);
 }
 
-.root[data-theme='sacred'] .navButton:disabled {
+.root[data-theme='sacred'] .navButton[aria-disabled='true'] {
   border-color: var(--goobs-gold-a20);
   background-color: var(--goobs-black-a20);
   color: var(--goobs-white-a30);
@@ -276,12 +281,12 @@
   color: var(--goobs-dark-text);
 }
 
-.root[data-theme='dark'] .navButton:hover:not(:disabled) {
+.root[data-theme='dark'] .navButton:hover:not([aria-disabled='true']) {
   border-color: var(--goobs-dark-border-strong);
   background-color: var(--goobs-dark-surface-raised);
 }
 
-.root[data-theme='dark'] .navButton:disabled {
+.root[data-theme='dark'] .navButton[aria-disabled='true'] {
   border-color: var(--goobs-dark-border);
   background-color: var(--goobs-dark-surface);
   color: var(--goobs-dark-text-muted);
