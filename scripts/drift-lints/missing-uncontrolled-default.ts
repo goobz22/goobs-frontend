@@ -95,6 +95,38 @@ function blankComments(text: string): string {
   return out.join('')
 }
 
+/** Blank the INTERIOR of every '…' / "…" / `…` string (delimiters + newlines
+ *  kept, escapes honored) so a string-literal type member — e.g. an
+ *  `Omit<…, 'type' | 'value' | 'onChange'>` extends clause — can never trip the
+ *  header guard's keyword/char tests (`\btype\b` etc. ignore quotes) or expose a
+ *  phantom member. Run AFTER blankComments. */
+function blankStrings(text: string): string {
+  const out = text.split('')
+  let str: string | null = null
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (str) {
+      if (c === '\\') {
+        if (text[i + 1] !== '\n') out[i + 1] = ' '
+        out[i] = ' '
+        i++
+        continue
+      }
+      if (c === str) {
+        str = null
+        continue
+      }
+      if (c !== '\n') out[i] = ' '
+      continue
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      str = c
+      continue
+    }
+  }
+  return out.join('')
+}
+
 /** From the opening `{` at `openIdx`, return the interior text (between the
  *  matched braces) and the index of the closing `}`. String-aware. */
 function braceBody(text: string, openIdx: number): [string, number] {
@@ -191,7 +223,7 @@ function isBodyBrace(gap: string): boolean {
 function measure(files: DriftFile[]): DriftInstance[] {
   const instances: DriftInstance[] = []
   for (const { path, text: raw } of files) {
-    const text = blankComments(raw)
+    const text = blankStrings(blankComments(raw))
     PROPS_DECL.lastIndex = 0
     let decl: RegExpExecArray | null
     while ((decl = PROPS_DECL.exec(text))) {
@@ -249,6 +281,9 @@ const lint: DriftLint = {
       'export interface BarProps {\n  checked: boolean\n  onChange: (next: boolean) => void\n}',
       // type-literal form, value + onChange, no defaultValue → 1 instance
       'export type BazProps = {\n  value?: string\n  onChange?: (v: string) => void\n}',
+      // `Omit<…, 'type'|'value'|'onChange'>` header: string-literal keywords in
+      // the extends clause must NOT make the guard skip the body (USDFieldProps).
+      "export interface QuxProps\n  extends Omit<\n    React.InputHTMLAttributes<HTMLInputElement>,\n    'onChange' | 'value' | 'type'\n  > {\n  value?: string\n  onChange?: (v: string) => void\n}",
     ],
     good: [
       // Declares the uncontrolled counterpart → canonical, not an instance.
