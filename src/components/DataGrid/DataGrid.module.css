@@ -206,11 +206,11 @@
    Black is therefore the base default; sacred is the override. */
 .verticalDivider {
   height: 20px;
-  border-left: 2px solid rgba(0, 0, 0, 1);
+  border-inline-start: 2px solid rgba(0, 0, 0, 1);
 }
 
 .verticalDivider[data-theme='sacred'] {
-  border-left: 2px solid var(--goobs-gold-a40);
+  border-inline-start: 2px solid var(--goobs-gold-a40);
   box-shadow:
     0 4px 6px -1px var(--goobs-gold-a60),
     0 2px 4px -1px var(--goobs-gold-a40);
@@ -252,7 +252,7 @@
 .tableWrapper {
   overflow-x: auto;
   width: 100%;
-  padding-right: 16px;
+  padding-inline-end: 16px;
   box-sizing: border-box;
 }
 
@@ -290,9 +290,9 @@
   line-height: 45px;
   vertical-align: bottom;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   color: var(--dg-header-color);
-  border-right: 1px solid var(--dg-header-border);
+  border-inline-end: 1px solid var(--dg-header-border);
   border-bottom: 2px solid var(--dg-header-border);
   user-select: none;
   white-space: nowrap;
@@ -383,7 +383,7 @@
 
 .cell {
   padding: var(--dg-cell-padding);
-  border-right: 1px solid var(--dg-cell-border);
+  border-inline-end: 1px solid var(--dg-cell-border);
   border-bottom: 1px solid var(--dg-cell-border);
   vertical-align: middle;
   color: var(--dg-cell-color);
@@ -422,14 +422,14 @@
   height: 100%;
   cursor: col-resize;
   background-color: rgba(148, 163, 184, 0.1);
-  border-right: 1px solid rgba(148, 163, 184, 0.3);
+  border-inline-end: 1px solid rgba(148, 163, 184, 0.3);
   transition: all 0.15s ease;
 }
 
 .resizeHandle:hover,
 .resizeHandleActive {
   background-color: var(--goobs-blue-a20);
-  border-right: 2px solid var(--goobs-light-primary);
+  border-inline-end: 2px solid var(--goobs-light-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -612,8 +612,8 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--mr-text-muted);
-  margin-left: 4px;
-  margin-right: 4px;
+  margin-inline-start: 4px;
+  margin-inline-end: 4px;
   white-space: nowrap;
 }
 
@@ -796,9 +796,9 @@
   display: flex;
   align-items: center;
   height: 100%;
-  margin-left: auto;
+  margin-inline-start: auto;
   overflow: visible;
-  padding-right: 1rem;
+  padding-inline-end: 1rem;
   flex-shrink: 0;
 }
 
@@ -957,7 +957,7 @@
   background-color: transparent;
   border: none;
   width: 100%;
-  text-align: left;
+  text-align: start;
   transition: background-color 0.15s ease;
 }
 
@@ -1014,7 +1014,7 @@
 
 .dropdownBtn {
   width: 100%;
-  text-align: left;
+  text-align: start;
   padding: 8px 12px;
   border: 1px solid #e5e7eb;
   background: #f9f9f9;
@@ -1140,7 +1140,7 @@
 
 .manageColumnsRequired {
   font-size: 11px;
-  margin-left: 8px;
+  margin-inline-start: 8px;
   color: var(--mc-required-color);
 }
 
@@ -1436,7 +1436,7 @@
   background-color: rgba(15, 12, 5, 0.98);
   border-radius: var(--goobs-radius-xl);
   padding: 1rem;
-  padding-left: 1.25rem;
+  padding-inline-start: 1.25rem;
   margin-bottom: 0.75rem;
   border: 2px solid var(--goobs-gold-a60);
   box-shadow:
@@ -1741,7 +1741,7 @@
    -------------------------------------------------------------------------- */
 
 .fields {
-  padding-right: 2rem;
+  padding-inline-end: 2rem;
 }
 
 /* --------------------------------------------------------------------------
