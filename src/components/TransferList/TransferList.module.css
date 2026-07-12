@@ -486,3 +486,34 @@
     transform: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   FORCED COLORS / WINDOWS HIGH CONTRAST (WCAG 1.4.1 Use of Colour, 1.4.11
+   Non-text Contrast, 2.4.7 Focus Visible)
+   In forced-colors mode the UA drops every box-shadow and repaints all
+   backgrounds/borders from a small system palette. That erases the checked-row
+   selection cue: the `.listItem[data-checked='true']` background tint + glow
+   box-shadow vanish, and its 4px accent left border is repainted to the SAME
+   system colour as every other row's border, so a selected row no longer stands
+   out at the row level. Selection is still conveyed by the native checkbox
+   (which forced-colors renders natively) — this is the non-colour backstop — but
+   restore the ROW-level cue with the one selection-semantics system colour that
+   survives forced-colors: a `Highlight` outline (the system colour that denotes
+   a selected item, so it carries the right meaning, not merely a focus ring).
+   The transfer buttons' `:focus-visible` outline already survives forced-colors
+   (the UA forces its colour), but pin it to the system focus colour here too so
+   a keyboard user's position is never lost regardless of the active theme token.
+   This mirrors the outline-based forced-colors repair the rest of the library
+   uses (Switch / Field/Search / SacredGlyphFrame / SignatureField).
+   -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .listItem[data-checked='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
