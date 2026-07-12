@@ -1,4 +1,12 @@
-# a11y campaign — live status (updated 2026-07-11 6:05pm)
+# a11y campaign — live status (updated 2026-07-11 8:45pm)
+
+**GATES NOW GREEN (verified runs):** `bun run typecheck` ✅ · `bun run lint:a11y` ✅
+(all 24 class-lint modules, selftests OK, 0 violations / 464 files) · `bun run lint:css` ✅.
+Wave-2 discovery gates 7/7 COMPLETE: data-component roots, **data-action on 108 controls
+across 33 files** (canonical verb vocabulary in the module header; load-bearing values
+untouched), overridable testids, SSR hydration (locale formatting + useId), theme-literal
+token swaps (PricingTable 30), public-ref lint, 3 cheap walls. Remaining: batch resumes
+(verifies/re-fixes/class-lint stragglers), then the final Field/Shell + full-gates wave.
 
 Rolling status of the full-repo accessibility retrofit (hearing / reading-screen-reader /
 SEO-semantic) + class-first lint gating. Per-component detail: the sibling
