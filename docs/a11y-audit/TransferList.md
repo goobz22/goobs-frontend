@@ -1,8 +1,10 @@
 # TransferList — a11y audit (2026-07-11)
 
-**Status: FIXED** — every in-directory issue resolved (14 of 15); one minor
-cross-file naming improvement (issue 15) is **DEFERRED** to `Field/Dropdown`
-because a rendering-neutral fix lives in that component's API, not here.
+**Status: FIXED** — every issue resolved in-directory (17 of 17). The second
+adversarial review's three findings all landed here at root cause: destination-
+named transfer buttons (16), the `multipleSelection` combobox name fallback +
+its first-ever play coverage (15, formerly deferred — now fixed in-component),
+and a `forced-colors` / Windows High Contrast block (17). Nothing is deferred.
 
 **APG pattern:** WAI-ARIA _list of related checkboxes_ (two multi-select item
 lists) driving a pair of _move buttons_. Each list is a real `<ul>` of `<li>`s;
@@ -44,7 +46,14 @@ to fire a button) is satisfied by native semantics with no custom key handling.
 | # | Severity | WCAG | Location | Issue | Status |
 |---|----------|------|----------|-------|--------|
 | 14 | Minor | 2.4.3 Focus Order / 2.4.7 Focus Visible | `index.tsx` transfer handlers + the four `<button>`s | Activating a transfer arrow can flip that same button to `disabled` — "move all right" empties the left list so its own precondition (`currentLeft.length === 0`) becomes true; the three other arrows disable the same way at their saturating move. When a **focused** element becomes disabled the browser blurs it and focus falls to `<body>`, so a keyboard user is silently dropped out of the control (every transfer button exhibits this at its saturating case). Issue 3 fixed focus *visibility* (the ring); it did not address focus *retention*. | FIXED |
-| 15 | Minor | 4.1.2 Name, Role, Value | `index.tsx` `renderLeftColumn` (`multipleSelection`, L~423) | In the `multipleSelection` variant the category `Dropdown` is given `label={dropdownLabel \|\| ''}`; the empty string leaves the `role="combobox"` with only a weak content-derived name (its display text, "Select…") when a consumer omits `dropdownLabel`. The paired list already falls back to `aria-label="Available items"`, but the combobox does not get an equivalent fallback. | DEFERRED |
+| 15 | Minor | 4.1.2 Name, Role, Value | `index.tsx` `renderLeftColumn` (`multipleSelection`, L~471) | In the `multipleSelection` variant the category `Dropdown` is given `label={dropdownLabel \|\| ''}`; the empty string leaves the `role="combobox"` with only a weak content-derived name (its display text, "Select…") when a consumer omits `dropdownLabel`. The paired list already falls back to `aria-label="Available items"`, but the combobox got no equivalent fallback. Compounded: the whole `multipleSelection` variant had **no story/play coverage**. | FIXED |
+
+### Second adversarial review (2026-07-11, review-fixes owner-pass)
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| 16 | Moderate | 1.3.3 Sensory Characteristics / 2.4.6 Headings & Labels | `index.tsx` (pre-fix L529/537/546/554) | The four transfer buttons were named SOLELY by spatial direction — hardcoded `aria-label="move all right"` / `"move selected right"` / `"move selected left"` / `"move all left"` — never referencing the destination LIST. A screen-reader user with no visual left/right mapping cannot tell, at point of activation, that "right" = the Assigned list; only the after-the-fact `role="status"` announcement disclosed it. The labels were also hardcoded, so they did NOT adapt to consumer `leftTitle`/`rightTitle`: in the `AccessibleStructure` story the group name ("Transfer items between Available and On team") and the button names ("right"/"left") disagreed. Not in the original 15-issue table. | FIXED |
+| 17 | Minor | 1.4.1 Use of Colour / 1.4.11 Non-text Contrast / 2.4.7 | `TransferList.module.css` (no `@media (forced-colors: active)`) | No forced-colors / Windows High Contrast handling while sibling components (Switch, Field/Text, Field/Search) received it in the same sweep. In HC mode the checked-row selection tint (`.listItem[data-checked='true']` background + glow box-shadow) is dropped and the 4px accent left border repaints to the same system colour as every other row, collapsing the row-level "selected" cue. Mitigated (the native checkbox carries selection natively; the button focus outline auto-adapts) so this is a robustness/consistency gap, not a hard Level-A failure — but the auditor never evaluated forced-colors. | FIXED |
 
 **Hearing-impaired (A):** CLEAN. Grep for `new Audio` / `AudioContext` /
 `navigator.vibrate` / `<audio>` / `<video>` / `speechSynthesis` in the component
@@ -124,6 +133,30 @@ All fixes are inside the component directory (`src/components/TransferList/`).
   — no prop, DOM, `data-*`/`role`/`aria` change; the machine-test selector
   contract is untouched.
 
+#### Second adversarial review (2026-07-11, review-fixes owner-pass)
+- **Destination-named transfer buttons (issue 16).** The four arrow buttons now
+  build their `aria-label` from the destination LIST title rather than a spatial
+  direction: `move all to ${rightTitle}` / `move selected to ${rightTitle}` /
+  `move selected to ${leftTitle}` / `move all to ${leftTitle}`. This references
+  the same titles the group's own name uses, so the group name and the control
+  names can never disagree, and both adapt to consumer `leftTitle`/`rightTitle`.
+  **Markup note:** the human-facing `aria-label` text changed on all four
+  buttons; the direction-keyed `data-action` machine selectors
+  (`move-all-right` / `move-selected-right` / `move-selected-left` /
+  `move-all-left`, derived from the unchanged `name` prop) are **preserved** —
+  the test contract is untouched.
+- **`multipleSelection` combobox name fallback (issue 15).** The category
+  `Dropdown` now gets `label={dropdownLabel || 'Category'}` (was `|| ''`), so
+  when a consumer omits `dropdownLabel` the `role="combobox"` is named "Category"
+  instead of the weak content-derived "Select…". This is the same fallback shape
+  the paired list already uses (`|| 'Available items'`). **Markup note:** because
+  `Field/Dropdown` derives both the visible FieldShell label AND the trigger's
+  `aria-label` from `label`, this now renders a *visible* "Category" floating
+  label in the no-`dropdownLabel` case (previously unlabeled) — an improvement
+  (a visible label out-ranks an invisible one under WCAG) and consistent with the
+  labeled case. The variant is now exercised end-to-end by the new
+  `MultipleSelection` story, which had zero coverage before.
+
 ### Styling — `TransferList.module.css`
 - **`:focus-visible` ring on the transfer buttons (issue 3)** — themed
   `outline` (gold / light-primary / dark-primary), using `outline` (not
@@ -136,6 +169,18 @@ All fixes are inside the component directory (`src/components/TransferList/`).
   region (which uses the per-theme WCAG-AA danger-text tokens, light `#b91c1c` =
   6.47:1). Added `.srOnly` (clip-rect) for the status region, and reset the UA
   list chrome on `.listInner` now that it is a `<ul>`.
+- **`@media (forced-colors: active)` block (issue 17)** — in Windows High
+  Contrast the checked-row tint + glow box-shadow are dropped and the accent left
+  border repaints to the shared system colour, so the row-level selection cue
+  collapses. The block restores a system `highlight` outline on
+  `.listItem[data-checked='true']` (`highlight` = the system colour that denotes
+  a *selected* item, carrying the right meaning rather than a mere focus ring)
+  and pins the transfer buttons' `:focus-visible` outline to the system focus
+  colour. Selection is still carried non-visually by the native checkbox; this
+  reinstates the row-level cue for parity with the normal-mode tint. Mirrors the
+  outline-based forced-colors repair used across the library (Switch /
+  Field/Search / SacredGlyphFrame / SignatureField); lowercase `highlight` per
+  the repo's `value-keyword-case: lower` stylelint rule.
 
 ---
 
@@ -164,11 +209,36 @@ a `play` that fails against the pre-fix markup:
   `[data-action="toggle"]` selector. `InteractiveDemo` already guards the
   no-double-toggle-on-label invariant (a label click ends single-toggled).
 - **`FocusRetainedAfterTransfer`** (new, fresh owner-pass, issue 14): starts with
-  a full left list and empty right list, clicks "move all right" (which disables
-  itself), then asserts focus landed on the now-enabled "move all left" — not on
-  the disabled button and not on `<body>`. jsdom does not auto-blur a disabled
-  element, so pre-fix the assertion fails with focus trapped on the disabled
-  button; it also fails against a real browser's fall-to-`<body>`.
+  a full left list and empty right list, clicks "move all to Assigned" (which
+  disables itself), then asserts focus landed on the now-enabled "move all to
+  Unassigned" — not on the disabled button and not on `<body>`. jsdom does not
+  auto-blur a disabled element, so pre-fix the assertion fails with focus trapped
+  on the disabled button; it also fails against a real browser's fall-to-`<body>`.
+
+#### Second adversarial review (2026-07-11)
+- **`InteractiveDemo` / `FocusRetainedAfterTransfer`** (updated, issue 16): now
+  query the transfer buttons by their destination-derived names ("move selected
+  to Assigned", "move all to Assigned" / "move all to Unassigned"); a regression
+  to the old spatial `right`/`left` labels fails the lookups.
+- **`AccessibleStructure`** (extended, issue 16): with custom titles
+  `leftTitle="Available"` / `rightTitle="On team"`, asserts all four buttons are
+  findable by their title-derived names ("move all to On team", "move selected to
+  Available", …) so the button names AGREE with the group name, and asserts the
+  old "move all right"/"move all left" names no longer exist.
+- **`MultipleSelection`** (new, issue 15): renders the `multipleSelection`
+  variant WITHOUT `dropdownLabel`, asserts the category combobox is findable by
+  the "Category" fallback name, then drives the whole path end-to-end — opens the
+  dropdown, picks a category, confirms the Available list populates, transfers an
+  item to Assigned, and confirms the `role="status"` announcement. This variant
+  had zero coverage before.
+- **`AccessibilityForcedColors`** (new, issue 17): checks a row, then walks the
+  CSSOM — scoped to TransferList's own hashed CSS-module class tokens so another
+  component's block can't false-green it — to assert TransferList's
+  `@media (forced-colors: active)` block exists and restores BOTH the checked-row
+  selection cue (an outline/border on a `data-checked` rule) and the button focus
+  outline. A play function can't flip the OS forced-colors preference, so this
+  CSSOM presence gate is the regression anchor (the established Switch/Search
+  pattern); the visual result is verified under Chromatic.
 
 ---
 
@@ -178,28 +248,32 @@ a `play` that fails against the pre-fix markup:
 - `7b651e37` — review follow-ups: explicit list/listitem roles, named group, whole-row-clickable toggle
 - `4fa192fb` — stories pinning the review follow-ups
 - `72a5f77f` — fresh owner-pass: retain keyboard focus when a transfer button self-disables (issue 14) + `FocusRetainedAfterTransfer` story
+- `747309dc` — second review-pass: destination-named transfer buttons (16), `multipleSelection` combobox name fallback (15), `@media (forced-colors: active)` block (17)
+- `427be482` — second review-pass stories: `MultipleSelection` + `AccessibilityForcedColors` + destination-named button assertions
 
 ---
 
 ## Deferred
 
-- **Issue 15 (Minor, WCAG 4.1.2).** In the `multipleSelection` variant the
-  category `Dropdown` receives `label={dropdownLabel || ''}`; when a consumer
-  omits `dropdownLabel` the `role="combobox"` has only a weak content-derived
-  name ("Select…"). A fallback could be passed from *inside* this directory
-  (`label={dropdownLabel || 'Category'}`), but that would render a *visible*
-  floating label — a rendering change to a variant that currently has **no story
-  coverage** to validate it — and the combobox is not fully nameless. The clean,
-  rendering-neutral fix belongs to the `Field/Dropdown/Regular` API: let the
-  combobox take an `aria-label` independent of the visible `label` (today
-  `aria-label={label}` ties them together). **Suggested change** in
-  `src/components/Field/Dropdown/Regular/index.tsx` (~L221): accept an optional
-  `ariaLabel?: string` prop and emit `aria-label={ariaLabel ?? label}` on the
-  trigger `<button role="combobox">`, so TransferList can name the category
-  selector without forcing a visible label. Not fixed here (file outside this
-  component's ownership; low severity; degenerate config).
+**Nothing is deferred.** All three second-review findings (15, 16, 17) were
+fixable at root cause inside this component directory and are FIXED above. Issue
+15 (formerly deferred to `Field/Dropdown`) is now resolved in-component with the
+`label={dropdownLabel || 'Category'}` fallback plus the new `MultipleSelection`
+story that validates it — the review correctly noted the gap "still lives in THIS
+component."
 
-Everything else landed inside the component directory. The row checkboxes reuse
+**Optional future refinement (NOT required, NOT a blocker).** `Field/Dropdown`
+derives the combobox `aria-label` from its visible `label`, so naming the
+category selector currently also renders a visible label. If a consumer ever
+wants to name it *without* a visible label, `Field/Dropdown/Regular`
+(`src/components/Field/Dropdown/Regular/index.tsx`, ~L233 where
+`aria-label={label}` is emitted on the `<button role="combobox">`) could accept
+an optional `ariaLabel?: string` and emit `aria-label={ariaLabel ?? label}`.
+That file is outside this component's ownership and the current in-component fix
+is fully accessible (a visible label out-ranks an invisible one under WCAG), so
+this is a nicety, not a gap.
+
+Everything landed inside the component directory. The row checkboxes reuse
 `../Checkbox` (`CustomCheckbox`) unchanged — its own `:focus-visible` ring,
 themed label, and `prefers-reduced-motion` handling already satisfy the
 per-checkbox requirements, so no shared file needed editing.
