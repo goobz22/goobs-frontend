@@ -40,10 +40,14 @@
   --rg-option-padding: 0.5rem 0;
   --rg-option-hover-transform: none;
 
-  /* Radio outer ring — light */
+  /* Radio outer ring — light.
+     Border color is text-muted (#4b5563, 7.56:1 on the white canvas), NOT the
+     generic control-border grey (#cbd5e1 was only 1.48:1): the unchecked ring
+     IS the control's visual boundary and must clear WCAG 2.2 1.4.11 Non-text
+     Contrast (≥3:1). Checked/hover/focus already use primary (#2563eb, 5.17:1). */
   --rg-radio-size: 20px;
   --rg-radio-border-width: 2px;
-  --rg-radio-border-color: var(--goobs-light-border-strong);
+  --rg-radio-border-color: var(--goobs-light-text-muted);
   --rg-radio-hover-border-color: var(--goobs-light-primary);
   --rg-radio-hover-bg: rgba(59, 130, 246, 0.04);
   --rg-radio-checked-border-color: var(--goobs-light-primary);

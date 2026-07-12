@@ -127,6 +127,46 @@ export const LightCustomSize: Story = {
   globals: { backgrounds: { value: 'light' } },
 }
 
+/**
+ * Light theme with NO initial selection. Every radio renders in its unchecked
+ * state, so this is the visual baseline for the unchecked radio-ring boundary
+ * contrast (WCAG 2.2 1.4.11 Non-text Contrast: the ring must hold ≥3:1 against
+ * the white canvas — it now uses the text-muted grey #4b5563 at 7.56:1, not the
+ * old #cbd5e1 at 1.48:1). The group still exposes its accessible name and stays
+ * fully keyboard-operable with nothing checked, and the root reports the empty
+ * state via `data-filled="false"`.
+ */
+export const LightNoSelection: Story = {
+  name: 'Light/No Selection',
+  args: {
+    name: 'no-selection-radio',
+    label: 'Pick one (nothing selected yet)',
+    options: basicOptions,
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The group advertises its accessible name even with no selection.
+    const group = canvas.getByRole('radiogroup', {
+      name: 'Pick one (nothing selected yet)',
+    })
+    await expect(group).toBeInTheDocument()
+
+    // All three options render as reachable, UNCHECKED radios.
+    const radios = canvas.getAllByRole('radio')
+    await expect(radios).toHaveLength(3)
+    for (const radio of radios) {
+      await expect(radio).not.toBeChecked()
+    }
+
+    // Root reflects the empty state for the machine-test selector contract.
+    const root = canvasElement.querySelector('[data-component="RadioGroup"]')
+    await expect(root).toHaveAttribute('data-filled', 'false')
+  },
+}
+
 // --------------------------------------------------------------------------
 // DARK THEME STORIES
 // --------------------------------------------------------------------------
