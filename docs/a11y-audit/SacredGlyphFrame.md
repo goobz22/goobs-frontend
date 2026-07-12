@@ -38,8 +38,8 @@ ships no `:focus-visible` style).
   `Accessibility/Decoration Hidden, Content Exposed` story. CLEAN.
 - **Reduced motion (WCAG 2.3.3 / 2.2.2):** both animations honour
   `@media (prefers-reduced-motion: reduce)` — `.glow` freezes to a static glow
-  (`SacredGlyphFrame.module.css:36–43`) and `.glyph` drops to `animation: none`
-  (`:69–74`). The 6s glow pulse is far too slow to be a flash risk (WCAG 2.3.1),
+  (`SacredGlyphFrame.module.css:49–56`) and `.glyph` drops to `animation: none`
+  (`:82–87`). The 6s glow pulse is far too slow to be a flash risk (WCAG 2.3.1),
   and reduced-motion is the accepted stop/hide mechanism for decorative infinite
   motion (WCAG 2.2.2); all motion is `aria-hidden` so no information is lost when
   it stops. CLEAN.
@@ -106,3 +106,15 @@ directory. No shared util, Field/Shell, `src/styles/global.css`, or barrel chang
 was required. The `sacredGlowPulse` / `sacredFloat` keyframes in
 `src/utils/keyframes.ts` (not owned here) are pure decorative CSS with no
 accessibility concern.
+
+## Re-audit confirmation (2026-07-11)
+
+Independently re-audited against the full checklist. Confirmed the committed fix
+holds: the `.root:focus-visible` outline is present
+(`SacredGlyphFrame.module.css:36–39`) and the `FocusableFrameFocusRing` story
+drives DOM focus onto the frame (`SacredGlyphFrame.stories.tsx:270–308`). All
+decoration subtrees remain `aria-hidden` (`index.tsx:149`, `index.tsx:190`) and the
+content region stays exposed (`index.tsx:214`); both reduced-motion blocks are in
+place. No new issue surfaced across hearing, reading/screen-reader, SEO-semantic,
+keyboard, focus, motion, or colour-only-state. Component is fully accessible;
+nothing further to fix.
