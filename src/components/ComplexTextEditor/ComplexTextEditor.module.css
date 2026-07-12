@@ -621,6 +621,24 @@
 }
 
 /* ==========================================================================
+   VISUALLY-HIDDEN LIVE REGION — screen-reader-only text for the polite
+   role="status" announcements (mode switch, markdown preview toggle). Clipped
+   from the visual layout but present in the accessibility tree (WCAG 4.1.3
+   Status Messages). Mirrors the library's shared srOnly definition.
+   ========================================================================== */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
    KEYBOARD FOCUS — an explicit, high-contrast focus-visible outline on the
    editing surfaces. The contentEditable rich surface and the textareas set
    `outline: none` and previously relied only on a border-COLOUR change; this

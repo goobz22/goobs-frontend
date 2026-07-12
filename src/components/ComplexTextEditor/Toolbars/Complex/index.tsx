@@ -1,7 +1,7 @@
 // src/components/ComplexTextEditor/Toolbars/Complex/index.tsx
 
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import RichEditor from '../../RichEditor'
 import MarkdownEditor from '../../MarkdownEditor'
 import SimpleEditor from '../../SimpleEditor'
@@ -23,6 +23,15 @@ interface ComplexToolbarProps {
   ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the editing surface. */
   ariaLabelledBy?: string | undefined
+  /** Stable id for the currently-rendered editing surface — applied as its `id` so the visible `<label htmlFor>` can target it. */
+  editorId?: string | undefined
+}
+
+// Human-readable surface names announced to AT when the editing mode changes.
+const MODE_LABELS: Record<EditorMode, string> = {
+  simple: 'Simple text editor',
+  rich: 'Rich text editor',
+  markdown: 'Markdown editor',
 }
 
 const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
@@ -34,11 +43,19 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
   styles,
   ariaLabel,
   ariaLabelledBy,
+  editorId,
 }) => {
+  // Screen-reader announcement channel for the mode switch. Sighted users see
+  // the editing surface swap directly; AT users need the context change spoken
+  // (WCAG 4.1.3 Status Messages). Starts empty so nothing is announced on
+  // mount — populated only when the user switches mode.
+  const [announcement, setAnnouncement] = useState('')
+
   const handleModeChange = (newMode: EditorMode) => {
     const converted = convertValue(value, mode, newMode)
     onChange(converted)
     setMode(newMode)
+    setAnnouncement(`${MODE_LABELS[newMode]} selected`)
   }
 
   const handleModeChangeWrapper = (
@@ -50,6 +67,11 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
 
   return (
     <div className={cssStyles.container} data-theme={styles?.theme || 'light'}>
+      {/* Polite live region announcing the editing-surface change to screen
+          readers (WCAG 4.1.3). Visually hidden; empty until the first switch. */}
+      <span role="status" aria-live="polite" className={cssStyles.srOnly}>
+        {announcement}
+      </span>
       {styles?.showModeToggle !== false && (
         // The accessible group name goes on ButtonGroup itself — it already
         // renders its own <div role="group">, so an outer role="group" here
@@ -99,6 +121,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           minRows={minRows}
           ariaLabel={ariaLabel}
           ariaLabelledBy={ariaLabelledBy}
+          editorId={editorId}
           {...(styles ? { styles } : {})}
         />
       )}
@@ -110,6 +133,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           minRows={minRows}
           ariaLabel={ariaLabel}
           ariaLabelledBy={ariaLabelledBy}
+          editorId={editorId}
           {...(styles ? { styles } : {})}
         />
       )}
@@ -121,6 +145,7 @@ const ComplexToolbar: React.FC<ComplexToolbarProps> = ({
           minRows={minRows}
           ariaLabel={ariaLabel}
           ariaLabelledBy={ariaLabelledBy}
+          editorId={editorId}
           {...(styles ? { styles } : {})}
         />
       )}

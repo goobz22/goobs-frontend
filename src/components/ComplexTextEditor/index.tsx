@@ -82,6 +82,12 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // unlabeled (WCAG 1.3.1 / 3.3.2 / 4.1.2).
   const reactId = useId()
   const labelId = `${reactId}-label`
+  // Stable id placed on whichever editing surface is currently rendered (only
+  // one renders at a time). The visible <label> points its `htmlFor` at it so
+  // the caption is a REAL associated label — clicking it focuses the editor
+  // (native for the textarea modes) instead of being a semantically-inert
+  // <label> that labels no control.
+  const editorId = `${reactId}-editor`
   const hasVisibleLabel = Boolean(label) && !accordion
   const editorAriaLabelledBy = hasVisibleLabel ? labelId : undefined
   const editorAriaLabel = hasVisibleLabel
@@ -229,6 +235,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           styles={styles as ComplexTextEditorStyles}
           ariaLabel={editorAriaLabel}
           ariaLabelledBy={editorAriaLabelledBy}
+          editorId={editorId}
         />
       )
     } else if (editorType === 'rich') {
@@ -242,6 +249,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           styles={styles as ComplexTextEditorStyles}
           ariaLabel={editorAriaLabel}
           ariaLabelledBy={editorAriaLabelledBy}
+          editorId={editorId}
         />
       )
     } else if (editorType === 'markdown') {
@@ -255,6 +263,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           styles={styles as ComplexTextEditorStyles}
           ariaLabel={editorAriaLabel}
           ariaLabelledBy={editorAriaLabelledBy}
+          editorId={editorId}
         />
       )
     } else {
@@ -268,6 +277,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           styles={styles as ComplexTextEditorStyles}
           ariaLabel={editorAriaLabel}
           ariaLabelledBy={editorAriaLabelledBy}
+          editorId={editorId}
         />
       )
     }
@@ -277,6 +287,7 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   const labelElement = label && !accordion && (
     <label
       id={labelId}
+      htmlFor={editorId}
       className={cssStyles.label}
       {...(styles?.theme && { 'data-theme': styles.theme })}
       {...(isSacredTheme && { 'data-sacred': 'true' })}

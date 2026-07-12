@@ -15,6 +15,8 @@ type SimpleEditorProps = {
   ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the textarea. */
   ariaLabelledBy?: string | undefined
+  /** Stable id for this editing surface — the visible `<label htmlFor>` targets it so clicking the label focuses the textarea. */
+  editorId?: string | undefined
 }
 
 const SimpleEditor: React.FC<SimpleEditorProps> = ({
@@ -25,6 +27,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
   styles,
   ariaLabel,
   ariaLabelledBy,
+  editorId,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -61,6 +64,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({
       placeholder={placeholder || 'Enter text...'}
       className={cssStyles.simpleTextarea}
       data-theme={styles?.theme || 'light'}
+      {...(editorId && { id: editorId })}
       {...(ariaLabelledBy
         ? { 'aria-labelledby': ariaLabelledBy }
         : ariaLabel

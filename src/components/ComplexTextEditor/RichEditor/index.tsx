@@ -23,6 +23,8 @@ export interface RichTextEditorProps {
   ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the editable surface. */
   ariaLabelledBy?: string | undefined
+  /** Stable id for this editing surface — the visible `<label htmlFor>` targets it so clicking the label associates with the editor. */
+  editorId?: string | undefined
 }
 
 export function RichTextEditor({
@@ -32,6 +34,7 @@ export function RichTextEditor({
   styles: editorStyles,
   ariaLabel,
   ariaLabelledBy,
+  editorId,
 }: RichTextEditorProps) {
   const accordion = editorStyles?.accordionMode || false
   const accordionSummary = editorStyles?.accordionSummary || 'Rich Text Editor'
@@ -127,6 +130,7 @@ export function RichTextEditor({
           contentEditable
           role="textbox"
           aria-multiline="true"
+          {...(editorId && { id: editorId })}
           {...(ariaLabelledBy
             ? { 'aria-labelledby': ariaLabelledBy }
             : ariaLabel

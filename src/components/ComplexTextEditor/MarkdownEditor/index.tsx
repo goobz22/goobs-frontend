@@ -23,6 +23,8 @@ type MarkdownEditorProps = {
   ariaLabel?: string | undefined
   /** Id of the visible label element to associate with the textarea. */
   ariaLabelledBy?: string | undefined
+  /** Stable id for this editing surface — the visible `<label htmlFor>` targets it so clicking the label focuses the textarea. */
+  editorId?: string | undefined
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -32,11 +34,17 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   styles,
   ariaLabel,
   ariaLabelledBy,
+  editorId,
 }) => {
   // Use value prop directly - this is a controlled component
   // No internal state needed for the value itself
   const [selectedText, setSelectedText] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  // Screen-reader announcement channel for the preview toggle. Sighted users
+  // see the preview pane appear/disappear directly; AT users need the context
+  // change spoken (WCAG 4.1.3 Status Messages). Starts empty so nothing is
+  // announced on mount — populated only when the user toggles.
+  const [announcement, setAnnouncement] = useState('')
   const previewId = useId()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -85,6 +93,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const handleBold = () => handleBoldClick(selectedText, value, onChange)
   const handleItalic = () => handleItalicClick(selectedText, value, onChange)
 
+  const handleTogglePreview = () => {
+    const next = !showPreview
+    setShowPreview(next)
+    setAnnouncement(next ? 'Markdown preview shown' : 'Markdown preview hidden')
+  }
+
   // Label is now handled by parent component
 
   return (
@@ -110,13 +124,18 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           dangling IDREF (invalid ARIA relation, ARIA 1.2). */}
       <button
         type="button"
-        onClick={() => setShowPreview(!showPreview)}
+        onClick={handleTogglePreview}
         aria-pressed={showPreview}
         data-action="toggle"
         {...(showPreview && { 'aria-controls': previewId })}
       >
         Toggle Preview
       </button>
+      {/* Polite live region announcing the preview show/hide to screen readers
+          (WCAG 4.1.3). Visually hidden; empty until the first toggle. */}
+      <span role="status" aria-live="polite" className={cssStyles.srOnly}>
+        {announcement}
+      </span>
       <div className={cssStyles.markdownRow}>
         <textarea
           ref={textareaRef}
@@ -130,6 +149,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           }
           className={cssStyles.markdownTextarea}
           data-theme={theme}
+          {...(editorId && { id: editorId })}
           {...(ariaLabelledBy
             ? { 'aria-labelledby': ariaLabelledBy }
             : ariaLabel
