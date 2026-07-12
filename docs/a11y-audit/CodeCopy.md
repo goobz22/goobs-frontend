@@ -171,10 +171,13 @@ The prior pass's two deferrals are both now **resolved, not deferred**:
 - **Shared `Button` `:focus-visible` (WCAG 2.4.7) — RESOLVED upstream, not by us.** A parallel
   `Button` a11y audit added a complete, theme-aware `:focus-visible` **outline** ring to
   `src/components/Button/Button.module.css` (`.button:focus-visible { outline: 2px solid
-  var(--goobs-sacred-focus-ring); outline-offset: 2px }`, with `[data-theme='light']` →
+  var(--goobs-sacred-primary); outline-offset: 2px }` at line 93, with `[data-theme='light']` →
   `--goobs-light-primary` and `[data-theme='dark']` → `--goobs-dark-primary` colour overrides
-  chosen to clear the 3:1 non-text-contrast floor; commits `5f4ce6a7` then `21fb5db6`). All
-  tokens resolve. Because the copy control **is** a `Button`, it now inherits this ring in all
+  chosen to clear the 3:1 non-text-contrast floor; commits `5f4ce6a7` then `21fb5db6`). The
+  sacred ring uses the **opaque** `--goobs-sacred-primary` (not the translucent
+  `--goobs-sacred-focus-ring` = `--goobs-gold-a60`) on purpose: sacred is the component-wide
+  default surface, so an opaque ring keeps its contrast backdrop-independent and ≥3:1 (see the
+  Button.module.css comment at lines 88–92). All three tokens resolve. Because the copy control **is** a `Button`, it now inherits this ring in all
   three themes — so the earlier CodeCopy-local ring was removed as redundant (Issue 10). The
   previously-suggested `box-shadow: var(--goobs-focus-*)` fix is **stale and must NOT be
   applied**: `Button` deliberately uses an `outline` (comment: "so it never fights the hover
