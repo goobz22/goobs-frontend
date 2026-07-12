@@ -1159,3 +1159,125 @@ export const ReflowSafeMarkdownPreview: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// A11Y — REVIEW FIXES (2026-07-11 adversarial review, second pass)
+// --------------------------------------------------------------------------
+
+/**
+ * The visible caption is a REAL associated `<label>`: its `htmlFor` targets the
+ * `id` on the currently-rendered editing surface (not a semantically-inert
+ * `<label>` that labels no control), so clicking the caption focuses the editor
+ * — the native label-to-control click affordance (WCAG 1.3.1 / 3.3.2).
+ */
+export const LabelClickFocus: Story = {
+  name: 'A11y — Label htmlFor click-focus',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Meeting Notes"
+      editorType="simple"
+      initialValue="Notes go here."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The editing surface (textarea = implicit textbox) carries an id, and the
+    // visible <label>'s `for` points at exactly that id.
+    const textbox = canvas.getByRole('textbox', { name: 'Meeting Notes' })
+    const label = canvasElement.querySelector('label') as HTMLLabelElement
+    expect(label).not.toBeNull()
+    expect(label.getAttribute('for')).toBeTruthy()
+    expect(label.getAttribute('for')).toBe(textbox.getAttribute('id'))
+
+    // Clicking the caption focuses the associated textarea (native affordance
+    // restored by the htmlFor/id wiring).
+    await userEvent.click(label)
+    expect(textbox).toHaveFocus()
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Switching the editing mode swaps the visible surface with no on-screen text
+ * change a screen-reader user would notice, so a polite `role="status"` live
+ * region announces the new surface (WCAG 4.1.3 Status Messages). It starts
+ * empty (no announcement on mount) and updates on each switch.
+ */
+export const ModeSwitchAnnouncement: Story = {
+  name: 'A11y — Mode Switch Announcement',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Document"
+      editorType="rich"
+      initialValue="Announcement demo."
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // A polite status region exists and is empty on mount (rich mode renders no
+    // preview announcer, so this first status IS the mode announcer).
+    const status = canvasElement.querySelector(
+      '[role="status"]'
+    ) as HTMLElement
+    expect(status).not.toBeNull()
+    expect(status).toHaveAttribute('aria-live', 'polite')
+    expect(status.textContent).toBe('')
+
+    // Switching to Markdown announces the new editing surface.
+    await userEvent.click(canvas.getByRole('button', { name: /markdown/i }))
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Markdown editor selected')
+    )
+
+    // Switching to Simple announces again.
+    await userEvent.click(canvas.getByRole('button', { name: /^simple$/i }))
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Simple text editor selected')
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Toggling the markdown preview shows/hides the preview pane; a polite
+ * `role="status"` live region in the markdown editor announces the change so an
+ * AT user is told the context changed (WCAG 4.1.3). Starts empty; the preview
+ * announcer is the last status region on the page.
+ */
+export const PreviewToggleAnnouncement: Story = {
+  name: 'A11y — Markdown Preview Announcement',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Markdown Content"
+      editorType="markdown"
+      initialValue="# Title"
+      styles={{ theme: 'light' }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const toggle = canvas.getByRole('button', { name: 'Toggle Preview' })
+
+    // Markdown mode renders two polite status regions (mode + preview); the
+    // preview announcer, which lives inside the markdown editor, is the last.
+    const statuses = canvasElement.querySelectorAll('[role="status"]')
+    const status = statuses[statuses.length - 1] as HTMLElement
+    expect(status).toHaveAttribute('aria-live', 'polite')
+    expect(status.textContent).toBe('')
+
+    await userEvent.click(toggle)
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Markdown preview shown')
+    )
+
+    await userEvent.click(toggle)
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Markdown preview hidden')
+    )
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
