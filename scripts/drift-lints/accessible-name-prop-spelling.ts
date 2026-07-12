@@ -46,6 +46,12 @@ import type { DriftFile, DriftInstance, DriftLint } from '../lint-drift'
  *     (`extends React.ButtonHTMLAttributes<…>`) — sanctioned AND invisible
  *     here (nothing to freeze; it grows freely).
  *   - JSX usage `<button aria-label="…">` and JSDoc prose (comments blanked).
+ *   - inline seam-named TYPE ARGUMENTS mid-expression, e.g.
+ *     `React.isValidElement<{ 'aria-describedby'?: string }>(children)` — a
+ *     type predicate reading a FOREIGN child's native attribute, not a goobs
+ *     Props member. Excluded by requiring the member to occupy its own line
+ *     (the codebase writes every real member one-per-line; the type-guard sits
+ *     mid-expression after `isValidElement<{`).
  */
 
 /** Blank `//` and `/* … *​/` comment content (string-aware, newlines kept) so
@@ -112,6 +118,15 @@ function lineAt(text: string, index: number): number {
   return text.slice(0, index).split('\n').length
 }
 
+// A real Props member occupies its own line: everything from the line start up
+// to the match is whitespace. This excludes mid-expression seam-named type
+// arguments like `isValidElement<{ 'aria-describedby'?: string }>` (a type
+// predicate about a foreign child, not a member of a goobs component's props).
+function isStandaloneMember(text: string, index: number): boolean {
+  const lineStart = text.lastIndexOf('\n', index - 1) + 1
+  return /^\s*$/.test(text.slice(lineStart, index))
+}
+
 const lint: DriftLint = {
   name: 'accessible-name-prop-spelling',
   scope: 'ts',
@@ -128,6 +143,7 @@ const lint: DriftLint = {
       CAMEL.lastIndex = 0
       let m: RegExpExecArray | null
       while ((m = CAMEL.exec(text))) {
+        if (!isStandaloneMember(text, m.index)) continue
         out.push({
           file: path,
           line: lineAt(text, m.index),
@@ -136,6 +152,7 @@ const lint: DriftLint = {
       }
       QUOTED.lastIndex = 0
       while ((m = QUOTED.exec(text))) {
+        if (!isStandaloneMember(text, m.index)) continue
         out.push({
           file: path,
           line: lineAt(text, m.index),
@@ -168,6 +185,9 @@ const lint: DriftLint = {
       'interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  label: string\n}',
       // JSX usage — an attribute, not a Props member declaration.
       '<button aria-label="Send" />',
+      // Inline type-guard argument reading a foreign child's native attribute —
+      // a type predicate mid-expression, not a goobs Props member (own-line rule).
+      "const ok =\n  React.isValidElement<{ 'aria-describedby'?: string }>(children)",
       // JSDoc prose describing the shape — blanked before scanning.
       '/** Optional ariaLabel?: string for the link; pass \'aria-label\' to override. */\nconst x = 1',
     ],
