@@ -184,6 +184,186 @@ export const DisabledInteractive: Story = {
 }
 
 /**
+ * A chip that is BOTH clickable (`onClick`) and deletable (`onDelete`). This is
+ * the one combination that must NOT be a `role="button"` wrapping the focusable
+ * delete `<button>` (an ARIA presentational-children conflict → inconsistent AT
+ * announcement, WCAG 4.1.2). Instead the root becomes a `role="group"` holding
+ * two sibling `<button>`s: the primary action (carrying the toggle
+ * `aria-pressed`) and the delete control. The play function pins the group
+ * shape, that the two controls are siblings (neither nested in the other), that
+ * each fires only its own handler, and that the primary action activates on
+ * Enter via native button semantics.
+ */
+export const ClickableDeletable: Story = {
+  name: 'State/Clickable + Deletable',
+  args: {
+    label: 'Assignee',
+    onClick: fn(),
+    onDelete: fn(),
+    active: false,
+    styles: {
+      theme: 'light',
+    },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    // The root is a role="group" — NOT a role="button" (which would wrap the
+    // focusable delete button, the ARIA anti-pattern this restructure removes).
+    const root = canvasElement.querySelector(
+      '[data-component="Chip"]'
+    ) as HTMLElement | null
+    await expect(root).not.toBeNull()
+    await expect(root).toHaveAttribute('role', 'group')
+
+    // Primary action: a real <button> (not the root <div>) reporting its
+    // pressed state for the toggle-filter use-case.
+    const action = canvas.getByRole('button', { name: 'Assignee' })
+    await expect(action.tagName).toBe('BUTTON')
+    await expect(action).toHaveAttribute('data-chip-action', 'true')
+    await expect(action).toHaveAttribute('aria-pressed', 'false')
+
+    // Delete control: a separate, real <button>.
+    const del = canvas.getByRole('button', { name: 'Remove Assignee' })
+    await expect(del.tagName).toBe('BUTTON')
+
+    // The two controls are SIBLINGS under the group root — neither is nested
+    // inside the other (the whole point of the group restructure).
+    await expect(action.contains(del)).toBe(false)
+    await expect(del.contains(action)).toBe(false)
+    await expect(action.parentElement).toBe(root)
+    await expect(del.parentElement).toBe(root)
+
+    // Each control fires only its own handler.
+    await userEvent.click(action)
+    await expect(args.onClick).toHaveBeenCalledTimes(1)
+    await expect(args.onDelete).not.toHaveBeenCalled()
+
+    await userEvent.click(del)
+    await expect(args.onDelete).toHaveBeenCalledTimes(1)
+    await expect(args.onClick).toHaveBeenCalledTimes(1)
+
+    // Keyboard: the primary action is a native <button>, so it activates on
+    // Enter without any role="button" keydown shim.
+    action.focus()
+    await expect(action).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(args.onClick).toHaveBeenCalledTimes(2)
+  },
+}
+
+/**
+ * Pins the accessible-name placement rule (ARIA 1.2): `aria-label` is prohibited
+ * on a generic (roleless) element. A plain decorative chip (`variant="chip"`, no
+ * `onClick` / `onDelete` / explicit role) is roleless, so it carries NO
+ * `aria-label` — its visible text is the accessible name. Supplying an explicit
+ * `ariaLabel` signals the caller wants a specific name, which needs a
+ * name-bearing role, so the chip is promoted to `role="img"` (a single named
+ * token). The play function pins both: the unnamed chip stays roleless with no
+ * `aria-label`, and the explicitly-named one exposes `role="img"` + the label.
+ */
+export const DecorativeLabeling: Story = {
+  name: 'A11y/Decorative Labeling',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Chip label="Plain" styles={{ theme: 'light' }} />
+      <Chip
+        label="Custom"
+        ariaLabel="Custom status token"
+        styles={{ theme: 'light' }}
+      />
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const chips = canvasElement.querySelectorAll('[data-component="Chip"]')
+    await expect(chips).toHaveLength(2)
+
+    // A roleless decorative chip must NOT carry aria-label (invalid on generic)
+    // and must not invent a role — the visible text is the accessible name.
+    const [plain, custom] = Array.from(chips) as HTMLElement[]
+    await expect(plain).not.toHaveAttribute('role')
+    await expect(plain).not.toHaveAttribute('aria-label')
+
+    // An explicitly-named decorative chip gets a name-bearing role (img) so the
+    // aria-label lands on an element that supports it.
+    await expect(custom).toHaveAttribute('role', 'img')
+    await expect(custom).toHaveAttribute('aria-label', 'Custom status token')
+  },
+}
+
+/**
+ * Pins the focus-ring contrast fix (WCAG 2.4.11 Focus Appearance / 1.4.11
+ * Non-text Contrast — ≥3:1). The shared `--goobs-{light,dark}-focus-ring`
+ * tokens are translucent blues that fall below 3:1 over their surfaces, so Chip
+ * overrides `--chip-focus` per theme with opaque high-contrast blues. This play
+ * function resolves the effective `--chip-focus` color (via a probe element that
+ * inherits it) and asserts it is opaque and clears 3:1 against the theme's
+ * surface — so a regression back to the below-threshold shared token fails here.
+ */
+export const FocusRingContrast: Story = {
+  name: 'A11y/Focus Ring Contrast',
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Chip label="Light" onClick={fn()} styles={{ theme: 'light' }} />
+      <Chip label="Dark" onClick={fn()} styles={{ theme: 'dark' }} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    type Rgb = { r: number; g: number; b: number; a: number }
+    const parseRgb = (value: string): Rgb => {
+      const match = value.match(/rgba?\(([^)]+)\)/)
+      if (!match) throw new Error(`unparseable color: ${value}`)
+      const parts = match[1].split(',').map(part => parseFloat(part.trim()))
+      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 }
+    }
+    const relLum = ({ r, g, b }: Rgb): number => {
+      const channel = (c: number) => {
+        const s = c / 255
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+      }
+      return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+    }
+    const contrast = (x: Rgb, y: Rgb): number => {
+      const lx = relLum(x)
+      const ly = relLum(y)
+      const hi = Math.max(lx, ly)
+      const lo = Math.min(lx, ly)
+      return (hi + 0.05) / (lo + 0.05)
+    }
+
+    // Resolve the effective --chip-focus color by inheriting it onto a probe.
+    const resolveFocus = (chip: HTMLElement): Rgb => {
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--chip-focus)'
+      chip.appendChild(probe)
+      const color = getComputedStyle(probe).color
+      chip.removeChild(probe)
+      return parseRgb(color)
+    }
+
+    const [lightChip, darkChip] = Array.from(
+      canvasElement.querySelectorAll('[data-component="Chip"]')
+    ) as HTMLElement[]
+
+    // Light theme: the ring sits over a white / near-white page surface.
+    const lightRing = resolveFocus(lightChip)
+    await expect(lightRing.a).toBe(1)
+    await expect(
+      contrast(lightRing, { r: 255, g: 255, b: 255, a: 1 })
+    ).toBeGreaterThanOrEqual(3)
+
+    // Dark theme: the ring sits over a dark page surface (≈ #111827).
+    const darkRing = resolveFocus(darkChip)
+    await expect(darkRing.a).toBe(1)
+    await expect(
+      contrast(darkRing, { r: 17, g: 24, b: 39, a: 1 })
+    ).toBeGreaterThanOrEqual(3)
+  },
+}
+
+/**
  * Pins the reduced-motion contract (WCAG 2.3.3): the module carries a
  * `@media (prefers-reduced-motion: reduce)` block that zeroes the chip's
  * color/border/shadow transitions on `.root` and `.closeButton`. A play
