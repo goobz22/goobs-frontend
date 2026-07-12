@@ -68,12 +68,9 @@ import type { TableProps, ColumnDef, CompositeFieldConfig } from '../types'
  * getRowId({ id: 123 }) // '123'
  * getRowId({}) // ''
  */
-export function getRowId(row: {
-  id?: string | number
-  _id?: string | number
-}): string {
-  return String(row.id ?? row._id ?? '')
-}
+// getRowId moved to ../utils/getRowId (leaf module) to break the
+// Table <-> Rows import cycle; re-exported so existing importers keep working.
+export { getRowId } from '../utils/getRowId'
 
 /**
  * TABLE COMPONENT
