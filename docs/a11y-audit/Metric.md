@@ -13,10 +13,12 @@ things, audited together:
 
 - **`MetricsAccordion` → Disclosure** (single toggle button + single collapsible panel),
   named "accordion" but structurally a disclosure. Correctly implemented core: native
-  `<button>` with `aria-expanded`, `aria-controls={panelId}`, panel `role="region"`
-  `aria-label={title}`, panel unmounted while collapsed, chevron `aria-hidden`. Keyboard
-  Enter/Space/Tab work natively. Gaps were focus visibility, motion, and the missing
-  heading wrapper the WAI-ARIA accordion pattern recommends.
+  `<button>` with `aria-expanded`, `aria-controls={panelId}` (only when a panel exists),
+  panel `role="region"` `aria-label={title}`, panel kept mounted while collapsed and hidden
+  via the native `hidden` attribute (Issue 7), chevron `aria-hidden`. Keyboard
+  Enter/Space/Tab work natively. Gaps were focus visibility, motion, the missing heading
+  wrapper the WAI-ARIA accordion pattern recommends, and the collapsed-disclosure
+  dangling-IDREF / SSR-content-absence defect (Issue 7).
 - **`MetricCard` → non-interactive display** (`role="group"` labelled `"<label>: <value>"`).
   Already sound: decorative icon `aria-hidden`, trend conveyed by arrow glyph + text +
   `aria-label` + `data-metric-trend` (not colour-alone), all content in the SSR'd HTML.
@@ -31,6 +33,7 @@ things, audited together:
 | 4 | minor | 1.3.1 Info and Relationships | `Accordion/index.tsx` `renderCard` / `metricsRow` (was line ~191, ~223) | In `metrics` mode the KPI strip rendered as sibling `<div>`s in a flex `<div>` — **no list semantics**, so screen readers got no "list, N items" affordance; grouped-mode card rows were not programmatically tied to their visible group label. | FIXED |
 | 5 | minor | 2.3.3 Animation from Interactions | `Card/Card.module.css` `.card` (`transition: border-color 0.2s`, line ~42) | Card border-colour transition had **no `prefers-reduced-motion` handling**. | FIXED |
 | 6 | moderate | 1.3.1 Info and Relationships | `Accordion/index.tsx` grouped `<ul>` (line ~247) + flat `<ul>` (line ~258) | **Adversarial-review follow-up to Issue 4.** Both new metric `<ul>`s carried NO explicit `role="list"` while `.metricsRow` sets `list-style:none` (`Accordion.module.css:145`). WebKit removes the implicit `list` role from any bulletless `<ul>`, so VoiceOver (primary iOS/macOS SR) would NOT announce "list, N items" — silently defeating Issue 4's own fix. The library already documents this exact convention (`List/index.tsx:85`, `Card/index.tsx`, `ListItemCard`, `ProjectBoard/board/index.tsx`). | FIXED |
+| 7 | minor | 4.1.2 Name/Role/Value (dangling IDREF) + SEO | `Accordion/index.tsx` panel render (was `{isExpanded && (…)}`, line ~345) + toggle `aria-controls` (line ~302) | **Adversarial-review follow-up.** The panel was conditionally rendered (`{isExpanded && …}`) while `aria-controls={panelId}` was set UNCONDITIONALLY, so while collapsed (the `initiallyOpen=false` default) `aria-controls` was a **dangling IDREF** to a non-existent element (axe needs-review; ARIA-hygiene defect). It also meant the metric card content was **absent from the collapsed SSR/DOM**, contradicting this report's own SEO claim that all primary content ships in the SSR'd HTML. The library's own sibling `Accordion` (`src/components/Accordion/index.tsx:245-252, 366-379`) deliberately avoids exactly this: panel always mounted via `hidden={!expanded}`, `aria-controls` gated on `hasPanel`. Fixed by mirroring it: panel now always mounted when content exists, toggled via native `hidden`; `aria-controls={hasPanel ? panelId : undefined}`. | FIXED |
 
 ## Hearing
 
@@ -70,13 +73,22 @@ conveyed by sound; the expand/collapse and trend states are all visual + program
   the (decorative) chevron rotation. Confirmed no colour-alone state (1.4.1).
 - **Motion (Issues 2, 5)** — both module CSS files now have
   `@media (prefers-reduced-motion: reduce)` blocks zeroing the chevron and card transitions.
+- **Disclosure mounting (Issue 7)** — the panel is now always mounted whenever the accordion
+  has content and its collapsed visibility is toggled with the native `hidden` attribute
+  (mirroring the sibling `Accordion`). Collapsed → removed from the a11y tree + layout but
+  left in the DOM, so `aria-controls` always resolves to a real element (no dangling IDREF,
+  WCAG 4.1.2) and the content ships in the SSR'd HTML (SEO). `aria-controls` is emitted only
+  when a panel exists (`hasPanel`), matching the sibling's `aria-controls={hasPanel ? … : undefined}`.
 
 ## SEO semantics
 
 - Real `<button>` (not an onClick div), real `<h1>`–`<h6>` when `headingLevel` is set, real
   `<ul>`/`<li>` for the metric list, panel `role="region"` landmark labelled by the title.
 - All primary content (titles, values, labels, trend text) is plain text present in the
-  SSR'd HTML — no client-only injection, no canvas/QR alternative needed.
+  SSR'd HTML — no client-only injection, no canvas/QR alternative needed. **Now genuinely
+  true even when collapsed** (Issue 7): the panel is always mounted (native `hidden` toggles
+  visibility), so a crawler sees the KPI content in the collapsed default state, not just
+  after a client-side expand.
 - No `linkComponent`/`<a>` surface in this component (no links to make crawlable).
 
 ## Fixes applied
@@ -91,6 +103,11 @@ conveyed by sound; the expand/collapse and trend states are all visual + program
    `<ul>` **with explicit `role="list"`** (Issue 6); grouped rows `aria-labelledby` their group
    label; `reactId` added to the `renderedMetrics` `useMemo` deps.
 4. `Card/Card.module.css`: `@media (prefers-reduced-motion: reduce)` block for `.card`.
+5. `Accordion/index.tsx` (Issue 7): panel now always mounted when content exists (`hasPanel`)
+   and toggled with the native `hidden` attribute instead of `{isExpanded && …}`;
+   `aria-controls` gated on `hasPanel` so it never dangles when collapsed. `Accordion.module.css`:
+   panel comment updated to note it relies on `hidden` (`.panel` sets no `display` so `hidden`
+   wins). Mirrors the sibling `src/components/Accordion/index.tsx`.
 
 No existing prop, export, `data-*`, `role`, or `aria-*` attribute was renamed or removed;
 all changes are additive. Machine-test selectors preserved
@@ -107,6 +124,11 @@ Yes. `Accordion/metricsAccordion.stories.tsx`:
 - `A11y/Grouped List Semantics` — grouped metrics + `headingLevel: 3`. Now carries a **`play`
   regression assertion** that EVERY grouped `<ul>` has both `role="list"` and an
   `aria-labelledby` — pinning both the Issue 4 label association and the Issue 6 explicit role.
+- `States/Collapsed` — now carries a **`play` regression assertion** for Issue 7: while
+  collapsed the panel is still MOUNTED, carries the `hidden` attribute, is the resolvable
+  target of the toggle's `aria-controls` (no dangling IDREF), and its collapsed DOM actually
+  contains the KPI content (SSR/SEO). Fails if the panel reverts to a `{isExpanded && …}`
+  conditional render.
 
 `MetricCard.stories.tsx`:
 - `Accordion/Heading Level` — array-mode accordion with `headingLevel={3}`.
