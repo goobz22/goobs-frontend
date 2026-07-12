@@ -11,6 +11,8 @@ import {
   parse,
   addMonths,
   subMonths,
+  addYears,
+  subYears,
   addWeeks,
   subWeeks,
   addDays,
@@ -664,7 +666,9 @@ export default function BigCalendar({
 
   // Month grid keyboard model (WAI-ARIA Grid / APG date-picker):
   // arrows move by day/week, Home/End jump to the week edge, PageUp/PageDown
-  // change the month (keeping focus on the equivalent day), Enter/Space select.
+  // change the month (Shift+PageUp/PageDown change the YEAR — per the APG
+  // date-picker grid pattern) keeping focus on the equivalent day, Enter/Space
+  // select.
   const handleMonthCellKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
     index: number
@@ -694,16 +698,22 @@ export default function BigCalendar({
         target = Math.min(index - (index % 7) + 6, len - 1)
         break
       case 'PageUp': {
+        // Shift+PageUp = previous year; PageUp = previous month.
         event.preventDefault()
-        const nd = subMonths(viewDates[index]!, 1)
+        const nd = event.shiftKey
+          ? subYears(viewDates[index]!, 1)
+          : subMonths(viewDates[index]!, 1)
         setSelectedDate(nd)
         onDateChange?.(nd)
         requestCellFocus(format(nd, 'yyyy-MM-dd'))
         return
       }
       case 'PageDown': {
+        // Shift+PageDown = next year; PageDown = next month.
         event.preventDefault()
-        const nd = addMonths(viewDates[index]!, 1)
+        const nd = event.shiftKey
+          ? addYears(viewDates[index]!, 1)
+          : addMonths(viewDates[index]!, 1)
         setSelectedDate(nd)
         onDateChange?.(nd)
         requestCellFocus(format(nd, 'yyyy-MM-dd'))
@@ -960,15 +970,43 @@ export default function BigCalendar({
                         .slice(0, 3)
                         .map(event => renderEvent(event, true))}
                       {dayEvents.length > 3 && (
-                        <Typography
-                          styles={{
-                            ...styles,
-                            fontSize: '0.65rem',
-                            marginTop: '2px',
+                        // The overflow indicator is a real <button>: the events
+                        // past the first three are otherwise unreachable by
+                        // keyboard / AT. Activating it opens the day view for
+                        // this date, where every event on the day is rendered
+                        // (WCAG 2.1.1 Keyboard, 4.1.2). stopPropagation keeps the
+                        // cell's own day-selection click from also firing.
+                        <button
+                          type="button"
+                          className={cssStyles.moreEventsButton}
+                          data-action="view-more"
+                          aria-label={`View all ${dayEvents.length} events on ${format(
+                            day,
+                            'EEEE, MMMM d, yyyy'
+                          )}`}
+                          onClick={e => {
+                            e.stopPropagation()
+                            setView('day')
+                            setSelectedDate(day)
+                            emitDiag({
+                              type: 'component.state',
+                              component: 'BigCalendar',
+                              state: 'day',
+                            })
+                            onViewChange?.('day')
+                            onDateChange?.(day)
                           }}
                         >
-                          +{dayEvents.length - 3} more
-                        </Typography>
+                          <Typography
+                            styles={{
+                              ...styles,
+                              fontSize: '0.65rem',
+                              marginTop: '2px',
+                            }}
+                          >
+                            +{dayEvents.length - 3} more
+                          </Typography>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -1042,13 +1080,17 @@ export default function BigCalendar({
             ))}
           </div>
 
-          {/* The hour cells share a single roving tab stop navigated by arrow
-              keys; `role="toolbar"` advertises that composite keyboard model to
-              AT (a bare group does not), keeping every cell keyboard-reachable
-              via one tab stop + arrows (WCAG 2.1.1). */}
+          {/* The hour cells are a 2-D ARIA grid (row = day column, cell = hour)
+              with a single roving tab stop navigated by arrow keys (Left/Right
+              by day, Up/Down by hour). `role="grid"` (not toolbar) is required
+              so an hour cell — a `role="gridcell"` — can legitimately CONTAIN
+              the clickable event `<button>` without the invalid nested-
+              interactive `<button role="button">` a toolbar item would force;
+              a grid is also inherently 2-D so it needs no aria-orientation
+              (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value). */}
           <div
             className={cssStyles.weekDaysContainer}
-            role="toolbar"
+            role="grid"
             aria-label={`Hour cells, week of ${format(startOfWeek(selectedDate), 'MMMM d, yyyy')}`}
           >
             {viewDates.map((day, dayIndex) => {
@@ -1059,6 +1101,8 @@ export default function BigCalendar({
               return (
                 <div
                   key={dayKey}
+                  role="row"
+                  aria-label={format(day, 'EEEE, MMMM d, yyyy')}
                   className={mergeClassNames(
                     cssStyles.weekDayColumn,
                     isSelected ? cssStyles.weekDayColumnSelected : undefined
@@ -1081,12 +1125,12 @@ export default function BigCalendar({
                     return (
                       <div
                         key={`${dayKey}-${hour}`}
-                        role="button"
+                        role="gridcell"
                         tabIndex={
                           effectiveFocusKey === cellFocusKey ? 0 : -1
                         }
                         data-focus-key={cellFocusKey}
-                        aria-pressed={spanSelected}
+                        aria-selected={spanSelected}
                         aria-current={isCurrentHour ? 'time' : undefined}
                         aria-label={`${format(setHours(day, hour), 'EEEE, MMMM d, yyyy, h a')}${
                           hourEvents.length
@@ -1179,16 +1223,19 @@ export default function BigCalendar({
             ))}
           </div>
 
-          {/* Vertical stack of hour cells sharing one roving tab stop; the
-              `toolbar` role + aria-orientation advertise the arrow-key model to
-              AT (a bare group does not) — WCAG 2.1.1. */}
+          {/* Single-column ARIA grid: each hour is a `role="row"` holding one
+              `role="gridcell"`, sharing one roving tab stop (Up/Down move by
+              hour). `role="grid"` (not toolbar) lets an hour gridcell legitimately
+              CONTAIN the clickable event `<button>` without the invalid nested-
+              interactive nesting a toolbar item would force; a grid is inherently
+              multi-dimensional so it needs no aria-orientation (WCAG 2.1.1,
+              4.1.2). */}
           <div
             className={mergeClassNames(
               cssStyles.dayContentColumn,
               isSelected ? cssStyles.dayContentColumnSelected : undefined
             )}
-            role="toolbar"
-            aria-orientation="vertical"
+            role="grid"
             aria-label={`Hour cells, ${format(selectedDate, 'EEEE, MMMM d, yyyy')}`}
           >
             {hours.map((hour, hourIndex) => {
@@ -1206,31 +1253,36 @@ export default function BigCalendar({
               )
               const cellFocusKey = timeFocusKey(selectedDate, hour)
               return (
-                <div
-                  key={hour}
-                  role="button"
-                  tabIndex={effectiveFocusKey === cellFocusKey ? 0 : -1}
-                  data-focus-key={cellFocusKey}
-                  aria-pressed={spanSelected}
-                  aria-current={isCurrentHour ? 'time' : undefined}
-                  aria-label={`${format(setHours(selectedDate, hour), 'EEEE, MMMM d, yyyy, h a')}${
-                    hourEvents.length
-                      ? `, ${hourEvents.length} event${hourEvents.length > 1 ? 's' : ''}`
-                      : ''
-                  }`}
-                  className={mergeClassNames(
-                    cssStyles.hourCell,
-                    isCurrentHour ? cssStyles.hourCellCurrent : undefined,
-                    spanSelected ? cssStyles.hourCellSelected : undefined
-                  )}
-                  style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
-                  onClick={() => {
-                    setFocusedCellKey(cellFocusKey)
-                    activateHourCell(selectedDate, hour)
-                  }}
-                  onKeyDown={e => handleTimeCellKeyDown(e, 0, hourIndex)}
-                >
-                  {hourEvents.map(event => renderEvent(event))}
+                // The row wrapper gives the single-column grid valid
+                // grid > row > gridcell structure; `display: contents`
+                // (cssStyles.gridRow) keeps the hour cell a direct flex child of
+                // the day column so the layout is unchanged.
+                <div key={hour} role="row" className={cssStyles.gridRow}>
+                  <div
+                    role="gridcell"
+                    tabIndex={effectiveFocusKey === cellFocusKey ? 0 : -1}
+                    data-focus-key={cellFocusKey}
+                    aria-selected={spanSelected}
+                    aria-current={isCurrentHour ? 'time' : undefined}
+                    aria-label={`${format(setHours(selectedDate, hour), 'EEEE, MMMM d, yyyy, h a')}${
+                      hourEvents.length
+                        ? `, ${hourEvents.length} event${hourEvents.length > 1 ? 's' : ''}`
+                        : ''
+                    }`}
+                    className={mergeClassNames(
+                      cssStyles.hourCell,
+                      isCurrentHour ? cssStyles.hourCellCurrent : undefined,
+                      spanSelected ? cssStyles.hourCellSelected : undefined
+                    )}
+                    style={{ ['--bc-hour-height' as string]: `${hourHeight}px` }}
+                    onClick={() => {
+                      setFocusedCellKey(cellFocusKey)
+                      activateHourCell(selectedDate, hour)
+                    }}
+                    onKeyDown={e => handleTimeCellKeyDown(e, 0, hourIndex)}
+                  >
+                    {hourEvents.map(event => renderEvent(event))}
+                  </div>
                 </div>
               )
             })}

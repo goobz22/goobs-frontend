@@ -726,3 +726,120 @@ export const A11yClearFilters: Story = {
     )
   },
 }
+
+// Five events on a single day (June 15) so month view caps at three and shows a
+// "+2 more" overflow control.
+const overflowEvents: CalendarEvent[] = Array.from({ length: 5 }, (_, i) => ({
+  id: `of${i + 1}`,
+  title: `Overflow Event ${i + 1}`,
+  startDate: at(15, 9 + i, 0),
+  endDate: at(15, 9 + i, 30),
+  color: '#1d4ed8',
+}))
+
+/**
+ * Shift+PageUp / Shift+PageDown page the month grid by YEAR (part of the cited
+ * APG date-picker grid keyboard pattern), carrying the roving focus to the same
+ * day of the new year (WCAG 2.1.1; `handleMonthCellKeyDown` Shift+Page branch).
+ */
+export const A11yMonthYearNavigation: Story = {
+  name: 'A11y/Month Year Navigation',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'month',
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const start = canvas.getByRole('gridcell', { name: /June 15, 2026/ })
+    start.focus()
+    expect(start).toHaveFocus()
+
+    // Shift+PageDown → next year; focus follows to June 15, 2027.
+    await userEvent.keyboard('{Shift>}{PageDown}{/Shift}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 15, 2027/ })
+      ).toHaveFocus()
+    )
+    expect(canvas.getByRole('grid')).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('June 2027')
+    )
+
+    // Shift+PageUp → previous year; focus follows back to June 15, 2026.
+    await userEvent.keyboard('{Shift>}{PageUp}{/Shift}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('gridcell', { name: /June 15, 2026/ })
+      ).toHaveFocus()
+    )
+  },
+}
+
+/**
+ * The month-cell "+N more" overflow indicator is a real, labelled `<button>`
+ * (not inert text): the events past the first three are otherwise unreachable by
+ * keyboard / AT. Activating it opens the day view for that date so every event
+ * on the day becomes reachable (WCAG 2.1.1 Keyboard, 4.1.2).
+ */
+export const A11yMonthOverflowButton: Story = {
+  name: 'A11y/Month Overflow Button',
+  args: {
+    events: overflowEvents,
+    currentDate: anchor,
+    view: 'month',
+    onViewChange: fn(),
+    onDateChange: fn(),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+
+    const moreButton = canvas.getByRole('button', {
+      name: /View all 5 events on Monday, June 15, 2026/,
+    })
+    expect(moreButton).toBeInTheDocument()
+
+    // Activating it opens the day view for that date.
+    await userEvent.click(moreButton)
+    await waitFor(() => expect(args.onViewChange).toHaveBeenCalledWith('day'))
+    expect(args.onDateChange).toHaveBeenCalled()
+  },
+}
+
+/**
+ * Nested-interactive regression guard (finding 2): in week view with
+ * `onEventClick` set, a clickable event is a native `<button>`. Its containing
+ * hour cell is a `role="gridcell"` (NOT `role="button"`), so the event button is
+ * a valid widget inside a grid cell — never a `<button>` nested inside a
+ * `role="button"` (invalid; WCAG 4.1.2).
+ */
+export const A11yWeekEventNoNesting: Story = {
+  name: 'A11y/Week Event No Nesting',
+  args: {
+    events: sampleEvents,
+    currentDate: anchor,
+    view: 'week',
+    startHour: 7,
+    endHour: 19,
+    onEventClick: fn(),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const eventButton = canvas.getByRole('button', {
+      name: /Team Standup - Engineering, Daily sync/,
+    })
+    // The event sits inside a grid cell...
+    expect(eventButton.closest('[role="gridcell"]')).not.toBeNull()
+    // ...and has NO interactive role="button" ancestor (no nested-interactive).
+    expect(eventButton.closest('[role="button"]')).toBeNull()
+  },
+}

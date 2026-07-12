@@ -138,46 +138,15 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
             }}
           />
         )}
-        <div style={{ flexGrow: 1 }} />
-        {activeFilterCount > 0 && (
-          <button
-            type="button"
-            aria-label="Clear all filters"
-            data-action="clear"
-            onClick={e => {
-              e.stopPropagation()
-              clearAllFilters()
-            }}
-            style={{
-              cursor: 'pointer',
-              padding: '4px',
-              borderRadius: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background-color 0.2s',
-              border: 'none',
-              background: 'transparent',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor =
-                styles?.theme === 'sacred'
-                  ? 'var(--goobs-gold-a10)'
-                  : 'var(--goobs-black-a04)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }}
-          >
-            <CloseIcon
-              styles={{ theme: styles?.theme ?? 'sacred', size: 16 }}
-              aria-hidden="true"
-            />
-          </button>
-        )}
+        {/* The "Clear all filters" control lives in the expanded panel (below),
+            NOT here: this summary is rendered by Accordion INSIDE its disclosure
+            <button>, and a <button> may not contain another interactive control
+            (invalid nested-interactive markup — keyboard-inoperable in some
+            browsers and it would pollute the disclosure button's accessible
+            name). See the details region for the clear control. */}
       </div>
     ),
-    [activeFilterCount, styles, theme, clearAllFilters]
+    [activeFilterCount, styles, theme]
   )
 
   const containerStyle: React.CSSProperties = {
@@ -214,6 +183,56 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
       }}
       details={
         <div style={containerStyle}>
+          {/* Clear-all control. Lives in the expanded panel (a real region), NOT
+              in the Accordion summary — the summary is rendered inside the
+              disclosure <button>, and a button cannot legally contain another
+              interactive control (WCAG 2.1.1 / 4.1.2 nested-interactive). A
+              real, labelled <button> here is keyboard-operable and named. */}
+          {activeFilterCount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                aria-label="Clear all filters"
+                data-action="clear"
+                onClick={clearAllFilters}
+                style={{
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'background-color 0.2s',
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'inherit',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor =
+                    styles?.theme === 'sacred'
+                      ? 'var(--goobs-gold-a10)'
+                      : 'var(--goobs-black-a04)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                <CloseIcon
+                  styles={{ theme: styles?.theme ?? 'sacred', size: 16 }}
+                  aria-hidden="true"
+                />
+                <Typography
+                  styles={{
+                    theme: styles?.theme ?? 'sacred',
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Clear all
+                </Typography>
+              </button>
+            </div>
+          )}
+
           {/* Removed global search */}
 
           {/* Date Range */}

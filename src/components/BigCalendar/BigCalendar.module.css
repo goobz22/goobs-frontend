@@ -432,6 +432,23 @@
   font-size: 0.7rem;
 }
 
+/* Month-cell "+N more" overflow indicator. A real <button> (opens the day view
+   so the hidden events become reachable — WCAG 2.1.1) with the UA button chrome
+   stripped so it reads like the previous inline text. */
+.moreEventsButton {
+  appearance: none;
+  border: none;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
 /* --------------------------------------------------------------------------
    TIME COLUMN (week / day)
    -------------------------------------------------------------------------- */
@@ -534,7 +551,8 @@
    Grid/hour cells use an inset offset so the ring stays inside the cell border;
    nav buttons and event chips use a positive offset. */
 .navButton:focus-visible,
-.event:focus-visible {
+.event:focus-visible,
+.moreEventsButton:focus-visible {
   outline: 2px solid var(--bc-focus-ring);
   outline-offset: 2px;
 }
