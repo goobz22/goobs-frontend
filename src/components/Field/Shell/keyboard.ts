@@ -8,7 +8,7 @@
  * WAI-ARIA tablist-equivalent pattern for combobox+listbox.
  */
 
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 /**
  * Closes a popover when Escape is pressed while the document has
@@ -121,5 +121,109 @@ export function useArrowKeyNav(opts: ArrowKeyNavOptions) {
     if (next === null) return
     event.preventDefault()
     onActiveIndexChange(next)
+  }
+}
+
+export interface TypeaheadOptions {
+  /**
+   * Ordered option labels to match against, index-aligned with the listbox
+   * options so the returned match index maps straight onto `activeIndex`.
+   */
+  labels: string[]
+  /**
+   * Currently active option index (-1 when nothing is highlighted). Used as the
+   * search start point so pressing the same key again cycles to the NEXT
+   * matching option instead of sticking on the first one.
+   */
+  activeIndex: number
+  /** Called with the matched option index when a printable-char match lands. */
+  onMatch: (index: number) => void
+  /**
+   * Idle window (ms) after which the accumulated buffer resets. Rapid typing
+   * inside the window accumulates a prefix ("ne" → "nodejs"); a pause starts a
+   * fresh single-character search. Defaults to the APG-conventional 500ms.
+   */
+  timeoutMs?: number
+}
+
+/**
+ * Pure matcher for printable-character type-ahead. Returns the index of the
+ * first label that starts with `query` (case-insensitive), searching
+ * cyclically from `startIndex`, or -1 when nothing matches.
+ *
+ * Two modes, mirroring the WAI-ARIA APG listbox type-ahead behaviour:
+ *   - **cycle** — the query is a single character, or the same character
+ *     repeated ("p" / "pp"): search from the item AFTER `startIndex` (wrapping),
+ *     so repeating the key steps through every option starting with that char.
+ *   - **accumulate** — the query has ≥2 distinct characters ("ty"): match
+ *     INCLUDING the current item, so extending the buffer keeps the highlight on
+ *     an already-matched option rather than jumping off it.
+ */
+export function findTypeaheadMatch(
+  labels: string[],
+  query: string,
+  startIndex: number
+): number {
+  const count = labels.length
+  if (count === 0 || query === '') return -1
+  const lower = query.toLowerCase()
+  const allSame = [...lower].every(char => char === lower[0])
+  const needle = allSame ? lower[0]! : lower
+  const from = allSame ? startIndex + 1 : startIndex < 0 ? 0 : startIndex
+  for (let offset = 0; offset < count; offset++) {
+    const index = (((from + offset) % count) + count) % count
+    if (labels[index]!.toLowerCase().startsWith(needle)) return index
+  }
+  return -1
+}
+
+/**
+ * Printable-character type-ahead for select-only comboboxes / listboxes — the
+ * APG-recommended affordance where typing a character moves the highlight to
+ * the next option starting with it (and rapid typing matches a longer prefix).
+ * Returns an `onKeyDown` handler the consumer attaches to the same element as
+ * `useArrowKeyNav`.
+ *
+ * Additive companion to `useArrowKeyNav`: attach BOTH and call the arrow-nav
+ * handler FIRST. This helper early-returns on `event.defaultPrevented`, so any
+ * Arrow/Home/End/Enter/Space that arrow-nav already consumed (it always
+ * `preventDefault`s the keys it acts on) is never mistaken for a typed
+ * character — only keys arrow-nav ignored reach the buffer. Non-printable keys
+ * (control keys report multi-character `event.key` names like `'ArrowDown'`),
+ * modifier combos (Ctrl/Meta/Alt), and a leading space are all ignored.
+ *
+ * The two search variants (SearchableSimple / SearchableHistory) intentionally
+ * do NOT use this — their text-filter input already provides type-to-filter, a
+ * richer affordance. This is for the filter-less Regular + MultiSelect surfaces.
+ */
+export function useTypeahead(opts: TypeaheadOptions) {
+  const { labels, activeIndex, onMatch, timeoutMs = 500 } = opts
+  const bufferRef = useRef('')
+  const lastKeyTimeRef = useRef(0)
+
+  // Recreated each render (like useArrowKeyNav) so the closure sees the latest
+  // labels/activeIndex; the buffer + timer persist across renders via refs.
+  return (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.defaultPrevented) return
+    if (event.ctrlKey || event.metaKey || event.altKey) return
+    // Printable characters are exactly length 1; control keys (ArrowDown, Tab,
+    // Shift, Enter, …) report multi-character names.
+    if (event.key.length !== 1) return
+
+    const now = Date.now()
+    const expired = now - lastKeyTimeRef.current > timeoutMs
+    let buffer = expired ? '' : bufferRef.current
+    // A space must not BEGIN a search — it matches nothing meaningful and would
+    // steal the Space activate key; it may still extend an in-flight buffer.
+    if (event.key === ' ' && buffer === '') return
+    buffer += event.key
+    bufferRef.current = buffer
+    lastKeyTimeRef.current = now
+
+    const match = findTypeaheadMatch(labels, buffer, activeIndex)
+    if (match >= 0) {
+      event.preventDefault()
+      onMatch(match)
+    }
   }
 }

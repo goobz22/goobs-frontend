@@ -472,5 +472,5 @@ export {
   type FieldValidator,
 } from './types'
 export { getRequiredProps, validateRequired } from './utils'
-export { useEscape, useArrowKeyNav } from './keyboard'
-export type { ArrowKeyNavOptions } from './keyboard'
+export { useEscape, useArrowKeyNav, useTypeahead, findTypeaheadMatch } from './keyboard'
+export type { ArrowKeyNavOptions, TypeaheadOptions } from './keyboard'
