@@ -150,6 +150,68 @@ export const Interactive: Story = {
 }
 
 /**
+ * Pins BOTH toggle-semantics modes side by side (additive `chipRole` prop).
+ *
+ * Default / `chipRole="button"` → the chip is a toggle BUTTON: `role="button"`
+ * exposing its `active` state as `aria-pressed` (and NO `aria-checked`).
+ *
+ * `chipRole="radio"` → the chip composes into a parent `role="radiogroup"`
+ * (single-select filters): it resolves to `role="radio"` and reports `active`
+ * as `aria-checked` INSTEAD of `aria-pressed`. The two radios here sit in a
+ * `role="radiogroup"` (as FilterSection's exclusive clusters render them), one
+ * checked + one unchecked. Both modes keep the tab stop + Enter/Space
+ * activation; only the role and the state attribute differ.
+ */
+export const ToggleModes: Story = {
+  name: 'A11y/Toggle Modes (button vs radio)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* Button mode (default) — aria-pressed toggle. */}
+      <Chip label="Filter" onClick={fn()} active styles={{ theme: 'light' }} />
+      {/* Radio mode — aria-checked, inside a radiogroup. */}
+      <div role="radiogroup" aria-label="Status" style={{ display: 'flex', gap: '0.5rem' }}>
+        <Chip
+          label="Published"
+          chipRole="radio"
+          active
+          onClick={fn()}
+          styles={{ theme: 'light' }}
+        />
+        <Chip
+          label="Draft"
+          chipRole="radio"
+          active={false}
+          onClick={fn()}
+          styles={{ theme: 'light' }}
+        />
+      </div>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Button mode: role="button", aria-pressed reflects active, no aria-checked.
+    const button = canvas.getByRole('button', { name: 'Filter' })
+    await expect(button).toHaveAttribute('aria-pressed', 'true')
+    await expect(button).not.toHaveAttribute('aria-checked')
+    await expect(button).toHaveAttribute('tabindex', '0')
+
+    // Radio mode: role="radio", aria-checked reflects active, NO aria-pressed.
+    const published = canvas.getByRole('radio', { name: 'Published' })
+    const draft = canvas.getByRole('radio', { name: 'Draft' })
+    await expect(published).toHaveAttribute('aria-checked', 'true')
+    await expect(draft).toHaveAttribute('aria-checked', 'false')
+    await expect(published).not.toHaveAttribute('aria-pressed')
+    await expect(draft).not.toHaveAttribute('aria-pressed')
+    // Radios stay keyboard-operable (tab stop + Space/Enter fire onClick).
+    await expect(published).toHaveAttribute('tabindex', '0')
+    published.focus()
+    await expect(published).toHaveFocus()
+  },
+}
+
+/**
  * A disabled interactive chip. Even while disabled, an `onClick` chip keeps
  * `role="button"` so screen readers announce a *dimmed / unavailable* button
  * (via `aria-disabled="true"`) rather than a roleless `<div>` — but it is

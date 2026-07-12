@@ -137,9 +137,23 @@ export interface ChipProps {
    *   - pill (read-only) → `'status'` (status indicator)
    *   - chip  (read-only) → no role (decorative)
    * Pass an explicit role when the semantic differs (e.g. a checkbox
-   * chip would use `'checkbox'`).
+   * chip would use `'checkbox'`). Passing `role="radio"` (or the ergonomic
+   * {@link chipRole}`="radio"`) puts the chip in radio mode — see `chipRole`.
    */
   role?: string
+  /**
+   * Toggle-semantics mode for an interactive chip. Additive; defaults to
+   * `'button'` (byte-identical to prior behaviour — a clickable chip is a toggle
+   * BUTTON exposing its `active` state as `aria-pressed`).
+   *
+   * Set `'radio'` to compose the chip into a parent `role="radiogroup"`
+   * (single-select / mutually-exclusive filters): the chip then resolves to
+   * `role="radio"` and exposes its `active` state as **`aria-checked`** INSTEAD
+   * of `aria-pressed` (a radio reports checked-ness, not pressed-ness). Focus and
+   * Enter/Space activation are unchanged. Equivalent to passing `role="radio"`
+   * directly; both routes emit `aria-checked` in place of `aria-pressed`.
+   */
+  chipRole?: 'button' | 'radio'
   /** Live-region politeness for status pills that update dynamically
    *  (e.g. "saving…" → "saved"). Only applied when the chip resolves to
    *  `role="status"`. */
@@ -254,7 +268,10 @@ function resolveAriaLabel(
  * hand-rolled StatusPill / StatusBadge / Pill components). A clickable chip
  * (`onClick` set and not disabled) renders as `role="button"` with
  * Enter/Space keyboard activation; a read-only pill renders as
- * `role="status"`. Colors come from the semantic `tone` palette or explicit
+ * `role="status"`. In radio mode (`chipRole="radio"` or `role="radio"`) an
+ * interactive chip instead resolves to `role="radio"` and reports its `active`
+ * state as `aria-checked` (for composing a parent `role="radiogroup"`).
+ * Colors come from the semantic `tone` palette or explicit
  * `styles` overrides (applied as CSS custom properties), and `dot` renders
  * the common leading colored-dot pattern. Theming via `styles.theme` (default
  * `'sacred'`); the root emits `data-chip`, `data-chip-variant`,
@@ -274,6 +291,7 @@ const Chip: React.FC<ChipProps> = ({
   dataField,
   dataValue,
   role,
+  chipRole,
   ariaLive,
   styles,
   style,
@@ -300,6 +318,15 @@ const Chip: React.FC<ChipProps> = ({
   // button semantics only when clickable-but-not-deletable.
   const isComposite = hasButtonIntent && hasDelete
   const rootIsButton = hasButtonIntent && !hasDelete
+  // Radio mode: an interactive chip that composes into a parent
+  // role="radiogroup" reports its toggle state as aria-checked (a radio's
+  // checked-ness) instead of aria-pressed (a toggle button's pressed-ness).
+  // Triggered by the ergonomic `chipRole="radio"` OR by passing `role="radio"`
+  // directly; both resolve the root role to "radio" and swap aria-pressed →
+  // aria-checked. Any other value (the default) is byte-identical to the prior
+  // button behaviour.
+  const isRadio = chipRole === 'radio' || role === 'radio'
+  const effectiveRole = role ?? (chipRole === 'radio' ? 'radio' : undefined)
   const theme = resolvedStyles?.theme ?? 'sacred'
 
   const rootClassName = [cssStyles.root, cssStyles[variant]]
@@ -322,7 +349,7 @@ const Chip: React.FC<ChipProps> = ({
 
   const dotColor = typeof dot === 'string' ? dot : undefined
   const resolvedRole = resolveRole(
-    role,
+    effectiveRole,
     hasButtonIntent,
     isComposite,
     hasDelete,
@@ -391,7 +418,10 @@ const Chip: React.FC<ChipProps> = ({
         ariaLive !== undefined && { 'aria-live': ariaLive })}
       tabIndex={rootIsButton && isClickable ? 0 : undefined}
       aria-pressed={
-        rootIsButton && active !== undefined ? active : undefined
+        rootIsButton && !isRadio && active !== undefined ? active : undefined
+      }
+      aria-checked={
+        rootIsButton && isRadio && active !== undefined ? active : undefined
       }
       aria-disabled={(!isComposite && isDisabled) || undefined}
       onClick={rootIsButton && isClickable ? handleClick : undefined}
