@@ -153,9 +153,11 @@ export const Selected: Story = {
  * the `<option>`. When the visual `selected` prop is aligned with the select's
  * `value` (the intended use), this story pins that (a) the native selection is
  * the value-selected option, (b) the `data-selected` test hook is preserved,
- * and (c) MenuItem does NOT emit a decoupled author `aria-selected` (which the
+ * (c) MenuItem does NOT emit a decoupled author `aria-selected` (which the
  * browser would ignore when aligned and which becomes a false announcement when
- * NOT aligned — see SelectedDecoupledFromValue below).
+ * NOT aligned — see SelectedDecoupledFromValue below), and (d) the selected
+ * highlight is NOT conveyed by color alone (WCAG 1.4.1): the selected item
+ * carries a heavier font weight than its unselected siblings.
  */
 export const SelectedStateAnnounced: Story = {
   render: () => (
@@ -182,8 +184,19 @@ export const SelectedStateAnnounced: Story = {
     // No decoupled author ARIA on the native option — native selection is the
     // single source of truth (regression guard for the review fix).
     await expect(selectedOption).not.toHaveAttribute('aria-selected')
-    await expect(canvas.getByText('JavaScript')).not.toHaveAttribute(
-      'aria-selected'
+    const unselectedOption = canvas.getByText('JavaScript')
+    await expect(unselectedOption).not.toHaveAttribute('aria-selected')
+    // WCAG 1.4.1 (Use of Color): the selected highlight is not color-alone — the
+    // `.root[data-selected='true']` rule applies a heavier font weight, so the
+    // selected item is distinguishable from its siblings independent of hue /
+    // luminance. Computed style reflects the matched cascade even though a native
+    // <option>'s painting is OS-controlled, so this is a deterministic guard that
+    // the non-color affordance stays in place.
+    expect(
+      Number(getComputedStyle(selectedOption).fontWeight)
+    ).toBeGreaterThanOrEqual(600)
+    expect(Number(getComputedStyle(unselectedOption).fontWeight)).toBeLessThan(
+      600
     )
   },
 }
@@ -232,6 +245,100 @@ export const SelectedDecoupledFromValue: Story = {
     await expect(canvas.getByText('JavaScript')).not.toHaveAttribute(
       'aria-selected'
     )
+    // WCAG 1.4.1: even in this decoupled / misuse case the highlight is not
+    // conveyed by color alone — the selected rule applies a heavier font weight,
+    // so the visual affordance survives grayscale / color-vision-deficiency
+    // rendering. (Programmatic AT exposure of a decoupled highlight is a consumer
+    // responsibility: MenuItem cannot see the parent value, so asserting
+    // aria-selected here would be a FALSE announcement — see index.tsx / R1.)
+    expect(
+      Number(getComputedStyle(highlighted).fontWeight)
+    ).toBeGreaterThanOrEqual(600)
+  },
+}
+
+// --------------------------------------------------------------------------
+// REDUCED MOTION — WCAG 2.3.3 (regression guard for the transition-off fix)
+// --------------------------------------------------------------------------
+
+/**
+ * A11y regression net for the `prefers-reduced-motion` fix (WCAG 2.3.3). `.root`
+ * declares `transition: var(--goobs-transition-medium)` for its background/color
+ * state changes; `MenuItem.module.css` carries an
+ * `@media (prefers-reduced-motion: reduce)` block that zeroes that transition
+ * (and any animation) so users who request reduced motion get instant state
+ * changes and no animation.
+ *
+ * Chromatic cannot emulate `prefers-reduced-motion`, and a reduced-motion
+ * MenuItem is pixel-identical to a normal one, so a visual diff can't protect
+ * this. Instead the play asserts the guard RULE structurally in the CSSOM — it
+ * fails if the media block that sets `transition: none` on the root class is ever
+ * removed — plus a real behavioral check when the runner DOES request reduced
+ * motion. This is the story the review flagged as missing.
+ */
+export const ReducedMotionGuard: Story = {
+  name: 'A11y — Reduced-Motion Guard',
+  render: () => (
+    <SelectWithState theme="light" initialValue="typescript">
+      <MenuItem value="javascript" styles={{ theme: 'light' }}>
+        JavaScript
+      </MenuItem>
+      <MenuItem value="typescript" selected styles={{ theme: 'light' }}>
+        TypeScript (selected)
+      </MenuItem>
+      <MenuItem value="react" styles={{ theme: 'light' }}>
+        React
+      </MenuItem>
+    </SelectWithState>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const option = canvasElement.querySelector(
+      '[data-component="MenuItem"]'
+    ) as HTMLElement | null
+    await expect(option).toBeInTheDocument()
+    // The hashed CSS-module root class the media guard must target.
+    const rootClass = option!.classList[0]
+    if (!rootClass) throw new Error('MenuItem option has no root class')
+
+    // Structural presence gate: some stylesheet must carry a
+    // `@media (prefers-reduced-motion: reduce)` rule that sets `transition: none`
+    // on the root class. getComputedStyle can't read a non-matching media query's
+    // value, so walk the CSSOM directly. Cross-origin sheets throw on `.cssRules`
+    // and are skipped.
+    let hasReducedMotionGuard = false
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList
+      try {
+        rules = sheet.cssRules
+      } catch {
+        continue // cross-origin sheet — not readable, skip
+      }
+      for (const rule of Array.from(rules)) {
+        if (
+          rule instanceof CSSMediaRule &&
+          rule.media.mediaText.includes('prefers-reduced-motion') &&
+          rule.media.mediaText.includes('reduce')
+        ) {
+          for (const inner of Array.from(rule.cssRules)) {
+            if (
+              inner instanceof CSSStyleRule &&
+              inner.selectorText.includes(rootClass) &&
+              /transition:\s*none/i.test(inner.cssText)
+            ) {
+              hasReducedMotionGuard = true
+            }
+          }
+        }
+      }
+    }
+    expect(hasReducedMotionGuard).toBe(true)
+
+    // Behavioral gate when the environment actually requests reduced motion
+    // (e.g. a runner configured to emulate it): the transition must be off.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      expect(getComputedStyle(option!).transitionProperty).toBe('none')
+    }
   },
 }
 

@@ -97,11 +97,19 @@
 }
 
 /* --------------------------------------------------------------------------
-   SELECTED — tinted background + accent text
+   SELECTED — tinted background + accent text + heavier weight
    -------------------------------------------------------------------------- */
 .root[data-selected='true'] {
   background-color: var(--menuitem-selected-bg);
   color: var(--menuitem-selected-text);
+  /* Non-color affordance (WCAG 1.4.1 Use of Color): the selected highlight must
+     NOT be carried by the tint + accent color alone. A heavier font weight
+     distinguishes the selected item independently of hue/luminance, so the
+     state survives grayscale / color-vision-deficiency rendering. This also
+     covers the decoupled-from-value case: MenuItem cannot see the parent
+     <select value>, so it must not assert aria-selected (see index.tsx) — the
+     weight keeps the VISUAL affordance from being color-only even then. */
+  font-weight: var(--goobs-weight-semibold);
 }
 
 /* --------------------------------------------------------------------------

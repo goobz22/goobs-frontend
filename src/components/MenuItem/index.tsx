@@ -118,7 +118,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
       // option whenever `selected` diverges from `value` (double/conflicting
       // announcement) — a defect worse than the color-only gap it aimed to fix.
       // A caller who owns the value↔selected alignment can still pass their own
-      // `aria-selected` via {...props}.
+      // `aria-selected` via {...props}. WCAG 1.4.1 (Use of Color) is nonetheless
+      // satisfied for the visual affordance in EVERY case — aligned or decoupled
+      // — because `.root[data-selected='true']` (MenuItem.module.css) conveys the
+      // highlight with a heavier font weight in addition to the tint/accent color,
+      // so the selected item is distinguishable without relying on color alone.
       style={dynamicStyle}
       disabled={disabled}
       onClick={handleClick}
