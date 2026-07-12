@@ -46,6 +46,13 @@
    -------------------------------------------------------------------------- */
 .tab {
   position: relative;
+  /* Match the <button> box for the <a> that a `route` tab renders as: anchors
+     default to `display: inline` + `text-align: start` + an underline, whereas
+     a <button> is inline-block, centered, and undecorated. Setting these
+     explicitly is a no-op for the button and makes the anchor identical. */
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
   padding: var(--goobs-space-sm) var(--goobs-space-lg);
   background: transparent;
   border-top: none;
@@ -63,6 +70,16 @@
   box-shadow: none;
   outline: none;
   opacity: 1;
+}
+
+/* Route tabs render as <a>. The UA `a:visited` rule (specificity 0-1-1) would
+   otherwise override the plain `.tab` sacred text color (0-1-0) once the route
+   has been visited, tinting an inactive tab. Restore it at 0-2-0 so a visited
+   anchor tab looks identical to an unvisited one. The active / hover rules are
+   equally-or-more specific AND later in source order, so they still win; the
+   light / dark theme base rules (0-2-0, later) already outrank UA `:visited`. */
+.tab:visited {
+  color: var(--goobs-sacred-text-secondary);
 }
 
 /* Hover (only when not active and not disabled) — replaces the

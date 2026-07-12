@@ -530,6 +530,17 @@ export const Tab: React.FC<TabProps> = ({
   // usage omits it and falls back to `isActive` (focus == selection).
   const inTabSequence = isFocusTarget ?? isActive
 
+  // Element-agnostic keydown adapter. The public `onKeyDown` prop is typed for
+  // an <button> currentTarget (unchanged for API compatibility); route tabs
+  // render an <a>, whose handler wants an anchor currentTarget. The handler
+  // only reads `event.key`, so bridge the two currentTarget types with a single
+  // narrowing cast here rather than retyping the public prop. Used for BOTH
+  // leaves so they stay consistent.
+  const handleKeyDown = onKeyDown
+    ? (event: React.KeyboardEvent<HTMLElement>) =>
+        onKeyDown(event as React.KeyboardEvent<HTMLButtonElement>)
+    : undefined
+
   // aria-controls reconciliation. A `route`/`onClick` tab — the majority usage —
   // is rendered WITHOUT a matching `<TabPanel>`, so the `aria-controls={panelId}`
   // emitted for SSR would DANGLE: an idref to an element that never mounts
@@ -602,7 +613,7 @@ export const Tab: React.FC<TabProps> = ({
         aria-controls={panelId}
         tabIndex={inTabSequence ? 0 : -1}
         onClick={handleClick}
-        onKeyDown={onKeyDown}
+        onKeyDown={handleKeyDown}
         className={cssStyles.tab}
       >
         {content}
@@ -624,7 +635,7 @@ export const Tab: React.FC<TabProps> = ({
       aria-controls={panelId}
       tabIndex={inTabSequence ? 0 : -1}
       onClick={handleClick}
-      onKeyDown={onKeyDown}
+      onKeyDown={handleKeyDown}
       className={cssStyles.tab}
       disabled={disabled}
     >
