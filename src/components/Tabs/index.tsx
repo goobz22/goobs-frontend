@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { emitDiag } from '../../utils/diag'
 import cssStyles from './Tabs.module.css'
 
@@ -32,6 +32,16 @@ export interface TabsItem {
    */
   title?: string | React.ReactNode
   label?: string | React.ReactNode
+  /**
+   * Destination for a `trigger: 'route'` tab. A route tab is a page
+   * navigation, so it renders as a real crawlable `<a href={route}>` (keeping
+   * `role="tab"` and every `data-*` selector) — links are crawlable for SEO
+   * and get native affordances (open-in-new-tab, copy-link, status-bar URL).
+   * Route tabs also use MANUAL activation: an arrow key moves focus only,
+   * navigation happens on Enter/Space/click (avoids an arrow-key context
+   * change — WCAG 3.2.2). Plain left-clicks navigate via `location.assign`;
+   * modifier/middle clicks fall through to the browser's native link handling.
+   */
   route?: string
   trigger?: 'route' | 'onClick'
   onClick?: () => void
@@ -125,6 +135,12 @@ function kebabFallback(input: string | undefined): string {
  * click-based activation. Emits `nav.change` diagnostics and stable
  * `data-tab-id`/`data-tab-subject` selectors; pairs with the exported `Tab` and
  * `TabPanel`.
+ *
+ * Activation follows the WAI-ARIA APG: onClick (panel-switching) tabs activate
+ * AUTOMATICALLY on arrow-key focus, while `route` tabs — which perform a full
+ * page navigation — render as real `<a href>` links and use MANUAL activation
+ * (arrow moves focus only; Enter/Space/click navigates), so an arrow key never
+ * triggers a page load / context change (WCAG 3.2.2).
  */
 const Tabs: React.FC<TabsProps> = ({
   items,
@@ -139,9 +155,30 @@ const Tabs: React.FC<TabsProps> = ({
   // sacred-gold inline regardless of theme); light/dark are [data-theme]
   // overrides in Tabs.module.css.
   const theme = styles?.theme || 'sacred'
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  // Roving-focus refs. A route tab renders as an <a> (see below), so the ref
+  // element may be an anchor, not a button — widen to HTMLElement; only
+  // `.focus()` (defined on HTMLElement) is ever called on it.
+  const tabRefs = useRef<Array<HTMLElement | null>>([])
 
-  const handleTabClick = (index: number, tab: TabsItem) => {
+  // Roving-tabindex focus pointer for the WAI-ARIA tablist. It normally tracks
+  // the selected `activeTab`, but MANUAL-activation route tabs let focus LEAD
+  // selection: an ArrowLeft/Right moves focus (and the roving `tabindex`)
+  // WITHOUT activating, so the focused tab differs from the selected one until
+  // the user presses Enter/Space/clicks. Synced to `activeTab` with React's
+  // render-phase "previous prop" pattern (no effect → no set-state-in-effect).
+  const [focusIndex, setFocusIndex] = useState(activeTab)
+  const [prevActiveTab, setPrevActiveTab] = useState(activeTab)
+  if (activeTab !== prevActiveTab) {
+    setPrevActiveTab(activeTab)
+    setFocusIndex(activeTab)
+  }
+
+  // Activate a tab: emit the nav diagnostic, notify the host, then run the
+  // tab's own effect (navigate for a `route` tab, invoke `onClick` otherwise).
+  // Invoked by a pointer click and by explicit keyboard activation
+  // (Enter/Space); NOT by arrow-key focus movement onto a route tab (that is a
+  // context change — see `handleTabKeyDown`).
+  const activateTab = (index: number, tab: TabsItem) => {
     // Diagnostic bus — emit a nav.change whenever the active tab changes.
     // Resolve the stable tab identifier the same way the render does
     // (explicit id → kebab-cased label/title → index) so the emitted `to`
@@ -171,11 +208,29 @@ const Tabs: React.FC<TabsProps> = ({
 
   // Keyboard nav — Left/Right move focus, Home/End jump to bounds,
   // Enter/Space activate. Mirrors the WAI-ARIA tablist pattern.
+  //
+  // Activation model (WAI-ARIA APG): AUTOMATIC for panel-switching tabs
+  // (activate on focus), but MANUAL for `route` tabs whose activation performs
+  // a full page navigation. Per the APG guidance to prefer manual activation
+  // when "activating a tab … causes a … change of context," an arrow key onto
+  // a route tab only MOVES focus (no navigation — WCAG 3.2.2); the route tab is
+  // selected only by an explicit Enter/Space/click.
   const handleTabKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
+    event: React.KeyboardEvent<HTMLElement>,
     currentIndex: number
   ) => {
     if (items.length === 0) return
+    const currentTab = items[currentIndex]
+
+    // Space on a route tab: an <a> does not fire a click on Space natively
+    // (only Enter does), so activate explicitly to keep the APG key contract.
+    // Non-route <button> tabs keep native Space/Enter activation untouched.
+    if (event.key === ' ' && currentTab?.trigger === 'route') {
+      event.preventDefault()
+      activateTab(currentIndex, currentTab)
+      return
+    }
+
     let nextIndex: number | null = null
     if (event.key === 'ArrowRight')
       nextIndex = (currentIndex + 1) % items.length
@@ -187,11 +242,16 @@ const Tabs: React.FC<TabsProps> = ({
     event.preventDefault()
     const targetTab = items[nextIndex]
     if (!targetTab) return
-    handleTabClick(nextIndex, targetTab)
-    // Move keyboard focus to the newly-active tab.
+    // Move the roving focus (and tabindex) to the target tab.
+    setFocusIndex(nextIndex)
     requestAnimationFrame(() => {
       tabRefs.current[nextIndex]?.focus()
     })
+    // Automatic activation for panel-switching tabs only. A route tab is NOT
+    // activated by arrow-key focus movement (context change — WCAG 3.2.2).
+    if (targetTab.trigger !== 'route') {
+      activateTab(nextIndex, targetTab)
+    }
   }
 
   // Handle tabLeftBorder - convert boolean to string
@@ -273,10 +333,21 @@ const Tabs: React.FC<TabsProps> = ({
             key={index}
             label={label}
             isActive={isActive}
+            // Roving tabindex follows FOCUS, not selection, so keyboard focus
+            // can rest on a route tab that isn't the selected one (manual
+            // activation) while exactly one tab stays in the Tab sequence.
+            isFocusTarget={focusIndex === index}
             theme={theme}
             tabId={tabId}
             panelId={panelId}
             count={tab.count}
+            // A `route` tab is a page navigation, so render it as a real
+            // crawlable <a href> (SEO) with native link affordances — Tab keeps
+            // role="tab" + every data-* selector. onClick/route-less tabs stay
+            // <button>. Omit href when absent (exactOptionalPropertyTypes).
+            {...(tab.trigger === 'route' && tab.route
+              ? { href: tab.route }
+              : {})}
             // Forward the entity noun as data-tab-subject so the
             // auto-CRUD test scaffolder can locate a tab by entity
             // even when the tab label changes (e.g. "Categories" →
@@ -289,7 +360,7 @@ const Tabs: React.FC<TabsProps> = ({
             buttonRef={el => {
               tabRefs.current[index] = el
             }}
-            onClick={() => handleTabClick(index, tab)}
+            onClick={() => activateTab(index, tab)}
             onKeyDown={event => handleTabKeyDown(event, index)}
           />
         )
@@ -327,6 +398,25 @@ export interface TabProps {
   isActive: boolean
   onClick: () => void
   disabled?: boolean
+  /**
+   * When set, this tab is a page-navigation link: it renders as
+   * `<a href={href} role="tab">` instead of `<button role="tab">` so it is
+   * crawlable (SEO) and gets native link affordances (open-in-new-tab,
+   * copy-link). Forwarded by `<Tabs>` from a `route` tab's `route`. A plain
+   * left-click still activates via the `onClick` handler (the parent's
+   * `location.assign` navigation); modifier/middle clicks fall through to the
+   * browser's native link handling. Ignored when `disabled` (a disabled tab
+   * falls back to `<button disabled>`; a disabled anchor is not focusable).
+   */
+  href?: string
+  /**
+   * Roving-tabindex target: `true` ⇒ this tab is the single tab in the Tab
+   * sequence (`tabIndex=0`), the rest are `-1`. `<Tabs>` sets it to follow
+   * keyboard FOCUS (which, for manual-activation route tabs, can differ from
+   * the selected tab). Defaults to `isActive` when omitted, preserving the
+   * standalone `<Tab>` behaviour where focus and selection coincide.
+   */
+  isFocusTarget?: boolean
   /**
    * Visual theme — surfaced as `data-theme` on the rendered `<button>` so
    * the CSS module's light/dark overrides apply. Defaults to `'sacred'`
@@ -375,11 +465,37 @@ export const Tab: React.FC<TabProps> = ({
   subject,
   count,
   icon,
+  href,
+  isFocusTarget,
   buttonRef,
   ref,
   onKeyDown,
 }) => {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // A route tab renders as an <a href>; a disabled tab (never a route tab in
+  // practice — <Tabs> never disables route tabs) falls back to <button> so the
+  // native `disabled` state + `:disabled` styling still apply.
+  const asAnchor = href != null && !disabled
+
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (asAnchor) {
+      // Anchor (route) tab: preserve the browser's native open-in-new-tab /
+      // copy-link affordances by letting modifier / middle clicks resolve the
+      // href natively; intercept only plain left clicks to keep the existing
+      // `location.assign` navigation path (unchanged behaviour for normal
+      // clicks, and Enter — which fires a plain synthetic click — navigates).
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      onClick()
+      return
+    }
     e.preventDefault()
     e.stopPropagation()
     if (!disabled) {
@@ -387,19 +503,32 @@ export const Tab: React.FC<TabProps> = ({
     }
   }
 
-  // Own reference to the rendered <button> so the aria-controls reconciliation
-  // effect below can mutate the live node without disturbing the parent's
-  // roving-focus ref or the public consumer ref.
-  const internalButtonRef = useRef<HTMLButtonElement | null>(null)
+  // Own reference to the rendered leaf (a <button>, or an <a> for route tabs)
+  // so the aria-controls reconciliation effect below can mutate the live node
+  // without disturbing the parent's roving-focus ref or the public consumer
+  // ref. Widened to HTMLElement to cover the anchor case; only DOM methods
+  // common to both (setAttribute/removeAttribute/focus) are used.
+  const internalButtonRef = useRef<HTMLElement | null>(null)
 
   // Merge the internal `buttonRef` (parent-owned roving focus) with the public
-  // consumer `ref` so a single DOM `ref` slot feeds both (plus our own node ref).
-  const setButtonRef = (el: HTMLButtonElement | null) => {
+  // consumer `ref` so a single DOM `ref` slot feeds both (plus our own node
+  // ref). The public `buttonRef`/`ref` props predate the anchor variant and are
+  // typed `HTMLButtonElement`; a route tab hands them an `HTMLAnchorElement` at
+  // runtime (both are `HTMLElement`, and callers only use the ref to focus) —
+  // cast at this boundary rather than retyping the public API.
+  const setButtonRef = (el: HTMLElement | null) => {
     internalButtonRef.current = el
-    buttonRef?.(el)
-    if (typeof ref === 'function') ref(el)
-    else if (ref) (ref as React.RefObject<HTMLButtonElement | null>).current = el
+    buttonRef?.(el as HTMLButtonElement | null)
+    if (typeof ref === 'function') ref(el as HTMLButtonElement | null)
+    else if (ref)
+      (ref as React.RefObject<HTMLButtonElement | null>).current =
+        el as HTMLButtonElement | null
   }
+
+  // Roving tabindex follows FOCUS when the parent supplies `isFocusTarget`
+  // (manual-activation route tabs let focus lead selection); standalone <Tab>
+  // usage omits it and falls back to `isActive` (focus == selection).
+  const inTabSequence = isFocusTarget ?? isActive
 
   // aria-controls reconciliation. A `route`/`onClick` tab — the majority usage —
   // is rendered WITHOUT a matching `<TabPanel>`, so the `aria-controls={panelId}`
@@ -425,24 +554,9 @@ export const Tab: React.FC<TabProps> = ({
     }
   }, [panelId, isActive])
 
-  return (
-    <button
-      type="button"
-      ref={setButtonRef}
-      role="tab"
-      id={tabId ? `tab-${tabId}` : undefined}
-      data-tab-id={tabId}
-      data-tab-subject={subject}
-      data-tab-active={isActive ? 'true' : 'false'}
-      data-theme={theme}
-      aria-selected={isActive}
-      aria-controls={panelId}
-      tabIndex={isActive ? 0 : -1}
-      onClick={handleClick}
-      onKeyDown={onKeyDown}
-      className={cssStyles.tab}
-      disabled={disabled}
-    >
+  // Content is identical across the <a>/<button> leaf — build it once.
+  const content = (
+    <>
       {icon != null ? (
         <span
           aria-hidden={typeof icon === 'string' ? 'true' : undefined}
@@ -463,6 +577,58 @@ export const Tab: React.FC<TabProps> = ({
           {count}
         </span>
       ) : null}
+    </>
+  )
+
+  // Attributes shared by both leaves. `role="tab"`, every `data-*` selector,
+  // `aria-selected`/`aria-controls`, and the roving `tabIndex` are IDENTICAL on
+  // the anchor and the button so the a11y + machine-test contract is unchanged
+  // regardless of which element renders.
+  if (asAnchor) {
+    // Route tab → real crawlable link. Keeps role="tab" (tablist semantics +
+    // ThothOS test contract) while gaining native link affordances and SSR
+    // crawlability. `href` is guaranteed defined here (asAnchor gate).
+    return (
+      <a
+        href={href}
+        ref={setButtonRef}
+        role="tab"
+        id={tabId ? `tab-${tabId}` : undefined}
+        data-tab-id={tabId}
+        data-tab-subject={subject}
+        data-tab-active={isActive ? 'true' : 'false'}
+        data-theme={theme}
+        aria-selected={isActive}
+        aria-controls={panelId}
+        tabIndex={inTabSequence ? 0 : -1}
+        onClick={handleClick}
+        onKeyDown={onKeyDown}
+        className={cssStyles.tab}
+      >
+        {content}
+      </a>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      ref={setButtonRef}
+      role="tab"
+      id={tabId ? `tab-${tabId}` : undefined}
+      data-tab-id={tabId}
+      data-tab-subject={subject}
+      data-tab-active={isActive ? 'true' : 'false'}
+      data-theme={theme}
+      aria-selected={isActive}
+      aria-controls={panelId}
+      tabIndex={inTabSequence ? 0 : -1}
+      onClick={handleClick}
+      onKeyDown={onKeyDown}
+      className={cssStyles.tab}
+      disabled={disabled}
+    >
+      {content}
     </button>
   )
 }
