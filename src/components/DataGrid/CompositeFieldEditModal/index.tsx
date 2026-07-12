@@ -537,6 +537,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           return fieldContainer(
             <IPAddressField
               label=""
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               initialValue={String(value || '')}
               onChange={value => handleFieldChange(fieldConfig.field, value)}
               styles={fieldStyles}
@@ -619,6 +620,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           return fieldContainer(
             <SupernetField
               label=""
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               value={supernetValue}
               onChange={(newValue: SubnetFieldValue) =>
                 handleFieldChange(fieldConfig.field, newValue)

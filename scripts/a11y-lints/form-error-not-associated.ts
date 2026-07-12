@@ -177,8 +177,11 @@ const lint: A11yLint = {
               : ''
         if (/\binputAriaProps\b/.test(value)) continue
         // Hatch 2c — sibling-shell mirror: the value targets a shell helper
-        // region id (an error-region link, not a clobber).
+        // region id (an error-region link, not a clobber), or FORWARDS another
+        // bag's association by reading its ['aria-describedby'] member (the
+        // DateRange end-input shape: startInputAriaRef.current['aria-describedby']).
         if (/helperId/i.test(value)) continue
+        if (/\[\s*['"]aria-describedby['"]\s*\]/.test(value)) continue
         // Hatch 2b — merge behind a variable: a bare identifier whose local
         // `const` initializer references the bag (or a shell helper id).
         const ident = value.trim()
@@ -222,6 +225,8 @@ const lint: A11yLint = {
       "const describedBy = [hintId, inputAriaProps['aria-describedby']].filter(Boolean).join(' ') || undefined\nexport const Y = () => <input {...inputAriaProps} aria-describedby={describedBy} />",
       // Sibling-shell mirror (the DateRange/TimeRange end-input shape).
       '<input {...inputAriaProps} aria-describedby={startHelperRendered ? startHelperIdRef.current : undefined} />',
+      // Mirror via a captured bag ref — forwards an existing association.
+      "<input {...inputAriaProps} aria-describedby={\n  startInputAriaRef.current['aria-describedby']\n} />",
     ],
   },
 }

@@ -466,6 +466,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <IPAddressField
             label="" // Explicitly pass empty label to override default
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             initialValue={String(value ?? '')}
             onChange={value =>
               onCreationFieldChange?.(fieldConfig.field, value)
@@ -605,6 +606,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
         return (
           <SupernetField
             label="" // Explicitly pass empty label to override default
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             value={
               (value as unknown as {
                 address: string

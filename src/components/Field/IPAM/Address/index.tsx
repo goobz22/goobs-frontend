@@ -15,6 +15,12 @@ export interface IPAddressFieldProps {
    * a ref / their own onBlur instead.
    */
   onChange?: (value: string) => void
+  /**
+   * Programmatic accessible name for LABEL-LESS usage (WCAG 4.1.2) —
+   * forwarded to FieldShell, which applies it as `aria-label` ONLY when no
+   * visible label is rendered. Ignored while a visible label is set.
+   */
+  ariaLabel?: string
   /** Field label (default 'IP Address'). */
   label?: string
   helperText?: string
@@ -256,6 +262,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
   initialValue = '',
   onChange: onChangeProp,
   label = 'IP Address',
+  ariaLabel,
   helperText,
   error: errorProp,
   dataField,
@@ -626,6 +633,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
         <div className={cssStyles.rangeFields}>
           <div className={cssStyles.rangeField}>
             <FieldShell
+              ariaLabel={ariaLabel}
               label={startIPValue ? label : ''}
               error={rangeError}
               disabled={disabled}
@@ -658,6 +666,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
           <Typography>-</Typography>
           <div className={cssStyles.rangeField}>
             <FieldShell
+              ariaLabel={ariaLabel}
               label={endIPValue ? label : ''}
               error={errorEnd || !isValidRange ? 'Invalid IP range' : undefined}
               disabled={disabled}
@@ -699,6 +708,7 @@ const IPAddressField: React.FC<IPAddressFieldProps> = ({
 
   return (
     <FieldShell
+      ariaLabel={ariaLabel}
       label={label}
       helperText={helperText}
       error={shellError}

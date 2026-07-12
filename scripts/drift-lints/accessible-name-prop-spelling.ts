@@ -131,25 +131,20 @@ const lint: DriftLint = {
   name: 'accessible-name-prop-spelling',
   scope: 'ts',
   description:
-    'Accessible-name props are spelled two rival ways across components: the camelCase goobs convention (ariaLabel / ariaLabelledby / ariaDescribedBy) and native quoted-kebab passthrough ("aria-label"). This censuses every explicit Props member naming that seam and freezes both populations.',
+    'Accessible-name props are spelled two rival ways across components: the camelCase goobs convention (ariaLabel / ariaLabelledby / ariaDescribedBy) and native quoted-kebab passthrough ("aria-label"). This freezes the NON-canonical quoted-kebab member population (canonical camelCase members are sanctioned and uncounted — recalibrated 2026-07-12).',
   canon:
     'Use camelCase for a goobs-facing accessible-name prop: `ariaLabel` / `ariaLabelledby` / `ariaDescribedby` (dominant 57 of 74 explicit members; the form the 2026-07 a11y campaign standardized on). Native quoted-kebab (`\'aria-label\'?: string`) is SANCTIONED only where the component builds a prop bag it spreads verbatim onto a native element (Field/Shell inputAriaProps, Icons svgA11y, internal button FCs) or an HTMLAttributes rest-spread passthrough — not as the default spelling for a new prop.\n' +
-    'EVIDENCE: JSX exposes native ARIA attributes as kebab (`aria-label`), so any component `extends *HTMLAttributes` gets kebab for free; goobs deliberately adds camelCase `ariaLabel` as its OWN prop so the seam is a real prop (documentable, defaultable, testable via getByRole name) rather than a raw DOM attribute. Census at freeze: 57 camelCase members vs 17 quoted-kebab members = 74 across the library; camelCase wins ~77%. Both existing populations are frozen (baseline is {file: count}); a NEW accessible-name prop must be camelCase, and the ratchet reminds you at the callsite.',
+    'EVIDENCE: JSX exposes native ARIA attributes as kebab (`aria-label`), so any component `extends *HTMLAttributes` gets kebab for free; goobs deliberately adds camelCase `ariaLabel` as its OWN prop so the seam is a real prop (documentable, defaultable, testable via getByRole name) rather than a raw DOM attribute. Census at freeze: 57 camelCase members vs 17 quoted-kebab members = 74 across the library; camelCase wins ~77%. The quoted-kebab population is frozen (baseline {file: count}); canonical camelCase members are uncounted, so adding one never fails the ratchet. A NEW quoted-kebab member outside a sanctioned prop-bag context is the drift.',
   measure(files: DriftFile[]): DriftInstance[] {
     const out: DriftInstance[] = []
     for (const { path, text: raw } of files) {
       const text = blankComments(raw)
       if (!text.includes('aria')) continue
-      CAMEL.lastIndex = 0
+      // RECALIBRATED 2026-07-12: canonical camelCase members are NOT
+      // instances — counting them made the ratchet fail on exactly the
+      // action its own failure message prescribes (adding an ariaLabel
+      // prop). Only the non-canonical quoted-kebab population is frozen.
       let m: RegExpExecArray | null
-      while ((m = CAMEL.exec(text))) {
-        if (!isStandaloneMember(text, m.index)) continue
-        out.push({
-          file: path,
-          line: lineAt(text, m.index),
-          token: `camelCase ${m[1]}`,
-        })
-      }
       QUOTED.lastIndex = 0
       while ((m = QUOTED.exec(text))) {
         if (!isStandaloneMember(text, m.index)) continue
@@ -164,16 +159,16 @@ const lint: DriftLint = {
   },
   selftest: {
     bad: [
-      // camelCase optional member — the canonical form, still frozen.
-      'export interface FooProps {\n  ariaLabel?: string\n}',
       // quoted-kebab optional members — the minority native-passthrough form.
       "interface BarProps {\n  'aria-label'?: string\n  'aria-labelledby'?: string\n}",
       // quoted-kebab REQUIRED member (an svgA11y / prop-bag shape).
       "interface Baz {\n  'aria-label': string | undefined\n}",
-      // camelCase labelledby/describedby family (both -by and -By casings).
-      'interface Q {\n  ariaLabelledBy?: string\n  ariaDescribedBy?: string\n}',
     ],
     good: [
+      // canonical camelCase members — the sanctioned form, NOT counted
+      // (recalibrated 2026-07-12: canon usage must never fail the ratchet).
+      'export interface FooProps {\n  ariaLabel?: string\n}',
+      'interface Q {\n  ariaLabelledBy?: string\n  ariaDescribedBy?: string\n}',
       // Function parameter, not a member — required camelCase is deliberately
       // under-measured to avoid this false positive.
       'function resolveAriaLabel(\n  ariaLabel: string | undefined,\n  label: ReactNode\n) {\n  return ariaLabel\n}',

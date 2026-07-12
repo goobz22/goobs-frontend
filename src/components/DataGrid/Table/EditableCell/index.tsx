@@ -527,6 +527,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         >
           <IPAddressField
             label=""
+            ariaLabel={column.headerName || column.field}
             initialValue={editingValue}
             onChange={value => onEditingValueChange(value)}
             styles={fieldStyles}
@@ -665,6 +666,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         >
           <SupernetField
             label=""
+            ariaLabel={column.headerName || column.field}
             value={supernetValue}
             onChange={(newValue: SubnetFieldValue) =>
               onEditingValueChange(JSON.stringify(newValue))

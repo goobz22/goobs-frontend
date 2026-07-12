@@ -33,6 +33,12 @@ export interface SupernetFieldProps {
    * outside a form (every existing callsite passes a `value`) it is inert.
    */
   name?: string
+  /**
+   * Programmatic accessible name for LABEL-LESS usage (WCAG 4.1.2) —
+   * forwarded to FieldShell, which applies it as `aria-label` ONLY when no
+   * visible label is rendered. Ignored while a visible label is set.
+   */
+  ariaLabel?: string
   styles?: FieldStyleOverrides
 }
 
@@ -44,6 +50,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
   value,
   onChange,
   label = 'Supernet',
+  ariaLabel,
   required = false,
   disabled = false,
   helperText,
@@ -68,6 +75,7 @@ const SupernetField: React.FC<SupernetFieldProps> = ({
       {...(error !== undefined ? { error } : {})}
       {...(dataField !== undefined ? { dataField } : {})}
       {...(dataFieldName !== undefined ? { dataFieldName } : {})}
+      {...(ariaLabel !== undefined ? { ariaLabel } : {})}
       {...(styles !== undefined ? { styles } : {})}
     />
   )
