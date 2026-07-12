@@ -31,6 +31,13 @@ export interface PercentageFieldProps {
   /** Appends '%' to the displayed value (default true); `onChange` still emits the bare number. */
   showPercentSymbol?: boolean
   placeholder?: string
+  /**
+   * Optional stable id applied to the field WRAPPER element. The value-bearing
+   * `<input>` always keeps an internally-generated id so its `<label htmlFor>`
+   * association (owned by FieldShell) stays intact — passing a custom `id`
+   * never diverges the input's id from the label's `htmlFor`, so it cannot
+   * silently break the programmatic name/label link (WCAG 1.3.1 / 4.1.2).
+   */
   id?: string
   helperText?: string
   /** Error message rendered below the input; sets aria-invalid. */
@@ -154,6 +161,13 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   const clampedNumericForAria = hasNumericAria
     ? Math.min(max, Math.max(min, numericForAria))
     : NaN
+  // True when the truthful display value diverged from the clamped
+  // aria-valuenow — i.e. an out-of-range seed/prop that got clamped for AT.
+  // In that state aria-valuetext MUST carry the REAL value (even when the %
+  // symbol is hidden) so a screen-reader user is told the true "150" rather
+  // than only the clamped "100" that aria-valuenow reports (truthfulness).
+  const numericIsClamped =
+    hasNumericAria && clampedNumericForAria !== numericForAria
 
   // Calculate width based on character count using CSS ch units —
   // avoids DOM measurement / useLayoutEffect for the auto-sized
@@ -268,11 +282,24 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
     onChange?.(newValue)
   }, [value, internalValue, onChange, min, step, formatValue])
 
-  // Spinbutton keyboard stepping on the input itself: ArrowUp/ArrowDown adjust
-  // by `step`, matching native <input type="number"> and the WAI-ARIA
-  // spinbutton pattern. Home/End/Left/Right are deliberately left to native
-  // caret movement so multi-digit text editing still works (native number
-  // inputs behave the same — they do not map Home/End to min/max).
+  // Jump straight to a range bound (Home → min, End → max). Clamped by
+  // formatValue (the bound is already in range, so this just canonicalizes the
+  // string form) and emitted through the same numeric onChange as the steppers.
+  const handleSetToBound = useCallback(
+    (target: number) => {
+      const newValueStr = formatValue(target.toString())
+      setInternalValue(newValueStr)
+      onChange?.(target)
+    },
+    [formatValue, onChange]
+  )
+
+  // Spinbutton keyboard stepping on the input itself (WAI-ARIA spinbutton
+  // pattern): ArrowUp/ArrowDown adjust by `step`; Home/End jump to min/max.
+  // These are the standard spinbutton keys. Left/Right are deliberately left
+  // to native caret movement so multi-digit text editing still works, and
+  // PageUp/PageDown (large-step, optional in the APG table) are intentionally
+  // omitted since no large-step size is defined for this field.
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (disabled) return
@@ -282,9 +309,15 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
         handleDecrement()
+      } else if (event.key === 'Home') {
+        event.preventDefault()
+        handleSetToBound(min)
+      } else if (event.key === 'End') {
+        event.preventDefault()
+        handleSetToBound(max)
       }
     },
-    [disabled, handleIncrement, handleDecrement]
+    [disabled, handleIncrement, handleDecrement, handleSetToBound, min, max]
   )
 
   // Pointer press-and-hold: begin auto-repeat after the initial delay. The
@@ -304,14 +337,25 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
   }
 
   // Canonical activation for BOTH a mouse click and keyboard Enter/Space (a
-  // native <button> fires `click` for both). Skips the step when a press-and-
-  // hold already auto-repeated, so releasing after a hold doesn't double-count.
-  const handleActivate = (handler: () => void) => {
+  // native <button> fires `click` for both). The auto-repeat double-count guard
+  // must apply ONLY to the trailing POINTER-release click after a press-and-
+  // hold — never to a keyboard activation. A keyboard-synthesized click on a
+  // <button> reports `detail === 0`; a real pointer click reports a positive
+  // click count. So: suppress-and-reset only when a pointer click lands while
+  // the guard is set; a keyboard activation always steps AND clears any stale
+  // guard left behind when a hold was released OFF the button (no trailing
+  // click fired there, so the ref would otherwise poison the next keypress).
+  const handleActivate = (
+    handler: () => void,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     if (disabled) return
-    if (didAutoRepeatRef.current) {
+    const isPointerClick = event.detail > 0
+    if (isPointerClick && didAutoRepeatRef.current) {
       didAutoRepeatRef.current = false
       return
     }
+    didAutoRepeatRef.current = false
     handler()
   }
 
@@ -412,6 +456,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
       {({ inputId, inputAriaProps }) => (
         <div
           className={cssStyles.inputWrapper}
+          id={id}
           style={wrapperCssVars as React.CSSProperties}
         >
           <input
@@ -423,9 +468,11 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
             aria-valuemin={min}
             aria-valuemax={max}
             aria-valuetext={
-              hasNumericAria && showPercentSymbol ? displayValue : undefined
+              hasNumericAria && (showPercentSymbol || numericIsClamped)
+                ? displayValue
+                : undefined
             }
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             data-field-name={dataFieldName}
             value={displayValue}
@@ -445,7 +492,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
               <button
                 type="button"
                 onMouseDown={() => handlePressStart(handleIncrement)}
-                onClick={() => handleActivate(handleIncrement)}
+                onClick={event => handleActivate(handleIncrement, event)}
                 aria-label={incrementAriaLabel}
                 data-action="increment"
                 disabled={disabled}
@@ -459,7 +506,7 @@ const PercentageField: React.FC<PercentageFieldProps> = ({
               <button
                 type="button"
                 onMouseDown={() => handlePressStart(handleDecrement)}
-                onClick={() => handleActivate(handleDecrement)}
+                onClick={event => handleActivate(handleDecrement, event)}
                 aria-label={decrementAriaLabel}
                 data-action="decrement"
                 disabled={disabled}

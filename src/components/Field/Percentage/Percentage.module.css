@@ -104,6 +104,16 @@
   margin-top: 2px;
 }
 
+/* Disabled affordance for the +/- steppers — mirrors .input:disabled so the
+   buttons visibly dim and drop the misleading pointer cursor when the field is
+   disabled (they were staying full-strength gold with cursor: pointer). The
+   native `disabled` attribute already blocks activation; this is the matching
+   visual cue. */
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Respect reduced-motion (WCAG 2.3.3): drop the border/background transitions
    for users who opt out of non-essential motion. */
 @media (prefers-reduced-motion: reduce) {
