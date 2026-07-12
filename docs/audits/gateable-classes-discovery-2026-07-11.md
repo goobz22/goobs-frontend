@@ -60,6 +60,37 @@ wave-2 builders check `ls scripts/a11y-lints/` before creating (contract already
 - `styles-props-read` / story coverage — already gated (`lint:styles-props`, `lint:coverage`).
 - Contrast render sweeps — Playwright-heavy, can't join `lint:all` cheaply.
 
+## Round 2 (2026-07-12) — enterprise-library categories sweep
+
+Prompted by "what do enterprise frontend libraries (Spectrum/Polaris/Carbon/MUI) gate
+that we don't?" Verified against this repo, not listed from memory:
+
+**Already covered here (verified):** strict react-hooks rules (immutability,
+static-components, set-state-in-render) in eslint.config.mjs; `peerDependencies`
+correct (react/react-dom/next as peers); `sideEffects: ["*.css"]` declared;
+`target="_blank"` clean (0 hits; browsers also default noopener since 2021).
+
+**BUILT + wired this round:**
+| Gate | Where | Found / state |
+|---|---|---|
+| `lint:circular` — circular imports (init-order fragility; DFS over first-party value imports, type-only skipped) | `lint:all` | 1 real cycle found+fixed: Table↔Rows via `getRowId` (extracted to `DataGrid/utils/getRowId.ts`); 563 modules now 0 cycles |
+| `lint:package` — exports-map integrity, peers, sideEffects (dependency-free publint/ATTW) | `prepublishOnly` (needs dist) | clean |
+| `lint:budget` — bundle-size budgets (es/umd/css, baseline+10%; raising = deliberate commit with reason) | `prepublishOnly` | 89–90% of budget |
+
+**CONFIRMED, queued (need a real campaign or careful checker — final-wave / follow-up):**
+- `rtl-logical-properties` (~255 physical-property hits in module.css: margin-left/right,
+  left:/right:, text-align) — the Spectrum/Polaris RTL category; migration to
+  margin-inline-*/inset-inline-* + a stylelint plugin rule. LARGE.
+- `effect-listener-missing-cleanup` (81 addEventListener sites to verify paired removal /
+  AbortController in the same effect) — memory-leak class; needs effect-scope-aware checking.
+- `dsih-sanitization-provenance` (5 dangerouslySetInnerHTML sites) — require `__html` to
+  flow through an escaping/sanitizing pipeline (Markdown's mdToHtml escapes source;
+  DOMPurify is already in the graph via jspdf); per-site pipeline reading needed first.
+- Public API report (api-extractor-style `.api.md` diff gate over dist/index.d.ts) —
+  catches accidental breaking changes; needs tooling decision.
+- Interaction-test coverage: every interactive component ≥1 play function (extend
+  lint:coverage) — counts exist in stories, needs an "interactive" classification.
+
 ## Method / provenance
 
 Lenses: test-selector wiring · ARIA idiom drift · keyboard interaction · SSR safety ·

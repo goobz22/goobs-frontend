@@ -51,7 +51,7 @@ import React from 'react'
 import { ColumnDef, type RowData, type DataGridStyles } from '../../types'
 import EditableCell from '../EditableCell'
 import Chip from '../../../Chip'
-import { getRowId } from '../index'
+import { getRowId } from '../../utils/getRowId'
 import { useGridKeyboardNav } from '../../utils/useGridKeyboardNav'
 import cssStyles from '../../DataGrid.module.css'
 

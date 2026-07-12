@@ -55,22 +55,12 @@ import CompositeFieldEditModal from '../CompositeFieldEditModal'
 import { useColumnResize } from '../utils/useColumnResize'
 import cssStyles from '../DataGrid.module.css'
 import type { TableProps, ColumnDef, CompositeFieldConfig } from '../types'
+// getRowId moved to ../utils/getRowId (a leaf module) to break the
+// Table <-> Rows import cycle; imported for local use and re-exported so
+// existing importers keep working.
+import { getRowId } from '../utils/getRowId'
 
-/**
- * Extract row identifier from a row object.
- * Prefers _id (MongoDB convention) over id.
- *
- * @param row - Row object with id or _id property
- * @returns String identifier for the row
- *
- * @example
- * getRowId({ _id: '507f1f77bcf86cd799439011' }) // '507f1f77bcf86cd799439011'
- * getRowId({ id: 123 }) // '123'
- * getRowId({}) // ''
- */
-// getRowId moved to ../utils/getRowId (leaf module) to break the
-// Table <-> Rows import cycle; re-exported so existing importers keep working.
-export { getRowId } from '../utils/getRowId'
+export { getRowId }
 
 /**
  * TABLE COMPONENT

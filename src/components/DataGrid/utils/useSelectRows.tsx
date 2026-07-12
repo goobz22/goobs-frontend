@@ -1,7 +1,7 @@
 'use client'
 
 import type { RowData } from '../types'
-import { getRowId } from '../Table' // Adjust this import if getRowId is in a different file
+import { getRowId } from './getRowId'
 
 /**
  * Select or deselect **all** rows.
