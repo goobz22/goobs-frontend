@@ -4,9 +4,14 @@
 findings D2–D6 + the footer-menu keyboard model + WCAG 4.1.3 status messages FIXED at root
 cause; round 3 adversarial-review findings — **mobile card-grid ownership (R1)** and
 **aria-rowindex (R2)** FIXED at root cause, and **D1 (R3) PARTIALLY fixed** in-directory:
-the `text`/`phoneNumber` inline editors now get accessible names via the leaf-Field
-`ariaLabel` prop, and the remaining specialized field types are precisely deferred to the
-Field-layer owner. See "Review round 3" for the per-finding resolution and "Deferred".)
+the `text`/`phoneNumber` inline editors got accessible names via the leaf-Field
+`ariaLabel` prop. **Round 4 (D1 continued) NOW threads `ariaLabel` into every remaining
+specialized editor branch** — the leaf-Field `ariaLabel` sweep landed for USD, Date, Time,
+dropdown (SearchableSimple), MultiSelect, InternalIncrement, CVV, CreditCard, Account,
+Routing, Subnet, VLAN, CIDR, MACAddress — plus the footer page-size selector and the mobile
+CardField multiselect. Only the two IPAM leaves whose Field components still lack an
+`ariaLabel` prop (`IPAM/Address`, `IPAM/Supernet`) remain deferred. See "Review round 4"
+and "Deferred".)
 
 ## APG pattern
 
@@ -211,6 +216,39 @@ new behaviour is pinned by an extended play story (see "Stories updated").
   `internalIncrement`, `cvv`, `creditCardNumber`, `accountNumber`, `routingNumber`, and every
   IPAM field) whose leaf Field components do **not** yet accept `ariaLabel` — see "Deferred".
 
+## Review round 4 (D1 continued) — specialized editors adopt `ariaLabel`
+
+The leaf-Field `ariaLabel` sweep the round-3 note recommended landed for the specialized
+field types, so the four DataGrid editor callsites now thread the accessible name into
+**every** remaining editor branch (root-cause fix for the desktop + mobile inline editors).
+
+- **`EditableCell`, `CreationRow`, `CompositeFieldEditModal`, `MobileCardView/AddCard`** —
+  `ariaLabel={column.headerName || column.field}` (cell editor) /
+  `{fieldConfig.label || fieldConfig.field}` (creation + composite) / `{fieldDef.label}`
+  (mobile card) added to the `usd`/`currency`, `date`/`monthYear`, `time`,
+  `searchableDropdown`/`dropdown`, `multiselect`, `internalIncrement`, `cvv`,
+  `creditCardNumber`, `accountNumber`, `routingNumber`, `subnet`, `vlan`, `cidr`, and
+  `macAddress` branches. The leaf forwards it onto the input **only when no visible label
+  renders** (the editors pass `label=""`), so it is the input's sole accessible name. The
+  `time` editor additionally gains `label=""` (TimeField defaults to a visible "Time" label
+  that would otherwise suppress the ariaLabel; the field name already shows in the sibling
+  label). **Markup:** additive `aria-label` on each specialized editor input; nothing removed.
+- **`Footer` page-size selector** — the Regular `Dropdown` rendered with `label=""` (the
+  visible "Show:" text is an unassociated sibling `<span>`) now carries
+  `ariaLabel="Rows per page"`, naming the combobox trigger (WCAG 1.3.1 / 4.1.2).
+- **`MobileCardView/CardField`** — the inline `multiselect` editor is a goobs combobox, not
+  one of the native `<input>`/`<select>` the visible `<label htmlFor={inputId}>` associates
+  with, so it took `ariaLabel={column.headerName}`.
+- **Still deferred (Field-layer, unchanged):** `IPAM/Address` (`IPAddressFieldProps`) and
+  `IPAM/Supernet` (`SupernetFieldProps`) — their leaf Field components still expose **no**
+  `ariaLabel` prop, so the `ipAddress` and `supernet` editor branches cannot yet be named
+  from the DataGrid side (verified by reading the leaves). See "Deferred".
+
+New play story: **`A11y — Specialized Cell Editor Names`** opens the `age`
+(`internalIncrement` → `role="spinbutton"` input, named "Age") and `department`
+(`dropdown` → `role="combobox"`, named "Department") editors from the keyboard and asserts
+each exposes its column header as the accessible name — the regression net for round 4.
+
 ## Hearing
 
 Grepped the whole directory for `Audio`/`AudioContext`/`<audio>`/`<video>`/
@@ -317,30 +355,24 @@ existing stories already mount):
 
 ## Deferred
 
-Only the **specialized-field-type half of D1 (R3)** remains, and its root cause is in the
-leaf Field components / `FieldShell` — shared components **outside DataGrid ownership**. The
-DataGrid callers already pass `ariaLabel` to every `TextField`/`PhoneNumberField` they render;
-the remaining editor types cannot receive a name because their leaf Field component has no
-`ariaLabel` prop.
+After round 4 only **two** editor branches (`ipAddress`, `supernet`) remain unnamed, because
+their leaf Field components — `Field/IPAM/Address` (`IPAddressFieldProps`) and
+`Field/IPAM/Supernet` (`SupernetFieldProps`, a thin `SubnetField` wrapper that does not
+forward one) — still expose **no** `ariaLabel` prop. That root cause is in the shared leaf
+Field components, **outside DataGrid ownership**. Every other editor type (14 leaf types +
+the footer page-size selector + the mobile CardField multiselect) is now named from the
+DataGrid side — see "Review round 4".
 
-**Precise remaining fix (Field-layer owner), pick either:**
+**Precise remaining fix (Field-layer owner)** — add an `ariaLabel?: string` prop to the two
+leaf components and render it as `aria-label={ariaLabel}` on the underlying input, exactly as
+the sibling leaves (`Field/IPAM/Subnet`, `Field/IPAM/VLAN`, `Field/IPAM/CIDR`,
+`Field/IPAM/MACAddress`) already do; for `Supernet`, forward it into the wrapped `SubnetField`:
 
-1. **Per-leaf (matches the pattern `Field/Text` + `Field/PhoneNumber` already use):** add an
-   `ariaLabel?: string` (+ optional `ariaLabelledby?: string`) prop to each of these leaf Field
-   components and render it as `aria-label={ariaLabel}` on the underlying input, exactly as
-   `src/components/Field/Text/index.tsx:44-54,340-341` does:
-   `Field/USD`, `Field/Date/DateField`, `Field/Dropdown/SearchableSimple`,
-   `Field/Dropdown/MultiSelect`, `Field/Number/InternalIncrement`, `Field/Number/CVV`,
-   `Field/Number/CreditCardNumber`, `Field/Number/AccountNumber`, `Field/Number/RoutingNumber`,
-   `Field/IPAM/Address`, `Field/IPAM/Subnet`, `Field/IPAM/VLAN`, `Field/IPAM/CIDR`,
-   `Field/IPAM/Supernet`, `Field/IPAM/MACAddress`.
-2. **Central (one change, names every field):** add an `ariaLabel?: string` prop to
-   `FieldShell` (`src/components/Field/Shell/index.tsx`), map it into `inputAriaProps` at
-   line ~345 (`if (ariaLabel && no visible label) inputAriaProps['aria-label'] = ariaLabel`),
-   and spread `inputAriaProps` (already the pattern) onto the input in every leaf Field.
+- `Field/IPAM/Address/index.tsx` — `IPAddressFieldProps` (no `ariaLabel` today).
+- `Field/IPAM/Supernet/index.tsx` — `SupernetFieldProps` (add + forward to `SubnetField`).
 
-Once either lands, the four DataGrid callers are **already** threading
-`ariaLabel={column.headerName || fieldConfig.label || field}` into `TextField`/`PhoneNumber`
-and only need the same one-liner added to the remaining field-type branches (all in this
-directory, in `EditableCell`, `CreationRow`, `CompositeFieldEditModal`, `MobileCardView/AddCard`).
-See the structured `deferred` result for the exact file:line anchors.
+Once either lands, the two DataGrid callers are **ready to adopt** the same one-liner already
+used by every other branch — `ariaLabel={column.headerName || column.field}` in
+`EditableCell` and `ariaLabel={fieldConfig.label || fieldConfig.field}` in `CreationRow` /
+`CompositeFieldEditModal` — added to the `ipAddress` and `supernet` `case` branches (all in
+this directory). See the structured `deferred` result for the exact file:line anchors.
