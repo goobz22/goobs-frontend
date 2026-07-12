@@ -75,8 +75,16 @@
 /* --------------------------------------------------------------------------
    GLYPH — sacred-only decorative mark, absolutely positioned top-right.
    The old theme referenced an undefined `glyphRotate` keyframe, so nothing
-   actually animated. The keyframe is now defined below so the intended slow
-   rotation renders; color/size/position are exact from theme/toolbar.ts.
+   ever animated in the shipped product. A later migration DEFINED that
+   keyframe, introducing a perpetual `animation: glyphRotate 10s linear
+   infinite` spin — but auto-starting motion that runs forever, in parallel
+   with the toolbar's controls, violates WCAG 2.2.2 Pause/Stop/Hide (Level A):
+   that SC requires a pause/stop/hide mechanism for ALL users (a
+   `prefers-reduced-motion` guard only satisfies the AAA 2.3.3 case). A
+   pause control on a tiny decorative mark is the wrong UI, so the correct
+   root-cause fix is to NOT auto-animate at all — which also restores the
+   original (never-animated) behavior. The glyph is now static; color / size /
+   position remain exact from theme/toolbar.ts.
    -------------------------------------------------------------------------- */
 .glyph {
   position: absolute;
@@ -84,26 +92,13 @@
   right: 0.5rem;
   color: var(--toolbar-glyph-color);
   font-size: 0.875rem;
-  animation: glyphRotate 10s linear infinite;
 }
 
+/* The glyph no longer animates, so the only motion the container can drive is
+   the sacred theme cross-fade `transition`; suppress it under reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
-  .glyph {
-    animation: none;
-  }
-
-  /* Suppress the theme cross-fade too, so no motion is driven under reduce. */
   .root {
     transition: none;
-  }
-}
-
-@keyframes glyphRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 

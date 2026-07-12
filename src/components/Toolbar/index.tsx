@@ -159,9 +159,11 @@ const isTextEntryElement = (el: HTMLElement | null): boolean => {
  * palette for the searchbar.
  *
  * Implements the WAI-ARIA APG Toolbar pattern: the root is a labelled
- * `role="toolbar"` and the contained controls share a single Tab stop, roved
- * with Left/Right Arrow + Home/End (a focused searchbar or open filter dropdown
- * keeps its own Arrow behavior).
+ * `role="toolbar"` and its button/combobox controls share a single Tab stop,
+ * roved with Left/Right Arrow + Home/End. A contained text field (the
+ * searchbar) is intentionally excluded from the roving set — arrows are needed
+ * for its caret motion — so it keeps its own default Tab stop and Arrow keys
+ * (as does an open filter dropdown, for its own option navigation).
  */
 const CustomToolbar: FC<CustomToolbarProps> = ({
   buttons,

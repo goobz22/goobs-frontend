@@ -331,7 +331,9 @@ const KeyboardRovingRenderer = () => {
  *    (the toolbar does NOT hijack those keys from a text field); opening the
  *    filter combobox likewise gives it the Arrow keys for its options.
  *  - The sacred 𓊗 glyph (top-right) is `aria-hidden="true"`, so screen readers
- *    skip the decorative hieroglyph (WCAG 1.1.1).
+ *    skip the decorative hieroglyph (WCAG 1.1.1), and it is STATIC — it carries
+ *    no perpetual CSS animation, so there is no auto-starting motion that would
+ *    require a pause/stop/hide mechanism (WCAG 2.2.2, Level A).
  */
 export const KeyboardRovingTabIndex: Story = {
   render: () => <KeyboardRovingRenderer />,
@@ -400,5 +402,15 @@ export const KeyboardRovingTabIndex: Story = {
     )
     await expect(glyph).not.toBeNull()
     await expect(glyph).toHaveTextContent('𓊗')
+
+    // WCAG 2.2.2 (Pause/Stop/Hide, Level A): the decorative glyph must NOT
+    // auto-spin forever. Auto-starting motion that runs >5s in parallel with
+    // the controls would require a pause/stop/hide mechanism, so the glyph
+    // carries NO perpetual CSS animation at all (a pause control on a tiny
+    // decorative mark is the wrong UI). This guards against re-introducing the
+    // `glyphRotate 10s linear infinite` spin a prior migration had added.
+    await expect(
+      window.getComputedStyle(glyph as HTMLElement).animationName
+    ).toBe('none')
   },
 }
