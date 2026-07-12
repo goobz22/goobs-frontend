@@ -18,6 +18,31 @@ the accessibility tree**, which was the dominant defect here.
 | 2 | Serious | 2.4.7 Focus Visible (AA), 2.4.11 Focus Appearance (AA) | `RadioGroup.module.css` — no `:focus-visible` rule anywhere in the file | `missing-focus-visible-style` | **FIXED** |
 | 3 | Moderate | 1.3.1 Info & Relationships (A), 4.1.2 Name/Role/Value (A) | `index.tsx` — `aria-labelledby` always pointed at a `<label>` that is empty when neither `label` nor `labelText` is set (was line 241) | `missing-accessible-name` | **FIXED** |
 | 4 | Minor | 1.3.1 Info & Relationships (A) | `index.tsx` — group heading rendered as an orphan `<label>` with no `htmlFor` (was line 238) | `orphan-label-element` | **FIXED** |
+| 5 | Serious | 1.4.11 Non-text Contrast (AA) | `RadioGroup.module.css:46` — light `--rg-radio-border-color` was `var(--goobs-light-border-strong)` (#cbd5e1) | `low-contrast-control-boundary` | **FIXED** |
+
+> **2026-07-11 re-audit (this pass):** issues 1–4 were fixed by prior commit `3f4be98f`
+> and re-verified here (all pass). This re-audit found and fixed the remaining **issue 5**
+> below (commit `25a01498`).
+
+### Issue 5 — Unchecked radio ring below 3:1 in light theme (Serious)
+
+The light-theme unchecked ring used the generic grey `--goobs-light-border-strong` (#cbd5e1),
+which is only **1.48:1** against the white canvas — far below the **3:1** WCAG 2.2 1.4.11
+threshold for a control's visual boundary. The unchecked ring is the *only* visual indicator
+that an unselected radio exists and its state, so a low-vision user could not perceive the
+unselected options. Verified with a relative-luminance script:
+
+| ring color | surface | ratio | verdict |
+|---|---|---|---|
+| `#cbd5e1` (old, border-strong) | `#ffffff` | 1.48:1 | ✗ fails 1.4.11 |
+| `#4b5563` (new, text-muted) | `#ffffff` | 7.56:1 | ✓ passes |
+| `#94a3b8` dark ring | `#1e293b` / `#111827` | 5.71 / 6.92:1 | ✓ (already fine) |
+| `#2563eb` checked fill / focus | `#ffffff` | 5.17:1 | ✓ (already fine) |
+
+Dark (`--goobs-dark-text-muted` #94a3b8) and sacred (gold) unchecked rings already cleared 3:1,
+as did the checked fill, hover border, and all focus outlines — only the **light** default was
+non-compliant. Fix: point the light default `--rg-radio-border-color` at `--goobs-light-text-muted`
+(#4b5563, 7.56:1). No change to dark/sacred or to any caller-override path.
 
 ### Issue 1 — `display: none` removes the radios from the a11y tree and keyboard order (Critical)
 
@@ -128,6 +153,10 @@ client-only injection of primary content. **No issues.**
 5. **Decorative ring/dot hidden (hardening)** — added `aria-hidden="true"` to the presentational
    `.radioSpan` so the graphic representation cannot add screen-reader noise or leak into the
    per-option name; the native input already conveys checked state.
+6. **Light unchecked-ring contrast (Issue 5, 2026-07-11, commit `25a01498`)** — light default
+   `--rg-radio-border-color` changed from `var(--goobs-light-border-strong)` (#cbd5e1, 1.48:1)
+   to `var(--goobs-light-text-muted)` (#4b5563, 7.56:1). Dark/sacred unchanged (already ≥3:1);
+   checked/hover/focus already use primary. No public API or markup change.
 
 No public API change: no prop renamed/removed/retyped, no export changed. The only rendered
 markup changes are the group heading element (`<label>` → `<span>`, both structural) and an
@@ -149,6 +178,13 @@ Added one `play`-backed regression story to `RadioGroup.stories.tsx`, matching t
 
 The existing `Interaction and A11y Test` story (click-to-select) is retained.
 
+**2026-07-11 re-audit added:** `Light/No Selection` (`LightNoSelection`) — renders the group
+with **no `defaultValue`**, so every radio is unchecked. No prior story exercised the
+all-unchecked initial state, making this the Chromatic visual baseline that pins the Issue-5
+unchecked-ring contrast fix. Its `play` test asserts the radiogroup still exposes its accessible
+name, all three options are reachable unchecked `radio` roles, and the root reports
+`data-filled="false"`.
+
 Gates run per-file and passing: `bun lint:file` on `index.tsx` + `RadioGroup.stories.tsx`
 (exit 0), `stylelint` on `RadioGroup.module.css` (exit 0).
 
@@ -161,5 +197,20 @@ Gates run per-file and passing: `bun lint:file` on `index.tsx` + `RadioGroup.sto
   `name` prop (which would announce e.g. "basic-radio"). Accessible-by-default is met
   whenever `label`/`labelText` is provided (the intended usage, and the case in every story).
   Consumer responsibility; no code change.
-- **No cross-file (unowned) fixes were required** — both root-cause fixes lived entirely
-  inside the RadioGroup directory. No `deferred` edits to shared/unowned files.
+- **The prior (issues 1–4) root-cause fixes lived entirely inside the RadioGroup directory.**
+  Issue 5's fix is likewise fully in-directory (RadioGroup now points its own light default at a
+  compliant token).
+- **Shared control-border token fails 1.4.11 library-wide (found during the 2026-07-11 re-audit).**
+  `src/styles/global.css:283` / `:304` define `--goobs-light-border-strong` **and**
+  `--goobs-light-control-border` both as `#cbd5e1` (1.48:1 on white). Any component that borders
+  an *enabled* control with these tokens on a white surface has the same 1.4.11 failure RadioGroup
+  had. Suggested change (owned by the `src/styles` owner, NOT RadioGroup): raise the
+  control-boundary token(s) to a ≥3:1 grey — e.g. `#767676` (≈4.54:1) or reuse
+  `--goobs-light-text-muted` (#4b5563). RadioGroup is now insulated regardless.
+- **No error / required / invalid rendering.** RadioGroup binds via `useFieldBinding` directly
+  and does not wrap in `Field/Shell`, so inside a `<Form>` a validation error / required marker /
+  `aria-invalid` for this field is neither shown nor exposed. This is an *absent feature*, not a
+  live WCAG failure (no error text is rendered at all, so nothing is mis-associated). Adding it
+  would require additive props + integration with `src/components/Field/Shell/` (not this
+  directory). Suggested: route RadioGroup through `Field/Shell` like the other bound inputs so the
+  shared error region + `aria-invalid` + required indicator apply uniformly.
