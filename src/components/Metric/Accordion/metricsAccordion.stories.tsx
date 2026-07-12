@@ -218,8 +218,10 @@ export const SacredTheme: Story = {
 // --------------------------------------------------------------------------
 
 /**
- * Collapsed state — the default. Only the toggle button is shown; the panel is
- * not mounted until opened.
+ * Collapsed state — the default. The panel is present in the DOM (so its
+ * content ships in the SSR'd HTML and the toggle's `aria-controls` resolves to
+ * a real element) but carries the native `hidden` attribute, so it is removed
+ * from the a11y tree and from layout — visually only the toggle button shows.
  */
 export const Collapsed: Story = {
   name: 'States/Collapsed',
@@ -230,6 +232,34 @@ export const Collapsed: Story = {
     styles: { theme: 'light' },
   },
   globals: { backgrounds: { value: 'light' } },
+  // Regression assertion (goobs has no unit tests — the play fn IS the test) for
+  // the collapsed-disclosure ARIA-hygiene + SEO fix: when collapsed, the panel
+  // must (a) still be MOUNTED (content crawlable in SSR), (b) carry `hidden`
+  // (removed from the a11y tree + layout), and (c) be the resolvable target of
+  // the toggle's `aria-controls` — i.e. NOT a dangling IDREF. Fails if the panel
+  // reverts to a conditional `{isExpanded && …}` render.
+  play: async ({ canvasElement }) => {
+    const toggle = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-testid="metrics-accordion-toggle"]',
+    )
+    await expect(toggle).not.toBeNull()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+
+    // aria-controls is set AND points at a mounted element (no dangling IDREF).
+    const controlsId = toggle!.getAttribute('aria-controls')
+    await expect(controlsId).toBeTruthy()
+    const panel = canvasElement.querySelector(`#${controlsId}`)
+    await expect(panel).not.toBeNull()
+
+    // Same element is the testid'd panel, and it is collapsed via `hidden`.
+    await expect(panel).toBe(
+      canvasElement.querySelector('[data-testid="metrics-accordion-panel"]'),
+    )
+    await expect(panel).toHaveAttribute('hidden')
+
+    // Content is really in the collapsed DOM (SSR/SEO): the first KPI title.
+    await expect((panel as HTMLElement).textContent).toContain('Total Revenue')
+  },
 }
 
 /**

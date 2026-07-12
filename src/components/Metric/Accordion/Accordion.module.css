@@ -126,7 +126,10 @@
 }
 
 /* --------------------------------------------------------------------------
-   Panel (only rendered when open)
+   Panel — always mounted when the accordion has content; collapsed state
+   toggles visibility via the native `hidden` attribute (which supplies
+   `display:none`; .panel deliberately sets no `display` so `hidden` wins),
+   keeping the content in the SSR'd DOM for SEO + a valid aria-controls target.
    -------------------------------------------------------------------------- */
 .panel {
   border: 1px solid color-mix(in srgb, var(--ma-accent) 30%, transparent);

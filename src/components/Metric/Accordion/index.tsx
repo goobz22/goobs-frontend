@@ -128,11 +128,16 @@ function useScreenSize() {
  * In `metrics` mode the accordion shell renders when `collapsible` (default
  * `true`) or, with `responsiveCollapseOnTablet`, when the viewport is
  * narrower than 1024px — otherwise the cards render bare and expanded.
- * Default state is collapsed (`initiallyOpen: false`) and the panel is only
- * mounted while open, so tests must click the toggle before asserting on
- * panel content. Test selectors: `data-metrics-accordion` + `data-state` on
- * the wrapper and toggle, plus `data-testid="metrics-accordion-toggle"` /
- * `"metrics-accordion-panel"`.
+ * Default state is collapsed (`initiallyOpen: false`). The panel stays mounted
+ * whenever the accordion has content — including while collapsed — and toggles
+ * visibility with the native `hidden` attribute, so its markup ships in the
+ * SSR'd HTML (crawlable / indexable) and the toggle's `aria-controls` always
+ * points at a real element (never a dangling IDREF). A collapsed panel is
+ * removed from the a11y tree and from layout but LEFT in the DOM, mirroring the
+ * sibling `Accordion`; assert on its visibility (Playwright's default
+ * visibility gate treats `[hidden]` as not-visible), not on its presence. Test
+ * selectors: `data-metrics-accordion` + `data-state` on the wrapper and toggle,
+ * plus `data-testid="metrics-accordion-toggle"` / `"metrics-accordion-panel"`.
  */
 export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   children,
@@ -292,6 +297,16 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   }
 
   const content = children ?? renderedMetrics
+  // The panel renders whenever the accordion HAS content — including while
+  // COLLAPSED — so its markup ships in the SSR'd HTML (crawlable/indexable for
+  // SEO) and the trigger's `aria-controls` always resolves to a real element
+  // rather than a dangling IDREF. Visibility is toggled with the native
+  // `hidden` attribute (below): collapsed removes it from the a11y tree AND from
+  // layout but LEAVES it in the DOM — disclosed, not deleted — exactly mirroring
+  // the sibling `Accordion`. `content` is null only in the degenerate
+  // empty-metrics case (accordion shell forced with no children/metrics); then
+  // there is no panel and `aria-controls` is omitted.
+  const hasPanel = content != null
 
   const toggleButton = (
     <button
@@ -299,7 +314,7 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       type="button"
       onClick={handleToggle}
       aria-expanded={isExpanded}
-      aria-controls={panelId}
+      aria-controls={hasPanel ? panelId : undefined}
       data-action="toggle"
       data-testid={toggleTestId}
       data-state={state}
@@ -342,13 +357,18 @@ export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
       })}
     >
       {toggle}
-      {isExpanded && (
+      {hasPanel && (
         <div
           id={panelId}
           role="region"
           aria-label={title}
           data-testid={panelTestId}
           className={styles.panel}
+          // Collapsed: kept in the DOM for SSR/SEO (crawlable content) + so
+          // `aria-controls` isn't a dangling IDREF, but hidden from assistive
+          // tech AND layout via the native `hidden` attribute. Removed from
+          // view when collapsed; visible when expanded.
+          hidden={!isExpanded}
         >
           {content}
         </div>
