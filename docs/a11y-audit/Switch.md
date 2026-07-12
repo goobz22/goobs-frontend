@@ -20,6 +20,20 @@ UA-promoted focus outline + `canvastext` thumb border), matching the library's e
 outline-based forced-colors focus convention. Regression-gated by a new
 `AccessibilityForcedColors` CSSOM story.
 
+**4th review (2026-07-11):** the previously-**Deferred Issue 5 / WCAG 2.4.7 + 2.4.11** closed
+at root cause. The 3rd review's forced-colors outline fixed HCM, but in a *normal* browser the
+only focus cue was still a `box-shadow` glow that (a) was fully removable via
+`styles.focusEffects === false` (leaving keyboard users with no indicator) and (b) as a
+~0.2-alpha ring was too faint to clear the 3:1 focus-appearance floor. Earlier passes called
+this "not fixable without a breaking API change" — but it **is**: keep `focusEffects` suppressing
+only the *decorative glow* and add an **ungated** solid `:focus-visible` outline as the baseline
+indicator, exactly the pattern the sibling **Checkbox** already uses
+(`Checkbox.module.css:157-167`, chosen over box-shadow for 2.4.7/2.4.11). Fixed with a new
+per-theme `--switch-focus-outline-color` token + an ungated `.track:has(.input:focus-visible)`
+outline; regression-gated by a new `AccessibilityFocusVisible` CSSOM story that renders with
+`focusEffects: false` and proves the base outline survives. No public API change. Commit
+`8df0e1fb`.
+
 **APG pattern:** [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/). The
 component is built on a native `<input type="checkbox">` wrapped in a `<label>`
 (`index.tsx:158-213`) — the "semantic HTML first" implementation. The APG's
@@ -38,7 +52,7 @@ to move focus, `Space` to toggle).
 | 2 | Moderate | 1.1.1 Non-text Content (A), 4.1.2 Name, Role, Value (A) | `index.tsx` `.thumb` div (glyph `✓`/`𓊹`/`𓊨`) + `.shimmer` div | **FIXED** |
 | 3 | Moderate | 2.3.3 Animation from Interactions (AAA) | `Switch.module.css` — infinite `sacredSwitchShimmer` + `transition` everywhere, no reduced-motion block | **FIXED** |
 | 4 | Minor (by design — consumer responsibility) | 4.1.2 Name, Role, Value (A) | `index.tsx` — no accessible name when neither label nor `aria-label` is supplied | **DEFERRED (documented, not a defect)** |
-| 5 | Minor (opt-in — documented) | 2.4.7 Focus Visible (AA) | `Switch.module.css:250` focus ring is suppressible via `styles.focusEffects === false` | **DEFERRED (public API, default is accessible)** |
+| 5 | Serious | 2.4.7 Focus Visible (AA); 2.4.11 Focus Appearance (AA) | `Switch.module.css` focus ring was `box-shadow`-only, fully suppressible via `styles.focusEffects === false` (→ no keyboard indicator), and the ~0.2-alpha glow was too faint for the 3:1 focus-appearance floor even when enabled | **FIXED (4th review)** |
 | 6 | Moderate | 1.4.11 Non-text Contrast (AA) | `Switch.module.css` light-theme OFF state — track border `rgba(156,163,175,0.2)` (~1.2:1 vs a light page), track fill ~1.3:1, white thumb ~1.3:1: the OFF control was effectively invisible to low-vision users | **FIXED (2nd review)** |
 | 7 | Serious | 2.4.7 Focus Visible (AA); 1.4.1 (A) / 1.4.11 (AA) secondary | `Switch.module.css:260` focus ring is `box-shadow`-only (dropped in forced-colors) + `<input>` is `opacity:0` → no keyboard focus indicator in Windows High Contrast; track/thumb backgrounds collapse to one system colour | **FIXED (3rd review)** |
 
@@ -136,6 +150,37 @@ solid canvastext` so the moving thumb keeps a real system-colour boundary when i
 collapses. Uses only `transparent` + the lowercase CSS4 system colour `canvastext`;
 `stylelint src/components/Switch/Switch.module.css` → 0 warnings.
 
+### Issue 5 — keyboard focus indicator box-shadow-only + fully suppressible (Serious) — 4th review
+
+Reclassified from Deferred to a real defect by the fourth review. In a *normal* (non-forced-
+colors) browser the switch's only keyboard-focus cue was the `box-shadow` glow
+(`--switch-track-focus-shadow`), and that rule was gated behind
+`.container:not([data-focus-effects='false'])`. Two failures:
+
+- **2.4.7 — indicator removable.** With the public `styles.focusEffects: false` opt-out
+  (`data-focus-effects='false'` on the `<label>`), the box-shadow rule stops matching, so a
+  keyboard user gets **no visible focus indicator at all** — the native `<input>` is
+  `opacity: 0`, so its UA outline is invisible too. `focusEffects` was meant to drop the
+  *decorative* glow, not the baseline accessible indicator.
+- **2.4.11 — too faint even when enabled.** The default glow tokens are ~0.2-alpha rings
+  (light = `--goobs-focus-light` = `0 0 0 3px rgba(59,130,246,0.2)` ≈ 1.1:1 over white), well
+  under the 3:1 focus-appearance floor.
+
+**Root cause:** a box-shadow-only focus treatment that was *also* opt-out-able — the sibling
+**Checkbox** (`Checkbox.module.css:157-167`) already solved this exact shape with an **ungated
+solid `outline`** on `:focus-visible`, explicitly choosing `outline` over `box-shadow` "so it
+never collides with the state-dependent box-shadow" and to survive forced-colors. Switch was
+the outlier.
+
+**Fix:** added an **ungated** `.track:has(.input:focus-visible)` rule drawing a solid,
+full-opacity `2px` outline (offset `2px`) via a new per-theme `--switch-focus-outline-color`
+token (sacred → `--goobs-gold` `#ffd700`; light → `--goobs-light-primary` `#2563eb`; dark →
+`--goobs-dark-primary` `#60a5fa` — all clearing 3:1). It is **not** gated by `data-focus-effects`,
+so `focusEffects=false` can no longer remove the accessible indicator; the decorative box-shadow
+glow is retained behind it and stays opt-out. `outline` (not box-shadow) so it never collides
+with the checked-state track glow and survives forced-colors (the 3rd-review forced-colors block
+still normalizes it to the system focus colour at end-of-file). `Switch.module.css:259-283`.
+
 ## Hearing
 
 No audio, video, `Audio`, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate`
@@ -171,13 +216,14 @@ WCAG 1.2.x / 1.4.2 do not apply. **No issues.**
   contract for free — `Tab`/`Shift+Tab` to move focus, `Space` to toggle. Verified by
   the new story (`kb.focus()` + `userEvent.keyboard(' ')` → `toBeChecked()`). No custom
   key handling needed or added. Good.
-- **Focus visible:** a `:focus-visible` ring exists
-  (`Switch.module.css:260`, `--switch-track-focus-shadow`, per-theme). It is only shown
-  for keyboard focus (`:focus-visible`, not `:focus`). **Fixed** (Issue 7, 3rd review) the
-  forced-colors gap — the box-shadow ring is dropped in Windows High Contrast, so a
-  `@media (forced-colors: active)` block adds a UA-promoted transparent focus outline
-  (ungated by `focusEffects` so HCM keyboard focus is always visible) and a `canvastext`
-  thumb border. Good by default (see Deferred #5 on the `focusEffects` opt-out).
+- **Focus visible:** **Fixed** (Issue 5, 4th review) — an **ungated** solid `:focus-visible`
+  outline (`--switch-focus-outline-color`, per-theme, `Switch.module.css:259-283`) is now the
+  guaranteed keyboard-focus indicator, shown only for keyboard focus (`:focus-visible`, not
+  `:focus`) and **not** removable by `focusEffects=false` (that prop now suppresses only the
+  decorative box-shadow glow layered behind it). Matches the Checkbox sibling's outline treatment.
+  Also **Fixed** (Issue 7, 3rd review) the forced-colors gap — a `@media (forced-colors: active)`
+  block adds a UA-promoted transparent focus outline and a `canvastext` thumb border for Windows
+  High Contrast (where box-shadow is dropped).
 - **Disabled:** conveyed by the native `disabled` attribute (programmatic) plus
   `data-disabled` styling — not visual-only. Good.
 - **Motion:** **Fixed** (Issue 3) — added `@media (prefers-reduced-motion: reduce)`.
@@ -228,6 +274,14 @@ primary content. **No issues.**
    forced-colors-only; the default rendering and Chromatic baselines are unchanged.
    Uses only `transparent` + the lowercase CSS4 system colour `canvastext` — token-leak
    clean. Regression-gated by the new `AccessibilityForcedColors` story. Commit `625ce4c3`.
+6. **Ungated baseline focus outline (Issue 5, 4th review)** — added a new per-theme
+   `--switch-focus-outline-color` token (`--goobs-gold` / `--goobs-light-primary` /
+   `--goobs-dark-primary`) and an **ungated** `.track:has(.input:focus-visible)` rule drawing a
+   solid `2px` outline (offset `2px`) as the guaranteed keyboard-focus indicator (WCAG 2.4.7 /
+   2.4.11), matching the Checkbox sibling's treatment (`Checkbox.module.css:157-167`). The
+   decorative box-shadow glow is retained and stays opt-out via `focusEffects=false`, but the
+   outline is NOT gated by `[data-focus-effects]`. Additive CSS only; no DOM/API change; token-
+   leak clean. Regression-gated by the new `AccessibilityFocusVisible` story. Commit `8df0e1fb`.
 
 **Markup change note (required disclosure):** the only DOM change is the **addition**
 of `role="switch"` (and two `aria-hidden` attributes). No element was swapped, and no
@@ -273,18 +327,25 @@ changes are additive attributes + additive CSS.
   for `@media (forced-colors: active)` rules matching those tokens, and asserts (a) a
   `:focus-visible` rule restores an `outline` and (b) a rule restores a thumb `border`.
   Re-fails if the forced-colors block is dropped or weakened.
+- **(4th review)** Added **`AccessibilityFocusVisible`**
+  (`Accessibility - Focus Indicator (WCAG 2.4.7)`): renders a light switch with
+  `focusEffects: false` (decorative glow suppressed), asserts the wrapping `<label>` carries
+  `data-focus-effects='false'` and the control is still keyboard-focusable, then walks the CSSOM
+  scoped to Switch's hashed track class and to **BASE (non-`@media`) rules only** — so the
+  transparent forced-colors fallback can't false-green it — and asserts a solid, **non-transparent**
+  `:focus-visible` outline rule still exists. Re-fails if the outline is re-gated or dropped.
 
 ## Gates & evidence
 
 **Run locally, per-file (this is the complete list of what was executed here):**
-- `bun lint:file src/components/Switch/Switch.stories.tsx` → exit 0 (2nd + 3rd review).
+- `bun lint:file src/components/Switch/Switch.stories.tsx` → exit 0 (2nd, 3rd + 4th review).
 - `bunx stylelint src/components/Switch/Switch.module.css` → exit 0 (token-leak clean;
-  `#6b7280` and the lowercase system colour `canvastext` are not forbidden literals, and
-  the transparent focus outline uses no colour keyword).
-- `index.tsx` was **not** modified in the 2nd or 3rd review, so it was not re-linted here.
+  `#6b7280` and the lowercase system colour `canvastext` are not forbidden literals; the
+  4th-review outline uses only `var(--switch-focus-outline-color)` → `var(--goobs-*)` tokens).
+- `index.tsx` was **not** modified in the 2nd, 3rd, or 4th review, so it was not re-linted here.
 - WCAG contrast figures above were computed with a standalone sRGB-luminance script and
   are additionally encoded as live assertions in the stories.
-- **3rd review is pure CSS + a new story** — no `index.tsx`/markup/DOM/API change, so no
+- **3rd + 4th reviews are pure CSS + a new story** — no `index.tsx`/markup/DOM/API change, so no
   role-query or selector-contract impact.
 
 **NOT run locally (deliberately):** the `test-storybook` (`@storybook/test-runner`) run
@@ -310,12 +371,12 @@ evidence (the play was authored, not executed here) and has been corrected above
   `...props` onto the `<input>`), so the correct name source is available;
   accessible-by-default is met whenever a label/`aria-label` is provided. Documented as
   consumer responsibility; no code change.
-- **Issue 5 — `styles.focusEffects === false` suppresses the focus ring.** The public
-  `SwitchStyles.focusEffects` opt-out (`data-focus-effects='false'`) removes the
-  keyboard focus indicator, which would fail WCAG 2.4.7 for that opt-in configuration.
-  The default (`focusEffects` unset/true) is fully accessible, and removing the prop
-  would be a breaking API change, so this is left as documented consumer risk rather
-  than a defect. No code change.
+- **Issue 5 — RESOLVED (4th review), no longer deferred.** Previously logged here as an
+  unfixable-without-breaking-API opt-out risk. The 4th review fixed it at root cause: the
+  `styles.focusEffects: false` opt-out now suppresses only the *decorative* box-shadow glow, while
+  a new **ungated** solid `:focus-visible` outline (per-theme `--switch-focus-outline-color`)
+  remains as the guaranteed keyboard-focus indicator — accessible-by-default with **no** API
+  change. See "Issue 5 — 4th review" and Fix #6. Gated by `AccessibilityFocusVisible`.
 - **`styles.outline === false` also removes the OFF-state boundary (2nd review).** Like
   `focusEffects`, `outline: false` (`data-outline='false'`) strips the track border
   entirely; in light OFF that leaves only the ~1.3:1 track fill, so a consumer who opts
