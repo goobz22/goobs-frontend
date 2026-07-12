@@ -30,9 +30,20 @@ remaining gaps: page-change **announcement**, **focus retention** across window 
 **Verified already-correct (prior committed pass — no regression, not re-fixed):** `<nav>` landmark
 with `aria-label` (WCAG 1.3.1 / 4.1.2), the `<ul>/<li>` list structure (1.3.1), `aria-current="page"`
 on the selected page button (4.1.2), an `aria-label` accessible name on every control — numbered
-`"Go to page N"` (satisfies 2.5.3 Label in Name — the visible "N" is contained), direction
-`"Go to first/previous/next/last page"` (4.1.2) — decorative direction icons `aria-hidden="true"`
-(1.1.1), and non-colour-alone selected state (background + weight-600 + `aria-current`, so 1.4.1 holds).
+`"Go to page N"` (or `"page N"` once current — see Issue 7; satisfies 2.5.3 Label in Name, the visible
+"N" is contained either way), direction `"Go to first/previous/next/last page"` (4.1.2) — decorative
+direction icons `aria-hidden="true"` (1.1.1), and non-colour-alone selected state (background +
+weight-600 + `aria-current`, so 1.4.1 holds).
+
+## Post-review pass (2026-07-11) — adversarial review follow-ups
+
+An adversarial review of the pass above surfaced two remaining focus-order / accessible-naming gaps.
+Both fixed at root cause inside the component directory; commit `ee790f24`.
+
+| # | Severity | WCAG | Location | Issue | Status |
+|---|----------|------|----------|-------|--------|
+| 6 | Minor | 2.4.3 Focus Order (A) | `index.tsx` `PaginationButton` (first/prev/next/last) | Direction buttons used the **native `disabled` attribute** (`page <= 1` / `page >= count`). A keyboard user pressing Enter on "Next"/"Last" to reach the final page (or "Prev"/"First" to reach page 1) activates a control that **disables itself on the re-render**, so it drops out of the focus order and focus falls to `document.body` — the disabled-focused-element anti-pattern. A sighted keyboard user loses their place (the live region only helps AT users). | FIXED |
+| 7 | Minor | 2.5.3 Label in Name (A) / naming quality | `index.tsx` `PaginationItem` (numbered button) | The current page kept `aria-label="Go to page N"` while **also** carrying `aria-current="page"`, so a screen reader announced the mildly contradictory "Go to page 5, current page" — a "Go to" call-to-action verb for the page already active. The MUI reference differentiates ("page N" when current vs "Go to page N" otherwise). Not a hard SC failure (aria-current mitigates it), but a naming nicety the prior pass glossed as "names verified correct". | FIXED |
 
 ## Hearing
 
@@ -59,10 +70,17 @@ is applicable.
   `--goobs-light-primary` by default and per-theme overrides (`--goobs-sacred-focus-ring`,
   `--goobs-dark-primary`) — clearly visible on page and direction buttons in all three themes, and it
   never fights the hover/selected glow (`outline`, not `box-shadow`).
-- **Keyboard model:** Tab/Shift+Tab move between the native `<button>`s; Enter/Space activate them;
-  boundary buttons (`first`/`prev` at page 1, `next`/`last` at last page) and the whole pager under
-  `styles.disabled` are natively `disabled` (removed from the tab order, programmatically conveyed —
-  not colour-alone). No arrow-key roving is owed for this list-of-controls pattern; no keyboard trap.
+- **Keyboard model:** Tab/Shift+Tab move between the native `<button>`s; Enter/Space activate them.
+  Boundary buttons (`first`/`prev` at page 1, `next`/`last` at last page) and every direction button
+  under `styles.disabled` are disabled via **`aria-disabled="true"` (not the native `disabled`
+  attribute)** so they stay focusable — a keyboard user who activates one to reach a boundary keeps
+  focus on that control instead of dropping to `<body>` (Issue 6); their handler is neutralised so an
+  aria-disabled button never navigates (and can never step to page 0 / count+1). The disabled state is
+  programmatically conveyed (aria-disabled) and visually dimmed — not colour-alone. No arrow-key roving
+  is owed for this list-of-controls pattern; no keyboard trap.
+- **Current-page name (Issue 7):** the active numbered button now reads `"page N"`; every other reads
+  `"Go to page N"`. The "Go to" verb no longer contradicts the `aria-current="page"` on the current
+  control, and 2.5.3 Label in Name holds either way (the visible "N" is contained).
 
 ## SEO semantics
 
@@ -91,6 +109,21 @@ All at root cause, inside the component directory, additive-only (no prop rename
 - `Pagination.stories.tsx` — added the `PageChangeAnnouncement` accessibility story; committed the
   in-flight `AccessibleStructure` story.
 
+**Post-review pass (commit `ee790f24`):**
+
+- `index.tsx` — `PaginationButton` now renders **`aria-disabled={disabled || undefined}`** in place of
+  the native `disabled` attribute and neutralises its own click handler when disabled (Issue 6), so a
+  boundary/globally-disabled direction button stays focusable and never navigates past a boundary. The
+  numbered `PaginationItem` `aria-label` is now `isSelected ? \`page ${item}\` : \`Go to page ${item}\``
+  (Issue 7).
+- `Pagination.module.css` — the three `.navButton` disabled rules (default / sacred / dark) key off
+  `[aria-disabled='true']` instead of `:disabled`, and the three hover rules use
+  `:hover:not([aria-disabled='true'])`. Identical rendered output (same tokens, same specificity), just
+  driven by the attribute the button now carries.
+- `Pagination.stories.tsx` — added the `BoundaryFocusRetention` accessibility story (two pagers, one at
+  each boundary, so both aria-disabled ends render); refreshed the `AccessibleStructure` JSDoc for the
+  new aria-disabled boundary model and the differentiated current-page name.
+
 ### Markup changes (per the API contract note)
 
 - The root `<nav>` **gains one new visually-hidden child** `<div role="status" aria-live="polite"
@@ -101,6 +134,17 @@ All at root cause, inside the component directory, additive-only (no prop rename
 - No `data-*`/`role`/`aria` attribute in the machine-test selector contract is removed or renamed; the
   `button[role="combobox"]`/`[role="listbox"]` dropdown contract is not involved in this component.
 
+**Post-review pass:**
+
+- Direction buttons **swap the native `disabled` attribute for `aria-disabled="true"`** (present only
+  when disabled — never emitted as `"false"`, matching the library's FieldShell aria-disabled
+  contract). The `data-action` verbs (`first`/`prev`/`next`/`last`) and every other attribute are
+  unchanged; the buttons are now focusable at a boundary (intended focus-retention change). No goobs or
+  ThothOS test keyed on the native `disabled` state of these buttons (verified: no Pagination story uses
+  `toBeDisabled`; ThothOS keys on `data-action`).
+- The current numbered page button's `aria-label` value changes from `"Go to page N"` to `"page N"`
+  (text only; the attribute itself and all `data-pagination-*`/`aria-current` selectors are unchanged).
+
 ## Stories updated
 
 - `PageChangeAnnouncement` — **new**: `count={30}`, `initialPage={15}` (mid-range, so both ellipses and
@@ -109,7 +153,11 @@ All at root cause, inside the component directory, additive-only (no prop rename
   the clicked control — and renders the higher-contrast ellipses (Issue 3).
 - `AccessibleStructure` (committed from in-flight) — exercises the `<nav>`/`<ul>/<li>` structure,
   `aria-current="page"`, the accessible names, the `aria-hidden` direction icons, the
-  `:focus-visible` ring, and boundary-disabled buttons.
+  `:focus-visible` ring, and the aria-disabled boundary buttons.
+- `BoundaryFocusRetention` — **new** (post-review): two interactive pagers, one at page 1 and one at the
+  last page, so both aria-disabled boundary ends (`first`/`prev` and `next`/`last`) render together.
+  Confirms the dimmed boundary buttons still accept and hold keyboard focus (Issue 6) and that
+  activating them never navigates past the boundary.
 - Existing `Default`/`DarkTheme`/`SacredTheme`/`WithFirstLastButtons`/`HiddenPrevNext`/
   `ManyPagesWithEllipsis`/`SiblingAndBoundaryCount`/`Disabled` stories continue to cover the palettes,
   button options, ellipsis rendering, and the disabled state across all three themes.
