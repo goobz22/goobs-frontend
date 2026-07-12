@@ -273,6 +273,7 @@ const InternalIncrementNumberField: React.FC<
   return (
     <div style={style} data-field={dataField}>
       <FieldShell
+        id={id}
         label={label}
         helperText={helperText}
         error={error}
@@ -287,7 +288,7 @@ const InternalIncrementNumberField: React.FC<
           <div className={cssStyles.inputContainer}>
             <input
               ref={inputRef}
-              id={id ?? inputId}
+              id={inputId}
               name={name}
               data-field-name={dataFieldName ?? name}
               autoComplete={autoComplete}

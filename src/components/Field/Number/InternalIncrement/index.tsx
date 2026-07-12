@@ -244,6 +244,7 @@ const InternalIncrementNumberField: React.FC<
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -265,7 +266,7 @@ const InternalIncrementNumberField: React.FC<
             aria-valuenow={hasNumericValue ? numericValue : undefined}
             aria-valuemin={min}
             aria-valuemax={max}
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={internalValue}
             onChange={handleChange}

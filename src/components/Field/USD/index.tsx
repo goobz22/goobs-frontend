@@ -316,6 +316,7 @@ const USDField: React.FC<USDFieldProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={resolvedLabel}
       helperText={helperText}
       error={error}
@@ -368,7 +369,7 @@ const USDField: React.FC<USDFieldProps> = ({
               ref={inputRef}
               type="text"
               inputMode="decimal"
-              id={id ?? inputId}
+              id={inputId}
               name={name}
               data-field-name={dataFieldName}
               value={internalValue}

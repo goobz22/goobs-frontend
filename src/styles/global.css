@@ -248,7 +248,9 @@
   --goobs-sacred-primary-contrast: rgba(10, 10, 10, 0.95);
   --goobs-sacred-control-bg: rgba(0, 0, 0, 0.4);
   --goobs-sacred-control-border: var(--goobs-gold-a40);
-  --goobs-sacred-focus-ring: var(--goobs-gold-a60);
+  /* Opaque (was gold-a60): a translucent ring composites below the 3:1
+     non-text-contrast floor (WCAG 1.4.11) on dark surfaces. */
+  --goobs-sacred-focus-ring: var(--goobs-gold);
   /* Severity TEXT grades for sacred surfaces (see group 8 — the shared
      severity bases stay for fills/borders; text must be theme-graded to
      hold ≥4.5:1). All proven against #0e0e0e/#040404: danger 5.13–5.45,
@@ -302,7 +304,9 @@
   --goobs-light-primary-contrast: #ffffff;
   --goobs-light-control-bg: #ffffff;
   --goobs-light-control-border: #cbd5e1;
-  --goobs-light-focus-ring: rgba(59, 130, 246, 0.4);
+  /* Opaque (was 40%-alpha #3b82f6): composited ~1.6:1 on white — below the
+     3:1 floor. #2563eb is the ring Button/Typography already standardized. */
+  --goobs-light-focus-ring: var(--goobs-light-primary);
   /* Severity TEXT grades for light surfaces (shared group-8 bases fail as
      text on white: #ef4444 3.76:1, #22c55e 2.27:1, #3b82f6 3.5:1). Proven:
      danger #b91c1c 5.83–6.47 on #ffffff/#f3f3f3/#fef2f2; warn #b45309
@@ -333,7 +337,9 @@
   --goobs-dark-primary-contrast: #0b1220;
   --goobs-dark-control-bg: #1e293b;
   --goobs-dark-control-border: #334155;
-  --goobs-dark-focus-ring: rgba(96, 165, 250, 0.45);
+  /* Opaque (was 45%-alpha #60a5fa): composited ~2.0-2.3:1 on dark surfaces.
+     #60a5fa proves 4.8:1+ on the dark control surfaces (see severity notes). */
+  --goobs-dark-focus-ring: var(--goobs-dark-primary);
   /* Severity TEXT grades for dark surfaces (400-scale so they read as the
      same hue family lifted for dark). Proven on #1e293b/#111827/#273746:
      danger #f87171 5.29/6.41/4.41*; warn #fbbf24 8.76+; info #60a5fa

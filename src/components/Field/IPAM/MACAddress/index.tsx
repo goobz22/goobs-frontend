@@ -240,6 +240,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={shellError}
@@ -254,7 +255,7 @@ const MACAddressField: React.FC<MACAddressFieldProps> = ({
       {({ inputId, inputAriaProps }) => (
         <input
           ref={inputRef}
-          id={id ?? inputId}
+          id={inputId}
           data-field-name={dataFieldName ?? name}
           autoComplete={autoComplete}
           value={value}

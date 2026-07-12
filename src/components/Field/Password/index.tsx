@@ -197,6 +197,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -216,7 +217,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
           <input
             ref={inputRef}
             type={passwordVisible ? 'text' : 'password'}
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             data-field-name={dataFieldName}
             value={value}

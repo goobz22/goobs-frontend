@@ -644,6 +644,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        // Default to a NON-submitting button — a bare <Button> inside a form
+        // must not fire the form (WCAG 3.2.2 / accidental-submit class). A
+        // consumer-passed `type` overrides via the trailing prop spread;
+        // SaveButton passes its gated type="submit" explicitly.
+        type="button"
         className={classNames.join(' ')}
         data-component="Button"
         data-theme={theme}

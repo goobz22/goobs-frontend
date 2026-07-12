@@ -319,6 +319,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -339,7 +340,7 @@ const CreditCardNumber: React.FC<CreditCardNumberProps> = ({
             ref={inputRef}
             type="text"
             inputMode="numeric"
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={getDisplayValue()}
             onChange={handleChange}

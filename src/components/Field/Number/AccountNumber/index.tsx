@@ -209,6 +209,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -228,7 +229,7 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
           <input
             ref={inputRef}
             type="text"
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={getDisplayValue()}
             onChange={handleChange}

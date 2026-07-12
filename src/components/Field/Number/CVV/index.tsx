@@ -192,6 +192,7 @@ const CVV: React.FC<CVVProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -212,7 +213,7 @@ const CVV: React.FC<CVVProps> = ({
             ref={inputRef}
             type="password"
             inputMode="numeric"
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={getDisplayValue()}
             onChange={handleChange}

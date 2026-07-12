@@ -202,6 +202,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -222,7 +223,7 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
             ref={inputRef}
             type="text"
             inputMode="numeric"
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={getDisplayValue()}
             onChange={handleChange}

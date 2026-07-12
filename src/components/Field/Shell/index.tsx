@@ -67,6 +67,7 @@ export interface FieldShellSlot {
    * aria-describedby (when error/helperText is present).
    */
   inputAriaProps: {
+    'aria-label'?: string
     'aria-required'?: boolean
     'aria-disabled'?: boolean
     'aria-invalid'?: boolean
@@ -164,6 +165,32 @@ export interface FieldShellProps {
    * instance.
    */
   styles?: FieldStyleOverrides | undefined
+
+  /**
+   * Programmatic accessible name for LABEL-LESS fields (WCAG 4.1.2). Merged
+   * into `inputAriaProps` as `aria-label` ONLY when no visible label renders —
+   * a visible `<label>` stays the name source when present (WCAG 2.5.3 Label
+   * in Name). Lets bare inputs (DataGrid cell editors, footer page-size
+   * selectors, TransferList's category dropdown) name themselves without
+   * forcing a visible label. Additive; ignored when `label` is rendered.
+   */
+  ariaLabel?: string | undefined
+
+  /**
+   * Consumer-supplied input id. When set it becomes the slot's `inputId`, so
+   * the shell's `<label htmlFor>` and the consumer's `<input id>` can never
+   * diverge (leaves historically rendered `id={id ?? inputId}` while the
+   * label kept the generated id — a consumer-passed id silently broke the
+   * label↔input association). Defaults to the SSR-safe generated id.
+   */
+  id?: string | undefined
+
+  /**
+   * Extra `aria-describedby` target joined with the helper region's id — a
+   * seam for persistent instructions that should always be announced even
+   * when no helper/error text is showing.
+   */
+  describedById?: string | undefined
 
   /**
    * The input/button/popover-trigger element. Receives the slot with
@@ -272,6 +299,9 @@ function styleOverridesToCss(
 
 const FieldShell: React.FC<FieldShellProps> = ({
   label,
+  ariaLabel,
+  id,
+  describedById,
   required: requiredProp,
   disabled: disabledProp,
   error,
@@ -286,9 +316,11 @@ const FieldShell: React.FC<FieldShellProps> = ({
 }) => {
   // useId gives stable, SSR-safe ids per instance. Two ids: one for
   // the input itself (label htmlFor + aria-controls / etc. anchor),
-  // one for the helper region (aria-describedby target).
+  // one for the helper region (aria-describedby target). A consumer
+  // `id` replaces the input id EVERYWHERE (label htmlFor + slot) so
+  // the association cannot diverge.
   const reactId = useId()
-  const inputId = `field-${reactId}`
+  const inputId = id ?? `field-${reactId}`
   const helperId = `field-helper-${reactId}`
 
   // Optional form-engine context. `null` outside any <Form> — which is the
@@ -338,15 +370,26 @@ const FieldShell: React.FC<FieldShellProps> = ({
   // pseudo-classes handle focus on their own).
   const resolvedState = state ?? (hasError ? 'error' : undefined)
 
+  // Whether a visible <label> renders (the same condition the JSX uses) —
+  // when it does, it is the accessible-name source and ariaLabel is ignored
+  // (WCAG 2.5.3 Label in Name: the programmatic name must match the visible
+  // label, so we never let the two diverge).
+  const hasVisibleLabel = label !== undefined && label !== null && label !== ''
+
   // Build the ARIA prop bag the consumer spreads onto their element.
   // Only include attributes when their values would be meaningful —
   // omitting `aria-required="false"` keeps the AT tree quieter than
   // emitting it everywhere.
   const inputAriaProps: FieldShellSlot['inputAriaProps'] = {}
+  if (!hasVisibleLabel && ariaLabel !== undefined)
+    inputAriaProps['aria-label'] = ariaLabel
   if (required) inputAriaProps['aria-required'] = true
   if (disabled) inputAriaProps['aria-disabled'] = true
   if (hasError) inputAriaProps['aria-invalid'] = true
-  if (showHelper) inputAriaProps['aria-describedby'] = helperId
+  const describedBy = [showHelper ? helperId : undefined, describedById]
+    .filter(Boolean)
+    .join(' ')
+  if (describedBy) inputAriaProps['aria-describedby'] = describedBy
 
   // Diagnostic bus — every Field flows through this shell, so emitting here
   // wires form.validation.failed for ALL field types (Text, Dropdown, Date,
@@ -386,7 +429,7 @@ const FieldShell: React.FC<FieldShellProps> = ({
       aria-invalid={hasError || undefined}
       style={styleOverridesToCss(styles)}
     >
-      {label !== undefined && label !== null && label !== '' && (
+      {hasVisibleLabel && (
         // Empty-string labels render no <label> element — historically
         // the shell allocated a ~25px label slot (font-size 14px + 4px
         // gap + 4px margin) even with `label=""`, dropping bare inputs

@@ -189,6 +189,7 @@ const ExternalIncrementNumberField: React.FC<
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -219,7 +220,7 @@ const ExternalIncrementNumberField: React.FC<
             role="spinbutton"
             aria-valuenow={hasNumericValue ? numericValue : undefined}
             aria-valuemin={0}
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             value={internalValue}
             onChange={handleChange}

@@ -284,6 +284,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={shellError}
@@ -299,7 +300,7 @@ const VLANField: React.FC<VLANFieldProps> = ({
         <div className={cssStyles.inputContainer}>
           <input
             ref={inputRef}
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             data-field-name={dataFieldName ?? name}
             autoComplete={autoComplete}

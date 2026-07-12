@@ -272,6 +272,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
   return (
     <div data-field={dataField}>
       <FieldShell
+        id={id}
         label={label}
         helperText={helperText}
         error={error}
@@ -286,7 +287,7 @@ const CIDRField: React.FC<CIDRFieldProps> = ({
           <div className={cssStyles.inputContainer}>
             <input
               ref={inputRef}
-              id={id ?? inputId}
+              id={inputId}
               data-field-name={dataFieldName ?? name}
               autoComplete={autoComplete}
               value={`/${currentValue}`}

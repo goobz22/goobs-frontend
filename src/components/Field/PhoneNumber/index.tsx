@@ -267,6 +267,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
 
   return (
     <FieldShell
+      id={id}
       label={label}
       helperText={helperText}
       error={error}
@@ -287,7 +288,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
           <input
             ref={inputRef}
             type="tel"
-            id={id ?? inputId}
+            id={inputId}
             name={name}
             data-field-name={dataFieldName ?? name}
             value={phoneNumber}
