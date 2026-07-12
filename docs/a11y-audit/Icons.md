@@ -16,6 +16,14 @@
 > had no play-assertion. For a published lib whose stories are the only tests,
 > those branches could regress silently. Added the `Accessibility/NamingBranches`
 > story (Issue 3 below).
+>
+> **Adversarial-review pass (2026-07-11).** The review found one further
+> `untested-a11y-contract-branch` instance: ShowHideEye's **sacred-theme** glyph
+> `<div>` branches wire the contract through a hand-written path (not the shared
+> `{...svgA11y}` spread) and were unexercised — `MultiBranchIcon` only rendered
+> the light-theme `<svg>`. The wiring is correct (traced), so this was a coverage
+> gap, not a runtime defect; closed by the `Accessibility/SacredGlyphBranches`
+> story (Issue 4 below).
 
 **APG pattern:** No interactive APG pattern applies — icons are graphics, not
 controls. The governing guidance is the
@@ -115,6 +123,37 @@ one multi-branch `ShowHideEye.tsx`). Representative icons read in full:
   → no `aria-hidden`, no `role`, no name, still `focusable="false"`). No
   implementation change — the branches already behave correctly; this locks them.
 
+### 4. ShowHideEye's two sacred-theme glyph `<div>` branches had no regression coverage — MINOR — WCAG 1.1.1 (Non-text Content, A), 4.1.2 (Name, Role, Value, A) — FIXED (adversarial review pass)
+- **Where:** `src/components/Icons/ShowHideEye.tsx:56-73` (visible glyph `𓂀`)
+  and `:94-123` (hidden glyph `𓂀` + slash) vs `IconA11y.stories.tsx`
+  `MultiBranchIcon` before this pass, which rendered ShowHideEye only in the
+  **default light theme** (an `<svg>`), never with `styles={{ theme: 'sacred' }}`.
+- **Problem:** in the sacred theme ShowHideEye renders **no `<svg>` at all** — it
+  paints a hieroglyph on a `<div>` and wires the accessible-icon contract through
+  a **hand-written code path** that is distinct from every other icon's shared
+  `{...rest}{...svgA11y}` spread: `aria-hidden={svgA11y['aria-hidden']}`,
+  `role={svgA11y.role}`, `aria-label={svgA11y['aria-label'] ?? title}`,
+  `aria-labelledby={svgA11y['aria-labelledby']}` are picked out individually, and
+  `title` is routed through `aria-label` (a `<div>` has no child `<title>`). That
+  wiring is **correct** (traced all sub-cases: decorative → `aria-hidden="true"`,
+  no role/name; named → `role="img"` + name, `aria-hidden` dropped), but it can
+  regress **independently** of the `<svg>` resolver spread with nothing failing —
+  goobs' Storybook play functions are the only regression tests, and both glyph
+  branches were entirely unexercised. Note the `<div>` correctly omits the
+  SVG-only `focusable` attribute (a `<div>` is not a tab stop, so no defect there).
+- **Pattern class:** `untested-a11y-contract-branch` (same class as Issue 3;
+  this is the *sacred-glyph* instance of it — a candidate for a lint module that
+  flags any icon a11y attribute set on a non-`<svg>` element without a pinning
+  story).
+- **Fix:** added the `Accessibility/SacredGlyphBranches` story to
+  `IconA11y.stories.tsx` — a `glyphIn()` helper that targets the glyph `<div>`
+  (the single element child of the `[data-theme]` wrapper, not an `<svg>`), plus
+  a play function pinning **both** glyph branches (visible `𓂀` and hidden
+  `𓂀`+slash) in their decorative-default (`aria-hidden="true"`, no role/name),
+  `aria-label` (`role="img"` + name, no `aria-hidden`), and `title` (routed to
+  `aria-label` on this path, `role="img"`, not hidden) forms. No implementation
+  change — the branches already behave correctly; this locks them.
+
 ## Hearing (WCAG 1.2.x, 1.4.2)
 No audio, `AudioContext`, `<audio>`/`<video>`, or `navigator.vibrate` anywhere in
 `src/components/Icons` (grep — 0 matches). Icons convey nothing by sound. Nothing
@@ -179,6 +218,12 @@ Clean.
     `role="img"` while `aria-label` is also present, and force-**expose**
     (`aria-hidden={false}` on an unnamed icon → no `aria-hidden`/`role`/name, still
     `focusable="false"`). Closes Issue 3.
+  - `Accessibility/SacredGlyphBranches` **(added adversarial-review pass)** — pins
+    the two sacred-theme glyph `<div>` branches of `ShowHideEye` (which wire the
+    contract through a hand-written path, not the shared `{...svgA11y}` spread):
+    the visible (`𓂀`) and hidden (`𓂀`+slash) glyphs, each in decorative-default,
+    `aria-label`, and `title` forms, via a `glyphIn()` helper that targets the
+    glyph `<div>` rather than an `<svg>`. Closes Issue 4.
 - `AllIcons.stories.tsx` / `SacredGlyphs.stories.tsx` unchanged: both label their
   cells with visible text, so the icons being `aria-hidden` by default is correct
   there (no update needed).
