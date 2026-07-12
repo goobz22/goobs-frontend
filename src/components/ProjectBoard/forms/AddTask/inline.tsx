@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useState, useMemo, useRef, type ElementType } from 'react'
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  type ElementType,
+} from 'react'
 import type {
   ProjectBoardStyles,
   Task,
@@ -117,6 +123,33 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     setActiveTab(target)
     requestAnimationFrame(() => tabRefs.current[next]?.focus())
   }
+
+  // CONDITIONAL scrollable-region-focusable remediation for the "New Task"
+  // sidebar (WCAG 2.1.1; axe scrollable-region-focusable). The sidebar is a
+  // fixed-width `overflow-y:auto` column holding ONLY non-interactive content —
+  // the intro paragraph and the static required-fields list — with no focusable
+  // control of its own. Inside the `height:100vh` flex-row root, a short viewport
+  // (or 200% zoom) makes that content exceed the sidebar height, so it becomes a
+  // scroll container a keyboard-only user cannot reach: without a tab stop there
+  // is no way to arrow-scroll the clipped requirements text. Mirrors the library
+  // reference fix (CodeCopy `<pre>` / Panel.Body): MEASURE overflow client-side
+  // (unknowable at SSR) and opt the sidebar into the tab order ONLY when it
+  // actually overflows, so the common non-overflowing case stays out of the tab
+  // order and is not announced as an empty group. Re-measures on resize via a
+  // ResizeObserver.
+  const sidebarRef = useRef<HTMLDivElement | null>(null)
+  const [isSidebarScrollable, setIsSidebarScrollable] = useState(false)
+  useEffect(() => {
+    const node = sidebarRef.current
+    if (!node) return undefined
+    const measureOverflow = () => {
+      setIsSidebarScrollable(node.scrollHeight > node.clientHeight)
+    }
+    measureOverflow()
+    const resizeObserver = new ResizeObserver(measureOverflow)
+    resizeObserver.observe(node)
+    return () => resizeObserver.disconnect()
+  }, [])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedSeverityId, setSelectedSeverityId] = useState('')
@@ -337,7 +370,20 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   return (
     <div className={cssStyles.root} data-theme={theme}>
       {/* Sidebar - Quick Info */}
-      <div className={cssStyles.sidebar}>
+      <div
+        ref={sidebarRef}
+        className={cssStyles.sidebar}
+        // Only a tab stop when it is genuinely an unfocusable scroll trap
+        // (measured above). `undefined` omits the attributes entirely so a
+        // non-overflowing sidebar adds no tab-stop / screen-reader noise. When it
+        // DOES overflow, tabIndex=0 makes it arrow-scrollable and role="group" +
+        // aria-label give the region an accessible name announced on focus
+        // (role="group" supports naming without registering a landmark per
+        // sidebar — same choice as CodeCopy's scrollable `<pre>`).
+        tabIndex={isSidebarScrollable ? 0 : undefined}
+        role={isSidebarScrollable ? 'group' : undefined}
+        aria-label={isSidebarScrollable ? 'New task requirements' : undefined}
+      >
         <div className={cssStyles.sectionTitle}>New Task</div>
         <p className={cssStyles.sidebarParagraph}>
           Fill in the details to create a new task. All required fields are

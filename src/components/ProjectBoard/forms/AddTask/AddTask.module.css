@@ -67,6 +67,28 @@
   flex-shrink: 0;
 }
 
+/* SIDEBAR KEYBOARD FOCUS (WCAG 2.1.1 + 2.4.7)
+   When the "New Task" sidebar overflows it is promoted to a `tabindex="0"`
+   scroll region (inline.tsx measures it) so a keyboard user can focus it and
+   arrow-scroll the clipped requirements text (axe scrollable-region-focusable).
+   Give that focus a visible ring. The ring is INSET (box-shadow, not an outset
+   outline) because the sidebar sits flush against the `.root` edges and `.root`
+   is `overflow: hidden` — an outset ring would be clipped at the top/left/bottom.
+   Colours mirror CodeCopy's scroll-region ring: gold on the sacred default,
+   blue on the light/dark themes. */
+.sidebar:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 3px var(--goobs-gold-a40);
+}
+
+.root[data-theme='light'] .sidebar:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--goobs-blue-a20);
+}
+
+.root[data-theme='dark'] .sidebar:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--goobs-blue-light-a30);
+}
+
 .sidebarParagraph {
   font-size: 0.875rem;
   color: var(--at-secondary);

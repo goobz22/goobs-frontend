@@ -10,7 +10,7 @@
  */
 import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { expect, fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { InlineAddTask } from './forms/AddTask/inline'
 import { InlineShowTask } from './forms/ShowTask/inline'
 import type {
@@ -428,6 +428,64 @@ export const AddTaskAccessibleTabs: Story = {
       'aria-labelledby',
       'add-task-tab-knowledgeBase'
     )
+  },
+}
+
+/**
+ * Keyboard-accessible scrollable "New Task" sidebar (WCAG 2.1.1 Level A; axe
+ * `scrollable-region-focusable`). The sidebar is a fixed-width `overflow-y:auto`
+ * column of purely non-interactive content (the intro paragraph + the static
+ * required-fields list), so when it overflows it is a scroll container a
+ * keyboard-only user could not otherwise reach. The measured remediation
+ * (inline.tsx) opts it into the tab order ONLY when it actually overflows:
+ * `tabindex="0"` + a naming-capable `role="group"` + an `aria-label`, so the
+ * clipped requirements can be arrow-scrolled and the region announces itself.
+ *
+ * The inline form's root is `height:100vh` by design (a full-viewport surface),
+ * so this story constrains it to a short demo frame — the exact short-viewport /
+ * zoom condition that makes the sidebar's content exceed its height and its
+ * overflow engage — via a scoped style override on the wrapper's direct child.
+ */
+export const AddTaskSidebarScrollable: Story = {
+  args: {
+    // No product/service rosters keeps the layout simple; the sidebar content
+    // (paragraph + required-fields list) still exceeds the short demo frame.
+    rawProducts: [],
+    rawServices: [],
+  },
+  globals: { backgrounds: { value: 'light' } },
+  render: args => (
+    <div data-addtask-scroll-demo style={{ height: '180px', overflow: 'hidden' }}>
+      {/* Override the inline form root's `height:100vh` down to this 180px frame
+          so the sidebar's content overflows and its overflow:auto engages. Scoped
+          to the wrapper's direct child (the form root) so nothing else moves. */}
+      <style>{`[data-addtask-scroll-demo] > div { height: 100% !important; }`}</style>
+      <InlineAddTask {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Resolving a form control proves the client component mounted; the overflow
+    // measurement (ResizeObserver) runs in the same lifecycle, so the sidebar's
+    // scrollable decision settles by the time the assertions below retry.
+    await canvas.findByRole('button', { name: 'Create Task' })
+
+    // The measured sidebar becomes a keyboard-focusable, named scroll region.
+    await waitFor(() => {
+      const sidebar = canvasElement.querySelector<HTMLElement>(
+        '[aria-label="New task requirements"]'
+      )
+      expect(sidebar).not.toBeNull()
+      expect(sidebar).toHaveAttribute('tabindex', '0')
+      expect(sidebar).toHaveAttribute('role', 'group')
+    })
+
+    // It actually accepts focus (proves the tab stop takes effect at runtime).
+    const sidebar = canvasElement.querySelector<HTMLElement>(
+      '[aria-label="New task requirements"]'
+    )
+    sidebar?.focus()
+    await expect(sidebar).toHaveFocus()
   },
 }
 
