@@ -4,9 +4,9 @@
  *
  * Physical, direction-hardcoded spacing/border/alignment properties bake a
  * left-to-right assumption into the stylesheet: under `direction: rtl` a
- * `margin-left` stays on the *left* instead of following the reading order, so a
+ * `margin-left` stays on the LEFT instead of following the reading order, so a
  * mirrored layout breaks. Their logical equivalents (`margin-inline-start`,
- * `text-align: start`, `border-start-start-radius`, …) are IDENTICAL to the
+ * `text-align: start`, `border-start-start-radius`, ...) are IDENTICAL to the
  * physical form in LTR but flip correctly in RTL, so converting them is a no-op
  * today and unblocks internationalization tomorrow.
  *
@@ -14,34 +14,34 @@
  *   - margin-left / margin-right            -> margin-inline-start / -end
  *   - padding-left / padding-right          -> padding-inline-start / -end
  *   - border-left / border-right (+ -width/-color/-style)
- *                                           -> border-inline-start / -end (…)
+ *                                           -> border-inline-start / -end (...)
  *   - text-align: left | right              -> text-align: start | end
  *   - border-{top,bottom}-{left,right}-radius
  *                                           -> border-{start,end}-{start,end}-radius
  *
- * EXPLICITLY NOT GATED (out of scope by design — these are NOT logicalizable by
- * a mechanical rename):
- *   - left: / right: / top: / bottom: positioning (often JS-anchored via
+ * EXPLICITLY NOT GATED (out of scope by design — not logicalizable by a
+ * mechanical rename):
+ *   - left / right / top / bottom positioning (often JS-anchored via
  *     getBoundingClientRect-fed CSS vars, or deliberate physical placement);
  *   - transform: translateX(...) directional motion; floats.
  *
  * Escape hatches (ENCODED in the check — never an external ignore-list):
- *   1. `rtl-keep` — a line carrying an inline `/* rtl-keep: <reason> *​/` marker
- *      is a DELIBERATE, documented physical property (e.g. a drawer edge anchored
- *      by a physical `[data-anchor='left']` prop, or a JS-placed tooltip arrow
- *      tail). Add the marker + a reason to keep a property physical on purpose.
- *   2. bare `transparent` border side — a `border-left/right` whose final color
+ *   1. rtl-keep — a line carrying an inline "rtl-keep:" marker comment is a
+ *      DELIBERATE, documented physical property (e.g. a drawer edge anchored by a
+ *      physical [data-anchor='left'] prop, or a JS-placed tooltip arrow tail).
+ *      Add the marker + a reason to keep a property physical on purpose.
+ *   2. bare `transparent` border side — a border-left/right whose final color
  *      token is exactly `transparent` is CSS-triangle / spacer geometry with no
  *      visible directional affordance; it renders identically LTR/RTL, so it is
- *      exempt. (A `color-mix(…, transparent)` or any visible color is NOT exempt.)
+ *      exempt. A color-mix(..., transparent) or any visible color is NOT exempt.
  *
- * Custom-property definitions (`--x-margin-left: …`) and `var(--x-left)`
- * references are naturally out of scope: the check is anchored to the DECLARATION
- * position (start of the trimmed line), where a `--`-prefixed name or a mid-value
- * `var()` never matches.
+ * Custom-property definitions (--x-margin-left: ...) and var(--x-left)
+ * references are out of scope: a physical direction preceded by `-` or a word
+ * char (the `--x-` prefix, or the tail of `scroll-margin-left`) never matches,
+ * because the property must sit at a declaration boundary.
  *
  * Usage:  bun scripts/lint-rtl-spacing.ts [--selftest]
- * Exit 1 when any un-exempt physical declaration exists (printed as file:line).
+ * Exit 1 when any un-exempt physical directional declaration exists (file:line).
  */
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -60,34 +60,43 @@ export interface Violation {
 const ROOT = join(import.meta.dir, '..')
 const SRC = join(ROOT, 'src')
 
-/** Blank every /* … *​/ comment (multi-line aware) while preserving line count,
- *  so a commented-out declaration is never flagged. Newlines are kept; every
- *  other comment character becomes a space. */
+/**
+ * Blank every CSS comment (multi-line aware) while preserving line count, so a
+ * commented-out declaration is never flagged. Newlines are kept; every other
+ * comment character becomes a space.
+ */
 function stripComments(text: string): string {
   return text.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
 }
 
-const cornerRe = /^\s*(border-(?:top|bottom)-(?:left|right)-radius)\s*:/
-const marginPadRe = /^\s*((?:margin|padding)-(?:left|right))\s*:/
-const borderSideRe = /^\s*(border-(?:left|right)(?:-width|-color|-style)?)\s*:\s*([^;]*)/
-const textAlignRe = /^\s*text-align\s*:\s*(left|right)\b/
-
-/** True when a border side value's final color token is exactly `transparent`
- *  (triangle / spacer geometry — RTL-neutral, exempt). A `color-mix(…,
- *  transparent)` or any visible color returns false (NOT exempt). */
-function isBareTransparentBorder(value: string): boolean {
-  const cleaned = value
-    .replace(/!important\s*$/i, '')
-    .replace(/;?\s*$/, '')
-    .trim()
-  return /(?:^|\s)transparent$/.test(cleaned)
-}
+// A physical direction only counts when it begins a property at a declaration
+// boundary: NOT preceded by a word char or `-` (which would make it part of a
+// --custom-prop, a var(--x-left) reference, or a compound like
+// scroll-margin-left). Each regex is global so multiple declarations on one line
+// (defensive; the codebase is one-per-line) are all reported.
+const textAlignRe = /(?<![-\w])text-align\s*:\s*(left|right)\b/g
+const cornerRe = /(?<![-\w])(border-(?:top|bottom)-(?:left|right)-radius)\s*:/g
+const marginPadRe = /(?<![-\w])((?:margin|padding)-(?:left|right))\s*:/g
+const borderSideRe = /(?<![-\w])(border-(?:left|right)(?:-width|-color|-style)?)\s*:\s*([^;}]*)/g
 
 const CORNER_TO_LOGICAL: Record<string, string> = {
   'border-top-left-radius': 'border-start-start-radius',
   'border-top-right-radius': 'border-start-end-radius',
   'border-bottom-left-radius': 'border-end-start-radius',
   'border-bottom-right-radius': 'border-end-end-radius',
+}
+
+/**
+ * True when a border side value's final color token is exactly `transparent`
+ * (triangle / spacer geometry — RTL-neutral, exempt). A color-mix(...,
+ * transparent) or any visible color returns false (NOT exempt).
+ */
+function isBareTransparentBorder(value: string): boolean {
+  const cleaned = value
+    .replace(/!important\s*$/i, '')
+    .replace(/;?\s*$/, '')
+    .trim()
+  return /(?:^|\s)transparent$/.test(cleaned)
 }
 
 export function check(files: LintFile[]): Violation[] {
@@ -99,55 +108,31 @@ export function check(files: LintFile[]): Violation[] {
       // Escape hatch 1: a documented, deliberate physical property.
       if (rawLines[i]!.includes('rtl-keep')) continue
       const line = codeLines[i]!
+      const at = (msg: string) => violations.push({ file: path, line: i + 1, message: msg })
 
-      const ta = line.match(textAlignRe)
-      if (ta) {
-        const logical = ta[1] === 'left' ? 'start' : 'end'
-        violations.push({
-          file: path,
-          line: i + 1,
-          message: `text-align: ${ta[1]} — use text-align: ${logical} (logical) so alignment follows RTL; add an inline /* rtl-keep: reason */ marker if the physical direction is intentional`,
-        })
-        continue
+      for (const m of line.matchAll(textAlignRe)) {
+        const logical = m[1] === 'left' ? 'start' : 'end'
+        at(
+          `text-align: ${m[1]} — use text-align: ${logical} (logical) so alignment follows RTL; add an inline /* rtl-keep: reason */ marker if the physical direction is intentional`
+        )
       }
-
-      const corner = line.match(cornerRe)
-      if (corner) {
-        const logical = CORNER_TO_LOGICAL[corner[1]!] ?? 'border-*-*-radius'
-        violations.push({
-          file: path,
-          line: i + 1,
-          message: `${corner[1]} — use ${logical} (logical corner) for RTL; add /* rtl-keep: reason */ if intentional`,
-        })
-        continue
+      for (const m of line.matchAll(cornerRe)) {
+        const logical = CORNER_TO_LOGICAL[m[1]!] ?? 'border-*-*-radius'
+        at(`${m[1]} — use ${logical} (logical corner) for RTL; add /* rtl-keep: reason */ if intentional`)
       }
-
-      const mp = line.match(marginPadRe)
-      if (mp) {
-        const prop = mp[1]!
-        const logical = prop.replace(/-left$/, '-inline-start').replace(/-right$/, '-inline-end')
-        violations.push({
-          file: path,
-          line: i + 1,
-          message: `${prop} — use ${logical} (logical) for RTL; add /* rtl-keep: reason */ if intentional`,
-        })
-        continue
+      for (const m of line.matchAll(marginPadRe)) {
+        const logical = m[1]!.replace(/-left$/, '-inline-start').replace(/-right$/, '-inline-end')
+        at(`${m[1]} — use ${logical} (logical) for RTL; add /* rtl-keep: reason */ if intentional`)
       }
-
-      const bs = line.match(borderSideRe)
-      if (bs) {
+      for (const m of line.matchAll(borderSideRe)) {
         // Escape hatch 2: bare-transparent triangle / spacer border.
-        if (isBareTransparentBorder(bs[2]!)) continue
-        const prop = bs[1]!
-        const logical = prop
+        if (isBareTransparentBorder(m[2]!)) continue
+        const logical = m[1]!
           .replace(/^border-left/, 'border-inline-start')
           .replace(/^border-right/, 'border-inline-end')
-        violations.push({
-          file: path,
-          line: i + 1,
-          message: `${prop} — use ${logical} (logical) for RTL; add /* rtl-keep: reason */ if the physical side is intentional (anchored/JS-placed) or the border is a bare-transparent triangle`,
-        })
-        continue
+        at(
+          `${m[1]} — use ${logical} (logical) for RTL; add /* rtl-keep: reason */ if the physical side is intentional (anchored/JS-placed) or the border is a bare-transparent triangle`
+        )
       }
     }
   }
@@ -171,6 +156,8 @@ const selftestFixtures = {
     '.x { border-bottom-right-radius: 4px; }',
     // color-mix with a transparent ARGUMENT is a visible border — NOT exempt.
     '.x { border-left: 1px solid color-mix(in srgb, var(--a) 25%, transparent); }',
+    // one-per-line (the real formatting) is caught too.
+    '.x {\n  padding-right: 8px;\n}',
   ],
   good: [
     '.x { margin-inline-start: 4px; }',
@@ -191,8 +178,10 @@ const selftestFixtures = {
     '.x { --pb-margin-left: 0; }',
     // A var() REFERENCE whose name contains a physical direction (decl is logical).
     '.x { border-inline-start: var(--tabs-border-left); }',
+    // scroll-margin-left is a distinct property, not the gated margin-left.
+    '.x { scroll-margin-left: 4px; }',
     // rtl-keep marker exempts a deliberate physical property.
-    ".paper { border-right: 1px solid red; /* rtl-keep: anchored drawer edge */ }",
+    '.paper { border-right: 1px solid red; /* rtl-keep: anchored drawer edge */ }',
     // A commented-out physical declaration must not be flagged.
     '.x { /* margin-left: 4px; */ color: red; }',
   ],
@@ -202,12 +191,14 @@ function runSelftest(): void {
   const failures: string[] = []
   selftestFixtures.bad.forEach((snippet, i) => {
     const hits = check([{ path: `__selftest__/bad-${i}.css`, text: snippet }])
-    if (hits.length === 0) failures.push(`bad[${i}] produced 0 violations (must be >=1): ${snippet}`)
+    if (hits.length === 0) failures.push(`bad[${i}] produced 0 violations (must be >=1): ${JSON.stringify(snippet)}`)
   })
   selftestFixtures.good.forEach((snippet, i) => {
     const hits = check([{ path: `__selftest__/good-${i}.css`, text: snippet }])
     if (hits.length > 0)
-      failures.push(`good[${i}] produced ${hits.length} violation(s) (must be 0): ${snippet} -> ${hits[0]!.message}`)
+      failures.push(
+        `good[${i}] produced ${hits.length} violation(s) (must be 0): ${JSON.stringify(snippet)} -> ${hits[0]!.message}`
+      )
   })
   if (failures.length) {
     console.error('✗ lint-rtl-spacing selftest FAILED')
@@ -241,9 +232,8 @@ function collectCssFiles(): LintFile[] {
 runSelftest()
 if (process.argv.includes('--selftest')) process.exit(0)
 
-const violations = check(collectCssFiles()).sort(
-  (a, b) => a.file.localeCompare(b.file) || a.line - b.line
-)
+const cssFiles = collectCssFiles()
+const violations = check(cssFiles).sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line)
 if (violations.length) {
   for (const v of violations) console.log(`${v.file}:${v.line} ${v.message}`)
   console.error(
@@ -252,5 +242,6 @@ if (violations.length) {
   )
   process.exit(1)
 }
-const scanned = collectCssFiles().length
-console.log(`lint-rtl-spacing clean — 0 un-exempt physical directional declarations across ${scanned} CSS file(s)`)
+console.log(
+  `lint-rtl-spacing clean — 0 un-exempt physical directional declarations across ${cssFiles.length} CSS file(s)`
+)
