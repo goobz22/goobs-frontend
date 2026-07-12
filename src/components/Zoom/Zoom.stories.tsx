@@ -427,6 +427,7 @@ export const ReducedMotion: Story = {
     // on this component's container class. getComputedStyle can't read a
     // non-matching media query's value, so walk the CSSOM directly.
     const containerClass = zoom.classList[0]
+    if (!containerClass) throw new Error('zoom container has no class')
     let hasReducedMotionGuard = false
     for (const sheet of Array.from(document.styleSheets)) {
       let rules: CSSRuleList

@@ -723,7 +723,9 @@ export const ColorVariantsSacred: Story = {
       'rgb(30, 64, 175)', // Info    #1e40af — 6.22:1
     ]
     for (let index = 0; index < expectedFills.length; index++) {
-      await expect(getComputedStyle(chips[index]).backgroundColor).toBe(
+      const chip = chips[index]
+      if (!chip) throw new Error(`missing severity chip ${index}`)
+      await expect(getComputedStyle(chip).backgroundColor).toBe(
         expectedFills[index]
       )
     }

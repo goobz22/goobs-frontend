@@ -357,7 +357,7 @@ export const DisabledSelection: Story = {
 
     // The tree still enters via a roving-tabindex node and stays operable.
     await expect(items[0]).toHaveAttribute('tabindex', '0')
-    items[0].focus()
+    items[0]?.focus()
     await expect(items[0]).toHaveFocus()
   },
 }
@@ -914,7 +914,7 @@ export const KeyboardNavigation: Story = {
     // APG parent→children OWNERSHIP: the expanded parent ('Documents') owns its
     // child group via aria-owns, and the referenced element is that group —
     // ownership is explicit, not merely implied by aria-level.
-    const ownsId = items[0].getAttribute('aria-owns')
+    const ownsId = items[0]?.getAttribute('aria-owns')
     await expect(ownsId).toBeTruthy()
     const ownedGroup = canvasElement.querySelector(`#${ownsId}`)
     await expect(ownedGroup).not.toBeNull()
@@ -935,7 +935,7 @@ export const KeyboardNavigation: Story = {
     await expect(items[1]).toHaveAttribute('tabindex', '-1')
 
     // Tab enters the tree onto the first node.
-    items[0].focus()
+    items[0]?.focus()
     await expect(items[0]).toHaveFocus()
 
     // Down / Up move roving focus, and the tabindex follows focus.
@@ -1004,7 +1004,7 @@ export const FocusCallbackOnKeyboard: Story = {
     const items = canvas.getAllByRole('treeitem')
 
     // Enter the tree, then rove down with the keyboard (no pointer involved).
-    items[0].focus()
+    items[0]?.focus()
     await expect(items[0]).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
     await expect(items[1]).toHaveFocus()
@@ -1082,7 +1082,7 @@ export const TypeaheadAndExpandSiblings: Story = {
 
     // Type-ahead: focus the first node and type 'p' → focus jumps to the next
     // visible node whose label starts with 'p' ('Personal').
-    items[0].focus()
+    items[0]?.focus()
     await expect(items[0]).toHaveFocus()
     await userEvent.keyboard('p')
     const personal = canvasElement.querySelector(
@@ -1092,7 +1092,7 @@ export const TypeaheadAndExpandSiblings: Story = {
 
     // '*' expands every sibling of the focused node. Focus a root node and press
     // '*' → the sibling roots that have children ('Downloads', 'Desktop') expand.
-    items[0].focus()
+    items[0]?.focus()
     await userEvent.keyboard('*')
     const downloads = canvasElement.querySelector(
       '[data-testid="tree-item-downloads"]'

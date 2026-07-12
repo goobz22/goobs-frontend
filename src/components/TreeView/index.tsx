@@ -338,7 +338,7 @@ export interface TreeItemProps {
    * only while the node is an expanded parent (the group is in the DOM);
    * `undefined` for leaves and collapsed parents.
    */
-  ownsGroupId?: string
+  ownsGroupId?: string | undefined
 
   /** Component styling */
   styles?: TreeViewStyles
@@ -1333,6 +1333,7 @@ const TreeItem: FC<TreeItemProps> = ({
             offset++
           ) {
             const candidate = visibleItems[(from + offset) % count]
+            if (!candidate) continue
             const candidateLabel = (candidate.textContent || '')
               .trim()
               .toLowerCase()
@@ -1840,7 +1841,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
               : items.map(getItemId)
           const newExpansion = new Set(expandedItems)
           let changed = false
-          siblingIds.forEach(siblingId => {
+          siblingIds.forEach((siblingId: TreeViewItemId) => {
             const kids = childrenMap.get(siblingId)
             if (kids && kids.length > 0 && !newExpansion.has(siblingId)) {
               newExpansion.add(siblingId)

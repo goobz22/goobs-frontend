@@ -48,6 +48,7 @@ export const Breadcrumb = React.forwardRef<
       <ol className={cssStyles.breadcrumbList}>
         <li className={cssStyles.breadcrumbItem}>
           <button
+            ref={ref}
             type="button"
             onClick={onBack}
             data-action="back"

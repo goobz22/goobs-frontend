@@ -680,6 +680,7 @@ export const ReducedMotionZeroesTransition: Story = {
     const button = canvas.getByRole('button', { name: 'Motion-safe' })
     // The base CSS-module class for `.button` (first className token).
     const buttonClass = button.className.split(' ')[0]
+    if (!buttonClass) throw new Error('button has no class')
 
     let mediaBlockFound = false
     let transitionZeroed = false

@@ -2563,6 +2563,8 @@ export const AccessibleStyleGuards: Story = {
   play: async () => {
     const cellClass = cssStyles.cell
     const exportMenuClass = cssStyles.exportMenu
+    if (!cellClass || !exportMenuClass)
+      throw new Error('DataGrid module classes missing (cell/exportMenu)')
     let hasCellFocusRing = false
     let hasReducedMotion = false
 

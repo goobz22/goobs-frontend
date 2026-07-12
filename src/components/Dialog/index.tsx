@@ -95,12 +95,12 @@ export interface DialogProps {
    * inside `children` (typically a `<Typography text="..." id="...">`).
    * Required for proper screenreader announcement of the dialog purpose.
    */
-  ariaLabelledBy?: string
+  ariaLabelledBy?: string | undefined
   /**
    * `aria-describedby` for the dialog. Optional — point at a paragraph
    * id inside `children` for screenreader description below the heading.
    */
-  ariaDescribedBy?: string
+  ariaDescribedBy?: string | undefined
   /**
    * `aria-label` fallback when there is no visible heading id to point
    * `ariaLabelledBy` at (rare — prefer `ariaLabelledBy` so the heading
@@ -116,7 +116,7 @@ export interface DialogProps {
    * form dialog must stay `'dialog'`, so the correct role is caller-specified
    * rather than inferred.
    */
-  role?: 'dialog' | 'alertdialog'
+  role?: 'dialog' | 'alertdialog' | undefined
 }
 
 /**

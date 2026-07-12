@@ -173,6 +173,6 @@ export const A11ySemantics: Story = {
     // Each row is a genuine <li>, announced as a listitem under role="list".
     const items = canvas.getAllByRole('listitem')
     await expect(items).toHaveLength(mockEntries.length)
-    await expect(items[0].tagName).toBe('LI')
+    await expect(items[0]?.tagName).toBe('LI')
   },
 }

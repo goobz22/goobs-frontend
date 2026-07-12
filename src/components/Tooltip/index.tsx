@@ -339,10 +339,11 @@ const StyledTooltip: React.FC<TooltipProps> = ({
   const describedChildren =
     title && React.isValidElement<{ 'aria-describedby'?: string }>(children)
       ? React.cloneElement(children, {
-          'aria-describedby':
-            [children.props['aria-describedby'], tooltipId]
-              .filter(Boolean)
-              .join(' ') || undefined,
+          // tooltipId (useId) is always present, so the join is never empty —
+          // the value stays `string` under exactOptionalPropertyTypes.
+          'aria-describedby': [children.props['aria-describedby'], tooltipId]
+            .filter(Boolean)
+            .join(' '),
         })
       : children
 
