@@ -151,3 +151,31 @@ Regression coverage: added `ToolbarRovingTabIndex` (R2) and
 `ModeToggleAccessibility` story still asserts the labelled group name (R4) and
 `LabelAssociation` / the toolbar stories still compile against the R1-typed props.
 `bun lint:file` clean on all six edited files.
+
+## Review fixes (2026-07-11 adversarial review, second pass)
+
+A second adversarial review found two remaining minor items. Both fixed at root
+cause; all additive (no existing prop/export/`data-*`/`role`/`aria` renamed or
+removed; the `data-component`/`data-field-name`/`data-action`/`data-state` test
+contract is untouched).
+
+| # | Severity | File | Issue | Fix |
+|---|----------|------|-------|-----|
+| R5 | minor | index.tsx label (`~284`) + SimpleEditor / RichEditor / MarkdownEditor / Toolbars/Complex | The visible `<label id=labelId>` had NO `htmlFor` and wrapped no control — the accessible name was supplied via `aria-labelledby` (so no 1.3.1/4.1.2 failure), but the `<label>` was semantically inert and clicking it no longer focused the editor (lost native label-to-control click affordance). | Wired the house `<label htmlFor>` pattern (matches `Field/Shell`): index.tsx derives a stable `editorId` from its `useId` and threads it — alongside the existing `ariaLabel`/`ariaLabelledBy` props — through `ComplexToolbar` to each editing surface, where it is applied as the element `id`. Only one surface renders at a time, so `htmlFor={editorId}` always resolves to the live surface. Native click-to-focus is restored for the textarea modes (simple/markdown); the rich contentEditable keeps its `aria-labelledby` name and degrades gracefully. |
+| R6 | minor | Toolbars/Complex/index.tsx (mode switch) + MarkdownEditor/index.tsx (preview toggle) | Switching editing mode (`handleModeChange`) and toggling the markdown preview each swap the visible surface/context with no `role="status"`/`aria-live` announcement — the pressed-states satisfy 4.1.2, but an AT user got no notification the editing surface itself changed (WCAG 4.1.3 Status Messages; enhancement, not a failure). | Added a visually-hidden polite `role="status" aria-live="polite"` live region in each spot (matching the library's `Field/Password` idiom + a local `.srOnly` module class): the toolbar announces `"<surface> selected"` on mode change; the markdown editor announces `"Markdown preview shown/hidden"` on toggle. Both `announcement` states start empty, so nothing is announced on mount. |
+
+Markup changes (per the additive-only contract): the `<label>` gains a `htmlFor`
+attribute; each editing surface (`SimpleEditor`/`MarkdownEditor` textarea,
+`RichEditor` contentEditable) gains an `id` (new optional `editorId?: string |
+undefined` prop, threaded through `ComplexToolbar`); two visually-hidden
+`<span role="status">` live regions were added. No element type changed; nothing
+was renamed or removed.
+
+Regression coverage: added three play stories — `LabelClickFocus` (R5:
+`label.for === textbox.id`, and clicking the label focuses the textarea),
+`ModeSwitchAnnouncement` and `PreviewToggleAnnouncement` (R6: the polite status
+region starts empty and updates on each mode switch / preview toggle). The
+existing `LabelAssociation`, `MarkdownPreviewAccessibility`, and
+`MarkdownPreviewAriaControls` stories still pass (accessible name, `aria-pressed`,
+conditional `aria-controls` all unchanged). `bun lint:file` clean on all six
+edited files (five components + the stories).
