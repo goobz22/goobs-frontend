@@ -546,3 +546,55 @@ export const ShowTaskMeetingFormLabels: Story = {
     ).toBeInTheDocument()
   },
 }
+
+// ---------------------------------------------------------------------------
+// InlineAddTask — SECURITY (XSS)
+// ---------------------------------------------------------------------------
+
+/**
+ * Knowledgebase article field values render as HTML (bold/images/code) by
+ * design, but each value is SANITIZED at the dangerouslySetInnerHTML seam
+ * (`sanitizeHtml`): a hostile `<img src=x onerror=…>` / `<script>` in a field
+ * value loses its script vector while legitimate formatting survives. Opening
+ * the article in the Knowledgebase tab and inspecting the rendered field proves
+ * no `<script>` element and no `on*` handler reach the DOM — removing the
+ * sanitizer re-introduces the XSS and fails this story.
+ */
+export const AddTaskSanitizesArticleFields: Story = {
+  name: 'AddTask/Security — KB fields sanitized',
+  args: {
+    knowledgebaseArticles: [
+      {
+        _id: 'xss-fixture',
+        articleTitle: 'Security fixture article',
+        categoryName: 'Security',
+        fieldValues: {
+          resolution:
+            'Safe <b>KBKEEPBOLD</b> then <img src=x onerror="window.__kbXss = true"> and <script>window.__kbXss2 = true</script> done',
+        },
+      },
+    ],
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Open the Knowledgebase tab, then the article's detail view.
+    await userEvent.click(canvas.getByRole('tab', { name: /Knowledgebase/ }))
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: /View article: Security fixture article/,
+      })
+    )
+    // The dSIH'd field value is sanitized: formatting kept, script vectors gone.
+    const bold = canvas.getByText('KBKEEPBOLD')
+    await expect(bold.tagName).toBe('B')
+    const field = bold.parentElement as HTMLElement
+    await expect(field.querySelector('script')).toBeNull()
+    await expect(field.innerHTML).not.toMatch(/onerror/i)
+    field.querySelectorAll('*').forEach(el => {
+      for (const attr of Array.from(el.attributes)) {
+        expect(attr.name.startsWith('on')).toBe(false)
+      }
+    })
+  },
+}

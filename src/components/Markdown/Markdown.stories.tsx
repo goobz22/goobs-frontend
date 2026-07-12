@@ -383,3 +383,53 @@ export const HeadingOffset: Story = {
     await expect(canvas.queryByRole('heading', { level: 1 })).toBeNull()
   },
 }
+
+// --------------------------------------------------------------------------
+// SECURITY STORIES (XSS — dSIH is safe by construction)
+// `mdToHtml` HTML-escapes the markdown source BEFORE it builds tags, so raw
+// `<img>`/`<script>` in the source render as literal TEXT (never a live DOM
+// element), and link/image URLs are scheme-restricted so a `javascript:` URL
+// cannot ride in. These play tests fail if either guard is removed.
+// --------------------------------------------------------------------------
+
+/**
+ * Injected HTML in the markdown source renders as escaped TEXT, not live markup
+ * (the `dangerouslySetInnerHTML` sink is safe because `mdToHtml` escapes the
+ * source first). A hostile `<img src=x onerror=…>` / `<script>` never becomes a
+ * DOM element, a `[link](javascript:…)` is rewritten to `href="#"`, and the
+ * normal `**bold**` around it still renders — proving escaping did not break the
+ * converter. Deleting the escape or the URL guard fails this story.
+ */
+export const SecurityHostileSourceEscaped: Story = {
+  name: 'Security/Hostile source escaped',
+  args: {
+    children:
+      'Safe **bold** then <img src=x onerror="window.__mdXss = true"> and <script>window.__mdXss2 = true</script> plus a [danger link](javascript:alert(1)) and an [ok link](https://example.com).',
+  },
+  decorators: [
+    Story => (
+      <div style={{ width: '640px', padding: '1.5rem', color: '#1a1a1a' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The injected tags were escaped to text: no <img>/<script> element exists,
+    // and the literal source is visible as text.
+    await expect(canvasElement.querySelector('img')).toBeNull()
+    await expect(canvasElement.querySelector('script')).toBeNull()
+    await expect(canvasElement).toHaveTextContent('onerror')
+    await expect(canvasElement).toHaveTextContent('window.__mdXss2 = true')
+    // Normal markdown around it still renders — `**bold**` is a real <strong>.
+    await expect(canvas.getByText('bold').tagName).toBe('STRONG')
+    // The javascript: link is neutralized to `#`; the https link survives.
+    const danger = canvas.getByRole('link', { name: 'danger link' })
+    await expect(danger.getAttribute('href')).not.toMatch(/javascript:/i)
+    await expect(danger).toHaveAttribute('href', '#')
+    await expect(
+      canvas.getByRole('link', { name: 'ok link' })
+    ).toHaveAttribute('href', 'https://example.com')
+  },
+}

@@ -1281,3 +1281,92 @@ export const PreviewToggleAnnouncement: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
 }
+
+// --------------------------------------------------------------------------
+// SECURITY — SANITIZED / ESCAPED INJECTED HTML (XSS)
+// Both raw-HTML dangerouslySetInnerHTML sinks route their value through the
+// conversion.ts escaping seam: RichEditor's contentEditable value is SANITIZED
+// (formatting kept, script vectors stripped), and the MarkdownEditor preview
+// renders `mdToHtml(value)`, which HTML-escapes the source. These play tests
+// fail if the seam is removed.
+// --------------------------------------------------------------------------
+
+/**
+ * The rich-text editor renders its `value` as HTML by design, but the value is
+ * SANITIZED at the dSIH seam (`sanitizeHtml`): a hostile `<img src=x onerror=…>`
+ * / `<script>` loses its script vector (no `<script>` element, no `on*`
+ * handler) while legitimate formatting (`<b>`) survives — this is sanitize, not
+ * escape-to-text. Removing the sanitizer re-introduces the XSS and fails here.
+ */
+export const RichEditorSanitizesValue: Story = {
+  name: 'Security/Rich editor sanitizes value',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Rich Content"
+      editorType="rich"
+      initialValue={
+        'Safe <b>KEEPBOLD</b> then <img src=x onerror="window.__richXss = true"> and <script>window.__richXss2 = true</script>'
+      }
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const surface = canvasElement.querySelector(
+      '[contenteditable]'
+    ) as HTMLElement
+    if (!surface) throw new Error('rich editable surface did not render')
+    // The <script> element was removed and no descendant carries an on* handler
+    // — the injected script can never execute.
+    await expect(surface.querySelector('script')).toBeNull()
+    await expect(surface.innerHTML).not.toMatch(/onerror/i)
+    surface.querySelectorAll('*').forEach(el => {
+      for (const attr of Array.from(el.attributes)) {
+        expect(attr.name.startsWith('on')).toBe(false)
+      }
+    })
+    // Legitimate formatting is preserved (sanitize, not escape-to-text).
+    await expect(within(surface).getByText('KEEPBOLD').tagName).toBe('B')
+  },
+}
+
+/**
+ * The markdown PREVIEW renders `mdToHtml(value)`, which HTML-escapes the source
+ * first — so a hostile `<img src=x onerror=…>` / `<script>` in the markdown
+ * appears as escaped TEXT in the preview (no live element), and a
+ * `[link](javascript:…)` is rewritten to `href="#"`. Fails if `mdToHtml` stops
+ * escaping or the URL guard is removed.
+ */
+export const MarkdownPreviewEscapesSource: Story = {
+  name: 'Security/Markdown preview escapes source',
+  render: () => (
+    <ComplexTextEditorWithState
+      label="Markdown Content"
+      editorType="markdown"
+      initialValue={
+        'text <img src=x onerror="window.__mdpXss = true"> and <script>window.__mdpXss2 = true</script> plus [danger](javascript:alert(1))'
+      }
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Open the preview (opt-in), then locate it via the toggle's aria-controls.
+    const toggle = canvas.getByRole('button', { name: 'Toggle Preview' })
+    await userEvent.click(toggle)
+    const previewId = toggle.getAttribute('aria-controls')
+    await expect(previewId).toBeTruthy()
+    const preview = canvasElement.querySelector(
+      `#${CSS.escape(previewId as string)}`
+    ) as HTMLElement
+    await expect(preview).not.toBeNull()
+    // Injected tags were escaped to text — no live element in the preview.
+    await expect(preview.querySelector('img')).toBeNull()
+    await expect(preview.querySelector('script')).toBeNull()
+    await expect(preview).toHaveTextContent('onerror')
+    // The javascript: link is neutralized to `#`.
+    const link = preview.querySelector('a')
+    await expect(link?.getAttribute('href')).not.toMatch(/javascript:/i)
+  },
+}
