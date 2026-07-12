@@ -6,6 +6,7 @@ import FieldShell, {
   type FieldStyleOverrides,
   useEscape,
   useArrowKeyNav,
+  useTypeahead,
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 
@@ -173,6 +174,21 @@ const Dropdown: React.FC<DropdownProps> = ({
     },
   })
 
+  // APG select-only combobox type-ahead: while the menu is open, typing a
+  // printable character roves the highlight to the next option whose (rendered)
+  // value starts with it. This filter-less Regular dropdown has no search input,
+  // so this is its only jump-to-option affordance. The labels match the visible
+  // option text (`String(option.value)`), index-aligned with the rendered list.
+  const typeaheadLabels = useMemo(
+    () => filteredOptions.map(option => String(option.value)),
+    [filteredOptions]
+  )
+  const handleTypeahead = useTypeahead({
+    labels: typeaheadLabels,
+    activeIndex,
+    onMatch: setActiveIndex,
+  })
+
   const selectedOption = filteredOptions.find(
     opt =>
       String(opt.value) === String(value) || String(opt._id) === String(value)
@@ -252,7 +268,13 @@ const Dropdown: React.FC<DropdownProps> = ({
                   setIsOpen(true)
                   return
                 }
-                if (isOpen) handleKeyDown(event)
+                if (isOpen) {
+                  // Arrow-nav first: it preventDefaults every key it consumes,
+                  // and useTypeahead early-returns on defaultPrevented, so the
+                  // two never fight over the same key.
+                  handleKeyDown(event)
+                  handleTypeahead(event)
+                }
               }}
               disabled={disabled}
               {...inputAriaProps}

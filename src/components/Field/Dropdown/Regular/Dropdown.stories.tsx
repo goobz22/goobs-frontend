@@ -684,6 +684,74 @@ export const KeyboardArrowNavigation: Story = {
 }
 
 // --------------------------------------------------------------------------
+// A11Y INTERACTION TEST — Printable-character type-ahead
+// --------------------------------------------------------------------------
+
+// Deliberately P-heavy so the play can prove BOTH "jump to the FIRST match"
+// and "repeat the key to cycle to the NEXT match". Indices: 0 apple, 1 apricot,
+// 2 peach, 3 pear, 4 plum, 5 quince.
+const typeaheadOptions: DropdownOption[] = [
+  { value: 'apple' },
+  { value: 'apricot' },
+  { value: 'peach' },
+  { value: 'pear' },
+  { value: 'plum' },
+  { value: 'quince' },
+]
+
+/**
+ * Regression guard for the printable-character type-ahead (WAI-ARIA APG
+ * select-only combobox — APG-recommended affordance). While the menu is open,
+ * typing a printable character roves the highlight to the next option whose
+ * value starts with it; pressing the same character again cycles to the next
+ * match (wrapping). This filter-less Regular dropdown has no search input, so
+ * type-ahead is its ONLY jump-to-option affordance. Before this pass the shared
+ * `useArrowKeyNav` implemented Arrow/Home/End/Enter/Space but no type-ahead, so
+ * typing a letter did nothing. The buffer lives in the additive
+ * `Shell/keyboard.ts` `useTypeahead` helper. The Regular menu renders inline
+ * (not portalled), so the options live inside the story canvas.
+ */
+export const PrintableTypeahead: Story = {
+  name: 'A11y: printable-character type-ahead',
+  render: () => (
+    <DropdownWithState
+      label="Type-ahead"
+      options={typeaheadOptions}
+      styles={{ theme: 'light' }}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const combobox = canvas.getByRole('combobox')
+
+    // Open via the keyboard (combobox 1.2 open-on-ArrowDown); nothing is
+    // highlighted yet — the first printable char does the first jump.
+    combobox.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    expect(combobox).not.toHaveAttribute('aria-activedescendant')
+
+    const options = canvas.getAllByRole('option')
+
+    // Typing "p" jumps the highlight to the FIRST option starting with "p"
+    // (peach, index 2), skipping the earlier apple/apricot options. The active
+    // option gets data-active and the combobox points aria-activedescendant at
+    // its id (announced by AT).
+    await userEvent.keyboard('p')
+    expect(options[2]).toHaveAttribute('data-active', 'true')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[2]!.id)
+
+    // Pressing "p" again cycles to the NEXT "p" option (pear, index 3) and
+    // clears the previous highlight.
+    await userEvent.keyboard('p')
+    expect(options[3]).toHaveAttribute('data-active', 'true')
+    expect(options[2]).not.toHaveAttribute('data-active')
+    expect(combobox).toHaveAttribute('aria-activedescendant', options[3]!.id)
+  },
+}
+
+// --------------------------------------------------------------------------
 // INTERACTIVE DEMO
 // --------------------------------------------------------------------------
 
