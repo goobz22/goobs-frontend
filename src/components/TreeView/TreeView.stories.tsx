@@ -1285,6 +1285,71 @@ export const ProgrammaticCollapsePreservesFocus: Story = {
   },
 }
 
+/**
+ * Collapsing an ancestor moves BOTH DOM focus AND the roving tabindex (the
+ * tree's single Tab stop) onto that collapsing ancestor — it must not merely
+ * fall back to the first root. This pins the roving half of the WCAG 2.4.3
+ * guarantee, distinctly from the two stories above (which only assert focus and
+ * both collapse the FIRST root, where the fallback happens to coincide with the
+ * correct answer).
+ *
+ * Here the focused child lives under the SECOND root ('downloads' → 'software'),
+ * so the roving fallback (first root, 'documents') is a DIFFERENT node than the
+ * collapsing ancestor. With the fix, focus and `tabindex=0` land on 'downloads';
+ * the first root stays `tabindex=-1`. WITHOUT the fix, focus drops to `<body>`
+ * and the roving fallback puts the single `tabindex=0` on the first root
+ * ('documents') instead — so every assertion below is fix-dependent.
+ */
+export const CollapseMovesRovingFocusToAncestor: Story = {
+  name: 'Accessibility/Collapse Moves Roving Focus To Ancestor',
+  args: {
+    items: sampleTreeData,
+    // Expand only the SECOND root so its child row is on screen and focusable
+    // while the first root stays collapsed (the roving fallback target).
+    defaultExpandedItems: ['downloads'],
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // Focus a child INSIDE the second root ('downloads' → 'software').
+    const child = canvasElement.querySelector(
+      '[data-testid="tree-item-software"]'
+    ) as HTMLElement
+    child.focus()
+    await expect(child).toHaveFocus()
+
+    // Collapse the SECOND root by its chevron. A programmatic `.click()`
+    // dispatches the pointer collapse handler WITHOUT the browser's focus-fixup,
+    // so focus genuinely starts on the child that is about to unmount — the
+    // exact case the fix must handle (a real pointer press would focus-fixup the
+    // row first and mask the bug). The chevron is the ancestor row's first
+    // child.
+    const downloadsRow = canvasElement.querySelector(
+      '[data-testid="tree-item-downloads"]'
+    ) as HTMLElement
+    const chevron = downloadsRow.firstElementChild as HTMLElement
+    chevron.click()
+
+    await waitFor(async () => {
+      await expect(downloadsRow).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    // Focus moved to the collapsed ancestor — not to <body>.
+    await expect(downloadsRow).toHaveFocus()
+    await expect(document.body).not.toHaveFocus()
+
+    // The roving tabindex (single Tab stop) followed the collapse onto the
+    // ACTUAL ancestor, not the first-root fallback.
+    await waitFor(async () => {
+      await expect(downloadsRow).toHaveAttribute('tabindex', '0')
+    })
+    const firstRoot = canvasElement.querySelector(
+      '[data-testid="tree-item-documents"]'
+    ) as HTMLElement
+    await expect(firstRoot).toHaveAttribute('tabindex', '-1')
+  },
+}
+
 // --------------------------------------------------------------------------
 // PERFORMANCE TEST
 // --------------------------------------------------------------------------
