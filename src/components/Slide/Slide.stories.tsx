@@ -393,8 +393,18 @@ export const ReducedMotion: Story = {
  * Both panels below wrap a real focusable `<a>`: with a panel OUT the inner link must leave the
  * tab order only AFTER its slide-out completes; slid IN, it is tabbable + announced immediately.
  * The LEFT panel overrides the full `transition` shorthand (800ms); the RIGHT panel overrides
- * `transitionDelay`. Toggle and watch: each still animates out over its own duration before going
- * inert. Under the old inline-`transition` behaviour the left panel would have snapped out.
+ * `transitionDelay`. Toggle and watch: each still animates out with a surviving visibility delay
+ * before going inert. Under the old inline-`transition` behaviour the left panel would have
+ * snapped out.
+ *
+ * INERT TIMING (WCAG 1.3.1 / 4.1.2): the visibility delay tracks the FULL transform completion —
+ * `--slide-visibility-delay = calc(duration + delay)` — so on the per-token override path the
+ * inner link leaves the a11y tree + tab order EXACTLY when the slide finishes, not `delay` ms
+ * early. The RIGHT panel (`timeout: 600, transitionDelay: 150ms`) completes its slide at 750ms and
+ * now goes inert at 750ms (previously it flipped at 600ms — 150ms early — while still visibly
+ * sliding). The LEFT panel uses a full `transition` shorthand whose duration CSS cannot read back,
+ * so its inert timing falls back to the theme-default duration (the delay survives, just not the
+ * caller's exact 800ms) — the escape-hatch limitation, documented in `Slide.module.css`.
  */
 export const ExitAnimationSurvivesTimingOverride: Story = {
   render: function ExitAnimationSurvivesTimingOverrideStory() {
@@ -479,9 +489,12 @@ export const ExitAnimationSurvivesTimingOverride: Story = {
         </div>
 
         <Typography styles={{ variant: 'merrihelperfooter', theme: 'light' }}>
-          Both panels keep their delayed-inert exit: slid OUT, each animates fully
-          before its inner link leaves the tab order — the caller timing override no
-          longer strips the visibility delay.
+          Both panels keep their delayed-inert exit — the caller timing override no
+          longer strips the visibility delay. RIGHT (per-token) tracks it EXACTLY: the
+          inner link leaves the tab order precisely when the 750ms slide (600ms + 150ms
+          delay) completes. LEFT (full <code>transition</code> shorthand) keeps a
+          surviving delay at the theme default, since CSS cannot read the shorthand&rsquo;s
+          own duration back.
         </Typography>
       </div>
     )

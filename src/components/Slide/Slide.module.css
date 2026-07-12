@@ -26,15 +26,24 @@
   --slide-duration: 0.3s;
   --slide-timing: ease;
 
-  /* Visibility exit delay. On the way OUT it defaults to the slide duration so the
-     content stays perceivable/announced until the exit animation finishes, THEN
-     becomes inert; the `.in` rule flips it to 0s on the way IN. It lives in its OWN
-     custom property (NOT baked into an overridable `transition` shorthand) so the
-     delayed-inert exit SURVIVES a caller overriding the transform timing — whether
-     per-token via --slide-duration/--slide-timing/--slide-delay OR wholesale via a
-     full `transition` shorthand (routed from JS as --slide-transition, never as an
-     inline `transition` property that would strip this visibility half). */
-  --slide-visibility-delay: var(--slide-duration);
+  /* Visibility exit delay. On the way OUT it tracks the FULL transform completion
+     time — duration PLUS delay — so the content stays perceivable/announced until the
+     exit animation actually finishes, THEN becomes inert; the `.in` rule flips it to 0s
+     on the way IN. It MUST include --slide-delay: the transform half is delayed by
+     var(--slide-delay,0s) and runs for var(--slide-duration), so it completes at
+     (delay + duration). Tracking duration ALONE (the old value) flipped visibility to
+     hidden `delay` ms EARLY — the content left the a11y tree + tab order while still
+     visibly sliding (WCAG 1.3.1 / 4.1.2 transient mismatch: perceivable to sighted users,
+     gone from AT). It lives in its OWN custom property (NOT baked into an overridable
+     `transition` shorthand) so the delayed-inert exit SURVIVES a caller overriding the
+     transform timing — whether per-token via --slide-duration/--slide-timing/--slide-delay
+     OR wholesale via a full `transition` shorthand (routed from JS as --slide-transition,
+     never as an inline `transition` property that would strip this visibility half). NOTE:
+     a full --slide-transition shorthand carries its own opaque duration/delay that CSS
+     cannot read back, so for that escape-hatch path the inert timing falls back to the
+     theme-default duration; the per-token path (timeout/transitionDuration/transitionDelay)
+     tracks exactly. */
+  --slide-visibility-delay: calc(var(--slide-duration) + var(--slide-delay, 0s));
 
   /* Hidden by default; the .in class resets the transform to the resting
      translate(0, 0). Per-direction hidden transforms come from the
