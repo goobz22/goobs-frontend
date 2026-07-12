@@ -273,6 +273,11 @@ const PageSizeSelector: React.FC<{
           value={selectedValue}
           onChange={handlePageSizeChange}
           options={pageSizeOptions}
+          // The visible "Show:" text is a sibling <span>, not an associated
+          // label, so the label-less trigger needs its own accessible name
+          // (WCAG 1.3.1 / 4.1.2). The Regular Dropdown maps ariaLabel onto the
+          // combobox trigger's aria-label.
+          ariaLabel="Rows per page"
           styles={dropdownStyles}
         />
       </div>

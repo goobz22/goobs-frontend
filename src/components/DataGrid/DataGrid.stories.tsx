@@ -2310,6 +2310,92 @@ export const AccessibleGridKeyboard: Story = {
 }
 
 /**
+ * ACCESSIBILITY — the SPECIALIZED (non-text) inline editors expose the column
+ * header as their input's accessible name (D1 / R3, WCAG 1.3.1 / 4.1.2). The
+ * round-3 story already pinned the `text` editor; this pins the rest of the
+ * class now that the leaf Field components accept `ariaLabel` and the four
+ * DataGrid editor callsites thread `column.headerName` into every branch:
+ *   - `age` edits as an `internalIncrement` → a real `<input role="spinbutton">`
+ *     named "Age" (before the fix it rendered a nameless input).
+ *   - `department` edits as a `dropdown` → a `role="combobox"` trigger named
+ *     "Department" (before the fix its aria-label was the empty `label=""`).
+ * A single grid tracks one editing cell, so opening the department editor
+ * closes the age one — no explicit dismissal needed.
+ */
+export const AccessibleSpecializedEditorNames: Story = {
+  name: 'A11y — Specialized Cell Editor Names',
+  render: args => (
+    <div style={{ minHeight: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-editor-names',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const table = canvasElement.querySelector<HTMLTableElement>(
+      'table[role="grid"]'
+    )
+    if (!table) throw new Error('table[role="grid"] did not render')
+    const row = table.querySelector<HTMLElement>('tr[data-row-id="1"]')
+    if (!row) throw new Error('Desktop row [data-row-id="1"] did not render')
+
+    // 1. Open the AGE cell editor from the keyboard (select-then-edit, the same
+    //    contract the round-3 story exercises for the text editor). The age
+    //    column edits as an `internalIncrement` — a specialized, non-text leaf
+    //    whose input carries no visible <label>, so the threaded ariaLabel is
+    //    its ONLY accessible name.
+    const ageCell = row.querySelector<HTMLTableCellElement>(
+      'td[data-field-name="age"]'
+    )
+    if (!ageCell) throw new Error('Age cell of row 1 did not render')
+    ageCell.focus()
+    await expect(ageCell).toHaveFocus()
+    await userEvent.keyboard(' ')
+    await waitFor(() =>
+      expect(row).toHaveAttribute('data-row-state', 'selected')
+    )
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() =>
+      expect(ageCell).toHaveAttribute('data-cell-state', 'editing')
+    )
+    // The specialized number editor's input is named "Age" by the column header.
+    await waitFor(() =>
+      expect(
+        within(ageCell).getByRole('spinbutton', { name: 'Age' })
+      ).toBeInTheDocument()
+    )
+
+    // 2. Open the DEPARTMENT cell editor (a dropdown → combobox). The grid
+    //    tracks a single editing cell, so this closes the age editor. The
+    //    combobox trigger is likewise named by the column header, "Department"
+    //    (it used to expose only the empty label="").
+    const deptCell = row.querySelector<HTMLTableCellElement>(
+      'td[data-field-name="department"]'
+    )
+    if (!deptCell) throw new Error('Department cell of row 1 did not render')
+    deptCell.focus()
+    await expect(deptCell).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() =>
+      expect(deptCell).toHaveAttribute('data-cell-state', 'editing')
+    )
+    await waitFor(() =>
+      expect(
+        within(deptCell).getByRole('combobox', { name: 'Department' })
+      ).toBeInTheDocument()
+    )
+  },
+}
+
+/**
  * ACCESSIBILITY — keyboard column resize / reorder / menu roving (D4 / D5,
  * WCAG 2.1.1). Pins: the resize handle is a focusable `role="separator"` whose
  * Arrow keys change the column width; the column-actions menu supports Arrow

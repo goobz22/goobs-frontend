@@ -125,6 +125,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
             label=""
             initialValue={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
+            // No visible label on the inline editor — name the input via the
+            // column header (WCAG 1.3.1 / 4.1.2), same as the text/phone
+            // branches. The leaf forwards ariaLabel onto the underlying input.
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -174,6 +178,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onChange={(newValue: Date | null) =>
               onEditingValueChange(newValue ? newValue.toISOString() : '')
             }
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -218,6 +223,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
               }
             }}
             variant="month-year"
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -254,6 +260,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
               onEditingValueChange(valueToUse)
               // Don't auto-save on selection - let the user click outside or press Enter
             }}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -297,6 +304,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
               value: String(opt.value),
               _id: opt._id || String(opt.value),
             }))}
+            ariaLabel={column.headerName || column.field}
             styles={{
               ...fieldStyles,
               height: 'auto',
@@ -339,6 +347,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
               }
               onEditingValueChange(isNaN(numValue) ? '0' : String(numValue))
             }}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -401,6 +410,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -430,6 +440,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -459,6 +470,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -488,6 +500,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             value={editingValue}
             onChange={(newValue: string) => onEditingValueChange(newValue)}
             onBlur={onSave}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -554,6 +567,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onChange={(newValue: SubnetFieldValue) =>
               onEditingValueChange(JSON.stringify(newValue))
             }
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -583,6 +597,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             label=""
             initialValue={editingValue}
             onChange={vlanValue => onEditingValueChange(String(vlanValue))}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -615,6 +630,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 Number.isNaN(cidrValue) ? '24' : String(cidrValue)
               )
             }}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>
@@ -682,6 +698,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             label=""
             initialValue={editingValue}
             onChange={value => onEditingValueChange(value)}
+            ariaLabel={column.headerName || column.field}
             styles={fieldStyles}
           />
         </div>

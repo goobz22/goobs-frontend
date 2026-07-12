@@ -199,6 +199,9 @@ function AddCard({
           placeholder={
             fieldDef.placeholder || fieldDef.helperText || 'Select...'
           }
+          // Name the combobox trigger itself (the visible <label> names the
+          // wrapping role="group", not the control) — WCAG 1.3.1 / 4.1.2.
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -220,6 +223,7 @@ function AddCard({
           helperText={
             fieldDef.placeholder || fieldDef.helperText || 'Select...'
           }
+          ariaLabel={fieldDef.label}
           styles={{
             ...fieldStyles,
             width: '100%',
@@ -238,6 +242,7 @@ function AddCard({
             handleFieldChange(fieldDef.field, dateValue)
           }}
           {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -254,6 +259,7 @@ function AddCard({
           }}
           variant="month-year"
           {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -272,6 +278,11 @@ function AddCard({
       })()
       return (
         <TimeField
+          // label="" suppresses TimeField's built-in "Time" label (the field
+          // name already shows in the sibling <label> naming the role="group"),
+          // so ariaLabel becomes the input's accessible name instead of being
+          // ignored in favour of a visible label (WCAG 1.3.1 / 4.1.2).
+          label=""
           value={timeValue}
           onChange={(newTime: Date | null) => {
             if (!newTime) {
@@ -283,6 +294,7 @@ function AddCard({
             handleFieldChange(fieldDef.field, `${hours}:${minutes}`)
           }}
           {...(fieldDef.helperText && { helperText: fieldDef.helperText })}
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -302,6 +314,7 @@ function AddCard({
           }}
           {...(fieldDef.min !== undefined && { min: fieldDef.min })}
           {...(fieldDef.max !== undefined && { max: fieldDef.max })}
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )
@@ -323,6 +336,9 @@ function AddCard({
           placeholder={
             fieldDef.placeholder || fieldDef.helperText || 'Select...'
           }
+          // Name the combobox trigger itself (the visible <label> names the
+          // wrapping role="group", not the control) — WCAG 1.3.1 / 4.1.2.
+          ariaLabel={fieldDef.label}
           styles={fieldStyles}
         />
       )

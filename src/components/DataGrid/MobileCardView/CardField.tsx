@@ -171,6 +171,10 @@ function CardField({
             _id: opt._id || String(opt.value),
           }))}
           helperText="Select variables..."
+          // The visible <label htmlFor={inputId}> associates with the native
+          // inputs below, not this goobs combobox, so name it directly with the
+          // column header (WCAG 1.3.1 / 4.1.2).
+          ariaLabel={column.headerName}
           styles={{
             theme: theme,
             width: '100%',

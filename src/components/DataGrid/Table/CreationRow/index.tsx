@@ -173,6 +173,10 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            // No associated <label> (the creation form paints its own) — name
+            // the input from the field config (WCAG 1.3.1 / 4.1.2), as the
+            // text/phone branches do. The leaf forwards ariaLabel to the input.
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -214,6 +218,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -258,6 +263,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -279,6 +285,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -295,6 +302,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -331,6 +339,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(typeof fieldConfig.max === 'number'
               ? { max: fieldConfig.max }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -351,6 +360,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -390,6 +400,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -408,6 +419,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -426,6 +438,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -444,6 +457,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -524,6 +538,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.supernetMask !== undefined
               ? { supernetMask: fieldConfig.supernetMask?.toString() }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -542,6 +557,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(Array.isArray(fieldConfig.reservedVLANs)
               ? { reservedVLANs: fieldConfig.reservedVLANs }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -580,6 +596,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.helperText
               ? { helperText: fieldConfig.helperText }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )
@@ -621,6 +638,7 @@ const CreationRow: React.FC<CreationRowProps> = ({
             {...(fieldConfig.placeholder
               ? { placeholder: fieldConfig.placeholder }
               : {})}
+            ariaLabel={fieldConfig.label || fieldConfig.field}
             styles={fieldStyles}
           />
         )

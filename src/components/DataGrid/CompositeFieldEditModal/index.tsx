@@ -272,6 +272,10 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              // The visible label is an unassociated sibling <Typography>, so
+              // name the input from the field config (WCAG 1.3.1 / 4.1.2), as
+              // the text/phone branches do; the leaf forwards it to the input.
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -303,6 +307,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                   newValue ? newValue.toISOString() : ''
                 )
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -341,6 +346,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 }
               }}
               variant="month-year"
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -359,6 +365,11 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
           })()
           return fieldContainer(
             <TimeField
+              // label="" suppresses TimeField's built-in "Time" label (the
+              // field name already shows in the sibling <Typography>), so the
+              // ariaLabel below becomes the input's accessible name rather than
+              // being ignored in favour of a visible label (WCAG 1.3.1 / 4.1.2).
+              label=""
               value={timeValue}
               onChange={(newTime: Date | null) => {
                 if (!newTime) {
@@ -369,6 +380,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 const minutes = String(newTime.getMinutes()).padStart(2, '0')
                 handleFieldChange(fieldConfig.field, `${hours}:${minutes}`)
               }}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -391,6 +403,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 handleFieldChange(fieldConfig.field, valueToUse)
               }}
               placeholder={fieldConfig.placeholder || ''}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -420,6 +433,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                 value: String(opt.value),
                 _id: opt._id || String(opt.value),
               }))}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={{
                 ...fieldStyles,
                 height: 'auto',
@@ -447,6 +461,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                   isNaN(numValue) ? 0 : numValue
                 )
               }}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -474,6 +489,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -486,6 +502,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -498,6 +515,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -510,6 +528,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: string) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -542,6 +561,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               onChange={(newValue: SubnetFieldValue) =>
                 handleFieldChange(fieldConfig.field, newValue)
               }
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -553,6 +573,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               label=""
               initialValue={String(value || '')}
               onChange={value => handleFieldChange(fieldConfig.field, value)}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -579,6 +600,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
                   isNaN(cidrValue) ? 24 : cidrValue
                 )
               }}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
@@ -612,6 +634,7 @@ const CompositeFieldEditModal: React.FC<CompositeFieldEditModalProps> = ({
               label=""
               initialValue={String(value || '')}
               onChange={value => handleFieldChange(fieldConfig.field, value)}
+              ariaLabel={fieldConfig.label || fieldConfig.field}
               styles={fieldStyles}
             />
           )
