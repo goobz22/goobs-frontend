@@ -2748,6 +2748,17 @@ export const AccessibleStyleGuards: Story = {
  * rows, so every consumer page reported `aria-required-children`. The role now
  * lives on the `<table>` that genuinely owns the rows, and this asserts BOTH
  * halves: the table has it, the wrapper must NOT.
+ *
+ * ⚠️ REQUIRES A VIEWPORT >= 768px, and this is worth knowing before debugging a
+ * red here. Below that breakpoint `.desktopView` is `display: none`, so the
+ * whole `<table>` — column-actions trigger included — has no layout box:
+ * `.focus()` on the trigger silently does nothing, the dialog's
+ * previously-focused element is therefore `<body>`, and the focus-restore
+ * assertion fails while the component is entirely correct. Measured at 764px
+ * this story reports "focus not restored"; at 1440px every assertion passes.
+ * A narrow runner viewport is the likeliest cause of a red here, so check that
+ * BEFORE concluding the focus contract regressed. (The sibling
+ * `AccessibleColumnKeyboard` story has the same dependency.)
  */
 export const AccessibleColumnMenuFocusContract: Story = {
   name: 'A11y — Column Menu Focus Contract',
