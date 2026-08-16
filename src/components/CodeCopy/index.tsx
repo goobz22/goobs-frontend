@@ -13,7 +13,7 @@ import React, {
   type FC,
 } from 'react'
 import Button from '../../components/Button'
-import hljs from 'highlight.js'
+import { loadHighlighter } from './highlighter'
 import cssStyles from './CodeCopy.module.css'
 
 // --------------------------------------------------------------------------
@@ -179,9 +179,29 @@ const CodeCopy: FC<CodeCopyProps> = props => {
   // to run imperatively here now lives in CodeCopy.module.css under
   // [data-theme='sacred'] .pre :global(.hljs-*), so this effect only needs
   // to invoke highlight.js.
+  //
+  // highlight.js is loaded HERE, on first render of a code block, rather than
+  // imported at module scope — see ./highlighter for why (the all-languages
+  // entry point registers 192 grammars as a module side effect, so importing
+  // it statically put ~872 KB into every consumer route, code block or not).
+  // The load is async, so the element is re-read from the ref after the await
+  // and a `cancelled` flag drops results that arrive after the code/language
+  // changed again or the component unmounted.
   useEffect(() => {
-    if (codeRef.current) {
-      hljs.highlightElement(codeRef.current)
+    let cancelled = false
+    void loadHighlighter(language).then(hljs => {
+      const codeElement = codeRef.current
+      if (cancelled || !codeElement) return
+      // highlight.js marks an element it has already processed and warns (and
+      // no-ops) on a second pass. Re-highlighting is normal here — `code` and
+      // `language` are props that change in place — so clear the marker first.
+      // Previously the highlight ran synchronously on mount and this case was
+      // rarer; making the load async makes re-entry the common path.
+      delete codeElement.dataset.highlighted
+      hljs.highlightElement(codeElement)
+    })
+    return () => {
+      cancelled = true
     }
   }, [code, language])
 
