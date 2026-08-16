@@ -2725,3 +2725,131 @@ export const AccessibleStyleGuards: Story = {
     await expect(hasReducedMotion).toBe(true)
   },
 }
+
+/**
+ * ACCESSIBILITY — the column-actions dialog focus contract + the grid's ARIA
+ * child structure. Pins the two defects that, measured downstream in ThothOS,
+ * owned 74 % of that app's critical a11y findings (`aria-required-children`
+ * x42) and 90 % of its keyboard findings (`dialog-focus-*` x54) from this ONE
+ * component.
+ *
+ * WHY THIS STORY EXISTS ALONGSIDE `AccessibleColumnKeyboard`, which already
+ * opens this same menu: that story pins arrow-key roving and asserts focus
+ * lands on the first item, so the "focus moved IN" half was covered. The other
+ * two thirds of the reported triad — focus TRAPPED while open, focus RESTORED
+ * to the trigger on close — were implemented in Popover but pinned NOWHERE, so
+ * either could have regressed silently and taken every consumer's keyboard
+ * board with it. An implemented-but-unpinned behaviour is one careless edit
+ * from being an unimplemented one.
+ *
+ * The structural half pins the shape of a regression that actually SHIPPED:
+ * in the published 0.200.0 the `role="grid"` sat on the outer wrapper `<div>`,
+ * which also contains the toolbar, filters and footer. A grid may only own
+ * rows, so every consumer page reported `aria-required-children`. The role now
+ * lives on the `<table>` that genuinely owns the rows, and this asserts BOTH
+ * halves: the table has it, the wrapper must NOT.
+ */
+export const AccessibleColumnMenuFocusContract: Story = {
+  name: 'A11y — Column Menu Focus Contract',
+  render: args => (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: sampleColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-column-menu-focus',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    // ── 1. The grid role sits on the element that OWNS rows, not on the
+    //       wrapper that also holds toolbar/filter/footer chrome.
+    const wrapper = canvasElement.querySelector<HTMLElement>(
+      `.${cssStyles.datagrid}`
+    )
+    if (!wrapper) throw new Error('DataGrid wrapper did not render')
+    await expect(wrapper).not.toHaveAttribute('role', 'grid')
+
+    const table = canvasElement.querySelector<HTMLTableElement>(
+      'table[role="grid"]'
+    )
+    if (!table) throw new Error('table[role="grid"] did not render')
+
+    // Every direct child of the grid must be a rowgroup, and every child of a
+    // rowgroup a row — the exact chain `aria-required-children` checks.
+    const gridChildren = Array.from(table.children)
+    await expect(gridChildren.length).toBeGreaterThan(0)
+    for (const child of gridChildren) {
+      await expect(child).toHaveAttribute('role', 'rowgroup')
+      for (const grandchild of Array.from(child.children)) {
+        await expect(grandchild.getAttribute('role')).toBe('row')
+      }
+    }
+
+    // ── 2. Opening the column-actions dialog moves focus INTO it.
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    if (!nameHeader) throw new Error('Name column header did not render')
+    const menuTrigger = nameHeader.querySelector<HTMLButtonElement>(
+      '[data-action="open-column-menu"]'
+    )
+    if (!menuTrigger) throw new Error('Column menu trigger did not render')
+
+    await userEvent.click(menuTrigger)
+    const menu = await waitFor(() => {
+      const el = document.body.querySelector<HTMLElement>(
+        '[data-column-menu-for="name"]'
+      )
+      if (!el) throw new Error('Column menu did not open')
+      return el
+    })
+    // The portalled surface is a named dialog, and focus is inside it.
+    const dialog = menu.closest('[role="dialog"]')
+    if (!dialog) throw new Error('Column menu is not inside a role="dialog"')
+    await expect(dialog).toHaveAttribute('aria-label')
+    await waitFor(() =>
+      expect(menu.contains(document.activeElement)).toBe(true)
+    )
+
+    // ── 3. Focus is TRAPPED: tabbing off the last menu item cycles back into
+    //       the dialog instead of escaping to the page behind it.
+    const items = Array.from(
+      menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')
+    )
+    await expect(items.length).toBeGreaterThan(1)
+    items[items.length - 1]!.focus()
+    await userEvent.tab()
+    await waitFor(() =>
+      expect(dialog.contains(document.activeElement)).toBe(true)
+    )
+    // Shift+Tab off the first item must not escape backwards either.
+    items[0]!.focus()
+    await userEvent.tab({ shift: true })
+    await waitFor(() =>
+      expect(dialog.contains(document.activeElement)).toBe(true)
+    )
+
+    // ── 4. Escape closes the dialog AND returns focus to the trigger, so a
+    //       keyboard user is not dropped at the top of the document.
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(
+        document.body.querySelector('[data-column-menu-for="name"]')
+      ).toBeNull()
+    )
+    await waitFor(() => expect(menuTrigger).toHaveFocus())
+  },
+}
