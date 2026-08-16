@@ -3051,9 +3051,10 @@ export const AccessibleResizeHandleContract: Story = {
       `${startValue + 10} pixels`
     )
 
+    // Shift makes the step 50px, from the 10px-wider width the Arrow left above.
     await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
     await waitFor(() =>
-      expect(numericAttr(handle, 'aria-valuenow')).toBe(startValue - 40)
+      expect(numericAttr(handle, 'aria-valuenow')).toBe(startValue + 10 - 50)
     )
 
     // Home / End hit the published bounds exactly — the announced range is the

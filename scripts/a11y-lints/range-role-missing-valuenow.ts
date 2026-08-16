@@ -37,6 +37,13 @@ const REQUIRES_VALUENOW_WHEN_FOCUSABLE = new Set(['separator'])
  * cannot be read as markup. Offsets are preserved so violation lines stay
  * correct; string and template literals are respected so a `https://…` inside a
  * string is not mistaken for a line comment.
+ *
+ * KNOWN GAP, stated rather than implied: this does not model REGEX LITERALS, so a
+ * pattern containing an unpaired quote (`/["']/`) opens phantom string state and
+ * the rest of that file's comments go un-blanked. Reaching a false positive from
+ * there needs a range role written inside such a comment AND arranged to parse as
+ * an opening tag, which `enclosingOpeningTag` then has to accept. If that ever
+ * happens the fix is a real tokenizer here, not an ignore list.
  */
 function blankComments(text: string): string {
   const out = text.split('')
