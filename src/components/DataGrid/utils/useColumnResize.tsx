@@ -2,6 +2,13 @@
 
 import React, { useCallback, useRef, useState, useEffect } from 'react'
 import type { ColumnDef } from '../types'
+import {
+  DEFAULT_MAX_COLUMN_WIDTH,
+  MIN_COLUMN_WIDTH,
+  clampColumnWidth,
+  getColumnWidth,
+  resolveColumnResizeBounds,
+} from './columnResizeBounds'
 
 interface UseColumnResizeProps {
   columns: ColumnDef[]
@@ -36,6 +43,15 @@ export function useColumnResize({
   const [updatedColumns, setUpdatedColumns] = useState<ColumnDef[]>(columns)
   const [tempWidth, setTempWidth] = useState<number | null>(null)
   const resizingElementRef = useRef<HTMLElement | null>(null)
+  /**
+   * Bounds of the column being dragged, resolved once at mousedown so the
+   * mousemove handler can clamp without depending on (and re-subscribing to)
+   * the columns array on every frame.
+   */
+  const resizeBoundsRef = useRef<{ min: number; max: number }>({
+    min: MIN_COLUMN_WIDTH,
+    max: DEFAULT_MAX_COLUMN_WIDTH,
+  })
 
   // Update columns when props change - use derived state pattern during render
   if (columnsHaveChanged(columns, updatedColumns)) {
@@ -57,7 +73,8 @@ export function useColumnResize({
       setIsResizing(true)
       setResizingColumn(columnField)
       setStartX(e.clientX)
-      setStartWidth(column.computedWidth || column.width || 200)
+      setStartWidth(getColumnWidth(column))
+      resizeBoundsRef.current = resolveColumnResizeBounds(column)
     },
     [updatedColumns]
   )
@@ -67,7 +84,18 @@ export function useColumnResize({
       if (!isResizing || !resizingColumn) return
 
       const deltaX = e.clientX - startX
-      const newWidth = Math.max(50, startWidth + deltaX) // Minimum width of 50px
+      // Clamp to the bounds resolved at mousedown — the same range the resize
+      // separator publishes as aria-valuemin/aria-valuemax. Inlining a floor
+      // here (it used to be a bare `Math.max(50, …)`) is what lets the
+      // announced range drift away from the enforced one. The bounds are read
+      // from a ref rather than from `updatedColumns` so this callback's
+      // identity stays stable for the whole drag — depending on the columns
+      // would re-register the document listeners on every mousemove.
+      const bounds = resizeBoundsRef.current
+      const newWidth = Math.min(
+        Math.max(startWidth + deltaX, bounds.min),
+        bounds.max
+      )
 
       setTempWidth(newWidth)
 
@@ -146,19 +174,20 @@ export function useColumnResize({
   )
 
   /**
-   * Keyboard-operable resize (WCAG 2.1.1). The drag handle is pointer-only;
-   * this adjusts a column's width by `delta` px (clamped to the same 50px
-   * minimum the mouse path enforces) and notifies the parent via
+   * Keyboard-operable resize (WCAG 2.1.1). The drag handle was pointer-only;
+   * this adjusts a column's width by `delta` px — clamped through the SAME
+   * `clampColumnWidth` bounds the mouse path uses and the separator publishes
+   * as `aria-valuemin`/`aria-valuemax` — and notifies the parent via
    * `onColumnResize`, so the resize `role="separator"` handle can be driven
-   * with Arrow keys. The new width flows to the header through `computedWidth`
-   * (rendered as the `--dg-col-width` CSS variable), matching the mouse path.
+   * with Arrow/Home/End/Enter. The new width flows to the header through
+   * `computedWidth` (rendered as the `--dg-col-width` CSS variable), matching
+   * the mouse path.
    */
   const resizeColumnBy = useCallback(
     (columnField: string, delta: number) => {
       const column = updatedColumns.find(col => col.field === columnField)
       if (!column) return
-      const current = column.computedWidth || column.width || 200
-      const newWidth = Math.max(50, current + delta)
+      const newWidth = clampColumnWidth(column, getColumnWidth(column) + delta)
       setUpdatedColumns(prev =>
         prev.map(col =>
           col.field === columnField

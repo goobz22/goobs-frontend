@@ -453,6 +453,19 @@ export interface ColumnDef<TRow extends RowData = RowData> {
   index?: number
   /** Initial width in pixels */
   width?: number
+  /**
+   * Narrowest this column may be resized to, in pixels. Default:
+   * `MIN_COLUMN_WIDTH` (50). Enforced by BOTH resize paths (drag and Arrow
+   * keys) and published as the resize separator's `aria-valuemin`.
+   */
+  minWidth?: number
+  /**
+   * Widest this column may be resized to, in pixels. Default:
+   * `DEFAULT_MAX_COLUMN_WIDTH` (1200). Enforced by BOTH resize paths and
+   * published as the resize separator's `aria-valuemax`. A column that arrives
+   * already wider than this keeps its width — see `resolveColumnResizeBounds`.
+   */
+  maxWidth?: number
   /** Whether column can be resized by dragging. Default: true */
   resizable?: boolean
   /** Whether cells in this column can be edited. Default: true */

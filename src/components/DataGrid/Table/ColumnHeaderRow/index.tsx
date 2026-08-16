@@ -1,11 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 import type { ColumnDef, DataGridStyles } from '../../types'
 import Checkbox from '../../../Checkbox'
 import MoreVertIcon from '../../../Icons/MoreVert'
 import Popover from '../../../Popover'
 import cssStyles from '../../DataGrid.module.css'
+import {
+  DEFAULT_COLUMN_WIDTH,
+  getColumnWidth,
+  resolveColumnResizeBounds,
+} from '../../utils/columnResizeBounds'
 
 interface ColumnHeaderRowProps {
   allRowsSelected: boolean
@@ -78,6 +83,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
   const headerRefs = React.useRef<Record<string, HTMLTableCellElement | null>>(
     {}
   )
+  // Unique-per-instance prefix for the header-cell ids the resize separators
+  // point at with `aria-controls` (several DataGrids can share a page).
+  const headerIdPrefix = useId()
+  /**
+   * Width a column had before Enter collapsed it to its minimum, so a second
+   * Enter can restore it — the APG window-splitter "cycle" behaviour.
+   */
+  const preCollapseWidths = React.useRef<Record<string, number>>({})
 
   // Wrapper function to convert boolean to ChangeEvent
   const handleCheckboxChange = (checked: boolean) => {
@@ -126,6 +139,60 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
     items[nextIndex]?.focus()
   }
 
+  /**
+   * Resize-separator keyboard model — the APG **window splitter** pattern
+   * (https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/), which is what a
+   * focusable `role="separator"` promises assistive tech it implements:
+   *
+   *   ←/→        nudge the column narrower/wider by 10px (50px with Shift)
+   *   Home / End jump to the column's minimum / maximum width
+   *   Enter      collapse to the minimum, or restore the pre-collapse width
+   *
+   * Every branch resolves its target through `resolveColumnResizeBounds`, the
+   * same helper that produces the published `aria-valuemin`/`aria-valuemax`, so
+   * the keys can never reach a width the announced range says is unreachable.
+   */
+  const handleResizeKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    col: ColumnDef
+  ) => {
+    const { min, max } = resolveColumnResizeBounds(col)
+    const current = getColumnWidth(col)
+    const step = e.shiftKey ? 50 : 10
+    let target: number
+    switch (e.key) {
+      case 'ArrowLeft':
+        target = current - step
+        break
+      case 'ArrowRight':
+        target = current + step
+        break
+      case 'Home':
+        target = min
+        break
+      case 'End':
+        target = max
+        break
+      case 'Enter': {
+        if (current > min) {
+          preCollapseWidths.current[col.field] = current
+          target = min
+        } else {
+          const restored =
+            preCollapseWidths.current[col.field] ?? DEFAULT_COLUMN_WIDTH
+          target = restored > min ? restored : max
+        }
+        break
+      }
+      default:
+        return
+    }
+    e.preventDefault()
+    // `resizeColumnBy` takes a DELTA and clamps it; passing target-current
+    // keeps the bounds logic in the one place that owns it.
+    resizeColumnBy?.(col.field, target - current)
+  }
+
   return (
     // aria-rowindex={1}: the column-header row is the first row of the grid, so
     // the data rows (which carry aria-rowindex from the page offset) start at 2.
@@ -169,6 +236,17 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         // aria-sort reflects the grid's current sort state on the sorted
         // column and is omitted on the rest (WCAG 1.3.1 / 4.1.2). The parent
         // owns sort state and threads it in via sortField/sortDirection.
+        // Stable id for this header cell, so the column's resize separator can
+        // name what it controls via `aria-controls` (an idref that must
+        // resolve). `useId` keeps it unique across DataGrid instances.
+        const headerCellId = `${headerIdPrefix}-col-${col.field}`
+
+        // Resize range + current width, resolved from the SHARED bounds helper
+        // that also clamps both resize paths (see columnResizeBounds.ts).
+        const { min: resizeMin, max: resizeMax } =
+          resolveColumnResizeBounds(col)
+        const currentWidth = getColumnWidth(col)
+
         const ariaSort: 'ascending' | 'descending' | undefined =
           sortField === col.field
             ? sortDirection === 'desc'
@@ -179,6 +257,7 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         return (
           <th
             key={col.field}
+            id={headerCellId}
             ref={el => {
               headerRefs.current[col.field] = el
             }}
@@ -334,10 +413,24 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
               </div>
             </Popover>
 
-            {/* Resize handle - for all columns that are resizable.
-                role="separator" + tabIndex + Arrow-key handler make the
-                previously pointer-only resize keyboard operable (WCAG 2.1.1):
-                ←/→ nudge the width by 10px (50px with Shift). */}
+            {/* Resize handle — an APG WINDOW SPLITTER for every resizable
+                column. `role="separator"` + `tabIndex` + the key handler make
+                the once pointer-only resize keyboard operable (WCAG 2.1.1).
+
+                ⚠️ A FOCUSABLE separator is a RANGE WIDGET, not decoration, and
+                that is the whole reason the aria-value* trio below is not
+                optional: ARIA (and axe's `aria-required-attr`, which exempts
+                only NON-focusable separators) requires `aria-valuenow`, and
+                without an explicit min/max ARIA's implicit 0–100 would have AT
+                announce a 200px column as "200 out of 100". Measured downstream
+                in ThothOS, the missing trio was 18 of that app's 22 remaining
+                critical a11y findings — every instance this one element.
+
+                The contract runs BOTH ways: if this handle ever stops being
+                keyboard operable, it must ALSO leave the accessibility tree
+                (drop `tabIndex`, drop the name, add `aria-hidden`) rather than
+                keep advertising a role it no longer implements. The
+                `AccessibleResizeHandleContract` story pins both directions. */}
             {col.resizable !== false && (
               <div
                 {...getResizeHandleProps(col.field)}
@@ -346,17 +439,21 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 role="separator"
                 aria-orientation="vertical"
                 aria-label={`Resize ${col.headerName || col.field} column`}
+                // The range the separator both PUBLISHES and (via
+                // clampColumnWidth) enforces — one home, so an announced width
+                // is always a reachable width.
+                aria-valuenow={currentWidth}
+                aria-valuemin={resizeMin}
+                aria-valuemax={resizeMax}
+                // Without this, AT reads the raw ratio as a percentage; pixels
+                // are what the control actually manipulates.
+                aria-valuetext={`${currentWidth} pixels`}
+                // Names the thing being resized (APG: the splitter controls its
+                // primary pane) — here, this column's header cell.
+                aria-controls={headerCellId}
                 tabIndex={0}
                 data-action="resize-handle"
-                onKeyDown={e => {
-                  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
-                  e.preventDefault()
-                  const step = e.shiftKey ? 50 : 10
-                  resizeColumnBy?.(
-                    col.field,
-                    e.key === 'ArrowLeft' ? -step : step
-                  )
-                }}
+                onKeyDown={e => handleResizeKeyDown(e, col)}
               />
             )}
           </th>
