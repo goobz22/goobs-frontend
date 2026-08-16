@@ -248,6 +248,27 @@
   outline: none;
 }
 
+/* WCAG 2.5.8 Target Size (Minimum) — 24x24 CSS px floor.
+   The block-link declares no height, so its box is exactly one line of title
+   text: line-height 1.3 over a clamped 0.95-1.05rem font = 19.8px at the
+   mobile end of the clamp and 21.8px at the tablet end. A SHORT single-line
+   title therefore left the control 2-4px under the floor. Measured downstream
+   in ThothOS at 63x20 (mobile) and 71x22 (tablet) on
+   /dashboard/administration/workspace/companies.
+   A multi-line title already clears 24px, so this only lifts the short case;
+   `inline-flex` is what makes the minimum apply to the ANCHOR too, since
+   min-height has no effect on a default-`inline` <a>.
+   Note this is the element's own box: the ::after overlay above separately
+   makes the whole card clickable. Both matter — the overlay serves the pointer
+   user, this serves any oracle or AT that measures the control itself, and the
+   two are not substitutes. */
+.title a.blockLink,
+.title button.blockLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
 .subtitle {
   font-size: clamp(0.75rem, 2vw, 0.85rem);
   color: var(--card-subtitle);
