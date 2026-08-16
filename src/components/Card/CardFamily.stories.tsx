@@ -959,6 +959,64 @@ export const BlockLinkKeyboardFocus: Story = {
 }
 
 // --------------------------------------------------------------------------
+// CARD.TITLE block-link — WCAG 2.5.8 target size on a SHORT title
+// --------------------------------------------------------------------------
+
+/**
+ * Pins the 24x24 CSS px pointer-target floor (WCAG 2.5.8 Target Size
+ * (Minimum)) for the block-link control itself.
+ *
+ * THE DEFECT THIS FENCES, measured rather than supposed. The block-link
+ * declared no height, so its box was exactly one line of title text:
+ * line-height 1.3 over a clamped 0.95-1.05rem font resolves to 19.8px at the
+ * mobile end and 21.8px at the tablet end. A LONG title wraps to two lines and
+ * clears the floor, which is why this went unnoticed; a SHORT one does not.
+ * Downstream in ThothOS it measured 63x20 (mobile) and 71x22 (tablet) on
+ * /dashboard/administration/workspace/companies, and was the last remaining
+ * blocking finding on that mobile board.
+ *
+ * WHY A SHORT TITLE IS THE WHOLE POINT: rendered with the long title used by
+ * the sibling BlockLinkKeyboardFocus story, this assertion passes even with
+ * the bug present, because two lines of text already exceed 24px. The title
+ * here is deliberately one short word so that the control's own box, not the
+ * text, is what gets measured.
+ *
+ * The repo drift ratchet small-interactive-target cannot own this case: it
+ * freezes rules that DECLARE a sub-24px size, and the defect here was the
+ * absence of any height declaration at all. That gap is why this is pinned as
+ * a story instead.
+ */
+export const BlockLinkTargetSize: Story = {
+  name: 'BlockLink/Target Size (WCAG 2.5.8)',
+  render: () => (
+    <div style={{ width: '360px' }}>
+      <Card
+        cardType="course"
+        cardId="blocklink-target-size"
+        styles={{ theme: 'light' }}
+        interactive
+      >
+        <CardHeader>
+          <CardTitle onClick={fn()} ariaLabel="Open T4NK3D">
+            T4NK3D
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const link = canvas.getByRole('button', { name: 'Open T4NK3D' })
+    const rect = link.getBoundingClientRect()
+    // Height is the axis that missed; width is asserted too so that a future
+    // icon-only title cannot regress the other dimension unnoticed.
+    await expect(rect.height).toBeGreaterThanOrEqual(24)
+    await expect(rect.width).toBeGreaterThanOrEqual(24)
+  },
+}
+
+// --------------------------------------------------------------------------
 // CARD ROOT aria-labelledby — dangling-idref reconciliation (title optional)
 // --------------------------------------------------------------------------
 
