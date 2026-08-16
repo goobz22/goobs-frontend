@@ -177,6 +177,12 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
         if (current > min) {
           preCollapseWidths.current[col.field] = current
           target = min
+        } else if (current < min) {
+          // Already narrower than the column's own minimum (a consumer can
+          // declare such a width). "Collapse" normalises it to the minimum
+          // rather than treating it as collapsed and jumping to a restore
+          // width the user never chose.
+          target = min
         } else {
           const restored =
             preCollapseWidths.current[col.field] ?? DEFAULT_COLUMN_WIDTH
@@ -448,8 +454,14 @@ const ColumnHeaderRow: React.FC<ColumnHeaderRowProps> = ({
                 // Without this, AT reads the raw ratio as a percentage; pixels
                 // are what the control actually manipulates.
                 aria-valuetext={`${currentWidth} pixels`}
-                // Names the thing being resized (APG: the splitter controls its
-                // primary pane) — here, this column's header cell.
+                // Names the thing being resized. ⚠️ DELIBERATE DEVIATION from
+                // the APG example, which points a splitter at a SIBLING pane:
+                // a grid column has exactly one addressable element and it is
+                // the header cell this handle is positioned inside, so the
+                // idref is an ancestor. AT resolves it either way; the
+                // alternative (no aria-controls at all) would leave the
+                // splitter without a stated subject. Do not "fix" this to a
+                // sibling — `.headerCellContent` is chrome, not the column.
                 aria-controls={headerCellId}
                 tabIndex={0}
                 data-action="resize-handle"

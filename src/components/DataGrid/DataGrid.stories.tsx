@@ -2874,3 +2874,222 @@ export const AccessibleColumnMenuFocusContract: Story = {
     await waitFor(() => expect(menuTrigger).toHaveFocus())
   },
 }
+
+/** Columns with EXPLICIT narrow resize bounds, so the contract story can drive
+ *  the range to both ends without a 1200px column reflowing the table. `status`
+ *  is deliberately non-resizable: its header must expose NO handle at all. */
+const resizeContractColumns: ColumnDef[] = [
+  {
+    field: 'name',
+    headerName: 'Name',
+    width: 150,
+    minWidth: 80,
+    maxWidth: 260,
+    resizable: true,
+  },
+  { field: 'age', headerName: 'Age', width: 110, resizable: true },
+  { field: 'status', headerName: 'Status', width: 120, resizable: false },
+]
+
+const onResizeContractSpy = fn()
+
+/**
+ * ACCESSIBILITY — the column-RESIZE handle contract, pinned in BOTH directions.
+ *
+ * Sibling of `AccessibleColumnMenuFocusContract`, and it exists for the same
+ * reason one layer in. That story's fix (moving `role="grid"` onto the element
+ * that owns rows) took `aria-required-children` to zero downstream in ThothOS —
+ * and the structurally-invalid grid had been MASKING this element: a focusable
+ * `role="separator"` published to assistive tech with an `aria-label` but
+ * without the attributes its role requires. It surfaced as all 18 of the app's
+ * remaining critical `aria-required-attr` findings, one component, desktop only.
+ *
+ * WHY THE ATTRIBUTES ARE MANDATORY, not decoration: ARIA classes a separator as
+ * structure when it is inert and as a RANGE WIDGET the moment it is focusable
+ * (axe's `aria-required-attr` encodes exactly that — `isStaticSeparator()`
+ * exempts only the non-focusable case). A range widget owes `aria-valuenow`,
+ * and owes a real `aria-valuemin`/`aria-valuemax` too, because ARIA's implicit
+ * range is 0–100: publish a 200px column's width with no bounds and AT
+ * announces "200 out of 100".
+ *
+ * THE TWO DIRECTIONS, which is the whole point of the story:
+ *   1. Keyboard-operable ⇒ fully described. Focusable + named ⇒ it must carry
+ *      valuenow/min/max, the value must sit inside the range, and the keys must
+ *      genuinely move the width (APG window splitter: Arrows nudge, Home/End
+ *      hit the bounds, Enter collapses and restores).
+ *   2. Not keyboard-operable ⇒ not in the AT tree. The honest alternative to
+ *      building the range out was removing the handle from accessibility
+ *      entirely — so any handle that is NOT focusable must also be unnamed and
+ *      `aria-hidden`. Advertising a role you do not implement is the defect;
+ *      either half alone lets it come back.
+ *
+ * The assertions re-implement the axe rule locally over EVERY separator in the
+ * grid, so a second focusable separator added anywhere in this component is
+ * caught here rather than downstream in a consumer's a11y board.
+ *
+ * ⚠️ Like its siblings this needs a viewport >= 768px — below that `.desktopView`
+ * is `display: none`, the handles have no layout box, and `.focus()` silently
+ * does nothing. Check the runner viewport before concluding the contract broke.
+ */
+export const AccessibleResizeHandleContract: Story = {
+  name: 'A11y — Resize Handle Contract',
+  render: args => (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+        margin: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <DataGrid {...args} />
+    </div>
+  ),
+  args: {
+    columns: resizeContractColumns,
+    rows: sampleRows,
+    dataGrid: 'a11y-resize-contract',
+    permissions: { access: 'write' },
+    searchbarProps: { value: '', onChange: () => {} },
+    styles: { theme: 'light' },
+    onCellSave: fn(),
+    onColumnResize: onResizeContractSpy,
+  },
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const numericAttr = (el: Element, attr: string): number => {
+      const raw = el.getAttribute(attr)
+      if (raw === null) throw new Error(`${attr} is missing from ${el.tagName}`)
+      const value = Number(raw)
+      if (Number.isNaN(value))
+        throw new Error(`${attr}="${raw}" is not a number`)
+      return value
+    }
+
+    // ── DIRECTION 2 (checked FIRST, over every separator in the grid): the
+    //    axe rule itself — a separator exposed to AT while focusable must
+    //    carry aria-valuenow; one that is not focusable must not be named.
+    const separators = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('[role="separator"]')
+    )
+    await expect(separators.length).toBeGreaterThan(0)
+    for (const separator of separators) {
+      const focusable =
+        separator.tabIndex >= 0 &&
+        separator.getAttribute('aria-hidden') !== 'true'
+      const named = Boolean(separator.getAttribute('aria-label')?.trim())
+      if (focusable) {
+        // Operable ⇒ it owes the range widget's required attribute.
+        await expect(separator).toHaveAttribute('aria-valuenow')
+        await expect(named).toBe(true)
+      } else {
+        // Inert ⇒ it must not advertise itself to AT at all.
+        await expect(named).toBe(false)
+      }
+    }
+
+    // A column that opted OUT of resizing exposes no handle whatsoever — the
+    // honest way to have no keyboard resize, and the reason direction 2 above
+    // has no "named but inert" instance to trip over.
+    const statusHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="status"]'
+    )
+    if (!statusHeader) throw new Error('Status column header did not render')
+    await expect(
+      statusHeader.querySelector('[data-action="resize-handle"]')
+    ).toBeNull()
+
+    // ── DIRECTION 1: the resizable column's handle is a fully described,
+    //    genuinely operable window splitter.
+    const nameHeader = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="name"]'
+    )
+    if (!nameHeader) throw new Error('Name column header did not render')
+    const handle = nameHeader.querySelector<HTMLElement>(
+      '[data-action="resize-handle"]'
+    )
+    if (!handle) throw new Error('Resize handle did not render')
+
+    await expect(handle).toHaveAttribute('role', 'separator')
+    await expect(handle).toHaveAttribute('aria-orientation', 'vertical')
+    await expect(handle).toHaveAttribute('aria-label', 'Resize Name column')
+    await expect(handle.tabIndex).toBe(0)
+
+    // The published range matches the column's declared bounds, and the
+    // current value sits inside it (an implicit 0–100 range would not).
+    const min = numericAttr(handle, 'aria-valuemin')
+    const max = numericAttr(handle, 'aria-valuemax')
+    await expect(min).toBe(80)
+    await expect(max).toBe(260)
+    const startValue = numericAttr(handle, 'aria-valuenow')
+    await expect(startValue).toBe(150)
+    await expect(startValue).toBeGreaterThanOrEqual(min)
+    await expect(startValue).toBeLessThanOrEqual(max)
+    await expect(handle).toHaveAttribute('aria-valuetext', '150 pixels')
+
+    // The splitter names what it resizes, and that idref resolves to THIS
+    // column's header cell (a dangling aria-controls is its own a11y finding).
+    const controls = handle.getAttribute('aria-controls')
+    if (!controls) throw new Error('aria-controls is missing from the handle')
+    await expect(document.getElementById(controls)).toBe(nameHeader)
+
+    // ── The keys actually move the width, and the exposure tracks it.
+    handle.focus()
+    await expect(handle).toHaveFocus()
+
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() =>
+      expect(numericAttr(handle, 'aria-valuenow')).toBe(startValue + 10)
+    )
+    await waitFor(() => expect(onResizeContractSpy).toHaveBeenCalled())
+    await expect(onResizeContractSpy.mock.calls.at(-1)).toEqual([
+      'name',
+      startValue + 10,
+    ])
+    await expect(handle).toHaveAttribute(
+      'aria-valuetext',
+      `${startValue + 10} pixels`
+    )
+
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
+    await waitFor(() =>
+      expect(numericAttr(handle, 'aria-valuenow')).toBe(startValue - 40)
+    )
+
+    // Home / End hit the published bounds exactly — the announced range is the
+    // reachable range, not an aspiration.
+    await userEvent.keyboard('{End}')
+    await waitFor(() => expect(numericAttr(handle, 'aria-valuenow')).toBe(max))
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() => expect(numericAttr(handle, 'aria-valuenow')).toBe(max))
+
+    await userEvent.keyboard('{Home}')
+    await waitFor(() => expect(numericAttr(handle, 'aria-valuenow')).toBe(min))
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
+    await waitFor(() => expect(numericAttr(handle, 'aria-valuenow')).toBe(min))
+
+    // Enter cycles collapse ⇄ restore (APG). From the minimum, the first Enter
+    // restores the width the previous collapse captured.
+    await userEvent.keyboard('{ArrowRight}')
+    await waitFor(() =>
+      expect(numericAttr(handle, 'aria-valuenow')).toBe(min + 10)
+    )
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(numericAttr(handle, 'aria-valuenow')).toBe(min))
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() =>
+      expect(numericAttr(handle, 'aria-valuenow')).toBe(min + 10)
+    )
+
+    // ── A column that declares no bounds still publishes a real range (the
+    //    library defaults), so no consumer can produce an undescribed handle
+    //    just by omitting minWidth/maxWidth.
+    const ageHandle = canvasElement.querySelector<HTMLElement>(
+      'th[data-column-header="age"] [data-action="resize-handle"]'
+    )
+    if (!ageHandle) throw new Error('Age resize handle did not render')
+    await expect(numericAttr(ageHandle, 'aria-valuemin')).toBe(50)
+    await expect(numericAttr(ageHandle, 'aria-valuemax')).toBe(1200)
+    await expect(numericAttr(ageHandle, 'aria-valuenow')).toBe(110)
+  },
+}
