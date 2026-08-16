@@ -2789,12 +2789,22 @@ export const AccessibleColumnMenuFocusContract: Story = {
 
     // Every direct child of the grid must be a rowgroup, and every child of a
     // rowgroup a row — the exact chain `aria-required-children` checks.
+    //
+    // Rows are matched by ACCESSIBILITY ROLE, not by the presence of a role
+    // ATTRIBUTE. `<tr>` already has an implicit `row` role and axe honours it,
+    // so the header `<tr>` legitimately carries no attribute while the data
+    // rows set one explicitly. Asserting the attribute instead of the role
+    // reds on correct markup — this assertion was written that way first and
+    // failed here against a perfectly valid grid.
     const gridChildren = Array.from(table.children)
     await expect(gridChildren.length).toBeGreaterThan(0)
     for (const child of gridChildren) {
       await expect(child).toHaveAttribute('role', 'rowgroup')
       for (const grandchild of Array.from(child.children)) {
-        await expect(grandchild.getAttribute('role')).toBe('row')
+        const isRow =
+          grandchild.tagName === 'TR' ||
+          grandchild.getAttribute('role') === 'row'
+        await expect(isRow).toBe(true)
       }
     }
 
