@@ -1,0 +1,47 @@
+{
+ "title": "Components/Field/Number/AccountNumber",
+ "stories": [
+  {
+   "id": "components-field-number-accountnumber--dark-theme",
+   "title": "Components/Field/Number/AccountNumber",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Account Number"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-number-accountnumber--with-default-value",
+   "title": "Components/Field/Number/AccountNumber",
+   "name": "With Default Value",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Account Number"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Account number from your profile"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,2102 @@
+{
+ "title": "Components/Icons/All Icons",
+ "stories": [
+  {
+   "id": "components-icons-all-icons--all-icons-showcase",
+   "title": "Components/Icons/All Icons",
+   "name": "All Icons Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-icon-name=\"AccessTime\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Account\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AccountBalance\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AccountBalanceWallet\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AccountTree\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Add\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AddCircle\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AddCircleOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AddPhotoAlternate\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AddShoppingCart\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AddTask\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AdminPanelSettings\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Analytics\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Animation\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Apartment\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Apple\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowBack\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowDropDown\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowDropDownCircle\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowDropUp\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowForward\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ArrowUpward\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Article\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Assessment\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Assignment\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AttachFile\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Attachment\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AttachMoney\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AutoAwesome\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"AutoGraph\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Autorenew\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Bank\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"BarChart\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Block\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"BugReport\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Build\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Business\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"BusinessCenter\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Calculate\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Calendar\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CalendarMonth\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Campaign\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Cancel\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CardGiftcard\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CardMembership\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Category\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Chat\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Check\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CheckBox\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CheckCircle\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CheckCircleOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ChevronLeft\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ChevronRight\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CircleOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Close\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CloudSync\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CloudUpload\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Code\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CompareArrows\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Construction\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Contacts\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ContentCopy\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Contract\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CreateNewFolder\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CreditCard\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CreditCardOff\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"CurrencyExchange\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Dashboard\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"DateRange\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Delete\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Description\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"DesktopWindows\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"DeviceHub\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Devices\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Dns\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Download\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"DragIndicator\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Edit\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Email\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"EmojiEvents\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Engineering\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Error\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ErrorOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Event\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"EventAvailable\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"EventBusy\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ExpandLess\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ExpandMore\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Extension\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Favorite\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FavoriteBorder\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Feedback\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FileCopy\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Filing\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FilterList\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Fingerprint\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FirstPage\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Flag\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatAlignCenter\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatAlignLeft\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatAlignRight\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatBold\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatItalic\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatListBulleted\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatListNumbered\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"FormatUnderlined\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Gavel\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Gesture\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Google\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"GridView\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Group\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Groups\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"GroupWork\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Handshake\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Help\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"History\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Home\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"HomeWork\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"HourglassEmpty\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Hub\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Image\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"IndeterminateCheckBox\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Info\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"InfoOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Insights\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"IntegrationInstructions\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Inventory\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"KeyboardArrowDown\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"KeyboardArrowLeft\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"KeyboardArrowRight\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"KeyboardReturn\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Lan\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LastPage\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Launch\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Layers\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Link\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ListAlt\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocalGasStation\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocalHospital\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocalOffer\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocalShipping\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Location\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocationCity\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LocationSearching\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Lock\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Login\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LogoutRounded\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LooksFour\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LooksOne\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LooksThree\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LooksTwo\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Loop\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"LowPriority\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Loyalty\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Map\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Menu\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"MenuBook\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"MonetizationOn\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"MoreHoriz\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"MoreVert\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Mouse\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Navigation\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"NetworkCheck\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"NotificationActive\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"NotificationImportant\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Notifications\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Pause\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Pdf\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PendingActions\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"People\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Person\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PersonAdd\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PersonOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Phone\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PlayArrow\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PlaylistAddCheck\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PointOfSale\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Policy\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PostAdd\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PrecisionManufacturing\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Preview\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Print\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"PriorityHigh\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Psychology\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Public\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"QrCode\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"QrCodeScanner\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"RateReview\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Receipt\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Redo\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Refresh\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Remove\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"RemoveCircleOutline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Repeat\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ReportProblem\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"RequestQuote\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Restore\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Router\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Save\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Schedule\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"School\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ScreenRotation\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Search\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Security\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Send\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Settings\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Shield\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ShoppingBag\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ShoppingBasket\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ShowChart\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ShowHideEye\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"SkipNext\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"SmartButton\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Smartphone\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Sms\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Sort\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Spa\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Speed\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Star\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"StarBorder\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Stop\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Storage\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Store\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"StoreMallDirectory\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"StrikethroughS\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"SupervisedUserCircle\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Support\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Sync\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Table\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Tablet\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Template\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"TextFields\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ThumbUp\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Timeline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Timer\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Transfer\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"TrendingDown\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"TrendingUp\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Undo\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"VerifiedUser\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Videocam\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"VideoLibrary\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewCompact\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewHeadline\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewKanban\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewList\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewModule\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"ViewSidebar\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Visibility\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"VisibilityOff\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"VpnKey\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"VpnLock\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Warning\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"WarningAmber\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"WaterDrop\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Web\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Widgets\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Wifi\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"WifiOff\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"Work\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    },
+    {
+     "selector": "div[data-icon-name=\"WorkspacePremium\"] > div > div:nth-child(3) > div:nth-child(1)",
+     "fg": "#d4af37",
+     "bg": "#ffffff",
+     "ratio": 2.1,
+     "required": 4.5,
+     "text": "Sacred"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

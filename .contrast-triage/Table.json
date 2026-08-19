@@ -1,0 +1,46 @@
+{
+ "title": "Components/Table",
+ "stories": [
+  {
+   "id": "components-table--style-overrides",
+   "title": "Components/Table",
+   "name": "Style Overrides",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(1)",
+     "fg": "#c4b5fd",
+     "bg": "#0f766e",
+     "ratio": 2.96,
+     "required": 4.5,
+     "text": "ID"
+    },
+    {
+     "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(2)",
+     "fg": "#c4b5fd",
+     "bg": "#0f766e",
+     "ratio": 2.96,
+     "required": 4.5,
+     "text": "Name"
+    },
+    {
+     "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(3)",
+     "fg": "#c4b5fd",
+     "bg": "#0f766e",
+     "ratio": 2.96,
+     "required": 4.5,
+     "text": "Category"
+    },
+    {
+     "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(4)",
+     "fg": "#c4b5fd",
+     "bg": "#0f766e",
+     "ratio": 2.96,
+     "required": 4.5,
+     "text": "Status"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

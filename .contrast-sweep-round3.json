@@ -1,0 +1,102 @@
+{
+  "sweptAt": null,
+  "total": 849,
+  "clean": 845,
+  "contrast": 4,
+  "renderErrors": 0,
+  "timeouts": 0,
+  "failures": [
+    {
+      "id": "components-appbar--disabled",
+      "title": "Components/AppBar",
+      "name": "State/Disabled",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "nav > span:nth-child(1)",
+          "fg": "#8f949b",
+          "bg": "#ffffff",
+          "ratio": 3.05,
+          "required": 4.5,
+          "text": "Dashboard"
+        },
+        {
+          "selector": "nav > span:nth-child(2)",
+          "fg": "#8f949b",
+          "bg": "#ffffff",
+          "ratio": 3.05,
+          "required": 4.5,
+          "text": "Reports"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-card-family--composed-dark",
+      "title": "Components/Card/Family",
+      "name": "Composed/Dark",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Card_metric__oQZJX[data-card-metric=\"true\"]:nth-child(1) > .Card_metricLabel___GAqL",
+          "fg": "#94a3b8",
+          "bg": "#233f43",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Paid"
+        },
+        {
+          "selector": ".Card_metric__oQZJX[data-card-metric=\"true\"]:nth-child(2) > .Card_metricLabel___GAqL",
+          "fg": "#94a3b8",
+          "bg": "#393b38",
+          "ratio": 4.41,
+          "required": 4.5,
+          "text": "Open"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-form-boundfields--dark-theme",
+      "title": "Components/Form/BoundFields",
+      "name": "Dark Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".TransferList_column___7cgs:nth-child(1) > .TransferList_column___7cgs > h3",
+          "fg": "#1f2937",
+          "bg": "#111827",
+          "ratio": 1.2,
+          "required": 4.5,
+          "text": "Available"
+        },
+        {
+          "selector": ".TransferList_column___7cgs:nth-child(3) > h3",
+          "fg": "#1f2937",
+          "bg": "#111827",
+          "ratio": 1.2,
+          "required": 4.5,
+          "text": "Assigned"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-form-boundfields--sacred-theme",
+      "title": "Components/Form/BoundFields",
+      "name": "Sacred Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "button[data-selected=\"true\"]",
+          "fg": "#ffd700",
+          "bg": "#807636",
+          "ratio": 3.28,
+          "required": 4.5,
+          "text": "Monthly"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

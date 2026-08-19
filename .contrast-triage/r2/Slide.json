@@ -1,0 +1,39 @@
+{
+ "title": "Components/Slide",
+ "stories": [
+  {
+   "id": "components-slide--all-directions",
+   "title": "Components/Slide",
+   "name": "All Directions",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Button_button__exqP_[data-component=\"Button\"]:nth-child(1) > span",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Slide up"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-slide--themes",
+   "title": "Components/Slide",
+   "name": "Themes",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Button_button__exqP_[data-component=\"Button\"][data-theme=\"light\"]:nth-child(1) > span",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "light theme"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

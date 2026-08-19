@@ -1,0 +1,158 @@
+{
+ "title": "Components/DataGrid",
+ "stories": [
+  {
+   "id": "components-datagrid--billing-information-example",
+   "title": "Components/DataGrid",
+   "name": "Billing Information Example",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--column-resize-demo",
+   "title": "Components/DataGrid",
+   "name": "Column Resize Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--custom-styling",
+   "title": "Components/DataGrid",
+   "name": "Custom Styling",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--desktop",
+   "title": "Components/DataGrid",
+   "name": "Desktop",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--inline-row-creation",
+   "title": "Components/DataGrid",
+   "name": "Inline Row Creation Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--light-theme",
+   "title": "Components/DataGrid",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--mobile",
+   "title": "Components/DataGrid",
+   "name": "Mobile (Card View)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--tablet",
+   "title": "Components/DataGrid",
+   "name": "Tablet (Card View)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-datagrid--validation-error-demo",
+   "title": "Components/DataGrid",
+   "name": "Validation Error Snackbar Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

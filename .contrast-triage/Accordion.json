@@ -1,0 +1,146 @@
+{
+ "title": "Components/Accordion",
+ "stories": [
+  {
+   "id": "components-accordion--comprehensive-showcase",
+   "title": "Components/Accordion",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Alternative Dark Theme"
+    },
+    {
+     "selector": "div:nth-child(4) > div > .Accordion_container__i2eM4[data-theme=\"light\"][data-state=\"collapsed\"]:nth-child(1) > .Accordion_summary__mWkk9[role=\"button\"]",
+     "fg": "#9333ea",
+     "bg": "#e1c6f9",
+     "ratio": 3.49,
+     "required": 4.5,
+     "text": "Custom Colors"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-accordion--controlled",
+   "title": "Components/Accordion",
+   "name": "State/Controlled",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Toggle Externally (Current: Collapsed)"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-accordion--indentation-variations",
+   "title": "Components/Accordion",
+   "name": "Level Testing/Indentation Variations",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div:nth-child(1) > div > .Accordion_container__i2eM4[data-state=\"active\"][data-theme=\"light\"] > .Accordion_link__18vIV[href=\"/\"] > .Accordion_summary__mWkk9[data-active=\"true\"][data-menu=\"true\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "Short Item"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme - Dynamic Width Expansion"
+    },
+    {
+     "selector": "div:nth-child(3) > div > .Accordion_container__i2eM4[data-state=\"active\"][data-theme=\"light\"] > .Accordion_link__18vIV[href=\"/\"] > .Accordion_summary__mWkk9[data-active=\"true\"][data-menu=\"true\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "Home"
+    },
+    {
+     "selector": "div:nth-child(6) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme with Base Indentation (30px base + 15px per level)"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-accordion--menu-vs-accordion",
+   "title": "Components/Accordion",
+   "name": "Level Testing/Menu vs Accordion",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-active=\"true\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "Home"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-accordion--six-level-navigation-test",
+   "title": "Components/Accordion",
+   "name": "Level Testing/Six Level Navigation",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Accordion_container__i2eM4[data-state=\"active\"][data-theme=\"light\"] > .Accordion_link__18vIV[href=\"/\"] > .Accordion_summary__mWkk9[data-active=\"true\"][data-menu=\"true\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "Home"
+    },
+    {
+     "selector": ".Accordion_container__i2eM4[data-state=\"active\"][data-theme=\"light\"] > .Accordion_summary__mWkk9[data-active=\"true\"][data-menu=\"true\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "Profile 1"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme Navigation"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

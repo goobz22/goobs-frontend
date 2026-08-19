@@ -148,3 +148,25 @@ export const FormBound: Story = {
   name: 'Form-bound (live gating)',
   render: () => <FormBoundDemo />,
 }
+
+/**
+ * REGRESSION PIN — SaveButton must render `type="submit"`. CustomButton's
+ * default flipped to `type="button"` (96486d1c, WCAG 3.2.2) on the stated
+ * premise that SaveButton passed its own `type="submit"` — it did not, so
+ * every consumer relying on native form submit (the documented `onSave`
+ * contract: "some forms submit via the surrounding <form>") went silent:
+ * click emitted the action.invoke diag, the form's submit never dispatched,
+ * no validation, no mutation, no error. Surfaced as 25 failing outcome specs
+ * in the ThothOS 2026-08-19 G4 sweep. SaveButtonProps `Omit<'type'>` makes
+ * the attribute un-overridable, so this assertion pins the ONLY value it can
+ * ever have.
+ */
+export const SubmitsTheForm: Story = {
+  name: 'type="submit" (regression pin)',
+  args: { valid: true, pending: false, subject: 'contract' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button', { name: /Save/ })
+    await expect(button).toHaveAttribute('type', 'submit')
+  },
+}

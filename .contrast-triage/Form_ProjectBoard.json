@@ -1,0 +1,22 @@
+{
+ "title": "Components/Form/ProjectBoard",
+ "stories": [
+  {
+   "id": "components-form-projectboard--light",
+   "title": "Components/Form/ProjectBoard",
+   "name": "Light",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".ProjectBoard_noTasks__L8Kdh",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

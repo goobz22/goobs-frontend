@@ -1,0 +1,47 @@
+{
+ "title": "Components/ComplexTextEditor",
+ "stories": [
+  {
+   "id": "components-complextexteditor--comprehensive-showcase",
+   "title": "Components/ComplexTextEditor",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div:nth-child(1) > div[data-component=\"ComplexTextEditor\"][data-filled=\"true\"] > .ComplexTextEditor_label__JGn2E",
+     "fg": "#792ec3",
+     "bg": "#111827",
+     "ratio": 2.52,
+     "required": 4.5,
+     "text": "Neon Style"
+    },
+    {
+     "selector": "div:nth-child(1) > div[data-component=\"ComplexTextEditor\"][data-filled=\"true\"] > .ComplexTextEditor_container__lQ5oc[data-theme=\"dark\"] > .ComplexTextEditor_container__lQ5oc[data-theme=\"dark\"] > .ComplexTextEditor_simpleTextarea__uMJro[placeholder=\"Enter text...\"]",
+     "fg": "#9333ea",
+     "bg": "#1e293b",
+     "ratio": 2.71,
+     "required": 4.5,
+     "text": "Futuristic editor"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-complextexteditor--helper-text-and-errors",
+   "title": "Components/ComplexTextEditor",
+   "name": "Helper Text and States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-helper-type=\"error\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Content validation failed. Please check your input."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

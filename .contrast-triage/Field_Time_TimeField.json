@@ -1,0 +1,219 @@
+{
+ "title": "Components/Field/Time/TimeField",
+ "stories": [
+  {
+   "id": "components-field-time-timefield--comprehensive-showcase",
+   "title": "Components/Field/Time/TimeField",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#field-_r_0_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "#field-_r_1_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "With Error"
+    },
+    {
+     "selector": "#field-_r_2_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "#field-helper-_r_2_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Too late"
+    },
+    {
+     "selector": "#field-_r_3_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "#field-_r_4_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "#field-_r_5_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_7_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Empty"
+    },
+    {
+     "selector": "#field-_r_7_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "label[for=\"field-_r_8_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "With Value"
+    },
+    {
+     "selector": "#field-_r_8_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-time-timefield--dark-theme",
+   "title": "Components/Field/Time/TimeField",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Start Time"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-time-timefield--light-theme",
+   "title": "Components/Field/Time/TimeField",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Start Time"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-time-timefield--required",
+   "title": "Components/Field/Time/TimeField",
+   "name": "Required",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Departure Time *"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-time-timefield--with-helper-text",
+   "title": "Components/Field/Time/TimeField",
+   "name": "With Helper Text",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Meeting Time"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Choose a time within business hours"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-time-timefield--with-value",
+   "title": "Components/Field/Time/TimeField",
+   "name": "With Value",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Appointment"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

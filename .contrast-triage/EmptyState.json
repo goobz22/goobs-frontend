@@ -1,0 +1,22 @@
+{
+ "title": "Components/EmptyState",
+ "stories": [
+  {
+   "id": "components-emptystate--light",
+   "title": "Components/EmptyState",
+   "name": "Light",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".EmptyState_emptyStateDescription__oLcte",
+     "fg": "#374151",
+     "bg": "#979797",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Create your first category to organize products."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

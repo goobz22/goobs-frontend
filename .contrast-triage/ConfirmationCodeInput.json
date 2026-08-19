@@ -1,0 +1,39 @@
+{
+ "title": "Components/ConfirmationCodeInput",
+ "stories": [
+  {
+   "id": "components-confirmationcodeinput--dark-success-state",
+   "title": "Components/ConfirmationCodeInput",
+   "name": "Dark Success State",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#000000",
+     "bg": "#0f172a",
+     "ratio": 1.17,
+     "required": 3,
+     "text": "Verification Successful"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-confirmationcodeinput--sacred-success-state",
+   "title": "Components/ConfirmationCodeInput",
+   "name": "Sacred Success State",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#000000",
+     "bg": "#1c1917",
+     "ratio": 1.2,
+     "required": 3,
+     "text": "Verification Successful"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

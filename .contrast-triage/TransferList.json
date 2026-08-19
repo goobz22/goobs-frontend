@@ -1,0 +1,15 @@
+{
+ "title": "Components/TransferList",
+ "stories": [
+  {
+   "id": "components-transferlist--interactive-demo",
+   "title": "Components/TransferList",
+   "name": "Interactive Demo",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "AssertionError: expected null not to be null // Object.is equality\n    at play (http://127.0.0.1:58096/components-TransferList-TransferList-stories.9fd62133.iframe.bundle.js:1:8155)\n    at async StoryRender.runPhase (http://127.0.0.1:58096/sb-preview/runtime.js:33925:21)\n    at async StoryRender.render (http://127.0.0.1:58096/sb-preview/runtime.js:34049:14)"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "title": "Components/Field/Dropdown/SearchableHistory",
+ "stories": [
+  {
+   "id": "components-field-dropdown-searchablehistory--error-state",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "Error State",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Navigate"
+    },
+    {
+     "selector": "#searchable-history-_r_0_-helper",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "A destination is required."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

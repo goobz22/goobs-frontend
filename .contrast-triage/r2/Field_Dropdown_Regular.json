@@ -1,0 +1,42 @@
+{
+ "title": "Components/Field/Dropdown/Regular",
+ "stories": [
+  {
+   "id": "components-field-dropdown-regular--complex-options",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Complex Options with Attributes",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "TestingLibraryElementError: Unable to find an element with the text: /React/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.\n\nIgnored nodes: comments, script, style\n<div\n  id=\"storybook-root\"\n>\n  <div\n    data-theme=\"sacred\"\n  >\n    <div\n      style=\"width: 400px; padding: 2rem;\"\n "
+   ]
+  },
+  {
+   "id": "components-field-dropdown-regular--comprehensive-showcase",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_9_\"]",
+     "fg": "#a95cee",
+     "bg": "#ffffff",
+     "ratio": 3.85,
+     "required": 4.5,
+     "text": "Purple Style"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--interaction-test",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Interaction Test",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "TestingLibraryElementError: Value \"typescript\" not found in options\n\nIgnored nodes: comments, script, style\n<button\n  aria-controls=\"field-_r_0_-listbox\"\n  aria-expanded=\"false\"\n  aria-haspopup=\"listbox\"\n  aria-label=\"Test Dropdown\"\n  class=\"Dropdown_button__ceak2\"\n  data-action=\"open\"\n  id=\"field-_r_0_\"\n  role=\"combobox\"\n  type=\"button\"\n>\n  <span>\n    Select...\n  </span>\n  <span\n    aria-hidden=\""
+   ]
+  }
+ ]
+}

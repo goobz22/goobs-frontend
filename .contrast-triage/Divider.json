@@ -1,0 +1,96 @@
+{
+ "title": "Components/Divider",
+ "stories": [
+  {
+   "id": "components-divider--disabled-states",
+   "title": "Components/Divider",
+   "name": "State/Disabled",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div > div > div:nth-child(1) > span:nth-child(1)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Section A"
+    },
+    {
+     "selector": "div:nth-child(1) > span:nth-child(3)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Section B"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-divider--spacing-examples",
+   "title": "Components/Divider",
+   "name": "Styling/Spacing Examples",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div:nth-child(1) > p:nth-child(1)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Above content"
+    },
+    {
+     "selector": "div:nth-child(1) > p:nth-child(3)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Below content"
+    },
+    {
+     "selector": "div:nth-child(2) > p:nth-child(1)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Left"
+    },
+    {
+     "selector": "div:nth-child(2) > p:nth-child(3)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Right"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-divider--vertical-orientation",
+   "title": "Components/Divider",
+   "name": "Orientation/Vertical",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > span:nth-child(1)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Left content"
+    },
+    {
+     "selector": "span:nth-child(3)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Right content"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

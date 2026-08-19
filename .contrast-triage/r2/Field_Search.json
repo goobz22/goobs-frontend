@@ -1,0 +1,30 @@
+{
+ "title": "Components/Field/Search",
+ "stories": [
+  {
+   "id": "components-field-search--error-states",
+   "title": "Components/Field/Search",
+   "name": "Error States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#b91c1c",
+     "bg": "#0e0e0e",
+     "ratio": 2.98,
+     "required": 4.5,
+     "text": "Search Query"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#b91c1c",
+     "bg": "#0e0e0e",
+     "ratio": 2.98,
+     "required": 4.5,
+     "text": "Search contains invalid characters."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

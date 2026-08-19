@@ -1,0 +1,195 @@
+{
+ "title": "Components/Field/Slider",
+ "stories": [
+  {
+   "id": "components-field-slider--comprehensive-showcase",
+   "title": "Components/Field/Slider",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "With Error"
+    },
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Too low"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_6_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Basic"
+    },
+    {
+     "selector": "label[for=\"field-_r_7_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "With Helper"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-slider--custom-range",
+   "title": "Components/Field/Slider",
+   "name": "Custom Range",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Temperature (°C)"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Range from -20 to 40"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Percentage"
+    },
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Fine-grained 0.05 steps"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Rating"
+    },
+    {
+     "selector": "#field-helper-_r_2_",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Discrete 1-5 steps"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-slider--dark-theme",
+   "title": "Components/Field/Slider",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Brightness"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-slider--light-theme",
+   "title": "Components/Field/Slider",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Volume"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-slider--required",
+   "title": "Components/Field/Slider",
+   "name": "Required",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Confidence Level *"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-slider--with-helper-text",
+   "title": "Components/Field/Slider",
+   "name": "With Helper Text",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Opacity"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Drag to adjust the layer opacity"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

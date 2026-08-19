@@ -1,0 +1,30 @@
+{
+ "title": "Components/Zoom",
+ "stories": [
+  {
+   "id": "components-zoom--dark-theme",
+   "title": "Components/Zoom",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Typography_h6__rqHkX",
+     "fg": "#e2e8f0",
+     "bg": "#ffffff",
+     "ratio": 1.23,
+     "required": 4.5,
+     "text": "Dark Theme Zoom"
+    },
+    {
+     "selector": ".Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]:nth-child(2)",
+     "fg": "#e2e8f0",
+     "bg": "#ffffff",
+     "ratio": 1.23,
+     "required": 4.5,
+     "text": "Scale transition on a dark surface."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

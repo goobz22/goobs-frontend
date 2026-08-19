@@ -1,0 +1,167 @@
+{
+ "title": "Components/Form/BoundFields",
+ "stories": [
+  {
+   "id": "components-form-boundfields--dark-theme",
+   "title": "Components/Form/BoundFields",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".TransferList_column___7cgs:nth-child(1) > .TransferList_column___7cgs > h3",
+     "fg": "#1f2937",
+     "bg": "#404551",
+     "ratio": 1.52,
+     "required": 4.5,
+     "text": "Available"
+    },
+    {
+     "selector": ".TransferList_column___7cgs:nth-child(3) > h3",
+     "fg": "#1f2937",
+     "bg": "#404551",
+     "ratio": 1.52,
+     "required": 4.5,
+     "text": "Assigned"
+    },
+    {
+     "selector": ".ComplexTextEditor_label__JGn2E",
+     "fg": "#64748b",
+     "bg": "#404551",
+     "ratio": 2.01,
+     "required": 4.5,
+     "text": "Meeting notes"
+    },
+    {
+     "selector": "button[data-selected=\"true\"]",
+     "fg": "#60a5fa",
+     "bg": "#3f5883",
+     "ratio": 2.81,
+     "required": 4.5,
+     "text": "Monthly"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-form-boundfields--sacred-theme",
+   "title": "Components/Form/BoundFields",
+   "name": "Sacred Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "form > div > span:nth-child(1)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Plan (Select)"
+    },
+    {
+     "selector": "form > div > span:nth-child(3)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Notifications (Switch)"
+    },
+    {
+     "selector": ".Switch_rightLabel__wD3U1",
+     "fg": "#ffd700",
+     "bg": "#6a6758",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Enable notifications"
+    },
+    {
+     "selector": "span:nth-child(5)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Skills (TransferList)"
+    },
+    {
+     "selector": "span:nth-child(7)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Verification code (ConfirmationCodeInput)"
+    },
+    {
+     "selector": "span:nth-child(9)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Meeting notes (ComplexTextEditor)"
+    },
+    {
+     "selector": ".ComplexTextEditor_label__JGn2E",
+     "fg": "#f0cc09",
+     "bg": "#6d6956",
+     "ratio": 3.5,
+     "required": 4.5,
+     "text": "Meeting notes"
+    },
+    {
+     "selector": "#contactMethod-label",
+     "fg": "#ffd700",
+     "bg": "#726d53",
+     "ratio": 3.71,
+     "required": 4.5,
+     "text": "Preferred contact method (RadioGroup)"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#efcb09",
+     "bg": "#5e5e5e",
+     "ratio": 4.08,
+     "required": 4.5,
+     "text": "Email"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#efcb09",
+     "bg": "#5e5e5e",
+     "ratio": 4.08,
+     "required": 4.5,
+     "text": "Phone"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#efcb09",
+     "bg": "#5e5e5e",
+     "ratio": 4.08,
+     "required": 4.5,
+     "text": "Portal message"
+    },
+    {
+     "selector": "span:nth-child(12)",
+     "fg": "#bfbfbf",
+     "bg": "#5e5e5e",
+     "ratio": 3.52,
+     "required": 4.5,
+     "text": "Billing cycle (ToggleButtonGroup)"
+    },
+    {
+     "selector": "button[data-selected=\"true\"]",
+     "fg": "#ffd700",
+     "bg": "#94873f",
+     "ratio": 2.58,
+     "required": 4.5,
+     "text": "Monthly"
+    },
+    {
+     "selector": "button[data-last=\"true\"]",
+     "fg": "#e4c310",
+     "bg": "#67645a",
+     "ratio": 3.41,
+     "required": 4.5,
+     "text": "Annual"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "title": "Components/ProgressBar",
+ "stories": [
+  {
+   "id": "components-progressbar--file-upload-simulation",
+   "title": "Components/ProgressBar",
+   "name": "File Upload Simulation",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Restart Upload"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,1802 @@
+{
+  "sweptAt": null,
+  "total": 849,
+  "clean": 787,
+  "contrast": 60,
+  "renderErrors": 2,
+  "timeouts": 0,
+  "failures": [
+    {
+      "id": "components-appbar--disabled",
+      "title": "Components/AppBar",
+      "name": "State/Disabled",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "nav > span:nth-child(1)",
+          "fg": "#8f949b",
+          "bg": "#ffffff",
+          "ratio": 3.05,
+          "required": 4.5,
+          "text": "Dashboard"
+        },
+        {
+          "selector": "nav > span:nth-child(2)",
+          "fg": "#8f949b",
+          "bg": "#ffffff",
+          "ratio": 3.05,
+          "required": 4.5,
+          "text": "Reports"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-avatar--disabled-states",
+      "title": "Components/Avatar",
+      "name": "State/Disabled",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div[data-theme=\"light\"]",
+          "fg": "#878d97",
+          "bg": "#f6f6f6",
+          "ratio": 3.09,
+          "required": 4.5,
+          "text": "MG"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-badge--bottom-left",
+      "title": "Components/Badge",
+      "name": "Position/Bottom Left",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Badge_badge__ohf_O",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "12"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-badge--custom-colors",
+      "title": "Components/Badge",
+      "name": "Colors/Custom Colors",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Badge_badge__ohf_O",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": "99+"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-badge--multiple-badges",
+      "title": "Components/Badge",
+      "name": "Composition/Multiple Badges",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Badge_container__G_V4V[data-component=\"Badge\"]:nth-child(2) > .Badge_badge__ohf_O[data-theme=\"light\"][data-position=\"top-right\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": "12"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-badge--offset-variants",
+      "title": "Components/Badge",
+      "name": "Offset/Offset Variants",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Badge_container__G_V4V[data-component=\"Badge\"]:nth-child(3) > .Badge_badge__ohf_O[data-theme=\"light\"][data-position=\"top-right\"]",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "15"
+        },
+        {
+          "selector": ".Badge_container__G_V4V[data-component=\"Badge\"]:nth-child(4) > .Badge_badge__ohf_O[data-theme=\"light\"][data-position=\"top-right\"]",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "25"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--dark-theme",
+      "title": "Components/BigCalendar",
+      "name": "Month View (Dark)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "button[data-selected=\"true\"] > .BigCalendar_viewLabel__SbeFA",
+          "fg": "#60a5fa",
+          "bg": "#274473",
+          "ratio": 3.82,
+          "required": 4.5,
+          "text": "Month"
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(16) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj:nth-child(1) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".Tooltip_container__yOcXj:nth-child(2) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(17) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(19) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(23) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"dark\"]",
+          "fg": "#ffffff",
+          "bg": "#ef4444",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--day-view",
+      "title": "Components/BigCalendar",
+      "name": "Day View",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(3) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(5) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(6) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--default",
+      "title": "Components/BigCalendar",
+      "name": "Month View (Light)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(16) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj:nth-child(1) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".Tooltip_container__yOcXj:nth-child(2) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(17) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(19) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(23) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#ef4444",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--no-toolbar",
+      "title": "Components/BigCalendar",
+      "name": "Without Toolbar",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(16) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj:nth-child(1) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".Tooltip_container__yOcXj:nth-child(2) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(17) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(19) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(23) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#ef4444",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--sacred-theme",
+      "title": "Components/BigCalendar",
+      "name": "Month View (Sacred)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(16) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj:nth-child(1) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"sacred\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".Tooltip_container__yOcXj:nth-child(2) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"sacred\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(17) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"sacred\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(19) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"sacred\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(23) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"sacred\"]",
+          "fg": "#ffffff",
+          "bg": "#ef4444",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--week-view",
+      "title": "Components/BigCalendar",
+      "name": "Week View",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(3) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(5) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(6) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_weekDayColumn__1Bx3Y:nth-child(3) > .BigCalendar_hourCell__Ug8O7:nth-child(8) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_weekDayColumn__1Bx3Y:nth-child(3) > .BigCalendar_hourCell__Ug8O7:nth-child(9) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(7) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_weekDayColumn__1Bx3Y:nth-child(5) > .BigCalendar_hourCell__Ug8O7:nth-child(8) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_weekDayColumn__1Bx3Y:nth-child(5) > .BigCalendar_hourCell__Ug8O7:nth-child(9) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_hourCell__Ug8O7:nth-child(10) > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-bigcalendar--with-filters",
+      "title": "Components/BigCalendar",
+      "name": "With Filters Panel",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Typography_cinzelH5__Rq4wX",
+          "fg": "#ffd700",
+          "bg": "#a5a087",
+          "ratio": 1.87,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#ebcb1f",
+          "bg": "#999999",
+          "ratio": 1.77,
+          "required": 4.5,
+          "text": "Start Date"
+        },
+        {
+          "selector": "label[for=\"field-_r_1_\"]",
+          "fg": "#ebcb1f",
+          "bg": "#999999",
+          "ratio": 1.77,
+          "required": 4.5,
+          "text": "End Date"
+        },
+        {
+          "selector": "label[for=\"field-_r_2_\"]",
+          "fg": "#ebcb1f",
+          "bg": "#999999",
+          "ratio": 1.77,
+          "required": 4.5,
+          "text": "City"
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(16) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj:nth-child(1) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".Tooltip_container__yOcXj:nth-child(2) > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#22c55e",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(17) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#f59e0b",
+          "ratio": 2.14,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(19) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#8b5cf6",
+          "ratio": 4.23,
+          "required": 4.5,
+          "text": ""
+        },
+        {
+          "selector": ".BigCalendar_cell__la7Wu:nth-child(23) > .BigCalendar_cellEventContainer__KDQEp > .Tooltip_container__yOcXj > .BigCalendar_event__zKW8n.BigCalendar_eventClickable__uBy97.BigCalendar_eventCompact__G0Vz7 > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+          "fg": "#ffffff",
+          "bg": "#ef4444",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-card-family--composed-dark",
+      "title": "Components/Card/Family",
+      "name": "Composed/Dark",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Card_statCell__WQcxp[data-card-stat-cell=\"true\"]:nth-child(2) > .Card_statValue__xFPZq",
+          "fg": "#ef4444",
+          "bg": "#1e293b",
+          "ratio": 3.88,
+          "required": 4.5,
+          "text": "$3,210"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-card-family--composed-light",
+      "title": "Components/Card/Family",
+      "name": "Composed/Light",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Card_statCell__WQcxp[data-card-stat-cell=\"true\"]:nth-child(2) > .Card_statValue__xFPZq",
+          "fg": "#ef4444",
+          "bg": "#ffffff",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": "$3,210"
+        },
+        {
+          "selector": ".Card_metric__oQZJX[data-card-metric=\"true\"]:nth-child(1) > .Card_metricValue__vZgzn",
+          "fg": "#22c55e",
+          "bg": "#e4f8ec",
+          "ratio": 2.05,
+          "required": 4.5,
+          "text": "34"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-complextexteditor--comprehensive-showcase",
+      "title": "Components/ComplexTextEditor",
+      "name": "Comprehensive Showcase",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div:nth-child(1) > div[data-component=\"ComplexTextEditor\"][data-filled=\"true\"] > .ComplexTextEditor_label__JGn2E",
+          "fg": "#792ec3",
+          "bg": "#111827",
+          "ratio": 2.52,
+          "required": 4.5,
+          "text": "Neon Style"
+        },
+        {
+          "selector": "div:nth-child(1) > div[data-component=\"ComplexTextEditor\"][data-filled=\"true\"] > .ComplexTextEditor_container__lQ5oc[data-theme=\"dark\"] > .ComplexTextEditor_container__lQ5oc[data-theme=\"dark\"] > .ComplexTextEditor_simpleTextarea__uMJro[placeholder=\"Enter text...\"]",
+          "fg": "#9333ea",
+          "bg": "#1e293b",
+          "ratio": 2.71,
+          "required": 4.5,
+          "text": "Futuristic editor"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-complextexteditor--helper-text-and-errors",
+      "title": "Components/ComplexTextEditor",
+      "name": "Helper Text and States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div[data-helper-type=\"error\"]",
+          "fg": "#ef4444",
+          "bg": "#ffffff",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": "Content validation failed. Please check your input."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--billing-information-example",
+      "title": "Components/DataGrid",
+      "name": "Billing Information Example",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--column-resize-demo",
+      "title": "Components/DataGrid",
+      "name": "Column Resize Demo",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--custom-styling",
+      "title": "Components/DataGrid",
+      "name": "Custom Styling",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--desktop",
+      "title": "Components/DataGrid",
+      "name": "Desktop",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--inline-row-creation",
+      "title": "Components/DataGrid",
+      "name": "Inline Row Creation Demo",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--light-theme",
+      "title": "Components/DataGrid",
+      "name": "Light Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--mobile",
+      "title": "Components/DataGrid",
+      "name": "Mobile (Card View)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--tablet",
+      "title": "Components/DataGrid",
+      "name": "Tablet (Card View)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-datagrid--validation-error-demo",
+      "title": "Components/DataGrid",
+      "name": "Validation Error Snackbar Demo",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-fade--themes",
+      "title": "Components/Fade",
+      "name": "Themes",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Button_button__exqP_[data-component=\"Button\"][data-theme=\"light\"]:nth-child(1) > span",
+          "fg": "#ffffff",
+          "bg": "#3b82f6",
+          "ratio": 3.67,
+          "required": 4.5,
+          "text": "light theme"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-dropdown-regular--complex-options",
+      "title": "Components/Field/Dropdown/Regular",
+      "name": "Complex Options with Attributes",
+      "status": "render-error",
+      "violations": [],
+      "errors": [
+        "TestingLibraryElementError: Unable to find an element with the text: /React/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.\n\nIgnored nodes: comments, script, style\n<div\n  id=\"storybook-root\"\n>\n  <div\n    data-theme=\"sacred\"\n  >\n    <div\n      style=\"width: 400px; padding: 2rem;\"\n "
+      ]
+    },
+    {
+      "id": "components-field-dropdown-regular--comprehensive-showcase",
+      "title": "Components/Field/Dropdown/Regular",
+      "name": "Comprehensive Showcase",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_9_\"]",
+          "fg": "#a95cee",
+          "bg": "#ffffff",
+          "ratio": 3.85,
+          "required": 4.5,
+          "text": "Purple Style"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-dropdown-regular--interaction-test",
+      "title": "Components/Field/Dropdown/Regular",
+      "name": "Interaction Test",
+      "status": "render-error",
+      "violations": [],
+      "errors": [
+        "TestingLibraryElementError: Value \"typescript\" not found in options\n\nIgnored nodes: comments, script, style\n<button\n  aria-controls=\"field-_r_0_-listbox\"\n  aria-expanded=\"false\"\n  aria-haspopup=\"listbox\"\n  aria-label=\"Test Dropdown\"\n  class=\"Dropdown_button__ceak2\"\n  data-action=\"open\"\n  id=\"field-_r_0_\"\n  role=\"combobox\"\n  type=\"button\"\n>\n  <span>\n    Select...\n  </span>\n  <span\n    aria-hidden=\""
+      ]
+    },
+    {
+      "id": "components-field-dropdown-searchablehistory--error-state",
+      "title": "Components/Field/Dropdown/SearchableHistory",
+      "name": "Error State",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label",
+          "fg": "#ef4444",
+          "bg": "#ffffff",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": "Navigate"
+        },
+        {
+          "selector": "#searchable-history-_r_0_-helper",
+          "fg": "#ef4444",
+          "bg": "#ffffff",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": "A destination is required."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-dropdown-searchablesimple--error-states",
+      "title": "Components/Field/Dropdown/SearchableSimple",
+      "name": "Error States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Select Option"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Please select a valid option."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-percentage--error-states",
+      "title": "Components/Field/Percentage",
+      "name": "Error States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Percentage"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Percentage cannot exceed 100%."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-phonenumber--error-states",
+      "title": "Components/Field/PhoneNumber",
+      "name": "Error States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Phone Number"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Please enter a valid phone number."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-search--error-states",
+      "title": "Components/Field/Search",
+      "name": "Error States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Search Query"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Search contains invalid characters."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-slider--with-error",
+      "title": "Components/Field/Slider",
+      "name": "With Error",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Threshold"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Value must be at least 25"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-text--error-states",
+      "title": "Components/Field/Text",
+      "name": "Error States",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Email Address"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Please enter a valid email address."
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-field-time-timefield--with-error",
+      "title": "Components/Field/Time/TimeField",
+      "name": "With Error",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "label[for=\"field-_r_0_\"]",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Start Time"
+        },
+        {
+          "selector": "#field-helper-_r_0_",
+          "fg": "#b91c1c",
+          "bg": "#0e0e0e",
+          "ratio": 2.98,
+          "required": 4.5,
+          "text": "Outside allowed hours"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-filedropzone--document-variant",
+      "title": "Components/FileDropzone",
+      "name": "Document Variant",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "#_r_0_-hint",
+          "fg": "#846e26",
+          "bg": "#221e12",
+          "ratio": 3.35,
+          "required": 4.5,
+          "text": "Drag &amp; drop or click to browse"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-filedropzone--form-bound-image",
+      "title": "Components/FileDropzone",
+      "name": "Form Bound Image",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "#_r_0_-hint",
+          "fg": "#846e26",
+          "bg": "#221e12",
+          "ratio": 3.35,
+          "required": 4.5,
+          "text": "Drag &amp; drop or click to browse"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-filedropzone--with-error",
+      "title": "Components/FileDropzone",
+      "name": "With Error",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "#_r_0_-hint",
+          "fg": "#846e26",
+          "bg": "#221e12",
+          "ratio": 3.35,
+          "required": 4.5,
+          "text": "Drag &amp; drop or click to browse"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-form-boundfields--dark-theme",
+      "title": "Components/Form/BoundFields",
+      "name": "Dark Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "form > div > span:nth-child(1)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Plan (Select)"
+        },
+        {
+          "selector": "div > span:nth-child(3)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Notifications (Switch)"
+        },
+        {
+          "selector": ".Switch_rightLabel__wD3U1",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Enable notifications"
+        },
+        {
+          "selector": "span:nth-child(5)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Skills (TransferList)"
+        },
+        {
+          "selector": "span:nth-child(7)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Verification code (ConfirmationCodeInput)"
+        },
+        {
+          "selector": "span:nth-child(9)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Meeting notes (ComplexTextEditor)"
+        },
+        {
+          "selector": ".ComplexTextEditor_label__JGn2E",
+          "fg": "#94a3b8",
+          "bg": "#ffffff",
+          "ratio": 2.56,
+          "required": 4.5,
+          "text": "Meeting notes"
+        },
+        {
+          "selector": "#contactMethod-label",
+          "fg": "#e2e8f0",
+          "bg": "#ffffff",
+          "ratio": 1.23,
+          "required": 4.5,
+          "text": "Preferred contact method (RadioGroup)"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Email"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Phone"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Portal message"
+        },
+        {
+          "selector": "span:nth-child(12)",
+          "fg": "#cbd5e1",
+          "bg": "#ffffff",
+          "ratio": 1.48,
+          "required": 4.5,
+          "text": "Billing cycle (ToggleButtonGroup)"
+        },
+        {
+          "selector": "button[data-selected=\"true\"]",
+          "fg": "#60a5fa",
+          "bg": "#c4dafc",
+          "ratio": 1.78,
+          "required": 4.5,
+          "text": "Monthly"
+        },
+        {
+          "selector": "button[data-last=\"true\"]",
+          "fg": "#cbd5e1",
+          "bg": "#c9ccd0",
+          "ratio": 1.08,
+          "required": 4.5,
+          "text": "Annual"
+        },
+        {
+          "selector": ".Checkbox_labelText__Z8vEy",
+          "fg": "#e2e8f0",
+          "bg": "#ffffff",
+          "ratio": 1.23,
+          "required": 4.5,
+          "text": "I accept the terms"
+        },
+        {
+          "selector": "pre[data-testid=\"engine-values\"]",
+          "fg": "#e2e8f0",
+          "bg": "#ffffff",
+          "ratio": 1.23,
+          "required": 4.5,
+          "text": ""
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-form-boundfields--sacred-theme",
+      "title": "Components/Form/BoundFields",
+      "name": "Sacred Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "select",
+          "fg": "#f5f5f5",
+          "bg": "#999999",
+          "ratio": 2.61,
+          "required": 4.5,
+          "text": "Starter Pro Enterprise"
+        },
+        {
+          "selector": ".Switch_rightLabel__wD3U1",
+          "fg": "#ffd700",
+          "bg": "#fffcec",
+          "ratio": 1.36,
+          "required": 4.5,
+          "text": "Enable notifications"
+        },
+        {
+          "selector": ".ComplexTextEditor_label__JGn2E",
+          "fg": "#ffdb17",
+          "bg": "#fffbe8",
+          "ratio": 1.31,
+          "required": 4.5,
+          "text": "Meeting notes"
+        },
+        {
+          "selector": "#contactMethod-label",
+          "fg": "#ffd700",
+          "bg": "#fffae0",
+          "ratio": 1.33,
+          "required": 4.5,
+          "text": "Preferred contact method (RadioGroup)"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+          "fg": "#ffdb19",
+          "bg": "#ffffff",
+          "ratio": 1.36,
+          "required": 4.5,
+          "text": "Email"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+          "fg": "#ffdb19",
+          "bg": "#ffffff",
+          "ratio": 1.36,
+          "required": 4.5,
+          "text": "Phone"
+        },
+        {
+          "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+          "fg": "#ffdb19",
+          "bg": "#ffffff",
+          "ratio": 1.36,
+          "required": 4.5,
+          "text": "Portal message"
+        },
+        {
+          "selector": "button[data-selected=\"true\"]",
+          "fg": "#ffd700",
+          "bg": "#fff2a9",
+          "ratio": 1.23,
+          "required": 4.5,
+          "text": "Monthly"
+        },
+        {
+          "selector": "button[data-last=\"true\"]",
+          "fg": "#ffde2b",
+          "bg": "#fffdf2",
+          "ratio": 1.3,
+          "required": 4.5,
+          "text": "Annual"
+        },
+        {
+          "selector": ".Button_button__exqP_ > span",
+          "fg": "#f5f5f5",
+          "bg": "#999999",
+          "ratio": 2.61,
+          "required": 4.5,
+          "text": "Save"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-form-datagrid--light",
+      "title": "Components/Form/DataGrid",
+      "name": "Light",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+          "fg": "#22c55e",
+          "bg": "#ffffff",
+          "ratio": 2.27,
+          "required": 4.5,
+          "text": "Add"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-pagination--dark-theme",
+      "title": "Components/Pagination",
+      "name": "Themes/Dark Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "button[aria-label=\"Go to page 10\"]",
+          "fg": "#020305",
+          "bg": "#111827",
+          "ratio": 1.16,
+          "required": 4.5,
+          "text": "10"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-progressbar--file-upload-simulation",
+      "title": "Components/ProgressBar",
+      "name": "File Upload Simulation",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button",
+          "fg": "#ffffff",
+          "bg": "#3b82f6",
+          "ratio": 3.67,
+          "required": 4.5,
+          "text": "Restart Upload"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-projectboard-inlineforms--add-task-validation-error",
+      "title": "Components/ProjectBoard/InlineForms",
+      "name": "Add Task Validation Error",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".AddTask_validationError__QIsza",
+          "fg": "#dc2626",
+          "bg": "#fef2f2",
+          "ratio": 4.41,
+          "required": 4.5,
+          "text": "Please fill in all required fields (Title, Description, Severity, Status, Produc"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-projectboard-inlineforms--show-task-light",
+      "title": "Components/ProjectBoard/InlineForms",
+      "name": "Show Task Light",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".ShowTask_deleteButton__JiXPE",
+          "fg": "#dc2626",
+          "bg": "#fef2f2",
+          "ratio": 4.41,
+          "required": 4.5,
+          "text": "Delete"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-qrcode--no-value",
+      "title": "Components/QRCode",
+      "name": "No Value (Error State)",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".QRCode_errorText__JXQVE",
+          "fg": "#ef4444",
+          "bg": "#ffffff",
+          "ratio": 3.76,
+          "required": 4.5,
+          "text": "Error: No QR code value provided"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-slide--all-directions",
+      "title": "Components/Slide",
+      "name": "All Directions",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Button_button__exqP_[data-component=\"Button\"]:nth-child(1) > span",
+          "fg": "#ffffff",
+          "bg": "#3b82f6",
+          "ratio": 3.67,
+          "required": 4.5,
+          "text": "Slide up"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-slide--themes",
+      "title": "Components/Slide",
+      "name": "Themes",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Button_button__exqP_[data-component=\"Button\"][data-theme=\"light\"]:nth-child(1) > span",
+          "fg": "#ffffff",
+          "bg": "#3b82f6",
+          "ratio": 3.67,
+          "required": 4.5,
+          "text": "light theme"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-snackbar--all-severities-dark",
+      "title": "Components/Snackbar",
+      "name": "Severity/All Severities - Dark Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button:nth-child(1)",
+          "fg": "#ffffff",
+          "bg": "#4caf50",
+          "ratio": 2.77,
+          "required": 4.5,
+          "text": "Show Success"
+        },
+        {
+          "selector": "button:nth-child(2)",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "Show Error"
+        },
+        {
+          "selector": "div:nth-child(1) > div > button:nth-child(3)",
+          "fg": "#ffffff",
+          "bg": "#ff9800",
+          "ratio": 2.15,
+          "required": 4.5,
+          "text": "Show Warning"
+        },
+        {
+          "selector": "button:nth-child(4)",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": "Show Info"
+        },
+        {
+          "selector": ".Alert_message__GCb8U",
+          "fg": "#15803d",
+          "bg": "#dae6e0",
+          "ratio": 3.91,
+          "required": 4.5,
+          "text": "Operation completed successfully!"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-snackbar--all-severities-light",
+      "title": "Components/Snackbar",
+      "name": "Severity/All Severities - Light Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button:nth-child(1)",
+          "fg": "#ffffff",
+          "bg": "#4caf50",
+          "ratio": 2.77,
+          "required": 4.5,
+          "text": "Show Success"
+        },
+        {
+          "selector": "button:nth-child(2)",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "Show Error"
+        },
+        {
+          "selector": "div:nth-child(1) > div > button:nth-child(3)",
+          "fg": "#ffffff",
+          "bg": "#ff9800",
+          "ratio": 2.15,
+          "required": 4.5,
+          "text": "Show Warning"
+        },
+        {
+          "selector": "button:nth-child(4)",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": "Show Info"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-snackbar--all-severities-sacred",
+      "title": "Components/Snackbar",
+      "name": "Severity/All Severities - Sacred Theme",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button:nth-child(1)",
+          "fg": "#ffffff",
+          "bg": "#4caf50",
+          "ratio": 2.77,
+          "required": 4.5,
+          "text": "Show Success"
+        },
+        {
+          "selector": "button:nth-child(2)",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "Show Error"
+        },
+        {
+          "selector": "div:nth-child(1) > div > button:nth-child(3)",
+          "fg": "#ffffff",
+          "bg": "#ff9800",
+          "ratio": 2.15,
+          "required": 4.5,
+          "text": "Show Warning"
+        },
+        {
+          "selector": "button:nth-child(4)",
+          "fg": "#ffffff",
+          "bg": "#2196f3",
+          "ratio": 3.12,
+          "required": 4.5,
+          "text": "Show Info"
+        },
+        {
+          "selector": ".Alert_message__GCb8U",
+          "fg": "#15803d",
+          "bg": "#dae6e0",
+          "ratio": 3.91,
+          "required": 4.5,
+          "text": "Operation completed successfully!"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-snackbar--file-upload",
+      "title": "Components/Snackbar",
+      "name": "Use Cases/File Upload",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button:nth-child(1)",
+          "fg": "#ffffff",
+          "bg": "#4caf50",
+          "ratio": 2.77,
+          "required": 4.5,
+          "text": "Upload Success"
+        },
+        {
+          "selector": "button:nth-child(2)",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "Upload Error"
+        },
+        {
+          "selector": "button:nth-child(3)",
+          "fg": "#ffffff",
+          "bg": "#ff9800",
+          "ratio": 2.15,
+          "required": 4.5,
+          "text": "Upload Warning"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-snackbar--form-submission",
+      "title": "Components/Snackbar",
+      "name": "Use Cases/Form Submission",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div > button:nth-child(1)",
+          "fg": "#ffffff",
+          "bg": "#4caf50",
+          "ratio": 2.77,
+          "required": 4.5,
+          "text": "Submit Successfully"
+        },
+        {
+          "selector": "button:nth-child(2)",
+          "fg": "#ffffff",
+          "bg": "#f44336",
+          "ratio": 3.68,
+          "required": 4.5,
+          "text": "Submit with Error"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-table--style-overrides",
+      "title": "Components/Table",
+      "name": "Style Overrides",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(1)",
+          "fg": "#c4b5fd",
+          "bg": "#0f766e",
+          "ratio": 2.96,
+          "required": 4.5,
+          "text": "ID"
+        },
+        {
+          "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(2)",
+          "fg": "#c4b5fd",
+          "bg": "#0f766e",
+          "ratio": 2.96,
+          "required": 4.5,
+          "text": "Name"
+        },
+        {
+          "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(3)",
+          "fg": "#c4b5fd",
+          "bg": "#0f766e",
+          "ratio": 2.96,
+          "required": 4.5,
+          "text": "Category"
+        },
+        {
+          "selector": "tr[data-hover=\"false\"] > .Table_cell__KR3T1:nth-child(4)",
+          "fg": "#c4b5fd",
+          "bg": "#0f766e",
+          "ratio": 2.96,
+          "required": 4.5,
+          "text": "Status"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-tooltip--open-light",
+      "title": "Components/Tooltip",
+      "name": "Open/Light Bubble",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Button_button__exqP_ > span",
+          "fg": "#f5f5f5",
+          "bg": "#999999",
+          "ratio": 2.61,
+          "required": 4.5,
+          "text": "Anchor"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-treeview--comprehensive-showcase",
+      "title": "Components/TreeView",
+      "name": "Comprehensive Showcase",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div:nth-child(2) > h3",
+          "fg": "#9ca3af",
+          "bg": "#ffffff",
+          "ratio": 2.53,
+          "required": 3,
+          "text": "Dark Theme"
+        },
+        {
+          "selector": "div[data-testid=\"tree-item-frontend\"] > .TreeView_label__OUAvC[data-theme=\"dark\"]",
+          "fg": "#60a5fa",
+          "bg": "#283c58",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Frontend Team"
+        },
+        {
+          "selector": "div[data-testid=\"tree-item-backend\"] > .TreeView_label__OUAvC[data-theme=\"dark\"]",
+          "fg": "#60a5fa",
+          "bg": "#283c58",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Backend Team"
+        },
+        {
+          "selector": "div:nth-child(3) > h3",
+          "fg": "#9ca3af",
+          "bg": "#ffffff",
+          "ratio": 2.53,
+          "required": 3,
+          "text": "Dark Theme Elements"
+        },
+        {
+          "selector": "div[data-testid=\"tree-item-fire\"] > .TreeView_label__OUAvC[data-theme=\"dark\"]",
+          "fg": "#60a5fa",
+          "bg": "#283c58",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Fire"
+        },
+        {
+          "selector": "div:nth-child(3) > p",
+          "fg": "#9ca3af",
+          "bg": "#ffffff",
+          "ratio": 2.53,
+          "required": 4.5,
+          "text": "Dark theme with element hierarchy"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-treeview--dark-interactive-elements",
+      "title": "Components/TreeView",
+      "name": "Themes/Dark Interactive Elements",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div[data-selected=\"true\"] > .TreeView_label__OUAvC[data-theme=\"dark\"]",
+          "fg": "#60a5fa",
+          "bg": "#283c58",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Fire"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-treeview--dark-with-checkboxes",
+      "title": "Components/TreeView",
+      "name": "Themes/Dark with Checkboxes",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": "div[data-selected=\"true\"] > .TreeView_label__OUAvC[data-theme=\"dark\"]",
+          "fg": "#60a5fa",
+          "bg": "#283c58",
+          "ratio": 4.39,
+          "required": 4.5,
+          "text": "Engineering"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "components-zoom--themes",
+      "title": "Components/Zoom",
+      "name": "Themes",
+      "status": "contrast",
+      "violations": [
+        {
+          "selector": ".Button_button__exqP_[data-component=\"Button\"][data-theme=\"light\"]:nth-child(1) > span",
+          "fg": "#ffffff",
+          "bg": "#3b82f6",
+          "ratio": 3.67,
+          "required": 4.5,
+          "text": "light theme"
+        },
+        {
+          "selector": ".Button_button__exqP_[data-theme=\"sacred\"][data-component=\"Button\"] > span",
+          "fg": "#f5f5f5",
+          "bg": "#999999",
+          "ratio": 2.61,
+          "required": 4.5,
+          "text": "sacred theme"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

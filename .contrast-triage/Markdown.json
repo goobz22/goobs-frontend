@@ -1,0 +1,194 @@
+{
+ "title": "Components/Markdown",
+ "stories": [
+  {
+   "id": "components-markdown--center-aligned",
+   "title": "Components/Markdown",
+   "name": "Alignment/Center",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h2",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Centered heading"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > p",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "This block is centered within its bounded width."
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-markdown--dark-theme",
+   "title": "Components/Markdown",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "a[href$=\"example.com\"]",
+     "fg": "#0000ee",
+     "bg": "#111827",
+     "ratio": 1.88,
+     "required": 4.5,
+     "text": "Links"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-markdown--full-width",
+   "title": "Components/Markdown",
+   "name": "Width/Full",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Markdown_root__ZGhvH > h1",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Markdown renderer"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > p:nth-child(2)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "A read-only renderer that mirrors the editor preview, so what authors write is e"
+    },
+    {
+     "selector": "p:nth-child(2) > strong",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "read-only"
+    },
+    {
+     "selector": "h2",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Features"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > ul > li:nth-child(1)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Headings, paragraphs, and _emphasis_"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > ul > li:nth-child(2)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Ordered and unordered lists"
+    },
+    {
+     "selector": "ul > li:nth-child(3)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Inline code and fenced blocks"
+    },
+    {
+     "selector": "li:nth-child(3) > code",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "code"
+    },
+    {
+     "selector": "li:nth-child(4)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Links and images"
+    },
+    {
+     "selector": "a[href$=\"example.com\"]",
+     "fg": "#0000ee",
+     "bg": "#0e0e0e",
+     "ratio": 2.05,
+     "required": 4.5,
+     "text": "Links"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > pre > code",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "const greeting = 'hello, markdown' console.log(greeting)"
+    },
+    {
+     "selector": "p:nth-child(6)",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "&gt; Safe by construction: source is escaped before tags are built."
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-markdown--right-aligned",
+   "title": "Components/Markdown",
+   "name": "Alignment/Right",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h2",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Right-aligned heading"
+    },
+    {
+     "selector": ".Markdown_root__ZGhvH > p",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "This block is aligned to the right edge."
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-markdown--sacred-theme",
+   "title": "Components/Markdown",
+   "name": "Sacred Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "a[href$=\"example.com\"]",
+     "fg": "#0000ee",
+     "bg": "#111827",
+     "ratio": 1.88,
+     "required": 4.5,
+     "text": "Links"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "title": "Components/Pagination",
+ "stories": [
+  {
+   "id": "components-pagination--dark-theme",
+   "title": "Components/Pagination",
+   "name": "Themes/Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "button[aria-label=\"Go to page 10\"]",
+     "fg": "#020305",
+     "bg": "#111827",
+     "ratio": 1.16,
+     "required": 4.5,
+     "text": "10"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-pagination--many-pages-with-ellipsis",
+   "title": "Components/Pagination",
+   "name": "Counts/Many Pages (Ellipsis)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "button[aria-current=\"page\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "25"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-pagination--sibling-and-boundary-count",
+   "title": "Components/Pagination",
+   "name": "Counts/Sibling & Boundary",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "button[aria-current=\"page\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "25"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-pagination--with-first-last-buttons",
+   "title": "Components/Pagination",
+   "name": "Buttons/First & Last",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "button[aria-current=\"page\"]",
+     "fg": "#3b82f6",
+     "bg": "#e7f0fe",
+     "ratio": 3.2,
+     "required": 4.5,
+     "text": "10"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

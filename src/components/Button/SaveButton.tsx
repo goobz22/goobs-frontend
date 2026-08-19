@@ -137,6 +137,16 @@ const SaveButton: React.FC<SaveButtonProps> = ({
       <CustomButton
         action="save"
         variant="primary"
+        // THE submit affordance. CustomButton defaults to type="button" since
+        // 96486d1c (WCAG 3.2.2 — a bare Button inside a form must not fire it),
+        // and that commit's comment claimed SaveButton passed its gated
+        // type="submit" explicitly — it did not, so every consumer relying on
+        // native form submit (the documented contract in `onSave`'s doc above)
+        // went SILENT: click emitted action.invoke, the form's handleSubmit
+        // never ran, no validation, no mutation, no error. Found as 25 failing
+        // outcome specs in the ThothOS G4 sweep, 2026-08-19. SaveButtonProps
+        // Omit<'type'> makes this un-overridable — SaveButton IS the submitter.
+        type="submit"
         text={pending ? pendingLabel : label}
         {...(pending && { icon: <PendingSpinner /> })}
         disabled={isDisabled}

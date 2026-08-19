@@ -1,0 +1,22 @@
+{
+ "title": "Components/Form/DataGrid",
+ "stories": [
+  {
+   "id": "components-form-datagrid--light",
+   "title": "Components/Form/DataGrid",
+   "name": "Light",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".DataGrid_stickyToolbar__L1Zzy > .DataGrid_toolbar__ffAGY > .DataGrid_toolbarRight__0Vs79 > .DataGrid_manageRow___FATg[data-grid-managerow=\"true\"][data-selected-count=\"0\"] > .DataGrid_manageRowAddBtn__URTNi[title=\"Add\"][data-action=\"add\"] > .DataGrid_manageRowAddLabel__h9D89",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "Add"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

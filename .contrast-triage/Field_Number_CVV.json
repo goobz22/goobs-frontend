@@ -1,0 +1,47 @@
+{
+ "title": "Components/Field/Number/CVV",
+ "stories": [
+  {
+   "id": "components-field-number-cvv--amex-cvv",
+   "title": "Components/Field/Number/CVV",
+   "name": "Amex CVV",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Amex Security Code"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Enter the 4-digit code on the front of your Amex card"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-number-cvv--dark-theme",
+   "title": "Components/Field/Number/CVV",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "CVV"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

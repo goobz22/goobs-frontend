@@ -1,0 +1,560 @@
+{
+ "title": "Components/RadioGroup",
+ "stories": [
+  {
+   "id": "components-radiogroup--custom-brand-colors",
+   "title": "Components/RadioGroup",
+   "name": "Customization/Brand Colors",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#065f46",
+     "bg": "#0e0e0e",
+     "ratio": 2.51,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#065f46",
+     "bg": "#0e0e0e",
+     "ratio": 2.51,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#065f46",
+     "bg": "#0e0e0e",
+     "ratio": 2.51,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--custom-fonts",
+   "title": "Components/RadioGroup",
+   "name": "Customization/Custom Fonts",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#font-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Custom typography"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Basic Plan - $9/month"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Pro Plan - $19/month"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Enterprise Plan - $49/month"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--custom-sizing",
+   "title": "Components/RadioGroup",
+   "name": "Customization/Custom Sizing",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#sizing-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Large radio buttons"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--form-integration",
+   "title": "Components/RadioGroup",
+   "name": "Interactive/Form Integration",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "User Preferences Form"
+    },
+    {
+     "selector": "#notifications-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "How would you like to receive notifications?"
+    },
+    {
+     "selector": "div[aria-labelledby=\"notifications-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Email notifications"
+    },
+    {
+     "selector": "div[aria-labelledby=\"notifications-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "SMS notifications"
+    },
+    {
+     "selector": "div[aria-labelledby=\"notifications-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Push notifications"
+    },
+    {
+     "selector": "div[aria-labelledby=\"notifications-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(4) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "No notifications"
+    },
+    {
+     "selector": "#plan-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Select your subscription plan:"
+    },
+    {
+     "selector": "div[aria-labelledby=\"plan-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Basic Plan - $9/month"
+    },
+    {
+     "selector": "div[aria-labelledby=\"plan-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Pro Plan - $19/month"
+    },
+    {
+     "selector": "div[aria-labelledby=\"plan-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Enterprise Plan - $49/month"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--interaction-test",
+   "title": "Components/RadioGroup",
+   "name": "Interaction and A11y Test",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#test-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Test Radio Group"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--interactive-demo",
+   "title": "Components/RadioGroup",
+   "name": "Interactive/State Management",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div:nth-child(1) > strong",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 4.5,
+     "text": "Current selection:"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div:nth-child(1) > span",
+     "fg": "#2563eb",
+     "bg": "#0e0e0e",
+     "ratio": 3.73,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": "#interactive-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Interactive Radio Group"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--light",
+   "title": "Components/RadioGroup",
+   "name": "Light/Basic",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#basic-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Choose an option"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--light-custom-size",
+   "title": "Components/RadioGroup",
+   "name": "Light/Custom Size",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#size-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Custom sized radio buttons"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 1"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 2"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Option 3"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--light-with-colored-options",
+   "title": "Components/RadioGroup",
+   "name": "Light/Colored Options",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#colored-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Select your favorite color"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE[data-has-color=\"true\"]",
+     "fg": "#dc2626",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Red Option"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE[data-has-color=\"true\"]",
+     "fg": "#2563eb",
+     "bg": "#0e0e0e",
+     "ratio": 3.73,
+     "required": 4.5,
+     "text": "Blue Option"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(4) > .RadioGroup_text__gpGFE[data-has-color=\"true\"]",
+     "fg": "#9333ea",
+     "bg": "#0e0e0e",
+     "ratio": 3.58,
+     "required": 4.5,
+     "text": "Purple Option"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--light-with-label-text",
+   "title": "Components/RadioGroup",
+   "name": "Light/With Label Text",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#preference-radio-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Notification Preferences"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Email notifications"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "SMS notifications"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Push notifications"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(4) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "No notifications"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-radiogroup--multiple-groups",
+   "title": "Components/RadioGroup",
+   "name": "Interactive/Multiple Groups",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#group1-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Notification Settings"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group1-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Email notifications"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group1-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "SMS notifications"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group1-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Push notifications"
+    },
+    {
+     "selector": ".RadioGroup_optionLabel__eANbm:nth-child(4) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "No notifications"
+    },
+    {
+     "selector": "#group2-label",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Subscription Plan"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group2-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(1) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Basic Plan - $9/month"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group2-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(2) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Pro Plan - $19/month"
+    },
+    {
+     "selector": "div[aria-labelledby=\"group2-label\"] > .RadioGroup_optionLabel__eANbm:nth-child(3) > .RadioGroup_text__gpGFE",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Enterprise Plan - $49/month"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

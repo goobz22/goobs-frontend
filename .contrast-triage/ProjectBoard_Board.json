@@ -1,0 +1,178 @@
+{
+ "title": "Components/ProjectBoard/Board",
+ "stories": [
+  {
+   "id": "components-projectboard-board--company-variant",
+   "title": "Components/ProjectBoard/Board",
+   "name": "Company Variant",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".ProjectBoard_noTasks__L8Kdh",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-board--dark-theme",
+   "title": "Components/ProjectBoard/Board",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Type"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(1) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Open tasks"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(2) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Tasks currently being worked on"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(3) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Completed tasks"
+    },
+    {
+     "selector": ".ProjectBoard_noTasks__L8Kdh",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-board--light-theme",
+   "title": "Components/ProjectBoard/Board",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".ProjectBoard_noTasks__L8Kdh",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-board--severity-board",
+   "title": "Components/ProjectBoard/Board",
+   "name": "Severity Board",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(2) > .ProjectBoard_tasksContainer__BmW4k > .ProjectBoard_noTasks__L8Kdh",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "No tasks yet"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(4) > .ProjectBoard_tasksContainer__BmW4k > .ProjectBoard_noTasks__L8Kdh",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-board--topic-board",
+   "title": "Components/ProjectBoard/Board",
+   "name": "Topic Board",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Type"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(1) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Technical support issues"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(2) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Billing related issues"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(3) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "General questions"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(3) > .ProjectBoard_tasksContainer__BmW4k > .ProjectBoard_noTasks__L8Kdh",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "No tasks yet"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(4) > .ProjectBoard_columnHeader__9OGeu[draggable=\"true\"] > .ProjectBoard_columnDescription__09ODy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "New feature requests"
+    },
+    {
+     "selector": ".ProjectBoard_column__sUIQG:nth-child(4) > .ProjectBoard_tasksContainer__BmW4k > .ProjectBoard_noTasks__L8Kdh",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "No tasks yet"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

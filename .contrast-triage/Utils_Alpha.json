@@ -1,0 +1,86 @@
+{
+ "title": "Components/Utils/Alpha",
+ "stories": [
+  {
+   "id": "components-utils-alpha--gold-opacity-ladder",
+   "title": "Components/Utils/Alpha",
+   "name": "Gold Opacity Ladder",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "figure[data-opacity=\"0.1\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.1)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.2\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.2)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.3\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.3)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.4\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.4)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.5\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.5)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.6\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.6)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.7\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.7)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.8\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.8)"
+    },
+    {
+     "selector": "figure[data-opacity=\"0.9\"] > figcaption",
+     "fg": "#6e6e6e",
+     "bg": "#0e0e0e",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "rgba(255, 215, 0, 0.9)"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

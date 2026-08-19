@@ -1,0 +1,32 @@
+{
+ "title": "Components/Button",
+ "stories": [
+  {
+   "id": "components-button--interaction-test",
+   "title": "Components/Button",
+   "name": "Interaction and A11y Test",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "JestExtendError: expect(element).toBeDisabled()\n\nReceived element is not disabled:\n  <span />\n    at Proxy.expectWrapper (http://127.0.0.1:58096/sb-preview/runtime.js:24474:17)\n    at Proxy.<anonymous> (http://127.0.0.1:58096/sb-preview/runtime.js:23994:18)\n    at Proxy.methodWrapper (http://127.0.0.1:58096/sb-preview/runtime.js:18488:25)\n    at play (http://127.0.0.1:58096/components-Button-Butto"
+   ]
+  },
+  {
+   "id": "components-button--light-theme-group",
+   "title": "Components/Button",
+   "name": "Group/Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Button_selected__h51kM > span:nth-child(2)",
+     "fg": "#374151",
+     "bg": "#121721",
+     "ratio": 1.74,
+     "required": 4.5,
+     "text": "Send"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

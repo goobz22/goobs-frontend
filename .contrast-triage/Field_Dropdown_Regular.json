@@ -1,0 +1,268 @@
+{
+ "title": "Components/Field/Dropdown/Regular",
+ "stories": [
+  {
+   "id": "components-field-dropdown-regular--basic-options",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Basic Options",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Simple Selection"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--complex-options",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Complex Options with Attributes",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#151515",
+     "ratio": 3.77,
+     "required": 4.5,
+     "text": "Technology Stack"
+    }
+   ],
+   "errors": [
+    "TestingLibraryElementError: Unable to find an element with the text: /React/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.\n\nIgnored nodes: comments, script, style\n<div\n  id=\"storybook-root\"\n>\n  <div\n    data-theme=\"sacred\"\n  >\n    <div\n      style=\"width: 400px; padding: 2rem;\"\n "
+   ]
+  },
+  {
+   "id": "components-field-dropdown-regular--comprehensive-showcase",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid selection"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_4_\"]",
+     "fg": "#4ed17e",
+     "bg": "#ffffff",
+     "ratio": 1.95,
+     "required": 4.5,
+     "text": "Custom Colors"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Alternative Dark Theme"
+    },
+    {
+     "selector": "#field-helper-_r_7_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid selection"
+    },
+    {
+     "selector": "label[for=\"field-_r_9_\"]",
+     "fg": "#a95cee",
+     "bg": "#ffffff",
+     "ratio": 3.85,
+     "required": 4.5,
+     "text": "Purple Style"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--custom-colors",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Custom Colors",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#660466",
+     "bg": "#0e0e0e",
+     "ratio": 1.63,
+     "required": 4.5,
+     "text": "Custom Styled"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--custom-layout",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Custom Layout & Spacing",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Size"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Compact Size"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--dark-theme",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Country"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--dark-theme-alt",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Dark Theme Alt",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Select Option"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--error-states",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Error States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Selection"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Invalid Choice"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--interaction-test",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Interaction Test",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Test Dropdown"
+    }
+   ],
+   "errors": [
+    "TestingLibraryElementError: Value \"typescript\" not found in options\n\nIgnored nodes: comments, script, style\n<button\n  aria-controls=\"field-_r_0_-listbox\"\n  aria-expanded=\"false\"\n  aria-haspopup=\"listbox\"\n  aria-label=\"Test Dropdown\"\n  class=\"Dropdown_button__ceak2\"\n  data-action=\"open\"\n  id=\"field-_r_0_\"\n  role=\"combobox\"\n  type=\"button\"\n>\n  <span>\n    Select...\n  </span>\n  <span\n    aria-hidden=\""
+   ]
+  },
+  {
+   "id": "components-field-dropdown-regular--required-dropdown",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "Required Dropdown",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Selection *"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Country *"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Required Tech Stack *"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-regular--with-default-value",
+   "title": "Components/Field/Dropdown/Regular",
+   "name": "With Default Value",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Pre-selected Option"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

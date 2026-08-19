@@ -1,0 +1,121 @@
+{
+ "title": "Components/ProjectBoard/InlineForms",
+ "stories": [
+  {
+   "id": "components-projectboard-inlineforms--add-task-light",
+   "title": "Components/ProjectBoard/InlineForms",
+   "name": "Add Task Light",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-active=\"false\"]",
+     "fg": "#6b7280",
+     "bg": "#f3f4f6",
+     "ratio": 4.39,
+     "required": 4.5,
+     "text": "Knowledgebase"
+    },
+    {
+     "selector": ".MultiSelect_placeholder__qveZq",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "Select items..."
+    },
+    {
+     "selector": ".AddTask_submitButton__eWew7",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Create Task"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-inlineforms--add-task-submit-flow",
+   "title": "Components/ProjectBoard/InlineForms",
+   "name": "Add Task Submit Flow",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-active=\"false\"]",
+     "fg": "#6b7280",
+     "bg": "#f3f4f6",
+     "ratio": 4.39,
+     "required": 4.5,
+     "text": "Knowledgebase"
+    },
+    {
+     "selector": ".MultiSelect_placeholder__qveZq",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "Select items..."
+    },
+    {
+     "selector": ".AddTask_submitButton__eWew7",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Create Task"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-inlineforms--add-task-validation-error",
+   "title": "Components/ProjectBoard/InlineForms",
+   "name": "Add Task Validation Error",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-active=\"false\"]",
+     "fg": "#6b7280",
+     "bg": "#f3f4f6",
+     "ratio": 4.39,
+     "required": 4.5,
+     "text": "Knowledgebase"
+    },
+    {
+     "selector": ".MultiSelect_placeholder__qveZq",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 4.5,
+     "text": "Select items..."
+    },
+    {
+     "selector": ".AddTask_validationError__QIsza",
+     "fg": "#dc2626",
+     "bg": "#fef2f2",
+     "ratio": 4.41,
+     "required": 4.5,
+     "text": "Please fill in all required fields (Title, Description, Severity, Status, Produc"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-projectboard-inlineforms--show-task-light",
+   "title": "Components/ProjectBoard/InlineForms",
+   "name": "Show Task Light",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".ShowTask_deleteButton__JiXPE",
+     "fg": "#dc2626",
+     "bg": "#fef2f2",
+     "ratio": 4.41,
+     "required": 4.5,
+     "text": "Delete"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

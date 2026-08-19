@@ -1,0 +1,408 @@
+{
+ "title": "Components/Field/PhoneNumber",
+ "stories": [
+  {
+   "id": "components-field-phonenumber--comprehensive-showcase",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Phone Number"
+    },
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid format"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_4_\"]",
+     "fg": "#4ed17e",
+     "bg": "#ffffff",
+     "ratio": 1.95,
+     "required": 4.5,
+     "text": "Custom Colors"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_6_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Divine Contact"
+    },
+    {
+     "selector": ".FieldShell_shell__kpYUW[data-theme=\"sacred\"][data-filled=\"false\"]:nth-child(1) > .PhoneNumber_inputWrapper__thBHt > .PhoneNumber_prefix__T_bj_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "+1"
+    },
+    {
+     "selector": "#field-_r_6_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "label[for=\"field-_r_7_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Sacred Phone"
+    },
+    {
+     "selector": "div[data-state=\"error\"][data-filled=\"true\"][data-theme=\"sacred\"] > .PhoneNumber_inputWrapper__thBHt > .PhoneNumber_prefix__T_bj_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "+1"
+    },
+    {
+     "selector": "#field-_r_7_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "#field-helper-_r_7_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid sacred digits"
+    },
+    {
+     "selector": "label[for=\"field-_r_8_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Holy Number"
+    },
+    {
+     "selector": ".FieldShell_shell__kpYUW[data-theme=\"sacred\"][data-filled=\"false\"]:nth-child(3) > .PhoneNumber_inputWrapper__thBHt > .PhoneNumber_prefix__T_bj_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "+1"
+    },
+    {
+     "selector": "#field-_r_8_",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "label[for=\"field-_r_9_\"]",
+     "fg": "#a95cee",
+     "bg": "#ffffff",
+     "ratio": 3.85,
+     "required": 4.5,
+     "text": "Neon Style"
+    },
+    {
+     "selector": "div:nth-child(4) > div > .FieldShell_shell__kpYUW[data-theme=\"dark\"][data-filled=\"false\"] > .PhoneNumber_inputWrapper__thBHt > .PhoneNumber_prefix__T_bj_",
+     "fg": "#9333ea",
+     "bg": "#0d0d0d",
+     "ratio": 3.61,
+     "required": 4.5,
+     "text": "+1"
+    },
+    {
+     "selector": "#field-_r_9_",
+     "fg": "#9333ea",
+     "bg": "#0d0d0d",
+     "ratio": 3.61,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--custom-colors",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Custom Colors",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#19317f",
+     "bg": "#0e0e0e",
+     "ratio": 1.64,
+     "required": 4.5,
+     "text": "Custom Styled Phone"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--custom-layout",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Custom Layout & Spacing",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Padding"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Dimensions"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Asymmetric Padding"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--custom-typography",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Custom Typography",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Text"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Font"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Small &amp; Light"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--dark-theme",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Contact Number"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--default-placeholder",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Default Placeholder",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Light Theme - Default Placeholder"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Dark Theme - Default Placeholder"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--disabled-states",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Disabled States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Disabled Light"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Disabled Dark"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--light-theme",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Light Theme (Default)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Phone Number"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--neon-style",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Neon Style",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#1d914e",
+     "bg": "#111827",
+     "ratio": 4.4,
+     "required": 4.5,
+     "text": "Neon Phone Input"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--required-fields",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Required Fields",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Phone"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Business Phone"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-phonenumber--validation-demo",
+   "title": "Components/Field/PhoneNumber",
+   "name": "Validation Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Phone Number Validation"
+    },
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Phone Number *"
+    },
+    {
+     "selector": "div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Validate Phone"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > p",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Enter a phone number in the format (555) 123-4567 to see validation in action."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

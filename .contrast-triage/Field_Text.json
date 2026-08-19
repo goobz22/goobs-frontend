@@ -1,0 +1,547 @@
+{
+ "title": "Components/Field/Text",
+ "stories": [
+  {
+   "id": "components-field-text--comprehensive-showcase",
+   "title": "Components/Field/Text",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Username"
+    },
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid input"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_4_\"]",
+     "fg": "#4ed17e",
+     "bg": "#ffffff",
+     "ratio": 1.95,
+     "required": 4.5,
+     "text": "Custom Colors"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_6_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Ancient Text"
+    },
+    {
+     "selector": "label[for=\"field-_r_7_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Sacred Knowledge"
+    },
+    {
+     "selector": "#field-helper-_r_7_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "This knowledge is forbidden"
+    },
+    {
+     "selector": "label[for=\"field-_r_8_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Divine Input"
+    },
+    {
+     "selector": "label[for=\"field-_r_9_\"]",
+     "fg": "#a95cee",
+     "bg": "#ffffff",
+     "ratio": 3.85,
+     "required": 4.5,
+     "text": "Neon Style"
+    },
+    {
+     "selector": "#field-_r_9_",
+     "fg": "#9333ea",
+     "bg": "#0d0d0d",
+     "ratio": 3.61,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "#field-_r_a_",
+     "fg": "#feffff",
+     "bg": "#f9fafb",
+     "ratio": 1.04,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": "label[for=\"field-_r_d_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Required Dark *"
+    },
+    {
+     "selector": "#field-helper-_r_d_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "This field is required"
+    },
+    {
+     "selector": "label[for=\"field-_r_e_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Custom Required (required)"
+    },
+    {
+     "selector": "label[for=\"field-_r_e_\"] > .FieldShell_requiredIndicator__8lvTO[aria-hidden=\"true\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "(required)"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--custom-colors",
+   "title": "Components/Field/Text",
+   "name": "Custom Colors",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#660466",
+     "bg": "#0e0e0e",
+     "ratio": 1.63,
+     "required": 4.5,
+     "text": "Custom Styled"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--custom-layout",
+   "title": "Components/Field/Text",
+   "name": "Custom Layout & Spacing",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Padding"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Dimensions"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Asymmetric Padding"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--custom-transitions",
+   "title": "Components/Field/Text",
+   "name": "Custom Transitions",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Slow Transition"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Fast Transition"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--custom-typography",
+   "title": "Components/Field/Text",
+   "name": "Custom Typography",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Text"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Font"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Small &amp; Light"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--dark-theme",
+   "title": "Components/Field/Text",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Username"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--disabled-states",
+   "title": "Components/Field/Text",
+   "name": "Disabled States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Disabled Light"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Disabled Dark"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--labels-and-placeholders",
+   "title": "Components/Field/Text",
+   "name": "Labels and Placeholders",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "With Label and Placeholder"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Label Only"
+    },
+    {
+     "selector": "label[for=\"field-_r_3_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Pre-filled Value"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--light-theme",
+   "title": "Components/Field/Text",
+   "name": "Light Theme (Default)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Email Address"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--required-fields",
+   "title": "Components/Field/Text",
+   "name": "Required Fields",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Field *"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Required Password *"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--required-validation",
+   "title": "Components/Field/Text",
+   "name": "Required Validation Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Required Field Validation"
+    },
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Full Name *"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Email Address *"
+    },
+    {
+     "selector": "div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Submit Form"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > p",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Try submitting the form without filling in the required fields to see validation"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--shared-required-system",
+   "title": "Components/Field/Text",
+   "name": "Shared Required System",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Shared Required System Demo"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > p",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "This demo shows how TextField and Dropdown components share the same required fi"
+    },
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "First Name *"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Last Name *"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Email Address *"
+    },
+    {
+     "selector": "div:nth-child(5) > label",
+     "fg": "#374151",
+     "bg": "#0e0e0e",
+     "ratio": 1.87,
+     "required": 4.5,
+     "text": "Country *"
+    },
+    {
+     "selector": "div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Submit Form"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--top-level-required-prop",
+   "title": "Components/Field/Text",
+   "name": "Top-level required prop (vs styles.required)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Top-level required *"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Styles required *"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Not required"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-text--with-adornments",
+   "title": "Components/Field/Text",
+   "name": "With Adornments",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Search"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Password"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Username"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

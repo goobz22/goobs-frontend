@@ -1,0 +1,435 @@
+{
+ "title": "Components/Field/Dropdown/SearchableSimple",
+ "stories": [
+  {
+   "id": "components-field-dropdown-searchablesimple--comprehensive-showcase",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Comprehensive Showcase",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "With Error"
+    },
+    {
+     "selector": "#field-helper-_r_1_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Invalid selection"
+    },
+    {
+     "selector": "div:nth-child(2) > h3",
+     "fg": "#9ca3af",
+     "bg": "#ffffff",
+     "ratio": 2.53,
+     "required": 3,
+     "text": "Dark Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_4_\"]",
+     "fg": "#4ed17e",
+     "bg": "#ffffff",
+     "ratio": 1.95,
+     "required": 4.5,
+     "text": "Custom Colors"
+    },
+    {
+     "selector": "div:nth-child(3) > h3",
+     "fg": "#ffd700",
+     "bg": "#ffffff",
+     "ratio": 1.4,
+     "required": 3,
+     "text": "Sacred Theme"
+    },
+    {
+     "selector": "label[for=\"field-_r_6_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Divine Selection"
+    },
+    {
+     "selector": "#field-_r_6_ > span:nth-child(1)",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "Search sacred choice"
+    },
+    {
+     "selector": "label[for=\"field-_r_7_\"]",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Sacred Dropdown"
+    },
+    {
+     "selector": "#field-_r_7_ > span:nth-child(1)",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "Search divine option"
+    },
+    {
+     "selector": "#field-helper-_r_7_",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "Choice forbidden"
+    },
+    {
+     "selector": "label[for=\"field-_r_8_\"]",
+     "fg": "#ffdf33",
+     "bg": "#ffffff",
+     "ratio": 1.32,
+     "required": 4.5,
+     "text": "Holy Selection"
+    },
+    {
+     "selector": "#field-_r_8_ > span:nth-child(1)",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "Search divine choice"
+    },
+    {
+     "selector": "label[for=\"field-_r_9_\"]",
+     "fg": "#a95cee",
+     "bg": "#ffffff",
+     "ratio": 3.85,
+     "required": 4.5,
+     "text": "Neon Style"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--custom-colors",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Custom Colors",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#2b2676",
+     "bg": "#0e0e0e",
+     "ratio": 1.5,
+     "required": 4.5,
+     "text": "Custom Dropdown"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--custom-layout",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Custom Layout & Spacing",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Padding"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Dimensions"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Asymmetric Padding"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--custom-typography",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Custom Typography",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Text"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Custom Font"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Small &amp; Light"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--dark-theme",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Select Country"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--disabled-states",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Disabled States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Disabled Light"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Disabled Dark"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--interaction-test",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Interaction Test",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Test Searchable Simple"
+    }
+   ],
+   "errors": [
+    "TestingLibraryElementError: Unable to find an accessible element with the role \"button\"\n\nHere are the accessible roles:\n\n  combobox:\n\n  Name \"Test Searchable Simple\":\n  <button\n    aria-controls=\"field-_r_0_-listbox\"\n    aria-expanded=\"false\"\n    aria-haspopup=\"listbox\"\n    aria-label=\"Test Searchable Simple\"\n    class=\"SearchableSimple_button__W_xkc\"\n    data-action=\"open\"\n    id=\"field-_r_0_\"\n  "
+   ]
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--light-theme",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Light Theme (Default)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Select Fruit"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--neon-style",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Neon Style",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#108966",
+     "bg": "#111827",
+     "ratio": 4.04,
+     "required": 4.5,
+     "text": "Neon Dropdown"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--option-variations",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Option Variations",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Fruits"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Countries"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Large Dataset"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--required-fields",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Required Fields",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Required Selection"
+    },
+    {
+     "selector": "label[for=\"field-_r_2_\"]",
+     "fg": "#64748b",
+     "bg": "#0e0e0e",
+     "ratio": 4.05,
+     "required": 4.5,
+     "text": "Category"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablesimple--search-demo",
+   "title": "Components/Field/Dropdown/SearchableSimple",
+   "name": "Search Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "h3",
+     "fg": "#000000",
+     "bg": "#0e0e0e",
+     "ratio": 1.08,
+     "required": 3,
+     "text": "Simple Searchable Dropdown Demo"
+    },
+    {
+     "selector": "label[for=\"field-_r_0_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Country"
+    },
+    {
+     "selector": "label[for=\"field-_r_1_\"]",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Fruit"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > button",
+     "fg": "#ffffff",
+     "bg": "#3b82f6",
+     "ratio": 3.67,
+     "required": 4.5,
+     "text": "Submit Selection"
+    },
+    {
+     "selector": "div:nth-child(5) > p",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Simple searchable dropdown features:"
+    },
+    {
+     "selector": "div:nth-child(5) > ul > li:nth-child(1)",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Type to search and filter options"
+    },
+    {
+     "selector": "div:nth-child(5) > ul > li:nth-child(2)",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Select from filtered results"
+    },
+    {
+     "selector": "ul > li:nth-child(3)",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Clean, simple interface"
+    },
+    {
+     "selector": "li:nth-child(4)",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "No history tracking"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

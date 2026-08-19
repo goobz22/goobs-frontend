@@ -1,0 +1,206 @@
+{
+ "title": "Components/Icons/SacredGlyphs",
+ "stories": [
+  {
+   "id": "components-icons-sacredglyphs--all-glyphs",
+   "title": "Components/Icons/SacredGlyphs",
+   "name": "All Glyphs",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "figure[data-glyph=\"𓁟\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+1305F"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓂀\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13080"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓃀\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+130C0"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓄿\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+1313F"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊖\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13296"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊗\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13297"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓋴\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132F4"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓏏\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+133CF"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊨\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132A8"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓁦\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13066"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓅓\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13153"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓆄\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13184"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓇳\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+131F3"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓈖\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13216"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊹\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132B9"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊺\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132BA"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊻\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132BB"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓋹\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132F9"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓌻\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+1333B"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓍿\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+1337F"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓅨\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+13168"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓂋\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+1308B"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓏭\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+133ED"
+    },
+    {
+     "selector": "figure[data-glyph=\"𓊵\"] > figcaption",
+     "fg": "#717171",
+     "bg": "#121212",
+     "ratio": 3.83,
+     "required": 4.5,
+     "text": "U+132B5"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

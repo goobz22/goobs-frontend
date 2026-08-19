@@ -1,0 +1,845 @@
+[
+ {
+  "key": "Icons_All_Icons",
+  "title": "Components/Icons/All Icons",
+  "stories": 1,
+  "violations": 261,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Icons/AllIcons.stories.tsx"
+ },
+ {
+  "key": "RadioGroup",
+  "title": "Components/RadioGroup",
+  "stories": 11,
+  "violations": 57,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/RadioGroup/RadioGroup.stories.tsx"
+ },
+ {
+  "key": "Field_Date_DateRange",
+  "title": "Components/Field/Date/DateRange",
+  "stories": 11,
+  "violations": 55,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Date/DateRange/DateRange.stories.tsx"
+ },
+ {
+  "key": "Field_Text",
+  "title": "Components/Field/Text",
+  "stories": 14,
+  "violations": 52,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Text/TextField.stories.tsx"
+ },
+ {
+  "key": "Field_Password",
+  "title": "Components/Field/Password",
+  "stories": 10,
+  "violations": 43,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Password/PasswordField.stories.tsx"
+ },
+ {
+  "key": "BigCalendar",
+  "title": "Components/BigCalendar",
+  "stories": 7,
+  "violations": 41,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/BigCalendar/BigCalendar.stories.tsx"
+ },
+ {
+  "key": "Field_Dropdown_SearchableSimple",
+  "title": "Components/Field/Dropdown/SearchableSimple",
+  "stories": 12,
+  "violations": 40,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Dropdown/SearchableSimple/SearchableSimple.stories.tsx"
+ },
+ {
+  "key": "Card_Family",
+  "title": "Components/Card/Family",
+  "stories": 4,
+  "violations": 39,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Card/CardFamily.stories.tsx"
+ },
+ {
+  "key": "Field_PhoneNumber",
+  "title": "Components/Field/PhoneNumber",
+  "stories": 11,
+  "violations": 38,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/PhoneNumber/PhoneNumberField.stories.tsx"
+ },
+ {
+  "key": "TreeView",
+  "title": "Components/TreeView",
+  "stories": 16,
+  "violations": 37,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/TreeView/TreeView.stories.tsx"
+ },
+ {
+  "key": "Field_Percentage",
+  "title": "Components/Field/Percentage",
+  "stories": 11,
+  "violations": 36,
+  "statuses": [
+   "contrast",
+   "render-error"
+  ],
+  "storyFile": "src/components/Field/Percentage/PercentageField.stories.tsx"
+ },
+ {
+  "key": "Stepper",
+  "title": "Components/Stepper",
+  "stories": 8,
+  "violations": 36,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Stepper/Stepper.stories.tsx"
+ },
+ {
+  "key": "DataGrid",
+  "title": "Components/DataGrid",
+  "stories": 15,
+  "violations": 33,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/DataGrid/DataGrid.stories.tsx"
+ },
+ {
+  "key": "Field_Search",
+  "title": "Components/Field/Search",
+  "stories": 10,
+  "violations": 32,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Search/SearchBar.stories.tsx"
+ },
+ {
+  "key": "ComplexTextEditor",
+  "title": "Components/ComplexTextEditor",
+  "stories": 14,
+  "violations": 31,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ComplexTextEditor/ComplexTextEditor.stories.tsx"
+ },
+ {
+  "key": "MetricsAccordion",
+  "title": "Components/MetricsAccordion",
+  "stories": 8,
+  "violations": 31,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Metric/Accordion/metricsAccordion.stories.tsx"
+ },
+ {
+  "key": "Icons_SacredGlyphs",
+  "title": "Components/Icons/SacredGlyphs",
+  "stories": 1,
+  "violations": 24,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Icons/SacredGlyphs.stories.tsx"
+ },
+ {
+  "key": "Card",
+  "title": "Components/Card",
+  "stories": 8,
+  "violations": 23,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Card/card.stories.tsx"
+ },
+ {
+  "key": "FilterSection",
+  "title": "Components/FilterSection",
+  "stories": 6,
+  "violations": 23,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Filter/Section/filterSection.stories.tsx"
+ },
+ {
+  "key": "Field_Dropdown_Regular",
+  "title": "Components/Field/Dropdown/Regular",
+  "stories": 11,
+  "violations": 20,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Dropdown/Regular/Dropdown.stories.tsx"
+ },
+ {
+  "key": "Field_Time_TimeField",
+  "title": "Components/Field/Time/TimeField",
+  "stories": 6,
+  "violations": 20,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Time/TimeField/TimeField.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_CIDR",
+  "title": "Components/Field/IPAM/CIDR",
+  "stories": 4,
+  "violations": 19,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/CIDR/CIDR.stories.tsx"
+ },
+ {
+  "key": "Snackbar",
+  "title": "Components/Snackbar",
+  "stories": 5,
+  "violations": 19,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Snackbar/Snackbar.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_Supernet",
+  "title": "Components/Field/IPAM/Supernet",
+  "stories": 5,
+  "violations": 18,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/Supernet/Supernet.stories.tsx"
+ },
+ {
+  "key": "Form_BoundFields",
+  "title": "Components/Form/BoundFields",
+  "stories": 2,
+  "violations": 18,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Form/FormBoundFields.stories.tsx"
+ },
+ {
+  "key": "Markdown",
+  "title": "Components/Markdown",
+  "stories": 5,
+  "violations": 18,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Markdown/Markdown.stories.tsx"
+ },
+ {
+  "key": "ToggleButton",
+  "title": "Components/ToggleButton",
+  "stories": 5,
+  "violations": 18,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ToggleButton/ToggleButton.stories.tsx"
+ },
+ {
+  "key": "Field_Slider",
+  "title": "Components/Field/Slider",
+  "stories": 6,
+  "violations": 17,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Slider/Slider.stories.tsx"
+ },
+ {
+  "key": "ProjectBoard_Board",
+  "title": "Components/ProjectBoard/Board",
+  "stories": 5,
+  "violations": 16,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ProjectBoard/board/ProjectBoard.stories.tsx"
+ },
+ {
+  "key": "WorkspaceFilterShell",
+  "title": "Components/WorkspaceFilterShell",
+  "stories": 2,
+  "violations": 16,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/WorkspaceFilterShell/workspaceFilterShell.stories.tsx"
+ },
+ {
+  "key": "CodeCopy",
+  "title": "Components/CodeCopy",
+  "stories": 3,
+  "violations": 14,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/CodeCopy/CodeCopy.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_Subnet",
+  "title": "Components/Field/IPAM/Subnet",
+  "stories": 4,
+  "violations": 14,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/Subnet/Subnet.stories.tsx"
+ },
+ {
+  "key": "Form",
+  "title": "Components/Form",
+  "stories": 8,
+  "violations": 14,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Form/Form.stories.tsx"
+ },
+ {
+  "key": "ProgressBar",
+  "title": "Components/ProgressBar",
+  "stories": 3,
+  "violations": 13,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ProgressBar/ProgressBar.stories.tsx"
+ },
+ {
+  "key": "Accordion",
+  "title": "Components/Accordion",
+  "stories": 5,
+  "violations": 12,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Accordion/Accordion.stories.tsx"
+ },
+ {
+  "key": "Field_Dropdown_MultiSelect",
+  "title": "Components/Field/Dropdown/MultiSelect",
+  "stories": 7,
+  "violations": 11,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Dropdown/MultiSelect/MultiSelect.stories.tsx"
+ },
+ {
+  "key": "Typography",
+  "title": "Components/Typography",
+  "stories": 8,
+  "violations": 11,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Typography/Typography.stories.tsx"
+ },
+ {
+  "key": "Content",
+  "title": "Components/Content",
+  "stories": 4,
+  "violations": 10,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Content/Content.stories.tsx"
+ },
+ {
+  "key": "Metric",
+  "title": "Components/Metric",
+  "stories": 6,
+  "violations": 10,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Metric/MetricCard.stories.tsx"
+ },
+ {
+  "key": "ProjectBoard_InlineForms",
+  "title": "Components/ProjectBoard/InlineForms",
+  "stories": 4,
+  "violations": 10,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ProjectBoard/InlineForms.stories.tsx"
+ },
+ {
+  "key": "Utils_Alpha",
+  "title": "Components/Utils/Alpha",
+  "stories": 1,
+  "violations": 9,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/utils/alpha.stories.tsx"
+ },
+ {
+  "key": "Divider",
+  "title": "Components/Divider",
+  "stories": 3,
+  "violations": 8,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Divider/Divider.stories.tsx"
+ },
+ {
+  "key": "Field_Date_DateField",
+  "title": "Components/Field/Date/DateField",
+  "stories": 5,
+  "violations": 8,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Date/DateField/DateField.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_VLAN",
+  "title": "Components/Field/IPAM/VLAN",
+  "stories": 5,
+  "violations": 8,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/VLAN/VLAN.stories.tsx"
+ },
+ {
+  "key": "FieldGrid",
+  "title": "Components/FieldGrid",
+  "stories": 3,
+  "violations": 8,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/FieldGrid/FieldGrid.stories.tsx"
+ },
+ {
+  "key": "Field_Dropdown_SearchableHistory",
+  "title": "Components/Field/Dropdown/SearchableHistory",
+  "stories": 5,
+  "violations": 7,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Dropdown/SearchableHistory/SearchableHistory.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_MACAddress",
+  "title": "Components/Field/IPAM/MACAddress",
+  "stories": 4,
+  "violations": 7,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/MACAddress/MACAddress.stories.tsx"
+ },
+ {
+  "key": "Select",
+  "title": "Components/Select",
+  "stories": 3,
+  "violations": 7,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Select/Select.stories.tsx"
+ },
+ {
+  "key": "Field_IPAM_Address",
+  "title": "Components/Field/IPAM/Address",
+  "stories": 4,
+  "violations": 6,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/IPAM/Address/IPAddress.stories.tsx"
+ },
+ {
+  "key": "Field_MoneyText",
+  "title": "Components/Field/MoneyText",
+  "stories": 4,
+  "violations": 6,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/USD/MoneyText.stories.tsx"
+ },
+ {
+  "key": "Form_DataGrid",
+  "title": "Components/Form/DataGrid",
+  "stories": 5,
+  "violations": 6,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Form/DataGrid/FormDataGrid.stories.tsx"
+ },
+ {
+  "key": "QRCode",
+  "title": "Components/QRCode",
+  "stories": 6,
+  "violations": 6,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/QRCode/QRCode.stories.tsx"
+ },
+ {
+  "key": "Badge",
+  "title": "Components/Badge",
+  "stories": 4,
+  "violations": 5,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Badge/Badge.stories.tsx"
+ },
+ {
+  "key": "Field_Number_CreditCardNumber",
+  "title": "Components/Field/Number/CreditCardNumber",
+  "stories": 3,
+  "violations": 5,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/CreditCardNumber/CreditCardNumber.stories.tsx"
+ },
+ {
+  "key": "FileDropzone",
+  "title": "Components/FileDropzone",
+  "stories": 4,
+  "violations": 5,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/FileDropzone/FileDropzone.stories.tsx"
+ },
+ {
+  "key": "Breadcrumb",
+  "title": "Components/Breadcrumb",
+  "stories": 1,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Breadcrumb/Breadcrumb.stories.tsx"
+ },
+ {
+  "key": "Chip",
+  "title": "Components/Chip",
+  "stories": 1,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Chip/Chip.stories.tsx"
+ },
+ {
+  "key": "Fade",
+  "title": "Components/Fade",
+  "stories": 2,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Fade/Fade.stories.tsx"
+ },
+ {
+  "key": "Field_Time_TimeRange",
+  "title": "Components/Field/Time/TimeRange",
+  "stories": 2,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Time/TimeRange/TimeRange.stories.tsx"
+ },
+ {
+  "key": "Field_USDField",
+  "title": "Components/Field/USDField",
+  "stories": 2,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/USD/USDField.stories.tsx"
+ },
+ {
+  "key": "Pagination",
+  "title": "Components/Pagination",
+  "stories": 4,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Pagination/Pagination.stories.tsx"
+ },
+ {
+  "key": "SacredGlyphFrame",
+  "title": "Components/SacredGlyphFrame",
+  "stories": 1,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/SacredGlyphFrame/SacredGlyphFrame.stories.tsx"
+ },
+ {
+  "key": "Table",
+  "title": "Components/Table",
+  "stories": 1,
+  "violations": 4,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Table/Table.stories.tsx"
+ },
+ {
+  "key": "Field_Number_AccountNumber",
+  "title": "Components/Field/Number/AccountNumber",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/AccountNumber/AccountNumber.stories.tsx"
+ },
+ {
+  "key": "Field_Number_CVV",
+  "title": "Components/Field/Number/CVV",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/CVV/CVV.stories.tsx"
+ },
+ {
+  "key": "Field_Number_InternalIncrement",
+  "title": "Components/Field/Number/InternalIncrement",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/InternalIncrement/InternalIncrement.stories.tsx"
+ },
+ {
+  "key": "Field_Number_RoutingNumber",
+  "title": "Components/Field/Number/RoutingNumber",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/RoutingNumber/RoutingNumber.stories.tsx"
+ },
+ {
+  "key": "Field_Signature",
+  "title": "Components/Field/Signature",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Signature/SignatureField.stories.tsx"
+ },
+ {
+  "key": "MenuItem",
+  "title": "Components/MenuItem",
+  "stories": 1,
+  "violations": 3,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/MenuItem/MenuItem.stories.tsx"
+ },
+ {
+  "key": "Tabs",
+  "title": "Components/Tabs",
+  "stories": 2,
+  "violations": 3,
+  "statuses": [
+   "render-error",
+   "contrast"
+  ],
+  "storyFile": "src/components/Tabs/Tabs.stories.tsx"
+ },
+ {
+  "key": "AppBar",
+  "title": "Components/AppBar",
+  "stories": 1,
+  "violations": 2,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/AppBar/AppBar.stories.tsx"
+ },
+ {
+  "key": "ConfirmationCodeInput",
+  "title": "Components/ConfirmationCodeInput",
+  "stories": 2,
+  "violations": 2,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/ConfirmationCodeInput/ConfirmationCodeInput.stories.tsx"
+ },
+ {
+  "key": "Slide",
+  "title": "Components/Slide",
+  "stories": 1,
+  "violations": 2,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Slide/Slide.stories.tsx"
+ },
+ {
+  "key": "Zoom",
+  "title": "Components/Zoom",
+  "stories": 1,
+  "violations": 2,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Zoom/Zoom.stories.tsx"
+ },
+ {
+  "key": "Alert",
+  "title": "Components/Alert",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Alert/Alert.stories.tsx"
+ },
+ {
+  "key": "Button",
+  "title": "Components/Button",
+  "stories": 2,
+  "violations": 1,
+  "statuses": [
+   "render-error",
+   "contrast"
+  ],
+  "storyFile": "src/components/Button/Button.stories.tsx"
+ },
+ {
+  "key": "EmptyState",
+  "title": "Components/EmptyState",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/EmptyState/EmptyState.stories.tsx"
+ },
+ {
+  "key": "Field_Number_ExternalIncrement",
+  "title": "Components/Field/Number/ExternalIncrement",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Field/Number/ExternalIncrement/ExternalIncrement.stories.tsx"
+ },
+ {
+  "key": "Form_ProjectBoard",
+  "title": "Components/Form/ProjectBoard",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Form/ProjectBoard/FormProjectBoard.stories.tsx"
+ },
+ {
+  "key": "Panel",
+  "title": "Components/Panel",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Panel/Panel.stories.tsx"
+ },
+ {
+  "key": "Toolbar",
+  "title": "Components/Toolbar",
+  "stories": 1,
+  "violations": 1,
+  "statuses": [
+   "contrast"
+  ],
+  "storyFile": "src/components/Toolbar/Toolbar.stories.tsx"
+ },
+ {
+  "key": "Popover",
+  "title": "Components/Popover",
+  "stories": 2,
+  "violations": 0,
+  "statuses": [
+   "render-error"
+  ],
+  "storyFile": "src/components/Popover/Popover.stories.tsx"
+ },
+ {
+  "key": "Switch",
+  "title": "Components/Switch",
+  "stories": 1,
+  "violations": 0,
+  "statuses": [
+   "timeout"
+  ],
+  "storyFile": "src/components/Switch/Switch.stories.tsx"
+ },
+ {
+  "key": "TransferList",
+  "title": "Components/TransferList",
+  "stories": 1,
+  "violations": 0,
+  "statuses": [
+   "render-error"
+  ],
+  "storyFile": "src/components/TransferList/TransferList.stories.tsx"
+ }
+]

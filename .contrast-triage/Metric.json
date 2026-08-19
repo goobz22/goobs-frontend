@@ -1,0 +1,139 @@
+{
+ "title": "Components/Metric",
+ "stories": [
+  {
+   "id": "components-metric--accordion-array-light",
+   "title": "Components/Metric",
+   "name": "Accordion/Array (Light)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[aria-label=\"Up 12.5 percent\"]",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "↗ 12.5%"
+    },
+    {
+     "selector": "div[aria-label=\"Up 4.2 percent\"]",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "↗ 4.2%"
+    },
+    {
+     "selector": ".Card_negative__EYhlJ",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "↘ 0.8%"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-metric--accordion-grouped-sacred",
+   "title": "Components/Metric",
+   "name": "Accordion/Grouped (Sacred)",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-metrics-group=\"templates\"] > .Accordion_groupLabel__o1XIg",
+     "fg": "#6c6e74",
+     "bg": "#0a0e17",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "Templates"
+    },
+    {
+     "selector": "div[data-metrics-group=\"by-target\"] > .Accordion_groupLabel__o1XIg",
+     "fg": "#6c6e74",
+     "bg": "#0a0e17",
+     "ratio": 3.78,
+     "required": 4.5,
+     "text": "By Target"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-metric--custom-styling",
+   "title": "Components/Metric",
+   "name": "Card/Custom Styling",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Card_trend__n2A5r",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "↗ 2.1%"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-metric--dark-theme",
+   "title": "Components/Metric",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Card_label__n2kRy",
+     "fg": "#64748b",
+     "bg": "#1e293b",
+     "ratio": 3.07,
+     "required": 4.5,
+     "text": "Active Users"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-metric--light-theme",
+   "title": "Components/Metric",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Card_trend__n2A5r",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "↗ 12.5%"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-metric--trend-states",
+   "title": "Components/Metric",
+   "name": "Card/Trend States",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Card_positive__42YG7",
+     "fg": "#22c55e",
+     "bg": "#ffffff",
+     "ratio": 2.27,
+     "required": 4.5,
+     "text": "↗ 12.5%"
+    },
+    {
+     "selector": ".Card_negative__EYhlJ",
+     "fg": "#ef4444",
+     "bg": "#ffffff",
+     "ratio": 3.76,
+     "required": 4.5,
+     "text": "↘ 5.4%"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

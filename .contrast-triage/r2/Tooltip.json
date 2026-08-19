@@ -1,0 +1,22 @@
+{
+ "title": "Components/Tooltip",
+ "stories": [
+  {
+   "id": "components-tooltip--open-light",
+   "title": "Components/Tooltip",
+   "name": "Open/Light Bubble",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Button_button__exqP_ > span",
+     "fg": "#f5f5f5",
+     "bg": "#999999",
+     "ratio": 2.61,
+     "required": 4.5,
+     "text": "Anchor"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

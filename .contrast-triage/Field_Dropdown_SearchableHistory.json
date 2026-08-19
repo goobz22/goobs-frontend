@@ -1,0 +1,106 @@
+{
+ "title": "Components/Field/Dropdown/SearchableHistory",
+ "stories": [
+  {
+   "id": "components-field-dropdown-searchablehistory--dark-theme",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#111827",
+     "ratio": 3.72,
+     "required": 4.5,
+     "text": "Navigate"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablehistory--interactive-demo",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "Interactive Demo",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Navigate"
+    },
+    {
+     "selector": "div[data-theme=\"sacred\"] > div > div > div:nth-child(2)",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Nothing selected yet — open the dropdown and pick an item."
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablehistory--no-items",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "No Navigation Items",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Navigate"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablehistory--required",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "Required",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Navigate *"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-dropdown-searchablehistory--with-helper-text",
+   "title": "Components/Field/Dropdown/SearchableHistory",
+   "name": "With Helper Text",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Navigate"
+    },
+    {
+     "selector": "#searchable-history-_r_0_-helper",
+     "fg": "#6b7280",
+     "bg": "#0e0e0e",
+     "ratio": 3.99,
+     "required": 4.5,
+     "text": "Recently visited items appear under the History tab."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

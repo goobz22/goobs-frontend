@@ -1,0 +1,89 @@
+{
+ "title": "Components/Field/IPAM/Address",
+ "stories": [
+  {
+   "id": "components-field-ipam-address--dark-theme",
+   "title": "Components/Field/IPAM/Address",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "IP Address"
+    },
+    {
+     "selector": "#field-_r_0_",
+     "fg": "#000000",
+     "bg": "#0f172a",
+     "ratio": 1.17,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-ipam-address--error-state",
+   "title": "Components/Field/IPAM/Address",
+   "name": "Error State",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#field-_r_0_",
+     "fg": "#000000",
+     "bg": "#1c1917",
+     "ratio": 1.2,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-ipam-address--network-configuration",
+   "title": "Components/Field/IPAM/Address",
+   "name": "Network Configuration",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Gateway IP"
+    },
+    {
+     "selector": "#field-_r_0_",
+     "fg": "#000000",
+     "bg": "#0f172a",
+     "ratio": 1.17,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-ipam-address--sacred-theme",
+   "title": "Components/Field/IPAM/Address",
+   "name": "Sacred Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "#field-_r_0_",
+     "fg": "#000000",
+     "bg": "#1c1917",
+     "ratio": 1.2,
+     "required": 4.5,
+     "text": ""
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

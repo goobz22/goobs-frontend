@@ -1,0 +1,121 @@
+{
+ "title": "Components/Content",
+ "stories": [
+  {
+   "id": "components-content--custom-component",
+   "title": "Components/Content",
+   "name": "Variant/Custom Component",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Typography_root__0otb6",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "With a custom node"
+    },
+    {
+     "selector": "div[data-component=\"Content\"] > div:nth-child(2)",
+     "fg": "#9333ea",
+     "bg": "#1e1228",
+     "ratio": 3.32,
+     "required": 4.5,
+     "text": "Arbitrary custom content injected via `customComponent`."
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-content--light-theme",
+   "title": "Components/Content",
+   "name": "Light Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Typography_h4___4wR2",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Content Section"
+    },
+    {
+     "selector": "div:nth-child(2) > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": ""
+    },
+    {
+     "selector": ".Typography_cinzelBase__LUU0p",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Learn more"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-content--multiple-grids",
+   "title": "Components/Content",
+   "name": "Variant/Multiple Grids",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "div[data-component=\"Content\"]:nth-child(1) > div:nth-child(1) > .Typography_root__0otb6.Typography_h4___4wR2[data-component=\"Typography\"]",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Section A"
+    },
+    {
+     "selector": "div[data-component=\"Content\"]:nth-child(2) > div:nth-child(1) > .Typography_root__0otb6.Typography_h4___4wR2[data-component=\"Typography\"]",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Section B"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-content--typography-only",
+   "title": "Components/Content",
+   "name": "Variant/Typography Only",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Typography_h1__7ft6I",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Heading One"
+    },
+    {
+     "selector": ".Typography_h3__cyf5y",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 3,
+     "text": "Heading Three"
+    },
+    {
+     "selector": "div:nth-child(3) > .Typography_root__0otb6[data-component=\"Typography\"][data-theme=\"light\"]",
+     "fg": "#1f2937",
+     "bg": "#0e0e0e",
+     "ratio": 1.31,
+     "required": 4.5,
+     "text": "Body copy rendered through the Content composer."
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "title": "Components/AppBar",
+ "stories": [
+  {
+   "id": "components-appbar--disabled",
+   "title": "Components/AppBar",
+   "name": "State/Disabled",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "nav > span:nth-child(1)",
+     "fg": "#8f949b",
+     "bg": "#ffffff",
+     "ratio": 3.05,
+     "required": 4.5,
+     "text": "Dashboard"
+    },
+    {
+     "selector": "nav > span:nth-child(2)",
+     "fg": "#8f949b",
+     "bg": "#ffffff",
+     "ratio": 3.05,
+     "required": 4.5,
+     "text": "Reports"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

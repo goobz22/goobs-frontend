@@ -1,0 +1,47 @@
+{
+ "title": "Components/Field/Number/RoutingNumber",
+ "stories": [
+  {
+   "id": "components-field-number-routingnumber--dark-theme",
+   "title": "Components/Field/Number/RoutingNumber",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Routing Number"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-number-routingnumber--without-validation",
+   "title": "Components/Field/Number/RoutingNumber",
+   "name": "Without Validation",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Simple Routing Number"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Enter 9-digit routing number (validation disabled)"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

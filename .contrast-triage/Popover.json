@@ -1,0 +1,25 @@
+{
+ "title": "Components/Popover",
+ "stories": [
+  {
+   "id": "components-popover--interaction-test",
+   "title": "Components/Popover",
+   "name": "Interaction and A11y Test",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "TestingLibraryElementError: Unable to find an element by: [data-testid=\"popover-title\"]\n\nIgnored nodes: comments, script, style\n<div\n  id=\"storybook-root\"\n>\n  <div\n    data-theme=\"sacred\"\n  >\n    <div\n      style=\"padding: 100px;\"\n    >\n      <button\n        class=\"Button_button__exqP_\"\n        data-component=\"Button\"\n        data-testid=\"toggle-popover\"\n        data-theme=\"light\"\n      />\n    </d"
+   ]
+  },
+  {
+   "id": "components-popover--sacred",
+   "title": "Components/Popover",
+   "name": "Themes/Sacred",
+   "status": "render-error",
+   "violations": [],
+   "errors": [
+    "TestingLibraryElementError: Unable to find an accessible element with the role \"button\" and name \"Toggle Popover\"\n\nHere are the accessible roles:\n\n  button:\n\n  Name \"\":\n  <button\n    class=\"Button_button__exqP_\"\n    data-component=\"Button\"\n    data-theme=\"sacred\"\n  />\n\n  --------------------------------------------------\n\nIgnored nodes: comments, script, style\n<div\n  id=\"storybook-root\"\n>\n  <div\n "
+   ]
+  }
+ ]
+}

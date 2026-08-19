@@ -1,0 +1,72 @@
+{
+ "title": "Components/Field/Number/CreditCardNumber",
+ "stories": [
+  {
+   "id": "components-field-number-creditcardnumber--dark-theme",
+   "title": "Components/Field/Number/CreditCardNumber",
+   "name": "Dark Theme",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Credit Card Number"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-number-creditcardnumber--disabled-state",
+   "title": "Components/Field/Number/CreditCardNumber",
+   "name": "Disabled State",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Credit Card Number"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Card number is saved securely"
+    }
+   ],
+   "errors": []
+  },
+  {
+   "id": "components-field-number-creditcardnumber--without-formatting",
+   "title": "Components/Field/Number/CreditCardNumber",
+   "name": "Without Formatting",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": "label",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Raw Card Number"
+    },
+    {
+     "selector": "#field-helper-_r_0_",
+     "fg": "#64748b",
+     "bg": "#0f172a",
+     "ratio": 3.75,
+     "required": 4.5,
+     "text": "Enter card number without spaces"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}

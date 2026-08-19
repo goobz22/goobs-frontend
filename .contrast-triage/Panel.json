@@ -1,0 +1,22 @@
+{
+ "title": "Components/Panel",
+ "stories": [
+  {
+   "id": "components-panel--fullscreen",
+   "title": "Components/Panel",
+   "name": "Fullscreen",
+   "status": "contrast",
+   "violations": [
+    {
+     "selector": ".Typography_root__0otb6",
+     "fg": "#1f2937",
+     "bg": "#000000",
+     "ratio": 1.43,
+     "required": 4.5,
+     "text": "Fullscreen Takeover"
+    }
+   ],
+   "errors": []
+  }
+ ]
+}
