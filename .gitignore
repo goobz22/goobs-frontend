@@ -63,3 +63,7 @@ claude.md
 .design-sync/node_modules
 .ds-sync/
 ds-bundle/
+# contrast-sweep scratch output + measure logs (never source)
+.contrast-*.json
+.contrast-triage/
+*.log.tmp
