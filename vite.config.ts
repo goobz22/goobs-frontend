@@ -28,7 +28,9 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      // ESM config (`"type": "module"`): `__dirname` is a CJS global that Vite's
+      // upcoming default `configLoader: 'native'` cannot provide (vite ≥8.2 warns).
+      entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'GoobsFrontend',
       formats: ['es', 'umd'],
       fileName: format => `goobs-frontend.${format}.js`,
