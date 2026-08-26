@@ -7,9 +7,6 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  checks: {
-    pluginTimings: false,
-  },
   plugins: [
     react(),
     dts({
@@ -37,7 +34,18 @@ export default defineConfig({
       fileName: format => `goobs-frontend.${format}.js`,
     },
     cssCodeSplit: false,
-    rollupOptions: {
+    // Vite 8 (rolldown): `build.rollupOptions` is a @deprecated alias of
+    // `build.rolldownOptions` (Vite shims `rolldownOptions ??= rollupOptions`).
+    // Rolldown's `checks` is an INPUT option, so it lives here — a top-level
+    // `checks` key is not a Vite UserConfig field and was silently ignored.
+    rolldownOptions: {
+      checks: {
+        // Rolldown's plugin-timing heuristic flags any build where plugins
+        // dominate wall-clock. For a library build that is ALWAYS the case:
+        // unplugin-dts (declaration emit — required package output) is ~75%
+        // of the build. The warning carries no actionable signal here.
+        pluginTimings: false,
+      },
       external: [/^react(\/.*)?$/, /^react-dom(\/.*)?$/, /^next(\/.*)?$/],
       output: {
         globals: {
