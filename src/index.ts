@@ -641,6 +641,16 @@ export type {
   ProjectBoardStyles,
   TaskMeeting,
   NewMeetingData,
+  MeetingCapability,
+  MeetingAccessGrant,
+  MeetingCapabilityPermissions,
+} from './components/ProjectBoard/types'
+// The meeting-affordance decision, exported so a host can ask the same question
+// the board asks (e.g. to decide whether to fetch meeting data at all) instead
+// of re-deriving it. See ProjectBoard/utils/meetingCapability.ts.
+export {
+  MEETING_CAPABILITIES,
+  canUseMeetingCapability,
 } from './components/ProjectBoard/types'
 
 // Task Management Components
