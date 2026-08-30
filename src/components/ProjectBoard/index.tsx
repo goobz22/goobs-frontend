@@ -115,6 +115,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     onCancelMeeting,
     onConfirmMeeting,
     onRescheduleMeeting,
+    meetingPermissions,
     currentDate,
     onUpdateCompanyNotes,
     onUpdateCustomerNotes,
@@ -513,6 +514,11 @@ function ProjectBoardContent(props: ProjectBoardProps) {
       }
     }
 
+    // The meeting props below are forwarded by CONDITIONAL SPREAD rather than
+    // passed directly: under `exactOptionalPropertyTypes` an explicit
+    // `undefined` is not assignable to an optional prop, and a WITHHELD meeting
+    // handler is the entire point — its absence is what hides the control. Same
+    // shape the file already uses for onCaseUpdate / employees / administrators.
     return (
       <InlineShowTask
         headingLevel={headingLevel}
@@ -564,10 +570,11 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         regionOptions={rawRegions}
         styles={styles}
         meetings={meetings.filter(m => m.taskId === activeTaskId)}
-        onScheduleMeeting={onScheduleMeeting}
-        onCancelMeeting={onCancelMeeting}
-        onConfirmMeeting={onConfirmMeeting}
-        onRescheduleMeeting={onRescheduleMeeting}
+        {...(onScheduleMeeting && { onScheduleMeeting })}
+        {...(onCancelMeeting && { onCancelMeeting })}
+        {...(onConfirmMeeting && { onConfirmMeeting })}
+        {...(onRescheduleMeeting && { onRescheduleMeeting })}
+        {...(meetingPermissions && { meetingPermissions })}
         currentDate={currentDate}
         variant={variant === 'customer' ? 'customer' : 'employee'}
         {...(onCaseUpdate && { onCaseUpdate })}

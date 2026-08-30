@@ -1,6 +1,6 @@
 {
   "note": "Public API surface of goobs-frontend — the names re-exported from src/index.ts (values AND types). Regenerate with `bun scripts/lint-api-surface.ts --update`. Gate: `bun run lint:api`. REMOVALS are breaking changes (require a semver MAJOR bump + a deliberate baseline update); ADDITIONS require a deliberate baseline-update commit.",
-  "count": 418,
+  "count": 422,
   "surface": [
     "Accordion",
     "AccordionProps",
@@ -234,6 +234,9 @@
     "MACAddressFieldProps",
     "Markdown",
     "MarkdownProps",
+    "MeetingAccessGrant",
+    "MeetingCapability",
+    "MeetingCapabilityPermissions",
     "MenuItem",
     "MenuItemProps",
     "MenuItemStyles",
@@ -404,6 +407,7 @@
     "ZoomProps",
     "ZoomStyles",
     "alpha",
+    "canUseMeetingCapability",
     "commonKeyframes",
     "css",
     "getRequiredProps",

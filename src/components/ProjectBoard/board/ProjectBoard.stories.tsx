@@ -714,3 +714,95 @@ export const CustomerVariant: Story = {
     },
   },
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MEETING AFFORDANCE GATING — the three contract states of
+// `canUseMeetingCapability` (src/components/ProjectBoard/utils/meetingCapability.ts).
+//
+// The four meeting handlers are OPTIONAL, and a capability that the host did
+// not supply renders NO control rather than a disabled one. These stories are
+// the visual half of that contract; the decision itself is pinned by
+// `scripts/__tests__/meeting-capability.test.ts` and every render site is
+// walled by `bun run lint:meeting-affordance`.
+//
+// The meeting controls live inside a task's Scheduling view, so these are
+// state fixtures for Chromatic and for driving by hand — reach them by opening
+// any task and switching to Scheduling.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Strip the meeting handlers, which is how a host withholds the capability. */
+const withoutMeetingHandlers = (
+  args: AdministratorBoardProps
+): AdministratorBoardProps => {
+  const next = { ...args }
+  delete next.onScheduleMeeting
+  delete next.onCancelMeeting
+  delete next.onConfirmMeeting
+  delete next.onRescheduleMeeting
+  return next
+}
+
+/**
+ * Meeting affordances — ALL GRANTED (the baseline). Every handler is supplied
+ * and no per-capability map is passed, so the handler is the whole decision and
+ * a task's Scheduling view offers Schedule, Accept/Confirm, Reschedule/New Time
+ * and Cancel/Decline. This is the state every existing caller already gets;
+ * it is here as the control group for the two stories below.
+ */
+export const MeetingAffordancesGranted: Story = {
+  render: args => (
+    <ProjectBoardProvider>
+      <ProjectBoard {...args} />
+    </ProjectBoardProvider>
+  ),
+  args: { ...administratorArgs, styles: { theme: 'light' } },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Meeting affordances — HANDLERS WITHHELD. The host passed none of the four
+ * meeting callbacks, so the Scheduling view renders no meeting controls at all.
+ * Not disabled ones: a greyed-out "Schedule Meeting" still advertises a
+ * capability this deployment does not have, which is the affordance-honesty
+ * defect the optional handlers exist to kill. Compare against
+ * `MeetingAffordancesGranted` — the difference IS the fix.
+ */
+export const MeetingAffordancesWithheld: Story = {
+  render: args => (
+    <ProjectBoardProvider>
+      <ProjectBoard {...args} />
+    </ProjectBoardProvider>
+  ),
+  args: {
+    ...withoutMeetingHandlers(administratorArgs),
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/**
+ * Meeting affordances — PER-CAPABILITY MAP DENIES. Every handler IS supplied,
+ * but `meetingPermissions` grants only `confirm` and `reschedule`. So the
+ * Scheduling view offers Accept and New Time and renders no Schedule or Cancel
+ * control — the axis a single coarse `permissions.access` cannot express, and
+ * the reason a host forced to give one answer for four questions gives the
+ * permissive one.
+ */
+export const MeetingAffordancesPartiallyGranted: Story = {
+  render: args => (
+    <ProjectBoardProvider>
+      <ProjectBoard {...args} />
+    </ProjectBoardProvider>
+  ),
+  args: {
+    ...administratorArgs,
+    meetingPermissions: {
+      schedule: { access: 'read' },
+      confirm: { access: 'write' },
+      reschedule: { access: 'write' },
+      cancel: { access: 'no-access' },
+    },
+    styles: { theme: 'light' },
+  },
+  globals: { backgrounds: { value: 'light' } },
+}

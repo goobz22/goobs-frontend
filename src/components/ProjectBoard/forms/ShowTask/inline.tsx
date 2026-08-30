@@ -24,6 +24,10 @@ import type {
   TaskMeeting,
   NewMeetingData,
 } from '../../types'
+import {
+  canUseMeetingCapability,
+  type MeetingCapabilityPermissions,
+} from '../../utils/meetingCapability'
 import Dropdown, { type DropdownOption } from '../../../Field/Dropdown/Regular'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
 import SearchBar from '../../../Field/Search'
@@ -108,16 +112,21 @@ export interface InlineShowTaskProps {
   /** Administrator users (for resolving comment authors in admin context) */
   administrators?: Array<{ _id: string; firstName: string; lastName: string }>
   styles: ProjectBoardStyles
-  // Meeting scheduling props
+  // Meeting scheduling props. All four handlers are OPTIONAL: a withheld
+  // handler renders NO control for that capability (never a disabled one), the
+  // same contract `onUpdateCustomerNotes?` already had. See
+  // `canUseMeetingCapability` — the single home for the decision.
   meetings: TaskMeeting[]
-  onScheduleMeeting: (meetingData: NewMeetingData) => Promise<void> | void
-  onCancelMeeting: (meetingId: string, reason: string) => Promise<void> | void
-  onConfirmMeeting: (meetingId: string) => Promise<void> | void
-  onRescheduleMeeting: (
+  onScheduleMeeting?: (meetingData: NewMeetingData) => Promise<void> | void
+  onCancelMeeting?: (meetingId: string, reason: string) => Promise<void> | void
+  onConfirmMeeting?: (meetingId: string) => Promise<void> | void
+  onRescheduleMeeting?: (
     meetingId: string,
     newStartTime: string,
     newEndTime: string
   ) => Promise<void> | void
+  /** Per-capability grants; an unnamed capability falls back to the handler check. */
+  meetingPermissions?: MeetingCapabilityPermissions
   currentDate: Date
   /** Whether this is being viewed by an employee (can accept/decline bookings) or a customer */
   variant?: 'employee' | 'customer'
@@ -205,6 +214,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onCancelMeeting,
   onConfirmMeeting,
   onRescheduleMeeting,
+  meetingPermissions,
   currentDate,
   // Case history audit logging
   onCaseUpdate,
@@ -216,6 +226,33 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   // (`h3`), replacing hardcoded `<h2>`/`<h3>` that could skip levels.
   const SectionHeading = `h${Math.min(6, headingLevel)}` as ElementType
   const CardHeading = `h${Math.min(6, headingLevel + 1)}` as ElementType
+
+  /**
+   * The four meeting affordances, resolved ONCE through the single home so the
+   * ten render sites below cannot drift apart. `false` means the control is not
+   * rendered at all — never rendered-disabled, which would still advertise a
+   * capability this deployment does not have.
+   */
+  const canScheduleMeeting = canUseMeetingCapability(
+    'schedule',
+    onScheduleMeeting,
+    meetingPermissions
+  )
+  const canConfirmMeeting = canUseMeetingCapability(
+    'confirm',
+    onConfirmMeeting,
+    meetingPermissions
+  )
+  const canRescheduleMeeting = canUseMeetingCapability(
+    'reschedule',
+    onRescheduleMeeting,
+    meetingPermissions
+  )
+  const canCancelMeeting = canUseMeetingCapability(
+    'cancel',
+    onCancelMeeting,
+    meetingPermissions
+  )
   const [activeTab, setActiveTab] = useState<TabType>('details')
   // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern
   // (order matches the rendered tab strip).
@@ -1803,7 +1840,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Meeting form submission handler
   const handleScheduleMeeting = async () => {
-    if (!onScheduleMeeting) return
+    // Capability gate, not just a null check: a denying meetingPermissions map
+    // must stop the action too, not only hide the button.
+    if (!canScheduleMeeting || !onScheduleMeeting) return
 
     // Validation
     if (!meetingTitle.trim()) {
@@ -1879,7 +1918,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Meeting cancel handler
   const handleCancelMeetingAction = async (meetingId: string) => {
-    if (!onCancelMeeting) return
+    if (!canCancelMeeting || !onCancelMeeting) return
     const meeting = meetings.find(m => m._id === meetingId)
     await onCancelMeeting(meetingId, cancelReason)
 
@@ -1899,7 +1938,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Meeting confirm handler
   const handleConfirmMeetingAction = async (meetingId: string) => {
-    if (!onConfirmMeeting) return
+    if (!canConfirmMeeting || !onConfirmMeeting) return
     const meeting = meetings.find(m => m._id === meetingId)
     await onConfirmMeeting(meetingId)
 
@@ -1918,7 +1957,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Meeting reschedule handler
   const handleRescheduleMeetingAction = async () => {
-    if (!onRescheduleMeeting || !selectedMeeting) return
+    if (!canRescheduleMeeting || !onRescheduleMeeting || !selectedMeeting) return
 
     if (!rescheduleDate || !rescheduleTime) {
       setMeetingError('Please select a new date and time')
@@ -2249,19 +2288,24 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             >
               Cancel
             </button>
-            <button
-              data-action="create"
-              onClick={handleScheduleMeeting}
-              disabled={isSubmittingMeeting || !onScheduleMeeting}
-              className={cx(
-                cssStyles.button,
-                cssStyles.primaryButton,
-                (isSubmittingMeeting || !onScheduleMeeting) &&
-                  cssStyles.buttonDisabled
-              )}
-            >
-              {isSubmittingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
-            </button>
+            {/* HIDDEN, not disabled, when the capability is unavailable: a
+                greyed-out "Schedule Meeting" still advertises a capability this
+                deployment does not have. Only `isSubmittingMeeting` — a
+                transient in-flight state — disables it. */}
+            {canScheduleMeeting && (
+              <button
+                data-action="create"
+                onClick={handleScheduleMeeting}
+                disabled={isSubmittingMeeting}
+                className={cx(
+                  cssStyles.button,
+                  cssStyles.primaryButton,
+                  isSubmittingMeeting && cssStyles.buttonDisabled
+                )}
+              >
+                {isSubmittingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
+              </button>
+            )}
           </div>
         </div>
       )
@@ -2373,7 +2417,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           {/* Actions */}
           <div className={cssStyles.detailActions}>
-            {isPending && (
+            {isPending && canConfirmMeeting && (
               <button
                 data-action="confirm"
                 onClick={() => handleConfirmMeetingAction(selectedMeeting._id)}
@@ -2382,7 +2426,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 Confirm Meeting
               </button>
             )}
-            {isActive && isUpcoming && (
+            {isActive && isUpcoming && canRescheduleMeeting && (
               <button
                 data-action="reschedule"
                 onClick={() => {
@@ -2394,7 +2438,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 Reschedule
               </button>
             )}
-            {isActive && isUpcoming && (
+            {isActive && isUpcoming && canCancelMeeting && (
               <button
                 data-action="cancel-meeting"
                 onClick={() => handleCancelMeetingAction(selectedMeeting._id)}
@@ -2564,6 +2608,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             >
               Cancel
             </button>
+            {/* The reschedule view is only reachable from a control that is
+                itself gated, but the submit is gated too: the view survives a
+                state change and a submit that cannot fire must not be drawn. */}
+            {canRescheduleMeeting && (
             <button
               data-action="confirm"
               onClick={handleRescheduleMeetingAction}
@@ -2579,6 +2627,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             >
               {isSubmittingMeeting ? 'Rescheduling...' : 'Confirm Reschedule'}
             </button>
+            )}
           </div>
         </div>
       )
@@ -2627,44 +2676,50 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   </div>
                   <div className={cssStyles.bookingCardActions}>
                     {/* Accept */}
-                    <button
-                      data-action="confirm"
-                      onClick={() => handleConfirmMeetingAction(meeting._id)}
-                      className={cx(
-                        cssStyles.button,
-                        cssStyles.bookingActionButton,
-                        cssStyles.acceptButton
-                      )}
-                    >
-                      Accept
-                    </button>
+                    {canConfirmMeeting && (
+                      <button
+                        data-action="confirm"
+                        onClick={() => handleConfirmMeetingAction(meeting._id)}
+                        className={cx(
+                          cssStyles.button,
+                          cssStyles.bookingActionButton,
+                          cssStyles.acceptButton
+                        )}
+                      >
+                        Accept
+                      </button>
+                    )}
                     {/* Propose new time */}
-                    <button
-                      data-action="reschedule"
-                      onClick={() => {
-                        setSelectedMeeting(meeting)
-                        setSchedulingView('reschedule')
-                      }}
-                      className={cx(
-                        cssStyles.button,
-                        cssStyles.bookingActionButton,
-                        cssStyles.proposeButton
-                      )}
-                    >
-                      New Time
-                    </button>
+                    {canRescheduleMeeting && (
+                      <button
+                        data-action="reschedule"
+                        onClick={() => {
+                          setSelectedMeeting(meeting)
+                          setSchedulingView('reschedule')
+                        }}
+                        className={cx(
+                          cssStyles.button,
+                          cssStyles.bookingActionButton,
+                          cssStyles.proposeButton
+                        )}
+                      >
+                        New Time
+                      </button>
+                    )}
                     {/* Decline */}
-                    <button
-                      data-action="cancel-meeting"
-                      onClick={() => handleCancelMeetingAction(meeting._id)}
-                      className={cx(
-                        cssStyles.button,
-                        cssStyles.bookingActionButton,
-                        cssStyles.declineButton
-                      )}
-                    >
-                      Decline
-                    </button>
+                    {canCancelMeeting && (
+                      <button
+                        data-action="cancel-meeting"
+                        onClick={() => handleCancelMeetingAction(meeting._id)}
+                        className={cx(
+                          cssStyles.button,
+                          cssStyles.bookingActionButton,
+                          cssStyles.declineButton
+                        )}
+                      >
+                        Decline
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2677,16 +2732,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <p className={cssStyles.emptyMeetingsText}>
               No meetings scheduled for this task yet.
             </p>
-            <button
-              data-action="add"
-              onClick={() => {
-                setMeetingTitle(`Meeting: ${taskTitle}`)
-                setSchedulingView('form')
-              }}
-              className={cx(cssStyles.button, cssStyles.scheduleMeetingButton)}
-            >
-              Schedule Meeting
-            </button>
+            {canScheduleMeeting && (
+              <button
+                data-action="add"
+                onClick={() => {
+                  setMeetingTitle(`Meeting: ${taskTitle}`)
+                  setSchedulingView('form')
+                }}
+                className={cx(cssStyles.button, cssStyles.scheduleMeetingButton)}
+              >
+                Schedule Meeting
+              </button>
+            )}
           </div>
         ) : (
           <div className={cssStyles.meetingListColumn}>

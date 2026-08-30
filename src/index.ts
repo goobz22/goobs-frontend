@@ -648,10 +648,10 @@ export type {
 // The meeting-affordance decision, exported so a host can ask the same question
 // the board asks (e.g. to decide whether to fetch meeting data at all) instead
 // of re-deriving it. See ProjectBoard/utils/meetingCapability.ts.
-export {
-  MEETING_CAPABILITIES,
-  canUseMeetingCapability,
-} from './components/ProjectBoard/types'
+// `MEETING_CAPABILITIES` stays INTERNAL on purpose: it is an iteration helper
+// for the board and its tests, not something a host needs, and every public
+// barrel name owes a story (lint:coverage).
+export { canUseMeetingCapability } from './components/ProjectBoard/types'
 
 // Task Management Components
 export { default as ProjectBoard } from './components/ProjectBoard'

@@ -1,3 +1,15 @@
+import type { MeetingCapabilityPermissions } from '../utils/meetingCapability'
+
+export type {
+  MeetingCapability,
+  MeetingAccessGrant,
+  MeetingCapabilityPermissions,
+} from '../utils/meetingCapability'
+export {
+  MEETING_CAPABILITIES,
+  canUseMeetingCapability,
+} from '../utils/meetingCapability'
+
 /**
  * Caller-supplied styling options for the ProjectBoard component.
  * Transcribed locally from the (now-retired) theme/projectboard.ts so the
@@ -356,14 +368,37 @@ interface ProjectBoardBaseProps {
   }
   /** Meeting scheduling props */
   meetings: TaskMeeting[]
-  onScheduleMeeting: (meetingData: NewMeetingData) => Promise<void> | void
-  onCancelMeeting: (meetingId: string, reason: string) => Promise<void> | void
-  onConfirmMeeting: (meetingId: string) => Promise<void> | void
-  onRescheduleMeeting: (
+  /**
+   * Schedule a new meeting against the task. OPTIONAL: omit it and the board
+   * renders no scheduling control at all, the same way omitting
+   * `onUpdateCompanyNotes` renders no notes editor. A host that must not offer
+   * the capability withholds the handler rather than passing a stub, because a
+   * stub draws a live button that reports success the product never delivers.
+   */
+  onScheduleMeeting?: (meetingData: NewMeetingData) => Promise<void> | void
+  /** Cancel/decline a meeting. Omit to render no cancel control (see `onScheduleMeeting`). */
+  onCancelMeeting?: (meetingId: string, reason: string) => Promise<void> | void
+  /** Confirm/accept a proposed meeting. Omit to render no confirm control (see `onScheduleMeeting`). */
+  onConfirmMeeting?: (meetingId: string) => Promise<void> | void
+  /** Move a meeting to a new time. Omit to render no reschedule control (see `onScheduleMeeting`). */
+  onRescheduleMeeting?: (
     meetingId: string,
     newStartTime: string,
     newEndTime: string
   ) => Promise<void> | void
+  /**
+   * Per-capability grants for the four meeting affordances, for hosts whose
+   * RBAC answers them independently — a seat may confirm a booking it may not
+   * schedule, or reschedule one it may not cancel. The coarse board-wide
+   * `permissions` above cannot express that, and a host forced to give one
+   * answer for four questions gives the permissive one.
+   *
+   * PARTIAL: an unnamed capability is not denied, it is ungoverned, and falls
+   * back to "did the host pass a handler". A named capability must grant
+   * `write` or its control is not rendered. Both halves are AND-ed — see
+   * `canUseMeetingCapability`, the single home for this decision.
+   */
+  meetingPermissions?: MeetingCapabilityPermissions
   currentDate: Date
   /** Callback for updating company internal notes (travels with the company, not task-specific - for admin -> company context) */
   onUpdateCompanyNotes?: (
