@@ -406,6 +406,13 @@
   --goobs-control-height-compact: 28px;
   --goobs-control-padding-x: 12px;
 
+  /* The bare pointer-target floor (WCAG 2.5.8 Target Size (Minimum), AA) for
+     targets that are NOT full control rows — an inline block-link inside a card
+     title, say, whose box would otherwise be one line of text tall. A control
+     row uses --goobs-control-height; this is the floor everything else clears.
+     Both rise together on touch (see TOUCH TARGET BASELINE below). */
+  --goobs-target-min: 24px;
+
   /* §4.1 color-alpha primitives — value-identical to the literals they replace */
   --goobs-amber-a10: rgba(255, 215, 0, 0.1);
   --goobs-amber-a100: rgba(255, 215, 0, 1);
@@ -454,6 +461,37 @@
   --goobs-white-a50: rgba(255, 255, 255, 0.5);
   --goobs-white-a90: rgba(255, 255, 255, 0.9);
   --goobs-white-a95: rgba(255, 255, 255, 0.95);
+}
+
+/* ==========================================================================
+   TOUCH TARGET BASELINE — WCAG 2.5.5 Target Size (Enhanced), 44x44 CSS px.
+
+   THE BUG THIS FIXES, stated exactly. The control vocabulary above is a
+   MOUSE vocabulary: 32px normally and --goobs-control-height-compact: 28px
+   under `@media (width <= 768px)`. That breakpoint is the one where the
+   pointer becomes a THUMB, so the library was making its controls SMALLER on
+   precisely the devices where they are hardest to hit. Measured downstream
+   (ThothOS G18.mobile-responsive, .runner/ship/mobile-responsive.json,
+   2026-08-19): 505 control instances across tablet+mobile cleared the 24px AA
+   floor but sat under 44px, and the single dominant class was goobs'
+   `.button` at 28x36 — the compact token, doing exactly what it was told.
+
+   The fix is ONE HOME, not a per-component override: every control that reads
+   these tokens follows, and a component that does not read them is the bug
+   (see scripts/lint-touch-target-height.ts, which walls both halves).
+
+   Scoped to coarse pointers OR the existing <=768px compact breakpoint:
+   `pointer: coarse` is the real property, and the width clause keeps the
+   guarantee on the narrow-viewport emulation that the downstream audit and
+   every responsive dev-tools session actually run under, where the emulated
+   pointer is not always reported as coarse.
+   ========================================================================== */
+@media (width <= 768px), (pointer: coarse) {
+  :root {
+    --goobs-control-height: 44px;
+    --goobs-control-height-compact: 44px;
+    --goobs-target-min: 44px;
+  }
 }
 
 /* ==========================================================================

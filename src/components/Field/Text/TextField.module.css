@@ -243,7 +243,10 @@
 
 @media (max-width: 768px) {
   .inputWrapper {
-    min-height: 36px;
+    /* Was a hardcoded 36px, i.e. the field SHRANK on the touch breakpoint.
+       Reads the shared control token so it rises to the 44px thumb target
+       instead — one home, src/styles/global.css §TOUCH TARGET BASELINE. */
+    min-height: var(--goobs-control-height);
   }
 
   .input,

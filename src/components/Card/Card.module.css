@@ -266,7 +266,13 @@
 .title button.blockLink {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+
+  /* Was a hardcoded 24px (the AA floor). Reads the shared token so the block
+     link rises to 44px on touch with every other target instead of staying at
+     the mouse-era minimum — one home, see src/styles/global.css §TOUCH TARGET
+     BASELINE. `inline-flex` remains load-bearing: min-height has no effect on
+     a default-`inline` <a>. */
+  min-height: var(--goobs-target-min);
 }
 
 .subtitle {

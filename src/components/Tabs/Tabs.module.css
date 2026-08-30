@@ -50,10 +50,23 @@
      default to `display: inline` + `text-align: start` + an underline, whereas
      a <button> is inline-block, centered, and undecorated. Setting these
      explicitly is a no-op for the button and makes the anchor identical. */
-  display: inline-block;
+  /* inline-FLEX, not inline-block: a tab is a pointer target, so it joins the
+     shared control-row baseline below, and min-height only centres its label
+     under a flex box. Horizontal centring is unchanged (justify-content
+     replaces the inline-block text-align, which is kept for any inline
+     fallback content). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   text-decoration: none;
   padding: var(--goobs-space-sm) var(--goobs-space-lg);
+
+  /* Was undeclared, so the tab's height was whatever padding + line-height
+     happened to produce (measured 37px downstream — under the 44px thumb
+     target). Reading the shared token puts it on the control-row baseline and
+     carries it to 44px on touch. One home: src/styles/global.css. */
+  min-height: var(--goobs-control-height);
   background: transparent;
   border-top: none;
   border-inline-end: none;
