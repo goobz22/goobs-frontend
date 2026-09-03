@@ -656,3 +656,54 @@ export const AddTaskSanitizesArticleFields: Story = {
     })
   },
 }
+
+/**
+ * THE CUSTOMER'S OWN TICKET VIEW (`viewerRole="customer"`).
+ *
+ * The same detail view a staff member sees, minus the company's side of the
+ * ticket. Pins, in one story, every affordance the customer role removes:
+ *
+ *   · NO Delete button — `onDelete` is withheld, and a withheld handler renders
+ *     no control rather than a disabled or no-op one (the contract
+ *     `onUpdateCustomerNotes?` and the four meeting handlers already follow).
+ *   · NO "Internal Customer Notes" section — those are the company's private
+ *     record ABOUT the customer, so they are not rendered on the customer's own
+ *     view at all. The customer's channel is the Comments tab.
+ *   · Status / Substatus / Severity / Queue / Region / Assigned To render as
+ *     read-only VALUES even in edit mode, because the company owns them.
+ *   · Edit, comments and Back to Board all remain — the customer's own side of
+ *     the ticket stays fully editable, which is the whole point of the role.
+ *
+ * The server enforces the identical split on its own authority (the ticket
+ * mutations refuse a customer these fields); this story pins the RENDERING half,
+ * so a regression that quietly puts a Delete button back in front of a customer
+ * fails the baseline.
+ */
+export const ShowTaskCustomerView: Story = {
+  render: () => (
+    <InlineShowTask
+      {...showTaskProps}
+      viewerRole="customer"
+      onDelete={undefined}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The three staff-only controls are ABSENT, not merely disabled.
+    await expect(
+      canvas.queryByRole('button', { name: /^Delete$/ })
+    ).toBeNull()
+    await expect(canvas.queryByText(/Internal Customer Notes/)).toBeNull()
+    // The customer's own affordances survive.
+    await expect(
+      canvas.getByRole('button', { name: /^Edit$/ })
+    ).toBeInTheDocument()
+    // Entering edit mode must NOT surface the company-owned editors.
+    await userEvent.click(canvas.getByRole('button', { name: /^Edit$/ }))
+    await expect(canvas.queryByLabelText(/Assigned To/)).toBeNull()
+    await expect(canvas.queryByLabelText(/^Status$/)).toBeNull()
+    await expect(canvas.queryByLabelText(/^Severity$/)).toBeNull()
+    await expect(canvas.queryByLabelText(/^Queue$/)).toBeNull()
+  },
+}
