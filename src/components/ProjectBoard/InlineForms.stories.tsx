@@ -680,13 +680,13 @@ export const AddTaskSanitizesArticleFields: Story = {
  * fails the baseline.
  */
 export const ShowTaskCustomerView: Story = {
-  render: () => (
-    <InlineShowTask
-      {...showTaskProps}
-      viewerRole="customer"
-      onDelete={undefined}
-    />
-  ),
+  render: () => {
+    // `onDelete` is OMITTED, not passed as undefined: with
+    // exactOptionalPropertyTypes an explicit `undefined` is not the same as an
+    // absent key, and "absent" is the contract a withheld handler means.
+    const { onDelete: _staffOnlyDelete, ...customerProps } = showTaskProps
+    return <InlineShowTask {...customerProps} viewerRole="customer" />
+  },
   globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
