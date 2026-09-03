@@ -684,7 +684,8 @@ export const ShowTaskCustomerView: Story = {
     // `onDelete` is OMITTED, not passed as undefined: with
     // exactOptionalPropertyTypes an explicit `undefined` is not the same as an
     // absent key, and "absent" is the contract a withheld handler means.
-    const { onDelete: _staffOnlyDelete, ...customerProps } = showTaskProps
+    const customerProps = { ...showTaskProps }
+    delete customerProps.onDelete
     return <InlineShowTask {...customerProps} viewerRole="customer" />
   },
   globals: { backgrounds: { value: 'light' } },

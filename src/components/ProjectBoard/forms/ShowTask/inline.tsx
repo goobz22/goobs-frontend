@@ -76,7 +76,32 @@ export interface InlineShowTaskProps {
   productId: string
   serviceId: string
   onEdit: (updatedData: any) => void
-  onDelete: () => void
+  /**
+   * OPTIONAL since 2026-09-03. A withheld handler renders NO Delete control —
+   * never a disabled one — the same contract `onUpdateCustomerNotes?` and the
+   * four meeting handlers already had.
+   *
+   * It had to become optional for the customer ticket view: deleting a ticket is
+   * a staff action, and the only ways to express "no delete" against a REQUIRED
+   * handler were to pass a no-op (a button that lies) or to fork the component.
+   */
+  onDelete?: () => void
+  /**
+   * WHO IS LOOKING AT THIS TICKET. `'staff'` (the default, so every existing
+   * caller is unchanged) is the full back-office view. `'customer'` is the
+   * ticket's own customer looking at their own ticket: they may edit THEIR side
+   * of it — the subject, the description, the priority they are requesting, their
+   * attachments, and their own comments — while the company's side renders as
+   * read-only values.
+   *
+   * ONE prop rather than five booleans on purpose. "Which fields may a customer
+   * change" is a single product decision, and split across
+   * `canDelete`/`canAssign`/`canSetStatus`/… it is a decision that drifts: the
+   * next field added gets a default, and the default is the wrong direction for
+   * an authorization surface. The server enforces the same split independently —
+   * this prop decides what is RENDERED, never what is permitted.
+   */
+  viewerRole?: 'staff' | 'customer'
   onComment: (text: string, taskId: string) => void
   onEditComment: (commentId: string, newText: string) => void
   onBack: () => void
@@ -182,6 +207,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   serviceId,
   onEdit,
   onDelete,
+  viewerRole = 'staff',
   onComment,
   onEditComment,
   onBack,
@@ -283,6 +309,21 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     requestAnimationFrame(() => tabRefs.current[next]?.focus())
   }
   const [isEditMode, setIsEditMode] = useState(false)
+
+  /**
+   * The company's side of the ticket — status workflow, sub-status, assigned
+   * severity, assignee, scheduling queue, region — renders as VALUES for a
+   * customer, never as editors, and the internal-notes block is not rendered at
+   * all. Derived once here so the several field rows below cannot disagree about
+   * who is looking, and so a field row added later inherits the decision by
+   * reading this flag rather than re-deciding it.
+   *
+   * This is a RENDERING decision. The server refuses the same writes on its own
+   * authority; a hidden control and an unpermitted write are two independent
+   * statements of one rule, and neither substitutes for the other.
+   */
+  const viewerIsCustomer = viewerRole === 'customer'
+  const canEditCompanyFields = !viewerIsCustomer
   const [isMobile, setIsMobile] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
   const [editedDescription, setEditedDescription] = useState(description)
@@ -867,7 +908,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
 
           {/* Queue - Editable in edit mode */}
-          {isEditMode ? (
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Queue"
@@ -885,7 +926,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Region - Editable in edit mode */}
-          {isEditMode ? (
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Region"
@@ -903,7 +944,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Status - Editable in edit mode */}
-          {isEditMode ? (
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Status"
@@ -924,7 +965,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Substatus - Editable in edit mode */}
-          {isEditMode
+          {isEditMode && canEditCompanyFields
             ? filteredSubStatusOptions.length > 0 && (
                 <div className={cssStyles.editFieldWrap}>
                   <Dropdown
@@ -947,7 +988,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               )}
 
           {/* Severity - Editable in edit mode */}
-          {isEditMode ? (
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Severity"
@@ -965,7 +1006,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Assigned To - Editable in edit mode */}
-          {isEditMode ? (
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <Dropdown
                 label="Assigned To"
@@ -1091,13 +1132,19 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 >
                   Edit
                 </button>
-                <button
-                  className={cx(cssStyles.button, cssStyles.deleteButton)}
-                  data-action="delete"
-                  onClick={onDelete}
-                >
-                  Delete
-                </button>
+                {/* A withheld handler renders NO control (never a disabled or
+                    no-op one) — the contract the meeting handlers and
+                    onUpdateCustomerNotes already follow. Deleting a ticket is a
+                    staff action, so the customer view simply has no Delete. */}
+                {onDelete && (
+                  <button
+                    className={cx(cssStyles.button, cssStyles.deleteButton)}
+                    data-action="delete"
+                    onClick={onDelete}
+                  >
+                    Delete
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -1317,8 +1364,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
         )}
 
-        {/* Internal Customer Notes Section - Shown when associatedCustomerId is provided */}
-        {associatedCustomerId && (
+        {/* Internal Customer Notes Section — shown when associatedCustomerId is
+            provided AND the viewer is staff.
+
+            These notes are the COMPANY's private record ABOUT the customer
+            ("attached to the customer record and will appear on all tasks for
+            this customer"), so on a customer's own ticket view they are not the
+            customer's to read or write — the section is not rendered at all. The
+            customer's channel is the Comments tab, which is attributed to them
+            and visible to both sides. The server refuses the write independently;
+            this is the rendering half of the same rule. */}
+        {associatedCustomerId && canEditCompanyFields && (
           <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
             <div className={cssStyles.notesHeaderRow}>
               <div
