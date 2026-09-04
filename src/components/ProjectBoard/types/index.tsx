@@ -337,7 +337,18 @@ interface ProjectBoardBaseProps {
   rawRegions: RawRegion[]
   rawSeverityLevels: RawSeverityLevel[]
   onEdit: (args: { _id: string }) => void
-  onDelete: (args: { _id: string }) => void
+  /**
+   * OPTIONAL since 2026-09-03, matching `InlineShowTask.onDelete?`. A withheld
+   * handler renders NO Delete control — never a disabled or no-op one — the same
+   * contract `onUpdateCustomerNotes?` already had on this component.
+   */
+  onDelete?: (args: { _id: string }) => void
+  /**
+   * WHO IS LOOKING AT THE BOARD. Forwarded verbatim to the detail view; see
+   * `InlineShowTaskProps.viewerRole` for what 'customer' changes. Default 'staff',
+   * so every existing caller is unchanged.
+   */
+  viewerRole?: 'staff' | 'customer'
   onEditComment: (commentId: string, newText: string, taskId: string) => void
   onAdd: (newTask: Omit<Task, '_id'>) => void
   currentUser: CurrentUser

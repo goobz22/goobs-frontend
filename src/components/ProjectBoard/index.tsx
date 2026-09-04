@@ -101,6 +101,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     rawSeverityLevels,
     onEdit,
     onDelete,
+    viewerRole = 'staff',
     onEditComment,
     onAdd,
     onComment,
@@ -495,12 +496,16 @@ function ProjectBoardContent(props: ProjectBoardProps) {
       }
     }
 
-    const deleteCallback = () => {
-      if (!permissions || permissions.access === 'write') {
-        onDelete({ _id: activeTaskId })
-        handleBackToBoard()
-      }
-    }
+    // Undefined when the caller withheld onDelete, which is what removes the
+    // control rather than disabling it (the onUpdateCustomerNotes contract).
+    const deleteCallback = onDelete
+      ? () => {
+          if (!permissions || permissions.access === 'write') {
+            onDelete({ _id: activeTaskId })
+            handleBackToBoard()
+          }
+        }
+      : undefined
 
     const commentCallback = (text: string, _id: string) => {
       if (!permissions || permissions.access === 'write') {
@@ -553,7 +558,8 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         serviceId={currentShowTask.serviceId}
         region={currentShowTask.region}
         onEdit={editCallback}
-        onDelete={deleteCallback}
+        {...(deleteCallback && { onDelete: deleteCallback })}
+        viewerRole={viewerRole}
         onComment={commentCallback}
         onEditComment={editCommentCallback}
         {...(onUpdateCustomerNotes && { onUpdateCustomerNotes })}
