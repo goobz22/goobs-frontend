@@ -20,6 +20,9 @@ const meta: Meta<typeof SaveButton> = {
     pending: { control: 'boolean' },
     label: { control: 'text' },
     pendingLabel: { control: 'text' },
+    completedLabel: { control: 'text' },
+    failedLabel: { control: 'text' },
+    outcome: { control: 'select', options: [undefined, 'success', 'error'] },
     subject: { control: 'text' },
     onSave: { action: 'save' },
   },
@@ -95,6 +98,126 @@ export const CompletionAnnounced: Story = {
 
     // Finish the save → the region announces completion (was silently cleared
     // before the fix; this assertion fails if the completion edge regresses).
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Save complete/)
+  },
+}
+
+/**
+ * REGRESSION PIN — a FAILED save must not announce completion. The caller
+ * reports the outcome in the same state update that clears `pending`; when that
+ * outcome is `'error'` the polite region announces `failedLabel` (default `''`
+ * = silent, because the caller's own `role="alert"` is the announcer) instead
+ * of `completedLabel`. Before the fix the region announced "Save complete" on
+ * ANY `pending: true → false`, so a screen-reader user heard "Save complete"
+ * beside the error alert.
+ *
+ * The demo mirrors a real caller: ONE state object flips `pending` on and, on
+ * the way back down, carries the resolved outcome — never inferred by
+ * SaveButton.
+ */
+const OutcomeLifecycleDemo: React.FC<{
+  outcome: 'success' | 'error'
+  failedLabel?: string
+}> = ({ outcome, failedLabel }) => {
+  const [save, setSave] = useState<{
+    pending: boolean
+    outcome?: 'success' | 'error'
+  }>({ pending: false })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <button
+        type="button"
+        onClick={() =>
+          setSave(s =>
+            s.pending ? { pending: false, outcome } : { pending: true }
+          )
+        }
+      >
+        toggle pending
+      </button>
+      <SaveButton
+        valid
+        pending={save.pending}
+        subject="contract"
+        {...(save.outcome !== undefined && { outcome: save.outcome })}
+        {...(failedLabel !== undefined && { failedLabel })}
+      />
+      {/* The caller's own failure announcer — the reason `failedLabel`
+          defaults to silence. */}
+      {save.outcome === 'error' && failedLabel === undefined && (
+        <span role="alert">Could not save the contract</span>
+      )}
+    </div>
+  )
+}
+
+export const FailureAnnouncesNoCompletion: Story = {
+  name: 'Failed save announces no completion',
+  render: () => <OutcomeLifecycleDemo outcome="error" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const status = canvas.getByRole('status')
+    const toggle = canvas.getByRole('button', { name: 'toggle pending' })
+
+    // Start the save → the region announces the pending label.
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Saving/)
+
+    // Finish it as a FAILURE → the region must NOT claim completion. This is
+    // the assertion that fails if the completion edge stops reading `outcome`.
+    await userEvent.click(toggle)
+    await expect(status).not.toHaveTextContent(/Save complete/)
+    // Silent by default (jest-dom rejects toHaveTextContent('')).
+    await expect(status).toBeEmptyDOMElement()
+
+    // The caller's alert is what a screen reader hears instead.
+    await expect(canvas.getByRole('alert')).toHaveTextContent(
+      /Could not save/
+    )
+  },
+}
+
+/**
+ * A caller with NO error alert of its own may give the failure words by passing
+ * `failedLabel`; the polite region then announces those words on the error
+ * edge (and still never `completedLabel`).
+ */
+export const FailureWithCustomLabel: Story = {
+  name: 'Failed save with a custom failedLabel',
+  render: () => (
+    <OutcomeLifecycleDemo outcome="error" failedLabel="Save failed" />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const status = canvas.getByRole('status')
+    const toggle = canvas.getByRole('button', { name: 'toggle pending' })
+
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Saving/)
+
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent('Save failed')
+    await expect(status).not.toHaveTextContent(/Save complete/)
+  },
+}
+
+/**
+ * The success edge is unchanged: `outcome="success"` announces `completedLabel`
+ * exactly as an outcome-less caller does, so adding the prop breaks nobody.
+ */
+export const SuccessStillAnnouncesCompletion: Story = {
+  name: 'Successful save still announces completion',
+  render: () => <OutcomeLifecycleDemo outcome="success" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const status = canvas.getByRole('status')
+    const toggle = canvas.getByRole('button', { name: 'toggle pending' })
+
+    await userEvent.click(toggle)
+    await expect(status).toHaveTextContent(/Saving/)
+
     await userEvent.click(toggle)
     await expect(status).toHaveTextContent(/Save complete/)
   },
