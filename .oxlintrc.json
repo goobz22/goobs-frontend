@@ -1,3 +1,48 @@
+// oxlint configuration for goobs-frontend. This REPLACED eslint.config.mjs in
+// the 0.300.0 lint-toolchain migration; the mapping below is the audit trail
+// from the 113 rules ESLint actually resolved on this tree to what runs now.
+//
+//   92  native oxlint rules      (nextjs/*, typescript/*, react/*, jsx-a11y/*,
+//                                 import/*, jsdoc/*, and the eslint core set)
+//   11  eslint-plugin-storybook  via jsPlugins (no native port exists)
+//    3  subsumed by an enabled equivalent, nothing to enforce separately:
+//         react/jsx-uses-vars   -> covered by no-unused-vars, which is on
+//         react/jsx-uses-react  -> obsolete under the React 17+ JSX transform
+//         react/prop-types      -> was OFF in the baseline; TS owns prop types
+//    7  DROPPED, each for a stated reason:
+//         @next/next/no-location-assign-relative-destination
+//              not implemented in oxlint 1.81.0. Cost: a Next-app-router lint
+//              on a component LIBRARY that ships no pages -- lowest-cost loss
+//              in the set.
+//         react/no-deprecated
+//              oxlint's stated counterpart is typescript/no-deprecated, which
+//              is far broader: it flags EVERY @deprecated symbol, including
+//              this library's own still-honored compat props (sacredtheme,
+//              level, backgroundColor...) -- 102 findings, 82 of them in the
+//              stories that exist to exercise those compat paths. Enabling it
+//              would mean deleting demos of capabilities the library still
+//              supports, which is a REMOVAL and therefore the operator's call.
+//              It is left wired below at "off" so the decision is visible.
+//              Residual coverage: react/no-string-refs, no-find-dom-node,
+//              no-is-mounted and no-render-return-value are all on, and React
+//              19's types no longer declare the removed legacy APIs at all.
+//         react-hooks/config, react-hooks/gating
+//              oxlint pins valid React Compiler options and does not expose
+//              them, so there is no configuration for these two to validate.
+//         no-restricted-syntax
+//              not implemented in oxlint. These were OPERATOR-AUTHORED house
+//              bans, so they are NOT lost: reimplemented as
+//              scripts/lint-story-restricted-syntax.ts (same two selectors,
+//              same carve-out, planted-defect selftest), wired into lint:all.
+//         jsdoc/no-types, jsdoc/check-alignment
+//              not implemented in oxlint. Cost: JSDoc hygiene only --
+//              jsdoc/check-tag-names, which is what enforces the house
+//              @fileoverview tag, is native and still on.
+//
+// The four DELIBERATE "off" decisions from eslint.config.mjs are preserved
+// verbatim and are marked at their rule below: typescript/no-explicit-any,
+// react/purity, and (for the three peer-authored stories)
+// storybook/no-renderer-packages + storybook/no-redundant-story-name.
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["nextjs", "typescript", "react", "import", "jsx-a11y", "jsdoc"],
