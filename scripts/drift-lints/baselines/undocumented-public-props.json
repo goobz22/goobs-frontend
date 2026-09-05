@@ -61,7 +61,7 @@
  "src/components/PricingTable/index.tsx": 8,
  "src/components/ProjectBoard/board/index.tsx": 6,
  "src/components/ProjectBoard/forms/AddTask/inline.tsx": 13,
- "src/components/ProjectBoard/forms/ShowTask/inline.tsx": 51,
+ "src/components/ProjectBoard/forms/ShowTask/inline.tsx": 50,
  "src/components/ProjectBoard/types/index.tsx": 37,
  "src/components/Select/index.tsx": 7,
  "src/components/Snackbar/index.tsx": 4,

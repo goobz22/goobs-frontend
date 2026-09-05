@@ -84,6 +84,13 @@ const BusyLifecycleDemo: React.FC = () => {
   )
 }
 
+/**
+ * Pins BOTH edges of the busy lifecycle in the polite live region: on
+ * `pending: false → true` it reads the pending label ("Saving…"), and on
+ * `true → false` it reads `completedLabel` ("Save complete"). The completion
+ * edge is the regression: the region used to clear to `''` instead, so an AT
+ * user heard the save start and never heard it finish.
+ */
 export const CompletionAnnounced: Story = {
   name: 'Busy lifecycle announced (start + completion)',
   render: () => <BusyLifecycleDemo />,
@@ -153,6 +160,12 @@ const OutcomeLifecycleDemo: React.FC<{
   )
 }
 
+/**
+ * Pins the FAILED save: after `pending: true → false` carrying
+ * `outcome: 'error'`, the polite region is EMPTY — it must not claim
+ * "Save complete" — and the caller's own `role="alert"` is what a screen
+ * reader hears. Silence is the default because `failedLabel` defaults to `''`.
+ */
 export const FailureAnnouncesNoCompletion: Story = {
   name: 'Failed save announces no completion',
   render: () => <OutcomeLifecycleDemo outcome="error" />,
@@ -267,6 +280,12 @@ const FormBoundDemo: React.FC = () => {
   )
 }
 
+/**
+ * Live gating inside a goobs `<Form>`: the button is disabled while the
+ * required Contract Name is empty, enables the moment it is non-empty, and
+ * shows the busy state for the 1.5s simulated save. Nothing is derived by
+ * SaveButton — the parent owns both `valid` and `pending`.
+ */
 export const FormBound: Story = {
   name: 'Form-bound (live gating)',
   render: () => <FormBoundDemo />,
