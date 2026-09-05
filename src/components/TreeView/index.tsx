@@ -1529,6 +1529,19 @@ const TreeItem: FC<TreeItemProps> = ({
 // MAIN TREE VIEW COMPONENT
 // --------------------------------------------------------------------------
 
+/**
+ * Hydration probe for useSyncExternalStore. The "store" never changes, so the
+ * subscribe callback registers nothing and returns a no-op unsubscribe; the
+ * client snapshot is always true and the server snapshot always false. React
+ * therefore renders `false` on the server and through the hydrating pass, then
+ * `true` on the client — a hydration-safe "am I mounted" without setting state
+ * from an effect. Declared at module scope so all three references are stable
+ * and useSyncExternalStore never resubscribes.
+ */
+const subscribeToNothing = (): (() => void) => () => {}
+const getHydratedSnapshot = (): boolean => true
+const getServerSnapshot = (): boolean => false
+
 const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
   (
     {
@@ -1569,7 +1582,18 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
     })
     const [focusedItem, setFocusedItem] = useState<TreeViewItemId | null>(null)
     const [disabledItems] = useState<Set<TreeViewItemId>>(new Set())
-    const [isMounted, setIsMounted] = useState(false)
+    // Hydration gate for the sacred background (see the render site below).
+    // useSyncExternalStore returns the SERVER snapshot (false) for the SSR
+    // pass and the first hydrating render, then the client snapshot (true)
+    // once hydration completes — the React-supported way to ask "am I on the
+    // client yet". It replaces a `useState(false)` +
+    // `useEffect(() => setIsMounted(true), [])` pair, which set state from an
+    // effect purely to trigger a second render (react-hooks/set-state-in-effect).
+    const isMounted = React.useSyncExternalStore(
+      subscribeToNothing,
+      getHydratedSnapshot,
+      getServerSnapshot
+    )
 
     // Shared type-ahead buffer (APG Tree View recommended type-ahead). Kept in a
     // ref (not state) so it is shared across every row's key handler without
@@ -1578,11 +1602,6 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
       query: string
       timer: ReturnType<typeof setTimeout> | null
     }>({ query: '', timer: null })
-
-    // Set mounted state to ensure consistent rendering
-    useEffect(() => {
-      setIsMounted(true)
-    }, [])
 
     // Selection and expansion state
     const { selectedItems, setSelectedItems, toggleItemSelection } =
@@ -1790,9 +1809,17 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
       ]
     )
 
-    // Render tree recursively
+    // Render tree recursively. The callback is a NAMED function expression so
+    // the recursive call below binds to the function's own name rather than to
+    // the `renderTree` const, which is still being initialized while
+    // useCallback runs (react-hooks/immutability: "accessed before it is
+    // declared"). Behaviour is identical; only the binding the recursion
+    // resolves through changes.
     const renderTree = useCallback(
-      (items: TreeViewItem[], level = 0): ReactNode => {
+      function renderTreeNodes(
+        items: TreeViewItem[],
+        level = 0
+      ): ReactNode {
         return items.map((item, index) => {
           const itemId = getItemId(item)
           const children = getItemChildren(item)
@@ -1845,7 +1872,7 @@ const TreeView = forwardRef<HTMLDivElement, TreeViewProps>(
                     itemChildrenIndentation
                   )}
                 >
-                  {renderTree(children, level + 1)}
+                  {renderTreeNodes(children, level + 1)}
                 </div>
               )}
             </React.Fragment>

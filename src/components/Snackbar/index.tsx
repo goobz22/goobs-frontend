@@ -51,9 +51,18 @@ const Snackbar: React.FC<SnackbarProps> = ({
   const [isFocusWithin, setIsFocusWithin] = useState(false)
   const isPaused = isHovered || isFocusWithin
 
-  useEffect(() => {
+  // Mirror the `open` prop into the local latch WITHOUT an effect. React's
+  // documented "adjusting state when a prop changes" pattern: compare the prop
+  // against the copy we last saw and re-seed during render, so the re-render
+  // settles before the browser paints. The old
+  // `useEffect(() => setIsOpen(open), [open])` painted the stale latch first
+  // and then immediately re-rendered (react-hooks/set-state-in-effect), which
+  // on a reopen showed one frame of the closed state.
+  const [lastOpenProp, setLastOpenProp] = useState(open)
+  if (lastOpenProp !== open) {
+    setLastOpenProp(open)
     setIsOpen(open)
-  }, [open])
+  }
 
   // Reset the WCAG 2.2.1 pause flags whenever the snackbar is CLOSED. A parent
   // almost always keeps this instance MOUNTED and merely toggles `open` (we
@@ -72,12 +81,19 @@ const Snackbar: React.FC<SnackbarProps> = ({
   // the reused toast would never auto-dismiss, silently breaking the auto-hide
   // contract on the a11y-critical keyboard/pointer path. Clearing on close
   // guarantees every reopen starts unpaused with a fresh full-duration timer.
-  useEffect(() => {
+  // Same render-adjust shape as the `open` mirror above: edge-detect the
+  // isOpen transition against the copy we last saw instead of running the
+  // reset from an effect (react-hooks/set-state-in-effect). The reset still
+  // lands on the closing render, one pass after the latch flips, exactly as
+  // the effect did — and still before any subsequent reopen reads isPaused.
+  const [lastIsOpen, setLastIsOpen] = useState(isOpen)
+  if (lastIsOpen !== isOpen) {
+    setLastIsOpen(isOpen)
     if (!isOpen) {
       setIsHovered(false)
       setIsFocusWithin(false)
     }
-  }, [isOpen])
+  }
 
   // Diagnostic bus — emit the snackbar open/closed lifecycle as a
   // `component.state` transition so outcome tests can assert the snackbar

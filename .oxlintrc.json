@@ -9,8 +9,25 @@
     "builtin": true
   },
   "options": {
+    // Type-aware rules (oxlint-tsgolint on typescript-go) are ON: the whole
+    // typescript/* set below resolves real types, verified by temporarily
+    // enabling typescript/no-deprecated and watching it resolve @deprecated
+    // JSDoc across module boundaries.
     "typeAware": true,
-    "typeCheck": true
+    // The EXPERIMENTAL TypeScript-compiler-diagnostic passthrough is OFF, on
+    // purpose, and it costs no coverage: `npm run typecheck` already runs the
+    // real tsc 7.0.2 over BOTH programs (tsconfig.json and
+    // tsconfig.stories.json) and both are green. oxlint builds its own program
+    // per file, and *.stories.tsx is deliberately EXCLUDED from tsconfig.json
+    // (tsconfig.stories.json is the story type gate -- see its header), so a
+    // story lands in an ad-hoc program without the ambient
+    // `declare module '*.css'` from src/vite-env.d.ts and reports a false
+    // TS2307 on src/components/DataGrid/DataGrid.stories.tsx:24. Passing
+    // `--tsconfig tsconfig.stories.json` does not change it: that flag
+    // redirects import resolution only, not program construction. Turning this
+    // on would mean either deleting a used CSS import or folding the stories
+    // into the root program, which would undo the phantom-prop split.
+    "typeCheck": false
   },
   "settings": {
     "jsdoc": {

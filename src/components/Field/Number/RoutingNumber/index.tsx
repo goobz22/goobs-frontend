@@ -85,6 +85,17 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
   const value = boundValue ?? ''
 
   const [internalValue, setInternalValue] = useState<string>(value)
+  // Mirror an incoming `value` change into the local draft WITHOUT an effect.
+  // React's documented "adjusting state when a prop changes" pattern: compare
+  // the prop against the copy we last saw and re-seed during render, so the
+  // re-render happens before the browser paints. The old
+  // `useEffect(() => setInternalValue(value), [value])` painted the stale
+  // draft first and then immediately re-rendered (react-hooks/set-state-in-effect).
+  const [lastSeenValue, setLastSeenValue] = useState<string>(value)
+  if (lastSeenValue !== value) {
+    setLastSeenValue(value)
+    setInternalValue(value)
+  }
   // Tracks focus for the masked default-value display flip only.
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false)
@@ -140,10 +151,6 @@ const RoutingNumber: React.FC<RoutingNumberProps> = ({
         : internalValue,
     [isDefaultValue, isFocused, hasBeenEdited, internalValue, maskRoutingNumber]
   )
-
-  useEffect(() => {
-    setInternalValue(value)
-  }, [value])
 
   // Listen for native 'input' events to support browser automation tools
   useEffect(() => {

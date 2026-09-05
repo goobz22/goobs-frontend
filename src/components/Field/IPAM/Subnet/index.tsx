@@ -515,12 +515,11 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
   const [mask, setMask] = useState<number>(
     value.mask || (maskType === 'supernet' ? 8 : 16)
   )
-  const [networkRange, setNetworkRange] = useState<{
-    start: string
-    end: string
-    cidr: number
-  } | null>(null)
-  const [isValidSubnet, setIsValidSubnet] = useState<boolean>(true)
+  // `networkRange` and `isValidSubnet` used to be state written from effects.
+  // Both are PURE functions of the props + the two pieces of real state above,
+  // so they are derived with useMemo below instead: an effect that only ever
+  // recomputes a value from its own render inputs paints one stale frame first
+  // and then re-renders (react-hooks/set-state-in-effect).
 
   const cidrToMaskFn = useCallback((cidr: number): string => {
     const binary = '1'.repeat(cidr) + '0'.repeat(32 - cidr)
@@ -583,45 +582,54 @@ const SubnetField: React.FC<SubnetFieldProps> = ({
     []
   )
 
-  React.useEffect(() => {
+  // Re-seed the local draft from an incoming `value` (or a `maskType` switch,
+  // which changes the mask default) WITHOUT an effect — React's documented
+  // "adjusting state when a prop changes" pattern. The seed key carries every
+  // dependency the old effect listed, so the re-seed fires on exactly the same
+  // transitions, but during render instead of after paint.
+  const seed = [value.address ?? '', value.mask ?? '', maskType].join(' ')
+  const [lastSeed, setLastSeed] = useState<string>(seed)
+  if (lastSeed !== seed) {
+    setLastSeed(seed)
     setAddress(value.address || '')
     setMask(value.mask || (maskType === 'supernet' ? 8 : 16))
-  }, [value.address, value.mask, maskType])
+  }
 
-  React.useEffect(() => {
-    if (supernetAddress && supernetMask) {
-      try {
-        const cidr =
-          typeof supernetMask === 'string' && supernetMask.includes('.')
-            ? maskToCidr(supernetMask)
-            : Number(supernetMask)
-        const range = calculateNetworkRange(supernetAddress, cidr)
-        setNetworkRange({ start: range.start, end: range.end, cidr })
-      } catch (err) {
-        console.error('Error calculating network range:', err)
-        setNetworkRange(null)
-      }
-    } else {
-      setNetworkRange(null)
+  // Pure derivation of the supernet range (was an effect writing state).
+  const networkRange = React.useMemo<{
+    start: string
+    end: string
+    cidr: number
+  } | null>(() => {
+    if (!supernetAddress || !supernetMask) return null
+    try {
+      const cidr =
+        typeof supernetMask === 'string' && supernetMask.includes('.')
+          ? maskToCidr(supernetMask)
+          : Number(supernetMask)
+      const range = calculateNetworkRange(supernetAddress, cidr)
+      return { start: range.start, end: range.end, cidr }
+    } catch (err) {
+      console.error('Error calculating network range:', err)
+      return null
     }
   }, [supernetAddress, supernetMask])
 
-  React.useEffect(() => {
+  // Pure derivation of the in-supernet check (was an effect writing state).
+  // Same short-circuits, same order, same result as the effect it replaces.
+  const isValidSubnet = React.useMemo<boolean>(() => {
     if (!address || !supernetAddress || !supernetMask || !networkRange) {
-      setIsValidSubnet(true)
-      return
+      return true
     }
     const segments = address.split('.')
     if (segments.length !== 4 || segments.some(s => s === '')) {
-      setIsValidSubnet(true)
-      return
+      return true
     }
     const subnetMaskStr =
       typeof supernetMask === 'number' || !isNaN(Number(supernetMask))
         ? cidrToMaskFn(Number(supernetMask))
         : supernetMask
-    const isInRange = isIPInNetwork(address, supernetAddress, subnetMaskStr)
-    setIsValidSubnet(isInRange)
+    return isIPInNetwork(address, supernetAddress, subnetMaskStr)
   }, [
     address,
     supernetAddress,

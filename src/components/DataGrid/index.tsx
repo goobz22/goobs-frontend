@@ -937,14 +937,31 @@ function DataGridContent({
    * change. Smart-search lives in `filterRowsBySearch` — column-header terms
    * resolve to "show everything", content terms narrow to matching rows.
    *
-   * Effect runs after layout but is read-only against rows/columns, so it
-   * doesn't race with the providedRows sync effect above.
+   * `filteredRows` cannot be a plain useMemo: sorting, inline edits and the
+   * providedRows sync all write it directly, so it is real state. Instead this
+   * is React's "adjusting state when a prop changes" pattern — the same three
+   * inputs the old effect depended on, compared by identity against the copy
+   * we last filtered on. Running during render (rather than in an effect that
+   * fired after paint, react-hooks/set-state-in-effect) means the grid never
+   * paints one frame of unfiltered rows after a keystroke. `null` seeds the
+   * first pass so the initial filter still happens, exactly as the mount run
+   * of the effect did.
    */
-  React.useEffect(() => {
-    const nextFiltered = filterRowsBySearch(rows, visibleColumns, searchTerm)
-    setFilteredRows(nextFiltered)
+  const [lastFilterInputs, setLastFilterInputs] = useState<{
+    searchTerm: string
+    rows: RowData[]
+    visibleColumns: typeof visibleColumns
+  } | null>(null)
+  if (
+    !lastFilterInputs ||
+    lastFilterInputs.searchTerm !== searchTerm ||
+    lastFilterInputs.rows !== rows ||
+    lastFilterInputs.visibleColumns !== visibleColumns
+  ) {
+    setLastFilterInputs({ searchTerm, rows, visibleColumns })
+    setFilteredRows(filterRowsBySearch(rows, visibleColumns, searchTerm))
     setPage(0)
-  }, [searchTerm, rows, visibleColumns])
+  }
 
   /** Map `DataGridFilter[]` to goobs FilterSection's prop shape. */
   const filterDropdowns: FilterDropdownDef[] = useMemo(() => {

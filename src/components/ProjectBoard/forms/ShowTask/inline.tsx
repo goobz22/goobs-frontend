@@ -183,6 +183,48 @@ type TabType =
   | 'scheduling'
   | 'knowledgeBase'
 
+/**
+ * A local draft value that is SEEDED from props and then owned by the user
+ * until the props it was seeded from change again.
+ *
+ * This is React's documented "adjusting state when a prop changes" pattern,
+ * factored out because this form seeds six such drafts from six different
+ * option lists. `seed` is the value to (re)seed with; `seedKey` is the list of
+ * inputs the seed derives from, compared by identity exactly as an effect
+ * dependency array would be. When any entry changes, the draft is re-seeded
+ * DURING RENDER, so the re-render settles before the browser paints instead of
+ * painting the stale draft and then correcting it, which is what the
+ * `useEffect(() => setDraft(seed), [seedKey])` shape did
+ * (react-hooks/set-state-in-effect).
+ */
+function usePropSeededDraft<T>(
+  seed: T,
+  seedKey: readonly unknown[]
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [draft, setDraft] = useState<T>(seed)
+  const [lastSeedKey, setLastSeedKey] = useState<readonly unknown[]>(seedKey)
+  if (
+    lastSeedKey.length !== seedKey.length ||
+    lastSeedKey.some((entry, i) => entry !== seedKey[i])
+  ) {
+    setLastSeedKey(seedKey)
+    setDraft(seed)
+  }
+  return [draft, setDraft]
+}
+
+/**
+ * Hydration probe for useSyncExternalStore: the store never changes, so
+ * subscribe registers nothing, the client snapshot is always true and the
+ * server snapshot always false. React renders `false` on the server and
+ * through the hydrating pass, then `true` on the client — a hydration-safe
+ * "am I on the client yet" that does not set state from an effect. Declared at
+ * module scope so the three callbacks are stable across renders.
+ */
+const subscribeToNothing = (): (() => void) => () => {}
+const getHydratedSnapshot = (): boolean => true
+const getServerSnapshot = (): boolean => false
+
 export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   taskId,
   taskTitle,
@@ -382,22 +424,33 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   }
 
   // Edit mode state for editable fields
-  const [editedSeverityId, setEditedSeverityId] = useState(
-    severityOptions.find(s => s.description === severity)?._id || ''
+  // Each of these six drafts is seeded from a prop + its option list and then
+  // owned by the user's edits until that pair changes again — see
+  // usePropSeededDraft above, which replaced six prop-mirroring effects.
+  const [editedSeverityId, setEditedSeverityId] = usePropSeededDraft(
+    severityOptions.find(s => s.description === severity)?._id || '',
+    [severity, severityOptions]
   )
-  const [editedStatusId, setEditedStatusId] = useState(
-    statusOptions.find(s => s.status === status)?._id || ''
+  const [editedStatusId, setEditedStatusId] = usePropSeededDraft(
+    statusOptions.find(s => s.status === status)?._id || '',
+    [status, statusOptions]
   )
-  const [editedSubStatusId, setEditedSubStatusId] = useState(
-    subStatusOptions.find(s => s.subStatus === subStatus)?._id || ''
+  const [editedSubStatusId, setEditedSubStatusId] = usePropSeededDraft(
+    subStatusOptions.find(s => s.subStatus === subStatus)?._id || '',
+    [subStatus, subStatusOptions]
   )
-  const [editedQueueId, setEditedQueueId] = useState(
-    schedulingQueueOptions.find(q => q.queueName === schedulingQueue)?._id || ''
+  const [editedQueueId, setEditedQueueId] = usePropSeededDraft(
+    schedulingQueueOptions.find(q => q.queueName === schedulingQueue)?._id || '',
+    [schedulingQueue, schedulingQueueOptions]
   )
-  const [editedRegionId, setEditedRegionId] = useState(
-    regionOptions.find(r => r.regionName === region)?._id || ''
+  const [editedRegionId, setEditedRegionId] = usePropSeededDraft(
+    regionOptions.find(r => r.regionName === region)?._id || '',
+    [region, regionOptions]
   )
-  const [editedTeamMember, setEditedTeamMember] = useState(teamMemberAssigned)
+  const [editedTeamMember, setEditedTeamMember] = usePropSeededDraft(
+    teamMemberAssigned,
+    [teamMemberAssigned]
+  )
   const [editedNextActionDate, setEditedNextActionDate] =
     useState(nextActionDate)
 
@@ -459,11 +512,14 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     return () => mediaQuery.removeListener(handleChange)
   }, [])
 
-  useEffect(() => {
-    if (isMobile && isSidebarCollapsed) {
-      setIsSidebarCollapsed(false)
-    }
-  }, [isMobile, isSidebarCollapsed])
+  // The sidebar cannot stay collapsed at mobile widths (it becomes the only
+  // route to the field rows). Adjusting during render rather than from an
+  // effect (react-hooks/set-state-in-effect) means the collapsed sidebar is
+  // never painted at a mobile width for one frame. This converges: the
+  // re-render sees isSidebarCollapsed === false and the branch is skipped.
+  if (isMobile && isSidebarCollapsed) {
+    setIsSidebarCollapsed(false)
+  }
 
   // Helper function to log case updates for audit trail
   const logCaseUpdate = (
@@ -498,39 +554,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     }
   }
 
-  // Keep edited values in sync with current props
-  useEffect(() => {
-    const severityId =
-      severityOptions.find(s => s.description === severity)?._id || ''
-    setEditedSeverityId(severityId)
-  }, [severity, severityOptions])
-
-  useEffect(() => {
-    const statusId = statusOptions.find(s => s.status === status)?._id || ''
-    setEditedStatusId(statusId)
-  }, [status, statusOptions])
-
-  useEffect(() => {
-    const subStatusId =
-      subStatusOptions.find(s => s.subStatus === subStatus)?._id || ''
-    setEditedSubStatusId(subStatusId)
-  }, [subStatus, subStatusOptions])
-
-  useEffect(() => {
-    const queueId =
-      schedulingQueueOptions.find(q => q.queueName === schedulingQueue)?._id ||
-      ''
-    setEditedQueueId(queueId)
-  }, [schedulingQueue, schedulingQueueOptions])
-
-  useEffect(() => {
-    const regionId = regionOptions.find(r => r.regionName === region)?._id || ''
-    setEditedRegionId(regionId)
-  }, [region, regionOptions])
-
-  useEffect(() => {
-    setEditedTeamMember(teamMemberAssigned)
-  }, [teamMemberAssigned])
+  // The six "keep edited values in sync with current props" effects that used
+  // to live here are now expressed at the useState sites above through
+  // usePropSeededDraft — same inputs, same trigger conditions, but re-seeded
+  // during render instead of after paint.
 
   // --- Hydration-safe date/time formatting ---------------------------------
   // The server cannot know the viewer's locale or time zone, so formatting a
@@ -539,16 +566,20 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   // wall-clock time. We render a deterministic fixed-locale + UTC value on the
   // server and the first client render, then switch to the viewer's own locale
   // + zone right after mount. Gate: scripts/a11y-lints/locale-format-in-render.ts.
-  const [dateLocale, setDateLocale] = useState<string>('en-US')
-  const [dateZone, setDateZone] = useState<string | undefined>('UTC')
-  useEffect(() => {
-    setDateLocale(
-      typeof navigator !== 'undefined' && navigator.language
-        ? navigator.language
-        : 'en-US'
-    )
-    setDateZone(undefined)
-  }, [])
+  // `isHydrated` is false for the SSR pass and the hydrating render, true
+  // afterwards, so locale/zone are DERIVED rather than pushed into state from
+  // a mount effect (react-hooks/set-state-in-effect). The rendered text is
+  // identical in both phases to what the old two-state version produced.
+  const isHydrated = React.useSyncExternalStore(
+    subscribeToNothing,
+    getHydratedSnapshot,
+    getServerSnapshot
+  )
+  const dateLocale: string =
+    isHydrated && typeof navigator !== 'undefined' && navigator.language
+      ? navigator.language
+      : 'en-US'
+  const dateZone: string | undefined = isHydrated ? undefined : 'UTC'
   const formatLocalDateTime = (
     value: string | number | Date,
     options?: Intl.DateTimeFormatOptions

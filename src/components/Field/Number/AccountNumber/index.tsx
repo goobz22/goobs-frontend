@@ -96,6 +96,17 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
   const value = boundValue ?? ''
 
   const [internalValue, setInternalValue] = useState<string>(value)
+  // Mirror an incoming `value` change into the local draft WITHOUT an effect.
+  // React's documented "adjusting state when a prop changes" pattern: compare
+  // the prop against the copy we last saw and re-seed during render, so the
+  // re-render happens before the browser paints. The old
+  // `useEffect(() => setInternalValue(value), [value])` painted the stale
+  // draft first and then immediately re-rendered (react-hooks/set-state-in-effect).
+  const [lastSeenValue, setLastSeenValue] = useState<string>(value)
+  if (lastSeenValue !== value) {
+    setLastSeenValue(value)
+    setInternalValue(value)
+  }
   // Tracks whether the input is focused so the masked default-value
   // display flips to the raw value while the user is editing it. Pure
   // display logic — not used for visual border state (CSS handles that
@@ -143,10 +154,6 @@ const AccountNumber: React.FC<AccountNumberProps> = ({
     internalValue,
     maskAccountNumber,
   ])
-
-  useEffect(() => {
-    setInternalValue(value)
-  }, [value])
 
   // Listen for native 'input' events to support browser automation tools
   // (e.g. agent-browser's form_input) that set `input.value` directly

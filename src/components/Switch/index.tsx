@@ -179,11 +179,15 @@ const Switch: React.FC<SwitchProps> = ({
 
       <div className={cssStyles.track}>
         {/* role="switch" upgrades the native checkbox's exposed role so AT
-            announces it as an on/off switch (WAI-ARIA APG Switch pattern);
-            aria-checked is derived automatically from the checkbox's checked
-            state. Callers can still supply an accessible name via `aria-label`
-            / `aria-labelledby` (spread through `...props`) or via the wrapping
-            <label> (leftLabel/rightLabel live inside it). */}
+            announces it as an on/off switch (WAI-ARIA APG Switch pattern).
+            aria-checked is written explicitly from the same `effectiveChecked`
+            value that drives `checked`, so the two can never disagree: the
+            switch role makes aria-checked a REQUIRED state, and leaning on the
+            host mapping from the native checked state leaves it unexposed in
+            any AT that does not implement that mapping. Callers can still
+            supply an accessible name via `aria-label` / `aria-labelledby`
+            (spread through `...props`) or via the wrapping <label>
+            (leftLabel/rightLabel live inside it). */}
         <input
           ref={ref}
           type="checkbox"
@@ -196,6 +200,7 @@ const Switch: React.FC<SwitchProps> = ({
           }
           {...props}
           checked={effectiveChecked}
+          aria-checked={effectiveChecked}
         />
 
         {/* Sacred shimmer effect — visibility/animation handled purely in CSS
