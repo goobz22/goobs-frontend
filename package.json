@@ -7,7 +7,9 @@
   "main": "./dist/goobs-frontend.es.js",
   "module": "./dist/goobs-frontend.es.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,10 +32,10 @@
     "start": "storybook dev -p 6006",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.stories.json",
     "typecheck:file": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{jsx,ts,tsx}\" --fix --max-warnings=0",
-    "lint:file": "eslint --fix --max-warnings=0",
+    "lint": "oxlint --type-aware --fix --deny-warnings src",
+    "lint:file": "oxlint --fix --deny-warnings",
     "lint:css": "stylelint \"src/**/*.css\"",
-    "lint:stories": "eslint \"src/**/*.stories.tsx\" \".storybook/**/*.{ts,tsx}\" --max-warnings=0",
+    "lint:stories": "bun scripts/lint-stories.ts",
     "lint:styles-props": "bun scripts/lint-styles-props-read.ts",
     "lint:coverage": "bun scripts/lint-story-coverage.ts",
     "lint:a11y": "bun scripts/lint-a11y.ts",
@@ -62,7 +64,6 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.1.1",
     "@storybook/addon-a11y": "^10.6.0",
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/addon-links": "^10.6.0",
@@ -76,9 +77,6 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.1.1",
     "chromatic": "^18.7.2",
-    "eslint": "^10.10.0",
-    "eslint-config-next": "^16.3.4",
-    "eslint-plugin-jsdoc": "^64.3.5",
     "eslint-plugin-storybook": "^10.6.0",
     "next": "^16.3.4",
     "oxlint": "^1.81.0",
@@ -90,7 +88,6 @@
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.69.0",
     "vite": "^8.2.2",
     "vite-plugin-dts": "^5.1.0"
   },

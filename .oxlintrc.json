@@ -47,7 +47,6 @@
     "public/**",
     "src/data/**/*",
     "fix-explicit-any.ts",
-    "eslint.config.mjs",
     "scripts/**"
   ],
   "rules": {
