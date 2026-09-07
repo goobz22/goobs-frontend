@@ -198,25 +198,6 @@
 }
 
 /* --------------------------------------------------------------------------
-   Vertical Divider (theme-driven; sacred default, light/dark overrides)
-   -------------------------------------------------------------------------- */
-
-/* Original component only branched on `theme === 'sacred'`: any other
-   value (including undefined) rendered the black, shadowless divider.
-   Black is therefore the base default; sacred is the override. */
-.verticalDivider {
-  height: 20px;
-  border-inline-start: 2px solid rgba(0, 0, 0, 1);
-}
-
-.verticalDivider[data-theme='sacred'] {
-  border-inline-start: 2px solid var(--goobs-gold-a40);
-  box-shadow:
-    0 4px 6px -1px var(--goobs-gold-a60),
-    0 2px 4px -1px var(--goobs-gold-a40);
-}
-
-/* --------------------------------------------------------------------------
    Sticky Toolbar Wrapper
    -------------------------------------------------------------------------- */
 
