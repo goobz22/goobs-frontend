@@ -14,7 +14,14 @@
     // See also https://aka.ms/tsconfig/module
     "module": "esnext",
     "target": "esnext",
-    "types": [],
+    // `vite/client` is the ONLY source of the `*.module.css` / `*.css` ambient module
+    // declarations every component's `import styles from './X.module.css'` relies on.
+    // With `"types": []` it was reached only through a machine-local, gitignored
+    // `src/vite-env.d.ts` (`src/**/*.d.ts` is ignored below to hide tsc's own
+    // declaration emit), so a fresh clone failed `typecheck` with 373× TS2307 +
+    // 1× TS2882 (2026-09-07, mkgol rebuild). Declaring it here makes the dependency
+    // tracked instead of ambient.
+    "types": ["vite/client"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
