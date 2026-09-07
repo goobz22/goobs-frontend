@@ -1,0 +1,76 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+
+  // ─── WHICH KNIP SIGNALS GATE THIS REPO, AND WHY ─────────────────────────────
+  //
+  // ERROR (blocking, decides the exit code) — the DEPENDENCY-DECLARATION rules
+  // (dependencies / devDependencies / unlisted / unresolved / binaries). They compare
+  // package.json against the real import graph and are exact: an undeclared import or a
+  // missing binary breaks the published package or a lint script for every consumer, and
+  // there is no judgement call to make about it.
+  //
+  // WARN (advisory, still PRINTED every run) — the REACHABILITY rules
+  // (files / exports / types / duplicates / enumMembers). These are never silenced; they
+  // are simply off the blocking gate, because in a COMPONENT LIBRARY reachability is a
+  // domain question, not a mechanical one:
+  //   • The public API is whatever `src/index.ts` re-exports. knip does not report exports
+  //     OF an entry file, so anything still listed under `exports`/`types` is INTERNAL —
+  //     but "internal and unimported" can mean either dead code OR a built component that
+  //     nothing has wired up yet. The second one is a product surface, not garbage
+  //     (CLAUDE.md C3), and deleting it keeps every gate green while losing the feature.
+  //   • `duplicates` flags the house convention `export function X` + `export default X`.
+  //     A pair whose BOTH spellings have importers is the convention and stays. A pair
+  //     with a half that NOTHING imports (in src, .storybook, scripts, .design-sync, or in
+  //     ThothOS's deep `goobs-frontend/...` imports) is dead code wearing the convention's
+  //     clothes — delete that half's export, keep the symbol.
+  // So: triage these per row by domain meaning. Never mass-delete, never suppress.
+  //
+  // FILES CONSUMED BY PATH ARE `entry`, NOT `ignore`. Most of this repo's tooling is
+  // loaded by a runtime rather than imported (package.json `lint:*` scripts shell
+  // `bun scripts/<x>.ts`; the a11y/drift runners `import(pathToFileURL(...))` every module
+  // in their sibling directory). An `ignore` would also hide a genuinely orphaned module
+  // added there later; an `entry` makes the file a root of its own graph and keeps
+  // everything BELOW it under watch.
+  //
+  // EVERY `ignore` / `ignoreDependencies` ENTRY CARRIES A WRITTEN REASON and stays only
+  // while knip reports it live — knip prints "Remove from ignore" hints for inert entries;
+  // act on those hints instead of keeping an entry "just in case".
+  "rules": {
+    "dependencies": "error",
+    "devDependencies": "error",
+    "unlisted": "error",
+    "unresolved": "error",
+    "binaries": "error",
+    "files": "warn",
+    "exports": "warn",
+    "types": "warn",
+    "duplicates": "warn",
+    "enumMembers": "warn"
+  },
+
+  "ignoreExportsUsedInFile": true,
+
+  "entry": [
+    // package.json `lint:*` / `test` scripts shell these BY PATH (`bun scripts/lint-a11y.ts`
+    // …), and the two runners then `import(pathToFileURL(join(dir, entry)))` every module in
+    // scripts/a11y-lints/ and scripts/drift-lints/ — a dynamic, directory-scan load knip
+    // cannot follow. Declared as entry so the modules stay roots while their imports stay
+    // under watch. `.mjs`/`.js` are included for future runner scripts.
+    "scripts/**/*.{ts,tsx,mjs,js,cjs}",
+
+    // The design-sync bridge for claude.ai/design (`.design-sync/config.json` names each of
+    // these): `inject-reference-fonts.mjs` is run by node from the sync tool,
+    // `next-stubs/*.tsx` are `paths` targets in `.design-sync/bundle-tsconfig.json` (the
+    // external bundler substitutes them for next/link + next/image), and `previews/*.tsx`
+    // are hand-owned preview overrides the tool compiles by path. All external-runtime
+    // roots, none of them imported from this repo's own graph.
+    ".design-sync/**/*.{ts,tsx,mjs}"
+  ],
+
+  "ignore": [
+    // The COMMITTED output of `bun run build-storybook` — vercel.json serves this directory
+    // as the deployed site (`outputDirectory: "./storybook-static"`), so it is tracked
+    // rather than gitignored. Generated webpack bundles, not source of this repo.
+    "storybook-static/**"
+  ]
+}
