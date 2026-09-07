@@ -51,6 +51,15 @@
   "ignoreExportsUsedInFile": true,
 
   "entry": [
+    // THE PUBLISHED PACKAGE ENTRY. vite.config.ts builds `build.lib.entry` with
+    // `resolve(import.meta.dirname, 'src/index.ts')` — a computed expression, so knip's
+    // vite plugin cannot read the path out of it and reported src/index.ts (the barrel
+    // package.json `exports` points at) as an unused FILE, which in turn hid every public
+    // re-export from the graph. Declared here so the public API is a root: knip does not
+    // report exports OF an entry file, which is exactly right — src/index.ts IS the
+    // library's public surface.
+    "src/index.ts",
+
     // package.json `lint:*` / `test` scripts shell these BY PATH (`bun scripts/lint-a11y.ts`
     // …), and the two runners then `import(pathToFileURL(join(dir, entry)))` every module in
     // scripts/a11y-lints/ and scripts/drift-lints/ — a dynamic, directory-scan load knip
@@ -72,5 +81,17 @@
     // as the deployed site (`outputDirectory: "./storybook-static"`), so it is tracked
     // rather than gitignored. Generated webpack bundles, not source of this repo.
     "storybook-static/**"
-  ]
+  ],
+
+  // `@ds-stories/...` is not a package: it is a BUNDLER ALIAS the external claude.ai/design
+  // sync tool defines for the duration of its own build, pointing back at this repo's own
+  // `src/**/*.stories.tsx`. `.design-sync/previews/Snackbar.tsx` (an entry above — an owned
+  // preview override the tool compiles by path) imports through it, so knip read a real,
+  // resolvable-at-build-time specifier as an undeclared npm package. TEACHING KNIP THE ALIAS
+  // (rather than ignoring the dependency) keeps the edge in the graph: the preview now counts
+  // as a consumer of snackbar.stories.tsx, and a preview pointing at a story that no longer
+  // exists still reds as `unresolved`.
+  "paths": {
+    "@ds-stories/*": ["./*"]
+  }
 }
