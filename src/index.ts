@@ -218,6 +218,11 @@ export {
   type FormProps,
   type FormEngine,
   type FormContextValue,
+  // `Form.AutoFields` is a public authoring surface (see Form.stories.tsx
+  // "Authoring/AutoFields"), and every other type on the Form module is
+  // exported here — its props type was the one omission, which left it
+  // unreachable for a consumer typing an AutoFields wrapper. Added 2026-09-07.
+  type AutoFieldsProps,
 } from './components/Form'
 export {
   useFieldBinding,
