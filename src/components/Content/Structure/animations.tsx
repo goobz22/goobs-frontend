@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import cssStyles from './animations.module.css'
 
 export type Animation =
@@ -61,48 +61,10 @@ export const AnimatedElement: React.FC<AnimationProps> = ({
   )
 }
 
-export const StuckElement: React.FC<{
-  children?: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-}> = ({ children, className, style, ...props }) => {
-  const mergedClassName = mergeClassNames(cssStyles.stuck, className)
-
-  return (
-    <div
-      className={mergedClassName}
-      {...(style !== undefined ? { style } : {})}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-}
-
-export function useAnimation(ref: React.RefObject<HTMLDivElement>) {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate')
-          } else {
-            entry.target.classList.remove('animate')
-          }
-        })
-      },
-      { threshold: 0.2 }
-    )
-
-    const currentRef = ref.current
-    if (currentRef) {
-      observer.observe(currentRef)
-    }
-
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
-      }
-    }
-  }, [ref])
-}
+// `StuckElement` and `useAnimation` were removed 2026-09-07. StuckElement was a
+// second route to the `.stuck` rule that `AnimatedElement`'s `stuckOnScroll`
+// variant already reaches through `animationClassNames`, and nothing rendered
+// it. `useAnimation` was an IntersectionObserver that toggled a bare `animate`
+// class no stylesheet in the library defines (the entrance animations are pure
+// CSS in `animations.module.css`), so it could not have had a visual effect;
+// nothing called it either.

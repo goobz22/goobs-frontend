@@ -472,5 +472,11 @@ export {
   type FieldValidator,
 } from './types'
 export { getRequiredProps, validateRequired } from './utils'
-export { useEscape, useArrowKeyNav, useTypeahead, findTypeaheadMatch } from './keyboard'
-export type { ArrowKeyNavOptions, TypeaheadOptions } from './keyboard'
+// `findTypeaheadMatch` + `TypeaheadOptions` are NOT re-exported here: the match
+// function is an implementation detail of `useTypeahead` (its only caller, in
+// keyboard.ts) and the options type is that hook's parameter shape, which
+// callers pass as an object literal. Nothing imported either through this
+// barrel (removed 2026-09-07); they stay exported from `./keyboard` for the
+// hook itself.
+export { useEscape, useArrowKeyNav, useTypeahead } from './keyboard'
+export type { ArrowKeyNavOptions } from './keyboard'

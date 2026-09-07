@@ -256,7 +256,7 @@ export interface WorkspaceFilterShellProps {
   ref?: React.Ref<HTMLDivElement>
 }
 
-export const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
+const WorkspaceFilterShell: React.FC<WorkspaceFilterShellProps> = ({
   metrics,
   nav,
   subNav,

@@ -1,6 +1,6 @@
 {
   "note": "Public API surface of goobs-frontend — the names re-exported from src/index.ts (values AND types). Regenerate with `bun scripts/lint-api-surface.ts --update`. Gate: `bun run lint:api`. REMOVALS are breaking changes (require a semver MAJOR bump + a deliberate baseline update); ADDITIONS require a deliberate baseline-update commit.",
-  "count": 422,
+  "count": 423,
   "surface": [
     "Accordion",
     "AccordionProps",
@@ -14,6 +14,7 @@
     "AppBarProps",
     "AppBarStyles",
     "ArrowKeyNavOptions",
+    "AutoFieldsProps",
     "Avatar",
     "AvatarProps",
     "AvatarStyles",

@@ -28,7 +28,7 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({
   )
 }
 
-export const useDateField = ({
+const useDateField = ({
   dateField,
 }: UseDateFieldProps): React.ReactElement[] => {
   if (!dateField) return []

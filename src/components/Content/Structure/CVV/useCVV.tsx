@@ -35,7 +35,7 @@ const CVVComponent: React.FC<CVVProps> = ({
   )
 }
 
-export const useCVV = ({ cvv }: UseCVVProps): React.ReactElement[] => {
+const useCVV = ({ cvv }: UseCVVProps): React.ReactElement[] => {
   if (!cvv) return []
 
   const fields = Array.isArray(cvv) ? cvv : [cvv]

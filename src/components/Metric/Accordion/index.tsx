@@ -139,7 +139,7 @@ function useScreenSize() {
  * selectors: `data-metrics-accordion` + `data-state` on the wrapper and toggle,
  * plus `data-testid="metrics-accordion-toggle"` / `"metrics-accordion-panel"`.
  */
-export const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
+const MetricsAccordion: React.FC<MetricsAccordionProps> = ({
   children,
   metrics,
   title = 'Metrics Summary',

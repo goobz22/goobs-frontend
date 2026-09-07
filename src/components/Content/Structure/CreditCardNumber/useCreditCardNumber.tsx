@@ -1,14 +1,13 @@
 import React from 'react'
 import CreditCardNumber, {
   type CreditCardNumberProps,
-  type CardType,
 } from '../../../Field/Number/CreditCardNumber'
 
 export interface UseCreditCardNumberProps {
   creditCardNumber?: CreditCardNumberProps | CreditCardNumberProps[]
 }
 
-export type { CreditCardNumberProps, CardType }
+export type { CreditCardNumberProps }
 
 const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
   onChange,
@@ -38,7 +37,7 @@ const CreditCardNumberComponent: React.FC<CreditCardNumberProps> = ({
   )
 }
 
-export const useCreditCardNumber = ({
+const useCreditCardNumber = ({
   creditCardNumber,
 }: UseCreditCardNumberProps): React.ReactElement[] => {
   if (!creditCardNumber) return []

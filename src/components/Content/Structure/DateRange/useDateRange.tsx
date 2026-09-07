@@ -1,14 +1,13 @@
 import React from 'react'
 import DateRangeComponent, {
   type DateRangeProps,
-  type DateRange,
 } from '../../../Field/Date/DateRange'
 
 export interface UseDateRangeProps {
   dateRange?: DateRangeProps | DateRangeProps[]
 }
 
-export type { DateRangeProps, DateRange }
+export type { DateRangeProps }
 
 const DateRangeWrapper: React.FC<DateRangeProps> = ({
   onChange,
@@ -37,7 +36,7 @@ const DateRangeWrapper: React.FC<DateRangeProps> = ({
   )
 }
 
-export const useDateRange = ({
+const useDateRange = ({
   dateRange,
 }: UseDateRangeProps): React.ReactElement[] => {
   if (!dateRange) return []

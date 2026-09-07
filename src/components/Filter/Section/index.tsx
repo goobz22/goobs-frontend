@@ -277,7 +277,7 @@ const cx = (...names: Array<string | false | undefined>): string =>
 
 const AUTO_SEARCHABLE_THRESHOLD = 8
 
-export const FilterSection: React.FC<FilterSectionProps> = ({
+const FilterSection: React.FC<FilterSectionProps> = ({
   searchValue,
   onSearchChange,
   searchPlaceholder = 'Search...',

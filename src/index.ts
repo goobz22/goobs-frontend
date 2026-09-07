@@ -206,6 +206,10 @@ export {
 // Form — goobs-owned, zod-native controlled form engine (8-method FormEngine
 // seam). Fields auto-bind by `name` inside a <Form>; explicit-prop callsites
 // outside a form are untouched. See components/Form/context.ts.
+// `AutoFieldsProps` joined this block 2026-09-07: `Form.AutoFields` is a public
+// authoring surface (Form.stories.tsx "Authoring/AutoFields") and every other
+// type on the Form module was already exported here, so its props type was the
+// single omission — unreachable for a consumer typing an AutoFields wrapper.
 export {
   default as Form,
   useFormContext,
@@ -218,10 +222,6 @@ export {
   type FormProps,
   type FormEngine,
   type FormContextValue,
-  // `Form.AutoFields` is a public authoring surface (see Form.stories.tsx
-  // "Authoring/AutoFields"), and every other type on the Form module is
-  // exported here — its props type was the one omission, which left it
-  // unreachable for a consumer typing an AutoFields wrapper. Added 2026-09-07.
   type AutoFieldsProps,
 } from './components/Form'
 export {

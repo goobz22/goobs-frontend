@@ -28,7 +28,7 @@ export interface RichTextEditorProps {
   editorId?: string | undefined
 }
 
-export function RichTextEditor({
+function RichTextEditor({
   value,
   onChange,
   minRows = 5,

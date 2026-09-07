@@ -43,7 +43,7 @@ const USDComponent: React.FC<USDFieldProps> = ({
   )
 }
 
-export const useUSD = ({ usdField }: UseUSDProps): React.ReactElement[] => {
+const useUSD = ({ usdField }: UseUSDProps): React.ReactElement[] => {
   if (!usdField) return []
 
   const fields = Array.isArray(usdField) ? usdField : [usdField]

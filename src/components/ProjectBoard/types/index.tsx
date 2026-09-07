@@ -5,10 +5,11 @@ export type {
   MeetingAccessGrant,
   MeetingCapabilityPermissions,
 } from '../utils/meetingCapability'
-export {
-  MEETING_CAPABILITIES,
-  canUseMeetingCapability,
-} from '../utils/meetingCapability'
+// `MEETING_CAPABILITIES` is deliberately NOT re-exported here (removed
+// 2026-09-07): src/index.ts keeps it internal on purpose, and its only consumer
+// — scripts/__tests__/meeting-capability.test.ts — imports it straight from
+// `../utils/meetingCapability`, so this hop had no callers.
+export { canUseMeetingCapability } from '../utils/meetingCapability'
 
 /**
  * Caller-supplied styling options for the ProjectBoard component.

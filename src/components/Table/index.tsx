@@ -299,7 +299,7 @@ export const TableContainer: React.FC<TableContainerProps> = ({
  * between the two cascades, dark outranks light (rule order) — theme them
  * consistently.
  */
-const Table: React.FC<SimpleTableProps> = ({
+export const Table: React.FC<SimpleTableProps> = ({
   children,
   caption,
   styles,

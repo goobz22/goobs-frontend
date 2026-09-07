@@ -95,7 +95,7 @@ export interface PaperProps extends React.HTMLAttributes<HTMLDivElement> {
   dataPaper?: string
 }
 
-export const Paper = forwardRef<HTMLDivElement, PaperProps>(
+const Paper = forwardRef<HTMLDivElement, PaperProps>(
   (
     {
       children,
