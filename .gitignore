@@ -67,3 +67,6 @@ ds-bundle/
 .contrast-*.json
 .contrast-triage/
 *.log.tmp
+
+# Claude Code session hooks (save-work-checkpoint / worker-events) write a per-cwd ledger here — never repo content.
+.runner/
