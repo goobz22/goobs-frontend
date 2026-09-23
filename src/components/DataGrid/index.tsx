@@ -101,6 +101,7 @@ import { areRowsEqual } from './utils/rowComparison'
 import type { DatagridProps, RowData, ColumnDef } from './types'
 import { ColumnVisibilityProvider } from './context/ColumnVisibilityContext'
 import cssStyles from './DataGrid.module.css'
+import { resolveOptionId } from '../Field/Dropdown/optionId'
 
 /**
  * Module-level ref to the DataGrid container element.
@@ -979,13 +980,15 @@ function DataGridContent({
           onChange: (resolvedValue: string) => {
             // Goobs Dropdown emits the primitive value; reconstruct the
             // option object the legacy `DataGridFilter.onChange` contract
-            // expects so existing consumers keep working unchanged.
+            // expects so existing consumers keep working unchanged. The
+            // emitted string came from `resolveOptionId`, so the match runs
+            // through it too; '' is a cleared pick, never an option.
             const matched =
-              (f.options ?? []).find(
-                opt =>
-                  String(opt._id ?? '') === resolvedValue ||
-                  String(opt.value) === resolvedValue
-              ) ?? null
+              resolvedValue === ''
+                ? null
+                : ((f.options ?? []).find(
+                    opt => resolveOptionId(opt) === resolvedValue
+                  ) ?? null)
             dropdownChange(matched)
           },
           variant: 'searchable',

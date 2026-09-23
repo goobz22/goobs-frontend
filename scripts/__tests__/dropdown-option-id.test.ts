@@ -55,6 +55,15 @@ describe('the wiring — every branch resolves through the home', () => {
     expect(regular).toContain('resolveOptionId(')
   })
 
+  test("the DataGrid toolbar maps the emitted string back to its option through the same home", () => {
+    // It used to match `String(opt._id ?? '') === resolvedValue`, so the '' a dead searchable
+    // filter emitted matched the FIRST option without an _id: a pick of "Paused" filtered by
+    // whatever option happened to be listed first.
+    const dataGrid = read('src/components/DataGrid/index.tsx')
+    expect(dataGrid).toContain('resolveOptionId(opt) === resolvedValue')
+    expect(dataGrid).not.toMatch(/String\(opt\._id \?\? ''\) === resolvedValue/)
+  })
+
   test('the planted defect is caught: the old hand-rolled line fails the wiring check', () => {
     const planted = "onChange={opt => d.onChange((opt?._id as string) ?? '')}"
     expect(planted).toMatch(/_id[^\n]{0,20}\?\?\s*''/)
