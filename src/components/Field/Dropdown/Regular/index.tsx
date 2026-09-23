@@ -9,6 +9,7 @@ import FieldShell, {
   useTypeahead,
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
+import { resolveOptionId } from '../optionId'
 
 export interface DropdownOption {
   value: string | number
@@ -162,12 +163,9 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const handleSelect = (option: DropdownOption) => {
     // Form-binding convention: prefer `_id` when present, otherwise
-    // emit the option's own `value`. Both are coerced to string so
-    // the canonical onChange shape stays primitive.
-    const selected =
-      option._id != null && option._id !== ''
-        ? String(option._id)
-        : String(option.value)
+    // emit the option's own `value`, as a string — the one home that
+    // FilterSection's searchable branch resolves through too.
+    const selected = resolveOptionId(option)
     if (!isControlled) setInternalValue(option.value)
     setIsOpen(false)
     onChange?.(selected)

@@ -68,6 +68,7 @@ import Dropdown from '../../Field/Dropdown/Regular'
 import SearchableSimple, {
   type DropdownOption,
 } from '../../Field/Dropdown/SearchableSimple'
+import { resolveOptionId } from '../../Field/Dropdown/optionId'
 import DateRange from '../../Field/Date/DateRange'
 import Switch from '../../Switch'
 import Chip from '../../Chip'
@@ -394,7 +395,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         >
           <SearchableSimple
             {...commonProps}
-            onChange={opt => d.onChange((opt?._id as string) ?? '')}
+            onChange={opt => d.onChange(opt ? resolveOptionId(opt) : '')}
           />
         </div>
       )
