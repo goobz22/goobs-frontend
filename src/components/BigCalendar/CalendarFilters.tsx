@@ -10,6 +10,7 @@ import Typography from '../Typography'
 import DateRange from '../Field/Date/DateRange'
 import * as Icons from '../Icons'
 import type { FieldStyleOverrides } from '../Field/Shell/types'
+import { resolveOptionId } from '../Field/Dropdown/optionId'
 
 const { FilterListIcon, CloseIcon } = Icons
 
@@ -290,7 +291,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
                       onFiltersChange({
                         ...filters,
                         resources: opt?.value
-                          ? [String(opt._id || opt.value)]
+                          ? [resolveOptionId(opt)]
                           : [],
                       })
                     }

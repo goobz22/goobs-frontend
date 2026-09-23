@@ -68,4 +68,39 @@ describe('the wiring — every branch resolves through the home', () => {
     const planted = "onChange={opt => d.onChange((opt?._id as string) ?? '')}"
     expect(planted).toMatch(/_id[^\n]{0,20}\?\?\s*''/)
   })
+
+  test('MultiSelect emits resolveOptionId, not option._id || option.value', () => {
+    const source = read('src/components/Field/Dropdown/MultiSelect/index.tsx')
+    expect(source).toContain('resolveOptionId(')
+    expect(source).not.toMatch(/option\._id\s*\|\|\s*option\.value/)
+  })
+
+  test('CalendarFilters emits resolveOptionId, not opt._id || opt.value', () => {
+    const source = read('src/components/BigCalendar/CalendarFilters.tsx')
+    expect(source).toContain('resolveOptionId(')
+    expect(source).not.toMatch(/opt\._id\s*\|\|\s*opt\.value/)
+  })
+
+  test('EditableCell maps option ids through resolveOptionId', () => {
+    const source = read('src/components/DataGrid/Table/EditableCell/index.tsx')
+    expect(source).toContain('resolveOptionId(')
+    expect(source).not.toMatch(/opt\._id\s*\|\|\s*String\(opt\.value\)/)
+  })
+
+  test('AddCard maps option ids through resolveOptionId', () => {
+    const source = read('src/components/DataGrid/MobileCardView/AddCard.tsx')
+    expect(source).toContain('resolveOptionId(')
+    expect(source).not.toMatch(/opt\._id\s*\|\|\s*String\(opt\.value\)/)
+  })
+
+  test('CardField maps option ids through resolveOptionId', () => {
+    const source = read('src/components/DataGrid/MobileCardView/CardField.tsx')
+    expect(source).toContain('resolveOptionId(')
+    expect(source).not.toMatch(/opt\._id\s*\|\|\s*String\(opt\.value\)/)
+  })
+
+  test('a planted _id || value fork still matches the wiring check', () => {
+    const planted = 'handleToggle(option._id || option.value)'
+    expect(planted).toMatch(/option\._id\s*\|\|\s*option\.value/)
+  })
 })

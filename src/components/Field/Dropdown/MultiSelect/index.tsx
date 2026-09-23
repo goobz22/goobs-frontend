@@ -11,6 +11,7 @@ import FieldShell, {
   useTypeahead,
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
+import { resolveOptionId } from '../optionId'
 
 export interface SelectOption {
   value: string
@@ -201,7 +202,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     onActiveIndexChange: setActiveIndex,
     onActivate: index => {
       const option = options[index]
-      if (option) handleToggle(option._id || option.value)
+      if (option) handleToggle(resolveOptionId(option))
     },
   })
 
@@ -375,7 +376,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                   }}
                 >
                   {options.map((option, index) => {
-                    const optionId = option._id || option.value
+                    const optionId = resolveOptionId(option)
                     const isSelected = selectedValues.includes(optionId)
                     const isActive = index === activeIndex
                     const optionClassNames = [

@@ -3,6 +3,7 @@
 import React, { useCallback, useId, useRef, useEffect } from 'react'
 import MultiSelectChip from '../../Field/Dropdown/MultiSelect'
 import type { ColumnDef } from '../types'
+import { resolveOptionId } from '../../Field/Dropdown/optionId'
 import cssStyles from '../DataGrid.module.css'
 
 interface CardFieldProps {
@@ -168,7 +169,7 @@ function CardField({
           }}
           options={column.creationField.options.map(opt => ({
             value: String(opt.value),
-            _id: opt._id || String(opt.value),
+            _id: resolveOptionId(opt),
           }))}
           helperText="Select variables..."
           // The visible <label htmlFor={inputId}> associates with the native

@@ -11,6 +11,7 @@ import PhoneNumberField from '../../Field/PhoneNumber'
 import ComplexTextEditor from '../../ComplexTextEditor'
 import Button from '../../Button'
 import type { ColumnDef, CompositeFieldConfig } from '../types'
+import { resolveOptionId } from '../../Field/Dropdown/optionId'
 
 // Unified field definition for rendering
 interface RenderableField {
@@ -218,7 +219,7 @@ function AddCard({
           }
           options={fieldDef.options.map(opt => ({
             value: String(opt.value),
-            _id: opt._id || String(opt.value),
+            _id: resolveOptionId(opt),
           }))}
           helperText={
             fieldDef.placeholder || fieldDef.helperText || 'Select...'

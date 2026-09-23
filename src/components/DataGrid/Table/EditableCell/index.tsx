@@ -9,6 +9,7 @@ import SearchableSimple, {
   type DropdownOption,
 } from '../../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
+import { resolveOptionId } from '../../../Field/Dropdown/optionId'
 import InternalIncrementNumberField from '../../../Field/Number/InternalIncrement'
 import PhoneNumberField from '../../../Field/PhoneNumber'
 import CVV from '../../../Field/Number/CVV'
@@ -302,7 +303,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             }}
             options={multiOptions.map(opt => ({
               value: String(opt.value),
-              _id: opt._id || String(opt.value),
+              _id: resolveOptionId(opt),
             }))}
             ariaLabel={column.headerName || column.field}
             styles={{
