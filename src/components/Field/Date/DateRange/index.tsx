@@ -128,10 +128,17 @@ const DateRange: React.FC<DateRangeProps> = ({
     const dateString = e.target.value
     if (dateString) {
       const date = new Date(dateString + 'T00:00:00')
-      onChange?.({
+      const newRange = {
         start: value?.start || null,
         end: date,
-      })
+      }
+      // An end before the start is refused. The native `min` attribute does
+      // not block a typed or filled value, so the end is cleared here — the
+      // same outcome as a start that lands after the end.
+      if (newRange.start && date < newRange.start) {
+        newRange.end = null
+      }
+      onChange?.(newRange)
     } else {
       onChange?.({ start: value?.start || null, end: null })
     }
@@ -168,7 +175,11 @@ const DateRange: React.FC<DateRangeProps> = ({
       if (dateString !== formatDateForInput(value?.end || null)) {
         if (dateString) {
           const date = new Date(dateString + 'T00:00:00')
-          onChange?.({ start: value?.start || null, end: date })
+          const newRange = { start: value?.start || null, end: date }
+          if (newRange.start && date < newRange.start) {
+            newRange.end = null
+          }
+          onChange?.(newRange)
         } else {
           onChange?.({ start: value?.start || null, end: null })
         }
