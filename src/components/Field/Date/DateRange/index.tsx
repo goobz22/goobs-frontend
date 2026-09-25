@@ -128,7 +128,7 @@ const DateRange: React.FC<DateRangeProps> = ({
     const dateString = e.target.value
     if (dateString) {
       const date = new Date(dateString + 'T00:00:00')
-      const newRange = {
+      const newRange: DateRange = {
         start: value?.start || null,
         end: date,
       }
@@ -175,7 +175,7 @@ const DateRange: React.FC<DateRangeProps> = ({
       if (dateString !== formatDateForInput(value?.end || null)) {
         if (dateString) {
           const date = new Date(dateString + 'T00:00:00')
-          const newRange = { start: value?.start || null, end: date }
+          const newRange: DateRange = { start: value?.start || null, end: date }
           if (newRange.start && date < newRange.start) {
             newRange.end = null
           }
