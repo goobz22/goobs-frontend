@@ -15,20 +15,23 @@ interface UseColumnResizeProps {
   onColumnResize?: (columnField: string, newWidth: number) => void
 }
 
-// Helper to check if columns changed
-function columnsHaveChanged(
-  columns: ColumnDef[],
-  updatedColumns: ColumnDef[]
-): boolean {
-  if (columns.length !== updatedColumns.length) return true
-  return columns.some((col, idx) => {
-    const prevCol = updatedColumns[idx]
-    return (
-      !prevCol ||
-      col.field !== prevCol.field ||
-      col.width !== prevCol.width ||
-      col.headerName !== prevCol.headerName
-    )
+/**
+ * Overlay the user's resized widths on the LIVE columns.
+ *
+ * The grid used to copy `columns` into state and replace that copy only when
+ * field / width / headerName changed. `renderCell` is a new function whenever
+ * the caller closes over a newer list, so that copy kept the first render's
+ * function for the life of the grid (W-769). Widths live in state. Everything
+ * else, including `renderCell`, comes from the prop on every render.
+ */
+export function applyResizedWidths<T extends ColumnDef>(
+  columns: readonly T[],
+  resizedWidths: Readonly<Record<string, number>>
+): T[] {
+  return columns.map(col => {
+    const width = resizedWidths[col.field]
+    if (width == null) return col
+    return { ...col, width, computedWidth: width }
   })
 }
 
@@ -40,8 +43,9 @@ export function useColumnResize({
   const [resizingColumn, setResizingColumn] = useState<string | null>(null)
   const [startX, setStartX] = useState(0)
   const [startWidth, setStartWidth] = useState(0)
-  const [updatedColumns, setUpdatedColumns] = useState<ColumnDef[]>(columns)
+  const [resizedWidths, setResizedWidths] = useState<Record<string, number>>({})
   const [tempWidth, setTempWidth] = useState<number | null>(null)
+  const updatedColumns = applyResizedWidths(columns, resizedWidths)
   const resizingElementRef = useRef<HTMLElement | null>(null)
   /**
    * Bounds of the column being dragged, resolved once at mousedown so the
@@ -52,11 +56,6 @@ export function useColumnResize({
     min: MIN_COLUMN_WIDTH,
     max: DEFAULT_MAX_COLUMN_WIDTH,
   })
-
-  // Update columns when props change - use derived state pattern during render
-  if (columnsHaveChanged(columns, updatedColumns)) {
-    setUpdatedColumns(columns)
-  }
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, columnField: string) => {
@@ -107,12 +106,10 @@ export function useColumnResize({
       }
 
       // Also update the state for consistency (but this might be batched)
-      setUpdatedColumns(prev =>
-        prev.map(col =>
-          col.field === resizingColumn
-            ? { ...col, computedWidth: newWidth, width: newWidth }
-            : col
-        )
+      setResizedWidths(prev =>
+        prev[resizingColumn] === newWidth
+          ? prev
+          : { ...prev, [resizingColumn]: newWidth }
       )
     },
     [isResizing, resizingColumn, startX, startWidth]
@@ -188,12 +185,10 @@ export function useColumnResize({
       const column = updatedColumns.find(col => col.field === columnField)
       if (!column) return
       const newWidth = clampColumnWidth(column, getColumnWidth(column) + delta)
-      setUpdatedColumns(prev =>
-        prev.map(col =>
-          col.field === columnField
-            ? { ...col, computedWidth: newWidth, width: newWidth }
-            : col
-        )
+      setResizedWidths(prev =>
+        prev[columnField] === newWidth
+          ? prev
+          : { ...prev, [columnField]: newWidth }
       )
       onColumnResize?.(columnField, newWidth)
     },
