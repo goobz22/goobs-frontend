@@ -318,18 +318,7 @@ function formatCurrency(
         e.currentTarget.style.boxShadow = colorScheme.shadow
       }}
     >
-      {/* Add pulse animation styles dynamically */}
-      {colorScheme.pulse && (
-        <style>
-          {`
-            @keyframes pulse-datagrid-currency {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0.85; }
-            }
-          `}
-        </style>
-      )}
-
+      {/* pulse-datagrid-currency lives in styles/global.css — no <style> element (CSP style-src-elem). */}
       {/* Value indicator icon for large amounts. Decorative: the amount itself
           (rendered below) conveys the value, so the ▲ glyph is hidden from
           assistive tech to avoid announcing "up-pointing triangle" (WCAG 1.1.1). */}
@@ -383,16 +372,7 @@ function formatCurrency(
               'linear-gradient(90deg, transparent, var(--goobs-white-a30), transparent)',
             animation: `shimmer-datagrid-currency 3s ease-in-out infinite`,
           }}
-        >
-          <style>
-            {`
-              @keyframes shimmer-datagrid-currency {
-                0% { left: -100%; }
-                50%, 100% { left: 100%; }
-              }
-            `}
-          </style>
-        </span>
+        />
       )}
     </span>
   )

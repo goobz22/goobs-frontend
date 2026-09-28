@@ -504,6 +504,29 @@
    the global definitions here keep the historical global names available for
    external consumers that referenced them.)
    ========================================================================== */
+
+/* DataGrid currency cell (Table/Rows): the large-value pulse and shimmer. These were <style>
+   elements rendered inside the cell, which a host page's nonce-only style-src-elem refuses. */
+@keyframes pulse-datagrid-currency {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes shimmer-datagrid-currency {
+  0% {
+    left: -100%;
+  }
+  50%,
+  100% {
+    left: 100%;
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {

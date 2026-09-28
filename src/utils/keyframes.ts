@@ -1,19 +1,43 @@
 /**
- * Creates and injects CSS keyframes animations and returns the animation name
+ * ONE constructed stylesheet for every runtime keyframe, adopted by the document once.
+ *
+ * This used to append a `<style data-keyframe>` element per name. A Content-Security-Policy with a
+ * nonce-only `style-src-elem` refuses every unnonced <style> element, and a library cannot know the
+ * page's nonce. A constructed stylesheet (`new CSSStyleSheet()` + `document.adoptedStyleSheets`) is
+ * not an inline <style> element, so the rules land without weakening the host page's CSP.
+ */
+let runtimeKeyframeSheet: CSSStyleSheet | null = null
+const runtimeKeyframeNames = new Set<string>()
+
+function keyframeSheet(): CSSStyleSheet | null {
+  if (runtimeKeyframeSheet) return runtimeKeyframeSheet
+  if (
+    typeof document === 'undefined' ||
+    typeof CSSStyleSheet === 'undefined' ||
+    !('adoptedStyleSheets' in document)
+  ) {
+    return null
+  }
+  runtimeKeyframeSheet = new CSSStyleSheet()
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, runtimeKeyframeSheet]
+  return runtimeKeyframeSheet
+}
+
+/**
+ * Registers CSS keyframes (once per name) and returns the animation name
  * @param name - The name for the keyframes animation
  * @param animation - The CSS keyframes content (without @keyframes wrapper)
  * @returns The animation name to be used in CSS animation properties
  */
 export const keyframes = (name: string, animation: string): string => {
-  if (typeof document !== 'undefined') {
-    const existingStyle = document.head.querySelector(
-      `style[data-keyframe="${name}"]`
-    )
-    if (!existingStyle) {
-      const styleElement = document.createElement('style')
-      styleElement.setAttribute('data-keyframe', name)
-      styleElement.textContent = `@keyframes ${name} { ${animation} }`
-      document.head.appendChild(styleElement)
+  if (runtimeKeyframeNames.has(name)) return name
+  const sheet = keyframeSheet()
+  if (sheet) {
+    try {
+      sheet.insertRule(`@keyframes ${name} { ${animation} }`, sheet.cssRules.length)
+      runtimeKeyframeNames.add(name)
+    } catch {
+      // An invalid body is dropped, exactly as the browser dropped an invalid <style> rule.
     }
   }
   return name
