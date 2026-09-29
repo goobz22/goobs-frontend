@@ -9,6 +9,7 @@ import FieldShell, {
   useArrowKeyNav,
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
+import { menuGeometry, type MenuGeometry } from '../menuGeometry'
 
 export interface DropdownOption {
   value: string | number
@@ -99,7 +100,7 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
   const [internalValue, setInternalValue] = useState<string | number>(
     defaultValue ?? ''
   )
-  const [dropdownPosition, setDropdownPosition] = useState({
+  const [dropdownPosition, setDropdownPosition] = useState<MenuGeometry>({
     top: 0,
     left: 0,
     width: 0,
@@ -136,18 +137,16 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
     const trigger = buttonRef.current
     if (!trigger) return
     const rect = trigger.getBoundingClientRect()
-    const GAP = 4
-    const spaceBelow = window.innerHeight - rect.bottom - GAP
-    // Clamp the menu height to the room below the trigger so a fixed-position
-    // menu never spills past the viewport edge (it scrolls internally beyond
-    // that); the floor keeps it usable when the field sits low on screen.
-    const maxHeight = Math.max(160, Math.min(300, spaceBelow))
-    setDropdownPosition({
-      top: rect.bottom + GAP,
-      left: rect.left,
-      width: rect.width,
-      maxHeight,
-    })
+    setDropdownPosition(
+      menuGeometry(
+        rect,
+        {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+        300
+      )
+    )
   }, [])
 
   const closeMenu = React.useCallback(() => {
@@ -345,7 +344,14 @@ const SearchableSimple: React.FC<SearchableSimpleProps> = ({
                   className={cssStyles.menu}
                   data-theme={styles?.theme || 'sacred'}
                   style={{
-                    top: `${dropdownPosition.top}px`,
+                    top:
+                      dropdownPosition.top === undefined
+                        ? undefined
+                        : `${dropdownPosition.top}px`,
+                    bottom:
+                      dropdownPosition.bottom === undefined
+                        ? undefined
+                        : `${dropdownPosition.bottom}px`,
                     left: `${dropdownPosition.left}px`,
                     width: `${dropdownPosition.width}px`,
                     maxHeight: `${dropdownPosition.maxHeight}px`,

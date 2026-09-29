@@ -12,6 +12,7 @@ import FieldShell, {
 } from '../../Shell'
 import { useFieldBinding } from '../../Shell/useFieldBinding'
 import { resolveOptionId } from '../optionId'
+import { menuGeometry, type MenuGeometry } from '../menuGeometry'
 
 export interface SelectOption {
   value: string
@@ -100,7 +101,7 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const [dropdownPosition, setDropdownPosition] = useState({
+  const [dropdownPosition, setDropdownPosition] = useState<MenuGeometry>({
     top: 0,
     left: 0,
     width: 0,
@@ -121,15 +122,16 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
     const trigger = triggerRef.current
     if (!trigger) return
     const rect = trigger.getBoundingClientRect()
-    const GAP = 4
-    const spaceBelow = window.innerHeight - rect.bottom - GAP
-    const maxHeight = Math.max(120, Math.min(200, spaceBelow))
-    setDropdownPosition({
-      top: rect.bottom + GAP,
-      left: rect.left,
-      width: rect.width,
-      maxHeight,
-    })
+    setDropdownPosition(
+      menuGeometry(
+        rect,
+        {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+        200
+      )
+    )
   }, [])
 
   const closeMenu = useCallback(() => setIsOpen(false), [])
@@ -369,7 +371,14 @@ const MultiSelectChip: React.FC<MultiSelectChipProps> = ({
                   className={cssStyles.menu}
                   data-theme={styles?.theme || 'sacred'}
                   style={{
-                    top: `${dropdownPosition.top}px`,
+                    top:
+                      dropdownPosition.top === undefined
+                        ? undefined
+                        : `${dropdownPosition.top}px`,
+                    bottom:
+                      dropdownPosition.bottom === undefined
+                        ? undefined
+                        : `${dropdownPosition.bottom}px`,
                     left: `${dropdownPosition.left}px`,
                     width: `${dropdownPosition.width}px`,
                     maxHeight: `${dropdownPosition.maxHeight}px`,

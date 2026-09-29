@@ -185,6 +185,8 @@
   --sh-clear-text: var(--goobs-gold);
 
   position: fixed;
+  display: flex;
+  flex-direction: column;
   z-index: 9999;
   background-color: var(--sh-menu-bg);
   border: var(--sh-menu-border);
@@ -252,6 +254,8 @@
 }
 
 .content {
+  flex: 1;
+  min-height: 0;
   max-height: 350px;
   overflow-y: auto;
   padding: var(--goobs-space-xs);

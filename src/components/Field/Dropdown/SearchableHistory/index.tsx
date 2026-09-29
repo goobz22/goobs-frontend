@@ -12,6 +12,7 @@ import {
   getRequiredProps,
   type FieldStyleOverrides,
 } from '../../Shell'
+import { menuGeometry, type MenuGeometry } from '../menuGeometry'
 
 export type NavigationItem = {
   id: string
@@ -89,7 +90,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
   const searchBoxRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [dropdownPosition, setDropdownPosition] = useState({
+  const [dropdownPosition, setDropdownPosition] = useState<MenuGeometry>({
     top: 0,
     left: 0,
     width: 0,
@@ -104,15 +105,16 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     const anchor = searchBoxRef.current
     if (!anchor) return
     const rect = anchor.getBoundingClientRect()
-    const GAP = 4
-    const spaceBelow = window.innerHeight - rect.bottom - GAP
-    const maxHeight = Math.max(160, Math.min(300, spaceBelow))
-    setDropdownPosition({
-      top: rect.bottom + GAP,
-      left: rect.left,
-      width: rect.width,
-      maxHeight,
-    })
+    setDropdownPosition(
+      menuGeometry(
+        rect,
+        {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+        300
+      )
+    )
   }, [])
 
   // The active theme drives the [data-theme] attribute on the container +
@@ -444,9 +446,17 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
               style={{
                 // Runtime position from getBoundingClientRect — cannot be
                 // expressed statically, stays inline per the CSS-module recipe.
-                top: `${dropdownPosition.top}px`,
+                top:
+                  dropdownPosition.top === undefined
+                    ? undefined
+                    : `${dropdownPosition.top}px`,
+                bottom:
+                  dropdownPosition.bottom === undefined
+                    ? undefined
+                    : `${dropdownPosition.bottom}px`,
                 left: `${dropdownPosition.left}px`,
                 width: `${dropdownPosition.width}px`,
+                maxHeight: `${dropdownPosition.maxHeight}px`,
               }}
             >
               {/* Tabs for Overview, Search and History */}
