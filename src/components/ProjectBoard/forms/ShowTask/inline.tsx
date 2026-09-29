@@ -31,6 +31,7 @@ import {
 import Dropdown, { type DropdownOption } from '../../../Field/Dropdown/Regular'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
 import SearchBar from '../../../Field/Search'
+import TextField from '../../../Field/Text'
 import DateField from '../../../Field/Date/DateField'
 import TimeField from '../../../Field/Time/TimeField'
 import cssStyles from './ShowTask.module.css'
@@ -102,6 +103,27 @@ export interface InlineShowTaskProps {
    * this prop decides what is RENDERED, never what is permitted.
    */
   viewerRole?: 'staff' | 'customer'
+  /**
+   * CUSTOMER viewer only. Raise this ticket's severity — UPLIFT ONLY, with a reason. The control lists
+   * just the levels more severe than the current one and refuses to send without a reason
+   * (`MIN_SEVERITY_UPLIFT_REASON_LENGTH`). Withheld = no control.
+   */
+  onRaiseSeverity?: (args: {
+    taskId: string
+    severityId: string
+    reason: string
+  }) => Promise<void> | void
+  /**
+   * CUSTOMER viewer only. The statuses / sub-statuses the COMPANY has marked customer-usable, and the
+   * handler that moves the ticket to one of them. Withheld or empty = the status stays read-only.
+   */
+  customerAllowedStatuses?: RawStatus[]
+  customerAllowedSubStatuses?: RawSubStatus[]
+  onCustomerSetStatus?: (args: {
+    taskId: string
+    statusId: string
+    substatusId?: string
+  }) => Promise<void> | void
   onComment: (text: string, taskId: string) => void
   onEditComment: (commentId: string, newText: string) => void
   onBack: () => void
@@ -225,6 +247,249 @@ const subscribeToNothing = (): (() => void) => () => {}
 const getHydratedSnapshot = (): boolean => true
 const getServerSnapshot = (): boolean => false
 
+/**
+ * The shortest reason a customer must give to RAISE a ticket's severity. The company reads it; a
+ * one-word answer is not a reason. (The server enforces its own minimum — this only keeps the form from
+ * sending what it would refuse.)
+ */
+export const MIN_SEVERITY_UPLIFT_REASON_LENGTH = 20
+
+/**
+ * CUSTOMER viewer: raise this ticket's severity, with a reason. Uplift only — the options are the
+ * levels MORE severe than the current one (a lower `severityLevel` number), so a customer can never
+ * lower what the company has set. Rendered only when the host supplies `onRaiseSeverity`.
+ */
+function CustomerSeverityUplift({
+  taskId,
+  currentSeverity,
+  severityOptions,
+  onRaise,
+  theme,
+}: {
+  taskId: string
+  currentSeverity: string
+  severityOptions: RawSeverityLevel[]
+  onRaise: (args: {
+    taskId: string
+    severityId: string
+    reason: string
+  }) => Promise<void> | void
+  theme: 'light' | 'dark' | 'sacred'
+}) {
+  const [open, setOpen] = useState(false)
+  const [targetId, setTargetId] = useState('')
+  const [reason, setReason] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const currentLevel = severityOptions.find(
+    level => level.description === currentSeverity
+  )?.severityLevel
+  const higher = useMemo(
+    () =>
+      currentLevel === undefined
+        ? []
+        : severityOptions
+            .filter(level => level.severityLevel < currentLevel)
+            .sort((a, b) => a.severityLevel - b.severityLevel),
+    [severityOptions, currentLevel]
+  )
+  if (higher.length === 0) return null
+  const options: DropdownOption[] = [
+    { value: '', _id: '' },
+    ...higher.map(level => ({
+      value: level.description || `Level ${level.severityLevel}`,
+      _id: level._id,
+    })),
+  ]
+  const submit = async () => {
+    if (!targetId) {
+      setError('Choose the severity you are raising this to.')
+      return
+    }
+    if (reason.trim().length < MIN_SEVERITY_UPLIFT_REASON_LENGTH) {
+      setError(
+        `Tell your company why this is more urgent (at least ${MIN_SEVERITY_UPLIFT_REASON_LENGTH} characters).`
+      )
+      return
+    }
+    setError('')
+    setBusy(true)
+    try {
+      await onRaise({ taskId, severityId: targetId, reason: reason.trim() })
+      setOpen(false)
+      setTargetId('')
+      setReason('')
+    } catch (raised) {
+      setError(
+        raised instanceof Error
+          ? raised.message
+          : 'The severity could not be raised. Try again.'
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+  if (!open) {
+    return (
+      <div className={cssStyles.editFieldWrap}>
+        <button
+          type="button"
+          className={cssStyles.button}
+          onClick={() => setOpen(true)}
+        >
+          Raise severity
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className={cssStyles.editFieldWrap}>
+      <Dropdown
+        label="Raise severity to"
+        options={options}
+        value={targetId}
+        onChange={value => setTargetId(value)}
+        styles={{ theme, required: true }}
+      />
+      <TextField
+        label="Why is this more urgent?"
+        value={reason}
+        onChange={setReason}
+        multiline
+        minRows={3}
+        required
+        error={error || undefined}
+        placeholder="Describe the business impact so your company can respond appropriately"
+        styles={{ theme }}
+      />
+      <div className={cssStyles.actionButtons}>
+        <button
+          type="button"
+          className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
+          disabled={busy}
+          onClick={() => void submit()}
+        >
+          {busy ? 'Raising…' : 'Raise severity'}
+        </button>
+        <button
+          type="button"
+          className={cssStyles.button}
+          disabled={busy}
+          onClick={() => {
+            setOpen(false)
+            setError('')
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * CUSTOMER viewer: move the ticket to a status the company has marked customer-usable (for example
+ * to close it or reopen it). The host supplies ONLY the allowed statuses and sub-statuses; the control
+ * cannot offer anything else, and the server refuses anything else independently.
+ */
+function CustomerStatusPicker({
+  taskId,
+  currentStatus,
+  currentSubStatus,
+  statuses,
+  subStatuses,
+  onSet,
+  theme,
+}: {
+  taskId: string
+  currentStatus: string
+  currentSubStatus: string
+  statuses: RawStatus[]
+  subStatuses: RawSubStatus[]
+  onSet: (args: {
+    taskId: string
+    statusId: string
+    substatusId?: string
+  }) => Promise<void> | void
+  theme: 'light' | 'dark' | 'sacred'
+}) {
+  const [statusId, setStatusId] = useState('')
+  const [subStatusId, setSubStatusId] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const allowedSubStatuses = subStatuses.filter(sub => sub.statusId === statusId)
+  if (statuses.length === 0) return null
+  const statusDropdown: DropdownOption[] = [
+    { value: '', _id: '' },
+    ...statuses.map(status => ({ value: status.status, _id: status._id })),
+  ]
+  const subStatusDropdown: DropdownOption[] = [
+    { value: '', _id: '' },
+    ...allowedSubStatuses.map(sub => ({ value: sub.subStatus, _id: sub._id })),
+  ]
+  const apply = async () => {
+    if (!statusId) {
+      setError('Choose a status.')
+      return
+    }
+    setError('')
+    setBusy(true)
+    try {
+      await onSet({
+        taskId,
+        statusId,
+        ...(subStatusId ? { substatusId: subStatusId } : {}),
+      })
+      setStatusId('')
+      setSubStatusId('')
+    } catch (raised) {
+      setError(
+        raised instanceof Error
+          ? raised.message
+          : 'The status could not be changed. Try again.'
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className={cssStyles.editFieldWrap}>
+      <Dropdown
+        label={`Change status (now: ${currentSubStatus ? `${currentStatus} — ${currentSubStatus}` : currentStatus})`}
+        options={statusDropdown}
+        value={statusId}
+        onChange={value => {
+          setStatusId(value)
+          setSubStatusId('')
+        }}
+        styles={{ theme }}
+      />
+      {allowedSubStatuses.length > 0 && (
+        <Dropdown
+          label="Sub status"
+          options={subStatusDropdown}
+          value={subStatusId}
+          onChange={value => setSubStatusId(value)}
+          styles={{ theme }}
+        />
+      )}
+      {error && (
+        <div role="alert" className={cssStyles.fieldValue}>
+          {error}
+        </div>
+      )}
+      <button
+        type="button"
+        className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
+        disabled={busy || !statusId}
+        onClick={() => void apply()}
+      >
+        {busy ? 'Updating…' : 'Update status'}
+      </button>
+    </div>
+  )
+}
+
 export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   taskId,
   taskTitle,
@@ -250,6 +515,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onEdit,
   onDelete,
   viewerRole = 'staff',
+  onRaiseSeverity,
+  customerAllowedStatuses = [],
+  customerAllowedSubStatuses = [],
+  onCustomerSetStatus,
   onComment,
   onEditComment,
   onBack,
@@ -1034,6 +1303,26 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               <div className={cssStyles.fieldLabel}>Severity</div>
               <div className={cssStyles.fieldValue}>{severity}</div>
             </div>
+          )}
+          {viewerIsCustomer && onRaiseSeverity && (
+            <CustomerSeverityUplift
+              taskId={taskId}
+              currentSeverity={severity}
+              severityOptions={severityOptions}
+              onRaise={onRaiseSeverity}
+              theme={styles?.theme || 'light'}
+            />
+          )}
+          {viewerIsCustomer && onCustomerSetStatus && (
+            <CustomerStatusPicker
+              taskId={taskId}
+              currentStatus={status}
+              currentSubStatus={subStatus}
+              statuses={customerAllowedStatuses}
+              subStatuses={customerAllowedSubStatuses}
+              onSet={onCustomerSetStatus}
+              theme={styles?.theme || 'light'}
+            />
           )}
 
           {/* Assigned To - Editable in edit mode */}

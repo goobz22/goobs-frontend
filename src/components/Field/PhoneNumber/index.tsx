@@ -5,9 +5,28 @@ import cssStyles from './PhoneNumber.module.css'
 import FieldShell, { type FieldStyleOverrides } from '../Shell'
 import { useFieldBinding } from '../Shell/useFieldBinding'
 
+/**
+ * The NATIONAL digits of whatever was typed, pasted or autofilled — always at most 10.
+ *
+ * The field shows a fixed "+1" prefix, so the value it holds is the 10-digit national number. A
+ * leading 1 is only a COUNTRY CODE when it makes the number eleven digits long (a paste or autofill of
+ * "+1 512-555-0100" / "1-512-555-0100"); it is stripped then, BEFORE the 10-digit cap, so the last digit
+ * of a pasted number is never the one that is dropped.
+ *
+ * It used to be stripped on EVERY keystroke (`replace(/^1/, '')`), so typing "1", "2", "3" left "23": the
+ * digit the person had just typed vanished, silently, and only the first one. Typed digits are kept as
+ * typed — an area code cannot start with 1, so validation (the host's schema) says so out loud instead of
+ * the field quietly editing what was entered.
+ */
+export const nationalPhoneDigits = (raw: string): string => {
+  const digits = raw.replace(/\D/g, '')
+  const national =
+    digits.length > 10 && digits.startsWith('1') ? digits.slice(1) : digits
+  return national.slice(0, 10)
+}
+
 const formatPhoneNumber = (inputValue: string): string => {
-  const digits = inputValue.replace(/\D/g, '').replace(/^1/, '')
-  const limitedDigits = digits.slice(0, 10)
+  const limitedDigits = nationalPhoneDigits(inputValue)
   let formattedNumber = '+1 '
   if (limitedDigits.length > 0) {
     formattedNumber += limitedDigits.slice(0, 3)
@@ -23,11 +42,12 @@ const formatPhoneNumber = (inputValue: string): string => {
 
 const parseExistingPhoneNumber = (value: string): string => {
   if (!value) return ''
-  if (value.includes('+1')) {
-    const digits = value.replace(/\D/g, '').replace(/^1/, '')
-    return digits ? formatPhoneNumber(digits).replace('+1 ', '') : ''
-  }
-  return formatPhoneNumber(value).replace('+1 ', '')
+  // A controlled value that carries the field's own "+1 " prefix: strip THAT LITERAL prefix and read the
+  // rest as the national number. (It used to strip a leading "1" from all the digits, which also removed
+  // a national number's own first digit — the round trip of what was typed.)
+  const national = /^\s*\+1/.test(value) ? value.replace(/^\s*\+1/, '') : value
+  const digits = nationalPhoneDigits(national)
+  return digits ? formatPhoneNumber(digits).replace('+1 ', '') : ''
 }
 
 export interface PhoneNumberFieldProps {
@@ -172,7 +192,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
     const handleNativeInput = (e: Event) => {
       const target = e.target as HTMLInputElement
       if (target.value !== phoneNumber) {
-        const strippedInput = target.value.replace(/\D/g, '').slice(0, 10)
+        const strippedInput = nationalPhoneDigits(target.value)
         const fullFormattedValue = strippedInput
           ? formatPhoneNumber(strippedInput)
           : '+1 '
@@ -207,7 +227,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value
-      const strippedInput = input.replace(/\D/g, '').slice(0, 10)
+      const strippedInput = nationalPhoneDigits(input)
 
       // Format just the digits part for display with stable formatting
       let formattedDigits = ''

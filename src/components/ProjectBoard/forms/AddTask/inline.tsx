@@ -76,6 +76,24 @@ export interface InlineAddTaskProps {
    * Defaults to `2` (sections `h2`, cards `h3`), preserving the prior markup.
    */
   headingLevel?: number
+  /**
+   * WHO is filling the form in. Mirrors `InlineShowTask.viewerRole`. `'staff'` (the default) is
+   * the full triage form and renders exactly as before. `'customer'` is the CUSTOMER's request
+   * form: the company owns triage, so it offers only what a customer owns —
+   *   · Title and Description (both always required),
+   *   · Severity (always required — the customer states how serious it is; the company may
+   *     re-triage it, and the customer can only ever RAISE it afterwards),
+   *   · Product and/or Service, each required only when the company says so
+   *     (`requireProduct` / `requireService`),
+   * and it does NOT render Status, Sub-status, Region, Topics, the company/customer pickers or the
+   * knowledgebase-linking tab. The staff-only ids are submitted empty; the server stamps the
+   * company's own defaults for them.
+   */
+  viewerRole?: 'staff' | 'customer'
+  /** Customer form only: the company requires a Product on every customer request. */
+  requireProduct?: boolean
+  /** Customer form only: the company requires a Service on every customer request. */
+  requireService?: boolean
 }
 
 export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
@@ -96,7 +114,11 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   knowledgebaseArticles = [],
   styles,
   headingLevel = 2,
+  viewerRole = 'staff',
+  requireProduct = false,
+  requireService = false,
 }) => {
+  const isCustomer = viewerRole === 'customer'
   // Real heading elements at the caller-controlled level: view/section
   // headings at `headingLevel` (default `h2`), knowledgebase card titles one
   // below (`h3`), replacing hardcoded `<h2>`/`<h3>` that could skip levels.
@@ -104,7 +126,9 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
   const CardHeading = `h${Math.min(6, headingLevel + 1)}` as ElementType
   const [activeTab, setActiveTab] = useState<AddTaskTabType>('details')
   // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern.
-  const tabOrder: AddTaskTabType[] = ['details', 'knowledgeBase']
+  const tabOrder: AddTaskTabType[] = isCustomer
+    ? ['details']
+    : ['details', 'knowledgeBase']
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -164,6 +188,10 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     'product' | 'service'
   >(hasProducts ? 'product' : 'service')
   const [productServiceId, setProductServiceId] = useState('')
+  // CUSTOMER form only: product and service are independent pickers (the company can require
+  // either, both, or neither), unlike the staff form's single Type toggle.
+  const [customerProductId, setCustomerProductId] = useState('')
+  const [customerServiceId, setCustomerServiceId] = useState('')
   const [selectedRegionId, setSelectedRegionId] = useState('')
   const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>([])
   const [articleSearchTerm, setArticleSearchTerm] = useState('')
@@ -298,11 +326,20 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
     if (!title.trim()) missing.push('Title')
     if (!description.trim()) missing.push('Description')
     if (!selectedSeverityId) missing.push('Severity')
-    if (!selectedStatusId) missing.push('Status')
-    const hasProductServiceOptions =
-      rawProducts.length > 0 || rawServices.length > 0
-    if (hasProductServiceOptions && !productServiceId)
-      missing.push('Product/Service')
+    if (isCustomer) {
+      // A requirement on a list that has nothing in it could never be met — it is not a rule the
+      // customer can be held to, so it only applies when there is something to choose.
+      if (requireProduct && hasProducts && !customerProductId)
+        missing.push('Product')
+      if (requireService && hasServices && !customerServiceId)
+        missing.push('Service')
+    } else {
+      if (!selectedStatusId) missing.push('Status')
+      const hasProductServiceOptions =
+        rawProducts.length > 0 || rawServices.length > 0
+      if (hasProductServiceOptions && !productServiceId)
+        missing.push('Product/Service')
+    }
 
     if (missing.length > 0) {
       setValidationError(
@@ -317,11 +354,13 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
       title: title.trim(),
       description: description.trim(),
       severityId: selectedSeverityId,
-      statusId: selectedStatusId,
-      substatusId: selectedSubStatusId || selectedStatusId,
+      // A customer does not triage: status / sub-status go out empty and the server stamps the
+      // company's own defaults.
+      statusId: isCustomer ? '' : selectedStatusId,
+      substatusId: isCustomer ? '' : selectedSubStatusId || selectedStatusId,
       schedulingQueueId: '',
-      topicIds: selectedTopicIds,
-      articleIds: selectedArticleIds,
+      topicIds: isCustomer ? [] : selectedTopicIds,
+      articleIds: isCustomer ? [] : selectedArticleIds,
       companyId: selectedCompanyId,
       customerId: selectedCustomerId,
       commentIds: [],
@@ -349,17 +388,33 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
         .map(a => a.articleTitle),
       teamMember: '',
       nextActionDate: '',
-      regionId: selectedRegionId,
-      region:
-        rawRegions.find(r => r._id === selectedRegionId)?.regionName || '',
-      productOrService,
-      productServiceName:
-        productOrService === 'product'
+      regionId: isCustomer ? '' : selectedRegionId,
+      region: isCustomer
+        ? ''
+        : rawRegions.find(r => r._id === selectedRegionId)?.regionName || '',
+      productOrService: isCustomer
+        ? customerProductId
+          ? 'product'
+          : 'service'
+        : productOrService,
+      productServiceName: isCustomer
+        ? rawProducts.find(p => p._id === customerProductId)?.productName ||
+          rawServices.find(s => s._id === customerServiceId)?.serviceName ||
+          ''
+        : productOrService === 'product'
           ? rawProducts.find(p => p._id === productServiceId)?.productName || ''
           : rawServices.find(s => s._id === productServiceId)?.serviceName ||
             '',
-      productId: productOrService === 'product' ? productServiceId : '',
-      serviceId: productOrService === 'service' ? productServiceId : '',
+      productId: isCustomer
+        ? customerProductId
+        : productOrService === 'product'
+          ? productServiceId
+          : '',
+      serviceId: isCustomer
+        ? customerServiceId
+        : productOrService === 'service'
+          ? productServiceId
+          : '',
       companyInternalNotes: '',
       customerInternalNotes: '',
     }
@@ -384,10 +439,13 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
         role={isSidebarScrollable ? 'group' : undefined}
         aria-label={isSidebarScrollable ? 'New task requirements' : undefined}
       >
-        <div className={cssStyles.sectionTitle}>New Task</div>
+        <div className={cssStyles.sectionTitle}>
+          {isCustomer ? 'New Request' : 'New Task'}
+        </div>
         <p className={cssStyles.sidebarParagraph}>
-          Fill in the details to create a new task. All required fields are
-          marked.
+          {isCustomer
+            ? 'Tell us what you need. Your company reviews every request and can adjust its priority.'
+            : 'Fill in the details to create a new task. All required fields are marked.'}
         </p>
 
         <div className={cssStyles.sidebarSection}>
@@ -395,10 +453,20 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
           <ul className={cssStyles.requiredList}>
             <li>Title</li>
             <li>Description</li>
-            {(hasProducts || hasServices) && <li>Type</li>}
-            {(hasProducts || hasServices) && <li>Product/Service</li>}
-            <li>Severity</li>
-            <li>Status</li>
+            {isCustomer ? (
+              <>
+                <li>Severity</li>
+                {requireProduct && hasProducts && <li>Product</li>}
+                {requireService && hasServices && <li>Service</li>}
+              </>
+            ) : (
+              <>
+                {(hasProducts || hasServices) && <li>Type</li>}
+                {(hasProducts || hasServices) && <li>Product/Service</li>}
+                <li>Severity</li>
+                <li>Status</li>
+              </>
+            )}
           </ul>
         </div>
       </div>
@@ -432,6 +500,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
           >
             Task Details
           </button>
+          {!isCustomer && (
           <button
             type="button"
             role="tab"
@@ -450,6 +519,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
             Knowledgebase{' '}
             {selectedArticleIds.length > 0 && `(${selectedArticleIds.length})`}
           </button>
+          )}
         </div>
 
         {/* Content Area — the active tab's panel. */}
@@ -462,7 +532,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
           {activeTab === 'details' ? (
             <>
               <SectionHeading className={cssStyles.heading}>
-                Create New Task
+                {isCustomer ? 'Create New Request' : 'Create New Task'}
               </SectionHeading>
 
               {/* Title & Description */}
@@ -490,7 +560,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               {/* Two Column Layout */}
               <div className={cssStyles.twoColumnGrid}>
                 {/* Company Selection (if applicable) */}
-                {rawCompanies.length > 0 && (
+                {!isCustomer && rawCompanies.length > 0 && (
                   <Dropdown
                     label="Company"
                     options={companyOptions}
@@ -501,7 +571,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 )}
 
                 {/* Customer Selection (if applicable) */}
-                {rawCustomers.length > 0 && (
+                {!isCustomer && rawCustomers.length > 0 && (
                   <Dropdown
                     label="Customer"
                     options={customerOptions}
@@ -511,8 +581,35 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   />
                 )}
 
+                {/* CUSTOMER: product and service are independent pickers, each required only when
+                    the company says so. */}
+                {isCustomer && hasProducts && (
+                  <Dropdown
+                    label="Product"
+                    options={productOptions}
+                    value={customerProductId}
+                    onChange={value => setCustomerProductId(value)}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      required: requireProduct,
+                    }}
+                  />
+                )}
+                {isCustomer && hasServices && (
+                  <Dropdown
+                    label="Service"
+                    options={serviceOptions}
+                    value={customerServiceId}
+                    onChange={value => setCustomerServiceId(value)}
+                    styles={{
+                      theme: styles?.theme || 'light',
+                      required: requireService,
+                    }}
+                  />
+                )}
+
                 {/* Product or Service Type - only show when at least one type has data */}
-                {hasProducts && hasServices ? (
+                {isCustomer ? null : hasProducts && hasServices ? (
                   <Dropdown
                     label="Type"
                     options={[
@@ -545,7 +642,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 ) : null}
 
                 {/* Product/Service Dropdown - only show when options exist */}
-                {(hasProducts || hasServices) && (
+                {!isCustomer && (hasProducts || hasServices) && (
                   <Dropdown
                     label={
                       productOrService === 'product' ? 'Product' : 'Service'
@@ -582,6 +679,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 />
 
                 {/* Status */}
+                {!isCustomer && (
                 <Dropdown
                   label="Status"
                   options={statusOptions}
@@ -592,9 +690,10 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                   }}
                   styles={{ theme: styles?.theme || 'light', required: true }}
                 />
+                )}
 
                 {/* SubStatus */}
-                {filteredSubStatuses.length > 0 && (
+                {!isCustomer && filteredSubStatuses.length > 0 && (
                   <Dropdown
                     label="Sub Status"
                     options={subStatusOptions}
@@ -608,7 +707,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                 )}
 
                 {/* Region */}
-                {rawRegions.length > 0 && (
+                {!isCustomer && rawRegions.length > 0 && (
                   <Dropdown
                     label="Region"
                     options={regionOptions}
@@ -620,7 +719,7 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
               </div>
 
               {/* Topics */}
-              {topics.length > 0 && (
+              {!isCustomer && topics.length > 0 && (
                 <div className={cssStyles.fieldWrapper}>
                   <MultiSelectChip
                     label="Topics"

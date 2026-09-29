@@ -460,6 +460,28 @@ export interface CompanyBoardProps extends ProjectBoardBaseProps {
 // customer board — no company roster.
 export interface CustomerBoardProps extends ProjectBoardBaseProps {
   variant: 'customer'
+  /**
+   * The company requires a Product on every request a customer files. The customer request form
+   * (InlineAddTask `viewerRole="customer"`) marks the Product picker required and refuses to submit
+   * without one. Ignored when the company has no products to choose from.
+   */
+  requireProduct?: boolean
+  /** The company requires a Service on every request a customer files. See `requireProduct`. */
+  requireService?: boolean
+  /** Raise a ticket's severity (uplift only, with a reason). Forwarded to the ticket view. */
+  onRaiseSeverity?: (args: {
+    taskId: string
+    severityId: string
+    reason: string
+  }) => Promise<void> | void
+  /** The statuses the company lets a customer move a ticket to, and the handler for doing so. */
+  customerAllowedStatuses?: RawStatus[]
+  customerAllowedSubStatuses?: RawSubStatus[]
+  onCustomerSetStatus?: (args: {
+    taskId: string
+    statusId: string
+    substatusId?: string
+  }) => Promise<void> | void
 }
 
 export type ProjectBoardProps =

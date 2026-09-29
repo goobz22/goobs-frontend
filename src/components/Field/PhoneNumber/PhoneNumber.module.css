@@ -45,6 +45,9 @@
 }
 
 .prefix {
+  /* Never squeezed: a flex item shrinks, and the input beside it (min-width:auto = its default ~20ch
+     width) won the fight in a narrow container, leaving only the "+" of "+1" visible (site QA N7). */
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   padding-inline-start: 16px;
@@ -107,6 +110,8 @@
 
 .input {
   flex: 1;
+  /* Lets the input shrink below its intrinsic width so the prefix keeps its room. */
+  min-width: 0;
   height: 100%;
   background-color: transparent;
   outline: none;

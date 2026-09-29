@@ -476,10 +476,21 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         {...(activeAddTaskForm === 'companyCustomerDropdown'
           ? { rawCustomers }
           : {})}
-        {...(variant === 'company' ? { rawProducts } : {})}
+        {...(variant === 'company' || variant === 'customer'
+          ? { rawProducts }
+          : {})}
         rawServices={rawServices}
         rawRegions={rawRegions}
         knowledgebaseArticles={rawArticles}
+        // The customer board's create panel is the customer's REQUEST form: subject, description,
+        // severity and the product/service the company requires — never the staff triage fields.
+        viewerRole={variant === 'customer' ? 'customer' : 'staff'}
+        {...(props.variant === 'customer'
+          ? {
+              requireProduct: props.requireProduct === true,
+              requireService: props.requireService === true,
+            }
+          : {})}
         styles={styles}
       />
     )
@@ -576,6 +587,16 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         regionOptions={rawRegions}
         styles={styles}
         meetings={meetings.filter(m => m.taskId === activeTaskId)}
+        {...(props.variant === 'customer' && props.onRaiseSeverity
+          ? { onRaiseSeverity: props.onRaiseSeverity }
+          : {})}
+        {...(props.variant === 'customer' && props.onCustomerSetStatus
+          ? {
+              onCustomerSetStatus: props.onCustomerSetStatus,
+              customerAllowedStatuses: props.customerAllowedStatuses ?? [],
+              customerAllowedSubStatuses: props.customerAllowedSubStatuses ?? [],
+            }
+          : {})}
         {...(onScheduleMeeting && { onScheduleMeeting })}
         {...(onCancelMeeting && { onCancelMeeting })}
         {...(onConfirmMeeting && { onConfirmMeeting })}
