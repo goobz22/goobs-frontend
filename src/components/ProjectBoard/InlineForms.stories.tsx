@@ -495,7 +495,7 @@ export const AddTaskSidebarScrollable: Story = {
 
 /**
  * Pins the read-mode detail view on the light theme: the Ticket Summary
- * sidebar shows the truncated ticket #, Product "Analytics Suite", Queue,
+ * sidebar shows Ticket # "No number" (the id is not a public number), Product "Analytics Suite", Queue,
  * Region, Status "Open", Substatus "New", Severity "Critical", Assigned To,
  * Topics, KB Articles, and Next Action rows with Edit/Delete and Back to
  * Board buttons; the Details tab renders the Requestor/Customer card and the

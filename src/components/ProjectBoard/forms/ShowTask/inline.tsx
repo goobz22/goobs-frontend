@@ -1205,7 +1205,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
           <div className={cssStyles.fieldRow}>
             <div className={cssStyles.fieldLabel}>Ticket #</div>
-            <div className={cssStyles.fieldValue}>{taskId.substring(0, 8)}</div>
+            {/* The record's id is internal. Slicing it painted `companyT` / `administ`
+                (portal QA PQ-07/39). There is no public ticket number on the task,
+                so the row says so instead of inventing one from the id. */}
+            <div className={cssStyles.fieldValue}>No number</div>
           </div>
 
           {/* Product or Service - Dynamically determined */}
@@ -1565,7 +1568,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
             <div className={cssStyles.fieldRow}>
               <div className={cssStyles.fieldLabel}>Customer</div>
-              <div className={cssStyles.fieldValue}>{customerAssigned}</div>
+              <div className={cssStyles.fieldValue}>
+                {customerAssigned.trim() || 'No customer'}
+              </div>
             </div>
           </div>
 

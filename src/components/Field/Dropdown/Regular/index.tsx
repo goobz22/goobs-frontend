@@ -201,7 +201,11 @@ const Dropdown: React.FC<DropdownProps> = ({
     opt =>
       String(opt.value) === String(value) || String(opt._id) === String(value)
   )
-  const displayValue = selectedOption?.value || value || 'Select...'
+  // An unmatched value is an id the roster could not name. Echoing it painted
+  // `adminCompanyId1` in the closed company field (portal QA PQ-07). The empty
+  // state is the prompt, never the raw value.
+  const named = selectedOption ? String(selectedOption.value).trim() : ''
+  const displayValue = named || 'Select...'
 
   const buttonClassNames = [cssStyles.button, isOpen && cssStyles.open]
     .filter(Boolean)
