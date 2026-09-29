@@ -10,6 +10,7 @@ import SearchableSimple, {
 } from '../../../Field/Dropdown/SearchableSimple'
 import MultiSelectChip from '../../../Field/Dropdown/MultiSelect'
 import { resolveOptionId } from '../../../Field/Dropdown/optionId'
+import { isInsideOwnedPopup } from './ownedPopup'
 import InternalIncrementNumberField from '../../../Field/Number/InternalIncrement'
 import PhoneNumberField from '../../../Field/PhoneNumber'
 import CVV from '../../../Field/Number/CVV'
@@ -52,6 +53,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       // Find the table cell (td) that contains our field
       const tdElement = cellRef.current?.closest('td')
+
+      // A dropdown's listbox is portalled outside the <td>, but it is still THIS editor's: a press on it is
+      // inside, or the press that starts an option click would save the OLD value before the option is chosen.
+      if (
+        cellRef.current &&
+        isInsideOwnedPopup(cellRef.current, document, event.target)
+      ) {
+        return
+      }
 
       // If click is outside the entire table cell, save and exit
       if (tdElement && !tdElement.contains(event.target as Node)) {
