@@ -476,7 +476,9 @@ export interface CustomerBoardProps extends ProjectBoardBaseProps {
   }) => Promise<void> | void
   /** The statuses the company lets a customer move a ticket to, and the handler for doing so. */
   customerAllowedStatuses?: RawStatus[]
+  /** The sub-statuses (each under an allowed status) the company lets a customer pick. */
   customerAllowedSubStatuses?: RawSubStatus[]
+  /** Moves a ticket to a status the company allowed; rejects with the refusal sentence. */
   onCustomerSetStatus?: (args: {
     taskId: string
     statusId: string

@@ -113,12 +113,16 @@ export interface InlineShowTaskProps {
     severityId: string
     reason: string
   }) => Promise<void> | void
+  /** Placeholder of the "why is this more urgent" box in the raise-severity control. */
+  raiseSeverityReasonPlaceholder?: string
   /**
    * CUSTOMER viewer only. The statuses / sub-statuses the COMPANY has marked customer-usable, and the
    * handler that moves the ticket to one of them. Withheld or empty = the status stays read-only.
    */
   customerAllowedStatuses?: RawStatus[]
+  /** The sub-statuses (each under an allowed status) the company lets a customer pick. */
   customerAllowedSubStatuses?: RawSubStatus[]
+  /** Moves the ticket to an allowed status; rejects with the refusal sentence, shown by the control. */
   onCustomerSetStatus?: (args: {
     taskId: string
     statusId: string
@@ -264,6 +268,7 @@ function CustomerSeverityUplift({
   currentSeverity,
   severityOptions,
   onRaise,
+  reasonPlaceholder,
   theme,
 }: {
   taskId: string
@@ -274,6 +279,7 @@ function CustomerSeverityUplift({
     severityId: string
     reason: string
   }) => Promise<void> | void
+  reasonPlaceholder: string
   theme: 'light' | 'dark' | 'sacred'
 }) {
   const [open, setOpen] = useState(false)
@@ -334,6 +340,7 @@ function CustomerSeverityUplift({
       <div className={cssStyles.editFieldWrap}>
         <button
           type="button"
+          data-action="edit"
           className={cssStyles.button}
           onClick={() => setOpen(true)}
         >
@@ -359,12 +366,13 @@ function CustomerSeverityUplift({
         minRows={3}
         required
         error={error || undefined}
-        placeholder="Describe the business impact so your company can respond appropriately"
+        placeholder={reasonPlaceholder}
         styles={{ theme }}
       />
       <div className={cssStyles.actionButtons}>
         <button
           type="button"
+          data-action="save"
           className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
           disabled={busy}
           onClick={() => void submit()}
@@ -373,6 +381,7 @@ function CustomerSeverityUplift({
         </button>
         <button
           type="button"
+          data-action="cancel"
           className={cssStyles.button}
           disabled={busy}
           onClick={() => {
@@ -480,6 +489,7 @@ function CustomerStatusPicker({
       )}
       <button
         type="button"
+        data-action="apply"
         className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
         disabled={busy || !statusId}
         onClick={() => void apply()}
@@ -516,6 +526,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onDelete,
   viewerRole = 'staff',
   onRaiseSeverity,
+  raiseSeverityReasonPlaceholder = 'Describe the business impact so your company can respond appropriately',
   customerAllowedStatuses = [],
   customerAllowedSubStatuses = [],
   onCustomerSetStatus,
@@ -1310,6 +1321,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               currentSeverity={severity}
               severityOptions={severityOptions}
               onRaise={onRaiseSeverity}
+              reasonPlaceholder={raiseSeverityReasonPlaceholder}
               theme={styles?.theme || 'light'}
             />
           )}
