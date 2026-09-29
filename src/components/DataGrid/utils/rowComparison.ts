@@ -1,8 +1,9 @@
+import isEqual from 'lodash/isEqual'
 import type { RowData } from '../types'
 
 /**
- * Efficiently compares two arrays of rows to determine if they're equal
- * Uses ID and update timestamp for comparison to avoid deep object comparison
+ * Compare the values the grid may render, including fields added by later reads.
+ * IDs and timestamps alone cannot detect updated derived cells such as order labels.
  */
 export function areRowsEqual(
   a: RowData[] | undefined,
@@ -13,28 +14,8 @@ export function areRowsEqual(
   if (!a || !b) return false
   if (a.length !== b.length) return false
 
-  // Empty arrays are equal
-  if (a.length === 0) return true
-
-  // Create signatures based on IDs and timestamps for efficient comparison
-  // This avoids expensive deep equality checks
-  const createSignature = (rows: RowData[]): string => {
-    return rows
-      .map(row => {
-        const id = row._id || row.id || ''
-        const updated = row.updatedAt || row.createdAt || ''
-        // Include a hash of critical fields that might change
-        const title = typeof row.title === 'string' ? row.title : ''
-        const status = typeof row.status === 'string' ? row.status : ''
-        return `${id}-${updated}-${title}-${status}`
-      })
-      .join('|')
-  }
-
-  const aSignature = createSignature(a)
-  const bSignature = createSignature(b)
-
-  return aSignature === bSignature
+  if (a === b) return true
+  return isEqual(a, b)
 }
 
 // `getRowKey` and `areRowIdsEqual` were removed 2026-09-07: neither had a single
