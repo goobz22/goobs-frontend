@@ -1,14 +1,38 @@
 # Production audit and W-977 severity justification
 
-Active (2026-10-03): operator requested a deep security/React/memoization/design
-audit with enforcing tests, then directed this seat to the other AI's goobs handoff.
-Claimed and fully acknowledged W-977 epoch 1 after announcement A-1084.
+Library implementation complete (2026-10-03), release 0.302.5: resumed W-977
+epoch 2 in native Codex seat eb94 after all four sessions agreed their lanes.
+Saved the paused implementation as `5b0415d8`; fixed the board permission defect
+as `1a357d86`. Requirements live in [the ticket severity spec](docs/specs/ticket-severity-justification.md).
 
-W-977: one shared customer/staff severity setter; both directions need trimmed
-20..2000-character justification. Pending blocks duplicates; errors retain draft;
-success clears it; unchanged severity needs no reason. Proposed `onSetSeverity`
-payload `{taskId,severityId,reason}` announced to the ThothOS owner seat. That seat
-owns server/consumer changes; this seat owns goobs only. No publish/push.
+One shared customer/staff `onSetSeverity({taskId,severityId,reason})` editor handles
+both directions and requires a trimmed 20..2000-character justification. Pending
+saves block duplicates; errors retain drafts; success clears them; unchanged
+severity is a no-op. Option refreshes preserve drafts, and task identity keys the
+editor. The customer `onRaiseSeverity` remains compatible. All three board variants
+forward the setter for write access and withhold it for read-only access. Generic
+`onEdit` no longer writes severity; other customer field restrictions remain.
+
+Evidence: the read-only regression failed in all three variants before the fix.
+`bun run test:browser` now passes 7 form/editor cases, 14 severity cases and 6 actual
+CSF severity plays. `bun run typecheck`, `bun run lint:all` (including 54 unit tests),
+`bun run build`, `bun run build-storybook`, `bun run lint:package`, `bun run lint:api`
+and `bun run lint:budget` all exit 0. CI runs the browser cases and severity plays.
+The new literal-payload severity guard catches 3 planted bypasses, allows 2 clean
+edits, and finds 0 violations over 13 files / 5 generic ticket-edit object literals.
+It is included in lint:all; it does not claim to analyze arbitrary payload dataflow.
+
+ESM entry: 1,555,974 B, 327.29 KB gzip; UMD: 3,027,555 B; CSS: 444,344 B.
+Existing library budgets pass without changes. The operator's 170KB-gzip consumer
+first-load ceiling still applies to ThothOS and must be measured in that lane.
+Storybook builds with its existing asset-size warnings; tracked output is refreshed.
+No cloud Chromatic run was performed. Automatic reviews of the two earlier commits
+were inconclusive because remote workers lacked this repo's SHAs; independent pool
+verification remains required.
+
+Next: submit the library evidence for pool verification and hand off 0.302.5 to
+ThothOS seat c0bf, which owns server enforcement, consumer wiring and full-stack
+acceptance. Publishing belongs to the operator. Codex did not publish or push.
 
 Broader audit stays active. Security portion is posted as W-976 for the required
 Opus/Sonnet 5+ seat. Initial census: 660 source assets, 529 TSX and 94 CSS.
@@ -19,11 +43,10 @@ resize subscription. CI does not explicitly run all Storybook play functions.
 Existing drift checks retain recorded exceptions, so green is not full consistency.
 Official docs were fetched directly after the shared hook rejected the web tool.
 
-Next: agree the callback contract and add failing staff/customer severity stories
-and browser tests, then implement W-977; resume the broader audit afterwards.
-Scratch: `%TEMP%/goobs-deep-audit-01a0ffac`. Existing W-801 MultiSelectChip refresh
-failure needs diagnosis later; W-929 is verified and must not be repeated. Preserve
-the operator's 170KB-gzip consumer first-load ceiling.
+Broader audit scratch: `%TEMP%/goobs-deep-audit-01a0ffac`. W-801 dropdown work now
+belongs to the d87c session by the four-seat agreement; do not duplicate it here.
+W-929 is verified and must not be repeated. W-976 security work requires its
+qualified reviewer seat and is separate from this library implementation.
 
 ## Prior seven-issue audit — 0.302.4
 

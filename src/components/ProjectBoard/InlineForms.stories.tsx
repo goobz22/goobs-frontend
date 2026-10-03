@@ -316,7 +316,8 @@ export function SeverityHarness({
   useEffect(() => {
     onReady?.({
       completeSave: () => completion.current?.resolve(),
-      rejectSave: () => completion.current?.reject(new Error('Severity update refused')),
+      rejectSave: () =>
+        completion.current?.reject(new Error('Severity update refused')),
       refreshOptions: () => setRevision(value => value + 1),
     })
   }, [onReady])
@@ -340,13 +341,21 @@ export function SeverityHarness({
     ? { onRaiseSeverity: save }
     : { onSetSeverity: save }
   return (
-    <div data-testid="severity-harness" data-requests={JSON.stringify(requests)} data-general-edit={JSON.stringify(edit)}>
+    <div
+      data-testid="severity-harness"
+      data-requests={JSON.stringify(requests)}
+      data-general-edit={JSON.stringify(edit)}
+    >
       <InlineShowTask
         {...showTaskProps}
         {...severityHandler}
         viewerRole={role}
         severity={severity}
-        severityOptions={revision ? sampleSeverityLevels.map(level => ({ ...level })) : sampleSeverityLevels}
+        severityOptions={
+          revision
+            ? sampleSeverityLevels.map(level => ({ ...level }))
+            : sampleSeverityLevels
+        }
         onEdit={setEdit}
       />
     </div>
@@ -359,15 +368,43 @@ export const StaffSeverityJustification: Story = {
   globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Change severity', exact: true }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: /^Change severity$/ })
+    )
     await userEvent.click(canvas.getByRole('combobox', { name: /^Severity/ }))
-    await userEvent.click(within(canvasElement.ownerDocument.body).getByRole('option', { name: 'Low', exact: true }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Save severity', exact: true }))
-    await expect(canvas.getByRole('textbox', { name: /Justification/ })).toHaveAttribute('aria-invalid', 'true')
-    await userEvent.type(canvas.getByRole('textbox', { name: /Justification/ }), '  Business impact has decreased after restoring service.  ')
-    await userEvent.click(canvas.getByRole('button', { name: 'Save severity', exact: true }))
-    await waitFor(() => expect(canvas.getByTestId('severity-harness')).toHaveAttribute('data-requests', JSON.stringify([{ taskId: 'task1abc', severityId: 's4', reason: 'Business impact has decreased after restoring service.' }])))
-    await expect(canvas.queryByRole('textbox', { name: /Justification/ })).not.toBeInTheDocument()
+    await userEvent.click(
+      within(canvasElement.ownerDocument.body).getByRole('option', {
+        name: /^Low$/,
+      })
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: /^Save severity$/ })
+    )
+    await expect(
+      canvas.getByRole('textbox', { name: /Justification/ })
+    ).toHaveAttribute('aria-invalid', 'true')
+    await userEvent.type(
+      canvas.getByRole('textbox', { name: /Justification/ }),
+      '  Business impact has decreased after restoring service.  '
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: /^Save severity$/ })
+    )
+    await waitFor(() =>
+      expect(canvas.getByTestId('severity-harness')).toHaveAttribute(
+        'data-requests',
+        JSON.stringify([
+          {
+            taskId: 'task1abc',
+            severityId: 's4',
+            reason: 'Business impact has decreased after restoring service.',
+          },
+        ])
+      )
+    )
+    await expect(
+      canvas.queryByRole('textbox', { name: /Justification/ })
+    ).not.toBeInTheDocument()
   },
 }
 
@@ -556,7 +593,10 @@ export const AddTaskSidebarScrollable: Story = {
   },
   globals: { backgrounds: { value: 'light' } },
   render: args => (
-    <div data-addtask-scroll-demo style={{ height: '180px', overflow: 'hidden' }}>
+    <div
+      data-addtask-scroll-demo
+      style={{ height: '180px', overflow: 'hidden' }}
+    >
       {/* Override the inline form root's `height:100vh` down to this 180px frame
           so the sidebar's content overflows and its overflow:auto engages. Scoped
           to the wrapper's direct child (the form root) so nothing else moves. */}
@@ -793,9 +833,7 @@ export const ShowTaskCustomerView: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // The three staff-only controls are ABSENT, not merely disabled.
-    await expect(
-      canvas.queryByRole('button', { name: /^Delete$/ })
-    ).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^Delete$/ })).toBeNull()
     await expect(canvas.queryByText(/Internal Customer Notes/)).toBeNull()
     // The customer's own affordances survive.
     await expect(

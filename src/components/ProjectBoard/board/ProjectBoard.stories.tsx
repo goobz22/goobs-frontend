@@ -360,22 +360,126 @@ export default meta
 type Story = StoryObj<typeof ProjectBoard>
 
 /** Real board fixture shared by stories and severity browser regressions. */
-export function BoardSeverityHarness({ variant = 'company', access = 'write' }: {
-  variant?: ProjectBoardProps['variant']; access?: 'read' | 'write'
+export function BoardSeverityHarness({
+  variant = 'company',
+  access = 'write',
+}: {
+  variant?: ProjectBoardProps['variant']
+  access?: 'read' | 'write'
 }) {
   const [tasks, setTasks] = useState(sampleTasks)
   const [requests, setRequests] = useState<unknown[]>([])
-  const props = variant === 'administrator' ? administratorArgs : variant === 'customer' ? customerArgs : companyArgs
-  const onSetSeverity: NonNullable<ProjectBoardProps['onSetSeverity']> = request => {
+  const props =
+    variant === 'administrator'
+      ? administratorArgs
+      : variant === 'customer'
+        ? customerArgs
+        : companyArgs
+  const onSetSeverity: NonNullable<
+    ProjectBoardProps['onSetSeverity']
+  > = request => {
     setRequests(previous => [...previous, request])
-    setTasks(previous => previous.map(task => task._id === request.taskId ? {
-      ...task, severityId: request.severityId,
-      severity: sampleRawSeverityLevels.find(level => level._id === request.severityId)?.description ?? '',
-    } : task))
+    setTasks(previous =>
+      previous.map(task =>
+        task._id === request.taskId
+          ? {
+              ...task,
+              severityId: request.severityId,
+              severity:
+                sampleRawSeverityLevels.find(
+                  level => level._id === request.severityId
+                )?.description ?? '',
+            }
+          : task
+      )
+    )
   }
-  return <div data-testid="board-severity-harness" data-requests={JSON.stringify(requests)}>
-    <ProjectBoardProvider><ProjectBoard {...props} tasks={tasks} permissions={{ access }} onSetSeverity={onSetSeverity} /></ProjectBoardProvider>
-  </div>
+  return (
+    <div
+      data-testid="board-severity-harness"
+      data-requests={JSON.stringify(requests)}
+    >
+      <ProjectBoardProvider>
+        <ProjectBoard
+          {...props}
+          tasks={tasks}
+          permissions={{ access }}
+          onSetSeverity={onSetSeverity}
+        />
+      </ProjectBoardProvider>
+    </div>
+  )
+}
+
+/** The company board forwards the justified setter to the ticket detail. */
+export const CompanySeverityJustification: Story = {
+  render: () => <BoardSeverityHarness />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('checkbox', { name: /^Select task: Fix login issue$/ })
+    )
+    await userEvent.click(canvas.getByRole('button', { name: /^Manage$/ }))
+    await canvas.findByRole('tablist', { name: /^Task sections$/ })
+    await userEvent.click(
+      canvas.getByRole('button', { name: /^Change severity$/ })
+    )
+    await userEvent.click(canvas.getByRole('combobox', { name: /^Severity/ }))
+    await userEvent.click(
+      within(canvasElement.ownerDocument.body).getByRole('option', {
+        name: /^Low$/,
+      })
+    )
+    await userEvent.type(
+      canvas.getByRole('textbox', { name: /Justification/ }),
+      'Business impact has decreased after restoring service.'
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: /^Save severity$/ })
+    )
+    await waitFor(() =>
+      expect(canvas.getByTestId('board-severity-harness')).toHaveAttribute(
+        'data-requests',
+        JSON.stringify([
+          {
+            taskId: 't1',
+            severityId: 's4',
+            reason: 'Business impact has decreased after restoring service.',
+          },
+        ])
+      )
+    )
+  },
+}
+
+/** The administrator board uses the same justified severity callback. */
+export const AdministratorSeverityJustification: Story = {
+  ...CompanySeverityJustification,
+  render: () => <BoardSeverityHarness variant="administrator" />,
+}
+
+/** The customer board forwards the setter while its staff-only fields stay read-only. */
+export const CustomerSeverityJustification: Story = {
+  ...CompanySeverityJustification,
+  render: () => <BoardSeverityHarness variant="customer" />,
+}
+
+/** Read-only board permissions withhold severity editing even with a supplied handler. */
+export const ReadOnlySeverity: Story = {
+  render: () => <BoardSeverityHarness access="read" />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('checkbox', { name: /^Select task: Fix login issue$/ })
+    )
+    await userEvent.click(canvas.getByRole('button', { name: /^Manage$/ }))
+    await canvas.findByRole('tablist', { name: /^Task sections$/ })
+    await expect(
+      canvas.queryByRole('button', { name: /^Change severity$/ })
+    ).not.toBeInTheDocument()
+  },
 }
 
 export const LightTheme: Story = {

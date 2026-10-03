@@ -46,13 +46,12 @@ const cx = (...names: Array<string | false | null | undefined>): string =>
 // Keyboard parity for role="button" cards that wrap block content (headings,
 // grids) and so can't be native <button>s: Enter/Space fire the same handler
 // as the click (WCAG 2.1.1).
-const activateOnKey =
-  (handler: () => void) => (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      handler()
-    }
+const activateOnKey = (handler: () => void) => (event: React.KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    handler()
   }
+}
 
 export interface InlineShowTaskProps {
   taskId: string
@@ -383,7 +382,11 @@ function SeverityChange({
         <button
           type="button"
           data-action="save"
-          className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
+          className={cx(
+            cssStyles.button,
+            cssStyles.primaryButton,
+            busy && cssStyles.buttonDisabled
+          )}
           disabled={busy}
           onClick={() => void submit()}
         >
@@ -433,7 +436,9 @@ function CustomerStatusPicker({
   const [subStatusId, setSubStatusId] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const allowedSubStatuses = subStatuses.filter(sub => sub.statusId === statusId)
+  const allowedSubStatuses = subStatuses.filter(
+    sub => sub.statusId === statusId
+  )
   if (statuses.length === 0) return null
   const statusDropdown: DropdownOption[] = [
     { value: '', _id: '' },
@@ -497,7 +502,11 @@ function CustomerStatusPicker({
       <button
         type="button"
         data-action="apply"
-        className={cx(cssStyles.button, cssStyles.primaryButton, busy && cssStyles.buttonDisabled)}
+        className={cx(
+          cssStyles.button,
+          cssStyles.primaryButton,
+          busy && cssStyles.buttonDisabled
+        )}
         disabled={busy || !statusId}
         onClick={() => void apply()}
       >
@@ -654,6 +663,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
    */
   const viewerIsCustomer = viewerRole === 'customer'
   const canEditCompanyFields = !viewerIsCustomer
+  const setSeverity =
+    onSetSeverity ?? (viewerIsCustomer ? onRaiseSeverity : undefined)
   const [isMobile, setIsMobile] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
   const [editedDescription, setEditedDescription] = useState(description)
@@ -721,7 +732,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     [subStatus, subStatusOptions]
   )
   const [editedQueueId, setEditedQueueId] = usePropSeededDraft(
-    schedulingQueueOptions.find(q => q.queueName === schedulingQueue)?._id || '',
+    schedulingQueueOptions.find(q => q.queueName === schedulingQueue)?._id ||
+      '',
     [schedulingQueue, schedulingQueueOptions]
   )
   const [editedRegionId, setEditedRegionId] = usePropSeededDraft(
@@ -865,7 +877,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     value: string | number | Date,
     options?: Intl.DateTimeFormatOptions
   ): string =>
-    new Date(value).toLocaleString(dateLocale, { ...options, timeZone: dateZone })
+    new Date(value).toLocaleString(dateLocale, {
+      ...options,
+      timeZone: dateZone,
+    })
   const formatLocalDate = (
     value: string | number | Date,
     options?: Intl.DateTimeFormatOptions
@@ -1277,13 +1292,13 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             <div className={cssStyles.fieldLabel}>Severity</div>
             <div className={cssStyles.fieldValue}>{severity}</div>
           </div>
-          {(onSetSeverity ?? (viewerIsCustomer ? onRaiseSeverity : undefined)) && (
+          {setSeverity && (
             <SeverityChange
               key={taskId}
               taskId={taskId}
               currentSeverity={severity}
               severityOptions={severityOptions}
-              onSet={(onSetSeverity ?? onRaiseSeverity)!}
+              onSet={setSeverity}
               reasonPlaceholder={raiseSeverityReasonPlaceholder}
               theme={styles?.theme || 'light'}
             />
@@ -1845,7 +1860,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               : isDark
                 ? '#78350f'
                 : 'var(--goobs-warn)',
-            ['--st-submit-color']: isSacred ? '#FF9800' : 'var(--goobs-light-surface)',
+            ['--st-submit-color']: isSacred
+              ? '#FF9800'
+              : 'var(--goobs-light-surface)',
           }
         : {
             ['--st-submit-bg']: isSacred
@@ -1853,7 +1870,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               : isDark
                 ? 'var(--goobs-light-text-secondary)'
                 : 'var(--goobs-info)',
-            ['--st-submit-color']: isSacred ? 'var(--goobs-gold)' : 'var(--goobs-light-surface)',
+            ['--st-submit-color']: isSacred
+              ? 'var(--goobs-gold)'
+              : 'var(--goobs-light-surface)',
           }
     ) as React.CSSProperties
 
@@ -1948,7 +1967,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       ['--st-comment-border']: isSacred
                         ? 'rgba(255, 152, 0, 0.2)'
                         : 'rgba(245, 158, 11, 0.3)',
-                      ['--st-comment-accent']: isSacred ? '#FF9800' : 'var(--goobs-warn)',
+                      ['--st-comment-accent']: isSacred
+                        ? '#FF9800'
+                        : 'var(--goobs-warn)',
                     }
                   : {}
               ) as React.CSSProperties
@@ -2112,10 +2133,22 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const renderCaseUpdatesTab = () => {
     const updateTypeColors: Record<string, string> = {
-      created: isSacred ? 'var(--goobs-dark-success-text)' : isDark ? '#10B981' : '#10B981',
-      status_change: isSacred ? 'var(--goobs-dark-info-text)' : isDark ? 'var(--goobs-info)' : 'var(--goobs-info)',
+      created: isSacred
+        ? 'var(--goobs-dark-success-text)'
+        : isDark
+          ? '#10B981'
+          : '#10B981',
+      status_change: isSacred
+        ? 'var(--goobs-dark-info-text)'
+        : isDark
+          ? 'var(--goobs-info)'
+          : 'var(--goobs-info)',
       assignment: isSacred ? '#a78bfa' : isDark ? '#8B5CF6' : '#8B5CF6',
-      comment: isSacred ? 'var(--goobs-gold)' : isDark ? 'var(--goobs-warn)' : 'var(--goobs-warn)',
+      comment: isSacred
+        ? 'var(--goobs-gold)'
+        : isDark
+          ? 'var(--goobs-warn)'
+          : 'var(--goobs-warn)',
       field_update: isSacred ? '#fb923c' : isDark ? '#F97316' : '#F97316',
     }
 
@@ -2310,7 +2343,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   // Meeting reschedule handler
   const handleRescheduleMeetingAction = async () => {
-    if (!canRescheduleMeeting || !onRescheduleMeeting || !selectedMeeting) return
+    if (!canRescheduleMeeting || !onRescheduleMeeting || !selectedMeeting)
+      return
 
     if (!rescheduleDate || !rescheduleTime) {
       setMeetingError('Please select a new date and time')
@@ -2506,7 +2540,11 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     value={type}
                     checked={meetingType === type}
                     onChange={() => setMeetingType(type)}
-                    style={{ accentColor: isSacred ? 'var(--goobs-gold)' : 'var(--goobs-info)' }}
+                    style={{
+                      accentColor: isSacred
+                        ? 'var(--goobs-gold)'
+                        : 'var(--goobs-info)',
+                    }}
                   />
                   {type === 'video'
                     ? 'Video Call'
@@ -2965,21 +3003,21 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 itself gated, but the submit is gated too: the view survives a
                 state change and a submit that cannot fire must not be drawn. */}
             {canRescheduleMeeting && (
-            <button
-              data-action="confirm"
-              onClick={handleRescheduleMeetingAction}
-              disabled={
-                isSubmittingMeeting || !rescheduleDate || !rescheduleTime
-              }
-              className={cx(
-                cssStyles.button,
-                cssStyles.amberButton,
-                (isSubmittingMeeting || !rescheduleDate || !rescheduleTime) &&
-                  cssStyles.buttonDisabled
-              )}
-            >
-              {isSubmittingMeeting ? 'Rescheduling...' : 'Confirm Reschedule'}
-            </button>
+              <button
+                data-action="confirm"
+                onClick={handleRescheduleMeetingAction}
+                disabled={
+                  isSubmittingMeeting || !rescheduleDate || !rescheduleTime
+                }
+                className={cx(
+                  cssStyles.button,
+                  cssStyles.amberButton,
+                  (isSubmittingMeeting || !rescheduleDate || !rescheduleTime) &&
+                    cssStyles.buttonDisabled
+                )}
+              >
+                {isSubmittingMeeting ? 'Rescheduling...' : 'Confirm Reschedule'}
+              </button>
             )}
           </div>
         </div>
@@ -3092,7 +3130,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   setMeetingTitle(`Meeting: ${taskTitle}`)
                   setSchedulingView('form')
                 }}
-                className={cx(cssStyles.button, cssStyles.scheduleMeetingButton)}
+                className={cx(
+                  cssStyles.button,
+                  cssStyles.scheduleMeetingButton
+                )}
               >
                 Schedule Meeting
               </button>
@@ -3692,7 +3733,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             ) : (
               /* Empty state */
               <div className={cssStyles.resolutionEmpty}>
-                <div className={cssStyles.resolutionEmptyIcon} aria-hidden="true">
+                <div
+                  className={cssStyles.resolutionEmptyIcon}
+                  aria-hidden="true"
+                >
                   📋
                 </div>
                 <div className={cssStyles.resolutionEmptyTitle}>

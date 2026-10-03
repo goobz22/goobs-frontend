@@ -497,9 +497,7 @@ export interface CustomerBoardProps extends ProjectBoardBaseProps {
 }
 
 export type ProjectBoardProps =
-  | AdministratorBoardProps
-  | CompanyBoardProps
-  | CustomerBoardProps
+  AdministratorBoardProps | CompanyBoardProps | CustomerBoardProps
 
 /** View state for inline interface - tracks which view is currently displayed */
 export type ViewState = 'board' | 'addTask' | 'showTask'

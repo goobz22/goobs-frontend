@@ -5,13 +5,7 @@
  */
 'use client'
 
-import React, {
-  useMemo,
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from 'react'
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
 import {
   useProjectBoard,
   ProjectBoardProvider,
@@ -501,9 +495,11 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     if (viewState !== 'showTask' || !currentShowTask || !activeTaskId)
       return null
 
-    const setSeverity = (!permissions || permissions.access === 'write')
-      ? props.onSetSeverity ?? (props.variant === 'customer' ? props.onRaiseSeverity : undefined)
-      : undefined
+    const setSeverity =
+      !permissions || permissions.access === 'write'
+        ? (props.onSetSeverity ??
+          (props.variant === 'customer' ? props.onRaiseSeverity : undefined))
+        : undefined
 
     const editCallback = (updatedData: any) => {
       if (!permissions || permissions.access === 'write') {
@@ -596,7 +592,8 @@ function ProjectBoardContent(props: ProjectBoardProps) {
           ? {
               onCustomerSetStatus: props.onCustomerSetStatus,
               customerAllowedStatuses: props.customerAllowedStatuses ?? [],
-              customerAllowedSubStatuses: props.customerAllowedSubStatuses ?? [],
+              customerAllowedSubStatuses:
+                props.customerAllowedSubStatuses ?? [],
             }
           : {})}
         {...(onScheduleMeeting && { onScheduleMeeting })}

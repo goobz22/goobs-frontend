@@ -1,9 +1,8 @@
 # CI for the story+JSDoc program (docs/audits/story-jsdoc-standard-proposal.md §4.5).
-# goobs has no unit tests — stories + Chromatic ARE the regression net, so this
-# workflow is what makes every gate real instead of conventional:
-#   typecheck (root + stories) → lint:all (eslint, stylelint, story rules,
-#   styles-key-is-read, story-coverage) → library build → storybook build →
-#   Chromatic visual regression.
+# Regression gates include unit tests, browser checks and Storybook plays:
+#   typecheck (root + stories) → lint:all (oxlint, stylelint, story rules,
+#   coverage, contract guards and unit tests) → library build → browser tests →
+#   storybook build → Chromatic visual regression.
 #
 # CHROMATIC_PROJECT_TOKEN must be set in the repo's Actions secrets (owner
 # action — get it from chromatic.com project settings). Until the secret
@@ -32,7 +31,7 @@ jobs:
       - name: Typecheck (library + stories)
         run: bun run typecheck
 
-      - name: Lint (eslint + stylelint + story rules + coverage gates)
+      - name: Lint, contract guards and unit tests
         run: bun run lint:all
 
       - name: Build library
@@ -41,7 +40,7 @@ jobs:
       - name: Install browser for runtime regressions
         run: bunx playwright install --with-deps chromium
 
-      - name: Form and editor browser regressions
+      - name: Component browser regressions and severity Storybook interactions
         run: bun run test:browser
 
       - name: Build Storybook
