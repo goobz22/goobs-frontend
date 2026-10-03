@@ -8,7 +8,7 @@
  * choreography. These stories are the InlineAddTask / InlineShowTask
  * regression spec — goobs has no unit tests.
  */
-import type { ComponentProps } from 'react'
+import { useEffect, useRef, useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { InlineAddTask } from './forms/AddTask/inline'
@@ -279,6 +279,7 @@ const showTaskProps: ComponentProps<typeof InlineShowTask> = {
 const meta: Meta<typeof InlineAddTask> = {
   title: 'Components/ProjectBoard/InlineForms',
   component: InlineAddTask,
+  excludeStories: ['SeverityHarness'],
   parameters: {
     layout: 'fullscreen',
   },
@@ -287,6 +288,106 @@ const meta: Meta<typeof InlineAddTask> = {
 
 export default meta
 type Story = StoryObj<typeof InlineAddTask>
+
+/** Real ticket fixture shared by Storybook and the browser regression runner. */
+export function SeverityHarness({
+  role = 'staff',
+  mode = 'success',
+  legacy = false,
+  onReady,
+}: {
+  role?: 'staff' | 'customer'
+  mode?: 'success' | 'reject' | 'pending'
+  legacy?: boolean
+  onReady?: (controls: {
+    completeSave: () => void
+    rejectSave: () => void
+    refreshOptions: () => void
+  }) => void
+}) {
+  const [severity, setSeverity] = useState('High')
+  const [requests, setRequests] = useState<unknown[]>([])
+  const [edit, setEdit] = useState<unknown>(null)
+  const [revision, setRevision] = useState(0)
+  const completion = useRef<{
+    resolve: () => void
+    reject: (error: Error) => void
+  } | null>(null)
+  useEffect(() => {
+    onReady?.({
+      completeSave: () => completion.current?.resolve(),
+      rejectSave: () => completion.current?.reject(new Error('Severity update refused')),
+      refreshOptions: () => setRevision(value => value + 1),
+    })
+  }, [onReady])
+  const save = async (request: {
+    taskId: string
+    severityId: string
+    reason: string
+  }) => {
+    setRequests(previous => [...previous, request])
+    if (mode === 'reject') throw new Error('Severity update refused')
+    if (mode === 'pending')
+      await new Promise<void>((resolve, reject) => {
+        completion.current = { resolve, reject }
+      })
+    setSeverity(
+      sampleSeverityLevels.find(level => level._id === request.severityId)
+        ?.description ?? ''
+    )
+  }
+  const severityHandler = legacy
+    ? { onRaiseSeverity: save }
+    : { onSetSeverity: save }
+  return (
+    <div data-testid="severity-harness" data-requests={JSON.stringify(requests)} data-general-edit={JSON.stringify(edit)}>
+      <InlineShowTask
+        {...showTaskProps}
+        {...severityHandler}
+        viewerRole={role}
+        severity={severity}
+        severityOptions={revision ? sampleSeverityLevels.map(level => ({ ...level })) : sampleSeverityLevels}
+        onEdit={setEdit}
+      />
+    </div>
+  )
+}
+
+/** Staff changes require a trimmed justification, including downward changes. */
+export const StaffSeverityJustification: Story = {
+  render: () => <SeverityHarness />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Change severity', exact: true }))
+    await userEvent.click(canvas.getByRole('combobox', { name: /^Severity/ }))
+    await userEvent.click(within(canvasElement.ownerDocument.body).getByRole('option', { name: 'Low', exact: true }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Save severity', exact: true }))
+    await expect(canvas.getByRole('textbox', { name: /Justification/ })).toHaveAttribute('aria-invalid', 'true')
+    await userEvent.type(canvas.getByRole('textbox', { name: /Justification/ }), '  Business impact has decreased after restoring service.  ')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save severity', exact: true }))
+    await waitFor(() => expect(canvas.getByTestId('severity-harness')).toHaveAttribute('data-requests', JSON.stringify([{ taskId: 'task1abc', severityId: 's4', reason: 'Business impact has decreased after restoring service.' }])))
+    await expect(canvas.queryByRole('textbox', { name: /Justification/ })).not.toBeInTheDocument()
+  },
+}
+
+/** Customers use the same setter while unrelated staff fields remain read-only. */
+export const CustomerSeverityJustification: Story = {
+  ...StaffSeverityJustification,
+  render: () => <SeverityHarness role="customer" />,
+}
+
+/** A pending request keeps the justification visible and prevents duplicate saves. */
+export const SeverityPending: Story = {
+  render: () => <SeverityHarness mode="pending" />,
+  globals: { backgrounds: { value: 'light' } },
+}
+
+/** Rejected saves preserve the user's selected severity and justification for retry. */
+export const SeveritySaveFailure: Story = {
+  render: () => <SeverityHarness mode="reject" />,
+  globals: { backgrounds: { value: 'light' } },
+}
 
 // ---------------------------------------------------------------------------
 // InlineAddTask

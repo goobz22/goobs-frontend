@@ -587,6 +587,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         regionOptions={rawRegions}
         styles={styles}
         meetings={meetings.filter(m => m.taskId === activeTaskId)}
+        {...(props.onSetSeverity && { onSetSeverity: props.onSetSeverity })}
         {...(props.variant === 'customer' && props.onRaiseSeverity
           ? { onRaiseSeverity: props.onRaiseSeverity }
           : {})}

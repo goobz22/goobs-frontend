@@ -104,16 +104,18 @@ export interface InlineShowTaskProps {
    */
   viewerRole?: 'staff' | 'customer'
   /**
-   * CUSTOMER viewer only. Raise this ticket's severity — UPLIFT ONLY, with a reason. The control lists
-   * just the levels more severe than the current one and refuses to send without a reason
-   * (`MIN_SEVERITY_UPLIFT_REASON_LENGTH`). Withheld = no control.
+   * Change severity in either direction with a trimmed justification (20–2000 characters).
+   * Shared by staff and customers. Omit to keep severity read-only. Rejections retain
+   * the draft and display the error; the host owns persistence and authorization.
    */
-  onRaiseSeverity?: (args: {
+  onSetSeverity?: (args: {
     taskId: string
     severityId: string
     reason: string
   }) => Promise<void> | void
-  /** Placeholder of the "why is this more urgent" box in the raise-severity control. */
+  /** Customer compatibility alias for onSetSeverity, including downward changes. */
+  onRaiseSeverity?: InlineShowTaskProps['onSetSeverity']
+  /** Placeholder for the shared severity justification field. */
   raiseSeverityReasonPlaceholder?: string
   /**
    * CUSTOMER viewer only. The statuses / sub-statuses the COMPANY has marked customer-usable, and the
@@ -252,33 +254,27 @@ const getHydratedSnapshot = (): boolean => true
 const getServerSnapshot = (): boolean => false
 
 /**
- * The shortest reason a customer must give to RAISE a ticket's severity. The company reads it; a
- * one-word answer is not a reason. (The server enforces its own minimum — this only keeps the form from
- * sending what it would refuse.)
+ * Compatibility export: both directions and viewer roles use this minimum.
+ * The host independently enforces the justification contract.
  */
 export const MIN_SEVERITY_UPLIFT_REASON_LENGTH = 20
 
 /**
- * CUSTOMER viewer: raise this ticket's severity, with a reason. Uplift only — the options are the
- * levels MORE severe than the current one (a lower `severityLevel` number), so a customer can never
- * lower what the company has set. Rendered only when the host supplies `onRaiseSeverity`.
+ * Shared severity editor. Option-array refreshes do not reset the draft;
+ * key by taskId at the callsite so a draft cannot cross tickets.
  */
-function CustomerSeverityUplift({
+function SeverityChange({
   taskId,
   currentSeverity,
   severityOptions,
-  onRaise,
+  onSet,
   reasonPlaceholder,
   theme,
 }: {
   taskId: string
   currentSeverity: string
   severityOptions: RawSeverityLevel[]
-  onRaise: (args: {
-    taskId: string
-    severityId: string
-    reason: string
-  }) => Promise<void> | void
+  onSet: NonNullable<InlineShowTaskProps['onSetSeverity']>
   reasonPlaceholder: string
   theme: 'light' | 'dark' | 'sacred'
 }) {
@@ -287,51 +283,61 @@ function CustomerSeverityUplift({
   const [reason, setReason] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const currentLevel = severityOptions.find(
+  // State disables controls; the ref also blocks clicks before React commits.
+  const inFlight = useRef(false)
+  const currentId = severityOptions.find(
     level => level.description === currentSeverity
-  )?.severityLevel
-  const higher = useMemo(
-    () =>
-      currentLevel === undefined
-        ? []
-        : severityOptions
-            .filter(level => level.severityLevel < currentLevel)
-            .sort((a, b) => a.severityLevel - b.severityLevel),
-    [severityOptions, currentLevel]
+  )?._id
+  const options: DropdownOption[] = useMemo(
+    () => [
+      { value: '', _id: '' },
+      ...[...severityOptions]
+        .sort((a, b) => a.severityLevel - b.severityLevel)
+        .map(level => ({
+          value: level.description || `Level ${level.severityLevel}`,
+          _id: level._id,
+        })),
+    ],
+    [severityOptions]
   )
-  if (higher.length === 0) return null
-  const options: DropdownOption[] = [
-    { value: '', _id: '' },
-    ...higher.map(level => ({
-      value: level.description || `Level ${level.severityLevel}`,
-      _id: level._id,
-    })),
-  ]
+  const clearDraft = () => {
+    setOpen(false)
+    setTargetId('')
+    setReason('')
+    setError('')
+  }
   const submit = async () => {
-    if (!targetId) {
-      setError('Choose the severity you are raising this to.')
+    if (inFlight.current) return
+    if (!targetId || !severityOptions.some(level => level._id === targetId)) {
+      setError('Choose a severity from the available options.')
       return
     }
-    if (reason.trim().length < MIN_SEVERITY_UPLIFT_REASON_LENGTH) {
-      setError(
-        `Tell your company why this is more urgent (at least ${MIN_SEVERITY_UPLIFT_REASON_LENGTH} characters).`
-      )
+    if (targetId === currentId) {
+      clearDraft()
       return
     }
+    const justification = reason.trim()
+    if (
+      justification.length < MIN_SEVERITY_UPLIFT_REASON_LENGTH ||
+      justification.length > 2000
+    ) {
+      setError('Explain the severity change in 20–2000 characters.')
+      return
+    }
+    inFlight.current = true
     setError('')
     setBusy(true)
     try {
-      await onRaise({ taskId, severityId: targetId, reason: reason.trim() })
-      setOpen(false)
-      setTargetId('')
-      setReason('')
+      await onSet({ taskId, severityId: targetId, reason: justification })
+      clearDraft()
     } catch (raised) {
       setError(
-        raised instanceof Error
+        raised instanceof Error && raised.message
           ? raised.message
-          : 'The severity could not be raised. Try again.'
+          : 'The severity could not be changed. Try again.'
       )
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
@@ -342,9 +348,12 @@ function CustomerSeverityUplift({
           type="button"
           data-action="edit"
           className={cssStyles.button}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setTargetId(currentId ?? '')
+            setOpen(true)
+          }}
         >
-          Raise severity
+          Change severity
         </button>
       </div>
     )
@@ -352,14 +361,14 @@ function CustomerSeverityUplift({
   return (
     <div className={cssStyles.editFieldWrap}>
       <Dropdown
-        label="Raise severity to"
+        label="Severity"
         options={options}
         value={targetId}
-        onChange={value => setTargetId(value)}
-        styles={{ theme, required: true }}
+        onChange={setTargetId}
+        styles={{ theme, required: true, disabled: busy }}
       />
       <TextField
-        label="Why is this more urgent?"
+        label="Justification"
         value={reason}
         onChange={setReason}
         multiline
@@ -367,7 +376,8 @@ function CustomerSeverityUplift({
         required
         error={error || undefined}
         placeholder={reasonPlaceholder}
-        styles={{ theme }}
+        helperText="Explain the business impact in 20–2000 characters."
+        styles={{ theme, disabled: busy }}
       />
       <div className={cssStyles.actionButtons}>
         <button
@@ -377,17 +387,14 @@ function CustomerSeverityUplift({
           disabled={busy}
           onClick={() => void submit()}
         >
-          {busy ? 'Raising…' : 'Raise severity'}
+          {busy ? 'Saving severity…' : 'Save severity'}
         </button>
         <button
           type="button"
           data-action="cancel"
           className={cssStyles.button}
           disabled={busy}
-          onClick={() => {
-            setOpen(false)
-            setError('')
-          }}
+          onClick={clearDraft}
         >
           Cancel
         </button>
@@ -525,6 +532,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   onEdit,
   onDelete,
   viewerRole = 'staff',
+  onSetSeverity,
   onRaiseSeverity,
   raiseSeverityReasonPlaceholder = 'Describe the business impact so your company can respond appropriately',
   customerAllowedStatuses = [],
@@ -703,14 +711,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     return createdBy
   }
 
-  // Edit mode state for editable fields
-  // Each of these six drafts is seeded from a prop + its option list and then
-  // owned by the user's edits until that pair changes again — see
-  // usePropSeededDraft above, which replaced six prop-mirroring effects.
-  const [editedSeverityId, setEditedSeverityId] = usePropSeededDraft(
-    severityOptions.find(s => s.description === severity)?._id || '',
-    [severity, severityOptions]
-  )
+  // Edit drafts are seeded from their props and option lists.
   const [editedStatusId, setEditedStatusId] = usePropSeededDraft(
     statusOptions.find(s => s.status === status)?._id || '',
     [status, statusOptions]
@@ -923,16 +924,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   ])
 
   // Dropdown options for edit mode
-  const severityDropdownOptions: DropdownOption[] = useMemo(
-    () => [
-      { value: '', _id: '' },
-      ...severityOptions.map(level => ({
-        value: level.description || `Level ${level.severityLevel}`,
-        _id: level._id,
-      })),
-    ],
-    [severityOptions]
-  )
 
   const queueDropdownOptions: DropdownOption[] = useMemo(
     () => [
@@ -1001,8 +992,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const handleSaveEdit = () => {
     if (onEdit) {
       // Log case updates for each changed field
-      const currentSeverityId =
-        severityOptions.find(s => s.description === severity)?._id || ''
       const currentStatusId =
         statusOptions.find(s => s.status === status)?._id || ''
       const currentSubStatusId =
@@ -1015,20 +1004,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       const currentTopicIds = topicOptions
         .filter(t => topics.includes(t.topic))
         .map(t => t._id)
-
-      // Log severity change
-      if (editedSeverityId !== currentSeverityId) {
-        const newSeverity =
-          severityOptions.find(s => s._id === editedSeverityId)?.description ||
-          'Unknown'
-        logCaseUpdate(
-          'severity_change',
-          `Changed severity from "${severity}" to "${newSeverity}"`,
-          'severity',
-          severity,
-          newSeverity
-        )
-      }
 
       // Log status change
       if (editedStatusId !== currentStatusId) {
@@ -1119,7 +1094,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       onEdit({
         title: editedTitle,
         description: editedDescription,
-        severityId: editedSeverityId,
         statusId: editedStatusId,
         substatusId: editedSubStatusId,
         schedulingQueueId: editedQueueId,
@@ -1137,9 +1111,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     // Reset all edited values to original
     setEditedTitle(taskTitle)
     setEditedDescription(description)
-    setEditedSeverityId(
-      severityOptions.find(s => s.description === severity)?._id || ''
-    )
     setEditedStatusId(statusOptions.find(s => s.status === status)?._id || '')
     setEditedSubStatusId(
       subStatusOptions.find(s => s.subStatus === subStatus)?._id || ''
@@ -1301,29 +1272,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                 </div>
               )}
 
-          {/* Severity - Editable in edit mode */}
-          {isEditMode && canEditCompanyFields ? (
-            <div className={cssStyles.editFieldWrap}>
-              <Dropdown
-                label="Severity"
-                options={severityDropdownOptions}
-                value={editedSeverityId}
-                onChange={value => setEditedSeverityId(value)}
-                styles={{ theme: styles?.theme || 'light' }}
-              />
-            </div>
-          ) : (
-            <div className={cssStyles.fieldRow}>
-              <div className={cssStyles.fieldLabel}>Severity</div>
-              <div className={cssStyles.fieldValue}>{severity}</div>
-            </div>
-          )}
-          {viewerIsCustomer && onRaiseSeverity && (
-            <CustomerSeverityUplift
+          {/* Severity changes always use the dedicated, justified callback. */}
+          <div className={cssStyles.fieldRow}>
+            <div className={cssStyles.fieldLabel}>Severity</div>
+            <div className={cssStyles.fieldValue}>{severity}</div>
+          </div>
+          {(onSetSeverity ?? (viewerIsCustomer ? onRaiseSeverity : undefined)) && (
+            <SeverityChange
+              key={taskId}
               taskId={taskId}
               currentSeverity={severity}
               severityOptions={severityOptions}
-              onRaise={onRaiseSeverity}
+              onSet={(onSetSeverity ?? onRaiseSeverity)!}
               reasonPlaceholder={raiseSeverityReasonPlaceholder}
               theme={styles?.theme || 'light'}
             />
@@ -3234,7 +3194,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             onEdit({
               title: taskTitle,
               description: description,
-              severityId: editedSeverityId,
               statusId: editedStatusId,
               substatusId: editedSubStatusId,
               schedulingQueueId: editedQueueId,
@@ -3265,7 +3224,6 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             onEdit({
               title: taskTitle,
               description: description,
-              severityId: editedSeverityId,
               statusId: editedStatusId,
               substatusId: editedSubStatusId,
               schedulingQueueId: editedQueueId,

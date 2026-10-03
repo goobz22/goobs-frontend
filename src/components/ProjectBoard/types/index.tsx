@@ -362,6 +362,16 @@ interface ProjectBoardBaseProps {
    * define the signature here. You can also do (text: string) => void if that's your design.
    */
   onComment: (commentText: string, _id: string) => void
+  /**
+   * Change severity in either direction with a trimmed justification (20–2000 characters).
+   * Staff and customers share this control. Omit to keep severity read-only.
+   * The host owns persistence and authorization; reject to retain the draft.
+   */
+  onSetSeverity?: (args: {
+    taskId: string
+    severityId: string
+    reason: string
+  }) => Promise<void> | void
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles: ProjectBoardStyles
   /**
@@ -468,7 +478,7 @@ export interface CustomerBoardProps extends ProjectBoardBaseProps {
   requireProduct?: boolean
   /** The company requires a Service on every request a customer files. See `requireProduct`. */
   requireService?: boolean
-  /** Raise a ticket's severity (uplift only, with a reason). Forwarded to the ticket view. */
+  /** Customer compatibility alias for onSetSeverity, including downward changes. */
   onRaiseSeverity?: (args: {
     taskId: string
     severityId: string
