@@ -1,4 +1,6 @@
 import type { EditorMode } from '../Toolbars/Complex'
+import sanitizeMarkup from 'sanitize-html'
+import { decodeHTML } from 'entities'
 
 function escapeHtml(unsafe: string): string {
   return unsafe
@@ -76,51 +78,62 @@ function sanitizeUrl(url: string, context: 'href' | 'src'): string {
  * their content), inline `on*=` event-handler attributes, and
  * `javascript:`/`vbscript:`/non-image `data:` URLs in `href`/`src`.
  *
- * This is a dependency-free, best-effort CLIENT-side seam (defense in depth) so
- * a dSIH sink can never trivially execute injected script from an editor value;
- * it is NOT a substitute for a server-side sanitization policy on content that
- * crosses a trust boundary.
+ * Parse HTML before checking attributes: browsers decode character references
+ * in URLs and accept attribute syntax a regex cannot safely recognize. The
+ * same parser runs during SSR and in the browser, with an explicit allowlist
+ * for editor formatting. Hosts must also sanitize content at their own trust
+ * boundaries before storing or rendering it elsewhere.
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
-  let out = html
-  // Remove dangerous elements INCLUDING their content, so a <script>/<style>
-  // body cannot survive as text that a later parse could resurrect.
-  out = out.replace(
-    /<(script|style|iframe|object|embed|noscript|template)\b[\s\S]*?<\/\1\s*>/gi,
-    ''
-  )
-  // Remove any stray / unbalanced / void dangerous-element tag the paired pass
-  // above could not match.
-  out = out.replace(
-    /<\/?(?:script|style|iframe|object|embed|noscript|template|form|link|meta|base)\b[^>]*>/gi,
-    ''
-  )
-  // Strip inline event-handler attributes (onclick=, onerror=, onload=, …) in
-  // every quote form.
-  out = out.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
-  out = out.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '')
-  out = out.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '')
-  // Neutralize dangerous URL schemes in href/src/xlink:href (scheme detection
-  // on a control-char-stripped copy; safe values pass through untouched).
-  out = out.replace(
-    /(\s(?:href|src|xlink:href)\s*=\s*)("[^"]*"|'[^']*'|[^\s>]+)/gi,
-    (match: string, prefix: string, rawValue: string) => {
-      let quote = ''
-      let value = rawValue
-      const first = rawValue[0]
-      if ((first === '"' || first === "'") && rawValue.endsWith(first)) {
-        quote = first
-        value = rawValue.slice(1, -1)
-      }
-      const probe = urlSchemeProbe(value)
-      const dangerous =
-        /^(?:javascript|vbscript):/.test(probe) ||
-        (probe.startsWith('data:') && !probe.startsWith('data:image/'))
-      return dangerous ? `${prefix}${quote}#${quote}` : match
-    }
-  )
-  return out
+  const colors = [/^#[\da-f]{3,8}$/i, /^rgba?\([\d\s.,%]+\)$/i, /^[a-z]+$/i]
+  return sanitizeMarkup(html, {
+    allowedTags: [
+      ...sanitizeMarkup.defaults.allowedTags,
+      'img',
+      'font',
+      's',
+      'strike',
+    ],
+    allowedAttributes: {
+      '*': ['style'],
+      a: ['href', 'title', 'target', 'rel'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      font: ['color', 'face', 'size'],
+      code: ['class'],
+      th: ['colspan', 'rowspan', 'scope'],
+      td: ['colspan', 'rowspan'],
+      ol: ['start', 'reversed'],
+      li: ['value'],
+    },
+    allowedStyles: {
+      '*': {
+        'text-align': [/^(left|right|center|justify)$/],
+        color: colors,
+        'background-color': colors,
+        'font-size': [/^\d+(?:\.\d+)?(?:px|em|rem|%)$/],
+        'font-family': [/^[\w\s,'"-]+$/],
+        'font-weight': [/^(normal|bold|[1-9]00)$/],
+        'font-style': [/^(normal|italic|oblique)$/],
+        'text-decoration': [/^(none|underline|line-through|overline)$/],
+      },
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    allowedSchemesByTag: { img: ['http', 'https', 'data'] },
+    transformTags: {
+      img: (tagName, attribs) => ({
+        tagName,
+        attribs: { ...attribs, src: sanitizeUrl(attribs.src ?? '', 'src') },
+      }),
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs:
+          attribs.target === '_blank'
+            ? { ...attribs, rel: 'noopener noreferrer' }
+            : attribs,
+      }),
+    },
+  })
 }
 
 /**
@@ -311,7 +324,8 @@ function htmlToMd(html: string): string {
     prevMd = md
     md = md.replace(/<[^>]+>/g, '')
   }
-  return md.trim()
+  // Decode once, after stripping markup, so escaped literal tags remain text.
+  return decodeHTML(md).trim()
 }
 
 function textToHtml(text: string): string {
@@ -327,7 +341,7 @@ function htmlToText(html: string): string {
     prevText = text
     text = text.replace(/<[^>]+>/g, '')
   }
-  return text
+  return decodeHTML(text)
 }
 
 export function convertValue(

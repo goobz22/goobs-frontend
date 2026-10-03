@@ -32,18 +32,26 @@ const ROOT = join(import.meta.dir, '..')
 
 /** path -> max bytes (baseline noted alongside). */
 const BUDGETS: Record<string, { max: number; baseline: string }> = {
-  // Baseline 2026-08-16: 1.32 MB, down from 2.65 MB when highlight.js stopped
-  // being statically imported by CodeCopy (see EAGER_PAYLOADS below). The
-  // ceiling was lowered with it — leaving the old 2.95 MB ceiling in place
-  // would have silently re-admitted the exact regression that was just fixed.
-  'dist/goobs-frontend.es.js': { max: 1_450_000, baseline: '1.32 MB' },
+  // 0.302.4: 1,556,571 B (327 KB gzip). Replacing the bypassable HTML regex
+  // with sanitize-html adds its HTML/CSS parsers and entity tables. This is
+  // deliberately synchronous for matching SSR/browser output and preserves
+  // editor formatting. Retain ~10% headroom over that measured security cost.
+  // The eager-payload fence below still rejects the highlight.js regression.
+  'dist/goobs-frontend.es.js': {
+    max: 1_710_000,
+    baseline: '1.56 MB (parser-based HTML sanitization)',
+  },
   // UMD is a single-file format: it CANNOT code-split, so rolldown inlines
   // every dynamic import back into this one file. It therefore carries both
   // the per-grammar chunks and the full-bundle fallback, and grew 2.69 -> 2.84
   // MB in the same change that halved the ESM entry. That is the deliberate
   // trade: the modern ESM path (what every real consumer resolves) drops
   // ~1.34 MB, the legacy single-file path pays ~144 KB of duplication.
-  'dist/goobs-frontend.umd.js': { max: 2_990_000, baseline: '2.84 MB' },
+  // Same sanitizer cost in the single-file build: 3,027,979 B, ~10% headroom.
+  'dist/goobs-frontend.umd.js': {
+    max: 3_330_000,
+    baseline: '3.03 MB (parser-based HTML sanitization)',
+  },
   'dist/goobs-frontend.css': { max: 490_000, baseline: '443 KB' },
 }
 

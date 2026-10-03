@@ -1305,7 +1305,7 @@ export const RichEditorSanitizesValue: Story = {
       label="Rich Content"
       editorType="rich"
       initialValue={
-        'Safe <b>KEEPBOLD</b> then <img src=x onerror="window.__richXss = true"> and <script>window.__richXss2 = true</script>'
+        'Safe <b>KEEPBOLD</b> then <img src=x alt="" onerror="window.__richXss = true"> and <script>window.__richXss2 = true</script> <a href="java&#x73;cript:window.__richXss=true">encoded link</a>'
       }
       styles={{ theme: 'light' }}
     />
@@ -1327,6 +1327,20 @@ export const RichEditorSanitizesValue: Story = {
     })
     // Legitimate formatting is preserved (sanitize, not escape-to-text).
     await expect(within(surface).getByText('KEEPBOLD').tagName).toBe('B')
+    await expect(within(surface).getByText('encoded link')).not.toHaveAttribute('href')
+  },
+}
+
+/** Switching through rich text preserves literal text and decodes entities once. */
+export const EntityRoundTrip: Story = {
+  render: () => <ComplexTextEditorWithState label="Round trip" editorType="complex" initialMode="simple" initialValue="A & B < C" styles={{ theme: 'light' }} />,
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Rich Text' }))
+    await expect(canvas.getByRole('textbox')).toHaveTextContent('A & B < C')
+    await userEvent.click(canvas.getByRole('button', { name: 'Simple' }))
+    await expect(canvas.getByRole('textbox')).toHaveValue('A & B < C')
   },
 }
 

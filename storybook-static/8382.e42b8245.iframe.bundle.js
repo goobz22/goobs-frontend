@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkgoobs_frontend=self.webpackChunkgoobs_frontend||[]).push([[8382],{"./node_modules/highlight.js/es/languages/plaintext.js"(__unused_webpack_module,__webpack_exports__,__webpack_require__){function plaintext(hljs){return{name:"Plain text",aliases:["text","txt"],disableAutodetect:!0}}__webpack_require__.r(__webpack_exports__),__webpack_require__.d(__webpack_exports__,{default:()=>plaintext})}}]);
+//# sourceMappingURL=8382.e42b8245.iframe.bundle.js.map

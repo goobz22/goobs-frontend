@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkgoobs_frontend=self.webpackChunkgoobs_frontend||[]).push([[854],{"./node_modules/highlight.js/es/core.js"(__unused_webpack_module,__webpack_exports__,__webpack_require__){var _lib_core_js__WEBPACK_IMPORTED_MODULE_0__=__webpack_require__("./node_modules/highlight.js/lib/core.js");const __WEBPACK_DEFAULT_EXPORT__=__webpack_require__.n(_lib_core_js__WEBPACK_IMPORTED_MODULE_0__)();__webpack_require__.d(__webpack_exports__,["default",0,__WEBPACK_DEFAULT_EXPORT__])}}]);
+//# sourceMappingURL=854.31ff062c.iframe.bundle.js.map

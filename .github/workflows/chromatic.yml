@@ -38,6 +38,12 @@ jobs:
       - name: Build library
         run: bun run build
 
+      - name: Install browser for runtime regressions
+        run: bunx playwright install --with-deps chromium
+
+      - name: Form and editor browser regressions
+        run: bun run test:browser
+
       - name: Build Storybook
         run: bun run build-storybook
 

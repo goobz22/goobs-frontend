@@ -54,13 +54,10 @@ export function useFieldArray<T = unknown>(name: string): FieldArrayBinding<T> {
   const current = engine.getValue(name)
   const items = (Array.isArray(current) ? current : []) as T[]
 
-  const readArray = useCallback(
-    (): T[] => {
-      const value = engine.getValue(name)
-      return (Array.isArray(value) ? value : []) as T[]
-    },
-    [engine, name]
-  )
+  const readArray = useCallback((): T[] => {
+    const value = engine.getValue(name)
+    return (Array.isArray(value) ? value : []) as T[]
+  }, [engine, name])
 
   const append = useCallback(
     (item: T): void => engine.setValue(name, [...readArray(), item]),
@@ -87,7 +84,7 @@ export function useFieldArray<T = unknown>(name: string): FieldArrayBinding<T> {
 
   const move = useCallback(
     (from: number, to: number): void => {
-      const next = readArray()
+      const next = [...readArray()]
       if (from < 0 || from >= next.length || to < 0 || to >= next.length) return
       const [moved] = next.splice(from, 1)
       if (moved === undefined) return

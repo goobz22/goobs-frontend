@@ -21,7 +21,7 @@
  * by `<FieldShell>`, which already owns that edge-trigger.
  */
 
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -29,24 +29,26 @@ import { emitDiag } from '../../../utils/diag'
 import type { FormEngine } from '../context'
 
 /** Structural view of the zod schema surface the engine uses. */
-interface ZodSchemaLike {
-  safeParse: (value: unknown) => ZodSafeParseResult
+interface ZodSchemaLike<TValues> {
+  safeParse: (value: unknown) => ZodSafeParseResult<TValues>
   shape?: Record<string, unknown>
 }
 
-interface ZodSafeParseResult {
-  success: boolean
-  error?: {
-    issues?: ReadonlyArray<{
-      path: ReadonlyArray<PropertyKey>
-      message: string
-    }>
-  }
-}
+type ZodSafeParseResult<TValues> =
+  | { success: true; data: TValues }
+  | {
+      success: false
+      error: {
+        issues?: ReadonlyArray<{
+          path: ReadonlyArray<PropertyKey>
+          message: string
+        }>
+      }
+    }
 
 export interface UseZodFormEngineArgs<TValues extends Record<string, unknown>> {
   /** The zod object schema the form validates against. */
-  schema: ZodSchemaLike
+  schema: ZodSchemaLike<TValues>
   /** Initial field values. */
   initialValues: TValues
   /** Called with validated values once submission passes validation. */
@@ -59,8 +61,11 @@ export interface UseZodFormEngineArgs<TValues extends Record<string, unknown>> {
  * Flatten a zod `safeParse` failure into `{ 'a.b.c': 'first message' }`. Only
  * the first message per path is kept (the one a single-line field error shows).
  */
-function flattenIssues(result: ZodSafeParseResult): Record<string, string> {
+function flattenIssues(
+  result: ZodSafeParseResult<unknown>
+): Record<string, string> {
   const errors: Record<string, string> = {}
+  if (result.success) return errors
   const issues = result.error?.issues
   if (!issues) return errors
   for (const issue of issues) {
@@ -74,7 +79,7 @@ function flattenIssues(result: ZodSafeParseResult): Record<string, string> {
 }
 
 /** Collect the top-level schema keys so submit can mark every field touched. */
-function schemaKeys(schema: ZodSchemaLike): string[] {
+function schemaKeys(schema: ZodSchemaLike<unknown>): string[] {
   const shape = schema.shape
   if (shape && typeof shape === 'object') return Object.keys(shape)
   return []
@@ -86,7 +91,10 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
   onSubmit,
   formId,
 }: UseZodFormEngineArgs<TValues>): FormEngine<TValues> {
-  const [values, setValues] = useState<TValues>(initialValues)
+  const [values, setValues] = useState<TValues>(() => cloneDeep(initialValues))
+  // A mutation must observe earlier writes in the same event, before React
+  // renders again. Rendered values remain immutable snapshots of this store.
+  const currentValues = useRef(values)
   const [touched, setTouchedState] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   // EXTERNAL (server-side) per-field errors, injected via setExternalErrors.
@@ -96,6 +104,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
     Record<string, string>
   >({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const submitInFlight = useRef(false)
 
   /** Validate a candidate value set and return the flattened error map. */
   const validate = useCallback(
@@ -108,19 +117,19 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
   )
 
   const getValue = useCallback(
-    (name: string): unknown => get(values, name),
-    [values]
+    (name: string): unknown => get(currentValues.current, name),
+    []
   )
 
   const setValue = useCallback(
     (name: string, value: unknown): void => {
-      setValues(previous => {
-        const next = cloneDeep(previous)
-        set(next as Record<string, unknown>, name, value)
-        // Re-validate the whole form so cross-field rules update too.
-        setErrors(validate(next))
-        return next
-      })
+      const next = cloneDeep(currentValues.current)
+      set(next as Record<string, unknown>, name, cloneDeep(value))
+      const nextErrors = validate(next)
+      currentValues.current = next
+      setValues(next)
+      // Keep validation outside a React state updater (which may be replayed).
+      setErrors(nextErrors)
       // Editing a field invalidates any stale server verdict for it.
       setExternalErrorsState(previous => {
         if (previous[name] === undefined) return previous
@@ -162,42 +171,44 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
   const handleSubmit = useCallback(
     (event?: React.FormEvent): void => {
       event?.preventDefault()
-      setIsSubmitting(true)
+      if (submitInFlight.current) return
+
+      const parsed = schema.safeParse(currentValues.current)
+      const validationErrors = flattenIssues(parsed)
+      setErrors(validationErrors)
 
       // Mark every schema field touched so errors surface on submit even for
       // fields the user never focused.
-      const keys = schemaKeys(schema)
+      const keys = [...schemaKeys(schema), ...Object.keys(validationErrors)]
       setTouchedState(previous => {
         const next = { ...previous }
         for (const key of keys) next[key] = true
         return next
       })
 
-      const validationErrors = validate(values)
-      setErrors(validationErrors)
-
-      if (Object.keys(validationErrors).length > 0) {
-        setIsSubmitting(false)
-        return
-      }
+      if (!parsed.success) return
+      // State alone cannot guard two submits before the next React commit.
+      submitInFlight.current = true
+      setIsSubmitting(true)
 
       emitDiag({
         type: 'form.submit.attempt',
         formId: formId ?? '',
-        fields: values,
+        fields: parsed.data,
       })
 
       // Run onSubmit (sync or async) and always clear the submitting flag.
       void Promise.resolve()
-        .then(() => onSubmit(values))
+        .then(() => onSubmit(parsed.data))
         .then(() => {
           emitDiag({ type: 'form.validation.passed', formId: formId ?? '' })
         })
         .finally(() => {
+          submitInFlight.current = false
           setIsSubmitting(false)
         })
     },
-    [schema, validate, values, formId, onSubmit]
+    [schema, formId, onSubmit]
   )
 
   return useMemo<FormEngine<TValues>>(

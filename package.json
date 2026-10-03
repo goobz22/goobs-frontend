@@ -1,6 +1,6 @@
 {
   "name": "goobs-frontend",
-  "version": "0.302.3",
+  "version": "0.302.4",
   "type": "module",
   "description": "A comprehensive React-based libary for building modern web applications",
   "license": "MIT",
@@ -49,7 +49,9 @@
     "lint:touch-target": "bun scripts/lint-touch-target-height.ts",
     "lint:meeting-affordance": "bun scripts/lint-meeting-affordance-gate.ts",
     "test": "bun test ./scripts/__tests__",
-    "lint:all": "npm run lint && npm run lint:css && npm run lint:stories && npm run lint:story-syntax && npm run lint:styles-props && npm run lint:coverage && npm run lint:a11y && npm run lint:circular && npm run lint:drift && npm run lint:rtl && npm run lint:touch-target && npm run lint:meeting-affordance && npm run test",
+    "test:browser": "bun scripts/test-form-regressions.ts",
+    "lint:form-state": "bun scripts/lint-form-state.ts --selftest && bun scripts/lint-form-state.ts",
+    "lint:all": "npm run lint && npm run lint:css && npm run lint:stories && npm run lint:story-syntax && npm run lint:styles-props && npm run lint:coverage && npm run lint:a11y && npm run lint:circular && npm run lint:drift && npm run lint:rtl && npm run lint:touch-target && npm run lint:meeting-affordance && npm run lint:form-state && npm run test",
     "knip": "knip",
     "chromatic": "chromatic",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
@@ -58,11 +60,13 @@
   },
   "dependencies": {
     "date-fns": "^4.4.0",
+    "entities": "^8.1.0",
     "highlight.js": "^11.12.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lodash": "^4.18.1",
     "qrcode": "^1.5.4",
+    "sanitize-html": "^2.18.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -76,6 +80,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/sanitize-html": "^2.16.2",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.1.1",
     "chromatic": "^18.9.5",
