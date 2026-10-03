@@ -6,9 +6,12 @@ const fixture = await browserFixture(`
 import React from ${fixtureImport('node_modules/react/index.js')}
 import {createRoot} from ${fixtureImport('node_modules/react-dom/client.js')}
 import {SeverityHarness} from ${fixtureImport('src/components/ProjectBoard/InlineForms.stories.tsx')}
+import {BoardSeverityHarness} from ${fixtureImport('src/components/ProjectBoard/board/ProjectBoard.stories.tsx')}
 const query = new URLSearchParams(location.search)
 createRoot(document.getElementById('root')).render(React.createElement(React.StrictMode, null,
-  React.createElement(SeverityHarness, {role: query.get('role') || 'staff', mode: query.get('mode') || 'success', legacy: query.has('legacy'), onReady: controls => { window.__severityHarness = controls }})))
+  query.has('board')
+    ? React.createElement(BoardSeverityHarness, {variant: query.get('board'), access: query.get('access') || 'write'})
+    : React.createElement(SeverityHarness, {role: query.get('role') || 'staff', mode: query.get('mode') || 'success', legacy: query.has('legacy'), onReady: controls => { window.__severityHarness = controls }})))
 `)
 const { page } = fixture
 page.setDefaultTimeout(3000)
@@ -25,6 +28,19 @@ const choose = async (label: string) => {
 const save = () => page.getByRole('button', { name: 'Save severity', exact: true }).click()
 const justification = () => page.getByRole('textbox', { name: /Justification/ })
 const cases: [string, () => Promise<void>][] = []
+for (const variant of ['administrator', 'company', 'customer']) {
+  cases.push([
+    `${variant} read-only board withholds severity editing`,
+    async () => {
+      await page.goto(`${fixture.url}?board=${variant}&access=read`)
+      await page.getByRole('checkbox', { name: 'Select task: Fix login issue', exact: true }).check()
+      await page.getByRole('button', { name: 'Manage', exact: true }).click()
+      await page.getByRole('tablist', { name: 'Task sections', exact: true }).waitFor()
+      assert.equal(await page.getByRole('button', { name: 'Change severity', exact: true }).count(), 0)
+      assert.deepEqual(JSON.parse((await page.getByTestId('board-severity-harness').getAttribute('data-requests'))!), [])
+    },
+  ])
+}
 cases.push([
   'general edit never writes severity through onEdit',
   async () => {

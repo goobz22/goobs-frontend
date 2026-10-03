@@ -2,6 +2,7 @@
  * @fileoverview Storybook stories for the ProjectBoard component.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'
+import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import ProjectBoard from '../index'
 import { ProjectBoardProvider } from '../context/ProjectBoardContext'
@@ -24,6 +25,7 @@ import {
   AdministratorBoardProps,
   CompanyBoardProps,
   CustomerBoardProps,
+  ProjectBoardProps,
 } from '../types'
 
 // Sample raw data for all the components
@@ -334,6 +336,7 @@ const customerArgs: CustomerBoardProps = {
 const meta: Meta<typeof ProjectBoard> = {
   title: 'Components/ProjectBoard/Board',
   component: ProjectBoard,
+  excludeStories: ['BoardSeverityHarness'],
   parameters: {
     layout: 'fullscreen',
   },
@@ -355,6 +358,25 @@ const meta: Meta<typeof ProjectBoard> = {
 
 export default meta
 type Story = StoryObj<typeof ProjectBoard>
+
+/** Real board fixture shared by stories and severity browser regressions. */
+export function BoardSeverityHarness({ variant = 'company', access = 'write' }: {
+  variant?: ProjectBoardProps['variant']; access?: 'read' | 'write'
+}) {
+  const [tasks, setTasks] = useState(sampleTasks)
+  const [requests, setRequests] = useState<unknown[]>([])
+  const props = variant === 'administrator' ? administratorArgs : variant === 'customer' ? customerArgs : companyArgs
+  const onSetSeverity: NonNullable<ProjectBoardProps['onSetSeverity']> = request => {
+    setRequests(previous => [...previous, request])
+    setTasks(previous => previous.map(task => task._id === request.taskId ? {
+      ...task, severityId: request.severityId,
+      severity: sampleRawSeverityLevels.find(level => level._id === request.severityId)?.description ?? '',
+    } : task))
+  }
+  return <div data-testid="board-severity-harness" data-requests={JSON.stringify(requests)}>
+    <ProjectBoardProvider><ProjectBoard {...props} tasks={tasks} permissions={{ access }} onSetSeverity={onSetSeverity} /></ProjectBoardProvider>
+  </div>
+}
 
 export const LightTheme: Story = {
   render: args => (

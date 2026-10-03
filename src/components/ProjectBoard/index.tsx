@@ -501,6 +501,10 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     if (viewState !== 'showTask' || !currentShowTask || !activeTaskId)
       return null
 
+    const setSeverity = (!permissions || permissions.access === 'write')
+      ? props.onSetSeverity ?? (props.variant === 'customer' ? props.onRaiseSeverity : undefined)
+      : undefined
+
     const editCallback = (updatedData: any) => {
       if (!permissions || permissions.access === 'write') {
         onEdit({ _id: activeTaskId, ...updatedData })
@@ -587,10 +591,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         regionOptions={rawRegions}
         styles={styles}
         meetings={meetings.filter(m => m.taskId === activeTaskId)}
-        {...(props.onSetSeverity && { onSetSeverity: props.onSetSeverity })}
-        {...(props.variant === 'customer' && props.onRaiseSeverity
-          ? { onRaiseSeverity: props.onRaiseSeverity }
-          : {})}
+        {...(setSeverity && { onSetSeverity: setSeverity })}
         {...(props.variant === 'customer' && props.onCustomerSetStatus
           ? {
               onCustomerSetStatus: props.onCustomerSetStatus,
