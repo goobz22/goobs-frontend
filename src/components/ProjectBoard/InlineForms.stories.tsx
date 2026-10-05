@@ -847,3 +847,74 @@ export const ShowTaskCustomerView: Story = {
     await expect(canvas.queryByLabelText(/^Queue$/)).toBeNull()
   },
 }
+
+/**
+ * Pins the inline edit attribution on a comment (OWNER_QUEUE 2.206, W-1276): a staff member may rewrite a customer's
+ * comment as moderation, so the comment header must say WHO rewrote it — otherwise the customer appears to have written
+ * words they never wrote. Two shapes are drawn: the editor derived from the last non-original revision (`editedBy`), and an
+ * explicit `lastEditedBy`. A comment nobody edited carries NO label. The Comments tab is opened and the labels are asserted
+ * by their text, so the baseline fails if the attribution regresses to revision-history-only.
+ */
+export const ShowTaskCommentEditedBy: Story = {
+  render: () => (
+    <InlineShowTask
+      {...showTaskProps}
+      comments={[
+        {
+          _id: 'cm-customer-edited',
+          text: 'My order never arrived — please escalate.',
+          createdAt: new Date('2023-12-13T15:30:00.000Z'),
+          createdBy: 'Cora Customer',
+          editHistory: [
+            {
+              _id: 'rev-orig',
+              text: 'my order never arrived!!! fix this now',
+              isOriginal: true,
+            },
+            {
+              _id: 'rev-staff',
+              editedBy: 'Bob Manager',
+              editedAt: new Date('2023-12-13T16:00:00.000Z'),
+              text: 'My order never arrived — please escalate.',
+              isOriginal: false,
+            },
+          ],
+        },
+        {
+          _id: 'cm-explicit-editor',
+          text: 'Following up on the earlier report.',
+          createdAt: new Date('2023-12-13T17:00:00.000Z'),
+          createdBy: 'Cora Customer',
+          lastEditedBy: 'Dana Support',
+          editHistory: [
+            {
+              _id: 'rev-orig-2',
+              text: 'Following up on the earlier report.',
+              isOriginal: true,
+            },
+          ],
+        },
+        {
+          _id: 'cm-untouched',
+          text: 'Thanks, noted.',
+          createdAt: new Date('2023-12-13T18:00:00.000Z'),
+          createdBy: 'Alice Admin',
+          editHistory: [
+            { _id: 'rev-orig-3', text: 'Thanks, noted.', isOriginal: true },
+          ],
+        },
+      ]}
+    />
+  ),
+  globals: { backgrounds: { value: 'light' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('tab', { name: 'Comments' }))
+
+    const labels = canvas.getAllByText(/^edited by /)
+    // exactly the two EDITED comments carry the attribution; the untouched one does not
+    await expect(labels).toHaveLength(2)
+    await expect(labels[0]).toHaveTextContent('edited by Bob Manager')
+    await expect(labels[1]).toHaveTextContent('edited by Dana Support')
+  },
+}

@@ -75,6 +75,12 @@ export type Comment = {
   text: string
   createdAt: Date
   createdBy: string
+  /**
+   * Who last rewrote this comment (a display name or an id the board can resolve). When present the comment header shows
+   * "edited by <editor>" inline, so a staff moderation edit of a customer's comment is never read as the customer's own
+   * words. When absent the header falls back to the last non-original `editHistory` entry's `editedBy`.
+   */
+  lastEditedBy?: string
   editHistory: CommentEditHistory[]
 }
 

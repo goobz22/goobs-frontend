@@ -1974,6 +1974,15 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   : {}
               ) as React.CSSProperties
 
+              // WHO rewrote this comment, shown inline (OWNER_QUEUE 2.206, W-1276): a staff moderation edit of a customer's
+              // comment must not read as the customer's own words. The explicit `lastEditedBy` wins; otherwise the last
+              // non-original revision's editor.
+              const lastEditorId =
+                comment.lastEditedBy ||
+                [...(comment.editHistory ?? [])]
+                  .reverse()
+                  .find(entry => !entry.isOriginal)?.editedBy
+
               return (
                 <div
                   key={comment._id}
@@ -1991,6 +2000,11 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       <div className={cssStyles.commentTimestamp}>
                         {formatLocalDateTime(comment.createdAt)}
                       </div>
+                      {lastEditorId && (
+                        <span className={cssStyles.commentEditedBy}>
+                          {`edited by ${resolveAuthorName(lastEditorId)}`}
+                        </span>
+                      )}
                       {commentSection === 'internal' && (
                         <span className={cssStyles.internalBadge}>
                           INTERNAL
