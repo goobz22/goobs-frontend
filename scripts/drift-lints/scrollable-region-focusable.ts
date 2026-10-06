@@ -59,6 +59,14 @@ import type { DriftFile, DriftInstance, DriftLint } from '../lint-drift'
  *   • `{children}` / transient-overlay surfaces: Dialog `.content`, Drawer
  *     `.paper`/`.content`, ProjectBoard `.animationContent` (`tabIndex={-1}`).
  *
+ * W-1216 adds RichHtmlPreview `.preview` to this reviewed census (2026-10).
+ * It measures real overflow with ResizeObserver and image-load updates, then
+ * applies tabIndex=0, role=group and an accessible name only while scrolling.
+ * scripts/test-form-regressions.ts proves ArrowRight scrolls the wide preview
+ * after keyboard focus and a short preview has no tab stop, role or label.
+ * The new browser case failed before the fix and passes after it. This entry
+ * records the canonical behavior; it does not exempt unreviewed new regions.
+ *
  * ── WHAT IS AN INSTANCE ───────────────────────────────────────────────────────
  * A CSS rule whose block declares `overflow(-x|-y): auto|scroll` AND whose
  * selector SUBJECT (the final compound after the last combinator) is a CLASS

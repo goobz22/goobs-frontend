@@ -2,14 +2,23 @@
  * @fileoverview Defines the ComplexTextEditor, a versatile text editor with multiple modes.
  */
 'use client'
-import React, { useState, useCallback, useEffect, useId } from 'react'
-import ComplexToolbar, { type EditorMode } from './Toolbars/Complex'
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useId,
+  lazy,
+  Suspense,
+} from 'react'
+import type { EditorMode } from './Toolbars/Complex'
 import SimpleEditor from './SimpleEditor'
 import Accordion from '../Accordion'
 import { useFieldBinding } from '../Field/Shell/useFieldBinding'
 import { useOptionalFormContext } from '../Form/context'
 import type { ComplexTextEditorStyles } from './theme'
 import cssStyles from './ComplexTextEditor.module.css'
+
+const ComplexToolbar = lazy(() => import('./Toolbars/Complex'))
 
 export interface ComplexTextEditorProps {
   /** The current value of the editor (for controlled usage). */
@@ -163,7 +172,9 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
     ...(styles?.borderFocusedColor && {
       ['--ct-cb-border-focused']: styles.borderFocusedColor,
     }),
-    ...(styles?.borderWidth && { ['--ct-cb-border-width']: styles.borderWidth }),
+    ...(styles?.borderWidth && {
+      ['--ct-cb-border-width']: styles.borderWidth,
+    }),
     ...(styles?.padding && { ['--ct-cb-padding']: styles.padding }),
   } as React.CSSProperties
 
@@ -238,49 +249,28 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
           editorId={editorId}
         />
       )
-    } else if (editorType === 'rich') {
-      return (
-        <ComplexToolbar
-          mode={mode}
-          setMode={setMode}
-          value={value}
-          onChange={handleChange}
-          minRows={minRows}
-          styles={styles as ComplexTextEditorStyles}
-          ariaLabel={editorAriaLabel}
-          ariaLabelledBy={editorAriaLabelledBy}
-          editorId={editorId}
-        />
-      )
-    } else if (editorType === 'markdown') {
-      return (
-        <ComplexToolbar
-          mode={mode}
-          setMode={setMode}
-          value={value}
-          onChange={handleChange}
-          minRows={minRows}
-          styles={styles as ComplexTextEditorStyles}
-          ariaLabel={editorAriaLabel}
-          ariaLabelledBy={editorAriaLabelledBy}
-          editorId={editorId}
-        />
-      )
-    } else {
-      return (
-        <ComplexToolbar
-          mode={mode}
-          setMode={setMode}
-          value={value}
-          onChange={handleChange}
-          minRows={minRows}
-          styles={styles as ComplexTextEditorStyles}
-          ariaLabel={editorAriaLabel}
-          ariaLabelledBy={editorAriaLabelledBy}
-          editorId={editorId}
-        />
-      )
     }
+    return (
+      <Suspense
+        fallback={
+          <div role="status" aria-live="polite">
+            Loading editor…
+          </div>
+        }
+      >
+        <ComplexToolbar
+          mode={mode}
+          setMode={setMode}
+          value={value}
+          onChange={handleChange}
+          minRows={minRows}
+          styles={styles as ComplexTextEditorStyles}
+          ariaLabel={editorAriaLabel}
+          ariaLabelledBy={editorAriaLabelledBy}
+          editorId={editorId}
+        />
+      </Suspense>
+    )
   }
 
   // Render label if provided and not in accordion mode

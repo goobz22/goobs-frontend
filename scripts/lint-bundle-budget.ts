@@ -26,7 +26,9 @@
  * can actually fail (planted defect) and does not cry wolf (clean input).
  */
 import { readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
+import { gzipSync } from 'node:zlib'
+import ts from 'typescript'
 
 const ROOT = join(import.meta.dir, '..')
 
@@ -55,6 +57,11 @@ const BUDGETS: Record<string, { max: number; baseline: string }> = {
   'dist/goobs-frontend.css': { max: 490_000, baseline: '443 KB' },
 }
 
+// W-1216: 0.302.3 measured 255,167 B at gzip level 9. Static siblings
+// count toward initial transfer; every requested file has its own gzip stream.
+export const EAGER_GZIP_BASELINE = 255_167
+export const EAGER_GZIP_MAX = Math.floor(EAGER_GZIP_BASELINE * 1.1)
+
 /**
  * Entry chunks whose module body runs as soon as a consumer imports the
  * barrel. Anything reachable from module scope here is paid on every route.
@@ -71,6 +78,11 @@ const EAGER_ENTRIES = ['dist/goobs-frontend.es.js']
  * that reds on the fix is worse than no detector.
  */
 const EAGER_PAYLOADS: { marker: string; dep: string; loadedBy: string }[] = [
+  {
+    marker: 'allowedSchemesAppliedToAttributes',
+    dep: 'sanitize-html',
+    loadedBy: 'src/components/ComplexTextEditor/utils/conversion.ts',
+  },
   {
     marker: 'hljs-',
     dep: 'highlight.js',
@@ -106,100 +118,206 @@ export function findEagerPayloads(
   entry: string,
   source: string
 ): PayloadFinding[] {
-  return EAGER_PAYLOADS.filter(({ marker }) => source.includes(marker)).map(
-    ({ marker, dep }) => ({ entry, dep, marker })
-  )
+  const findings = EAGER_PAYLOADS.filter(({ marker }) =>
+    source.includes(marker)
+  ).map(({ marker, dep }) => ({ entry, dep, marker }))
+  const dependencies = [
+    ...EAGER_PAYLOADS.map(payload => payload.dep),
+    'entities',
+  ]
+  for (const specifier of staticSpecifiers(source)) {
+    const dep = dependencies.find(
+      name => specifier === name || specifier.startsWith(name + '/')
+    )
+    if (dep && !findings.some(finding => finding.dep === dep)) {
+      findings.push({ entry, dep, marker: `static import ${specifier}` })
+    }
+  }
+  return findings
 }
 
-if (process.argv.includes('--selftest')) {
-  const failures: string[] = []
-
-  // Direction 1 — it can fail. A chunk carrying a highlight.js payload must be
-  // reported, or the gate is decorative.
-  const planted = findEagerPayloads(
-    'planted.js',
-    'const o={classPrefix:"hljs-",languages:{}};export default o'
+function staticSpecifiers(source: string): string[] {
+  const file = ts.createSourceFile(
+    'bundle.js',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS
   )
-  if (planted.length !== 1 || planted[0]?.dep !== 'highlight.js') {
-    failures.push(
-      `planted highlight.js payload was not detected (got ${JSON.stringify(planted)})`
+  const imports: string[] = []
+  for (const statement of file.statements) {
+    if (
+      !ts.isImportDeclaration(statement) &&
+      !ts.isExportDeclaration(statement)
     )
+      continue
+    const specifier = statement.moduleSpecifier
+    if (specifier && ts.isStringLiteral(specifier)) imports.push(specifier.text)
+  }
+  return imports
+}
+
+export type EagerChunk = {
+  file: string
+  source: string
+  raw: number
+  gzip9: number
+}
+
+/** Follow static ESM imports/re-exports; dynamic imports stay deferred. */
+export function readEagerChunks(
+  distDirectory: string,
+  entry: string
+): EagerChunk[] {
+  const root = resolve(distDirectory)
+  const visited = new Set<string>()
+  const chunks: EagerChunk[] = []
+  const visit = (file: string) => {
+    const absolute = resolve(file)
+    if (!absolute.startsWith(root + sep))
+      throw new Error(`Bundle import escapes dist: ${absolute}`)
+    if (visited.has(absolute)) return
+    visited.add(absolute)
+    const bytes = readFileSync(absolute)
+    const source = bytes.toString('utf8')
+    chunks.push({
+      file: relative(root, absolute),
+      source,
+      raw: bytes.length,
+      gzip9: gzipSync(bytes, { level: 9 }).length,
+    })
+    for (const specifier of staticSpecifiers(source)) {
+      if (specifier.startsWith('./') || specifier.startsWith('../')) {
+        visit(resolve(dirname(absolute), specifier))
+      }
+    }
+  }
+  visit(resolve(root, entry))
+  return chunks
+}
+
+function runCli(): void {
+  if (process.argv.includes('--selftest')) {
+    const failures: string[] = []
+
+    // Direction 1 — it can fail. A chunk carrying a highlight.js payload must be
+    // reported, or the gate is decorative.
+    const planted = findEagerPayloads(
+      'planted.js',
+      'const o={classPrefix:"hljs-",languages:{}};export default o'
+    )
+    if (planted.length !== 1 || planted[0]?.dep !== 'highlight.js') {
+      failures.push(
+        `planted highlight.js payload was not detected (got ${JSON.stringify(planted)})`
+      )
+    }
+
+    // Direction 2 — it does not cry wolf. The CORRECT, code-split form leaves a
+    // bare `import('html2canvas')` specifier in the entry chunk; reporting that
+    // would red the very shape this gate is asking for.
+    const parser = findEagerPayloads(
+      'parser.js',
+      'const defaults={allowedSchemesAppliedToAttributes:[]};'
+    )
+    if (parser.length !== 1 || parser[0]?.dep !== 'sanitize-html')
+      failures.push('inline HTML parser was not detected')
+    const external = findEagerPayloads(
+      'external.js',
+      'import {decodeHTML} from "entities";'
+    )
+    if (external.length !== 1 || external[0]?.dep !== 'entities')
+      failures.push('eager external entity table was not detected')
+
+    const clean = findEagerPayloads(
+      'clean.js',
+      'const load=()=>import("html2canvas");const p=()=>import("jspdf");const html=()=>import("sanitize-html");const text=()=>import("entities");'
+    )
+    if (clean.length !== 0) {
+      failures.push(
+        `clean code-split input produced findings (got ${JSON.stringify(clean)})`
+      )
+    }
+
+    if (failures.length > 0) {
+      for (const f of failures) console.error(`✗ ${f}`)
+      console.error('\nlint-bundle-budget --selftest FAILED')
+      process.exit(1)
+    }
+    console.log(
+      'lint-bundle-budget --selftest clean (3 planted payloads detected; deferred imports clean)'
+    )
+    process.exit(0)
   }
 
-  // Direction 2 — it does not cry wolf. The CORRECT, code-split form leaves a
-  // bare `import('html2canvas')` specifier in the entry chunk; reporting that
-  // would red the very shape this gate is asking for.
-  const clean = findEagerPayloads(
-    'clean.js',
-    'const load=()=>import("html2canvas");const p=()=>import("jspdf");'
-  )
-  if (clean.length !== 0) {
-    failures.push(
-      `clean code-split input produced findings (got ${JSON.stringify(clean)})`
-    )
+  let failed = false
+
+  for (const [rel, { max, baseline }] of Object.entries(BUDGETS)) {
+    let size: number
+    try {
+      size = statSync(join(ROOT, rel)).size
+    } catch {
+      console.error(`✗ ${rel} missing — run \`bun run build\` first`)
+      failed = true
+      continue
+    }
+    const pct = ((size / max) * 100).toFixed(1)
+    if (size > max) {
+      console.error(
+        `✗ ${rel} is ${size.toLocaleString()} B — over its ${max.toLocaleString()} B budget (baseline ${baseline}). ` +
+          'Investigate what grew (new dep? un-code-split import?) before raising the budget here with a reason.'
+      )
+      failed = true
+    } else {
+      console.log(`  ${rel} ${size.toLocaleString()} B (${pct}% of budget)`)
+    }
   }
 
-  if (failures.length > 0) {
-    for (const f of failures) console.error(`✗ ${f}`)
-    console.error('\nlint-bundle-budget --selftest FAILED')
+  for (const rel of EAGER_ENTRIES) {
+    let chunks: EagerChunk[]
+    try {
+      chunks = readEagerChunks(
+        join(ROOT, 'dist'),
+        relative(join(ROOT, 'dist'), join(ROOT, rel))
+      )
+    } catch (error) {
+      console.error(`✗ ${rel} eager closure unreadable — ${String(error)}`)
+      failed = true
+      continue
+    }
+    const gzip = chunks.reduce((total, chunk) => total + chunk.gzip9, 0)
+    console.log(
+      `  initial ESM closure: ${chunks.length} file(s), ${gzip.toLocaleString()} B gzip9; baseline ${EAGER_GZIP_BASELINE.toLocaleString()} B, +10% ceiling ${EAGER_GZIP_MAX.toLocaleString()} B`
+    )
+    if (gzip > EAGER_GZIP_MAX) {
+      console.error(
+        `✗ ${rel} initial gzip cost exceeds the frozen +10% ceiling`
+      )
+      failed = true
+    }
+    console.log(
+      `  eager-payload scan: ${EAGER_PAYLOADS.length} payload signatures + 5 static dependency names × ${chunks.length} file(s)`
+    )
+    for (const chunk of chunks) {
+      for (const { dep, marker } of findEagerPayloads(
+        chunk.file,
+        chunk.source
+      )) {
+        const loadedBy =
+          EAGER_PAYLOADS.find(payload => payload.dep === dep)?.loadedBy ??
+          'src/components/ComplexTextEditor/utils/conversion.ts'
+        console.error(
+          `✗ ${chunk.file} eagerly loads ${dep} (marker ${JSON.stringify(marker)}). Load it with a dynamic import() instead — see ${loadedBy}.`
+        )
+        failed = true
+      }
+    }
+  }
+
+  if (failed) {
+    console.error('\nlint-bundle-budget FAILED')
     process.exit(1)
   }
-  console.log(
-    'lint-bundle-budget --selftest clean (planted defect reds, clean input passes)'
-  )
-  process.exit(0)
+  console.log('lint-bundle-budget clean')
 }
 
-let failed = false
-
-for (const [rel, { max, baseline }] of Object.entries(BUDGETS)) {
-  let size: number
-  try {
-    size = statSync(join(ROOT, rel)).size
-  } catch {
-    console.error(`✗ ${rel} missing — run \`bun run build\` first`)
-    failed = true
-    continue
-  }
-  const pct = ((size / max) * 100).toFixed(1)
-  if (size > max) {
-    console.error(
-      `✗ ${rel} is ${size.toLocaleString()} B — over its ${max.toLocaleString()} B budget (baseline ${baseline}). ` +
-        'Investigate what grew (new dep? un-code-split import?) before raising the budget here with a reason.'
-    )
-    failed = true
-  } else {
-    console.log(`  ${rel} ${size.toLocaleString()} B (${pct}% of budget)`)
-  }
-}
-
-// Print the denominator so "0 findings" cannot be confused with "0 examined".
-console.log(
-  `  eager-payload scan: ${EAGER_PAYLOADS.length} heavy dep(s) × ${EAGER_ENTRIES.length} entry chunk(s)`
-)
-for (const rel of EAGER_ENTRIES) {
-  let source: string
-  try {
-    source = readFileSync(join(ROOT, rel), 'utf8')
-  } catch {
-    console.error(`✗ ${rel} missing — run \`bun run build\` first`)
-    failed = true
-    continue
-  }
-  for (const { dep, marker } of findEagerPayloads(rel, source)) {
-    const loadedBy =
-      EAGER_PAYLOADS.find(p => p.dep === dep)?.loadedBy ?? 'unknown'
-    console.error(
-      `✗ ${rel} inlines ${dep} (marker ${JSON.stringify(marker)}) at module-eval scope. ` +
-        `Every consumer route pays those bytes whether or not it renders the component. ` +
-        `Load it with a dynamic import() instead — see ${loadedBy}.`
-    )
-    failed = true
-  }
-}
-
-if (failed) {
-  console.error('\nlint-bundle-budget FAILED')
-  process.exit(1)
-}
-console.log('lint-bundle-budget clean')
+if (import.meta.main) runCli()

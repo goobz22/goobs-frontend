@@ -1,0 +1,15 @@
+.preview {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+}
+
+.preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+.preview pre {
+  max-width: 100%;
+}

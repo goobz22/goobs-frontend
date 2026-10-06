@@ -6,6 +6,8 @@ import React, {
   useRef,
   useEffect,
   type ElementType,
+  lazy,
+  Suspense,
 } from 'react'
 import type {
   ProjectBoardStyles,
@@ -27,9 +29,13 @@ import MultiSelectChip, {
 } from '../../../Field/Dropdown/MultiSelect'
 import TextField from '../../../Field/Text'
 import ComplexTextEditor from '../../../ComplexTextEditor'
-import { sanitizeHtml } from '../../../ComplexTextEditor/utils/conversion'
+
 import SearchBar from '../../../Field/Search'
 import cssStyles from './AddTask.module.css'
+
+const RichHtmlPreview = lazy(
+  () => import('../../../ComplexTextEditor/RichHtmlPreview')
+)
 
 type AddTaskTabType = 'details' | 'knowledgeBase'
 
@@ -813,17 +819,21 @@ export const InlineAddTask: React.FC<InlineAddTaskProps> = ({
                             <div className={cssStyles.sectionTitle}>
                               {label}
                             </div>
-                            <div
-                              className={cssStyles.articleFieldTextPreWrap}
-                              // Article field values carry authored HTML (bold,
-                              // images, code) by design, so they render as HTML
-                              // — sanitized here so a stored value can never
-                              // execute injected script (script/on*/dangerous-
-                              // URL stripped; formatting preserved).
-                              dangerouslySetInnerHTML={{
-                                __html: sanitizeHtml(value),
-                              }}
-                            />
+                            <Suspense
+                              fallback={
+                                <div
+                                  className={cssStyles.articleFieldTextPreWrap}
+                                  role="status"
+                                >
+                                  Loading preview…
+                                </div>
+                              }
+                            >
+                              <RichHtmlPreview
+                                value={value}
+                                className={cssStyles.articleFieldTextPreWrap}
+                              />
+                            </Suspense>
                           </div>
                         )
                       }

@@ -17,9 +17,13 @@ await writeFile(
     `import {createRoot} from ${modulePath('node_modules/react-dom/client.js')}`,
     `import {AuditHarness} from ${modulePath('src/components/Form/FormRegression.stories.tsx')}`,
     `import ComplexEditor from ${modulePath('src/components/ComplexTextEditor/index.tsx')}`,
+    `import articleStyles from ${modulePath('src/components/ProjectBoard/forms/AddTask/AddTask.module.css')}`,
+    `const RichPreview=React.lazy(()=>import(${modulePath('src/components/ComplexTextEditor/RichHtmlPreview.tsx')}))`,
     `createRoot(document.getElementById('root')).render(React.createElement(React.Fragment, null, React.createElement(AuditHarness),
     React.createElement('section', {id:'editor-audit'}, React.createElement(ComplexEditor, {editorType:'complex',initialMode:'simple',initialValue:'A & B < C',label:'Mode round trip'})),
-    React.createElement('section', {id:'sanitizer-audit'}, React.createElement(ComplexEditor, {editorType:'rich',label:'HTML audit',initialValue:'<p style="text-align:center"><b>Safe</b> <a href="java&#x73;cript:window.__auditXss=true">encoded link</a></p>'}))))`,
+    React.createElement('section', {id:'sanitizer-audit'}, React.createElement(ComplexEditor, {editorType:'rich',label:'HTML audit',initialValue:'<p style="text-align:center"><b>Safe</b> <a href="java&#x73;cript:window.__auditXss=true">encoded link</a></p>'})),
+    React.createElement('section', {id:'preview-short',style:{width:240}}, React.createElement(React.Suspense,{fallback:'Loading short preview'},React.createElement(RichPreview,{value:'<p>Short preview</p>'}))),
+    React.createElement('section', {id:'preview-audit',style:{width:240}}, React.createElement(React.Suspense,{fallback:'Loading preview'},React.createElement(RichPreview,{className:articleStyles.articleFieldTextPreWrap,value:'<p><b>Preview safe</b> <a href="java&#x73;cript:window.__previewXss=true">preview link</a></p><img width="3000" height="20" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="><pre>'+ 'x'.repeat(8192)+'</pre>'})))))`,
   ].join('\n')
 )
 const build = await Bun.build({
@@ -53,6 +57,51 @@ const pageErrors: string[] = []
 page.on('pageerror', error => pageErrors.push(error.message))
 let failures = 0
 const cases: [string, () => Promise<void>][] = [
+  [
+    'deferred HTML preview sanitizes URLs and makes overflowing content keyboard reachable',
+    async () => {
+      const preview = page.locator('#preview-audit > div')
+      await preview.locator('b').waitFor()
+      assert.equal(await preview.locator('b').innerText(), 'Preview safe')
+      const link = preview.getByText('preview link')
+      assert.equal(await link.getAttribute('href'), null)
+      await link.evaluate(element => (element as HTMLAnchorElement).click())
+      assert.equal(await page.evaluate('window.__previewXss === true'), false)
+      const dimensions = await preview.evaluate(element => {
+        const image = element.querySelector('img')!
+        return {
+          width: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+          imageWidth: image.getBoundingClientRect().width,
+        }
+      })
+      assert.equal(dimensions.imageWidth <= dimensions.width, true)
+      assert.equal(dimensions.scrollWidth > dimensions.width, true)
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('#preview-audit > div')
+            ?.getAttribute('tabindex') === '0'
+      )
+      assert.equal(await preview.getAttribute('role'), 'group')
+      assert.equal(await preview.getAttribute('aria-label'), 'Article content')
+      await preview.focus()
+      assert.equal(
+        await preview.evaluate(element => document.activeElement === element),
+        true
+      )
+      await preview.press('ArrowRight')
+      await page.waitForFunction(
+        () =>
+          (document.querySelector('#preview-audit > div')?.scrollLeft ?? 0) > 0
+      )
+      const shortPreview = page.locator('#preview-short > div')
+      await shortPreview.getByText('Short preview').waitFor()
+      assert.equal(await shortPreview.getAttribute('tabindex'), null)
+      assert.equal(await shortPreview.getAttribute('role'), null)
+      assert.equal(await shortPreview.getAttribute('aria-label'), null)
+    },
+  ],
   [
     'HTML URL entities are decoded before sanitizing in the browser',
     async () => {

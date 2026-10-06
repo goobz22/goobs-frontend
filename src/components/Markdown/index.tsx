@@ -8,7 +8,7 @@
 'use client'
 
 import React, { useMemo, type CSSProperties } from 'react'
-import { mdToHtml } from '../ComplexTextEditor/utils/conversion'
+import { mdToHtml } from '../ComplexTextEditor/utils/markdown'
 import cssStyles from './Markdown.module.css'
 
 /** Local class joiner — repo has no clsx/classnames dependency. */

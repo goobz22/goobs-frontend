@@ -375,8 +375,9 @@
    injected as HTML via dangerouslySetInnerHTML, so a value can carry a wide
    <img> or a long <pre> code line. `white-space: pre-wrap` wraps long text but
    does NOT constrain images or <pre> blocks — those would overflow and force a
-   two-dimensional page scroll. Hold images to the content width; scroll code
-   blocks inside their own box. */
+   two-dimensional page scroll. Hold images to the content width. RichHtmlPreview
+   owns code scrolling and measures overflow to make its container keyboard
+   reachable; avoid a second, unfocusable nested scrollbar here. */
 .articleFieldTextPreWrap img {
   max-width: 100%;
   height: auto;
@@ -384,7 +385,6 @@
 
 .articleFieldTextPreWrap pre {
   max-width: 100%;
-  overflow-x: auto;
 }
 
 /* --------------------------------------------------------------------------

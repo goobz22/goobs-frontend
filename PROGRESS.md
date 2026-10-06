@@ -1,3 +1,48 @@
+# W-1216 sanitizer loading and release 0.302.7
+
+Implementation and publication checks pass in native Codex c0bf (2026-10-06,
+epoch 3). The sanitizer/editor toolbar and authored article preview now load
+through local React lazy boundaries. Markdown rendering uses the extracted,
+unchanged lightweight conversion helpers. The sanitizer function and allowlist
+are byte-for-byte unchanged (SHA256 `637a290fe65831a6535724cbf8e153f3d121290700b5bb80f7a81ef9a70f36f6`);
+the existing 11 sanitization/conversion assertions remain green.
+
+Initial ESM transfer follows every static import/re-export: 4 files total
+251,548 B gzip9, down 70,205 B from the measured eager 321,753 B closure.
+The frozen 0.302.3 baseline stays 255,167 B and the +10% ceiling is 280,683 B.
+The strengthened gate rejects eager parser/decoder imports and oversized static
+siblings while allowing deferred chunks. Seven planted/clean unit cases cover
+that behavior. The deferred conversion chunk is 225,712 B raw / 65,801 B gzip9.
+UMD still includes the parser because that format does not split modules.
+This library measurement does not establish ThothOS route-budget compliance.
+
+The authored preview measures overflow before exposing a named keyboard tab stop.
+Its actual AddTask class previously created an inaccessible nested code scrollbar;
+the browser regression failed 7/8 before the fix and passes 8/8 after it.
+The scroll-container census records only this reviewed canonical addition; the
+other drift baselines and the raw bundle ceilings are unchanged.
+
+Evidence: `bun run prepublishOnly` exits 0 (61 unit tests, 134 assertions,
+typecheck, full lint, production build, package exports, bundle budget and 423
+public API names). `bun run test:browser` exits 0: 8 form/editor cases, 14 severity
+cases, 6 severity Storybook plays and 1 comment-attribution play. Native receipts
+and measurements are in `.runner/work-pool/W-1216/epoch3/release-evidence.json`;
+the original attribution and fail-first evidence remain under epoch1 and A2961.
+
+The isolated Storybook build also exits 0 (native e992b4), with its existing
+asset-size warnings retained. Output and receipt are under epoch3/storybook and
+epoch3/storybook-evidence.json. It started after the CPU governor admitted it.
+
+Save state: all 15 owned paths are staged and the exact patch is conserved under
+epoch3/staged.patch. The earlier normal commit refusal (172 ahead, cap 50) is
+historical: the coordinator's A3038 confirms the push landed and the hold cleared.
+A3042 requests removal of this item's stale pool block through its normal authority.
+
+Next: save the tested implementation with a normal scoped commit and submit its
+real test/build evidence after the existing pool item is unblocked.
+Cloud Chromatic and independent review remain unmeasured. The operator publishes
+0.302.7; ThothOS must update its pin and remeasure afterward. No publish or push.
+
 # Production audit and W-977 severity justification
 
 Library implementation complete (2026-10-03), release 0.302.5: resumed W-977
