@@ -10,6 +10,7 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
+import axe from 'axe-core'
 import DataGrid from './index'
 import type {
   DatagridProps,
@@ -3092,5 +3093,43 @@ export const AccessibleResizeHandleContract: Story = {
     await expect(numericAttr(ageHandle, 'aria-valuemin')).toBe(50)
     await expect(numericAttr(ageHandle, 'aria-valuemax')).toBe(1200)
     await expect(numericAttr(ageHandle, 'aria-valuenow')).toBe(110)
+  },
+}
+
+/** Mobile tap hints must be readable in each theme before a row is selected.
+ * Selection still hides the hint; the contrast check never counts hidden text.
+ */
+export const MobileTapHintContrast: Story = {
+  render: () => (
+    <>
+      {(['sacred', 'light', 'dark'] as const).map(theme => (
+        <section key={theme} data-hint-theme={theme}
+          style={{ background: theme === 'light' ? '#ffffff' : '#0a0a0a', padding: 20 }}>
+          <DataGrid dataGrid={`hint-contrast-${theme}`} styles={{ theme }}
+            permissions={{ access: 'read' }}
+            columns={[{ field: 'title', headerName: 'Title', editable: false }]}
+            rows={[{ _id: `row-${theme}`, title: 'Named row' }]} />
+        </section>
+      ))}
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    const themes = canvasElement.querySelectorAll<HTMLElement>('[data-hint-theme]')
+    await expect(themes).toHaveLength(3)
+    for (const section of themes) {
+      const hint = [...section.querySelectorAll<HTMLElement>('[data-card="true"] > span')]
+        .find(element => element.textContent === 'Tap to select')
+      if (!hint) throw new Error('Mobile tap hint did not render')
+      await expect(hint).toBeVisible()
+      const result = await axe.run(hint, { runOnly: ['color-contrast'] })
+      console.info(JSON.stringify({ story: 'MobileTapHintContrast', theme: section.dataset.hintTheme, violations: result.violations, incomplete: result.incomplete, passingRules: result.passes.map(rule => rule.id) }))
+      await expect(result.violations).toEqual([])
+      await expect(result.passes.some(rule => rule.id === 'color-contrast')).toBe(true)
+      const card = section.querySelector<HTMLElement>('[data-card="true"]')
+      if (!card) throw new Error('Mobile row did not render')
+      await userEvent.click(card)
+      await waitFor(() => expect(card).toHaveAttribute('aria-selected', 'true'))
+      await waitFor(() => expect(getComputedStyle(hint).opacity).toBe('0'))
+    }
   },
 }

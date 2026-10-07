@@ -2,6 +2,20 @@
 
 **Status:** FIXED
 
+## 2026-10-07 count-contrast regression (W-1863, publication pending)
+
+The installed 0.302.5 sacred selected chip count measures 4.16:1. The current
+source matrix additionally reproduces dark selected counts at 3.68:1 for both
+appearances. Stacking translucent count fills over the selected tab causes this.
+`CountContrastMatrix` and `scripts/test-a11y-contrast-stories.ts` require twelve
+visible count badges (three themes, two appearances, selected and inactive), each
+with an applicable passing axe color-contrast measurement, no violation and no
+incomplete result. Solid theme surfaces remove the count's dependency on the
+parent fill. This checks badge text only: axe cannot determine the sacred
+underline tab label's gradient background, and that label is not credited as
+measured by this count regression. Existing keyboard/selection stories remain.
+Publication, installed-consumer BUILD/replay and visual qualification are pending.
+
 **APG pattern:** [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) — a
 `role="tablist"` container of `role="tab"` buttons with roving tabindex and
 **automatic activation**, paired with the exported `<TabPanel role="tabpanel">`.

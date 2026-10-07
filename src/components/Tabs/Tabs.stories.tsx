@@ -4,6 +4,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { expect, userEvent, within, waitFor, fn } from 'storybook/test'
 import Tabs, { TabsItem, TabPanel, tabPanelId } from './index'
+import axe from 'axe-core'
 
 const basicTabs: TabsItem[] = [
   { title: 'Home', route: '/home', trigger: 'route' },
@@ -605,5 +606,38 @@ export const ChipAppearance: Story = {
     await userEvent.click(ledgerTab)
     await expect(ledgerTab).toHaveAttribute('aria-selected', 'true')
     await expect(ledgerTab).toHaveAttribute('data-tab-active', 'true')
+  },
+}
+
+/** Counts at both appearances and all themes must retain readable contrast.
+ * The selected sacred chip originally stacked gold fills to yield 4.16:1.
+ * This story measures the actual browser colors, including small count text.
+ */
+export const CountContrastMatrix: Story = {
+  render: () => (
+    <>
+      {(['sacred', 'light', 'dark'] as const).map(theme => (
+        <section key={theme} style={{ background: theme === 'light' ? '#ffffff' : '#0a0a0a', padding: 20 }}>
+          {(['underline', 'chips'] as const).map(appearance => (
+            <Tabs key={appearance} ariaLabel={`${theme} ${appearance} counts`}
+              styles={{ theme }} appearance={appearance} alignment="left" activeTab={0}
+              items={[{ id: 'articles', title: 'Articles', count: 39, trigger: 'onClick', onClick: fn() },
+                { id: 'guides', title: 'Guides', count: 12, trigger: 'onClick', onClick: fn() }]} />
+          ))}
+        </section>
+      ))}
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    const badges = [...canvasElement.querySelectorAll<HTMLElement>('[data-tab-count]')]
+    await expect(badges).toHaveLength(12)
+    for (const badge of badges) {
+      await expect(badge).toBeVisible()
+      const result = await axe.run(badge, { runOnly: ['color-contrast'] })
+      console.info(JSON.stringify({ story: 'CountContrastMatrix', badge: badge.parentElement?.getAttribute('data-theme'), violations: result.violations, incomplete: result.incomplete, passingRules: result.passes.map(rule => rule.id) }))
+      await expect(result.violations).toEqual([])
+      await expect(result.incomplete).toEqual([])
+      await expect(result.passes.some(rule => rule.id === 'color-contrast')).toBe(true)
+    }
   },
 }

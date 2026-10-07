@@ -15,6 +15,18 @@ and "Deferred".)
 
 ## APG pattern
 
+### 2026-10-07 mobile hint contrast (W-1866, publication pending)
+
+The actual installed 0.302.5 sacred "Tap to select" hint measures 3.21:1 at10px:
+gold-a60 is dimmed again by element opacity0.7. `MobileTapHintContrast` and
+`scripts/test-a11y-contrast-stories.ts` measure the visible real hint in all three
+themes with axe, require a passing applicable color-contrast result, and retain
+selection hiding. The text must use readable theme text tokens at opacity1;
+the selected/selection-mode opacity0 selectors remain. This isolated source
+story is not a ThothOS G13 result, and does not reproduce the original Collections
+required-children finding. Publication, installed-consumer BUILD/replay and visual
+qualification are pending.
+
 The component renders a **real native `<table>`** (`<thead>/<tbody>/<tr>/<th>/<td>`) and
 additionally carries interactive-grid ARIA (`role="grid"` on the root, `role="row"`,
 `role="gridcell"`, `role="columnheader"`). It is an **editable data grid** — the applicable

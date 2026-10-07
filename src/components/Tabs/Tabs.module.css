@@ -182,14 +182,16 @@
   margin-inline-start: var(--goobs-space-xs);
   padding: 2px 8px;
   border-radius: var(--goobs-radius-pill);
-  background-color: var(--goobs-gold-a12);
+  /* A solid surface prevents stacked selected/hover fills from washing out
+     small count text, and lets axe measure it even over a gradient tab. */
+  background-color: var(--goobs-dark-surface);
   font-size: 0.75em;
   font-weight: 600;
 }
 
 /* Active tab's count badge gets a stronger fill. */
 .tab[data-tab-active='true'] .count {
-  background-color: var(--goobs-gold-a25);
+  background-color: var(--goobs-dark-surface);
 }
 
 /* ==========================================================================
@@ -229,14 +231,14 @@
 }
 
 .tab[data-theme='light'] .count {
-  background-color: var(--goobs-blue-a12);
+  background-color: var(--goobs-light-surface);
 }
 
 .tab[data-theme='light'][data-tab-active='true'] .count {
   /* Solid white, not blue-a25: the translucent badge composites over the
      active tab's blue fill to ~#b8d2fc, dropping the #1d4ed8 count text to
      4.36:1; on white it holds 6.70:1. */
-  background-color: #ffffff;
+  background-color: var(--goobs-light-surface);
 }
 
 /* ==========================================================================
@@ -276,11 +278,11 @@
 }
 
 .tab[data-theme='dark'] .count {
-  background-color: rgba(96, 165, 250, 0.12);
+  background-color: var(--goobs-dark-surface);
 }
 
 .tab[data-theme='dark'][data-tab-active='true'] .count {
-  background-color: rgba(96, 165, 250, 0.25);
+  background-color: var(--goobs-dark-surface);
 }
 
 /* ==========================================================================
