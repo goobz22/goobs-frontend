@@ -1,3 +1,40 @@
+# W-976 production security audit — 0.302.8
+
+Implementation and local verification are complete on 2026-10-07. The public
+ProjectBoard API now has one audience discriminator (`variant`), with no
+independent `viewerRole` that can contradict it. `no-access` renders no
+ProjectBoard/DataGrid data; read access removes task mutation and drag surfaces;
+the customer variant structurally omits staff notes/comments, histories,
+resolution/workflow editing and cross-ticket KB details. Notes and scheduling
+remain independent, explicitly handler/grant-gated RBAC axes.
+
+The audit also hardens rich-editor output and paste/link paths, route schemes,
+CSV exports, form diagnostics, browser persistence, object-URL lifecycle,
+dependency/CI supply chain, and file-validation documentation. The canonical
+invariants and the full finding table live in
+`docs/specs/security-boundaries.md` and `docs/security-audit-2026-10-07.md`.
+
+Evidence: focused Chromium regressions pass 7/7; the security unit suite passes
+5/5; the security source guard catches 11/11 planted defects and reports zero
+violations over 568 TS/TSX files and 27 reviewed sink sites. `bun run
+test:browser`, `bun run prepublishOnly`, the production dependency audit, package
+and bundle gates, and the isolated Storybook build all exit 0. The Storybook
+build retains its existing asset-size warnings. The full unit suite passes 66
+tests / 168 assertions. The shipped dependency graph has zero known advisories;
+five documented advisories remain in dev-only Storybook/stylelint tooling.
+
+The ThothOS integration trace found a separate server defect: customer comment
+queries return `[INTERNAL]` comments and full edit histories after ownership
+validation. UI hiding is not the fix; ThothOS must project those fields out
+before serialization in both single and batched customer paths. The user
+explicitly authorized that companion fix. ThothOS also needs the 0.302.8
+consumer migration: customer help keeps `variant="customer"`, employee tasks use
+`variant="company"`, and direct detail mounts pass `variant` plus `taskAccess`.
+
+Next: save the goobs release commit and receipt, then implement and prove the
+ThothOS server projection and consumer migration. The operator publishes and
+pushes; this lane does neither.
+
 # W-1216 sanitizer loading and release 0.302.7
 
 Implementation and publication checks pass in native Codex c0bf (2026-10-06,

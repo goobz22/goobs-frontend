@@ -14,19 +14,29 @@ on:
     branches: [production]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   gates:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           # Chromatic needs full history to find its baseline ancestor.
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.0
 
       - name: Install
         run: bun install --frozen-lockfile
+
+      - name: Audit production dependency graph
+        run: bun run audit:production
 
       - name: Typecheck (library + stories)
         run: bun run typecheck

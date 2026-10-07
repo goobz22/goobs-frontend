@@ -350,12 +350,6 @@ interface ProjectBoardBaseProps {
    * contract `onUpdateCustomerNotes?` already had on this component.
    */
   onDelete?: (args: { _id: string }) => void
-  /**
-   * WHO IS LOOKING AT THE BOARD. Forwarded verbatim to the detail view; see
-   * `InlineShowTaskProps.viewerRole` for what 'customer' changes. Default 'staff',
-   * so every existing caller is unchanged.
-   */
-  viewerRole?: 'staff' | 'customer'
   onEditComment: (commentId: string, newText: string, taskId: string) => void
   onAdd: (newTask: Omit<Task, '_id'>) => void
   currentUser: CurrentUser
@@ -421,10 +415,10 @@ interface ProjectBoardBaseProps {
    * `permissions` above cannot express that, and a host forced to give one
    * answer for four questions gives the permissive one.
    *
-   * PARTIAL: an unnamed capability is not denied, it is ungoverned, and falls
-   * back to "did the host pass a handler". A named capability must grant
-   * `write` or its control is not rendered. Both halves are AND-ed — see
-   * `canUseMeetingCapability`, the single home for this decision.
+   * PARTIAL: a named capability must grant `write`. An unnamed capability
+   * falls back to the board's task permission, so a read-only board does not
+   * acquire meeting writes merely because a stale caller passed handlers. A
+   * host with independent scheduling RBAC should name each grant explicitly.
    */
   meetingPermissions?: MeetingCapabilityPermissions
   currentDate: Date
@@ -478,7 +472,7 @@ export interface CustomerBoardProps extends ProjectBoardBaseProps {
   variant: 'customer'
   /**
    * The company requires a Product on every request a customer files. The customer request form
-   * (InlineAddTask `viewerRole="customer"`) marks the Product picker required and refuses to submit
+   * customer request form marks the Product picker required and refuses to submit
    * without one. Ignored when the company has no products to choose from.
    */
   requireProduct?: boolean

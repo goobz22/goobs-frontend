@@ -1417,9 +1417,7 @@ function DataGridContent({
                     },
                   }
                 : {}),
-              ...(hasWriteAccess && onManage
-                ? { onManage: handleManage }
-                : {}),
+              ...(hasWriteAccess && onManage ? { onManage: handleManage } : {}),
               ...(onShow ? { onShow: () => onShow(selectedRows) } : {}),
               handleClose: handleManageRowClose,
               permissions,
@@ -1561,11 +1559,15 @@ function DataGridContent({
  *   onCellSave={handleSave}
  * />
  */
-function DataGrid<TRow extends RowData = RowData>(
-  props: DatagridProps<TRow>
-) {
+function DataGrid<TRow extends RowData = RowData>(props: DatagridProps<TRow>) {
+  if (props.permissions?.access === 'no-access') return null
+
   return (
-    <ColumnVisibilityProvider>
+    <ColumnVisibilityProvider
+      {...(props.columnVisibilityStorageKey && {
+        storageKey: props.columnVisibilityStorageKey,
+      })}
+    >
       {/*
         The public API is generic over the row type (so consumers get typed
         renderCell rows), but the internal DataGridContent + Table render rows

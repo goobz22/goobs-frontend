@@ -13,6 +13,7 @@ import {
 } from '../theme'
 import cssStyles from '../ComplexTextEditor.module.css'
 import { sanitizeHtml } from '../utils/conversion'
+import { sanitizeUrl } from '../utils/markdown'
 
 export interface RichTextEditorProps {
   value: string
@@ -56,7 +57,10 @@ function RichTextEditor({
     }
   }, [value])
   const handleInput = () => {
-    if (editorRef.current) onChange(editorRef.current.innerHTML)
+    if (!editorRef.current) return
+    const safe = sanitizeHtml(editorRef.current.innerHTML)
+    if (editorRef.current.innerHTML !== safe) editorRef.current.innerHTML = safe
+    onChange(safe)
   }
   const execCmd = (cmd: string, val: string | undefined = undefined) => {
     editorRef.current?.focus()
@@ -70,7 +74,21 @@ function RichTextEditor({
   const handleCodeClick = () => execCmd('formatBlock', '<pre>') // rough
   const handleLinkClick = () => {
     const url = prompt('Enter URL')
-    if (url) execCmd('createLink', url)
+    if (!url) return
+    const safe = sanitizeUrl(url, 'href')
+    if (safe !== '#') execCmd('createLink', safe)
+  }
+  const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const html = event.clipboardData.getData('text/html')
+    if (html) document.execCommand('insertHTML', false, sanitizeHtml(html))
+    else
+      document.execCommand(
+        'insertText',
+        false,
+        event.clipboardData.getData('text/plain')
+      )
+    handleInput()
   }
   const handleUndo = () => execCmd('undo')
   const handleRedo = () => execCmd('redo')
@@ -143,6 +161,7 @@ function RichTextEditor({
               ? { 'aria-label': ariaLabel }
               : {})}
           onInput={handleInput}
+          onPaste={handlePaste}
           className={cssStyles.richSurface}
           style={surfaceStyle}
           // value is rendered as HTML (rich-text by design) but sanitized here

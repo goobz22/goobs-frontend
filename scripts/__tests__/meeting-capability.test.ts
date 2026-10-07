@@ -5,9 +5,11 @@
  * `ProjectBoard`/`InlineShowTask` consults, so its truth table IS the component
  * contract that ThothOS' `lint:workspace-affordance-axis` relies on:
  *
- *   handler present, no map            -> control RENDERED and fires
+ *   handler present, no map, task write -> control RENDERED and fires
+ *   handler present, no map, task read  -> control NOT rendered
  *   handler absent                     -> control NOT rendered
  *   handler present, map denies        -> control NOT rendered
+ *   handler present, explicit write     -> control RENDERED even on task read
  *
  * The rendering half of that contract is fenced by the Storybook stories in
  * `board/ProjectBoard.stories.tsx` (goobs has no DOM unit harness — the story +
@@ -74,22 +76,29 @@ describe('canUseMeetingCapability — the axis the coarse permission cannot expr
     expect(available).toEqual(['confirm', 'reschedule'])
   })
 
-  it('an UNNAMED capability is ungoverned, not denied — the handler decides', () => {
-    // Partial by design: a map that names only `cancel` must not silently
-    // switch the other three off, or adding a capability to the map would be a
-    // breaking change for every existing caller.
+  it('an unnamed capability falls back to task access', () => {
     const permissions = { cancel: { access: 'no-access' } } as const
     expect(canUseMeetingCapability('cancel', handler, permissions)).toBe(false)
-    expect(canUseMeetingCapability('schedule', handler, permissions)).toBe(true)
-    expect(canUseMeetingCapability('confirm', handler, permissions)).toBe(true)
-    expect(canUseMeetingCapability('reschedule', handler, permissions)).toBe(true)
+    for (const capability of ['schedule', 'confirm', 'reschedule'] as const) {
+      expect(
+        canUseMeetingCapability(capability, handler, permissions, 'read')
+      ).toBe(false)
+      expect(
+        canUseMeetingCapability(capability, handler, permissions, 'write')
+      ).toBe(true)
+    }
   })
 
-  it('an empty map behaves exactly like no map (backwards compatibility)', () => {
-    for (const capability of MEETING_CAPABILITIES)
-      expect(canUseMeetingCapability(capability, handler, {})).toBe(
-        canUseMeetingCapability(capability, handler)
+  it('an explicit scheduling write grant overrides read-only task access', () => {
+    expect(
+      canUseMeetingCapability(
+        'schedule',
+        handler,
+        { schedule: { access: 'write' } },
+        'read'
       )
+    ).toBe(true)
+    expect(canUseMeetingCapability('schedule', handler, {}, 'read')).toBe(false)
   })
 })
 

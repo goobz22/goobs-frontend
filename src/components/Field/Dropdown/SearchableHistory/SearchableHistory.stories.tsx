@@ -3,7 +3,8 @@
  * SearchableHistory is a searchable navigation dropdown: a combobox input that
  * filters a list of NavigationItems (grouped by category in an "Overview" tab)
  * and tracks recently selected items in a "History" tab persisted to
- * localStorage. Selecting an item fires `onSelect` to navigate.
+ * memory by default, or ID-only in localStorage when `storageKey` is supplied.
+ * Selecting an item fires `onSelect` to navigate.
  * These stories showcase the light / dark / sacred themes and the key states.
  */
 import type { Meta, StoryObj } from '@storybook/nextjs'

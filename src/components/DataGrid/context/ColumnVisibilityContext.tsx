@@ -28,17 +28,31 @@ const ColumnVisibilityContext = createContext<
 
 interface ColumnVisibilityProviderProps {
   children: ReactNode
+  storageKey?: string
 }
 
 export function ColumnVisibilityProvider({
   children,
+  storageKey,
 }: ColumnVisibilityProviderProps) {
   // Load initial state from localStorage
   const getInitialVisibility = (): ColumnVisibility => {
-    if (typeof window === 'undefined') return {}
+    if (typeof window === 'undefined' || !storageKey) return {}
     try {
-      const stored = localStorage.getItem('columnVisibility')
-      return stored ? JSON.parse(stored) : {}
+      const parsed: unknown = JSON.parse(
+        localStorage.getItem(storageKey) ?? '{}'
+      )
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+        return {}
+      return Object.fromEntries(
+        Object.entries(parsed).filter(
+          ([field, visible]) =>
+            typeof visible === 'boolean' &&
+            field !== '__proto__' &&
+            field !== 'prototype' &&
+            field !== 'constructor'
+        )
+      )
     } catch {
       return {}
     }
@@ -49,18 +63,21 @@ export function ColumnVisibilityProvider({
   const [columns, setColumnsState] = useState<string[]>([])
 
   // Save to localStorage whenever visibility changes
-  const saveToLocalStorage = useCallback((visibility: ColumnVisibility) => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('columnVisibility', JSON.stringify(visibility))
-      } catch (error) {
-        console.error(
-          'Failed to save column visibility to localStorage:',
-          error
-        )
+  const saveToLocalStorage = useCallback(
+    (visibility: ColumnVisibility) => {
+      if (typeof window !== 'undefined' && storageKey) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(visibility))
+        } catch (error) {
+          console.error(
+            'Failed to save column visibility to localStorage:',
+            error
+          )
+        }
       }
-    }
-  }, [])
+    },
+    [storageKey]
+  )
 
   const setColumns = useCallback((newColumns: string[]) => {
     setColumnsState(newColumns)

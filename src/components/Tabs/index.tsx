@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { emitDiag } from '../../utils/diag'
+import { navigateToSafeUrl, safeNavigationUrl } from '../../utils/security'
 import cssStyles from './Tabs.module.css'
 
 /**
@@ -39,7 +40,7 @@ export interface TabsItem {
    * and get native affordances (open-in-new-tab, copy-link, status-bar URL).
    * Route tabs also use MANUAL activation: an arrow key moves focus only,
    * navigation happens on Enter/Space/click (avoids an arrow-key context
-   * change — WCAG 3.2.2). Plain left-clicks navigate via `location.assign`;
+   * change — WCAG 3.2.2). Plain left-clicks use validated navigation;
    * modifier/middle clicks fall through to the browser's native link handling.
    */
   route?: string
@@ -199,8 +200,7 @@ const Tabs: React.FC<TabsProps> = ({
     }
 
     if (tab.trigger === 'route' && tab.route) {
-      // Use location.assign() instead of direct href assignment to avoid lint error
-      window.location.assign(tab.route)
+      navigateToSafeUrl(tab.route)
     } else if (tab.trigger === 'onClick' && tab.onClick) {
       tab.onClick()
     }
@@ -328,6 +328,7 @@ const Tabs: React.FC<TabsProps> = ({
         // helper `<TabPanel>` uses for its `id`, so
         // `tab.aria-controls === panel.id` holds by construction.
         const panelId = tabPanelId(tabId)
+        const safeRoute = tab.route ? safeNavigationUrl(tab.route) : null
         return (
           <Tab
             key={index}
@@ -345,8 +346,8 @@ const Tabs: React.FC<TabsProps> = ({
             // crawlable <a href> (SEO) with native link affordances — Tab keeps
             // role="tab" + every data-* selector. onClick/route-less tabs stay
             // <button>. Omit href when absent (exactOptionalPropertyTypes).
-            {...(tab.trigger === 'route' && tab.route
-              ? { href: tab.route }
+            {...(tab.trigger === 'route' && safeRoute
+              ? { href: safeRoute }
               : {})}
             // Forward the entity noun as data-tab-subject so the
             // auto-CRUD test scaffolder can locate a tab by entity
@@ -404,7 +405,7 @@ export interface TabProps {
    * crawlable (SEO) and gets native link affordances (open-in-new-tab,
    * copy-link). Forwarded by `<Tabs>` from a `route` tab's `route`. A plain
    * left-click still activates via the `onClick` handler (the parent's
-   * `location.assign` navigation); modifier/middle clicks fall through to the
+   * validated navigation); modifier/middle clicks fall through to the
    * browser's native link handling. Ignored when `disabled` (a disabled tab
    * falls back to `<button disabled>`; a disabled anchor is not focusable).
    */
@@ -481,15 +482,9 @@ export const Tab: React.FC<TabProps> = ({
       // Anchor (route) tab: preserve the browser's native open-in-new-tab /
       // copy-link affordances by letting modifier / middle clicks resolve the
       // href natively; intercept only plain left clicks to keep the existing
-      // `location.assign` navigation path (unchanged behaviour for normal
+      // validated navigation path (unchanged behaviour for normal
       // clicks, and Enter — which fires a plain synthetic click — navigates).
-      if (
-        e.button !== 0 ||
-        e.metaKey ||
-        e.ctrlKey ||
-        e.shiftKey ||
-        e.altKey
-      ) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
         return
       }
       e.preventDefault()

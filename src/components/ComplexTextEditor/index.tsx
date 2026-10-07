@@ -43,7 +43,12 @@ export interface ComplexTextEditorProps {
   name?: string
   /** Comprehensive styling options including theme, custom colors, and layout properties. */
   styles?: ComplexTextEditorStyles
+  /** Persist the draft as plaintext in localStorage. Requires `autoSaveKey`. */
   autoSave?: boolean
+  /**
+   * Caller-owned, user/tenant-namespaced storage key. Never use one shared key
+   * across accounts on a shared browser profile; omit to disable persistence.
+   */
   autoSaveKey?: string
 }
 
@@ -115,9 +120,11 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // This avoids the need for an effect that calls setState
   const [valueState, setValueState] = useState<string>(() => {
     if (autoSave && autoSaveKey && typeof window !== 'undefined') {
-      const draft = localStorage.getItem(autoSaveKey)
-      if (draft && !initialValue) {
-        return draft
+      try {
+        const draft = localStorage.getItem(autoSaveKey)
+        if (draft && !initialValue) return draft
+      } catch {
+        // Storage may be blocked by browser privacy policy.
       }
     }
     return initialValue
@@ -213,10 +220,13 @@ const ComplexTextEditor: React.FC<ComplexTextEditorProps> = ({
   // Auto-save to localStorage with debounce
   useEffect(() => {
     if (autoSave && autoSaveKey) {
-      const timeout = setTimeout(
-        () => localStorage.setItem(autoSaveKey, value),
-        1000
-      )
+      const timeout = setTimeout(() => {
+        try {
+          localStorage.setItem(autoSaveKey, value)
+        } catch {
+          // Auto-save is optional and must not break editing.
+        }
+      }, 1000)
       return () => clearTimeout(timeout)
     }
   }, [autoSave, autoSaveKey, value])

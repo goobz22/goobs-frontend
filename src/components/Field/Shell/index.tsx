@@ -412,7 +412,7 @@ const FieldShell: React.FC<FieldShellProps> = ({
       formId: dataField ?? '',
       field: dataFieldName ?? name ?? dataField ?? '',
       rule,
-      value: message || true,
+      value: true,
     })
   }, [boundError, dataField, dataFieldName, name])
 

@@ -24,12 +24,16 @@ export interface FileDropzoneProps {
    */
   value?: string
 
-  /** Called with the picked `File` whenever the user drops or browses one. */
+  /**
+   * Called with the picked `File` whenever the user drops or browses one. The
+   * host must validate size, signature/content, and authorization server-side
+   * before storing it; browser `File.type` and filenames are attacker-controlled.
+   */
   onFileSelect: (file: File) => void
 
   /**
-   * `accept` attribute for the hidden file input. Defaults are derived from
-   * `variant` (`'image/*'` for image, all files for document) when omitted.
+   * Picker hint only; it is not a security validation boundary. Defaults are
+   * derived from `variant` (`'image/*'` for image, all files for document).
    */
   accept?: string
 
@@ -283,108 +287,111 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
             .filter(Boolean)
             .join(' ') || undefined
         return (
-        <div
-          className={cssStyles.dropzone}
-          data-component="FileDropzone"
-          data-file-dropzone="true"
-          data-theme={theme}
-          data-variant={variant}
-          {...(uploading && { 'data-uploading': 'true' })}
-          {...(isDragActive && { 'data-drag-active': 'true' })}
-        >
-          <div className={cssStyles.row}>
-            <div
-              className={cssStyles.preview}
-              data-file-dropzone-preview="true"
-            >
-              {preview !== undefined ? (
-                preview
-              ) : (
-                <span className={cssStyles.placeholder} aria-hidden="true">
-                  {placeholderGlyph(variant)}
-                </span>
-              )}
-            </div>
-
-            <div className={cssStyles.controls}>
-              <input
-                ref={setFileInputRef}
-                id={inputId}
-                type="file"
-                className={cssStyles.hiddenInput}
-                {...(resolvedAccept !== '' && { accept: resolvedAccept })}
-                onChange={handleInputChange}
-                disabled={uploading}
-                {...inputAriaProps}
-              />
-              <button
-                ref={browseButtonRef}
-                type="button"
-                className={cssStyles.dropTarget}
-                data-action="upload"
-                onClick={() => fileInputRef.current?.click()}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                disabled={uploading}
-                {...inputAriaProps}
-                aria-describedby={describedBy}
-                {...(hasLabel && {
-                  'aria-labelledby': `${labelId} ${browseLabelId}`,
-                })}
-                {...(uploading && { 'aria-busy': true })}
-                data-file-dropzone-browse="true"
+          <div
+            className={cssStyles.dropzone}
+            data-component="FileDropzone"
+            data-file-dropzone="true"
+            data-theme={theme}
+            data-variant={variant}
+            {...(uploading && { 'data-uploading': 'true' })}
+            {...(isDragActive && { 'data-drag-active': 'true' })}
+          >
+            <div className={cssStyles.row}>
+              <div
+                className={cssStyles.preview}
+                data-file-dropzone-preview="true"
               >
-                <span id={browseLabelId} className={cssStyles.dropTargetLabel}>
-                  {browseLabel}
-                </span>
-                <span id={hintId} className={cssStyles.dropTargetHint}>
-                  Drag &amp; drop or click to browse
-                </span>
-              </button>
+                {preview !== undefined ? (
+                  preview
+                ) : (
+                  <span className={cssStyles.placeholder} aria-hidden="true">
+                    {placeholderGlyph(variant)}
+                  </span>
+                )}
+              </div>
 
-              {/* Visually-hidden, aria-hidden mirror of the visible field label
+              <div className={cssStyles.controls}>
+                <input
+                  ref={setFileInputRef}
+                  id={inputId}
+                  type="file"
+                  className={cssStyles.hiddenInput}
+                  {...(resolvedAccept !== '' && { accept: resolvedAccept })}
+                  onChange={handleInputChange}
+                  disabled={uploading}
+                  {...inputAriaProps}
+                />
+                <button
+                  ref={browseButtonRef}
+                  type="button"
+                  className={cssStyles.dropTarget}
+                  data-action="upload"
+                  onClick={() => fileInputRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  disabled={uploading}
+                  {...inputAriaProps}
+                  aria-describedby={describedBy}
+                  {...(hasLabel && {
+                    'aria-labelledby': `${labelId} ${browseLabelId}`,
+                  })}
+                  {...(uploading && { 'aria-busy': true })}
+                  data-file-dropzone-browse="true"
+                >
+                  <span
+                    id={browseLabelId}
+                    className={cssStyles.dropTargetLabel}
+                  >
+                    {browseLabel}
+                  </span>
+                  <span id={hintId} className={cssStyles.dropTargetHint}>
+                    Drag &amp; drop or click to browse
+                  </span>
+                </button>
+
+                {/* Visually-hidden, aria-hidden mirror of the visible field label
                   (issue 3). It exists solely as an aria-labelledby reference
                   target for the browse button above so the field name rides the
                   operable control; `aria-hidden` keeps browse-mode from reading
                   the label a second time (a directly-referenced hidden element
                   still contributes to the accessible name per the accname
                   spec). Omitted entirely when there's no label. */}
-              {hasLabel && (
-                <span
-                  id={labelId}
-                  className={cssStyles.srOnly}
-                  aria-hidden="true"
-                >
-                  {label}
-                </span>
-              )}
+                {hasLabel && (
+                  <span
+                    id={labelId}
+                    className={cssStyles.srOnly}
+                    aria-hidden="true"
+                  >
+                    {label}
+                  </span>
+                )}
 
-              {hasValue && onRemove !== undefined && (
-                <button
-                  type="button"
-                  className={cssStyles.removeButton}
-                  onClick={handleRemove}
-                  disabled={uploading}
-                  aria-label={`Remove ${noun}`}
-                  data-action="remove"
-                  data-file-dropzone-remove="true"
-                >
-                  Remove
-                </button>
-              )}
+                {hasValue && onRemove !== undefined && (
+                  <button
+                    type="button"
+                    className={cssStyles.removeButton}
+                    onClick={handleRemove}
+                    disabled={uploading}
+                    aria-label={`Remove ${noun}`}
+                    data-action="remove"
+                    data-file-dropzone-remove="true"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
 
-          <span
-            className={cssStyles.srOnly}
-            role="status"
-            aria-live="polite"
-            data-file-dropzone-status="true"
-          >
-            {statusText}
-          </span>
-        </div>
+            <span
+              className={cssStyles.srOnly}
+              role="status"
+              aria-live="polite"
+              data-file-dropzone-status="true"
+            >
+              {statusText}
+            </span>
+          </div>
         )
       }}
     </FieldShell>

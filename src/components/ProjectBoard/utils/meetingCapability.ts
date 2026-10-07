@@ -26,10 +26,11 @@
  *      not do this", and the control is NOT RENDERED (never rendered-disabled:
  *      a disabled control still advertises a capability the product does not
  *      have, which is the thing the caller was trying to avoid);
- *   2. the per-capability permission map, IF the host passed one, grants
- *      `write` for that capability. No map at all means the handler is the
- *      whole decision, which keeps every existing caller behaving exactly as
- *      before.
+ *   2. an explicit per-capability grant is `write`, or (when that capability
+ *      is unnamed) the containing task surface itself is writable. A read-only
+ *      task board therefore does not inherit meeting writes merely because a
+ *      stale caller passed handlers; a host with an independent scheduling
+ *      grant can name it explicitly.
  *
  * Both halves are deliberately AND-ed rather than either one winning: a host
  * that resolves permissions server-side still has to withhold nothing, and a
@@ -41,11 +42,7 @@
  */
 
 /** The four independently-grantable meeting affordances. */
-export type MeetingCapability =
-  | 'schedule'
-  | 'confirm'
-  | 'reschedule'
-  | 'cancel'
+export type MeetingCapability = 'schedule' | 'confirm' | 'reschedule' | 'cancel'
 
 /** Every capability, for exhaustive iteration by callers and tests. */
 export const MEETING_CAPABILITIES: readonly MeetingCapability[] = [
@@ -65,10 +62,9 @@ export interface MeetingAccessGrant {
 }
 
 /**
- * Per-capability grants. PARTIAL by design: an omitted capability is not
- * "denied", it is "not governed by this map", and falls through to the handler
- * check. A host that wants to deny one names it explicitly with a non-write
- * access, which keeps a typo from silently reading as a denial.
+ * Per-capability grants. An omitted capability falls through to the containing
+ * task surface's access. A host with independent scheduling RBAC names the
+ * capability explicitly; a non-write grant denies it.
  */
 export type MeetingCapabilityPermissions = Partial<
   Record<MeetingCapability, MeetingAccessGrant>
@@ -80,16 +76,17 @@ export type MeetingCapabilityPermissions = Partial<
  * @param capability which meeting affordance is being asked about.
  * @param handler the host's callback for it — any non-function (undefined
  *   included) means the host withheld it.
- * @param permissions the optional per-capability map; `undefined`, or a map
- *   that does not name this capability, leaves the handler as the sole decider.
+ * @param permissions the optional per-capability map.
+ * @param fallbackAccess containing task-surface access for unnamed capabilities.
  */
 export function canUseMeetingCapability(
   capability: MeetingCapability,
   handler: unknown,
-  permissions?: MeetingCapabilityPermissions
+  permissions?: MeetingCapabilityPermissions,
+  fallbackAccess: 'read' | 'write' = 'write'
 ): boolean {
   if (typeof handler !== 'function') return false
   const grant = permissions?.[capability]
-  if (!grant) return true
+  if (!grant) return fallbackAccess === 'write'
   return grant.access === 'write'
 }

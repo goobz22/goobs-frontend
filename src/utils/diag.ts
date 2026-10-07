@@ -35,14 +35,14 @@ export type GoobsDiagEvent =
   | {
       type: 'form.submit.attempt'
       formId: string
-      fields: Record<string, unknown>
+      fields: Record<string, true>
     }
   | {
       type: 'form.validation.failed'
       formId: string
       field: string
       rule: string
-      value: unknown
+      value: true
     }
   | { type: 'form.validation.passed'; formId: string }
   | { type: 'action.invoke'; action: string; subject?: string }

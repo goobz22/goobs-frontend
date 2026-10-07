@@ -338,9 +338,27 @@ export const WithPanelsAriaPairing: Story = {
 }
 
 const chipNavTabs: TabsItem[] = [
-  { title: 'Statements', id: 'statements', count: 12, trigger: 'onClick', onClick: fn() },
-  { title: 'Ledger', id: 'ledger', count: 3, trigger: 'onClick', onClick: fn() },
-  { title: 'Billing', id: 'billing', count: 0, trigger: 'onClick', onClick: fn() },
+  {
+    title: 'Statements',
+    id: 'statements',
+    count: 12,
+    trigger: 'onClick',
+    onClick: fn(),
+  },
+  {
+    title: 'Ledger',
+    id: 'ledger',
+    count: 3,
+    trigger: 'onClick',
+    onClick: fn(),
+  },
+  {
+    title: 'Billing',
+    id: 'billing',
+    count: 0,
+    trigger: 'onClick',
+    onClick: fn(),
+  },
   { title: 'Drafts', id: 'drafts', trigger: 'onClick', onClick: fn() },
 ]
 
@@ -358,7 +376,9 @@ const ChipAppearanceRenderer = () => {
         styles={{ theme: 'sacred' }}
       />
       <div style={{ padding: '16px', color: '#ffe680' }}>
-        <p>Chip-appearance tab strip — rounded pills instead of an underline row.</p>
+        <p>
+          Chip-appearance tab strip — rounded pills instead of an underline row.
+        </p>
       </div>
     </div>
   )
@@ -504,7 +524,7 @@ const RouteTabsRenderer = () => {
  *
  * The 2026-07-11 adversarial review flagged the last deferred item: a
  * `trigger: 'route'` tab was a `<button role="tab">` that did a full page
- * navigation via `window.location.assign`, which is (a) not crawlable as a
+ * navigation through JavaScript, which is (a) not crawlable as a
  * link (SEO), (b) a role/behaviour mismatch, and (c) — under automatic
  * activation — navigated away the instant an ArrowLeft/Right moved onto it (a
  * context change, WCAG 3.2.2). This pins the root-cause fix:

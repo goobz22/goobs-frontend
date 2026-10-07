@@ -33,6 +33,11 @@ export type SearchableHistoryProps = {
   helperText?: string
   styles?: FieldStyleOverrides
   maxHistoryItems?: number
+  /**
+   * Opt-in, caller-namespaced persistence key. Only item IDs are stored; omit
+   * this prop to keep history in memory for the current component lifetime.
+   */
+  storageKey?: string
   /** Stable test selector — emitted as `data-field` on the container. */
   dataField?: string
   /** Stable test selector — emitted as `data-field-name` on the container. */
@@ -55,6 +60,7 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   helperText,
   styles,
   maxHistoryItems = 10,
+  storageKey,
   dataField,
   dataFieldName,
   name,
@@ -67,18 +73,25 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState<NavigationItem | null>(null)
-  // Use lazy initialization to load history from localStorage
-  const [history, setHistory] = useState<NavigationItem[]>(() => {
-    if (typeof window === 'undefined') return []
-    const savedHistory = localStorage.getItem('searchableHistory')
-    if (savedHistory) {
-      try {
-        return JSON.parse(savedHistory)
-      } catch {
-        return []
-      }
+  // Persistence is explicit and stores opaque IDs only. Navigation routes,
+  // labels and metadata may contain tenant/user context and never cross into
+  // browser storage through this component.
+  const [historyIds, setHistoryIds] = useState<string[]>(() => {
+    if (typeof window === 'undefined' || !storageKey) return []
+    try {
+      const parsed: unknown = JSON.parse(
+        localStorage.getItem(storageKey) ?? '[]'
+      )
+      return Array.isArray(parsed)
+        ? parsed.filter((id): id is string => typeof id === 'string')
+        : []
+    } catch {
+      return []
     }
-    return []
+  })
+  const history = historyIds.flatMap(id => {
+    const item = items.find(candidate => candidate.id === id)
+    return item ? [item] : []
   })
   const [activeTab, setActiveTab] = useState<'overview' | 'history'>('overview')
   // Roving highlight for the listbox: index into the FLAT visible-option list
@@ -140,12 +153,18 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     containerStyleOverrides.marginRight = styles.marginRight
   }
 
-  // Save history to localStorage whenever it changes
+  // Save the ID-only history when the caller explicitly opted into storage.
   useEffect(() => {
-    if (typeof window !== 'undefined' && history.length > 0) {
-      localStorage.setItem('searchableHistory', JSON.stringify(history))
+    if (typeof window === 'undefined' || !storageKey) return
+    try {
+      if (historyIds.length > 0)
+        localStorage.setItem(storageKey, JSON.stringify(historyIds))
+      else localStorage.removeItem(storageKey)
+    } catch {
+      // Storage can be unavailable (privacy mode, quota, policy). History is
+      // an enhancement and must never break navigation.
     }
-  }, [history])
+  }, [historyIds, storageKey])
 
   // Close dropdown when clicking outside or scrolling
   useEffect(() => {
@@ -222,18 +241,24 @@ const SearchableHistory: React.FC<SearchableHistoryProps> = ({
     setActiveIndex(-1)
 
     // Add to history
-    setHistory(prev => {
-      const filtered = prev.filter(h => h.id !== item.id)
-      return [item, ...filtered].slice(0, maxHistoryItems)
+    setHistoryIds(previous => {
+      const filtered = previous.filter(id => id !== item.id)
+      return [item.id, ...filtered].slice(0, maxHistoryItems)
     })
 
     onSelect?.(item)
   }
 
   const clearHistory = () => {
-    setHistory([])
+    setHistoryIds([])
     setActiveIndex(-1)
-    localStorage.removeItem('searchableHistory')
+    if (storageKey) {
+      try {
+        localStorage.removeItem(storageKey)
+      } catch {
+        // See persistence effect: storage is optional.
+      }
+    }
   }
 
   // Filter items based on search term

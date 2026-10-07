@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import type { ColumnDef, RowData, DataGridStyles } from '../types'
 import Dropdown from '../../Field/Dropdown/Regular'
 import type { FieldStyleOverrides } from '../../Field/Shell/types'
+import { escapeCsvCell } from '../../../utils/security'
 import cssStyles from '../DataGrid.module.css'
 
 // Settings cog icon
@@ -473,14 +474,14 @@ const exportToCSV = (
   const csvRows: string[] = []
 
   // Add header row
-  csvRows.push(headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(','))
+  csvRows.push(headers.map(h => escapeCsvCell(String(h))).join(','))
 
   // Add data rows
   rows.forEach(row => {
     const values = fields.map(field => {
       const value = row[field]
       const formatted = formatValueForCSV(value)
-      return `"${formatted.replace(/"/g, '""')}"`
+      return escapeCsvCell(formatted)
     })
     csvRows.push(values.join(','))
   })
@@ -535,9 +536,8 @@ const ExportMenu: React.FC<{
   // reach the items — they'd fall at the end of the page tab order.
   useEffect(() => {
     if (!isOpen) return
-    const first = menuRef.current?.querySelector<HTMLButtonElement>(
-      '[role="menuitem"]'
-    )
+    const first =
+      menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')
     first?.focus()
   }, [isOpen])
 

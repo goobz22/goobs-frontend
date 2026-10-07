@@ -139,6 +139,8 @@ export interface BoardProps {
   onTaskSelect: (taskId: string) => void
   columnDragAndDrop: ReturnType<typeof useColumnDragAndDrop>
   taskDragAndDrop: ReturnType<typeof useTaskDragAndDrop>
+  /** Task/column drag state is mutating UI and is unavailable to read-only seats. */
+  canReorder?: boolean
   styles?: ProjectBoardStyles
   /** Base heading level; column titles render at this + 1, task titles + 2. */
   headingLevel?: number
@@ -150,6 +152,7 @@ export default function Board({
   onTaskSelect,
   columnDragAndDrop,
   taskDragAndDrop,
+  canReorder = true,
   styles,
   headingLevel = 2,
 }: BoardProps) {
@@ -239,7 +242,7 @@ export default function Board({
               }
               setAllColumns(newColumns)
             }}
-            draggable={true}
+            draggable={canReorder}
             onDragStart={(e: React.DragEvent) => {
               e.stopPropagation() // Prevent column drag from triggering
               taskDragAndDrop.handleTaskDragStart(
@@ -282,6 +285,7 @@ export default function Board({
       allColumns,
       setAllColumns,
       taskHeadingLevel,
+      canReorder,
     ]
   )
 
@@ -297,7 +301,7 @@ export default function Board({
           {/* Column Header - Only this area is draggable for column reordering */}
           <div
             className={cssStyles.columnHeader}
-            draggable={true}
+            draggable={canReorder}
             onDragStart={e => {
               e.stopPropagation()
               handleColumnDragStart(e, columnIndex)
@@ -331,14 +335,14 @@ export default function Board({
             className={cssStyles.tasksContainer}
             onDragOver={e => {
               // Only handle if it's a task being dragged, not a column
-              if (taskDragAndDrop.dragItem) {
+              if (canReorder && taskDragAndDrop.dragItem) {
                 e.stopPropagation()
                 taskDragAndDrop.handleColumnDragOver(e, columnIndex, allColumns)
               }
             }}
             onDrop={e => {
               // Only handle if it's a task being dragged, not a column
-              if (taskDragAndDrop.dragItem) {
+              if (canReorder && taskDragAndDrop.dragItem) {
                 e.stopPropagation()
                 taskDragAndDrop.handleColumnDrop(
                   e,
@@ -384,6 +388,7 @@ export default function Board({
       setAllColumns,
       renderTask,
       ColumnHeading,
+      canReorder,
     ]
   )
 

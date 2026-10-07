@@ -75,6 +75,8 @@ export interface InlineShowTaskProps {
   productServiceName: string
   productId: string
   serviceId: string
+  /** Task-record permission. Independent note/meeting capabilities stay handler-gated. */
+  taskAccess: 'read' | 'write'
   onEdit: (updatedData: any) => void
   /**
    * OPTIONAL since 2026-09-03. A withheld handler renders NO Delete control —
@@ -86,22 +88,6 @@ export interface InlineShowTaskProps {
    * handler were to pass a no-op (a button that lies) or to fork the component.
    */
   onDelete?: () => void
-  /**
-   * WHO IS LOOKING AT THIS TICKET. `'staff'` (the default, so every existing
-   * caller is unchanged) is the full back-office view. `'customer'` is the
-   * ticket's own customer looking at their own ticket: they may edit THEIR side
-   * of it — the subject, the description, the priority they are requesting, their
-   * attachments, and their own comments — while the company's side renders as
-   * read-only values.
-   *
-   * ONE prop rather than five booleans on purpose. "Which fields may a customer
-   * change" is a single product decision, and split across
-   * `canDelete`/`canAssign`/`canSetStatus`/… it is a decision that drifts: the
-   * next field added gets a default, and the default is the wrong direction for
-   * an authorization surface. The server enforces the same split independently —
-   * this prop decides what is RENDERED, never what is permitted.
-   */
-  viewerRole?: 'staff' | 'customer'
   /**
    * Change severity in either direction with a trimmed justification (20–2000 characters).
    * Shared by staff and customers. Omit to keep severity read-only. Rejections retain
@@ -181,7 +167,11 @@ export interface InlineShowTaskProps {
   meetingPermissions?: MeetingCapabilityPermissions
   currentDate: Date
   /** Whether this is being viewed by an employee (can accept/decline bookings) or a customer */
-  variant?: 'employee' | 'customer'
+  /**
+   * The single audience discriminator. Customer mode removes staff-private
+   * fields and actions; employee mode renders the back-office experience.
+   */
+  variant: 'employee' | 'customer'
   // Case history audit logging callback
   onCaseUpdate?: (
     taskId: string,
@@ -538,9 +528,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   productServiceName,
   productId,
   serviceId,
+  taskAccess,
   onEdit,
   onDelete,
-  viewerRole = 'staff',
   onSetSeverity,
   onRaiseSeverity,
   raiseSeverityReasonPlaceholder = 'Describe the business impact so your company can respond appropriately',
@@ -583,7 +573,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   currentDate,
   // Case history audit logging
   onCaseUpdate,
-  variant = 'employee',
+  variant,
   headingLevel = 2,
 }) => {
   // Real heading elements at the caller-controlled level: knowledgebase
@@ -601,34 +591,41 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const canScheduleMeeting = canUseMeetingCapability(
     'schedule',
     onScheduleMeeting,
-    meetingPermissions
+    meetingPermissions,
+    taskAccess
   )
   const canConfirmMeeting = canUseMeetingCapability(
     'confirm',
     onConfirmMeeting,
-    meetingPermissions
+    meetingPermissions,
+    taskAccess
   )
   const canRescheduleMeeting = canUseMeetingCapability(
     'reschedule',
     onRescheduleMeeting,
-    meetingPermissions
+    meetingPermissions,
+    taskAccess
   )
   const canCancelMeeting = canUseMeetingCapability(
     'cancel',
     onCancelMeeting,
-    meetingPermissions
+    meetingPermissions,
+    taskAccess
   )
   const [activeTab, setActiveTab] = useState<TabType>('details')
   // Roving-tabindex refs + order for the WAI-ARIA tablist keyboard pattern
   // (order matches the rendered tab strip).
-  const tabOrder: TabType[] = [
-    'details',
-    'comments',
-    'scheduling',
-    'knowledgeBase',
-    'resolution',
-    'caseUpdates',
-  ]
+  const tabOrder: TabType[] =
+    variant === 'customer'
+      ? ['details', 'comments', 'scheduling', 'knowledgeBase']
+      : [
+          'details',
+          'comments',
+          'scheduling',
+          'knowledgeBase',
+          'resolution',
+          'caseUpdates',
+        ]
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -661,10 +658,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
    * authority; a hidden control and an unpermitted write are two independent
    * statements of one rule, and neither substitutes for the other.
    */
-  const viewerIsCustomer = viewerRole === 'customer'
-  const canEditCompanyFields = !viewerIsCustomer
-  const setSeverity =
-    onSetSeverity ?? (viewerIsCustomer ? onRaiseSeverity : undefined)
+  const viewerIsCustomer = variant === 'customer'
+  const canWriteTask = taskAccess === 'write'
+  const canEditCompanyFields = !viewerIsCustomer && canWriteTask
+  const setSeverity = canWriteTask
+    ? (onSetSeverity ?? (viewerIsCustomer ? onRaiseSeverity : undefined))
+    : undefined
   const [isMobile, setIsMobile] = useState(false)
   const [editedTitle, setEditedTitle] = useState(taskTitle)
   const [editedDescription, setEditedDescription] = useState(description)
@@ -822,7 +821,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     oldValue?: string,
     newValue?: string
   ) => {
-    if (onCaseUpdate) {
+    if (canWriteTask && onCaseUpdate) {
       // Build the case update object, only including defined optional properties
       const caseUpdateData: {
         updateType: CaseUpdate['updateType']
@@ -1001,10 +1000,12 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   )
 
   const handleEditClick = () => {
+    if (!canWriteTask) return
     setIsEditMode(true)
   }
 
   const handleSaveEdit = () => {
+    if (!canWriteTask) return
     if (onEdit) {
       // Log case updates for each changed field
       const currentStatusId =
@@ -1106,18 +1107,25 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         )
       }
 
-      onEdit({
-        title: editedTitle,
-        description: editedDescription,
-        statusId: editedStatusId,
-        substatusId: editedSubStatusId,
-        schedulingQueueId: editedQueueId,
-        regionId: editedRegionId,
-        teamMember: editedTeamMember,
-        nextActionDate: editedNextActionDate,
-        topicIds: editedTopicIds,
-        articleIds: editedArticleIds,
-      })
+      onEdit(
+        viewerIsCustomer
+          ? {
+              title: editedTitle,
+              description: editedDescription,
+            }
+          : {
+              title: editedTitle,
+              description: editedDescription,
+              statusId: editedStatusId,
+              substatusId: editedSubStatusId,
+              schedulingQueueId: editedQueueId,
+              regionId: editedRegionId,
+              teamMember: editedTeamMember,
+              nextActionDate: editedNextActionDate,
+              topicIds: editedTopicIds,
+              articleIds: editedArticleIds,
+            }
+      )
     }
     setIsEditMode(false)
   }
@@ -1303,7 +1311,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               theme={styles?.theme || 'light'}
             />
           )}
-          {viewerIsCustomer && onCustomerSetStatus && (
+          {viewerIsCustomer && canWriteTask && onCustomerSetStatus && (
             <CustomerStatusPicker
               taskId={taskId}
               currentStatus={status}
@@ -1344,8 +1352,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             )
           )}
 
-          {/* Topics - Editable in edit mode */}
-          {isEditMode ? (
+          {/* Topics are staff-managed workflow metadata. */}
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <MultiSelectChip
                 label="Topics"
@@ -1369,8 +1377,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             )
           )}
 
-          {/* KB Articles - Editable in edit mode */}
-          {isEditMode ? (
+          {/* KB links are staff-managed workflow metadata. */}
+          {isEditMode && canEditCompanyFields ? (
             <div className={cssStyles.editFieldWrap}>
               <MultiSelectChip
                 label="KB Articles"
@@ -1404,59 +1412,56 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           <div className={cssStyles.actionButtons} data-mobile={mobileAttr}>
-            {isEditMode ? (
-              <>
-                <button
-                  className={cx(
-                    cssStyles.button,
-                    cssStyles.flexButton,
-                    cssStyles.saveButton
-                  )}
-                  data-action="save"
-                  onClick={handleSaveEdit}
-                >
-                  Save
-                </button>
-                <button
-                  className={cx(
-                    cssStyles.button,
-                    cssStyles.flexButton,
-                    cssStyles.ghostButton
-                  )}
-                  data-action="cancel"
-                  onClick={handleCancelEdit}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={cx(
-                    cssStyles.button,
-                    cssStyles.flexButton,
-                    cssStyles.editButton
-                  )}
-                  data-action="edit"
-                  onClick={handleEditClick}
-                >
-                  Edit
-                </button>
-                {/* A withheld handler renders NO control (never a disabled or
-                    no-op one) — the contract the meeting handlers and
-                    onUpdateCustomerNotes already follow. Deleting a ticket is a
-                    staff action, so the customer view simply has no Delete. */}
-                {onDelete && (
+            {canWriteTask &&
+              (isEditMode ? (
+                <>
                   <button
-                    className={cx(cssStyles.button, cssStyles.deleteButton)}
-                    data-action="delete"
-                    onClick={onDelete}
+                    className={cx(
+                      cssStyles.button,
+                      cssStyles.flexButton,
+                      cssStyles.saveButton
+                    )}
+                    data-action="save"
+                    onClick={handleSaveEdit}
                   >
-                    Delete
+                    Save
                   </button>
-                )}
-              </>
-            )}
+                  <button
+                    className={cx(
+                      cssStyles.button,
+                      cssStyles.flexButton,
+                      cssStyles.ghostButton
+                    )}
+                    data-action="cancel"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className={cx(
+                      cssStyles.button,
+                      cssStyles.flexButton,
+                      cssStyles.editButton
+                    )}
+                    data-action="edit"
+                    onClick={handleEditClick}
+                  >
+                    Edit
+                  </button>
+                  {onDelete && (
+                    <button
+                      className={cx(cssStyles.button, cssStyles.deleteButton)}
+                      data-action="delete"
+                      onClick={onDelete}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </>
+              ))}
           </div>
 
           <div
@@ -1588,8 +1593,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           </div>
         </div>
 
-        {/* Internal Company Notes Section - Shown when associatedCompanyId is provided */}
-        {associatedCompanyId && (
+        {/* Staff-private company record; never render it to a customer audience. */}
+        {associatedCompanyId && !viewerIsCustomer && (
           <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
             <div className={cssStyles.notesHeaderRow}>
               <div
@@ -1605,7 +1610,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   </span>
                 )}
               </div>
-              {!isEditingCompanyNotes && (
+              {!isEditingCompanyNotes && onUpdateCompanyNotes && (
                 <button
                   data-action="edit"
                   onClick={() => {
@@ -1686,7 +1691,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             customer's channel is the Comments tab, which is attributed to them
             and visible to both sides. The server refuses the write independently;
             this is the rendering half of the same rule. */}
-        {associatedCustomerId && canEditCompanyFields && (
+        {associatedCustomerId && !viewerIsCustomer && (
           <div className={cx(cssStyles.card, cssStyles.cardSpacedTop)}>
             <div className={cssStyles.notesHeaderRow}>
               <div
@@ -1702,7 +1707,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   </span>
                 )}
               </div>
-              {!isEditingCustomerNotes && (
+              {!isEditingCustomerNotes && onUpdateCustomerNotes && (
                 <button
                   data-action="edit"
                   onClick={() => {
@@ -1799,12 +1804,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     const publicComments = comments.filter(
       c => !c.text.startsWith('[INTERNAL]')
     )
-    const internalNotes = comments.filter(c => c.text.startsWith('[INTERNAL]'))
+    const internalNotes = viewerIsCustomer
+      ? []
+      : comments.filter(c => c.text.startsWith('[INTERNAL]'))
     const currentComments =
-      commentSection === 'external' ? publicComments : internalNotes
+      viewerIsCustomer || commentSection === 'external'
+        ? publicComments
+        : internalNotes
 
     const handleAddComment = () => {
-      if (newCommentText.trim()) {
+      if (canWriteTask && newCommentText.trim()) {
         if (commentSection === 'internal') {
           // Prefix with [INTERNAL] for internal notes
           onComment(`[INTERNAL] ${newCommentText.trim()}`, taskId)
@@ -1832,7 +1841,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
     }
 
     // Runtime accent color for the section description left border + add button.
-    const isInternal = commentSection === 'internal'
+    const isInternal = !viewerIsCustomer && commentSection === 'internal'
     // External accent: sacred gold else blue. Internal accent: sacred / amber.
     const sectionAccent = isInternal
       ? isSacred
@@ -1891,16 +1900,18 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           >
             External Comments ({publicComments.length})
           </button>
-          <button
-            type="button"
-            className={cssStyles.sectionToggle}
-            data-active={commentSection === 'internal' ? 'true' : undefined}
-            aria-pressed={commentSection === 'internal'}
-            data-action="select"
-            onClick={() => setCommentSection('internal')}
-          >
-            Internal Comments ({internalNotes.length})
-          </button>
+          {!viewerIsCustomer && (
+            <button
+              type="button"
+              className={cssStyles.sectionToggle}
+              data-active={commentSection === 'internal' ? 'true' : undefined}
+              aria-pressed={commentSection === 'internal'}
+              data-action="select"
+              onClick={() => setCommentSection('internal')}
+            >
+              Internal Comments ({internalNotes.length})
+            </button>
+          )}
         </div>
 
         {/* Section Description */}
@@ -1914,41 +1925,41 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         </p>
 
         {/* Add Comment */}
-        <div className={cssStyles.commentInputWrap}>
-          <textarea
-            value={newCommentText}
-            onChange={e => setNewCommentText(e.target.value)}
-            placeholder={
-              commentSection === 'external'
-                ? 'Add a comment for the customer...'
-                : 'Add an internal note (only visible to employees)...'
-            }
-            aria-label={
-              commentSection === 'external'
-                ? 'Add a comment for the customer'
-                : 'Add an internal note (only visible to employees)'
-            }
-            className={cssStyles.commentTextarea}
-            style={commentInputBorderVars}
-          />
-          <button
-            type="button"
-            className={cx(cssStyles.button, cssStyles.commentSubmitButton)}
-            style={submitVars}
-            data-action="add"
-            onClick={handleAddComment}
-          >
-            {commentSection === 'external'
-              ? 'Send to Customer'
-              : 'Add Internal Note'}
-          </button>
-        </div>
+        {canWriteTask && (
+          <div className={cssStyles.commentInputWrap}>
+            <textarea
+              value={newCommentText}
+              onChange={e => setNewCommentText(e.target.value)}
+              placeholder={
+                isInternal
+                  ? 'Add an internal note (only visible to employees)...'
+                  : 'Add a comment...'
+              }
+              aria-label={
+                isInternal
+                  ? 'Add an internal note (only visible to employees)'
+                  : 'Add a comment for the customer'
+              }
+              className={cssStyles.commentTextarea}
+              style={commentInputBorderVars}
+            />
+            <button
+              type="button"
+              className={cx(cssStyles.button, cssStyles.commentSubmitButton)}
+              style={submitVars}
+              data-action="add"
+              onClick={handleAddComment}
+            >
+              {isInternal ? 'Add Internal Note' : 'Send Comment'}
+            </button>
+          </div>
+        )}
 
         {/* Comments List */}
         <div className={cssStyles.commentsList}>
           {currentComments.length === 0 ? (
             <p className={cssStyles.centeredMuted}>
-              {commentSection === 'external'
+              {!isInternal
                 ? 'No external comments yet. Be the first to communicate with the customer!'
                 : 'No internal notes yet. Add notes for your team!'}
             </p>
@@ -2012,7 +2023,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                       )}
                     </div>
                     <div className={cssStyles.commentActions}>
-                      {comment.editHistory &&
+                      {!viewerIsCustomer &&
+                        comment.editHistory &&
                         comment.editHistory.length > 1 && (
                           <button
                             data-action="toggle"
@@ -2030,7 +2042,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                               : 'View History'}
                           </button>
                         )}
-                      {comment.createdBy === currentUserName &&
+                      {canWriteTask &&
+                        comment.createdBy === currentUserName &&
                         editingCommentId !== comment._id && (
                           <button
                             data-action="edit"
@@ -2042,7 +2055,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         )}
                     </div>
                   </div>
-                  {editingCommentId === comment._id ? (
+                  {canWriteTask && editingCommentId === comment._id ? (
                     <div>
                       <textarea
                         value={editingCommentText}
@@ -2079,7 +2092,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     <div className={cssStyles.commentBody}>{displayText}</div>
                   )}
                   {/* Inline revision history display */}
-                  {viewingRevisionHistoryId === comment._id &&
+                  {!viewerIsCustomer &&
+                    viewingRevisionHistoryId === comment._id &&
                     comment.editHistory &&
                     comment.editHistory.length > 1 && (
                       <div className={cssStyles.revisionHistory}>
@@ -3230,6 +3244,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
       )
 
       const handleToggleLinkCase = () => {
+        if (!canEditCompanyFields) return
         if (isLinkedToCase) {
           // Unlink - remove from editedArticleIds
           const newArticleIds = editedArticleIds.filter(
@@ -3303,23 +3318,25 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
             >
               <span aria-hidden="true">←</span> Back to Articles
             </button>
-            <button
-              type="button"
-              data-action="toggle"
-              onClick={handleToggleLinkCase}
-              className={cssStyles.kbLinkButton}
-              data-linked={isLinkedToCase ? 'true' : undefined}
-            >
-              {isLinkedToCase ? (
-                <>
-                  <span aria-hidden="true">✕ </span>Unlink from Case
-                </>
-              ) : (
-                <>
-                  <span aria-hidden="true">✓ </span>Link to Case
-                </>
-              )}
-            </button>
+            {canEditCompanyFields && (
+              <button
+                type="button"
+                data-action="toggle"
+                onClick={handleToggleLinkCase}
+                className={cssStyles.kbLinkButton}
+                data-linked={isLinkedToCase ? 'true' : undefined}
+              >
+                {isLinkedToCase ? (
+                  <>
+                    <span aria-hidden="true">✕ </span>Unlink from Case
+                  </>
+                ) : (
+                  <>
+                    <span aria-hidden="true">✓ </span>Link to Case
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           <SectionHeading className={cssStyles.kbArticleTitle}>
@@ -3378,7 +3395,8 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           )}
 
           {/* Other Linked Cases Section - Placeholder */}
-          {selectedArticleForView.linkedTasks &&
+          {!viewerIsCustomer &&
+            selectedArticleForView.linkedTasks &&
             selectedArticleForView.linkedTasks.length > 0 && (
               <div className={cssStyles.kbLinkedCases}>
                 <div className={cssStyles.sectionTitle}>
@@ -3562,7 +3580,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               >
                 Resolution Information
               </div>
-              {!isEditingResolution && (
+              {!isEditingResolution && canEditCompanyFields && (
                 <button
                   data-action="edit"
                   onClick={() => setIsEditingResolution(true)}
@@ -3573,7 +3591,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               )}
             </div>
 
-            {isEditingResolution ? (
+            {isEditingResolution && canEditCompanyFields ? (
               <>
                 {/* Reason for case being opened */}
                 <div className={cssStyles.kbSection}>
@@ -3667,6 +3685,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                   <button
                     data-action="save"
                     onClick={() => {
+                      if (!canEditCompanyFields) return
                       // Save resolution data - this would call onEdit with resolution fields
                       onEdit({
                         resolutionReason,

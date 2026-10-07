@@ -797,6 +797,13 @@ export interface DatagridProps<TRow extends RowData = RowData> {
   dataGrid?: string
 
   /**
+   * Opt-in, caller-namespaced key for persisting column visibility. Omit to
+   * keep preferences in memory and avoid cross-user/browser-profile leakage.
+   * Only column field names and booleans are stored.
+   */
+  columnVisibilityStorageKey?: string
+
+  /**
    * Access control for the grid.
    * - 'no-access': Hides the entire grid
    * - 'read': View-only mode, editing disabled

@@ -95,7 +95,6 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     rawSeverityLevels,
     onEdit,
     onDelete,
-    viewerRole = 'staff',
     onEditComment,
     onAdd,
     onComment,
@@ -119,6 +118,10 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     administrators,
     headingLevel = 2,
   } = props
+  // `variant` is the one security-relevant audience discriminator. The detail
+  // and create forms derive their customer/staff experience from it rather than
+  // accepting a second role value that can disagree.
+  const hasTaskWriteAccess = permissions.access === 'write'
   // rawCompanies exists ONLY on the administrator variant (narrowed off the `variant` discriminant);
   // company/customer boards default to the stable module empty. rawCustomers/rawProducts are
   // shared-optional base props.
@@ -296,6 +299,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   // Task operations
   const handleAddTask = useCallback(
     (newTask: Omit<Task, '_id'>) => {
+      if (!hasTaskWriteAccess) return
       const taskWithId = {
         ...newTask,
         _id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -336,7 +340,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
       handleBackToBoard()
       onAdd(newTask)
     },
-    [boardType, onAdd, setColumnState, handleBackToBoard]
+    [boardType, onAdd, setColumnState, handleBackToBoard, hasTaskWriteAccess]
   )
 
   const handleEditComment = useCallback(
@@ -373,6 +377,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   // Note: Animation origin is set to null for simplicity - the animation
   // will expand from center of viewport
   const handleCreateTaskClick = useCallback(() => {
+    if (!hasTaskWriteAccess) return
     setAnimationOrigin(null)
 
     // Determine which form to show based on variant and preferDropdown
@@ -399,6 +404,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     preferDropdown,
     rawCompanies,
     rawCustomers,
+    hasTaskWriteAccess,
     setActiveAddTaskForm,
     setViewState,
   ])
@@ -433,7 +439,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   const buttons = useMemo(() => {
     const btns = []
     // Only show Create Task button if user has write permissions
-    if (!permissions || permissions.access === 'write') {
+    if (hasTaskWriteAccess) {
       btns.push({
         text: 'Create Task',
         onClick: handleCreateTaskClick,
@@ -445,11 +451,17 @@ function ProjectBoardContent(props: ProjectBoardProps) {
       disabled: !selectedTaskId,
     })
     return btns
-  }, [selectedTaskId, permissions, handleCreateTaskClick, handleShowTaskClick])
+  }, [
+    selectedTaskId,
+    hasTaskWriteAccess,
+    handleCreateTaskClick,
+    handleShowTaskClick,
+  ])
 
   // Render add task form based on active form type
   const renderAddTaskForm = () => {
-    if (viewState !== 'addTask' || !activeAddTaskForm) return null
+    if (!hasTaskWriteAccess || viewState !== 'addTask' || !activeAddTaskForm)
+      return null
 
     // Unified inline form for all variants
     return (
@@ -495,37 +507,35 @@ function ProjectBoardContent(props: ProjectBoardProps) {
     if (viewState !== 'showTask' || !currentShowTask || !activeTaskId)
       return null
 
-    const setSeverity =
-      !permissions || permissions.access === 'write'
-        ? (props.onSetSeverity ??
-          (props.variant === 'customer' ? props.onRaiseSeverity : undefined))
-        : undefined
+    const setSeverity = hasTaskWriteAccess
+      ? (props.onSetSeverity ??
+        (props.variant === 'customer' ? props.onRaiseSeverity : undefined))
+      : undefined
 
     const editCallback = (updatedData: any) => {
-      if (!permissions || permissions.access === 'write') {
+      if (hasTaskWriteAccess) {
         onEdit({ _id: activeTaskId, ...updatedData })
       }
     }
 
     // Undefined when the caller withheld onDelete, which is what removes the
     // control rather than disabling it (the onUpdateCustomerNotes contract).
-    const deleteCallback = onDelete
-      ? () => {
-          if (!permissions || permissions.access === 'write') {
+    const deleteCallback =
+      hasTaskWriteAccess && onDelete
+        ? () => {
             onDelete({ _id: activeTaskId })
             handleBackToBoard()
           }
-        }
-      : undefined
+        : undefined
 
     const commentCallback = (text: string, _id: string) => {
-      if (!permissions || permissions.access === 'write') {
+      if (hasTaskWriteAccess) {
         onComment(text, _id)
       }
     }
 
     const editCommentCallback = (commentId: string, newText: string) => {
-      if (!permissions || permissions.access === 'write') {
+      if (hasTaskWriteAccess) {
         handleEditComment(commentId, newText, activeTaskId)
       }
     }
@@ -569,8 +579,8 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         serviceId={currentShowTask.serviceId}
         region={currentShowTask.region}
         onEdit={editCallback}
+        taskAccess={hasTaskWriteAccess ? 'write' : 'read'}
         {...(deleteCallback && { onDelete: deleteCallback })}
-        viewerRole={viewerRole}
         onComment={commentCallback}
         onEditComment={editCommentCallback}
         {...(onUpdateCustomerNotes && { onUpdateCustomerNotes })}
@@ -588,7 +598,9 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         styles={styles}
         meetings={meetings.filter(m => m.taskId === activeTaskId)}
         {...(setSeverity && { onSetSeverity: setSeverity })}
-        {...(props.variant === 'customer' && props.onCustomerSetStatus
+        {...(hasTaskWriteAccess &&
+        props.variant === 'customer' &&
+        props.onCustomerSetStatus
           ? {
               onCustomerSetStatus: props.onCustomerSetStatus,
               customerAllowedStatuses: props.customerAllowedStatuses ?? [],
@@ -603,7 +615,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
         {...(meetingPermissions && { meetingPermissions })}
         currentDate={currentDate}
         variant={variant === 'customer' ? 'customer' : 'employee'}
-        {...(onCaseUpdate && { onCaseUpdate })}
+        {...(hasTaskWriteAccess && onCaseUpdate && { onCaseUpdate })}
         {...(employees && { employees })}
         {...(administrators && { administrators })}
       />
@@ -663,6 +675,7 @@ function ProjectBoardContent(props: ProjectBoardProps) {
               onTaskSelect={handleTaskSelect}
               columnDragAndDrop={columnDragAndDrop}
               taskDragAndDrop={taskDragAndDrop}
+              canReorder={hasTaskWriteAccess}
               styles={{ theme: styles?.theme || 'light' }}
             />
           </div>
@@ -695,6 +708,8 @@ function ProjectBoardContent(props: ProjectBoardProps) {
 // --------------------------------------------------------------------------
 
 function ProjectBoard(props: ProjectBoardProps) {
+  if (props.permissions.access === 'no-access') return null
+
   return (
     <ProjectBoardProvider>
       <ProjectBoardContent {...props} />

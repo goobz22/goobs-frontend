@@ -246,6 +246,7 @@ const showTaskProps: ComponentProps<typeof InlineShowTask> = {
   productServiceName: 'Analytics Suite',
   productId: 'p1',
   serviceId: '',
+  taskAccess: 'write',
   onEdit: fn(),
   onDelete: fn(),
   onComment: fn(),
@@ -349,7 +350,7 @@ export function SeverityHarness({
       <InlineShowTask
         {...showTaskProps}
         {...severityHandler}
-        viewerRole={role}
+        variant={role === 'customer' ? 'customer' : 'employee'}
         severity={severity}
         severityOptions={
           revision
@@ -799,7 +800,7 @@ export const AddTaskSanitizesArticleFields: Story = {
 }
 
 /**
- * THE CUSTOMER'S OWN TICKET VIEW (`viewerRole="customer"`).
+ * THE CUSTOMER'S OWN TICKET VIEW (`variant="customer"`).
  *
  * The same detail view a staff member sees, minus the company's side of the
  * ticket. Pins, in one story, every affordance the customer role removes:
@@ -827,7 +828,7 @@ export const ShowTaskCustomerView: Story = {
     // absent key, and "absent" is the contract a withheld handler means.
     const customerProps = { ...showTaskProps }
     delete customerProps.onDelete
-    return <InlineShowTask {...customerProps} viewerRole="customer" />
+    return <InlineShowTask {...customerProps} variant="customer" />
   },
   globals: { backgrounds: { value: 'light' } },
   play: async ({ canvasElement }) => {

@@ -15,8 +15,8 @@
  * lodash `get`/`set` against a `cloneDeep` of the values — state is never
  * mutated in place, so React sees a fresh reference on every change.
  *
- * Diagnostics: `handleSubmit` emits `form.submit.attempt` (with the field
- * snapshot) once validation passes, and `form.validation.passed` after a
+ * Diagnostics: `handleSubmit` emits `form.submit.attempt` (field names only)
+ * once validation passes, and `form.validation.passed` after a
  * successful `onSubmit`. Per-field `form.validation.failed` beacons are emitted
  * by `<FieldShell>`, which already owns that edge-trigger.
  */
@@ -26,6 +26,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import { emitDiag } from '../../../utils/diag'
+import { redactDiagnosticFields } from '../../../utils/security'
 import type { FormEngine } from '../context'
 
 /** Structural view of the zod schema surface the engine uses. */
@@ -194,7 +195,7 @@ export function useZodFormEngine<TValues extends Record<string, unknown>>({
       emitDiag({
         type: 'form.submit.attempt',
         formId: formId ?? '',
-        fields: parsed.data,
+        fields: redactDiagnosticFields(parsed.data),
       })
 
       // Run onSubmit (sync or async) and always clear the submitting flag.
