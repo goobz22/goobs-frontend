@@ -23,17 +23,17 @@ build retains its existing asset-size warnings. The full unit suite passes 66
 tests / 168 assertions. The shipped dependency graph has zero known advisories;
 five documented advisories remain in dev-only Storybook/stylelint tooling.
 
-The ThothOS integration trace found a separate server defect: customer comment
-queries return `[INTERNAL]` comments and full edit histories after ownership
-validation. UI hiding is not the fix; ThothOS must project those fields out
-before serialization in both single and batched customer paths. The user
-explicitly authorized that companion fix. ThothOS also needs the 0.302.8
-consumer migration: customer help keeps `variant="customer"`, employee tasks use
-`variant="company"`, and direct detail mounts pass `variant` plus `taskAccess`.
+The ThothOS companion fix is implemented and regression-backed. Customer task
+payloads no longer expose raw comment IDs; customer comment reads and mutation
+responses exclude internal comments and full edit history; and reserved/internal
+comments cannot be created or mutated by customers. Customer, employee, company,
+and administrator task surfaces now make one audience decision and pass task
+read/write capability separately. A compatibility boundary derives the legacy
+0.302.5 `viewerRole` solely from `variant` until 0.302.8 is published, so host
+call sites cannot create a contradictory pair.
 
-Next: save the goobs release commit and receipt, then implement and prove the
-ThothOS server projection and consumer migration. The operator publishes and
-pushes; this lane does neither.
+Next: retain the exact goobs and ThothOS build/test receipts for independent pool
+verification. The operator publishes and pushes; this lane does neither.
 
 # W-1216 sanitizer loading and release 0.302.7
 

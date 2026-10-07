@@ -60,13 +60,17 @@ rendered nor invoked through library UI.
 ThothOS independently enforces company/customer ownership and mutation
 allowlists on the server. These component gates are a second wall and an honest
 UI contract; they are not an authorization substitute. The pre-audit ThothOS
-employee task board uses `variant="customer"` while expecting staff behavior.
-The new single-discriminator contract intentionally makes that combination
-fail closed; the consumer must migrate that board to `variant="company"`.
+employee task board used `variant="customer"` while expecting staff behavior.
+The companion fix migrates that board to `variant="company"` and routes all
+task surfaces through a compatibility boundary whose public input is only
+`variant`; while ThothOS remains pinned to goobs 0.302.5, the legacy
+`viewerRole` is derived internally and cannot disagree.
 
 Hosts must also project customer comment payloads before serialization:
-internal comments and revision history must never reach a customer client.
-Component filtering is defense in depth, not an API authorization boundary.
+internal comments, revision history, visibility metadata, and raw comment IDs
+must never reach a customer client. The ThothOS companion fix enforces this on
+single reads, batched reads, and mutation responses. Component filtering is
+defense in depth, not an API authorization boundary.
 
 ## Executable proof
 

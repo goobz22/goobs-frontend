@@ -39,11 +39,12 @@ controls remain the authorization authority.
 The trace also found a separate critical host defect: the customer comment
 queries verified ticket ownership and then serialized every comment, including
 `[INTERNAL]` staff notes and full revision histories. That private text reached
-the customer browser. The library now omits those surfaces in customer mode as
-defense in depth, but UI hiding is not authorization. ThothOS must filter the
-customer comment thread before serialization, omit revision history from the
-customer projection, and keep the staff projection unchanged. Both its single
-thread and batched thread paths must share that server-side projection.
+the customer browser. The companion ThothOS fix now applies one shared
+server-side customer projection to single and batched reads, keeps the staff
+projection unchanged, strips raw comment IDs from customer task payloads, and
+uses the same safe projection for mutation responses. Customers cannot create
+the reserved internal marker or mutate an internalized comment. UI filtering
+remains defense in depth, not authorization.
 
 The library defect was the UI's duplicate audience decision. The customer help
 board correctly selected the customer variant, but the employee task board also
@@ -51,15 +52,18 @@ selected `variant="customer"` while relying on the implicit staff role. That
 invalid combination is no longer representable in the public ProjectBoard API
 and fails closed at runtime.
 
-Required ThothOS consumer migration when adopting 0.302.8:
+The ThothOS consumer migration is implemented behind a narrow compatibility
+boundary because 0.302.8 is not yet available from the npm registry:
 
-1. Customer help: keep `variant="customer"`; remove `viewerRole="customer"`.
-2. Employee tasks: change `variant="customer"` to `variant="company"`.
-3. Direct `InlineShowTask` mounts: replace `viewerRole` with the single
-   `variant="customer" | "employee"` value and pass explicit
+1. Customer help selects `variant="customer"`; employee task boards select
+   `variant="company"`.
+2. Direct `InlineShowTask` mounts select one variant and pass explicit
    `taskAccess="read" | "write"`.
-4. Apply the server-side customer comment projection described above. The
-   ProjectBoard filter does not make an unfiltered API response safe.
+3. Workspace call sites never pass `viewerRole`. The compatibility boundary
+   derives the legacy value from `variant` for the installed 0.302.5 package, so
+   the two values cannot disagree; the derivation becomes inert on 0.302.8.
+4. The server-side customer task/comment projections are enforced independently
+   of the ProjectBoard filter and are pinned by ThothOS regression tests.
 
 ## Dependency audit
 
