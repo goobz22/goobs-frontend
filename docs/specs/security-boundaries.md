@@ -64,7 +64,10 @@ employee task board used `variant="customer"` while expecting staff behavior.
 The companion fix migrates that board to `variant="company"` and routes all
 task surfaces through a compatibility boundary whose public input is only
 `variant`; while ThothOS remains pinned to goobs 0.302.5, the legacy
-`viewerRole` is derived internally and cannot disagree.
+`viewerRole` is derived internally and cannot disagree. The bridge cannot
+backport 0.302.8's `taskAccess` behavior, so the new read-only UI guarantee is
+pending publication and the exact ThothOS dependency update; host server RBAC
+remains authoritative in the interim.
 
 Hosts must also project customer comment payloads before serialization:
 internal comments, revision history, visibility metadata, and raw comment IDs

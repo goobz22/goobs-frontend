@@ -30,7 +30,10 @@ comments cannot be created or mutated by customers. Customer, employee, company,
 and administrator task surfaces now make one audience decision and pass task
 read/write capability separately. A compatibility boundary derives the legacy
 0.302.5 `viewerRole` solely from `variant` until 0.302.8 is published, so host
-call sites cannot create a contradictory pair.
+call sites cannot create a contradictory pair. The bridge does not backport the
+new `taskAccess` behavior: the library's read-only UI guarantee remains pending
+the operator's 0.302.8 publication and ThothOS exact-pin update. Server RBAC and
+handler gating remain the authority while that release handoff is outstanding.
 
 Next: retain the exact goobs and ThothOS build/test receipts for independent pool
 verification. The operator publishes and pushes; this lane does neither.

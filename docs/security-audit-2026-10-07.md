@@ -62,6 +62,9 @@ boundary because 0.302.8 is not yet available from the npm registry:
 3. Workspace call sites never pass `viewerRole`. The compatibility boundary
    derives the legacy value from `variant` for the installed 0.302.5 package, so
    the two values cannot disagree; the derivation becomes inert on 0.302.8.
+   This bridge does not backport `taskAccess`: 0.302.5 ignores that new prop, so
+   the library's read-only affordance guarantee becomes active only after the
+   operator publishes 0.302.8 and ThothOS updates its exact dependency pin.
 4. The server-side customer task/comment projections are enforced independently
    of the ProjectBoard filter and are pinned by ThothOS regression tests.
 
