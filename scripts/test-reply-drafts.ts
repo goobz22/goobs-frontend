@@ -156,6 +156,8 @@ const cases: [string, () => Promise<void>][] = [
       await page.getByRole('button', { name: 'Use synchronous writer' }).click()
       await composer().fill('Sync reply')
       await send().click()
+      // Board receives refreshed comments through its column synchronization effect.
+      await page.getByText('Sync reply', { exact: true }).waitFor()
       assert.equal(await composer().inputValue(), '')
       assert.deepEqual(await calls(), [['Sync reply', 'ticket-1']])
       assert.equal(
