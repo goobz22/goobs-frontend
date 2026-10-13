@@ -4,6 +4,7 @@ import React, {
   useState,
   useMemo,
   useEffect,
+  useLayoutEffect,
   useRef,
   type ElementType,
 } from 'react'
@@ -115,8 +116,9 @@ export interface InlineShowTaskProps {
     statusId: string
     substatusId?: string
   }) => Promise<void> | void
-  onComment: (text: string, taskId: string) => void
-  onEditComment: (commentId: string, newText: string) => void
+  /** Resolve only once the reply is saved; reject to keep the draft for retry. */
+  onComment: (text: string, taskId: string) => Promise<void> | void
+  onEditComment: (commentId: string, newText: string) => Promise<void> | void
   onBack: () => void
   // Company notes (for administration -> company context)
   associatedCompanyId?: string
@@ -670,6 +672,22 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
   const [newCommentText, setNewCommentText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editingCommentText, setEditingCommentText] = useState('')
+  const [commentError, setCommentError] = useState<string | null>(null)
+  const [editCommentError, setEditCommentError] = useState<string | null>(null)
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [isSavingComment, setIsSavingComment] = useState(false)
+  // Refs lock synchronously, including two clicks before React renders disabled.
+  const commentPending = useRef(false)
+  const editCommentPending = useRef(false)
+  const commentRevision = useRef(0)
+  const editCommentRevision = useRef(0)
+  const editCommentSession = useRef(0)
+  const commentTask = useRef(taskId)
+  useLayoutEffect(() => {
+    commentTask.current = taskId
+    commentRevision.current++
+    editCommentRevision.current++
+  }, [taskId])
   // Internal state for viewing revision history (handled locally, no prop needed)
   const [viewingRevisionHistoryId, setViewingRevisionHistoryId] = useState<
     string | null
@@ -1783,19 +1801,47 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
 
   const renderCommentsTab = () => {
     const handleEditCommentClick = (comment: Comment) => {
+      editCommentSession.current++
+      editCommentRevision.current++
+      setEditCommentError(null)
       setEditingCommentId(comment._id)
       setEditingCommentText(comment.text)
     }
 
-    const handleSaveCommentEdit = (commentId: string) => {
-      if (editingCommentText.trim() && onEditComment) {
-        onEditComment(commentId, editingCommentText.trim())
-        setEditingCommentId(null)
-        setEditingCommentText('')
+    const handleSaveCommentEdit = async (commentId: string) => {
+      const text = editingCommentText.trim()
+      if (!text || !onEditComment || editCommentPending.current) return
+      const revision = editCommentRevision.current
+      const session = editCommentSession.current
+      editCommentPending.current = true
+      setIsSavingComment(true)
+      setEditCommentError(null)
+      try {
+        await onEditComment(commentId, text)
+        if (editCommentRevision.current === revision) {
+          setEditingCommentId(null)
+          setEditingCommentText('')
+        }
+      } catch (error) {
+        if (
+          editCommentSession.current === session &&
+          commentTask.current === taskId
+        ) {
+          setEditCommentError(
+            error instanceof Error ? error.message : 'Reply could not be saved'
+          )
+        }
+      } finally {
+        editCommentPending.current = false
+        setIsSavingComment(false)
       }
     }
 
     const handleCancelCommentEdit = () => {
+      // A late completion must not close an editor reopened after Cancel.
+      editCommentSession.current++
+      editCommentRevision.current++
+      setEditCommentError(null)
       setEditingCommentId(null)
       setEditingCommentText('')
     }
@@ -1812,11 +1858,17 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
         ? publicComments
         : internalNotes
 
-    const handleAddComment = () => {
-      if (canWriteTask && newCommentText.trim()) {
+    const handleAddComment = async () => {
+      const text = newCommentText.trim()
+      if (!canWriteTask || !text || commentPending.current) return
+      const revision = commentRevision.current
+      commentPending.current = true
+      setIsSubmittingComment(true)
+      setCommentError(null)
+      try {
         if (commentSection === 'internal') {
           // Prefix with [INTERNAL] for internal notes
-          onComment(`[INTERNAL] ${newCommentText.trim()}`, taskId)
+          await onComment(`[INTERNAL] ${text}`, taskId)
           logCaseUpdate(
             'internal_comment',
             `Added internal comment`,
@@ -1826,7 +1878,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               (newCommentText.trim().length > 100 ? '...' : '')
           )
         } else {
-          onComment(newCommentText.trim(), taskId)
+          await onComment(text, taskId)
           logCaseUpdate(
             'comment',
             `Added external comment`,
@@ -1836,7 +1888,16 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               (newCommentText.trim().length > 100 ? '...' : '')
           )
         }
-        setNewCommentText('')
+        if (commentRevision.current === revision) setNewCommentText('')
+      } catch (error) {
+        if (commentTask.current === taskId) {
+          setCommentError(
+            error instanceof Error ? error.message : 'Reply could not be saved'
+          )
+        }
+      } finally {
+        commentPending.current = false
+        setIsSubmittingComment(false)
       }
     }
 
@@ -1929,7 +1990,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
           <div className={cssStyles.commentInputWrap}>
             <textarea
               value={newCommentText}
-              onChange={e => setNewCommentText(e.target.value)}
+              onChange={e => {
+                commentRevision.current++
+                setNewCommentText(e.target.value)
+              }}
               placeholder={
                 isInternal
                   ? 'Add an internal note (only visible to employees)...'
@@ -1949,9 +2013,11 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
               style={submitVars}
               data-action="add"
               onClick={handleAddComment}
+              disabled={isSubmittingComment}
             >
               {isInternal ? 'Add Internal Note' : 'Send Comment'}
             </button>
+            {commentError && <p role="alert">{commentError}</p>}
           </div>
         )}
 
@@ -2059,7 +2125,10 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                     <div>
                       <textarea
                         value={editingCommentText}
-                        onChange={e => setEditingCommentText(e.target.value)}
+                        onChange={e => {
+                          editCommentRevision.current++
+                          setEditingCommentText(e.target.value)
+                        }}
                         aria-label="Edit comment"
                         className={cssStyles.commentEditTextarea}
                       />
@@ -2067,6 +2136,7 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                         <button
                           data-action="save"
                           onClick={() => handleSaveCommentEdit(comment._id)}
+                          disabled={isSavingComment}
                           className={cx(
                             cssStyles.button,
                             cssStyles.tinyButton,
@@ -2087,6 +2157,9 @@ export const InlineShowTask: React.FC<InlineShowTaskProps> = ({
                           Cancel
                         </button>
                       </div>
+                      {editCommentError && (
+                        <p role="alert">{editCommentError}</p>
+                      )}
                     </div>
                   ) : (
                     <div className={cssStyles.commentBody}>{displayText}</div>

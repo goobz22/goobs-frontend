@@ -344,7 +344,8 @@ function ProjectBoardContent(props: ProjectBoardProps) {
   )
 
   const handleEditComment = useCallback(
-    (commentId: string, newText: string, taskId: string) => {
+    async (commentId: string, newText: string, taskId: string) => {
+      await onEditComment(commentId, newText, taskId)
       setColumnState(oldCols =>
         oldCols.map(col => {
           const updatedTasks = col.tasks.map(task => {
@@ -360,7 +361,6 @@ function ProjectBoardContent(props: ProjectBoardProps) {
           return { ...col, tasks: updatedTasks }
         })
       )
-      onEditComment(commentId, newText, taskId)
     },
     [onEditComment, setColumnState]
   )
@@ -530,13 +530,13 @@ function ProjectBoardContent(props: ProjectBoardProps) {
 
     const commentCallback = (text: string, _id: string) => {
       if (hasTaskWriteAccess) {
-        onComment(text, _id)
+        return onComment(text, _id)
       }
     }
 
     const editCommentCallback = (commentId: string, newText: string) => {
       if (hasTaskWriteAccess) {
-        handleEditComment(commentId, newText, activeTaskId)
+        return handleEditComment(commentId, newText, activeTaskId)
       }
     }
 

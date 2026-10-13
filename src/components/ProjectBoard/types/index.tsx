@@ -350,7 +350,11 @@ interface ProjectBoardBaseProps {
    * contract `onUpdateCustomerNotes?` already had on this component.
    */
   onDelete?: (args: { _id: string }) => void
-  onEditComment: (commentId: string, newText: string, taskId: string) => void
+  onEditComment: (
+    commentId: string,
+    newText: string,
+    taskId: string
+  ) => Promise<void> | void
   onAdd: (newTask: Omit<Task, '_id'>) => void
   currentUser: CurrentUser
   customerId: string
@@ -361,7 +365,7 @@ interface ProjectBoardBaseProps {
    * If ShowTask calls onComment with both commentText and _id,
    * define the signature here. You can also do (text: string) => void if that's your design.
    */
-  onComment: (commentText: string, _id: string) => void
+  onComment: (commentText: string, _id: string) => Promise<void> | void
   /**
    * Change severity in either direction with a trimmed justification (20–2000 characters).
    * Staff and customers share this control. Omit to keep severity read-only.
