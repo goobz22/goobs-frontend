@@ -221,5 +221,7 @@ const meta = {
 } satisfies Meta<typeof ReplyDraftHarness>
 export default meta
 type Story = StoryObj<typeof meta>
+/** The reply draft survives a pending, rejected or aborted write in the InlineShowTask detail view. */
 export const Detail: Story = { args: { board: false } }
+/** The same draft-preservation contract through the ProjectBoard, which forwards the write's completion. */
 export const Board: Story = { args: { board: true } }
